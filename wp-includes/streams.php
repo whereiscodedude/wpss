@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright (c) 2003, 2005 Danilo Segan <danilo@kvota.net>.
+   Copyright (c) 2003 Danilo Segan <danilo@kvota.net>.
 
    This file is part of PHP-gettext.
 
@@ -103,13 +103,11 @@ class FileReader {
   }
 
   function read($bytes) {
-    if ($bytes) {
-      fseek($this->_fd, $this->_pos);
-      $data = fread($this->_fd, $bytes);
-      $this->_pos = ftell($this->_fd);
-      
-      return $data;
-    } else return '';
+    fseek($this->_fd, $this->_pos);
+    $data = fread($this->_fd, $bytes);
+    $this->_pos = ftell($this->_fd);
+
+    return $data;
   }
 
   function seekto($pos) {
@@ -131,29 +129,5 @@ class FileReader {
   }
 
 }
-
-// Preloads entire file in memory first, then creates a StringReader 
-// over it (it assumes knowledge of StringReader internals)
-class CachedFileReader extends StringReader {
-  function CachedFileReader($filename) {
-    if (file_exists($filename)) {
-
-      $length=filesize($filename);
-      $fd = fopen($filename,'rb');
-
-      if (!$fd) {
-	$this->error = 3; // Cannot read file, probably permissions
-	return false;
-      }
-      $this->_str = fread($fd, $length);
-      fclose($fd);
-
-    } else {
-      $this->error = 2; // File doesn't exist
-      return false;
-    }
-  }
-}
-
 
 ?>

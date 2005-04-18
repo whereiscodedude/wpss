@@ -66,7 +66,6 @@ $links_show_order = $_COOKIE['links_show_order_' . COOKIEHASH];
 if ('' != $_POST['assign']) $action = 'assign';
 if ('' != $_POST['visibility']) $action = 'visibility';
 if ('' != $_POST['move']) $action = 'move';
-if ('' != $_POST['linkcheck']) $linkcheck = $_POST[linkcheck];
 
 switch ($action) {
   case 'assign':
@@ -243,7 +242,7 @@ switch ($action) {
 	  WHERE link_id=$link_id");
     } // end if save
     setcookie('links_show_cat_id_' . COOKIEHASH, $links_show_cat_id, time()+600);
-    wp_redirect($this_file);
+    header('Location: ' . $this_file);
     break;
   } // end Save
 
@@ -267,7 +266,7 @@ switch ($action) {
     }
     $links_show_cat_id = $cat_id;
     setcookie('links_show_cat_id_' . COOKIEHASH, $links_show_cat_id, time()+600);
-    wp_redirect($this_file);
+    header('Location: '.$this_file);
     break;
   } // end Delete
 
@@ -347,10 +346,10 @@ switch ($action) {
             <tr>
               <th scope="row"> <?php _e('friendship') ?> </th>
               <td>
-			    <label for="contact">
-                <input class="valinp" type="radio" name="friendship" value="contact" id="contact" <?php xfn_check('friendship', 'contact', 'radio'); ?> /> <?php _e('contact') ?></label>
                 <label for="acquaintance">
                 <input class="valinp" type="radio" name="friendship" value="acquaintance" id="acquaintance" <?php xfn_check('friendship', 'acquaintance', 'radio'); ?> />  <?php _e('acquaintance') ?></label>
+                <label for="contact">
+                <input class="valinp" type="radio" name="friendship" value="contact" id="contact" <?php xfn_check('friendship', 'contact', 'radio'); ?> /> <?php _e('contact') ?></label>
                 <label id="friend">
                 <input class="valinp" type="radio" name="friendship" value="friend" id="friend" <?php xfn_check('friendship', 'friend', 'radio'); ?> /> <?php _e('friend') ?></label>
                 <label for="friendship">
@@ -391,7 +390,7 @@ switch ($action) {
               </td>
             </tr>
             <tr>
-              <th scope="row"> <?php _e('family') ?> </th>
+              <th scope="row"> family </th>
               <td>
                 <label for="child">
                 <input class="valinp" type="radio" name="family" value="child" id="child" <?php xfn_check('family', 'child', 'radio'); ?>  />
@@ -675,10 +674,11 @@ function checkAll(form)
             $visible = ($link->link_visible == 'Y') ? __('Yes') : __('No');
             ++$i;
             $style = ($i % 2) ? ' class="alternate"' : '';
-?>
-    <tr valign="middle" <?php echo $style; ?>>
-		<td><strong><?php echo $link->link_name; ?></strong><br />
-<?php			
+            echo <<<LINKS
+
+    <tr valign="middle" $style>
+        <td><strong>$link->link_name</strong><br />
+LINKS;
         echo sprintf(__('Description: %s'), $link->link_description) . "</td>";
         echo "<td><a href=\"$link->link_url\" title=\"" . sprintf(__('Visit %s'), $link->link_name) . "\">$short_url</a></td>";
         echo <<<LINKS

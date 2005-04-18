@@ -12,8 +12,8 @@ if (0 == $post_ID) {
 
 $sendto = $_SERVER['HTTP_REFERER'];
 
-if ( 0 != $post_ID && $sendto == get_permalink($post_ID) )
- 	$sendto = 'redo';
+if ( $sendto == get_permalink($post) )
+	$sendto = 'redo';
 $sendto = wp_specialchars( $sendto );
 
 ?>

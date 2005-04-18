@@ -13,10 +13,10 @@ if ( empty($post_status) ) {
 	die( __('Sorry, comments are closed for this item.') );
 }
 
-$comment_author       = trim($_POST['author']);
-$comment_author_email = trim($_POST['email']);
-$comment_author_url   = trim($_POST['url']);
-$comment_content      = trim($_POST['comment']);
+$comment_author       = $_POST['author'];
+$comment_author_email = $_POST['email'];
+$comment_author_url   = $_POST['url'];
+$comment_content      = $_POST['comment'];
 
 // If the user is logged in
 get_currentuserinfo();
@@ -31,12 +31,8 @@ endif;
 
 $comment_type = '';
 
-if ( get_settings('require_name_email') && !$user_ID ) {
-	if ('' == $comment_author_email || '' == $comment_author)
-		die( __('Error: please fill the required fields (name, email).') );
-	elseif ( !is_email($comment_author_email))
-		die( __('Error: please enter a valid email address.') );
-}
+if ( get_settings('require_name_email') && ('' == $comment_author_email || '' == $comment_author) )
+	die( __('Error: please fill the required fields (name, email).') );
 
 if ( '' == $comment_content )
 	die( __('Error: please type a comment.') );
@@ -54,7 +50,8 @@ header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 header('Cache-Control: no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
-$location = (empty($_POST['redirect_to'])) ? $_SERVER["HTTP_REFERER"] : $_POST['redirect_to']; 
+$location = get_permalink($comment_post_ID);
 
-wp_redirect($location);
+header("Location: $location");
+
 ?>

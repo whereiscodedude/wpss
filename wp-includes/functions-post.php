@@ -139,13 +139,12 @@ function wp_update_post($postarr = array()) {
 		WHERE ID = $ID";
 		
 	$result = $wpdb->query($sql);
-	$rows_affected = $wpdb->rows_affected;
 
 	wp_set_post_cats('', $ID, $post_category);
 
 	do_action('edit_post', $ID);
 
-	return $rows_affected;
+	return $wpdb->rows_affected;
 }
 
 function wp_get_post_cats($blogid = '1', $post_ID = 0) {
@@ -351,10 +350,10 @@ function user_can_create_draft($user_id, $blog_id = 1, $category_id = 'None') {
 /* returns true if $user_id can edit $post_id */
 function user_can_edit_post($user_id, $post_id, $blog_id = 1) {
 	$author_data = get_userdata($user_id);
-	$post = get_post($post_id);
-	$post_author_data = get_userdata($post->post_author);
+	$post_data   = get_postdata($post_id);
+	$post_author_data = get_userdata($post_data['Author_ID']);
 
-	if ( (($user_id == $post_author_data->ID) && !($post->post_status == 'publish' &&  $author_data->user_level < 2))
+	if ( ($user_id == $post_author_data->ID)
 	     || ($author_data->user_level > $post_author_data->user_level)
 	     || ($author_data->user_level >= 10) ) {
 		return true;
@@ -525,17 +524,14 @@ function do_trackbacks($post_id) {
 	$post = $wpdb->get_row("SELECT * FROM $wpdb->posts WHERE ID = $post_id");
 	$to_ping = get_to_ping($post_id);
 	$pinged  = get_pung($post_id);
+	$content = strip_tags($post->post_content);
+	$excerpt = strip_tags($post->post_excerpt);
+	$post_title = strip_tags($post->post_title);
 
-	if (empty($post->post_excerpt))
-		$excerpt = apply_filters('the_content', $post->post_content);
+	if ( $excerpt )
+		$excerpt = substr($excerpt, 0, 252) . '...';
 	else
-		$excerpt = apply_filters('the_excerpt', $post->post_excerpt);
-	$excerpt = str_replace(']]>', ']]&gt;', $excerpt);
-	$excerpt = strip_tags($excerpt);
-	$excerpt = substr($excerpt, 0, 252) . '...';
-
-	$post_title = apply_filters('the_title', $post->post_title);
-	$post_title = strip_tags($post_title);
+		$excerpt = substr($content, 0, 252) . '...';
 
 	if ($to_ping) : foreach ($to_ping as $tb_ping) :
 		$tb_ping = trim($tb_ping);

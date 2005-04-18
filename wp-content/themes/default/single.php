@@ -5,8 +5,8 @@
   <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
 	
 		<div class="navigation">
-			<div class="alignleft"><?php previous_post_link('&laquo; %link') ?></div>
-			<div class="alignright"><?php next_post_link('%link &raquo;') ?></div>
+			<div class="alignleft"><?php previous_post('&laquo; %','','yes') ?></div>
+			<div class="alignright"><?php next_post(' % &raquo;','','yes') ?></div>
 		</div>
 	
 		<div class="post">
@@ -56,7 +56,7 @@
 	
 	<?php endwhile; else: ?>
 	
-		<p>Sorry, no posts matched your criteria.</p>
+		<p><?php _e('Sorry, no posts matched your criteria.'); ?></p>
 	
 <?php endif; ?>
 	
