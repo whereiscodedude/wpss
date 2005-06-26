@@ -1164,14 +1164,9 @@ function update_category_cache() {
 
 function update_user_cache() {
 	global $cache_userdata, $wpdb;
-	$query = apply_filters('user_cache_query', "SELECT * FROM $wpdb->users WHERE user_level > 0");
-	if ( $users = $wpdb->get_results( $query ) ) :
+	
+	if ( $users = $wpdb->get_results("SELECT * FROM $wpdb->users WHERE user_level > 0") ) :
 		foreach ($users as $user) :
-			$metavalues = $wpdb->get_results("SELECT meta_key, meta_value FROM $wpdb->usermeta WHERE user_id = '$user->ID'");
-			if ( is_array($metavalues) )
-				foreach ( $metavalues as $meta )
-					$user->{$meta->meta_key} = $meta->meta_value;
-
 			$cache_userdata[$user->ID] = $user;
 			$cache_userdata[$user->user_login] =& $cache_userdata[$user->ID];
 		endforeach;
@@ -1285,7 +1280,7 @@ function is_author ($author = '') {
 		
 	if ($author == $author_obj->ID) {
 		return true;
-	} else if ($author == $author_obj->nickname) {
+	} else if ($author == $author_obj->user_nickname) {
 		return true;
 	} else if ($author == $author_obj->user_nicename) {
 		return true;
@@ -1408,7 +1403,7 @@ function get_stylesheet_directory() {
 }
 
 function get_stylesheet_directory_uri() {
-	$stylesheet = rawurlencode( get_stylesheet() );
+	$stylesheet = get_stylesheet();
 	$stylesheet_dir_uri = get_theme_root_uri() . "/$stylesheet";
 	return apply_filters('stylesheet_directory_uri', $stylesheet_dir_uri, $stylesheet);
 }
@@ -1808,7 +1803,7 @@ function add_query_arg() {
 }
 
 function remove_query_arg($key, $query) {
-	return add_query_arg($key, '', $query);
+	add_query_arg($key, '', $query);
 }
 
 function load_template($file) {
@@ -1852,58 +1847,6 @@ function wp_remote_fopen( $uri ) {
 	} else {
 		return false;
 	}	
-}
-
-function wp($query_vars = '') {
-	global $wp;
-	$wp->main($query_vars);
-}
-
-function status_header( $header ) {
-	if ( 200 == $header ) {
-		$text = 'OK';
-	} elseif ( 301 == $header ) {
-		$text = 'Moved Permanently';
-	} elseif ( 302 == $header ) {
-		$text = 'Moved Temporarily';
-	} elseif ( 304 == $header ) {
-		$text = 'Not Modified';
-	} elseif ( 404 == $header ) {
-		$text = 'Not Found';
-	} elseif ( 410 == $header ) {
-		$text = 'Gone';
-	}
-	if ( preg_match('/cgi/',php_sapi_name()) ) {
-		@header("Status: $header $text");
-		echo "\r\n\r\n";
-	} else {
-		if ( version_compare(phpversion(), '4.3.0', '>=') )
-			@header($text, TRUE, $header);
-		else
-			@header("HTTP/1.x $header $text");
-	}
-}
-
-function nocache_headers() {
-	@ header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
-	@ header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-	@ header('Cache-Control: no-cache, must-revalidate, max-age=0');
-	@ header('Pragma: no-cache');
-}
-
-function update_usermeta( $user_id, $meta_key, $meta_value ) {
-	global $wpdb;
-	$user_id = (int) $user_id;
-	$meta_key = preg_replace('|a-z0-9_|i', '', $meta_key);
-	$cur = $wpdb->get_row("SELECT * FROM $wpdb->usermeta WHERE user_id = '$user_id' AND meta_key = '$meta_key'");
-	if ( !$cur ) {
-		$wpdb->query("INSERT INTO $wpdb->usermeta ( user_id, meta_key, meta_value )
-		VALUES
-		( '$user_id', '$meta_key', '$meta_value' )");
-		return true;
-	}
-	if ( $cur->meta_value != $meta_value )
-		$wpdb->query("UPDATE $wpdb->usermeta SET meta_value = '$meta_value' WHERE user_id = '$user_id' AND meta_key = '$meta_key'");
 }
 
 ?>

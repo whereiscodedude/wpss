@@ -6,7 +6,7 @@ $wp_queries="CREATE TABLE $wpdb->categories (
   cat_name varchar(55) NOT NULL default '',
   category_nicename varchar(200) NOT NULL default '',
   category_description longtext NOT NULL,
-  category_parent bigint(20) NOT NULL default '0',
+  category_parent int(4) NOT NULL default '0',
   PRIMARY KEY  (cat_ID),
   KEY category_nicename (category_nicename)
 );
@@ -24,8 +24,8 @@ CREATE TABLE $wpdb->comments (
   comment_approved enum('0','1','spam') NOT NULL default '1',
   comment_agent varchar(255) NOT NULL default '',
   comment_type varchar(20) NOT NULL default '',
-  comment_parent bigint(20) NOT NULL default '0',
-  user_id bigint(20) NOT NULL default '0',
+  comment_parent int(11) NOT NULL default '0',
+  user_id int(11) NOT NULL default '0',
   PRIMARY KEY  (comment_ID),
   KEY comment_approved (comment_approved),
   KEY comment_post_ID (comment_post_ID)
@@ -91,14 +91,14 @@ CREATE TABLE $wpdb->postmeta (
   meta_id bigint(20) NOT NULL auto_increment,
   post_id bigint(20) NOT NULL default '0',
   meta_key varchar(255) default NULL,
-  meta_value longtext,
+  meta_value text,
   PRIMARY KEY  (meta_id),
   KEY post_id (post_id),
   KEY meta_key (meta_key)
 );
 CREATE TABLE $wpdb->posts (
   ID bigint(20) unsigned NOT NULL auto_increment,
-  post_author bigint(20) NOT NULL default '0',
+  post_author int(4) NOT NULL default '0',
   post_date datetime NOT NULL default '0000-00-00 00:00:00',
   post_date_gmt datetime NOT NULL default '0000-00-00 00:00:00',
   post_content longtext NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE $wpdb->posts (
   post_modified datetime NOT NULL default '0000-00-00 00:00:00',
   post_modified_gmt datetime NOT NULL default '0000-00-00 00:00:00',
   post_content_filtered text NOT NULL,
-  post_parent bigint(20) NOT NULL default '0',
+  post_parent int(11) NOT NULL default '0',
   guid varchar(255) NOT NULL default '',
   menu_order int(11) NOT NULL default '0',
   PRIMARY KEY  (ID),
@@ -125,25 +125,27 @@ CREATE TABLE $wpdb->users (
   ID bigint(20) unsigned NOT NULL auto_increment,
   user_login varchar(60) NOT NULL default '',
   user_pass varchar(64) NOT NULL default '',
+  user_firstname varchar(50) NOT NULL default '',
+  user_lastname varchar(50) NOT NULL default '',
+  user_nickname varchar(50) NOT NULL default '',
   user_nicename varchar(50) NOT NULL default '',
+  user_icq int(10) unsigned NOT NULL default '0',
   user_email varchar(100) NOT NULL default '',
   user_url varchar(100) NOT NULL default '',
+  user_ip varchar(15) NOT NULL default '',
+  user_domain varchar(200) NOT NULL default '',
+  user_browser varchar(200) NOT NULL default '',
   user_registered datetime NOT NULL default '0000-00-00 00:00:00',
   user_level int(2) unsigned NOT NULL default '0',
+  user_aim varchar(50) NOT NULL default '',
+  user_msn varchar(100) NOT NULL default '',
+  user_yim varchar(50) NOT NULL default '',
+  user_idmode varchar(20) NOT NULL default '',
   user_activation_key varchar(60) NOT NULL default '',
   user_status int(11) NOT NULL default '0',
-  display_name varchar(250) NOT NULL default '',
+  user_description longtext NOT NULL default '',
   PRIMARY KEY  (ID),
   UNIQUE KEY user_login (user_login)
-);
-CREATE TABLE $wpdb->usermeta (
-  umeta_id bigint(20) NOT NULL auto_increment,
-  user_id bigint(20) NOT NULL default '0',
-  meta_key varchar(255) default NULL,
-  meta_value longtext,
-  PRIMARY KEY  (umeta_id),
-  KEY user_id (user_id),
-  KEY meta_key (meta_key)
 );";
 
 function populate_options() {

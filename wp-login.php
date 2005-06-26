@@ -4,8 +4,10 @@ require( dirname(__FILE__) . '/wp-config.php' );
 $action = $_REQUEST['action'];
 $error = '';
 
-nocache_headers();
-
+header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+header('Cache-Control: no-cache, must-revalidate');
+header('Pragma: no-cache');
 header('Content-Type: '.get_bloginfo('html_type').'; charset='.get_bloginfo('charset'));
 
 if ( defined('RELOCATE') ) { // Move flag is set
@@ -22,7 +24,10 @@ case 'logout':
 
 	wp_clearcookie();
 	do_action('wp_logout');
-	nocache_headers();
+	header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+	header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+	header('Cache-Control: no-cache, must-revalidate, max-age=0');
+	header('Pragma: no-cache');
 	wp_redirect('wp-login.php');
 	exit();
 
@@ -98,7 +103,7 @@ do_action('retrieve_password', $user_login);
 	$key = substr( md5( uniqid( microtime() ) ), 0, 50);
 	// now insert the new pass md5'd into the db
  	$wpdb->query("UPDATE $wpdb->users SET user_activation_key = '$key' WHERE user_login = '$user_login'");
-	$message = __('Someone has asked to reset the password for the following site and username.') . "\r\n\r\n";
+	$message .= __('Someone has asked to reset the password for the following site and username.') . "\r\n\r\n";
 	$message .= get_option('siteurl') . "\r\n\r\n";
 	$message .= sprintf(__('Username: %s'), $user_login) . "\r\n\r\n";
 	$message .= __('To reset your password visit the following address, otherwise just ignore this email and nothing will happen.') . "\r\n\r\n";
@@ -121,7 +126,7 @@ break;
 case 'resetpass' :
 
 	// Generate something random for a password... md5'ing current time with a rand salt
-	$key = preg_replace('/a-z0-9/i', '', $_GET['key']);
+	$key = $_GET['key'];
 	if ( empty($key) )
 		die( __('Sorry, that key does not appear to be valid.') );
 	$user = $wpdb->get_row("SELECT * FROM $wpdb->users WHERE user_activation_key = '$key'");

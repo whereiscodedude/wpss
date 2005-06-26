@@ -6,62 +6,54 @@
 
 if ( !function_exists('get_currentuserinfo') ) :
 function get_currentuserinfo() {
-	global $user_login, $userdata, $user_level, $user_ID, $user_email, $user_url, $user_pass_md5, $user_identity;
+	global $user_login, $userdata, $user_level, $user_ID, $user_nickname, $user_email, $user_url, $user_pass_md5, $user_identity;
+	// *** retrieving user's data from cookies and db - no spoofing
 
-	if ( !isset($_COOKIE['wordpressuser_' . COOKIEHASH])) 
-		return false;
-
-	$user_login  = $_COOKIE['wordpressuser_' . COOKIEHASH];
-	$userdata    = get_userdatabylogin($user_login);
-	$user_level  = $userdata->user_level;
-	$user_ID     = $userdata->ID;
-	$user_email  = $userdata->user_email;
-	$user_url    = $userdata->user_url;
-
+	if (isset($_COOKIE['wordpressuser_' . COOKIEHASH])) 
+		$user_login = $_COOKIE['wordpressuser_' . COOKIEHASH];
+	$userdata = get_userdatabylogin($user_login);
+	$user_level = $userdata->user_level;
+	$user_ID = $userdata->ID;
+	$user_nickname = $userdata->user_nickname;
+	$user_email = $userdata->user_email;
+	$user_url = $userdata->user_url;
 	$user_pass_md5 = md5($userdata->user_pass);
 
-	$user_identity = $userdata->display_name;
+	$idmode = $userdata->user_idmode;
+	if ($idmode == 'nickname')  $user_identity = $userdata->user_nickname;
+	if ($idmode == 'login')     $user_identity = $userdata->user_login;
+	if ($idmode == 'firstname') $user_identity = $userdata->user_firstname;
+	if ($idmode == 'lastname')  $user_identity = $userdata->user_lastname;
+	if ($idmode == 'namefl')    $user_identity = $userdata->user_firstname.' '.$userdata->user_lastname;
+	if ($idmode == 'namelf')    $user_identity = $userdata->user_lastname.' '.$userdata->user_firstname;
+	if (!$idmode) $user_identity = $userdata->user_nickname;
 }
 endif;
 
 if ( !function_exists('get_userdata') ) :
-function get_userdata( $user_id ) {
+function get_userdata($userid) {
 	global $wpdb, $cache_userdata;
-	$user_id = (int) $user_id;
-	if ( $user_id == 0 )
-		return false;
+	$userid = (int) $userid;
+	if ( empty($cache_userdata[$userid]) && $userid != 0) {
+		$cache_userdata[$userid] = $wpdb->get_row("SELECT * FROM $wpdb->users WHERE ID = $userid");
+		$cache_userdata[$cache_userdata[$userid]->user_login] =& $cache_userdata[$userid];
+	} 
 
-	if ( isset( $cache_userdata[$user_id] ) ) 
-		return $cache_userdata[$user_id];
-
-	if ( !$user = $wpdb->get_row("SELECT * FROM $wpdb->users WHERE ID = '$user_id'") )
-		return $cache_userdata[$user_id] = false;
-
-	$metavalues = $wpdb->get_results("SELECT meta_key, meta_value FROM $wpdb->usermeta WHERE user_id = '$user_id'");
-
-	foreach ( $metavalues as $meta )
-		$user->{$meta->meta_key} = $meta->meta_value;
-
-	$cache_userdata[$user_id] = $user;
-
-	$cache_userdata[$cache_userdata[$userid]->user_login] =& $cache_userdata[$user_id];
-
-	return $cache_userdata[$user_id];
+	return $cache_userdata[$userid];
 }
 endif;
 
 if ( !function_exists('get_userdatabylogin') ) :
 function get_userdatabylogin($user_login) {
 	global $cache_userdata, $wpdb;
-	$user_login = sanitize_user( $user_login );
-	if ( empty( $user_login ) )
-		return false;
-	if ( isset( $cache_userdata[$user_login] ) )
-		return $cache_userdata[$user_login];
-	
-	$user_id = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login = '$user_login'");
-
-	return get_userdata( $user_id );
+	if ( !empty($user_login) && empty($cache_userdata[$user_login]) ) {
+		$user = $wpdb->get_row("SELECT * FROM $wpdb->users WHERE user_login = '$user_login'"); /* todo: get rid of this intermediate var */
+		$cache_userdata[$user->ID] = $user;
+		$cache_userdata[$user_login] =& $cache_userdata[$user->ID];
+	} else {
+		$user = $cache_userdata[$user_login];
+	}
+	return $user;
 }
 endif;
 
@@ -114,7 +106,10 @@ function auth_redirect() {
 	if ( (!empty($_COOKIE['wordpressuser_' . COOKIEHASH]) && 
 				!wp_login($_COOKIE['wordpressuser_' . COOKIEHASH], $_COOKIE['wordpresspass_' . COOKIEHASH], true)) ||
 			 (empty($_COOKIE['wordpressuser_' . COOKIEHASH])) ) {
-		nocache_headers();
+		header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+		header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+		header('Cache-Control: no-cache, must-revalidate, max-age=0');
+		header('Pragma: no-cache');
 	
 		header('Location: ' . get_settings('siteurl') . '/wp-login.php?redirect_to=' . urlencode($_SERVER['REQUEST_URI']));
 		exit();

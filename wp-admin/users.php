@@ -69,9 +69,9 @@ case 'adduser':
 	$new_users_can_blog = get_settings('new_users_can_blog');
 
 	$result = $wpdb->query("INSERT INTO $wpdb->users 
-		(user_login, user_pass, user_email, user_registered, user_level, user_nicename, user_url)
+		(user_login, user_pass, user_nickname, user_email, user_ip, user_domain, user_browser, user_registered, user_level, user_idmode, user_firstname, user_lastname, user_nicename, user_url)
 	VALUES 
-		('$user_login', MD5('$pass1'), '$user_email', '$now', '$new_users_can_blog', '$user_nicename', '$user_uri')");
+		('$user_login', MD5('$pass1'), '$user_nickname', '$user_email', '$user_ip', '$user_domain', '$user_browser', '$now', '$new_users_can_blog', 'nickname', '$user_firstname', '$user_lastname', '$user_nicename', '$user_uri')");
 	
 	if ($result == false)
 		die (__('<strong>ERROR</strong>: Couldn&#8217;t register you!'));
@@ -197,8 +197,8 @@ default:
 		echo "
 <tr $style>
 	<td align='center'>$user_data->ID</td>
-	<td><strong>$user_data->user_login</strong></td>
-	<td>$user_data->first_name $user_data->last_name</td>
+	<td><strong>$user_data->user_nickname</strong></td>
+	<td>$user_data->user_firstname $user_data->user_lastname</td>
 	<td><a href='mailto:$email' title='" . sprintf(__('e-mail: %s'), $email) . "'>$email</a></td>
 	<td><a href='$url' title='website: $url'>$short_url</a></td>
 	<td align='center'>";
@@ -252,8 +252,8 @@ foreach ($users as $user) {
 	$style = ('class="alternate"' == $style) ? '' : 'class="alternate"';
 echo "\n<tr $style>
 <td align='center'>$user_data->ID</td>
-<td><strong>$user_data->user_login</strong></td>
-<td>$user_data->first_name $user_data->last_name</td>
+<td><strong>$user_data->user_nickname</strong></td>
+<td>$user_data->user_firstname $user_data->user_lastname</td>
 <td><a href='mailto:$email' title='" . sprintf(__('e-mail: %s'), $email) . "'>$email</a></td>
 <td><a href='$url' title='website: $url'>$short_url</a></td>
 <td align='center'>";

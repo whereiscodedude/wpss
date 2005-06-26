@@ -1,8 +1,9 @@
 <?php 
-
-if (empty($wp)) {
-	require_once('wp-config.php');
-	wp('feed=rss2&withcomments=1');
+if ( empty($feed) ) {
+	$feed = 'rss2';
+	$withcomments = 1;
+	$doing_rss = 1;
+	require('wp-blog-header.php');
 }
 
 header('Content-type: text/xml;charset=' . get_settings('blog_charset'), true);
