@@ -265,10 +265,6 @@ function remove_accents($string) {
 	return $string;
 }
 
-function sanitize_user( $username ) {
-	return preg_replace('|a-z0-9 _.-|i', '', $username);
-}
-
 function sanitize_title($title, $fallback_title = '') {
 	$title = strip_tags($title);
 	$title = apply_filters('sanitize_title', $title);
@@ -594,6 +590,20 @@ function is_email($user_email) {
 		return false;
 	}
 }
+
+
+function strip_all_but_one_link($text, $mylink) {
+	$match_link = '#(<a.+?href.+?'.'>)(.+?)(</a>)#';
+	preg_match_all($match_link, $text, $matches);
+	$count = count($matches[0]);
+	for ($i=0; $i<$count; $i++) {
+		if (!strstr($matches[0][$i], $mylink)) {
+			$text = str_replace($matches[0][$i], $matches[2][$i], $text);
+		}
+	}
+	return $text;
+}
+
 
 // used by wp-mail to handle charsets in email subjects
 function wp_iso_descrambler($string) {

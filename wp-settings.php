@@ -48,12 +48,9 @@ $wpdb->links            = $table_prefix . 'links';
 $wpdb->linkcategories   = $table_prefix . 'linkcategories';
 $wpdb->options          = $table_prefix . 'options';
 $wpdb->postmeta         = $table_prefix . 'postmeta';
-$wpdb->usermeta         = $table_prefix . 'usermeta';
 
 if ( defined('CUSTOM_USER_TABLE') )
 	$wpdb->users = CUSTOM_USER_TABLE;
-if ( defined('CUSTOM_USER_META_TABLE') )
-	$wpdb->usermeta = CUSTOM_USER_META_TABLE;
 
 // We're going to need to keep this around for a few months even though we're not using it internally
 
@@ -148,10 +145,6 @@ function shutdown_action_hook() {
 }
 register_shutdown_function('shutdown_action_hook');
 
-$wp_query = new WP_Query();
-$wp_rewrite = new WP_Rewrite();
-$wp = new WP();
-
-// Everything is loaded and initialized.
+// Everything is loaded.
 do_action('init');
 ?>

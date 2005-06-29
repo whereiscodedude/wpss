@@ -1,209 +1,5 @@
 <?php
 
-// Creates a new post from the "Write Post" form using $_POST information.
-function write_post() {
-	global $user_ID;
-
-	if ( !user_can_create_draft($user_ID) )
-		die( __('You are not allowed to create posts or drafts on this blog.') );
-
-	// Rename.
-	$_POST['post_content']  = $_POST['content'];
-	$_POST['post_excerpt']  = $_POST['excerpt'];
-	$_POST['post_parent'] = $_POST['parent_id'];
-	$_POST['to_ping'] = $_POST['trackback_url'];
-
-	if (! empty($_POST['post_author_override'])) {
-		$_POST['$post_author'] = (int) $_POST['post_author_override'];
-	} else if (! empty($_POST['post_author'])) {
-		$_POST['post_author'] = (int) $_POST['post_author'];
-	} else {
-		$_POST['post_author'] = (int) $_POST['user_ID'];
-	}
-
-	if ( !user_can_edit_user($user_ID, $_POST['post_author']) )
-		die( __('You cannot post as this user.') );
-	
-	if ( 'publish' == $_POST['post_status'] && (!user_can_create_post($user_ID)) )
-		$_POST['post_status'] = 'draft';
-	
-	// What to do based on which button they pressed
-	if ('' != $_POST['saveasdraft']) $_POST['post_status'] = 'draft';
-	if ('' != $_POST['saveasprivate']) $_POST['post_status'] = 'private';
-	if ('' != $_POST['publish']) $_POST['post_status'] = 'publish';
-	if ('' != $_POST['advanced']) $_POST['post_status'] = 'draft';
-	if ('' != $_POST['savepage']) $_POST['post_status'] = 'static';
-		
-	if (user_can_set_post_date($user_ID) && (!empty($_POST['edit_date']))) {
-		$aa = $_POST['aa'];
-		$mm = $_POST['mm'];
-		$jj = $_POST['jj'];
-		$hh = $_POST['hh'];
-		$mn = $_POST['mn'];
-		$ss = $_POST['ss'];
-		$jj = ($jj > 31) ? 31 : $jj;
-		$hh = ($hh > 23) ? $hh - 24 : $hh;
-		$mn = ($mn > 59) ? $mn - 60 : $mn;
-		$ss = ($ss > 59) ? $ss - 60 : $ss;
-		$_POST['post_date'] = "$aa-$mm-$jj $hh:$mn:$ss";
-		$_POST['post_date_gmt'] = get_gmt_from_date("$aa-$mm-$jj $hh:$mn:$ss");
-	} 
-
-	// Create the post.
-	$post_ID = wp_insert_post($_POST);
-	add_meta($post_ID);
-
-	return $post_ID;
-}
-
-// Update an existing post with values provided in $_POST.
-function edit_post() {
-	global $user_ID;
-
-	if ( !isset($blog_ID) ) 
-		$blog_ID = 1;
-
-	$post_ID = (int) $_POST['post_ID'];
-
-	if (!user_can_edit_post($user_ID, $post_ID, $blog_ID))
-		die( __('You are not allowed to edit this post.') );
-
-	// Rename.
-	$_POST['ID'] = (int) $_POST['post_ID'];
-	$_POST['post_content']  = $_POST['content'];
-	$_POST['post_excerpt']  = $_POST['excerpt'];
-	$_POST['post_parent'] = $_POST['parent_id'];
-	$_POST['to_ping'] = $_POST['trackback_url'];
-
-	if (! empty($_POST['post_author_override'])) {
-		$_POST['$post_author'] = (int) $_POST['post_author_override'];
-	} else if (! empty($_POST['post_author'])) {
-		$_POST['post_author'] = (int) $_POST['post_author'];
-	} else {
-		$_POST['post_author'] = (int) $_POST['user_ID'];
-	}
-
-	if ( !user_can_edit_user($user_ID, $_POST['post_author']) )
-		die( __('You cannot post as this user.') );
-
-	if (user_can_set_post_date($user_ID) && (!empty($_POST['edit_date']))) {
-		$aa = $_POST['aa'];
-		$mm = $_POST['mm'];
-		$jj = $_POST['jj'];
-		$hh = $_POST['hh'];
-		$mn = $_POST['mn'];
-		$ss = $_POST['ss'];
-		$jj = ($jj > 31) ? 31 : $jj;
-		$hh = ($hh > 23) ? $hh - 24 : $hh;
-		$mn = ($mn > 59) ? $mn - 60 : $mn;
-		$ss = ($ss > 59) ? $ss - 60 : $ss;
-		$_POST['post_date'] = "$aa-$mm-$jj $hh:$mn:$ss";
-		$_POST['post_date_gmt'] = get_gmt_from_date("$aa-$mm-$jj $hh:$mn:$ss");
-	} 
-
-	wp_update_post($_POST);
-
-	// Meta Stuff
-	if ($_POST['meta']) :
-		foreach ($_POST['meta'] as $key => $value) :
-			update_meta($key, $value['key'], $value['value']);
-		endforeach;
-	endif;
-
-	if ($_POST['deletemeta']) :
-		foreach ($_POST['deletemeta'] as $key => $value) :
-			delete_meta($key);
-		endforeach;
-	endif;
-
-	add_meta($post_ID);
-}
-
-function edit_comment() {
-	global $user_ID;
-
-	$comment_ID = (int) $_POST['comment_ID'];
-	$comment_post_ID = (int) $_POST['comment_post_ID'];
-
-	if (!user_can_edit_post_comments($user_ID, $comment_post_ID))
-		die( __('You are not allowed to edit comments on this post, so you cannot edit this comment.') );
-
-	$_POST['comment_author'] = $_POST['newcomment_author'];
-	$_POST['comment_author_email']	= $_POST['newcomment_author_email'];
-	$_POST['comment_author_url'] = $_POST['newcomment_author_url'];
-	$_POST['comment_approved'] = $_POST['comment_status'];
-	$_POST['comment_content'] = $_POST['content'];
-	$_POST['comment_ID'] = (int) $_POST['comment_ID'];
- 
-	if (user_can_edit_post_date($user_ID, $post_ID) && (!empty($_POST['edit_date']))) {
-		$aa = $_POST['aa'];
-		$mm = $_POST['mm'];
-		$jj = $_POST['jj'];
-		$hh = $_POST['hh'];
-		$mn = $_POST['mn'];
-		$ss = $_POST['ss'];
-		$jj = ($jj > 31) ? 31 : $jj;
-		$hh = ($hh > 23) ? $hh - 24 : $hh;
-		$mn = ($mn > 59) ? $mn - 60 : $mn;
-		$ss = ($ss > 59) ? $ss - 60 : $ss;
-		$_POST['comment_date'] = "$aa-$mm-$jj $hh:$mn:$ss";
-	}
-
-	wp_update_comment($_POST);
-}
-
-// Get an existing post and format it for editing.
-function get_post_to_edit($id) {
-	$post = get_post($id);
-
-	$post->post_content = format_to_edit($post->post_content);
-	$post->post_content = apply_filters('content_edit_pre', $post->post_content);
-
-	$post->post_excerpt = format_to_edit($post->post_excerpt);
-	$post->post_excerpt = apply_filters('excerpt_edit_pre', $post->post_excerpt);
-
-	$post->post_title = format_to_edit($post->post_title);
-	$post->post_title = apply_filters('title_edit_pre', $post->post_title);
-
-	if ($post->post_status == 'static')
-		$post->page_template = get_post_meta($id, '_wp_page_template', true);	
-
-	return $post;
-}
-
-// Default post information to use when populating the "Write Post" form.
-function get_default_post_to_edit() {
-	global $content, $excerpt, $edited_post_title;
-
-	$post->post_status = 'draft';
-	$post->comment_status = get_settings('default_comment_status');
-	$post->ping_status = get_settings('default_ping_status');
-	$post->post_pingback = get_settings('default_pingback_flag');
-	$post->post_category = get_settings('default_category');
-	$content = wp_specialchars($content);
-	$post->post_content = apply_filters('default_content', $content);
-	$post->post_title = apply_filters('default_title', $edited_post_title);
-	$post->post_excerpt = apply_filters('default_excerpt', $excerpt);
-	$post->page_template = 'default';
-	$post->post_parent = 0;
-	$post->menu_order = 0;
-
-	return $post;
-}
-
-function get_comment_to_edit($id) {
-	$comment = get_comment($id);
-
-	$comment->comment_content = format_to_edit($comment->comment_content);
-	$comment->comment_content = apply_filters('comment_edit_pre', $comment->comment_content);
-
-	$comment->comment_author = format_to_edit($comment->comment_author);
-	$comment->comment_author_email = format_to_edit($comment->comment_author_email);
-	$comment->comment_author_url = format_to_edit($comment->comment_author_url);
-
-	return $comment;
-}
-
 function url_shorten ($url) {
 	$short_url = str_replace('http://', '', stripslashes($url));
 	$short_url = str_replace('www.', '', $short_url);
@@ -760,11 +556,32 @@ function save_mod_rewrite_rules() {
 	insert_with_markers($home_path.'.htaccess', 'WordPress', $rules);
 }
 
+function generate_page_rewrite_rules() {
+	global $wpdb;
+	$posts = $wpdb->get_results("SELECT ID, post_name FROM $wpdb->posts WHERE post_status = 'static' ORDER BY post_parent DESC");
+
+	$page_rewrite_rules = array();
+	
+	if ($posts) {
+		foreach ($posts as $post) {
+			// URI => page name
+			$uri = get_page_uri($post->ID);
+			
+			$page_rewrite_rules[$uri] = $post->post_name;
+		}
+		
+		update_option('page_uris', $page_rewrite_rules);
+		
+		save_mod_rewrite_rules();
+	}
+}
+
 function the_quicktags () {
 // Browser detection sucks, but until Safari supports the JS needed for this to work people just assume it's a bug in WP
 if ( !strstr($_SERVER['HTTP_USER_AGENT'], 'Safari') ) :
 	echo '
 	<div id="quicktags">
+	<a href="http://wordpress.org/docs/reference/post/#quicktags" title="' .  __('Help with quicktags') . '">' . __('Quicktags') . '</a>:
 	<script src="quicktags.js" type="text/javascript"></script>
 	<script type="text/javascript">edToolbar();</script>
 ';
