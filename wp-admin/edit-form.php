@@ -11,22 +11,23 @@
 
 <script type="text/javascript">
 <!--
-function focusit() { // focus on first input field
+function focusit() {
+	// focus on first input field
 	document.getElementById('title').focus();
 }
-addLoadEvent(focusit);
+window.onload = focusit;
 //-->
 </script>
 
 <div id="poststuff">
     <fieldset id="titlediv">
       <legend><a href="http://wordpress.org/docs/reference/post/#title" title="<?php _e('Help on titles') ?>"><?php _e('Title') ?></a></legend> 
-	  <div><input type="text" name="post_title" size="30" tabindex="1" value="<?php echo $post->post_title; ?>" id="title" /></div>
+	  <div><input type="text" name="post_title" size="30" tabindex="1" value="<?php echo $edited_post_title; ?>" id="title" /></div>
     </fieldset>
 
     <fieldset id="categorydiv">
       <legend><a href="http://wordpress.org/docs/reference/post/#category" title="<?php _e('Help on categories') ?>"><?php _e('Categories') ?></a></legend> 
-	  <div><?php dropdown_categories($post->post_category); ?></div>
+	  <div><?php dropdown_categories($default_post_cat); ?></div>
     </fieldset>
 
 <br />
@@ -39,7 +40,7 @@ addLoadEvent(focusit);
      $rows = 10;
  }
 ?>
-<div><textarea rows="<?php echo $rows; ?>" cols="40" name="content" tabindex="4" id="content"><?php echo $post->post_content ?></textarea></div>
+<div><textarea rows="<?php echo $rows; ?>" cols="40" name="content" tabindex="4" id="content"><?php echo $content ?></textarea></div>
 </fieldset>
 
 
@@ -57,7 +58,7 @@ edCanvas = document.getElementById('content');
 <p class="submit"><input name="saveasdraft" type="submit" id="saveasdraft" tabindex="9" value="<?php _e('Save as Draft') ?>" /> 
   <input name="saveasprivate" type="submit" id="saveasprivate" tabindex="10" value="<?php _e('Save as Private') ?>" />
 
-	 <?php if ( current_user_can('edit_posts') ) : ?>
+	 <?php if ( user_can_create_post($user_ID) ) : ?>
   <input name="publish" type="submit" id="publish" tabindex="6" style="font-weight: bold;" value="<?php _e('Publish') ?>" /> 
 <?php endif; ?>
 

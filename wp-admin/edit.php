@@ -7,8 +7,20 @@ require_once('admin-header.php');
 
 $_GET['m'] = (int) $_GET['m'];
 
-$drafts = get_users_drafts( $user_ID );
-$other_drafts = get_others_drafts( $user_ID);
+get_currentuserinfo();
+
+$drafts = $wpdb->get_results("SELECT ID, post_title FROM $wpdb->posts WHERE post_status = 'draft' AND post_author = $user_ID");
+if (1 < $user_level) {
+	$editable = $wpdb->get_col("SELECT ID FROM $wpdb->users WHERE user_level <= '$user_level' AND ID != $user_ID");
+	if( is_array( $editable ) == false )
+			$other_drafts = '';
+	else {
+		$editable = join(',', $editable);
+		$other_drafts = $wpdb->get_results("SELECT ID, post_title FROM $wpdb->posts WHERE post_status = 'draft' AND post_author IN ($editable) ");
+	}
+} else {
+	$other_drafts = false;
+}
 
 if ($drafts || $other_drafts) {
 ?> 
@@ -58,7 +70,7 @@ $what_to_show = 'posts';
 $posts_per_page = 15;
 $posts_per_archive_page = -1;
 
-wp();
+include(ABSPATH.'wp-blog-header.php');
 
 if ( is_month() ) {
 	single_month_title(' ');
@@ -196,13 +208,13 @@ foreach($posts_columns as $column_name=>$column_display_name) {
 
 	case 'control_edit':
 		?>
-		<td><?php if ( current_user_can('edit_post',$post->ID) ) { echo "<a href='post.php?action=edit&amp;post=$id' class='edit'>" . __('Edit') . "</a>"; } ?></td>
+		<td><?php if ( user_can_edit_post($user_ID,$post->ID) ) { echo "<a href='post.php?action=edit&amp;post=$id' class='edit'>" . __('Edit') . "</a>"; } ?></td>
 		<?php
 		break;
 
 	case 'control_delete':
 		?>
-		<td><?php if ( current_user_can('edit_post',$post->ID) ) { echo "<a href='post.php?action=delete&amp;post=$id' class='delete' onclick=\"return confirm('" . sprintf(__("You are about to delete this post \'%s\'\\n  \'OK\' to delete, \'Cancel\' to stop."), wp_specialchars(get_the_title('', ''), 1) ) . "')\">" . __('Delete') . "</a>"; } ?></td>
+		<td><?php if ( user_can_edit_post($user_ID,$post->ID) ) { echo "<a href='post.php?action=delete&amp;post=$id' class='delete' onclick=\"return confirm('" . sprintf(__("You are about to delete this post \'%s\'\\n  \'OK\' to delete, \'Cancel\' to stop."), wp_specialchars(get_the_title('', ''), 1) ) . "')\">" . __('Delete') . "</a>"; } ?></td>
 		<?php
 		break;
 
@@ -250,10 +262,10 @@ $comment_status = wp_get_comment_status($comment->comment_ID);
   @
   <?php comment_time('g:m:s a') ?> 
   <?php 
-			if ( current_user_can('edit_post', $post->ID) ) {
+			if (($user_level > $authordata->user_level) or ($user_login == $authordata->user_login)) {
 				echo "[ <a href=\"post.php?action=editcomment&amp;comment=".$comment->comment_ID."\">" .  __('Edit') . "</a>";
 				echo " - <a href=\"post.php?action=deletecomment&amp;p=".$post->ID."&amp;comment=".$comment->comment_ID."\" onclick=\"return confirm('" . sprintf(__("You are about to delete this comment by \'%s\'\\n  \'OK\' to delete, \'Cancel\' to stop."), $comment->comment_author) . "')\">" . __('Delete') . "</a> ";
-				if ( ('none' != $comment_status) && ( current_user_can('moderate_comments') ) ) {
+				if ( ('none' != $comment_status) && ($user_level >= 3) ) {
 					if ('approved' == wp_get_comment_status($comment->comment_ID)) {
 						echo " - <a href=\"post.php?action=unapprovecomment&amp;p=".$post->ID."&amp;comment=".$comment->comment_ID."\">" . __('Unapprove') . "</a> ";
 					} else {

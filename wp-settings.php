@@ -18,12 +18,14 @@ function unregister_GLOBALS() {
 
 unregister_GLOBALS(); 
 
-$HTTP_USER_AGENT = getenv('HTTP_USER_AGENT');
+$HTTP_HOST = getenv('HTTP_HOST');  /* domain name */
+$REMOTE_ADDR = getenv('REMOTE_ADDR'); /* visitor's IP */
+$HTTP_USER_AGENT = getenv('HTTP_USER_AGENT'); /* visitor's browser */
 unset( $wp_filter, $cache_userdata, $cache_lastcommentmodified, $cache_lastpostdate, $cache_settings, $category_cache, $cache_categories );
 
 // Fix for IIS, which doesn't set REQUEST_URI
-if ( empty( $_SERVER['REQUEST_URI'] ) ) {
-	$_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME']; // Does this work under CGI?
+if (! isset($_SERVER['REQUEST_URI'])) {
+	$_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'];
 	
 	// Append the query string if it exists and isn't null
 	if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
@@ -66,15 +68,10 @@ $wpdb->links            = $table_prefix . 'links';
 $wpdb->linkcategories   = $table_prefix . 'linkcategories';
 $wpdb->options          = $table_prefix . 'options';
 $wpdb->postmeta         = $table_prefix . 'postmeta';
-$wpdb->usermeta         = $table_prefix . 'usermeta';
-
-$wpdb->prefix           = $table_prefix;
 
 if ( defined('CUSTOM_USER_TABLE') )
 	$wpdb->users = CUSTOM_USER_TABLE;
-if ( defined('CUSTOM_USER_META_TABLE') )
-	$wpdb->usermeta = CUSTOM_USER_META_TABLE;
-	
+
 // We're going to need to keep this around for a few months even though we're not using it internally
 
 $tableposts = $wpdb->posts;
@@ -87,14 +84,12 @@ $tablelinkcategories = $wpdb->linkcategories;
 $tableoptions = $wpdb->options;
 $tablepostmeta = $wpdb->postmeta;
 
-$wp_filters = array();
-
 require (ABSPATH . WPINC . '/functions.php');
 require (ABSPATH . WPINC . '/default-filters.php');
 require_once (ABSPATH . WPINC . '/wp-l10n.php');
 
 $wpdb->hide_errors();
-if ( !update_category_cache() && (!strstr($_SERVER['PHP_SELF'], 'install.php') && !defined('WP_INSTALLING')) ) {
+if ( !update_user_cache() && (!strstr($_SERVER['PHP_SELF'], 'install.php') && !defined('WP_INSTALLING')) ) {
 	if ( strstr($_SERVER['PHP_SELF'], 'wp-admin') )
 		$link = 'install.php';
 	else
@@ -105,7 +100,6 @@ $wpdb->show_errors();
 
 require (ABSPATH . WPINC . '/functions-formatting.php');
 require (ABSPATH . WPINC . '/functions-post.php');
-require (ABSPATH . WPINC . '/capabilities.php');
 require (ABSPATH . WPINC . '/classes.php');
 require (ABSPATH . WPINC . '/template-functions-general.php');
 require (ABSPATH . WPINC . '/template-functions-links.php');
@@ -123,17 +117,6 @@ if (!strstr($_SERVER['PHP_SELF'], 'install.php') && !strstr($_SERVER['PHP_SELF']
     $cookiehash = md5(get_settings('siteurl')); // Remove in 1.4
 	define('COOKIEHASH', $cookiehash); 
 endif;
-
-if ( !defined('USER_COOKIE') )
-	define('USER_COOKIE', 'wordpressuser_'. COOKIEHASH);
-if ( !defined('PASS_COOKIE') )
-	define('PASS_COOKIE', 'wordpresspass_'. COOKIEHASH);
-if ( !defined('COOKIEPATH') )
-	define('COOKIEPATH', preg_replace('|https?://[^/]+|i', '', get_settings('home') . '/' ) );
-if ( !defined('SITECOOKIEPATH') )
-	define('SITECOOKIEPATH', preg_replace('|https?://[^/]+|i', '', get_settings('siteurl') . '/' ) );
-if ( !defined('COOKIE_DOMAIN') )
-	define('COOKIE_DOMAIN', false);
 
 require (ABSPATH . WPINC . '/vars.php');
 
@@ -162,25 +145,6 @@ if ( defined('WP_CACHE') && function_exists('wp_cache_postload') )
 
 do_action('plugins_loaded');
 
-// If already slashed, strip.
-if ( get_magic_quotes_gpc() ) {
-	$_GET    = stripslashes_deep($_GET   );
-	$_POST   = stripslashes_deep($_POST  );
-	$_COOKIE = stripslashes_deep($_COOKIE);
-	$_SERVER = stripslashes_deep($_SERVER);
-}
-
-// Escape with wpdb.
-$_GET    = add_magic_quotes($_GET   );
-$_POST   = add_magic_quotes($_POST  );
-$_COOKIE = add_magic_quotes($_COOKIE);
-$_SERVER = add_magic_quotes($_SERVER);
-
-$wp_query = new WP_Query();
-$wp_rewrite = new WP_Rewrite();
-$wp = new WP();
-$wp_roles = new WP_Roles();
-
 define('TEMPLATEPATH', get_template_directory());
 
 // Load the default text localization domain.
@@ -189,11 +153,18 @@ load_default_textdomain();
 // Pull in locale data after loading text domain.
 require_once(ABSPATH . WPINC . '/locale.php');
 
+if ( !get_magic_quotes_gpc() ) {
+	$_GET    = add_magic_quotes($_GET   );
+	$_POST   = add_magic_quotes($_POST  );
+	$_COOKIE = add_magic_quotes($_COOKIE);
+	$_SERVER = add_magic_quotes($_SERVER);
+}
+
 function shutdown_action_hook() {
 	do_action('shutdown');
 }
 register_shutdown_function('shutdown_action_hook');
 
-// Everything is loaded and initialized.
+// Everything is loaded.
 do_action('init');
 ?>

@@ -16,7 +16,7 @@ for ($i=0; $i<count($wpvarstoreset); $i += 1) {
 	}
 }
 require_once('../wp-config.php');
-require_once('upgrade-functions.php');
+require('upgrade-functions.php');
 header( 'Content-Type: text/html; charset=utf-8' );
 switch ($action) {
 
@@ -62,31 +62,45 @@ case "step1":
 			//$post_number = $postinfo[3];
 			$post_title = $postinfo[4];
 
-			$post_author = trim($wpdb->escape($postinfo[1]));
+			$post_author = trim(addslashes($postinfo[1]));
 			// we'll check the author is registered already
 			$user = $wpdb->get_row("SELECT * FROM $wpdb->users WHERE user_login = '$post_author'");
 			if (!$user) { // seems s/he's not, so let's register
+				$user_ip = '127.0.0.1';
+				$user_domain = 'localhost';
+				$user_browser = 'server';
 				$user_joindate = '1979-06-06 00:41:00'; // that's my birthdate (gmt+1) - I could choose any other date. You could change the date too. Just remember the year must be >=1970 or the world would just randomly fall on your head (everything might look fine, and then blam! major headache!)
-				$user_login = $wpdb->escape($post_author);
-				$pass1 = $wpdb->escape('password');
-				$user_email = $wpdb->escape('user@wordpress.org');
-				$user_url = $wpdb->escape('');
-				$user_joindate = $wpdb->escape($user_joindate);
+				$user_login = addslashes($post_author);
+				$pass1 = addslashes('password');
+				$user_nickname = addslashes($post_author);
+				$user_email = addslashes('user@wordpress.org');
+				$user_url = addslashes('');
+				$user_joindate = addslashes($user_joindate);
 				$result = $wpdb->query("
 				INSERT INTO $wpdb->users (
 					user_login,
 					user_pass,
+					user_nickname,
 					user_email,
 					user_url,
+					user_ip,
+					user_domain,
+					user_browser,
 					user_registered,
 					user_level,
+					user_idmode
 				) VALUES (
 					'$user_login',
 					'$pass1',
+					'$user_nickname',
 					'$user_email',
 					'$user_url',
+					'$user_ip',
+					'$user_domain',
+					'$user_browser',
 					'$user_joindate',
 					'1',
+					'nickname'
 				)");
 
 				echo ": Registered user <strong>$user_login</strong>";
@@ -111,10 +125,10 @@ case "step1":
 
 			$post_date = "$postyear-$postmonth-$postday $posthour:$postminute:$postsecond";
 
-			$post_content = $wpdb->escape($post_content);
+			$post_content = addslashes($post_content);
 			$post_content = str_replace('<br>', '<br />', $post_content); // the XHTML touch... ;)
 			
-			$post_title = $wpdb->escape($post_title);
+			$post_title = addslashes($post_title);
 			
 			// Quick-n-dirty check for dups:
 			$dupcheck = $wpdb->get_results("SELECT ID,post_date,post_title FROM $wpdb->posts WHERE post_date='$post_date' AND post_title='$post_title' LIMIT 1",ARRAY_A);

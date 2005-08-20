@@ -25,7 +25,7 @@ for ($i=0; $i<count($wpvarstoreset); $i += 1) {
 switch ($action) {
   case 'addcat':
   {
-      if ( !current_user_can('manage_links') )
+      if ($user_level < 5)
           die (__("Cheatin' uh ?"));
 
       $cat_name = wp_specialchars($_POST['cat_name']);
@@ -60,9 +60,9 @@ switch ($action) {
       if ($sort_desc != 'Y') {
           $sort_desc = 'N';
       }
-      $text_before_link = $_POST['text_before_link'];
-      $text_after_link = $_POST['text_after_link'];
-      $text_after_all = $_POST['text_after_all'];
+      $text_before_link = addslashes($_POST['text_before_link']);
+      $text_after_link = addslashes($_POST['text_after_link']);
+      $text_after_all = addslashes($_POST['text_after_all']);
 
       $list_limit = $_POST['list_limit'];
       if ($list_limit == '')
@@ -85,7 +85,7 @@ switch ($action) {
     if ($cat_id=="1")
         die(sprintf(__("Can't delete the <strong>%s</strong> link category: this is the default one"), $cat_name));
 
-    if ( !current_user_can('manage_links') )
+    if ($user_level < 5)
       die (__("Cheatin' uh ?"));
 
     $wpdb->query("DELETE FROM $wpdb->linkcategories WHERE cat_id='$cat_id'");
@@ -198,7 +198,7 @@ switch ($action) {
   } // end Edit
   case "editedcat":
   {
-    if ( !current_user_can('manage_links') )
+    if ($user_level < 5)
       die (__("Cheatin' uh ?"));
 
     $submit=$_POST["submit"];
@@ -238,9 +238,9 @@ switch ($action) {
     if ($sort_desc != 'Y') {
         $sort_desc = 'N';
     }
-    $text_before_link = $_POST["text_before_link"];
-    $text_after_link = $_POST["text_after_link"];
-    $text_after_all = $_POST["text_after_all"];
+    $text_before_link = addslashes($_POST["text_before_link"]);
+    $text_after_link = addslashes($_POST["text_after_link"]);
+    $text_after_all = addslashes($_POST["text_after_all"]);
 
     $list_limit = $_POST["list_limit"];
     if ($list_limit == '')
@@ -270,8 +270,9 @@ switch ($action) {
   default:
   {
     include_once ("admin-header.php");
-    if ( !current_user_can('manage_links') )
+    if ($user_level < 5) {
       die(__("You have do not have sufficient permissions to edit the link categories for this blog. :)"));
+    }
 ?>
 
 <div class="wrap">

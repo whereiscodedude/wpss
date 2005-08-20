@@ -1,8 +1,9 @@
 <?php 
-
-if (empty($wp)) {
-	require_once('wp-config.php');
-	wp('feed=rss2&withcomments=1');
+if ( empty($feed) ) {
+	$feed = 'rss2';
+	$withcomments = 1;
+	$doing_rss = 1;
+	require('wp-blog-header.php');
 }
 
 header('Content-type: text/xml;charset=' . get_settings('blog_charset'), true);
@@ -48,7 +49,12 @@ if (have_posts()) :
 			foreach ($comments as $comment) {
 ?>
 	<item>
-		<title>by: <?php comment_author_rss() ?></title>
+ 		<title><?php if ( (! is_single()) || (! is_page()) ) {
+ 			$title = get_the_title($comment->comment_post_ID);
+ 			$title = apply_filters('the_title', $title);
+ 			$title = apply_filters('the_title_rss', $title);
+ 			echo "Comment on $title";
+ 		} ?> by: <?php comment_author_rss() ?></title>
 		<link><?php comment_link() ?></link>
 		<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_comment_time('Y-m-d H:i:s', true), false); ?></pubDate>
 		<guid><?php comment_link() ?></guid>

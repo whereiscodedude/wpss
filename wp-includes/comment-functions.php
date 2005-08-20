@@ -13,8 +13,8 @@ function comments_template( $file = '/comments.php' ) {
 	if ( empty($comment_author) ) {
 		$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = '$post->ID' AND comment_approved = '1' ORDER BY comment_date");
 	} else {
-		$author_db = $wpdb->escape($comment_author);
-		$email_db  = $wpdb->escape($comment_author_email);
+		$author_db = addslashes($comment_author);
+		$email_db  = addslashes($comment_author_email);
 		$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = '$post->ID' AND ( comment_approved = '1' OR ( comment_author = '$author_db' AND comment_author_email = '$email_db' AND comment_approved = '0' ) ) ORDER BY comment_date");
 	}
 
@@ -89,47 +89,45 @@ function comments_popup_script($width=400, $height=400, $file='') {
 }
 
 function comments_popup_link($zero='No Comments', $one='1 Comment', $more='% Comments', $CSSclass='', $none='Comments Off') {
-	global $id, $wpcommentspopupfile, $wpcommentsjavascript, $post, $wpdb;
-	global $comment_count_cache;
-	
+    global $id, $wpcommentspopupfile, $wpcommentsjavascript, $post, $wpdb;
+    global $comment_count_cache;
+
 	if (! is_single() && ! is_page()) {
-	if ( !isset($comment_count_cache[$id]) )
-		$comment_count_cache[$id] = $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_post_ID = $id AND comment_approved = '1';");
-	
-	$number = $comment_count_cache[$id];
-	
-	if (0 == $number && 'closed' == $post->comment_status && 'closed' == $post->ping_status) {
-		echo $none;
-		return;
-	} else {
-		if (!empty($post->post_password)) { // if there's a password
-			if ($_COOKIE['wp-postpass_'.COOKIEHASH] != $post->post_password) {  // and it doesn't match the cookie
-				echo('Enter your password to view comments');
-				return;
-			}
-		}
-		echo '<a href="';
-		if ($wpcommentsjavascript) {
-			if ( empty($wpcommentspopupfile) )
-				$home = get_settings('home');
-			else
-				$home = get_settings('siteurl');
-			echo $home . '/' . $wpcommentspopupfile.'?comments_popup='.$id;
-			echo '" onclick="wpopen(this.href); return false"';
-		} else { // if comments_popup_script() is not in the template, display simple comment link
-			if ( 0 == $number )
-				echo get_permalink() . '#respond';
-			else
-				comments_link();
-			echo '"';
-		}
-		if (!empty($CSSclass)) {
-			echo ' class="'.$CSSclass.'"';
-		}
-		echo '>';
-		comments_number($zero, $one, $more, $number);
-		echo '</a>';
-	}
+    if ( !isset($comment_count_cache[$id]))
+			$comment_count_cache[$id] = $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_post_ID = $id AND comment_approved = '1';");
+
+		$number = $comment_count_cache[$id];
+
+    if (0 == $number && 'closed' == $post->comment_status && 'closed' == $post->ping_status) {
+        echo $none;
+        return;
+    } else {
+        if (!empty($post->post_password)) { // if there's a password
+            if ($_COOKIE['wp-postpass_'.COOKIEHASH] != $post->post_password) {  // and it doesn't match the cookie
+                echo('Enter your password to view comments');
+                return;
+            }
+        }
+        echo '<a href="';
+        if ($wpcommentsjavascript) {
+					if ( empty($wpcommentspopupfile) )
+						$home = get_settings('home');
+					else
+						$home = get_settings('siteurl');
+					echo $home . '/' . $wpcommentspopupfile.'?comments_popup='.$id;
+					echo '" onclick="wpopen(this.href); return false"';
+        } else {
+            // if comments_popup_script() is not in the template, display simple comment link
+            comments_link();
+            echo '"';
+        }
+        if (!empty($CSSclass)) {
+            echo ' class="'.$CSSclass.'"';
+        }
+        echo '>';
+        comments_number($zero, $one, $more, $number);
+        echo '</a>';
+    }
 	}
 }
 
@@ -357,20 +355,20 @@ function pings_open() {
 // Non-template functions
 
 function get_lastcommentmodified($timezone = 'server') {
-	global $tablecomments, $cache_lastcommentmodified, $pagenow, $wpdb;
+	global $cache_lastcommentmodified, $pagenow, $wpdb;
 	$add_seconds_blog = get_settings('gmt_offset') * 3600;
 	$add_seconds_server = date('Z');
 	$now = current_time('mysql', 1);
 	if ( !isset($cache_lastcommentmodified[$timezone]) ) {
 		switch(strtolower($timezone)) {
 			case 'gmt':
-				$lastcommentmodified = $wpdb->get_var("SELECT comment_date_gmt FROM $tablecomments WHERE comment_date_gmt <= '$now' ORDER BY comment_date_gmt DESC LIMIT 1");
+				$lastcommentmodified = $wpdb->get_var("SELECT comment_date_gmt FROM $wpdb->comments WHERE comment_date_gmt <= '$now' ORDER BY comment_date_gmt DESC LIMIT 1");
 				break;
 			case 'blog':
-				$lastcommentmodified = $wpdb->get_var("SELECT comment_date FROM $tablecomments WHERE comment_date_gmt <= '$now' ORDER BY comment_date_gmt DESC LIMIT 1");
+				$lastcommentmodified = $wpdb->get_var("SELECT comment_date FROM $wpdb->comments WHERE comment_date_gmt <= '$now' ORDER BY comment_date_gmt DESC LIMIT 1");
 				break;
 			case 'server':
-				$lastcommentmodified = $wpdb->get_var("SELECT DATE_ADD(comment_date_gmt, INTERVAL '$add_seconds_server' SECOND) FROM $tablecomments WHERE comment_date_gmt <= '$now' ORDER BY comment_date_gmt DESC LIMIT 1");
+				$lastcommentmodified = $wpdb->get_var("SELECT DATE_ADD(comment_date_gmt, INTERVAL '$add_seconds_server' SECOND) FROM $wpdb->comments WHERE comment_date_gmt <= '$now' ORDER BY comment_date_gmt DESC LIMIT 1");
 				break;
 		}
 		$cache_lastcommentmodified[$timezone] = $lastcommentmodified;
@@ -447,7 +445,6 @@ function pingback($content, $post_ID) {
 				$post_links[] = $link_test;
 			elseif(($test['path'] != '/') && ($test['path'] != ''))
 				$post_links[] = $link_test;
-			do_action('pre_ping',  array(&$post_links, &$pung));
 		endif;
 	endforeach;
 

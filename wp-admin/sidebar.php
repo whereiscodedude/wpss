@@ -3,7 +3,9 @@ $mode = 'sidebar';
 
 require_once('admin.php');
 
-if ( ! current_user_can('edit_posts') )
+get_currentuserinfo();
+
+if ($user_level == 0)
 	die ("Cheatin' uh ?");
 
 if ('b' == $_GET['a']) {

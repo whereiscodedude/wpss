@@ -1,10 +1,20 @@
 <?php
-
 function get_the_author($idmode = '') {
     global $authordata;
-    return $authordata->display_name;
-}
+    if (empty($idmode)) {
+        $idmode = $authordata->user_idmode;
+    }
 
+    if ($idmode == 'nickname')    $id = $authordata->user_nickname;
+    if ($idmode == 'login')    $id = $authordata->user_login;
+    if ($idmode == 'firstname')    $id = $authordata->user_firstname;
+    if ($idmode == 'lastname')    $id = $authordata->user_lastname;
+    if ($idmode == 'namefl')    $id = $authordata->user_firstname.' '.$authordata->user_lastname;
+    if ($idmode == 'namelf')    $id = $authordata->user_lastname.' '.$authordata->user_firstname;
+    if (!$idmode) $id = $authordata->user_nickname;
+    
+    return $id;
+}
 function the_author($idmode = '', $echo = true) {
 	if ($echo) echo get_the_author($idmode);
 	return get_the_author($idmode);
@@ -26,21 +36,21 @@ function the_author_login() {
 }
 
 function get_the_author_firstname() {
-    global $id,$authordata;    return $authordata->first_name;
+    global $id,$authordata;    return $authordata->user_firstname;
 }
 function the_author_firstname() {
     echo get_the_author_firstname();
 }
 
 function get_the_author_lastname() {
-    global $id,$authordata;    return $authordata->last_name;
+    global $id,$authordata;    return $authordata->user_lastname;
 }
 function the_author_lastname() {
     echo get_the_author_lastname();
 }
 
 function get_the_author_nickname() {
-    global $id,$authordata;    return $authordata->nickname;
+    global $id,$authordata;    return $authordata->user_nickname;
 }
 function the_author_nickname() {
     echo get_the_author_nickname();
@@ -70,37 +80,35 @@ function the_author_url() {
 }
 
 function get_the_author_icq() {
-    global $id,$authordata;    return $authordata->icq;
+    global $id,$authordata;    return $authordata->user_icq;
 }
 function the_author_icq() {
     echo get_the_author_icq();
 }
 
 function get_the_author_aim() {
-    global $id,$authordata;    return str_replace(' ', '+', $authordata->aim);
+    global $id,$authordata;    return str_replace(' ', '+', $authordata->user_aim);
 }
 function the_author_aim() {
     echo get_the_author_aim();
 }
 
 function get_the_author_yim() {
-    global $id,$authordata;    return $authordata->yim;
+    global $id,$authordata;    return $authordata->user_yim;
 }
 function the_author_yim() {
     echo get_the_author_yim();
 }
 
 function get_the_author_msn() {
-    global $id,$authordata;    return $authordata->msn;
+    global $id,$authordata;    return $authordata->user_msn;
 }
 function the_author_msn() {
     echo get_the_author_msn();
 }
 
 function get_the_author_posts() {
-    global $id,$post;
-	$posts=get_usernumposts($post->post_author);
-	return $posts;
+    global $id,$post;    $posts=get_usernumposts($post->post_author);    return $posts;
 }
 function the_author_posts() {
     echo get_the_author_posts();
@@ -123,7 +131,7 @@ function get_author_link($echo = false, $author_id, $author_nicename) {
         $file = get_settings('home') . '/';
         $link = $file . '?author=' . $auth_ID;
     } else {
-        if ('' == $author_nicename) $author_nicename = $cache_userdata[$author_id]->user_nicename;
+        if ('' == $author_nicename) $author_nicename = $cache_userdata[$author_id]->author_nicename;
 				$link = str_replace('%author%', $author_nicename, $link);
 				$link = get_settings('home') . trailingslashit($link);
     }
@@ -148,16 +156,15 @@ function wp_list_authors($args = '') {
 function list_authors($optioncount = false, $exclude_admin = true, $show_fullname = false, $hide_empty = true, $feed = '', $feed_image = '') {
     global $wpdb;
 
-    $query = "SELECT ID, user_nicename from $wpdb->users " . ($exclude_admin ? "WHERE user_login <> 'admin' " : '') . "ORDER BY display_name";
+    $query = "SELECT ID, user_nickname, user_firstname, user_lastname, user_nicename from $wpdb->users " . ($exclude_admin ? "WHERE user_login <> 'admin' " : '') . "ORDER BY user_nickname";
     $authors = $wpdb->get_results($query);
 
     foreach($authors as $author) {
-		$author = get_userdata( $author->ID );
         $posts = get_usernumposts($author->ID);
-        $name = $author->nickname;
+        $name = $author->user_nickname;
 
-        if ($show_fullname && ($author->first_name != '' && $author->last_name != '')) {
-            $name = "$author->first_name $author->last_name";
+        if ($show_fullname && ($author->user_firstname != '' && $author->user_lastname != '')) {
+            $name = "$author->user_firstname $author->user_lastname";
         }
         
         if (! ($posts == 0 && $hide_empty)) echo "<li>";
@@ -165,7 +172,7 @@ function list_authors($optioncount = false, $exclude_admin = true, $show_fullnam
             if ( !$hide_empty )
 				$link = $name;
         } else {
-            $link = '<a href="' . get_author_link(0, $author->ID, $author->user_nicename) . '" title="' . sprintf(__("Posts by %s"), wp_specialchars($author->display_name)) . '">' . $name . '</a>';
+            $link = '<a href="' . get_author_link(0, $author->ID, $author->user_nicename) . '" title="' . sprintf(__("Posts by %s"), wp_specialchars($author->user_nickname)) . '">' . $name . '</a>';
 
             if ( (! empty($feed_image)) || (! empty($feed)) ) {
                 

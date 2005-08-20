@@ -21,15 +21,13 @@ for ($i=0; $i<count($wpvarstoreset); $i += 1) {
 	}
 }
 
-if ( !current_user_can('manage_options') )
+if ($user_level < 6)
 	die ( __('Cheatin&#8217; uh?') );
 
 switch($action) {
 
 case 'update':
 	$any_changed = 0;
-	
-	check_admin_referer();
     
 	if (!$_POST['page_options']) {
 		foreach ($_POST as $key => $value) {
@@ -50,16 +48,18 @@ case 'update':
 // Options that if not there have 0 value but need to be something like "closed"
     $nonbools = array('default_ping_status', 'default_comment_status');
     if ($options) {
-		$options = apply_filters( 'options_to_update' , $options );
         foreach ($options as $option) {
-            $old_val = $option->option_value;
-            $new_val = trim($_POST[$option->option_name]);
-            if( in_array($option->option_name, $nonbools) && ( $new_val == '0' || $new_val == '') )
-				$new_val = 'closed';
-            if ($new_val !== $old_val) {
-                $result = $wpdb->query("UPDATE $wpdb->options SET option_value = '$new_val' WHERE option_name = '$option->option_name'");
-				$any_changed++;
-			}
+            // should we even bother checking?
+            if ($user_level >= $option->option_admin_level) {
+                $old_val = $option->option_value;
+                $new_val = trim($_POST[$option->option_name]);
+                if( in_array($option->option_name, $nonbools) && ( $new_val == '0' || $new_val == '') )
+					$new_val = 'closed';
+                if ($new_val !== $old_val) {
+                    $result = $wpdb->query("UPDATE $wpdb->options SET option_value = '$new_val' WHERE option_name = '$option->option_name'");
+					$any_changed++;
+				}
+            }
         }
         unset($cache_settings); // so they will be re-read
         get_settings('siteurl'); // make it happen now

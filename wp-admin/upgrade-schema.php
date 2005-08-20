@@ -6,8 +6,7 @@ $wp_queries="CREATE TABLE $wpdb->categories (
   cat_name varchar(55) NOT NULL default '',
   category_nicename varchar(200) NOT NULL default '',
   category_description longtext NOT NULL,
-  category_parent bigint(20) NOT NULL default '0',
-  category_count bigint(20) NOT NULL default '0',
+  category_parent int(4) NOT NULL default '0',
   PRIMARY KEY  (cat_ID),
   KEY category_nicename (category_nicename)
 );
@@ -25,8 +24,8 @@ CREATE TABLE $wpdb->comments (
   comment_approved enum('0','1','spam') NOT NULL default '1',
   comment_agent varchar(255) NOT NULL default '',
   comment_type varchar(20) NOT NULL default '',
-  comment_parent bigint(20) NOT NULL default '0',
-  user_id bigint(20) NOT NULL default '0',
+  comment_parent int(11) NOT NULL default '0',
+  user_id int(11) NOT NULL default '0',
   PRIMARY KEY  (comment_ID),
   KEY comment_approved (comment_approved),
   KEY comment_post_ID (comment_post_ID)
@@ -92,14 +91,14 @@ CREATE TABLE $wpdb->postmeta (
   meta_id bigint(20) NOT NULL auto_increment,
   post_id bigint(20) NOT NULL default '0',
   meta_key varchar(255) default NULL,
-  meta_value longtext,
+  meta_value text,
   PRIMARY KEY  (meta_id),
   KEY post_id (post_id),
   KEY meta_key (meta_key)
 );
 CREATE TABLE $wpdb->posts (
   ID bigint(20) unsigned NOT NULL auto_increment,
-  post_author bigint(20) NOT NULL default '0',
+  post_author int(4) NOT NULL default '0',
   post_date datetime NOT NULL default '0000-00-00 00:00:00',
   post_date_gmt datetime NOT NULL default '0000-00-00 00:00:00',
   post_content longtext NOT NULL,
@@ -116,7 +115,7 @@ CREATE TABLE $wpdb->posts (
   post_modified datetime NOT NULL default '0000-00-00 00:00:00',
   post_modified_gmt datetime NOT NULL default '0000-00-00 00:00:00',
   post_content_filtered text NOT NULL,
-  post_parent bigint(20) NOT NULL default '0',
+  post_parent int(11) NOT NULL default '0',
   guid varchar(255) NOT NULL default '',
   menu_order int(11) NOT NULL default '0',
   PRIMARY KEY  (ID),
@@ -126,24 +125,27 @@ CREATE TABLE $wpdb->users (
   ID bigint(20) unsigned NOT NULL auto_increment,
   user_login varchar(60) NOT NULL default '',
   user_pass varchar(64) NOT NULL default '',
+  user_firstname varchar(50) NOT NULL default '',
+  user_lastname varchar(50) NOT NULL default '',
+  user_nickname varchar(50) NOT NULL default '',
   user_nicename varchar(50) NOT NULL default '',
+  user_icq int(10) unsigned NOT NULL default '0',
   user_email varchar(100) NOT NULL default '',
   user_url varchar(100) NOT NULL default '',
+  user_ip varchar(15) NOT NULL default '',
+  user_domain varchar(200) NOT NULL default '',
+  user_browser varchar(200) NOT NULL default '',
   user_registered datetime NOT NULL default '0000-00-00 00:00:00',
+  user_level int(2) unsigned NOT NULL default '0',
+  user_aim varchar(50) NOT NULL default '',
+  user_msn varchar(100) NOT NULL default '',
+  user_yim varchar(50) NOT NULL default '',
+  user_idmode varchar(20) NOT NULL default '',
   user_activation_key varchar(60) NOT NULL default '',
   user_status int(11) NOT NULL default '0',
-  display_name varchar(250) NOT NULL default '',
+  user_description longtext NOT NULL default '',
   PRIMARY KEY  (ID),
   UNIQUE KEY user_login (user_login)
-);
-CREATE TABLE $wpdb->usermeta (
-  umeta_id bigint(20) NOT NULL auto_increment,
-  user_id bigint(20) NOT NULL default '0',
-  meta_key varchar(255) default NULL,
-  meta_value longtext,
-  PRIMARY KEY  (umeta_id),
-  KEY user_id (user_id),
-  KEY meta_key (meta_key)
 );";
 
 function populate_options() {
@@ -178,7 +180,7 @@ function populate_options() {
 	add_option('default_comment_status', 'open');
 	add_option('default_ping_status', 'open');
 	add_option('default_pingback_flag', 1);
-	add_option('default_post_edit_rows', 10);
+	add_option('default_post_edit_rows', 9);
 	add_option('posts_per_page', 10);
 	add_option('what_to_show', 'posts');
 	add_option('date_format', __('F j, Y'));
@@ -215,14 +217,9 @@ function populate_options() {
 	add_option('html_type', 'text/html');
 	// 1.5.1
 	add_option('use_trackback', 0);
-	// 1.6
-	add_option('default_role', 'inactive');
-	add_option('rich_editing', 'true');
-
-	populate_roles();
 
 	// Delete unused options
-	$unusedoptions = array ('blodotgsping_url', 'bodyterminator', 'emailtestonly', 'phoneemail_separator', 'smilies_directory', 'subjectprefix', 'use_bbcode', 'use_blodotgsping', 'use_phoneemail', 'use_quicktags', 'use_weblogsping', 'weblogs_cache_file', 'use_preview', 'use_htmltrans', 'smilies_directory', 'fileupload_allowedusers', 'use_phoneemail', 'default_post_status', 'default_post_category', 'archive_mode', 'time_difference', 'links_minadminlevel', 'links_use_adminlevels', 'links_rating_type', 'links_rating_char', 'links_rating_ignore_zero', 'links_rating_single_image', 'links_rating_image0', 'links_rating_image1', 'links_rating_image2', 'links_rating_image3', 'links_rating_image4', 'links_rating_image5', 'links_rating_image6', 'links_rating_image7', 'links_rating_image8', 'links_rating_image9', 'weblogs_cacheminutes', 'comment_allowed_tags', 'search_engine_friendly_urls', 'default_geourl_lat', 'default_geourl_lon', 'use_default_geourl', 'weblogs_xml_url', 'new_users_can_blog');
+	$unusedoptions = array ('blodotgsping_url', 'bodyterminator', 'emailtestonly', 'phoneemail_separator', 'smilies_directory', 'subjectprefix', 'use_bbcode', 'use_blodotgsping', 'use_phoneemail', 'use_quicktags', 'use_weblogsping', 'weblogs_cache_file', 'use_preview', 'use_htmltrans', 'smilies_directory', 'fileupload_allowedusers', 'use_phoneemail', 'default_post_status', 'default_post_category', 'archive_mode', 'time_difference', 'links_minadminlevel', 'links_use_adminlevels', 'links_rating_type', 'links_rating_char', 'links_rating_ignore_zero', 'links_rating_single_image', 'links_rating_image0', 'links_rating_image1', 'links_rating_image2', 'links_rating_image3', 'links_rating_image4', 'links_rating_image5', 'links_rating_image6', 'links_rating_image7', 'links_rating_image8', 'links_rating_image9', 'weblogs_cacheminutes', 'comment_allowed_tags', 'search_engine_friendly_urls', 'default_geourl_lat', 'default_geourl_lon', 'use_default_geourl', 'weblogs_xml_url');
 	foreach ($unusedoptions as $option) :
 		delete_option($option);
 	endforeach;
@@ -234,101 +231,4 @@ function populate_options() {
 	endforeach;
 }
 
-function populate_roles() {
-	global $table_prefix;
-
-	$roles = array ('administrator' =>
-									array('name' => __('Administrator'),
-											'capabilities' => array(
-												'edit_posts' => true,
-												'edit_others_posts' => true,
-												'edit_published_posts' => true,
-												'publish_posts' => true,
-												'edit_pages' => true,
-												'moderate_comments' => true,
-												'manage_categories' => true,
-												'manage_links' => true,
-												'upload_files' => true,
-												'manage_options' => true,
-												'switch_themes' => true,
-												'edit_themes' => true,
-												'activate_plugins' => true,
-												'edit_plugins' => true,
-												'edit_users' => true,
-												'edit_files' => true,
-												'read' => true,
-												'level_10' => true,
-												'level_9' => true,
-												'level_8' => true,
-												'level_7' => true,
-												'level_6' => true,
-												'level_5' => true,
-												'level_4' => true,
-												'level_3' => true,
-												'level_2' => true,
-												'level_1' => true,
-												'level_0' => true
-												)),
-
-									'editor' =>
-									array('name' => __('Editor'),
-											'capabilities' => array(
-												'edit_posts' => true,
-												'edit_others_posts' => true,
-												'edit_published_posts' => true,
-												'publish_posts' => true,
-												'edit_pages' => true,
-												'moderate_comments' => true,
-												'manage_categories' => true,
-												'manage_links' => true,
-												'upload_files' => true,
-												'read' => true,
-												'level_7' => true,
-												'level_6' => true,
-												'level_5' => true,
-												'level_4' => true,
-												'level_3' => true,
-												'level_2' => true,
-												'level_1' => true,
-												'level_0' => true
-												)),
-
-									'author' =>
-									array('name' => __('Author'),
-											'capabilities' => array(
-												'edit_posts' => true,
-												'publish_posts' => true,
-												'upload_files' => true,
-												'read' => true,
-												'level_2' => true,
-												'level_1' => true,
-												'level_0' => true
-												)),
-
-									'contributor' =>
-									array('name' => __('Contributor'),
-											'capabilities' => array(
-												'edit_posts' => true,
-												'read' => true,
-												'level_1' => true,
-												'level_0' => true
-												)),
-											
-									'subscriber' =>
-									array('name' => __('Subscriber'),
-											'capabilities' => array(
-												'read' => true,
-												'level_0' => true
-												)),
-
-									'inactive' =>
-									array('name' => __('Inactive'),
-												'capabilities' => array())
-									);
-	// FIXME: Temporary code to reset roles and caps if flag is set.
-	if ( defined('RESET_CAPS') )
-		update_option($table_prefix . 'user_roles', $roles);
-	else
-		add_option($table_prefix . 'user_roles', $roles);
-}
 ?>

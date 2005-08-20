@@ -2,7 +2,7 @@
 if (!file_exists('../wp-config.php')) die("There doesn't seem to be a wp-config.php file. You must install WordPress before you import any entries.");
 
 require_once('../wp-config.php');
-require_once('upgrade-functions.php');
+require('upgrade-functions.php');
 
 $wpvarstoreset = array('action', 'gmpath', 'archivespath', 'lastentry');
 for ($i=0; $i<count($wpvarstoreset); $i += 1) {
@@ -87,15 +87,19 @@ case "step1":
 	foreach($userbase as $user) {
 		$userdata=explode("|", $user);
 
+		$user_ip="127.0.0.1";
+		$user_domain="localhost";
+		$user_browser="server";
+
 		$s=$userdata[4];
 		$user_joindate=substr($s,6,4)."-".substr($s,0,2)."-".substr($s,3,2)." 00:00:00";
 
-		$user_login=$wpdb->escape($userdata[0]);
-		$pass1=$wpdb->escape($userdata[1]);
-		$user_nickname=$wpdb->escape($userdata[0]);
-		$user_email=$wpdb->escape($userdata[2]);
-		$user_url=$wpdb->escape($userdata[3]);
-		$user_joindate=$wpdb->escape($user_joindate);
+		$user_login=addslashes($userdata[0]);
+		$pass1=addslashes($userdata[1]);
+		$user_nickname=addslashes($userdata[0]);
+		$user_email=addslashes($userdata[2]);
+		$user_url=addslashes($userdata[3]);
+		$user_joindate=addslashes($user_joindate);
 
 		$loginthere = $wpdb->get_var("SELECT user_login FROM $wpdb->users WHERE user_login = '$user_login'");
 		if ($loginthere) {
@@ -103,7 +107,7 @@ case "step1":
 			continue;
 		}
 
-		$query = "INSERT INTO $wpdb->users (user_login,user_pass,user_email,user_url,user_registered,user_level) VALUES ('$user_login','$pass1','$user_email','$user_url','$user_joindate','1')";
+		$query = "INSERT INTO $wpdb->users (user_login,user_pass,user_nickname,user_email,user_url,user_ip,user_domain,user_browser,user_registered,user_level,user_idmode) VALUES ('$user_login','$pass1','$user_nickname','$user_email','$user_url','$user_ip','$user_domain','$user_browser','$user_joindate','1','nickname')";
 		$result = $wpdb->query($query);
 		if ($result==false) {
 			die ("<strong>ERROR</strong>: couldn't register an user!");
@@ -147,19 +151,22 @@ case "step1":
 			$postmaincontent=gm2autobr($entry[2]);
 			$postmorecontent=gm2autobr($entry[3]);
 
-			$post_author=trim($wpdb->escape($postinfo[1]));
+			$post_author=trim(addslashes($postinfo[1]));
 			// we'll check the author is registered, or if it's a deleted author
 			$sql = "SELECT * FROM $wpdb->users WHERE user_login = '$post_author'";
 			$result = $wpdb->query($sql);
 			if (! $result) { // if deleted from GM, we register the author as a level 0 user in wp
+				$user_ip="127.0.0.1";
+				$user_domain="localhost";
+				$user_browser="server";
 				$user_joindate="1979-06-06 00:41:00";
-				$user_login=$wpdb->escape($post_author);
-				$pass1=$wpdb->escape("password");
-				$user_nickname=$wpdb->escape($post_author);
-				$user_email=$wpdb->escape("user@deleted.com");
-				$user_url=$wpdb->escape("");
-				$user_joindate=$wpdb->escape($user_joindate);
-				$query = "INSERT INTO $wpdb->users (user_login,user_pass,user_email,user_url,user_registered,user_level) VALUES ('$user_login','$pass1','$user_email','$user_url','$user_joindate','0')";
+				$user_login=addslashes($post_author);
+				$pass1=addslashes("password");
+				$user_nickname=addslashes($post_author);
+				$user_email=addslashes("user@deleted.com");
+				$user_url=addslashes("");
+				$user_joindate=addslashes($user_joindate);
+				$query = "INSERT INTO $wpdb->users (user_login,user_pass,user_nickname,user_email,user_url,user_ip,user_domain,user_browser,user_registered,user_level,user_idmode) VALUES ('$user_login','$pass1','$user_nickname','$user_email','$user_url','$user_ip','$user_domain','$user_browser','$user_joindate','0','nickname')";
 				$result = $wpdb->query($query);
 				if ($result==false) {
 					die ("<strong>ERROR</strong>: couldn't register an user!");
@@ -171,7 +178,7 @@ case "step1":
 			$post_author_ID = $wpdb->get_var($sql);
 
 			$post_title=gm2autobr($postinfo[2]);
-			$post_title=$wpdb->escape($post_title);
+			$post_title=addslashes($post_title);
 
 			$postyear=$postinfo[6];
 			$postmonth=zeroise($postinfo[4],2);
@@ -188,7 +195,7 @@ case "step1":
 			$post_content=$postmaincontent;
 			if (strlen($postmorecontent)>3)
 				$post_content .= "<!--more--><br /><br />".$postmorecontent;
-			$post_content=$wpdb->escape($post_content);
+			$post_content=addslashes($post_content);
 
 			$post_karma=$postinfo[12];
 
@@ -222,10 +229,10 @@ case "step1":
 					$entry[$j]=gm2autobr($entry[$j]);
 					$commentinfo=explode("|",$entry[$j]);
 					$comment_post_ID=$post_ID;
-					$comment_author=$wpdb->escape($commentinfo[0]);
-					$comment_author_email=$wpdb->escape($commentinfo[2]);
-					$comment_author_url=$wpdb->escape($commentinfo[3]);
-					$comment_author_IP=$wpdb->escape($commentinfo[1]);
+					$comment_author=addslashes($commentinfo[0]);
+					$comment_author_email=addslashes($commentinfo[2]);
+					$comment_author_url=addslashes($commentinfo[3]);
+					$comment_author_IP=addslashes($commentinfo[1]);
 
 					$commentyear=$commentinfo[7];
 					$commentmonth=zeroise($commentinfo[5],2);
@@ -237,7 +244,7 @@ case "step1":
 						$commenthour=$commenthour+12;
 					$comment_date="$commentyear-$commentmonth-$commentday $commenthour:$commentminute:$commentsecond";
 
-					$comment_content=$wpdb->escape($commentinfo[12]);
+					$comment_content=addslashes($commentinfo[12]);
 
 					$sql3 = "INSERT INTO $wpdb->comments (comment_post_ID,comment_author,comment_author_email,comment_author_url,comment_author_IP,comment_date,comment_content) VALUES ('$comment_post_ID','$comment_author','$comment_author_email','$comment_author_url','$comment_author_IP','$comment_date','$comment_content')";
 					$result3 = $wpdb->query($sql3);

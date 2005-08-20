@@ -31,8 +31,9 @@ switch($action) {
 
 case 'update':
 
-	if ( ! current_user_can('moderate_comments') )
+	if ($user_level < 3) {
 		die(__('<p>Your level is not high enough to moderate comments.</p>'));
+	}
 
 	$item_ignored = 0;
 	$item_deleted = 0;
@@ -77,7 +78,7 @@ default:
 require_once('admin-header.php');
 
 if ( isset($_GET['deleted']) || isset($_GET['approved']) || isset($_GET['ignored']) ) {
-	echo "<div id='moderated' class='updated'>\n<p>";
+	echo "<div class='updated'>\n<p>";
 	$approved = (int) $_GET['approved'];
 	$deleted  = (int) $_GET['deleted'];
 	$ignored  = (int) $_GET['ignored'];
@@ -118,7 +119,7 @@ if ( isset($_GET['deleted']) || isset($_GET['approved']) || isset($_GET['ignored
 <div class="wrap">
 
 <?php
-if ( current_user_can('moderate_comments') )
+if ($user_level > 3)
 	$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_approved = '0'");
 else
 	$comments = '';

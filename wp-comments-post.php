@@ -24,9 +24,9 @@ $comment_content      = trim($_POST['comment']);
 // If the user is logged in
 get_currentuserinfo();
 if ( $user_ID ) :
-	$comment_author       = $wpdb->escape($user_identity);
-	$comment_author_email = $wpdb->escape($user_email);
-	$comment_author_url   = $wpdb->escape($user_url);
+	$comment_author       = addslashes($user_identity);
+	$comment_author_email = addslashes($user_email);
+	$comment_author_url   = addslashes($user_url);
 else :
 	if ( get_option('comment_registration') )
 		die( __('Sorry, you must be logged in to post a comment.') );
@@ -52,7 +52,10 @@ setcookie('comment_author_' . COOKIEHASH, stripslashes($comment_author), time() 
 setcookie('comment_author_email_' . COOKIEHASH, stripslashes($comment_author_email), time() + 30000000, COOKIEPATH);
 setcookie('comment_author_url_' . COOKIEHASH, stripslashes($comment_author_url), time() + 30000000, COOKIEPATH);
 
-nocache_headers();
+header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+header('Cache-Control: no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 $location = (empty($_POST['redirect_to'])) ? $_SERVER["HTTP_REFERER"] : $_POST['redirect_to']; 
 

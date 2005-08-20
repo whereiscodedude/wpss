@@ -157,8 +157,8 @@ class wp_xmlrpc_server extends IXR_Server {
 	    return $this->error;
 	  }
 
-	  $user = new WP_User($user_login);
-	  $is_admin = $user->has_cap('level_8');
+	  $user_data = get_userdatabylogin($user_login);
+	  $is_admin = $user_data->user_level > 3;
 
 	  $struct = array(
 	    'isAdmin'  => $is_admin,
@@ -186,12 +186,12 @@ class wp_xmlrpc_server extends IXR_Server {
 	  $user_data = get_userdatabylogin($user_login);
 
 	  $struct = array(
-	    'nickname'  => $user_data->nickname,
+	    'nickname'  => $user_data->user_nickname,
 	    'userid'    => $user_data->ID,
 	    'url'       => $user_data->user_url,
 	    'email'     => $user_data->user_email,
-	    'lastname'  => $user_data->last_name,
-	    'firstname' => $user_data->first_name
+	    'lastname'  => $user_data->user_lastname,
+	    'firstname' => $user_data->user_firstname
 	  );
 
 	  return $struct;
@@ -295,9 +295,10 @@ class wp_xmlrpc_server extends IXR_Server {
 	    return $this->error;
 	  }
 
-	  $user = new WP_User($user_login);
-	  if ( !$user->has_cap('edit_themes') ) {
-	    return new IXR_Error(401, 'Sorry, this user can not edit the template.');
+	  $user_data = get_userdatabylogin($user_login);
+
+	  if ($user_data->user_level < 3) {
+	    return new IXR_Error(401, 'Sorry, users whose level is less than 3, can not edit the template.');
 	  }
 
 	  /* warning: here we make the assumption that the weblog's URI is on the same server */
@@ -330,9 +331,10 @@ class wp_xmlrpc_server extends IXR_Server {
 	    return $this->error;
 	  }
 
-	  $user = new WP_User($user_login);
-	  if ( !$user->has_cap('edit_themes') ) {
-	    return new IXR_Error(401, 'Sorry, this user can not edit the template.');
+	  $user_data = get_userdatabylogin($user_login);
+
+	  if ($user_data->user_level < 3) {
+	    return new IXR_Error(401, 'Sorry, users whose level is less than 3, can not edit the template.');
 	  }
 
 	  /* warning: here we make the assumption that the weblog's URI is on the same server */
@@ -573,6 +575,16 @@ class wp_xmlrpc_server extends IXR_Server {
 
 	  logIO('O', "Posted ! ID: $post_ID");
 
+	  // FIXME: do we pingback always? pingback($content, $post_ID);
+	  // trackback_url_list($content_struct['mt_tb_ping_urls'],$post_ID);
+
+		if ('publish' == $post_status) {
+			if ($post_pingback) pingback($content, $post_ID);
+			do_enclose( $content, $post_ID );
+			do_trackbacks($post_ID);
+			do_action('publish_post', $post_ID);
+		}  
+
 	  return strval($post_ID);
 	}
 
@@ -653,6 +665,16 @@ class wp_xmlrpc_server extends IXR_Server {
 	  }
 
 	  logIO('O',"(MW) Edited ! ID: $post_ID");
+
+	  // FIXME: do we pingback always? pingback($content, $post_ID);
+	  // trackback_url_list($content_struct['mt_tb_ping_urls'], $post_ID);
+		if ('publish' == $post_status) {
+			if ($post_pingback) pingback($content, $post_ID);
+			do_enclose( $content, $post_ID );
+			do_trackbacks($post_ID);
+			do_action('publish_post', $post_ID);
+		}	
+		do_action('edit_post', $post_ID);
 
 	  return true;
 	}
@@ -847,9 +869,9 @@ class wp_xmlrpc_server extends IXR_Server {
 	    return $this->error;
 	  } 
 
-	  $user = new WP_User($user_login);
-	  if ( !$user->has_cap('upload_files') ) {
-	    logIO('O', '(MW) User does not have upload_files capability');
+	  if(get_settings('fileupload_minlevel') > $user_data->user_level) {
+	    // User has not enough privileges
+	    logIO('O', '(MW) Not enough privilege: user level too low');
 	    $this->error = new IXR_Error(401, 'You are not allowed to upload files to this site.');
 	    return $this->error;
 	  }
@@ -1243,14 +1265,14 @@ class wp_xmlrpc_server extends IXR_Server {
 			}
 		}
 
-		if ( empty($context) ) // URL pattern not found
+		if ( empty($context) )  // URL pattern not found
 			return new IXR_Error(17, 'The source URI does not contain a link to the target URI, and so cannot be used as a source.');
 
 		$pagelinkedfrom = preg_replace('#&([^amp\;])#is', '&amp;$1', $pagelinkedfrom);
 
 		$context = '[...] ' . wp_specialchars( $excerpt ) . ' [...]';
 		$original_pagelinkedfrom = $pagelinkedfrom;
-		$pagelinkedfrom = $wpdb->escape( $pagelinkedfrom );
+		$pagelinkedfrom = addslashes( $pagelinkedfrom );
 		$original_title = $title;
 
 		$comment_post_ID = $post_ID;

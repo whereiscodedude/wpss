@@ -45,8 +45,9 @@ switch($action) {
 
 case 'update':
 
-	if ( !current_user_can('edit_themes') )
+	if ($user_level < 5) {
 		die(__('<p>You have do not have sufficient permissions to edit templates for this blog.</p>'));
+	}
 
 	$newcontent = stripslashes($_POST['newcontent']);
 	$theme = urlencode($theme);
@@ -66,8 +67,9 @@ break;
 default:
 	
 	require_once('admin-header.php');
-	if ( !current_user_can('edit_themes') )
+	if ($user_level <= 5) {
 		die(__('<p>You have do not have sufficient permissions to edit themes for this blog.</p>'));
+	}
 
 	update_recently_edited($file);
 	
@@ -82,7 +84,7 @@ default:
 
 	?>
 <?php if (isset($_GET['a'])) : ?>
- <div id="message" class="updated fade"><p><?php _e('File edited successfully.') ?></p></div>
+ <div class="updated"><p><?php _e('File edited successfully.') ?></p></div>
 <?php endif; ?>
  <div class="wrap">
   <form name="theme" action="theme-editor.php" method="post"> 

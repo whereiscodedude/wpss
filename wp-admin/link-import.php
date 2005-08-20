@@ -15,7 +15,7 @@ switch ($step) {
     case 0:
     {
         include_once('admin-header.php');
-        if ( !current_user_can('manage_links') )
+        if ($user_level < 5)
             die (__("Cheatin&#8217; uh?"));
 
         $opmltype = 'blogrolling'; // default.
@@ -65,7 +65,7 @@ switch ($step) {
 
     case 1: {
                 include_once('admin-header.php');
-                if ( !current_user_can('manage_links') )
+                if ($user_level < 5)
                     die (__("Cheatin' uh ?"));
 ?>
 <div class="wrap">
@@ -107,7 +107,7 @@ switch ($step) {
                         if ('http' == substr($titles[$i], 0, 4))
                             $titles[$i] = '';
                         $query = "INSERT INTO $wpdb->links (link_url, link_name, link_target, link_category, link_description, link_owner, link_rss)
-                                VALUES('{$urls[$i]}', '".$wpdb->escape($names[$i])."', '', $cat_id, '".$wpdb->escape($descriptions[$i])."', $user_ID, '{$feeds[$i]}')\n";
+                                VALUES('{$urls[$i]}', '".addslashes($names[$i])."', '', $cat_id, '".addslashes($descriptions[$i])."', $user_ID, '{$feeds[$i]}')\n";
                         $result = $wpdb->query($query);
                         echo sprintf(__("<p>Inserted <strong>%s</strong></p>"), $names[$i]);
                     }

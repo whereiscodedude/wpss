@@ -8,8 +8,8 @@ $tp_database_password = 'password';
 $tp_database_host = 'localhost';
 
 if (!file_exists('../wp-config.php')) die("There doesn't seem to be a wp-config.php file. Double check that you updated wp-config-sample.php with the proper database connection information and renamed it to wp-config.php.");
-require_once('../wp-config.php');
-require_once('upgrade-functions.php');
+require('../wp-config.php');
+require('upgrade-functions.php');
 
 $step = $_GET['step'];
 if (!$step) $step = 0;
@@ -98,8 +98,8 @@ while ($post = mysql_fetch_array($posts)) {
 	$timestamp = mktime($hour, $minute, $second, $month, $day, $year);
 	$posted = date('Y-m-d H:i:s', $timestamp);
 	
-	$content = $wpdb->escape($post['Body_html']);
-	$title = $wpdb->escape($post['Title']);
+	$content = addslashes($post['Body_html']);
+	$title = addslashes($post['Title']);
 	$post_name = sanitize_title($title);
 
 	$wpdb->query("INSERT INTO $wpdb->posts

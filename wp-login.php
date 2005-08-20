@@ -4,8 +4,10 @@ require( dirname(__FILE__) . '/wp-config.php' );
 $action = $_REQUEST['action'];
 $error = '';
 
-nocache_headers();
-
+header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+header('Cache-Control: no-cache, must-revalidate');
+header('Pragma: no-cache');
 header('Content-Type: '.get_bloginfo('html_type').'; charset='.get_bloginfo('charset'));
 
 if ( defined('RELOCATE') ) { // Move flag is set
@@ -22,7 +24,10 @@ case 'logout':
 
 	wp_clearcookie();
 	do_action('wp_logout');
-	nocache_headers();
+	header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+	header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+	header('Cache-Control: no-cache, must-revalidate, max-age=0');
+	header('Pragma: no-cache');
 	wp_redirect('wp-login.php');
 	exit();
 
@@ -121,7 +126,7 @@ break;
 case 'resetpass' :
 
 	// Generate something random for a password... md5'ing current time with a rand salt
-	$key = preg_replace('/a-z0-9/i', '', $_GET['key']);
+	$key = $_GET['key'];
 	if ( empty($key) )
 		die( __('Sorry, that key does not appear to be valid.') );
 	$user = $wpdb->get_row("SELECT * FROM $wpdb->users WHERE user_activation_key = '$key'");
@@ -163,13 +168,12 @@ default:
 	if( !empty($_POST) ) {
 		$user_login = $_POST['log'];
 		$user_pass  = $_POST['pwd'];
-		$rememberme = $_POST['rememberme'];
 		$redirect_to = preg_replace('|[^a-z0-9-~+_.?#=&;,/:]|i', '', $_POST['redirect_to']);
 	} elseif ( !empty($_COOKIE) ) {
-		if (! empty($_COOKIE[USER_COOKIE]) )
-			$user_login = $_COOKIE[USER_COOKIE];
-		if (! empty($_COOKIE[PASS_COOKIE]) ) {
-			$user_pass = $_COOKIE[PASS_COOKIE];
+		if (! empty($_COOKIE['wordpressuser_' . COOKIEHASH]) )
+			$user_login = $_COOKIE['wordpressuser_' . COOKIEHASH];
+		if (! empty($_COOKIE['wordpresspass_' . COOKIEHASH]) ) {
+			$user_pass = $_COOKIE['wordpresspass_' . COOKIEHASH];
 			$using_cookie = true;
 		}
 	}
@@ -177,14 +181,13 @@ default:
 	do_action('wp_authenticate', array(&$user_login, &$user_pass));
 
 	if ($user_login && $user_pass) {
-		$user = new WP_User($user_login);
-		// If the user can't edit posts, send them to their profile.
-		if ( ! $user->has_cap('edit_posts') )
+		$user = get_userdatabylogin($user_login);
+		if ( 0 == $user->user_level )
 			$redirect_to = get_settings('siteurl') . '/wp-admin/profile.php';
 
 		if ( wp_login($user_login, $user_pass, $using_cookie) ) {
-			if ( !$using_cookie) {
-				wp_setcookie($user_login, $user_pass, false, '', '', $rememberme);
+			if (! $using_cookie) {
+				wp_setcookie($user_login, $user_pass);
 			}
 			do_action('wp_login', $user_login);
 			wp_redirect($redirect_to);
@@ -227,11 +230,8 @@ if ( $error )
 <form name="loginform" id="loginform" action="wp-login.php" method="post">
 <p><label><?php _e('Username:') ?><br /><input type="text" name="log" id="log" value="" size="20" tabindex="1" /></label></p>
 <p><label><?php _e('Password:') ?><br /> <input type="password" name="pwd" id="pwd" value="" size="20" tabindex="2" /></label></p>
-<p>
-  <label><input name="rememberme" type="checkbox" id="rememberme" value="forever" tabindex="3" /> 
-  <?php _e('Remember me'); ?></label></p>
 <p class="submit">
-	<input type="submit" name="submit" id="submit" value="<?php _e('Login'); ?> &raquo;" tabindex="4" />
+	<input type="submit" name="submit" id="submit" value="<?php _e('Login'); ?> &raquo;" tabindex="3" />
 	<input type="hidden" name="redirect_to" value="<?php echo $redirect_to; ?>" />
 </p>
 </form>

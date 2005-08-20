@@ -1,8 +1,10 @@
 <?php
+require_once( dirname(__FILE__) . '/wp-config.php' );
 
-if (empty($wp)) {
-	require_once('wp-config.php');
-	wp('tb=1');
+if ( empty($doing_trackback) ) {
+	$doing_trackback = true;
+	$tb = true;
+	require_once('wp-blog-header.php');
 }
 
 function trackback_response($error = 0, $error_message = '') {

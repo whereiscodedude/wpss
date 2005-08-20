@@ -3,14 +3,24 @@ require_once('admin.php');
 $title = __('Pages');
 $parent_file = 'edit.php';
 require_once('admin-header.php');
+
+get_currentuserinfo();
 ?>
 
 <div class="wrap">
 <h2><?php _e('Page Management'); ?></h2>
-<p><?php _e('Pages are like posts except they live outside of the normal blog chronology and can be hierarchical. You can use pages to organize and manage any amount of content.'); ?> <a href="page-new.php"><?php _e('Create a new page'); ?> &raquo;</a></p>
 
 <?php
-$posts = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE post_status = 'static'");
+if (isset($user_ID) && ('' != intval($user_ID))) {
+	$posts = $wpdb->get_results("
+	SELECT $wpdb->posts.*, $wpdb->users.user_level FROM $wpdb->posts
+	INNER JOIN $wpdb->users ON ($wpdb->posts.post_author = $wpdb->users.ID)
+	WHERE $wpdb->posts.post_status = 'static'
+	AND ($wpdb->users.user_level < $user_level OR $wpdb->posts.post_author = $user_ID)
+	");
+} else {
+    $posts = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE post_status = 'static'");
+}
 
 if ($posts) {
 ?>
@@ -33,9 +43,9 @@ if ($posts) {
 <?php
 } // end if ($posts)
 ?> 
-
+<p><?php _e('Pages are like posts except they live outside of the normal blog chronology. You can use pages to organize and manage any amount of content.'); ?></p>
 <h3><a href="page-new.php"><?php _e('Create New Page'); ?> &raquo;</a></h3>
+</div> 
 
-</div>
 
 <?php include('admin-footer.php'); ?> 

@@ -5,10 +5,13 @@ $title = 'Upload Image or File';
 
 require_once('admin-header.php');
 
+if ($user_level == 0) //Checks to see if user has logged in
+	die (__("Cheatin' uh ?"));
+
 if (!get_settings('use_fileupload')) //Checks if file upload is enabled in the config
 	die (__("The admin disabled this function"));
 
-if ( ! current_user_can('upload_files') )
+if ( !get_settings('fileupload_minlevel') )
 	die (__("You are not allowed to upload files"));
 
 $allowed_types = explode(' ', trim(strtolower(get_settings('fileupload_allowedtypes'))));

@@ -18,7 +18,7 @@ $add_hours = intval($timezone_offset);
 $add_minutes = intval(60 * ($timezone_offset - $add_hours));
 
 if (!file_exists('../wp-config.php')) die("There doesn't seem to be a wp-config.php file. You must install WordPress before you import any entries.");
-require_once('../wp-config.php');
+require('../wp-config.php');
 
 $step = $_GET['step'];
 if (!$step) $step = 0;
@@ -87,7 +87,7 @@ $title = $date = $categories = $content = $post_id =  '';
 echo "<li>Importing post... ";
 
 preg_match('|<title>(.*?)</title>|is', $post, $title);
-$title = $wpdb->escape( trim($title[1]) );
+$title = addslashes( trim($title[1]) );
 $post_name = sanitize_title($title);
 
 preg_match('|<pubdate>(.*?)</pubdate>|is', $post, $date);
@@ -112,11 +112,11 @@ if (!$categories) :
 endif;
 
 preg_match('|<guid.+?>(.*?)</guid>|is', $post, $guid);
-if ($guid) $guid = $wpdb->escape( trim($guid[1]) );
+if ($guid) $guid = addslashes( trim($guid[1]) );
 else $guid = '';
 
 preg_match('|<content:encoded>(.*?)</content:encoded>|is', $post, $content);
-$content = str_replace( array('<![CDATA[', ']]>'), '', $wpdb->escape( trim($content[1]) ) );
+$content = str_replace( array('<![CDATA[', ']]>'), '', addslashes( trim($content[1]) ) );
 
 if (!$content) : // This is for feeds that put content in description
 	preg_match('|<description>(.*?)</description>|is', $post, $content);
