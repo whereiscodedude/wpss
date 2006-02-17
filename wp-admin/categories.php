@@ -27,7 +27,7 @@ case 'addcat':
 
 	if ( !current_user_can('manage_categories') )
 		die (__('Cheatin&#8217; uh?'));
-
+	
 	wp_insert_category($_POST);
 
 	header('Location: categories.php?message=1#addcat');
@@ -85,7 +85,7 @@ case 'edit':
 			<td><textarea name="category_description" rows="5" cols="50" style="width: 97%;"><?php echo wp_specialchars($category->category_description, 1); ?></textarea></td>
 		</tr>
 		</table>
-	  <p class="submit"><input type="submit" name="submit" value="<?php _e('Edit category &raquo;') ?>" /></p>
+	  <p class="submit"><input type="submit" name="submit" value="<?php _e('Edit category') ?> &raquo;" /></p>
  </form>
  <p><a href="categories.php"><?php _e('&laquo; Return to category list'); ?></a></p>
 </div>
@@ -96,7 +96,7 @@ break;
 case 'editedcat':
 	if ( !current_user_can('manage_categories') )
 		die (__('Cheatin&#8217; uh?'));
-
+	
 	wp_update_category($_POST);
 
 	header('Location: categories.php?message=3');

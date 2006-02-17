@@ -4,13 +4,8 @@
 function write_post() {
 	global $user_ID;
 
-	if ( 'page' == $_POST['post_type'] ) {
-		if ( !current_user_can('edit_pages') )
-			die(__('You are not allowed to create pages on this blog.'));
-	} else {
-		if ( !current_user_can('edit_posts') )
-			die(__('You are not allowed to create posts or drafts on this blog.'));
-	}
+	if (!current_user_can('edit_posts'))
+		die(__('You are not allowed to create posts or drafts on this blog.'));
 
 	// Rename.
 	$_POST['post_content'] = $_POST['content'];
@@ -20,25 +15,15 @@ function write_post() {
 
 	if (!empty ($_POST['post_author_override'])) {
 		$_POST['post_author'] = (int) $_POST['post_author_override'];
-	} else {
+	} else
 		if (!empty ($_POST['post_author'])) {
 			$_POST['post_author'] = (int) $_POST['post_author'];
 		} else {
 			$_POST['post_author'] = (int) $_POST['user_ID'];
 		}
 
-	}
-
-	if ($_POST['post_author'] != $_POST['user_ID']) {
-		if ( 'page' == $_POST['post_type'] ) {
-			if ( !current_user_can('edit_others_pages') )
-				die(__('You cannot create pages as this user.'));
-		} else {
-			if ( !current_user_can('edit_others_posts') )
-				die(__('You cannot post as this user.'));
-
-		}
-	}
+	if (($_POST['post_author'] != $_POST['user_ID']) && !current_user_can('edit_others_posts'))
+		die(__('You cannot post as this user.'));
 
 	// What to do based on which button they pressed
 	if ('' != $_POST['saveasdraft'])
@@ -49,14 +34,14 @@ function write_post() {
 		$_POST['post_status'] = 'publish';
 	if ('' != $_POST['advanced'])
 		$_POST['post_status'] = 'draft';
+	if ('' != $_POST['savepage'])
+		$_POST['post_status'] = 'static';
 
-	if ( 'page' == $_POST['post_type'] ) {
-		if ('publish' == $_POST['post_status'] && !current_user_can('publish_pages'))
-			$_POST['post_status'] = 'draft';
-	} else {
-		if ('publish' == $_POST['post_status'] && !current_user_can('publish_posts'))
-			$_POST['post_status'] = 'draft';
-	}
+	if ('publish' == $_POST['post_status'] && !current_user_can('publish_posts'))
+		$_POST['post_status'] = 'draft';
+
+	if ('static' == $_POST['post_status'] && !current_user_can('edit_pages'))
+		die(__('This user cannot edit pages.'));
 
 	if (!empty ($_POST['edit_date'])) {
 		$aa = $_POST['aa'];
@@ -138,13 +123,8 @@ function edit_post() {
 
 	$post_ID = (int) $_POST['post_ID'];
 
-	if ( 'page' == $_POST['post_type'] ) {
-		if ( !current_user_can('edit_page', $post_ID) )
-			die(__('You are not allowed to edit this page.'));
-	} else {
-		if ( !current_user_can('edit_post', $post_ID) )
-			die(__('You are not allowed to edit this post.'));
-	}
+	if (!current_user_can('edit_post', $post_ID))
+		die(__('You are not allowed to edit this post.'));
 
 	// Rename.
 	$_POST['ID'] = (int) $_POST['post_ID'];
@@ -162,16 +142,8 @@ function edit_post() {
 			$_POST['post_author'] = (int) $_POST['user_ID'];
 		}
 
-	if ($_POST['post_author'] != $_POST['user_ID']) {
-		if ( 'page' == $_POST['post_type'] ) {
-			if ( !current_user_can('edit_others_pages') )
-				die(__('You cannot edit pages as this user.'));
-		} else {
-			if ( !current_user_can('edit_others_posts') )
-				die(__('You cannot edit posts as this user.'));
-
-		}
-	}
+	if (($_POST['post_author'] != $_POST['user_ID']) && !current_user_can('edit_others_posts'))
+		die(__('You cannot post as this user.'));
 
 	// What to do based on which button they pressed
 	if ('' != $_POST['saveasdraft'])
@@ -182,14 +154,14 @@ function edit_post() {
 		$_POST['post_status'] = 'publish';
 	if ('' != $_POST['advanced'])
 		$_POST['post_status'] = 'draft';
+	if ('' != $_POST['savepage'])
+		$_POST['post_status'] = 'static';
 
-	if ( 'page' == $_POST['post_type'] ) {
-		if ('publish' == $_POST['post_status'] && !current_user_can('edit_published_pages'))
-			$_POST['post_status'] = 'draft';
-	} else {
-		if ('publish' == $_POST['post_status'] && !current_user_can('edit_published_posts'))
-			$_POST['post_status'] = 'draft';
-	}
+	if ('publish' == $_POST['post_status'] && !current_user_can('publish_posts'))
+		$_POST['post_status'] = 'draft';
+
+	if ('static' == $_POST['post_status'] && !current_user_can('edit_pages'))
+		die(__('This user cannot edit pages.'));
 
 	if (!isset ($_POST['comment_status']))
 		$_POST['comment_status'] = 'closed';
@@ -217,7 +189,7 @@ function edit_post() {
 		foreach ($_POST['meta'] as $key => $value)
 			update_meta($key, $value['key'], $value['value']);
 	}
-
+	
 	if ($_POST['deletemeta']) {
 		foreach ($_POST['deletemeta'] as $key => $value)
 			delete_meta($key);
@@ -282,7 +254,7 @@ function get_post_to_edit($id) {
 	$post->post_title = format_to_edit($post->post_title);
 	$post->post_title = apply_filters('title_edit_pre', $post->post_title);
 
-	if ($post->post_type == 'page')
+	if ($post->post_status == 'static')
 		$post->page_template = get_post_meta($id, '_wp_page_template', true);
 
 	return $post;
@@ -464,13 +436,13 @@ function edit_user($user_id = 0) {
 
 function get_link_to_edit($link_id) {
 	$link = get_link($link_id);
-
+	
 	$link->link_url = wp_specialchars($link->link_url, 1);
 	$link->link_name = wp_specialchars($link->link_name, 1);
 	$link->link_description = wp_specialchars($link->link_description);
 	$link->link_notes = wp_specialchars($link->link_notes);
 	$link->link_rss = wp_specialchars($link->link_rss);
-
+	
 	return $link;
 }
 
@@ -479,17 +451,17 @@ function get_default_link_to_edit() {
 		$link->link_url = wp_specialchars($_GET['linkurl'], 1);
 	else
 		$link->link_url = '';
-
+	
 	if ( isset($_GET['name']) )
 		$link->link_name = wp_specialchars($_GET['name'], 1);
 	else
 		$link->link_name = '';
-
+		
 	return $link;
 }
 
 function add_link() {
-	return edit_link();
+	return edit_link();	
 }
 
 function edit_link($link_id = '') {
@@ -502,7 +474,7 @@ function edit_link($link_id = '') {
 	$_POST['link_image'] = wp_specialchars($_POST['link_image']);
 	$_POST['link_rss'] = wp_specialchars($_POST['link_rss']);
 	$auto_toggle = get_autotoggle($_POST['link_category']);
-
+	
 	// if we are in an auto toggle category and this one is visible then we
 	// need to make the others invisible before we add this new one.
 	// FIXME Add category toggle func.
@@ -577,7 +549,7 @@ function get_nested_categories($default = 0, $parent = 0) {
 			$result[$cat]['cat_name'] = get_the_category_by_ID($cat);
 		}
 	}
-
+	
 	usort($result, 'sort_cats');
 
 	return $result;
@@ -610,11 +582,12 @@ function cat_rows($parent = 0, $level = 0, $categories = 0) {
 		foreach ($categories as $category) {
 			if ($category->category_parent == $parent) {
 				$category->cat_name = wp_specialchars($category->cat_name);
+				$count = $wpdb->get_var("SELECT COUNT(post_id) FROM $wpdb->post2cat WHERE category_id = $category->cat_ID");
 				$pad = str_repeat('&#8212; ', $level);
 				if ( current_user_can('manage_categories') ) {
 					$edit = "<a href='categories.php?action=edit&amp;cat_ID=$category->cat_ID' class='edit'>".__('Edit')."</a></td>";
 					$default_cat_id = get_option('default_category');
-
+					
 					if ($category->cat_ID != $default_cat_id)
 						$edit .= "<td><a href='categories.php?action=delete&amp;cat_ID=$category->cat_ID' onclick=\"return deleteSomething( 'cat', $category->cat_ID, '".sprintf(__("You are about to delete the category &quot;%s&quot;.  All of its posts will go to the default category.\\n&quot;OK&quot; to delete, &quot;Cancel&quot; to stop."), wp_specialchars($category->cat_name, 1))."' );\" class='delete'>".__('Delete')."</a>";
 					else
@@ -626,7 +599,7 @@ function cat_rows($parent = 0, $level = 0, $categories = 0) {
 				$class = ('alternate' == $class) ? '' : 'alternate';
 				echo "<tr id='cat-$category->cat_ID' class='$class'><th scope='row'>$category->cat_ID</th><td>$pad $category->cat_name</td>
 								<td>$category->category_description</td>
-								<td>$category->category_count</td>
+								<td>$count</td>
 								<td>$edit</td>
 								</tr>";
 				cat_rows($category->cat_ID, $level +1, $categories);
@@ -640,7 +613,7 @@ function cat_rows($parent = 0, $level = 0, $categories = 0) {
 function page_rows($parent = 0, $level = 0, $pages = 0) {
 	global $wpdb, $class, $post;
 	if (!$pages)
-		$pages = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE post_type = 'page' ORDER BY menu_order");
+		$pages = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE post_status = 'static' ORDER BY menu_order");
 
 	if ($pages) {
 		foreach ($pages as $post) {
@@ -698,7 +671,7 @@ function wp_dropdown_cats($currentcat = 0, $currentparent = 0, $parent = 0, $lev
 
 function link_category_dropdown($fieldname, $selected = 0) {
 	global $wpdb;
-
+	
 	$results = $wpdb->get_results("SELECT cat_id, cat_name, auto_toggle FROM $wpdb->linkcategories ORDER BY cat_id");
 	echo "\n<select name='$fieldname' size='1'>\n";
 	foreach ($results as $row) {
@@ -1203,7 +1176,7 @@ function page_template_dropdown($default = '') {
 
 function parent_dropdown($default = 0, $parent = 0, $level = 0) {
 	global $wpdb, $post_ID;
-	$items = $wpdb->get_results("SELECT ID, post_parent, post_title FROM $wpdb->posts WHERE post_parent = $parent AND post_type = 'page' ORDER BY menu_order");
+	$items = $wpdb->get_results("SELECT ID, post_parent, post_title FROM $wpdb->posts WHERE post_parent = $parent AND post_status = 'static' ORDER BY menu_order");
 
 	if ($items) {
 		foreach ($items as $item) {
@@ -1231,37 +1204,32 @@ function user_can_access_admin_page() {
 	global $pagenow;
 	global $menu;
 	global $submenu;
-	global $menu_nopriv;
 
 	$parent = get_admin_page_parent();
-	
-	if ( isset($menu_nopriv[$pagenow]) )
-		return false;
-
-	if ( empty($parent) )
-		return true;
-
-	if (isset ($submenu[$parent])) {
-		foreach ($submenu[$parent] as $submenu_array) {
-			if ($submenu_array[2] == $pagenow) {
-				if (current_user_can($submenu_array[1]))
-					return true;
-				else
-					return false;
-			}
-		}
-	}
 
 	foreach ($menu as $menu_array) {
 		//echo "parent array: " . $menu_array[2];
 		if ($menu_array[2] == $parent) {
-			if (current_user_can($menu_array[1]))
-				return true;
-			else
+			if (!current_user_can($menu_array[1])) {
 				return false;
+			} else {
+				break;
+			}
 		}
 	}
-	
+
+	if (isset ($submenu[$parent])) {
+		foreach ($submenu[$parent] as $submenu_array) {
+			if ($submenu_array[2] == $pagenow) {
+				if (!current_user_can($submenu_array[1])) {
+					return false;
+				} else {
+					return true;
+				}
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -1318,12 +1286,8 @@ function get_admin_page_parent() {
 	global $submenu;
 	global $pagenow;
 	global $plugin_page;
-	global $real_parent_file;
 
-	if ( !empty ($parent_file) ) {
-		if ( isset($real_parent_file[$parent_file]) )
-			$parent_file = $real_parent_file[$parent_file];
-
+	if (isset ($parent_file) && !empty ($parent_file)) {
 		return $parent_file;
 	}
 
@@ -1331,18 +1295,13 @@ function get_admin_page_parent() {
 		foreach ($menu as $parent_menu) {
 			if ($parent_menu[2] == $plugin_page) {
 				$parent_file = $plugin_page;
-				if ( isset($real_parent_file[$parent_file]) )
-					$parent_file = $real_parent_file[$parent_file];
-					
-				return $parent_file;
+				return $plugin_page;
 			}
 		}
 	}
 
 	foreach (array_keys($submenu) as $parent) {
 		foreach ($submenu[$parent] as $submenu_array) {
-			if ( isset($real_parent_file[$parent]) )
-				$parent = $real_parent_file[$parent];
 			if ($submenu_array[2] == $pagenow) {
 				$parent_file = $parent;
 				return $parent;
@@ -1377,12 +1336,8 @@ function add_menu_page($page_title, $menu_title, $access_level, $file, $function
 function add_submenu_page($parent, $page_title, $menu_title, $access_level, $file, $function = '') {
 	global $submenu;
 	global $menu;
-	global $real_parent_file;
 
 	$parent = plugin_basename($parent);
-	if ( isset($real_parent_file[$parent]) )
-		$parent = $real_parent_file[$parent];
-
 	$file = plugin_basename($file);
 
 	// If the parent doesn't already have a submenu, add a link to the parent
@@ -1851,7 +1806,7 @@ o.submit();
 <input type="button" value="<?php _e('Cancel'); ?>" onclick="cancelUpload()" />
 </div>
 </form>
-<?php
+<?php	
 }
 
 function wp_import_handle_upload() {
@@ -1893,7 +1848,7 @@ function the_attachment_links($id = false) {
 	$id = (int) $id;
 	$post = & get_post($id);
 
-	if ( $post->post_type != 'attachment' )
+	if ( $post->post_status != 'attachment' )
 		return false;
 
 	$icon = get_attachment_icon($post->ID);

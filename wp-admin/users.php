@@ -4,7 +4,7 @@ require_once( ABSPATH . WPINC . '/registration-functions.php');
 
 $title = __('Users');
 $parent_file = 'profile.php';
-
+	
 $action = $_REQUEST['action'];
 $update = '';
 
@@ -32,7 +32,7 @@ case 'promote':
  		$user = new WP_User($id);
  		$user->set_role($_POST['new_role']);
  	}
-
+		
 	header('Location: users.php?update=' . $update);
 
 break;
@@ -49,7 +49,7 @@ case 'dodelete':
 		die(__('You can&#8217;t delete users.'));
 
 	$userids = $_POST['users'];
-
+	
 	$update = 'del';
  	foreach ($userids as $id) {
 		if($id == $current_user->id) {
@@ -132,27 +132,27 @@ break;
 
 case 'adduser':
 	check_admin_referer();
-
+	
 	$errors = add_user();
-
+	
 	if(count($errors) == 0) {
 		header('Location: users.php?update=add');
 		die();
 	}
 
 default:
-
+	
 	include ('admin-header.php');
-
+	
 	$userids = $wpdb->get_col("SELECT ID FROM $wpdb->users;");
-
+	
 	foreach($userids as $userid) {
 		$tmp_user = new WP_User($userid);
 		$roles = $tmp_user->roles;
 		$role = array_shift($roles);
 		$roleclasses[$role][$tmp_user->user_login] = $tmp_user;
-	}
-
+	}	
+	
 	?>
 
 	<?php 
@@ -198,7 +198,7 @@ default:
 	<?php 
 	endif;
 	?>
-
+	
 <form action="" method="post" name="updateusers" id="updateusers">
 <div class="wrap">
 	<h2><?php _e('User List by Role'); ?></h2>
@@ -234,7 +234,7 @@ default:
 		if (strlen($short_url) > 35)
 		$short_url =  substr($short_url, 0, 32).'...';
 		$style = ('class="alternate"' == $style) ? '' : 'class="alternate"';
-		$numposts = get_usernumposts($user_object->ID);
+		$numposts = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_author = '$user_object->ID' and post_status = 'publish'");
 		if (0 < $numposts) $numposts = "<a href='edit.php?author=$user_object->ID' title='" . __('View posts') . "'>$numposts</a>";
 		echo "
 <tr $style>
@@ -250,9 +250,9 @@ default:
 	echo '</td>';
 	echo '</tr>';
 	}
-
+	
 	?>
-
+	
 
 <?php
 	}
@@ -315,7 +315,7 @@ if ( $show_password_fields ) :
 <?php endif; ?>
   </table>
   <p class="submit">
-    <input name="adduser" type="submit" id="adduser" value="<?php _e('Add User &raquo;') ?>" />
+    <input name="adduser" type="submit" id="adduser" value="<?php _e('Add User') ?> &raquo;" />
   </p>
   </form>
 </div>

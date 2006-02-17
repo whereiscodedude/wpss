@@ -54,24 +54,10 @@ case 'delete-comment' :
 
 	if ( !$comment = get_comment($id) )
 		die('0');
-	if ( !current_user_can('edit_post', $comment->comment_post_ID) )
+	if ( !current_user_can('edit_post', $comment->comment_post_ID) )	
 		die('-1');
 
 	if ( wp_delete_comment($comment->comment_ID) ) {
-		die('1');
-	} else {
-		die('0');
-	}
-	break;
-case 'delete-comment-as-spam' :
-	$id = (int) $_POST['id'];
-
-	if ( !$comment = get_comment($id) )
-		die('0');
-	if ( !current_user_can('edit_post', $comment->comment_post_ID) )
-		die('-1');
-
-	if ( wp_set_comment_status($comment->comment_ID, 'spam') ) {
 		die('1');
 	} else {
 		die('0');
@@ -91,5 +77,5 @@ case 'delete-link-category' :
 		die('0');
 	}
 	break;
-endswitch;
+endswitch;		
 ?>

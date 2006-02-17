@@ -32,7 +32,7 @@ function ajaxDelete(what, id) {
 	ajaxDel.onLoading = function() { ajaxDel.myResponseElement.innerHTML = 'Sending Data...'; };
 	ajaxDel.onLoaded = function() { ajaxDel.myResponseElement.innerHTML = 'Data Sent...'; };
 	ajaxDel.onInteractive = function() { ajaxDel.myResponseElement.innerHTML = 'Processing Data...'; };
-	ajaxDel.onCompletion = function() { removeThisItem( what.replace('-as-spam', '') + '-' + id ); };
+	ajaxDel.onCompletion = function() { removeThisItem( what + '-' + id ); };
 	ajaxDel.runAJAX('action=delete-' + what + '&id=' + id);
 	return false;
 }
@@ -51,7 +51,7 @@ function removeThisItem(id) {
 		listItems.splice(pos,1);
 		recolorList(pos);
 		ajaxDel.myResponseElement.parentNode.removeChild(ajaxDel.myResponseElement);
-
+		
 	}
 }
 
@@ -63,7 +63,7 @@ function getListPos(id) {
 		}
 	}
 	return pos;
-}
+}	
 
 function getListItems() {
 	if (list) return;

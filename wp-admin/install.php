@@ -33,17 +33,17 @@ header( 'Content-Type: text/html; charset=utf-8' );
 		margin-right: 20%;
 		padding: .2em 2em;
 	}
-
+	
 	h1 {
 		color: #006;
 		font-size: 18px;
 		font-weight: lighter;
 	}
-
+	
 	h2 {
 		font-size: 16px;
 	}
-
+	
 	p, li, dt {
 		line-height: 140%;
 		padding-bottom: 2px;
@@ -127,7 +127,7 @@ if (empty($admin_email)) {
 } else if (!is_email($admin_email)) {
 	die (__("<strong>ERROR</strong>: the e-mail address isn't correct"));
 }
-
+	
 ?>
 <h1><?php _e('Second Step'); ?></h1>
 <p><?php _e('Now we&#8217;re going to create the database tables and fill them with some default data.'); ?></p>
@@ -170,7 +170,7 @@ $wpdb->query("INSERT INTO $wpdb->comments (comment_post_ID, comment_author, comm
 
 // First Page
 
-$wpdb->query("INSERT INTO $wpdb->posts (post_author, post_date, post_date_gmt, post_content, post_excerpt, post_title, post_category, post_name, post_modified, post_modified_gmt, post_status, post_type, to_ping, pinged, post_content_filtered) VALUES ('1', '$now', '$now_gmt', '".$wpdb->escape(__('This is an example of a WordPress page, you could edit this to put information about yourself or your site so readers know where you are coming from. You can create as many pages like this one or sub-pages as you like and manage all of your content inside of WordPress.'))."', '', '".$wpdb->escape(__('About'))."', '0', '".$wpdb->escape(__('about'))."', '$now', '$now_gmt', 'publish', 'page', '', '', '')");
+$wpdb->query("INSERT INTO $wpdb->posts (post_author, post_date, post_date_gmt, post_content, post_excerpt, post_title, post_category, post_name, post_modified, post_modified_gmt, post_status, to_ping, pinged, post_content_filtered) VALUES ('1', '$now', '$now_gmt', '".$wpdb->escape(__('This is an example of a WordPress page, you could edit this to put information about yourself or your site so readers know where you are coming from. You can create as many pages like this one or sub-pages as you like and manage all of your content inside of WordPress.'))."', '', '".$wpdb->escape(__('About'))."', '0', '".$wpdb->escape(__('about'))."', '$now', '$now_gmt', 'static', '', '', '')");
 $wp_rewrite->flush_rules();
 
 // Set up admin user

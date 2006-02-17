@@ -23,7 +23,7 @@ $action = "delete";
 }
 
 // Fix submenu highlighting for pages.
-if ( isset($_REQUEST['post']) && 'page' == get_post_type($_REQUEST['post']) )
+if ( isset($_REQUEST['post']) && 'static' == get_post_status($_REQUEST['post']) )
 	$submenu_file = 'page-new.php';
 
 $editing = true;
@@ -50,7 +50,7 @@ case 'post':
 		$location = 'post.php?posted=true';
 	}
 
-	if ( 'page' == $_POST['post_type'] )
+	if ( 'static' == $_POST['post_status'] )
 		$location = "page-new.php?saved=true";
 
 	if ( isset($_POST['save']) )
@@ -71,8 +71,8 @@ case 'edit':
 		die ( __('You are not allowed to edit this post.') );
 
 	$post = get_post_to_edit($post_ID);
-
-	if ($post->post_type == 'page')
+	
+	if ($post->post_status == 'static')
 		include('edit-page-form.php');
 	else
 		include('edit-form-advanced.php');
@@ -90,7 +90,7 @@ case 'editattachment':
 
 	// Don't let these be changed
 	unset($_POST['guid']);
-	$_POST['post_type'] = 'attachment';
+	$_POST['post_status'] = 'attachment';
 
 	// Update the thumbnail filename
 	$oldmeta = $newmeta = get_post_meta($post_id, '_wp_attachment_metadata', true);
@@ -130,11 +130,11 @@ case 'delete':
 	$post_id = (isset($_GET['post']))  ? intval($_GET['post']) : intval($_POST['post_ID']);
 
 	$post = & get_post($post_id);
-
-	if ( !current_user_can('edit_post', $post_id) )
+	
+	if ( !current_user_can('edit_post', $post_id) )	
 		die( __('You are not allowed to delete this post.') );
 
-	if ( $post->post_type == 'attachment' ) {
+	if ( $post->post_status == 'attachment' ) {
 		if ( ! wp_delete_attachment($post_id) )
 			die( __('Error in deleting...') );
 	} else {
@@ -161,7 +161,7 @@ case 'editcomment':
 	if ( ! $comment = get_comment($comment) )
 		die(sprintf(__('Oops, no comment with this ID. <a href="%s">Go back</a>!'), 'javascript:history.go(-1)'));
 
-	if ( !current_user_can('edit_post', $comment->comment_post_ID) )
+	if ( !current_user_can('edit_post', $comment->comment_post_ID) )	
 		die( __('You are not allowed to edit comments on this post.') );
 
 	$comment = get_comment_to_edit($comment);
@@ -180,14 +180,11 @@ case 'confirmdeletecomment':
 	if ( ! $comment = get_comment($comment) )
 		die(sprintf(__('Oops, no comment with this ID. <a href="%s">Go back</a>!'), 'edit.php'));
 
-	if ( !current_user_can('edit_post', $comment->comment_post_ID) )
+	if ( !current_user_can('edit_post', $comment->comment_post_ID) )	
 		die( __('You are not allowed to delete comments on this post.') );
 
 	echo "<div class='wrap'>\n";
-	if ( 'spam' == $_GET['delete_type'] )
-		echo "<p>" . __('<strong>Caution:</strong> You are about to mark the following comment as spam:') . "</p>\n";
-	else
-		echo "<p>" . __('<strong>Caution:</strong> You are about to delete the following comment:') . "</p>\n";
+	echo "<p>" . __('<strong>Caution:</strong> You are about to delete the following comment:') . "</p>\n";
 	echo "<table border='0'>\n";
 	echo "<tr><td>" . __('Author:') . "</td><td>$comment->comment_author</td></tr>\n";
 	echo "<tr><td>" . __('E-mail:') . "</td><td>$comment->comment_author_email</td></tr>\n";
@@ -198,8 +195,6 @@ case 'confirmdeletecomment':
 
 	echo "<form action='".get_settings('siteurl')."/wp-admin/post.php' method='get'>\n";
 	echo "<input type='hidden' name='action' value='deletecomment' />\n";
-	if ( 'spam' == $_GET['delete_type'] )
-		echo "<input type='hidden' name='delete_type' value='spam' />\n";
 	echo "<input type='hidden' name='p' value='$p' />\n";
 	echo "<input type='hidden' name='comment' value='{$comment->comment_ID}' />\n";
 	echo "<input type='hidden' name='noredir' value='1' />\n";
@@ -228,13 +223,11 @@ case 'deletecomment':
 	if ( ! $comment = get_comment($comment) )
 			 die(sprintf(__('Oops, no comment with this ID. <a href="%s">Go back</a>!'), 'post.php'));
 
-	if ( !current_user_can('edit_post', $comment->comment_post_ID) )
+	if ( !current_user_can('edit_post', $comment->comment_post_ID) )	
 		die( __('You are not allowed to edit comments on this post.') );
 
-	if ( 'spam' == $_GET['delete_type'] )
-		wp_set_comment_status($comment->comment_ID, 'spam');
-	else
-		wp_delete_comment($comment->comment_ID);
+	wp_set_comment_status($comment->comment_ID, "delete");
+	do_action('delete_comment', $comment->comment_ID);
 
 	if (($_SERVER['HTTP_REFERER'] != "") && (false == $noredir)) {
 		header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -259,7 +252,7 @@ case 'unapprovecomment':
 	if ( ! $comment = get_comment($comment) )
 		die(sprintf(__('Oops, no comment with this ID. <a href="%s">Go back</a>!'), 'edit.php'));
 
-	if ( !current_user_can('edit_post', $comment->comment_post_ID) )
+	if ( !current_user_can('edit_post', $comment->comment_post_ID) )	
 		die( __('You are not allowed to edit comments on this post, so you cannot disapprove this comment.') );
 
 	wp_set_comment_status($comment->comment_ID, "hold");
@@ -279,7 +272,7 @@ case 'mailapprovecomment':
 	if ( ! $comment = get_comment($comment) )
 			 die(sprintf(__('Oops, no comment with this ID. <a href="%s">Go back</a>!'), 'edit.php'));
 
-	if ( !current_user_can('edit_post', $comment->comment_post_ID) )
+	if ( !current_user_can('edit_post', $comment->comment_post_ID) )	
 		die( __('You are not allowed to edit comments on this post, so you cannot approve this comment.') );
 
 	if ('1' != $comment->comment_approved) {
@@ -305,7 +298,7 @@ case 'approvecomment':
 	if ( ! $comment = get_comment($comment) )
 		die(sprintf(__('Oops, no comment with this ID. <a href="%s">Go back</a>!'), 'edit.php'));
 
-	if ( !current_user_can('edit_post', $comment->comment_post_ID) )
+	if ( !current_user_can('edit_post', $comment->comment_post_ID) )	
 		die( __('You are not allowed to edit comments on this post, so you cannot approve this comment.') );
 
 	wp_set_comment_status($comment->comment_ID, "approve");
