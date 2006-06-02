@@ -4,14 +4,14 @@ require_once( ABSPATH . WPINC . '/registration-functions.php');
 
 $title = __('Users');
 $parent_file = 'profile.php';
-
+	
 $action = $_REQUEST['action'];
 $update = '';
 
 switch ($action) {
 
 case 'promote':
-	check_admin_referer('bulk-users');
+	check_admin_referer();
 
 	if (empty($_POST['users'])) {
 		header('Location: users.php');
@@ -32,14 +32,14 @@ case 'promote':
  		$user = new WP_User($id);
  		$user->set_role($_POST['new_role']);
  	}
-
+		
 	header('Location: users.php?update=' . $update);
 
 break;
 
 case 'dodelete':
 
-	check_admin_referer('delete-users');
+	check_admin_referer();
 
 	if ( empty($_POST['users']) ) {
 		header('Location: users.php');
@@ -49,7 +49,7 @@ case 'dodelete':
 		die(__('You can&#8217;t delete users.'));
 
 	$userids = $_POST['users'];
-
+	
 	$update = 'del';
  	foreach ($userids as $id) {
 		if($id == $current_user->id) {
@@ -72,21 +72,20 @@ break;
 
 case 'delete':
 
-	check_admin_referer('bulk-users');
+	check_admin_referer();
 
 	if (empty($_POST['users'])) {
 		header('Location: users.php');
 	}
 
 	if ( !current_user_can('edit_users') )
-		$error = new WP_Error('edit_users', __('You can&#8217;t delete users.'));
+		$error['edit_users'] = __('You can&#8217;t delete users.');
 
 	$userids = $_POST['users'];
 
 	include ('admin-header.php');
 ?>
 <form action="" method="post" name="updateusers" id="updateusers">
-<?php wp_nonce_field('delete-users') ?>
 <div class="wrap">
 <h2><?php _e('Delete Users'); ?></h2>
 <p><?php _e('You have specified these users for deletion:'); ?></p>
@@ -132,30 +131,28 @@ case 'delete':
 break;
 
 case 'adduser':
-	check_admin_referer('add-user');
-
-	$user_id = add_user();
-	if ( is_wp_error( $user_id ) )
-		$errors = $user_id;
-	else {
+	check_admin_referer();
+	
+	$errors = add_user();
+	
+	if(count($errors) == 0) {
 		header('Location: users.php?update=add');
 		die();
 	}
 
 default:
-	wp_enqueue_script( 'admin-users' );
-
+	
 	include ('admin-header.php');
-
+	
 	$userids = $wpdb->get_col("SELECT ID FROM $wpdb->users;");
-
+	
 	foreach($userids as $userid) {
 		$tmp_user = new WP_User($userid);
 		$roles = $tmp_user->roles;
 		$role = array_shift($roles);
 		$roleclasses[$role][$tmp_user->user_login] = $tmp_user;
-	}
-
+	}	
+	
 	?>
 
 	<?php 
@@ -190,66 +187,90 @@ default:
 			break;
 		}
 	endif; 
-	if ( is_wp_error( $errors ) ) : ?>
+	if ( isset($errors) ) : ?>
 	<div class="error">
 		<ul>
 		<?php
-			foreach ( $errors->get_error_messages() as $message )
-				 echo "<li>$message</li>";
+		foreach($errors as $error) echo "<li>$error</li>";
 		?>
 		</ul>
 	</div>
 	<?php 
 	endif;
 	?>
-
+	
 <form action="" method="post" name="updateusers" id="updateusers">
-<?php wp_nonce_field('bulk-users') ?>
 <div class="wrap">
 	<h2><?php _e('User List by Role'); ?></h2>
-<table class="widefat">
-<?php
-foreach($roleclasses as $role => $roleclass) {
-	ksort($roleclass);
-?>
+  <table cellpadding="3" cellspacing="3" width="100%">
+	<?php
+	foreach($roleclasses as $role => $roleclass) {
+		ksort($roleclass);
+		?>
 
-<tr>
-	<th colspan="8" align="left"><h3><?php echo $wp_roles->role_names[$role]; ?></h3></th>
-</tr>
-<thead>
-<tr>
-	<th style="text-align: left"><?php _e('ID') ?></th>
-	<th style="text-align: left"><?php _e('Username') ?></th>
-	<th style="text-align: left"><?php _e('Name') ?></th>
-	<th style="text-align: left"><?php _e('E-mail') ?></th>
-	<th style="text-align: left"><?php _e('Website') ?></th>
+	<tr>
+	<th colspan="8" align="left">
+  <h3><?php echo $wp_roles->role_names[$role]; ?></h3>
+  </th></tr>
+
+	<tr>
+	<th><?php _e('ID') ?></th>
+	<th><?php _e('Username') ?></th>
+	<th><?php _e('Name') ?></th>
+	<th><?php _e('E-mail') ?></th>
+	<th><?php _e('Website') ?></th>
 	<th><?php _e('Posts') ?></th>
 	<th>&nbsp;</th>
-</tr>
-</thead>
-<tbody id="role-<?php echo $role; ?>"><?php
-$style = '';
-foreach ($roleclass as $user_object) {
-	$style = (' class="alternate"' == $style) ? '' : ' class="alternate"';
-	echo "\n\t" . user_row( $user_object, $style );
-}
+	</tr>
+	<?php
+	$style = '';
+	foreach ($roleclass as $user_object) {
+		$email = $user_object->user_email;
+		$url = $user_object->user_url;
+		$short_url = str_replace('http://', '', $url);
+		$short_url = str_replace('www.', '', $short_url);
+		if ('/' == substr($short_url, -1))
+			$short_url = substr($short_url, 0, -1);
+		if (strlen($short_url) > 35)
+		$short_url =  substr($short_url, 0, 32).'...';
+		$style = ('class="alternate"' == $style) ? '' : 'class="alternate"';
+		$numposts = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_author = '$user_object->ID' and post_status = 'publish'");
+		if (0 < $numposts) $numposts = "<a href='edit.php?author=$user_object->ID' title='" . __('View posts') . "'>$numposts</a>";
+		echo "
+<tr $style>
+	<td><input type='checkbox' name='users[]' id='user_{$user_object->ID}' value='{$user_object->ID}' /> <label for='user_{$user_object->ID}'>{$user_object->ID}</label></td>
+	<td><label for='user_{$user_object->ID}'><strong>$user_object->user_login</strong></label></td>
+	<td><label for='user_{$user_object->ID}'>$user_object->first_name $user_object->last_name</label></td>
+	<td><a href='mailto:$email' title='" . sprintf(__('e-mail: %s'), $email) . "'>$email</a></td>
+	<td><a href='$url' title='website: $url'>$short_url</a></td>";
+	echo "<td align='right'>$numposts</td>";
+	echo '<td>';
+	if (current_user_can('edit_users'))
+		echo "<a href='user-edit.php?user_id=$user_object->ID' class='edit'>".__('Edit')."</a>";
+	echo '</td>';
+	echo '</tr>';
+	}
+	
+	?>
+	
 
-?>
-
-</tbody>
 <?php
-}
+	}
 ?>
-</table>
+  </table>
 
 
 	<h2><?php _e('Update Users'); ?></h2>
+<?php
+$role_select = '<select name="new_role">';
+foreach($wp_roles->role_names as $role => $name) {
+	$role_select .= "<option value=\"{$role}\">{$name}</option>";
+}
+$role_select .= '</select>';
+?>  
   <ul style="list-style:none;">
   	<li><input type="radio" name="action" id="action0" value="delete" /> <label for="action0"><?php _e('Delete checked users.'); ?></label></li>
-  	<li>
-		<input type="radio" name="action" id="action1" value="promote" /> <label for="action1"><?php _e('Set the Role of checked users to:'); ?></label>
-		<select name="new_role"><?php wp_dropdown_roles(); ?></select>
-	</li>
+  	<li><input type="radio" name="action" id="action1" value="promote" /> <?php echo '<label for="action1">'.__('Set the Role of checked users to:')."</label> $role_select"; ?></li>
   </ul>
 	<p class="submit"><input type="submit" value="<?php _e('Update &raquo;'); ?>" /></p>
 </div>
@@ -259,7 +280,6 @@ foreach ($roleclass as $user_object) {
 <h2><?php _e('Add New User') ?></h2>
 <?php echo '<p>'.sprintf(__('Users can <a href="%1$s">register themselves</a> or you can manually create users here.'), get_settings('siteurl').'/wp-register.php').'</p>'; ?>
 <form action="" method="post" name="adduser" id="adduser">
-  <?php wp_nonce_field('add-user') ?>
   <table class="editform" width="100%" cellspacing="2" cellpadding="5">
     <tr>
       <th scope="row" width="33%"><?php _e('Nickname') ?>
@@ -293,16 +313,11 @@ if ( $show_password_fields ) :
       <input name="pass2" type="password" id="pass2" /></td>
     </tr>
 <?php endif; ?>
-    <tr>
-      <th scope="row"><?php _e('Role'); ?></th>
-      <td><select name="role" id="role"><?php wp_dropdown_roles( get_settings('default_role') ); ?></select></td>
-    </tr>
   </table>
   <p class="submit">
-    <input name="adduser" type="submit" id="addusersub" value="<?php _e('Add User &raquo;') ?>" />
+    <input name="adduser" type="submit" id="adduser" value="<?php _e('Add User') ?> &raquo;" />
   </p>
   </form>
-<div id="ajax-response"></div>
 </div>
 	<?php
 

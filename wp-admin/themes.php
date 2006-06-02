@@ -2,17 +2,17 @@
 require_once('admin.php');
 
 if ( isset($_GET['action']) ) {
-	check_admin_referer('switch-theme_' . $_GET['template']);
-
+	check_admin_referer();
+	
 	if ('activate' == $_GET['action']) {
 		if ( isset($_GET['template']) )
 			update_option('template', $_GET['template']);
-
+		
 		if ( isset($_GET['stylesheet']) )
 			update_option('stylesheet', $_GET['stylesheet']);
-
+		
 		do_action('switch_theme', get_current_theme());
-
+		
 		header('Location: themes.php?activated=true');
 		exit;
 	}
@@ -69,7 +69,7 @@ foreach ($theme_names as $theme_name) {
 	$author = $themes[$theme_name]['Author'];
 	$screenshot = $themes[$theme_name]['Screenshot'];
 	$stylesheet_dir = $themes[$theme_name]['Stylesheet Dir'];
-	$activate_link = wp_nonce_url("themes.php?action=activate&amp;template=$template&amp;stylesheet=$stylesheet", 'switch-theme_' . $template);
+	$activate_link = "themes.php?action=activate&amp;template=$template&amp;stylesheet=$stylesheet";
 ?>
 <div class="available-theme">
 <h3><a href="<?php echo $activate_link; ?>"><?php echo "$title $version"; ?></a></h3>
@@ -102,7 +102,7 @@ if ( count($broken_themes) ) {
 	</tr>
 <?php
 	$theme = '';
-
+	
 	$theme_names = array_keys($broken_themes);
 	natcasesort($theme_names);
 

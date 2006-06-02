@@ -19,7 +19,7 @@ $rss = @fetch_rss('http://feeds.technorati.com/cosmos/rss/?url='. trailingslashi
 if ( isset($rss->items) && 0 != count($rss->items) ) {
 ?>
 <div id="incominglinks">
-<h3><?php _e('Incoming Links'); ?> <cite><a href="http://www.technorati.com/search/<?php echo trailingslashit(get_option('home')); ?>?partner=wordpress"><?php _e('More &raquo;'); ?></a></cite></h3>
+<h3><?php _e('Incoming Links'); ?> <cite><a href="http://www.technorati.com/search/<?php echo trailingslashit(get_option('home')); ?>?partner=wordpress"><?php _e('More'); ?> &raquo;</a></cite></h3>
 <ul>
 <?php
 $rss->items = array_slice($rss->items, 0, 10);
@@ -60,7 +60,7 @@ foreach ($comments as $comment) {
 <?php endif; ?>
 
 <?php
-if ( $recentposts = $wpdb->get_results("SELECT ID, post_title FROM $wpdb->posts WHERE post_type = 'post' AND post_status = 'publish' AND post_date_gmt < '$today' ORDER BY post_date DESC LIMIT 5") ) :
+if ( $recentposts = $wpdb->get_results("SELECT ID, post_title FROM $wpdb->posts WHERE post_status = 'publish' AND post_date_gmt < '$today' ORDER BY post_date DESC LIMIT 5") ) :
 ?>
 <div>
 <h3><?php _e('Posts'); ?> <a href="edit.php" title="<?php _e('More posts...'); ?>">&raquo;</a></h3>
@@ -79,7 +79,7 @@ foreach ($recentposts as $post) {
 <?php endif; ?>
 
 <?php
-if ( $scheduled = $wpdb->get_results("SELECT ID, post_title, post_date_gmt FROM $wpdb->posts WHERE post_type = 'post' AND post_status = 'future' ORDER BY post_date ASC") ) :
+if ( $scheduled = $wpdb->get_results("SELECT ID, post_title, post_date_gmt FROM $wpdb->posts WHERE post_status = 'publish' AND post_date_gmt > '$today' ORDER BY post_date ASC") ) :
 ?> 
 <div>
 <h3><?php _e('Scheduled Entries:') ?></h3>
@@ -98,7 +98,7 @@ foreach ($scheduled as $post) {
 <div>
 <h3><?php _e('Blog Stats'); ?></h3>
 <?php
-$numposts = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'post' AND post_status = 'publish'");
+$numposts = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'publish'");
 if (0 < $numposts) $numposts = number_format($numposts); 
 
 $numcomms = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '1'");
@@ -118,9 +118,9 @@ if (0 < $numcats) $numcats = number_format($numcats);
 <p><?php _e('Use these links to get started:'); ?></p>
 
 <ul>
-<li><a href="post-new.php"><?php _e('Write a post'); ?></a></li>
+<li><a href="post.php"><?php _e('Write a post'); ?></a></li>
 <li><a href="profile.php"><?php _e('Update your profile or change your password'); ?></a></li>
-<li><a href="link-add.php"><?php _e('Add a bookmark to your blogroll'); ?></a></li>
+<li><a href="link-add.php"><?php _e('Add a link to your blogroll'); ?></a></li>
 <li><a href="themes.php"><?php _e('Change your site&#8217;s look or theme'); ?></a></li>
 </ul>
 

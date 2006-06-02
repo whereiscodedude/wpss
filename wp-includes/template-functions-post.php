@@ -15,10 +15,6 @@ function the_ID() {
 	echo $id;
 }
 
-function get_the_ID() {
-	global $id;
-	return $id;
-}
 
 function the_title($before = '', $after = '', $echo = true) {
 	$title = get_the_title();
@@ -83,7 +79,7 @@ function get_the_content($more_link_text = '(more...)', $stripteaser = 0, $more_
 
 	$content = $pages[$page-1];
 	$content = explode('<!--more-->', $content, 2);
-	if ( (false !== strpos($post->post_content, '<!--noteaser-->') && ((!$multipage) || ($page==1))) )
+	if ( (preg_match('/<!--noteaser-->/', $post->post_content) && ((!$multipage) || ($page==1))) )
 		$stripteaser = 1;
 	$teaser = $content[0];
 	if ( ($more) && ($stripteaser) )
@@ -93,7 +89,7 @@ function get_the_content($more_link_text = '(more...)', $stripteaser = 0, $more_
 		if ( $more )
 			$output .= '<a id="more-'.$id.'"></a>'.$content[1];
 		else
-			$output = balanceTags($output . ' <a href="'. get_permalink() . "#more-$id\">$more_link_text</a>");
+			$output .= ' <a href="'. get_permalink() . "#more-$id\">$more_link_text</a>";
 	}
 	if ( $preview ) // preview fix for javascript bug with foreign languages
 		$output =	preg_replace('/\%u([0-9A-F]{4,4})/e',	"'&#'.base_convert('\\1',16,10).';'", $output);
@@ -215,7 +211,7 @@ function get_post_custom( $post_id = 0 ) {
 			// Force subkeys to be array type:
 			if ( !isset($post_meta_cache[$mpid]) || !is_array($post_meta_cache[$mpid]) )
 				$post_meta_cache[$mpid] = array();
-
+				
 			if ( !isset($post_meta_cache[$mpid]["$mkey"]) || !is_array($post_meta_cache[$mpid]["$mkey"]) )
 				$post_meta_cache[$mpid]["$mkey"] = array();
 
@@ -262,9 +258,6 @@ function the_meta() {
 	if ( $keys = get_post_custom_keys() ) {
 		echo "<ul class='post-meta'>\n";
 		foreach ( $keys as $key ) {
-			$keyt = trim($key);
-			if ( '_' == $keyt{0} )
-				continue;
 			$values = array_map('trim', get_post_custom_values($key));
 			$value = implode($values,', ');
 			echo "<li><span class='post-meta-key'>$key:</span> $value</li>\n";
@@ -278,17 +271,6 @@ function the_meta() {
 Pages
 */
 
-function walk_page_tree() {
-	$walker = new Walker_Page;
-	$args = func_get_args();
-	return call_user_func_array(array(&$walker, 'walk'), $args);
-}
-
-function walk_page_dropdown_tree() {
-	$walker = new Walker_PageDropdown;
-	$args = func_get_args();
-	return call_user_func_array(array(&$walker, 'walk'), $args);
-}
 
 function &get_page_children($page_id, $pages) {
 	global $page_cache;
@@ -311,58 +293,30 @@ function &get_page_children($page_id, $pages) {
 function &get_pages($args = '') {
 	global $wpdb;
 
-	if ( is_array($args) )
-		$r = &$args;
-	else
-		parse_str($args, $r);
+	parse_str($args, $r);
 
-	$defaults = array('child_of' => 0, 'sort_order' => 'ASC', 'sort_column' => 'post_title',
-				'hierarchical' => 1, 'exclude' => '', 'include' => '', 'meta_key' => '', 'meta_value' => '');
-	$r = array_merge($defaults, $r);
-	extract($r);
-
-	$inclusions = '';
-	if ( !empty($include) ) {
-		$child_of = 0; //ignore child_of, exclude, meta_key, and meta_value params if using include 
-		$exclude = '';  
-		$meta_key = '';
-		$meta_value = '';
-		$incpages = preg_split('/[\s,]+/',$include);
-		if ( count($incpages) ) {
-			foreach ( $incpages as $incpage ) {
-				if (empty($inclusions))
-					$inclusions = ' AND ( ID = ' . intval($incpage) . ' ';
-				else
-					$inclusions .= ' OR ID = ' . intval($incpage) . ' ';
-			}
-		}
-	}
-	if (!empty($inclusions)) 
-		$inclusions .= ')';	
+	if ( !isset($r['child_of']) )
+		$r['child_of'] = 0;
+	if ( !isset($r['sort_column']) )
+		$r['sort_column'] = 'post_title';
+	if ( !isset($r['sort_order']) )
+		$r['sort_order'] = 'ASC';
 
 	$exclusions = '';
-	if ( !empty($exclude) ) {
-		$expages = preg_split('/[\s,]+/',$exclude);
+	if ( !empty($r['exclude']) ) {
+		$expages = preg_split('/[\s,]+/',$r['exclude']);
 		if ( count($expages) ) {
 			foreach ( $expages as $expage ) {
-				if (empty($exclusions))
-					$exclusions = ' AND ( ID <> ' . intval($expage) . ' ';
-				else
-					$exclusions .= ' AND ID <> ' . intval($expage) . ' ';
+				$exclusions .= ' AND ID <> ' . intval($expage) . ' ';
 			}
 		}
 	}
-	if (!empty($exclusions)) 
-		$exclusions .= ')';
 
-	$query = "SELECT * FROM $wpdb->posts " ;
-	$query .= ( empty( $meta_key ) ? "" : ", $wpdb->postmeta " ) ; 
-	$query .= " WHERE (post_type = 'page' AND post_status = 'publish') $exclusions $inclusions " ;
-	$query .= ( empty( $meta_key ) | empty($meta_value)  ? "" : " AND ($wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = '$meta_key' AND $wpdb->postmeta.meta_value = '$meta_value' )" ) ;
-	$query .= " ORDER BY " . $sort_column . " " . $sort_order ;
-
-	$pages = $wpdb->get_results($query);
-	$pages = apply_filters('get_pages', $pages, $r);
+	$pages = $wpdb->get_results("SELECT * " .
+		"FROM $wpdb->posts " .
+		"WHERE post_status = 'static' " .
+		"$exclusions " .
+		"ORDER BY " . $r['sort_column'] . " " . $r['sort_order']);
 
 	if ( empty($pages) )
 		return array();
@@ -370,63 +324,65 @@ function &get_pages($args = '') {
 	// Update cache.
 	update_page_cache($pages);
 
-	if ( $child_of || $hierarchical )
-		$pages = & get_page_children($child_of, $pages);
+	if ( $r['child_of'] )
+		$pages = & get_page_children($r['child_of'], $pages);
 
 	return $pages;
 }
 
-function wp_dropdown_pages($args = '') {
-	if ( is_array($args) )
-		$r = &$args;
-	else
-		parse_str($args, $r);
-
-	$defaults = array('depth' => 0, 'child_of' => 0, 'selected' => 0, 'echo' => 1,
-		'name' => 'page_id');
-	$r = array_merge($defaults, $r);
-	extract($r);
-
-	$pages = get_pages($r);
-	$output = '';
-
-	if ( ! empty($pages) ) {
-		$output = "<select name='$name'>\n";
-		$output .= walk_page_dropdown_tree($pages, $depth, $r);
-		$output .= "</select>\n";
-	}
-
-	$output = apply_filters('wp_dropdown_pages', $output);
-
-	if ( $echo )
-		echo $output;
-
-	return $output;
-}
 
 function wp_list_pages($args = '') {
-	if ( is_array($args) )
-		$r = &$args;
-	else
-		parse_str($args, $r);
-
-	$defaults = array('depth' => 0, 'show_date' => '', 'date_format' => get_settings('date_format'),
-		'child_of' => 0, 'title_li' => __('Pages'), 'echo' => 1);
-	$r = array_merge($defaults, $r);
+	parse_str($args, $r);
+	if ( !isset($r['depth']) )
+		$r['depth'] = 0;
+	if ( !isset($r['show_date']) )
+		$r['show_date'] = '';
+	if ( !isset($r['child_of']) )
+		$r['child_of'] = 0;
+	if ( !isset($r['title_li']) )
+		$r['title_li'] = __('Pages');
+	if ( !isset($r['echo']) )
+		$r['echo'] = 1;
 
 	$output = '';
 
 	// Query pages.
-	$pages = get_pages($r);
+	$pages = & get_pages($args);
+	if ( $pages ) {
 
-	if ( !empty($pages) ) {
 		if ( $r['title_li'] )
 			$output .= '<li class="pagenav">' . $r['title_li'] . '<ul>';
 
-		global $wp_query;
-		$current_page = $wp_query->get_queried_object_id();
-		$output .= walk_page_tree($pages, $r['depth'], $current_page, $r['show_date'], $r['date_format']);
+		// Now loop over all pages that were selected
+		$page_tree = Array();
+		foreach ( $pages as $page ) {
+			// set the title for the current page
+			$page_tree[$page->ID]['title'] = $page->post_title;
+			$page_tree[$page->ID]['name'] = $page->post_name;
 
+			// set the selected date for the current page
+			// depending on the query arguments this is either
+			// the createtion date or the modification date
+			// as a unix timestamp. It will also always be in the
+			// ts field.
+			if ( !empty($r['show_date']) ) {
+				if ( 'modified' == $r['show_date'] )
+					$page_tree[$page->ID]['ts'] = $page->post_modified;
+				else
+					$page_tree[$page->ID]['ts'] = $page->post_date;
+			}
+
+			// The tricky bit!!
+			// Using the parent ID of the current page as the
+			// array index we set the curent page as a child of that page.
+			// We can now start looping over the $page_tree array
+			// with any ID which will output the page links from that ID downwards.
+			if ( $page->post_parent != $page->ID)
+				$page_tree[$page->post_parent]['children'][] = $page->ID;
+		}
+		// Output of the pages starting with child_of as the root ID.
+		// child_of defaults to 0 if not supplied in the query.
+		$output .= _page_level_out($r['child_of'],$page_tree, $r, 0, false);
 		if ( $r['title_li'] )
 			$output .= '</ul></li>';
 	}
@@ -434,6 +390,53 @@ function wp_list_pages($args = '') {
 	$output = apply_filters('wp_list_pages', $output);
 
 	if ( $r['echo'] )
+		echo $output;
+	else
+		return $output;
+}
+
+
+function _page_level_out($parent, $page_tree, $args, $depth = 0, $echo = true) {
+	global $wp_query;
+	$queried_obj = $wp_query->get_queried_object();
+	$output = '';
+
+	if ( $depth )
+		$indent = str_repeat("\t", $depth);
+		//$indent = join('', array_fill(0,$depth,"\t"));
+
+	if ( !is_array($page_tree[$parent]['children']) )
+		return false;
+
+	foreach ( $page_tree[$parent]['children'] as $page_id ) {
+		$cur_page = $page_tree[$page_id];
+		$title = $cur_page['title'];
+
+		$css_class = 'page_item';
+		if ( $page_id == $queried_obj->ID )
+			$css_class .= ' current_page_item';
+
+		$output .= $indent . '<li class="' . $css_class . '"><a href="' . get_page_link($page_id) . '" title="' . wp_specialchars($title) . '">' . $title . '</a>';
+
+		if ( isset($cur_page['ts']) ) {
+			$format = get_settings('date_format');
+			if ( isset($args['date_format']) )
+				$format = $args['date_format'];
+			$output .= " " . mysql2date($format, $cur_page['ts']);
+		}
+
+		if ( isset($cur_page['children']) && is_array($cur_page['children']) ) {
+			$new_depth = $depth + 1;
+
+			if ( !$args['depth'] || $depth < ($args['depth']-1) ) {
+				$output .= "$indent<ul>\n";
+				$output .= _page_level_out($page_id, $page_tree, $args, $new_depth, false);
+				$output .= "$indent</ul>\n";
+			}
+		}
+		$output .= "$indent</li>\n";
+	}
+	if ( $echo )
 		echo $output;
 	else
 		return $output;
@@ -447,7 +450,7 @@ function get_the_attachment_link($id = 0, $fullsize = false, $max_dims = false) 
 	$id = (int) $id;
 	$_post = & get_post($id);
 
-	if ( ('attachment' != $_post->post_type) || ('' == $_post->guid) )
+	if ( ('attachment' != $_post->post_status) || ('' == $_post->guid) )
 		return __('Missing Attachment');
 
 	if (! empty($_post->guid) ) {

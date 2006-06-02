@@ -28,8 +28,8 @@ switch($action) {
 
 case 'update':
 	$any_changed = 0;
-
-	check_admin_referer('update-options');
+	
+	check_admin_referer();
 
 	if (!$_POST['page_options']) {
 		foreach ($_POST as $key => $value) {
@@ -52,11 +52,11 @@ case 'update':
 			$value = trim(stripslashes($_POST[$option]));
 				if( in_array($option, $nonbools) && ( $value == '0' || $value == '') )
 				$value = 'closed';
-
+			
 			if( $option == 'blogdescription' || $option == 'blogname' )
 				if (current_user_can('unfiltered_html') == false)
 					$value = wp_filter_post_kses( $value );
-
+			
 			if (update_option($option, $value) ) {
 				$any_changed++;
 			}
@@ -68,6 +68,8 @@ case 'update':
 			if ( get_settings('siteurl') != $old_siteurl || get_settings('home') != $old_home ) {
 				// If home changed, write rewrite rules to new location.
 				$wp_rewrite->flush_rules();
+				// Get currently logged in user and password.
+				get_currentuserinfo();
 				// Clear cookies for old paths.
 				wp_clearcookie();
 				// Set cookies for new paths.
@@ -89,14 +91,13 @@ default:
 <div class="wrap">
   <h2><?php _e('All options'); ?></h2>
   <form name="form" action="options.php" method="post">
-  <?php wp_nonce_field('update-options') ?>
   <input type="hidden" name="action" value="update" />
   <table width="98%">
 <?php
 $options = $wpdb->get_results("SELECT * FROM $wpdb->options ORDER BY option_name");
 
 foreach ($options as $option) :
-	$value = wp_specialchars($option->option_value, 'single');
+	$value = wp_specialchars($option->option_value);
 	echo "
 <tr>
 	<th scope='row'><label for='$option->option_name'>$option->option_name</label></th>

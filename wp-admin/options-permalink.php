@@ -41,7 +41,7 @@ structure.onfocus = function () { document.getElementById('custom_selection').ch
 
 var aInputs = document.getElementsByTagName('input');
 
-for (var i = 0; i < aInputs.length; i++) {
+for (var i = 0; i < aInputs.length; i++) {		
 aInputs[i].onclick = aInputs[i].onkeyup = upit;
 }
 }
@@ -57,16 +57,14 @@ include('admin-header.php');
 
 $home_path = get_home_path();
 
-if ( isset($_POST['permalink_structure']) || isset($_POST['category_base']) ) {
-	check_admin_referer('update-permalink');
-
+if ( isset($_POST) ) {
 	if ( isset($_POST['permalink_structure']) ) {
 		$permalink_structure = $_POST['permalink_structure'];
 		if (! empty($permalink_structure) )
 			$permalink_structure = preg_replace('#/+#', '/', '/' . $_POST['permalink_structure']);
 		$wp_rewrite->set_permalink_structure($permalink_structure);
 	}
-
+	
 	if ( isset($_POST['category_base']) ) {
 		$category_base = $_POST['category_base'];
 		if (! empty($category_base) )
@@ -74,7 +72,7 @@ if ( isset($_POST['permalink_structure']) || isset($_POST['category_base']) ) {
 		$wp_rewrite->set_category_base($category_base);
 	}
 }
-
+	
 $permalink_structure = get_settings('permalink_structure');
 $category_base = get_settings('category_base');
 
@@ -117,7 +115,6 @@ $structures = array(
 	);
 ?>
 <form name="form" action="options-permalink.php" method="post"> 
-<?php wp_nonce_field('update-permalink') ?>
 <h3><?php _e('Common options:'); ?></h3>
 <p>
 	<label>
@@ -144,7 +141,7 @@ $structures = array(
 checked="checked"
 <?php } ?>
  /> 
-<?php _e('Custom, specify below'); ?>
+<?php _e('Custom, specify below'); ?>	
 </label>
 <br />
 </p>
@@ -166,7 +163,6 @@ checked="checked"
 <?php if ( $permalink_structure && !$usingpi && !$writable ) : ?>
   <p><?php _e('If your <code>.htaccess</code> file were <a href="http://codex.wordpress.org/Make_a_Directory_Writable">writable</a>, we could do this automatically, but it isn&#8217;t so these are the mod_rewrite rules you should have in your <code>.htaccess</code> file. Click in the field and press <kbd>CTRL + a</kbd> to select all.') ?></p>
 <form action="options-permalink.php" method="post">
-<?php wp_nonce_field('update-permalink') ?>
    <p>
 <textarea rows="5" style="width: 98%;" name="rules"><?php echo $wp_rewrite->mod_rewrite_rules(); ?>
 </textarea>
