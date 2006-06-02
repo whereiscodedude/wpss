@@ -14,9 +14,9 @@ case 'register':
 
 	$user_login = sanitize_user( $_POST['user_login'] );
 	$user_email = $_POST['user_email'];
-
+	
 	$errors = array();
-
+		
 	if ( $user_login == '' )
 		$errors['user_login'] = __('<strong>ERROR</strong>: Please enter a username.');
 
@@ -36,8 +36,10 @@ case 'register':
 	if ( username_exists( $user_login ) )
 		$errors['user_login'] = __('<strong>ERROR</strong>: This username is already registered, please choose another one.');
 
-	if ( email_exists( $user_email ) )
-		$errors['user_email'] = __('<strong>ERROR</strong>: This email is already registered, please choose another one.');
+	/* checking the email isn't already used by another user */
+	$email_exists = $wpdb->get_row("SELECT user_email FROM $wpdb->users WHERE user_email = '$user_email'");
+	if ( $email_exists)
+		die (__('<strong>ERROR</strong>: This email address is already registered, please supply another.'));
 
 	if ( 0 == count($errors) ) {
 		$password = substr( md5( uniqid( microtime() ) ), 0, 7);
@@ -48,15 +50,15 @@ case 'register':
 		else
 			wp_new_user_notification($user_id, $password);
 	}
-
+	
 	if ( 0 == count($errors) ) {
-
+			
 	?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>WordPress &raquo; <?php _e('Registration Complete') ?></title>
-	<meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php echo get_settings('blog_charset'); ?>" />
+	<meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php echo get_settings('blog_charset'); ?>" />	
 	<link rel="stylesheet" href="wp-admin/wp-admin.css" type="text/css" />
 	<style type="text/css">
 	.submit {
@@ -71,7 +73,7 @@ case 'register':
 	<p><?php printf(__('Username: %s'), "<strong>" . wp_specialchars($user_login) . "</strong>") ?><br />
 	<?php printf(__('Password: %s'), '<strong>' . __('emailed to you') . '</strong>') ?> <br />
 	<?php printf(__('E-mail: %s'), "<strong>" . wp_specialchars($user_email) . "</strong>") ?></p>
-	<p class="submit"><a href="wp-login.php"><?php _e('Login &raquo;'); ?></a></p>
+	<p class="submit"><a href="wp-login.php"><?php _e('Login'); ?> &raquo;</a></p>
 </div>
 </body>
 </html>
@@ -102,11 +104,11 @@ default:
 <h2><?php _e('Register for this blog') ?></h2>
 <?php if ( isset($errors) ) : ?>
 <div class="error">
-	<p>
+	<ul>
 	<?php
-	foreach($errors as $error) echo "$error<br />";
+	foreach($errors as $error) echo "<li>$error</li>";
 	?>
-	</p>
+	</ul>
 </div>
 <?php endif; ?>
 <form method="post" action="wp-register.php" id="registerform">
@@ -114,7 +116,7 @@ default:
 	<label for="user_login"><?php _e('Username:') ?></label><br /> <input type="text" name="user_login" id="user_login" size="20" maxlength="20" value="<?php echo wp_specialchars($user_login); ?>" /><br /></p>
 	<p><label for="user_email"><?php _e('E-mail:') ?></label><br /> <input type="text" name="user_email" id="user_email" size="25" maxlength="100" value="<?php echo wp_specialchars($user_email); ?>" /></p>
 	<p><?php _e('A password will be emailed to you.') ?></p>
-	<p class="submit"><input type="submit" value="<?php _e('Register &raquo;') ?>" id="submit" name="submit" /></p>
+	<p class="submit"><input type="submit" value="<?php _e('Register') ?> &raquo;" id="submit" name="submit" /></p>
 </form>
 <ul>
 	<li><a href="<?php bloginfo('home'); ?>/" title="<?php _e('Are you lost?') ?>">&laquo; <?php _e('Back to blog') ?></a></li>

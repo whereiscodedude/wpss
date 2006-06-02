@@ -65,7 +65,7 @@ function get_userdata( $user_id ) {
 		return false;
 
 	$user = wp_cache_get($user_id, 'users');
-
+	
 	if ( $user )
 		return $user;
 
@@ -96,10 +96,10 @@ function get_userdata( $user_id ) {
 		$user->user_lastname = $user->last_name;
 	if ( isset($user->description) )
 		$user->user_description = $user->description;
-
+		
 	wp_cache_add($user_id, $user, 'users');
 	wp_cache_add($user->user_login, $user, 'userlogins');
-
+	
 	return $user;
 }
 endif;
@@ -117,7 +117,7 @@ function get_userdatabylogin($user_login) {
 
 	if ( empty( $user_login ) )
 		return false;
-
+		
 	$userdata = wp_cache_get($user_login, 'userlogins');
 	if ( $userdata )
 		return $userdata;
@@ -205,7 +205,7 @@ endif;
 if ( !function_exists('is_user_logged_in') ) :
 function is_user_logged_in() {
 	$user = wp_get_current_user();
-
+	
 	if ( $user->id == 0 )
 		return false;
 
@@ -220,7 +220,7 @@ function auth_redirect() {
 				!wp_login($_COOKIE[USER_COOKIE], $_COOKIE[PASS_COOKIE], true)) ||
 			 (empty($_COOKIE[USER_COOKIE])) ) {
 		nocache_headers();
-
+	
 		header('Location: ' . get_settings('siteurl') . '/wp-login.php?redirect_to=' . urlencode($_SERVER['REQUEST_URI']));
 		exit();
 	}
@@ -229,17 +229,15 @@ endif;
 
 if ( !function_exists('check_admin_referer') ) :
 function check_admin_referer($action = -1) {
-	global $pagenow, $menu, $submenu, $parent_file, $submenu_file;;
+	global $pagenow;
 	$adminurl = strtolower(get_settings('siteurl')).'/wp-admin';
 	$referer = strtolower($_SERVER['HTTP_REFERER']);
 	if ( !wp_verify_nonce($_REQUEST['_wpnonce'], $action) &&
 		!(-1 == $action && strstr($referer, $adminurl)) ) {
-		if ( $referer ) 
-			$adminurl = $referer;
-		$title = __('WordPress Confirmation');
-		require_once(ABSPATH . '/wp-admin/admin-header.php');
-		// Remove extra layer of slashes.
-		$_POST   = stripslashes_deep($_POST  );
+		
+		$html  = "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n<html xmlns='http://www.w3.org/1999/xhtml' lang='en' xml:lang='en'>\n\n";
+		$html .= "<head>\n\t<title>" . __('WordPress Confirmation') . "</title>\n";
+		$html .= "</head>\n<body>\n";
 		if ( $_POST ) {
 			$q = http_build_query($_POST);
 			$q = explode( ini_get('arg_separator.output'), $q);
@@ -250,16 +248,15 @@ function check_admin_referer($action = -1) {
 				$html .= "\t\t<input type='hidden' name='" . wp_specialchars( urldecode($k), 1 ) . "' value='" . wp_specialchars( urldecode($v), 1 ) . "' />\n";
 			}
 			$html .= "\t\t<input type='hidden' name='_wpnonce' value='" . wp_create_nonce($action) . "' />\n";
-			$html .= "\t\t<div id='message' class='confirm fade'>\n\t\t<p>" . __('Are you sure you want to do this?') . "</p>\n\t\t<p><a href='$adminurl'>" . __('No') . "</a> <input type='submit' value='" . __('Yes') . "' /></p>\n\t\t</div>\n\t</form>\n";
+			$html .= "\t\t<p>" . __('Are you sure you want to do this?') . "</p>\n\t\t<p><a href='$adminurl'>No</a> <input type='submit' value='" . __('Yes') . "' /></p>\n\t</form>\n";
 		} else {
-			$html .= "\t<div id='message' class='confirm fade'>\n\t<p>" . __('Are you sure you want to do this?') . "</p>\n\t<p><a href='$adminurl'>" . __('No') . "</a> <a href='" . add_query_arg( '_wpnonce', wp_create_nonce($action), $_SERVER['REQUEST_URI'] ) . "'>" . __('Yes') . "</a></p>\n\t</div>\n";
+			$html .= "\t<p>" . __('Are you sure you want to do this?') . "</p>\n\t\t<p><a href='$adminurl'>No</a> <a href='" . add_query_arg( '_wpnonce', wp_create_nonce($action), $_SERVER['REQUEST_URI'] ) . "'>" . __('Yes') . "</a></p>\n";
 		}
 		$html .= "</body>\n</html>";
-		echo $html;
-		include_once(ABSPATH . '/wp-admin/admin-footer.php');
-		die();
+
+		die($html);
 	}
-	do_action('check_admin_referer', $action);
+	do_action('check_admin_referer');
 }endif;
 
 if ( !function_exists('check_ajax_referer') ) :
@@ -271,9 +268,9 @@ function check_ajax_referer() {
 		if ( false !== strpos($tasty, PASS_COOKIE) )
 			$pass = substr(strstr($tasty, '='), 1);
 	}
-	if ( !wp_login( $user, $pass, true ) )
-		die('-1');
-	do_action('check_ajax_referer');
+	if ( wp_login( $user, $pass, true ) )
+		return true;
+	return false;
 }
 endif;
 
@@ -357,9 +354,9 @@ function wp_notify_postauthor($comment_id, $comment_type='') {
 	$comment_author_domain = gethostbyaddr($comment->comment_author_IP);
 
 	$blogname = get_settings('blogname');
-
+	
 	if ( empty( $comment_type ) ) $comment_type = 'comment';
-
+	
 	if ('comment' == $comment_type) {
 		$notify_message  = sprintf( __('New comment on your post #%1$s "%2$s"'), $comment->comment_post_ID, $post->post_title ) . "\r\n";
 		$notify_message .= sprintf( __('Author : %1$s (IP: %2$s , %3$s)'), $comment->comment_author, $comment->comment_author_IP, $comment_author_domain ) . "\r\n";
@@ -385,8 +382,7 @@ function wp_notify_postauthor($comment_id, $comment_type='') {
 		$subject = sprintf( __('[%1$s] Pingback: "%2$s"'), $blogname, $post->post_title );
 	}
 	$notify_message .= get_permalink($comment->comment_post_ID) . "#comments\r\n\r\n";
-	$notify_message .= sprintf( __('To delete this comment, visit: %s'), get_settings('siteurl').'/wp-admin/comment.php?action=confirmdeletecomment&p='.$comment->comment_post_ID."&comment=$comment_id" ) . "\r\n";
-	$notify_message .= sprintf( __('To mark this comment as spam, visit: %s'), get_settings('siteurl').'/wp-admin/comment.php?action=confirmdeletecomment&delete_type=spam&p='.$comment->comment_post_ID."&comment=$comment_id" ) . "\r\n";
+	$notify_message .= sprintf( __('To delete this comment, visit: %s'), get_settings('siteurl').'/wp-admin/post.php?action=confirmdeletecomment&p='.$comment->comment_post_ID."&comment=$comment_id" ) . "\r\n";
 
 	$wp_email = 'wordpress@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME']));
 
@@ -442,9 +438,8 @@ function wp_notify_moderator($comment_id) {
 	$notify_message .= sprintf( __('URI    : %s'), $comment->comment_author_url ) . "\r\n";
 	$notify_message .= sprintf( __('Whois  : http://ws.arin.net/cgi-bin/whois.pl?queryinput=%s'), $comment->comment_author_IP ) . "\r\n";
 	$notify_message .= __('Comment: ') . "\r\n" . $comment->comment_content . "\r\n\r\n";
-	$notify_message .= sprintf( __('To approve this comment, visit: %s'),  get_settings('siteurl').'/wp-admin/comment.php?action=mailapprovecomment&p='.$comment->comment_post_ID."&comment=$comment_id" ) . "\r\n";
-	$notify_message .= sprintf( __('To delete this comment, visit: %s'), get_settings('siteurl').'/wp-admin/comment.php?action=confirmdeletecomment&p='.$comment->comment_post_ID."&comment=$comment_id" ) . "\r\n";
-	$notify_message .= sprintf( __('To mark this comment as spam, visit: %s'), get_settings('siteurl').'/wp-admin/comment.php?action=confirmdeletecomment&delete_type=spam&p='.$comment->comment_post_ID."&comment=$comment_id" ) . "\r\n";
+	$notify_message .= sprintf( __('To approve this comment, visit: %s'),  get_settings('siteurl').'/wp-admin/post.php?action=mailapprovecomment&p='.$comment->comment_post_ID."&comment=$comment_id" ) . "\r\n";
+	$notify_message .= sprintf( __('To delete this comment, visit: %s'), get_settings('siteurl').'/wp-admin/post.php?action=confirmdeletecomment&p='.$comment->comment_post_ID."&comment=$comment_id" ) . "\r\n";
 	$notify_message .= sprintf( __('Currently %s comments are waiting for approval. Please visit the moderation panel:'), $comments_waiting ) . "\r\n";
 	$notify_message .= get_settings('siteurl') . "/wp-admin/moderation.php\r\n";
 
@@ -463,14 +458,14 @@ endif;
 if ( !function_exists('wp_new_user_notification') ) :
 function wp_new_user_notification($user_id, $plaintext_pass = '') {
 	$user = new WP_User($user_id);
-
+	
 	$user_login = stripslashes($user->user_login);
 	$user_email = stripslashes($user->user_email);
-
+	
 	$message  = sprintf(__('New user registration on your blog %s:'), get_settings('blogname')) . "\r\n\r\n";
 	$message .= sprintf(__('Username: %s'), $user_login) . "\r\n\r\n";
 	$message .= sprintf(__('E-mail: %s'), $user_email) . "\r\n";
-
+	
 	@wp_mail(get_settings('admin_email'), sprintf(__('[%s] New User Registration'), get_settings('blogname')), $message);
 
 	if ( empty($plaintext_pass) )
@@ -479,9 +474,9 @@ function wp_new_user_notification($user_id, $plaintext_pass = '') {
 	$message  = sprintf(__('Username: %s'), $user_login) . "\r\n";
 	$message .= sprintf(__('Password: %s'), $plaintext_pass) . "\r\n";
 	$message .= get_settings('siteurl') . "/wp-login.php\r\n";
-
+		
 	wp_mail($user_email, sprintf(__('[%s] Your username and password'), get_settings('blogname')), $message);
-
+	
 }
 endif;
 

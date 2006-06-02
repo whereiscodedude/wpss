@@ -3,7 +3,7 @@ require_once('admin.php');
 
 $title = __('Moderate comments');
 $parent_file = 'edit.php';
-wp_enqueue_script( 'listman' );
+$list_js = true;
 
 $wpvarstoreset = array('action', 'item_ignored', 'item_deleted', 'item_approved', 'item_spam', 'feelinglucky');
 for ($i=0; $i<count($wpvarstoreset); $i += 1) {
@@ -117,7 +117,7 @@ if ( isset($_GET['deleted']) || isset($_GET['approved']) || isset($_GET['ignored
 }
 
 ?>
-
+	
 <div class="wrap">
 
 <?php
@@ -145,21 +145,16 @@ $i = 0;
 	else $class = '';
 	echo "\n\t<li id='comment-$comment->comment_ID' $class>"; 
 	?>
-	<p><strong><?php comment_author() ?></strong> <?php if ($comment->comment_author_email) { ?>| <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <?php comment_author_url_link() ?> <?php } ?>| <?php _e('IP:') ?> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a></p>
+	<p><strong><?php _e('Name:') ?></strong> <?php comment_author_link() ?> <?php if ($comment->comment_author_email) { ?>| <strong><?php _e('E-mail:') ?></strong> <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <strong><?php _e('URI:') ?></strong> <?php comment_author_url_link() ?> <?php } ?>| <strong><?php _e('IP:') ?></strong> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a> | <strong><?php _e('Date:') ?></strong> <?php comment_date(); ?></p>
 <?php comment_text() ?>
-<p><?php comment_date('M j, g:i A'); ?> &#8212; [ <?php
-echo '<a href="comment.php?action=editcomment&amp;comment='.$comment->comment_ID.'">' . __('Edit') . '</a> | ';
-echo " <a href=\"post.php?action=deletecomment&amp;p=".$comment->comment_post_ID."&amp;comment=".$comment->comment_ID."\" onclick=\"return deleteSomething( 'comment', $comment->comment_ID, '" . sprintf(__("You are about to delete this comment by &quot;%s&quot;.\\n&quot;Cancel&quot; to stop, &quot;OK&quot; to delete."), js_escape($comment->comment_author)) . "' );\">" . __('Delete ') . "</a> | "; ?>
-<?php
-$post = get_post($comment->comment_post_ID);
-$post_title = wp_specialchars( $post->post_title, 'double' );
-$post_title = ('' == $post_title) ? "# $comment->comment_post_ID" : $post_title;
-?>
-<a href="<?php echo get_permalink($comment->comment_post_ID); ?>" title="<?php echo $post_title; ?>"><?php _e('View Post') ?></a> ] &#8212;
- <?php _e('Bulk action:') ?>
-	<input type="radio" name="comment[<?php echo $comment->comment_ID; ?>]" id="comment[<?php echo $comment->comment_ID; ?>]-approve" value="approve" /> <label for="comment[<?php echo $comment->comment_ID; ?>]-approve"><?php _e('Approve') ?></label> &nbsp;
-	<input type="radio" name="comment[<?php echo $comment->comment_ID; ?>]" id="comment[<?php echo $comment->comment_ID; ?>]-spam" value="spam" /> <label for="comment[<?php echo $comment->comment_ID; ?>]-spam"><?php _e('Spam') ?></label> &nbsp;
-	<input type="radio" name="comment[<?php echo $comment->comment_ID; ?>]" id="comment[<?php echo $comment->comment_ID; ?>]-delete" value="delete" /> <label for="comment[<?php echo $comment->comment_ID; ?>]-delete"><?php _e('Delete') ?></label> &nbsp;
+<p><?php
+echo '<a href="post.php?action=editcomment&amp;comment='.$comment->comment_ID.'">' . __('Edit') . '</a> | ';?>
+<a href="<?php echo get_permalink($comment->comment_post_ID); ?>"><?php _e('View Post') ?></a> | 
+<?php 
+echo " <a href=\"" . wp_nonce_url("post.php?action=deletecomment&amp;p=".$comment->comment_post_ID."&amp;comment=".$comment->comment_ID, 'delete-comment_' . $comment->comment_ID) . "\" onclick=\"return deleteSomething( 'comment', $comment->comment_ID, '" . __("You are about to delete this comment.\\n&quot;Cancel&quot; to stop, &quot;OK&quot; to delete.") . "' );\">" . __('Delete just this comment') . "</a> | "; ?>  <?php _e('Bulk action:') ?>
+	<input type="radio" name="comment[<?php echo $comment->comment_ID; ?>]" id="comment[<?php echo $comment->comment_ID; ?>]-approve" value="approve" /> <label for="comment[<?php echo $comment->comment_ID; ?>]-approve"><?php _e('Approve') ?></label>
+	<input type="radio" name="comment[<?php echo $comment->comment_ID; ?>]" id="comment[<?php echo $comment->comment_ID; ?>]-spam" value="spam" /> <label for="comment[<?php echo $comment->comment_ID; ?>]-spam"><?php _e('Spam') ?></label>
+	<input type="radio" name="comment[<?php echo $comment->comment_ID; ?>]" id="comment[<?php echo $comment->comment_ID; ?>]-delete" value="delete" /> <label for="comment[<?php echo $comment->comment_ID; ?>]-delete"><?php _e('Delete') ?></label>
 	<input type="radio" name="comment[<?php echo $comment->comment_ID; ?>]" id="comment[<?php echo $comment->comment_ID; ?>]-nothing" value="later" checked="checked" /> <label for="comment[<?php echo $comment->comment_ID; ?>]-nothing"><?php _e('Defer until later') ?></label>
 	</p>
 
@@ -171,7 +166,7 @@ $post_title = ('' == $post_title) ? "# $comment->comment_post_ID" : $post_title;
 
 <div id="ajax-response"></div>
 
-    <p class="submit"><input type="submit" name="submit" value="<?php _e('Bulk Moderate Comments &raquo;') ?>" /></p>
+    <p class="submit"><input type="submit" name="submit" value="<?php _e('Moderate Comments &raquo;') ?>" /></p>
 <script type="text/javascript">
 // <![CDATA[
 function markAllForDelete() {
@@ -227,6 +222,4 @@ break;
 }
 
 
-include('admin-footer.php');
-
-?>
+include('admin-footer.php') ?>

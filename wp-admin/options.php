@@ -28,7 +28,7 @@ switch($action) {
 
 case 'update':
 	$any_changed = 0;
-
+	
 	check_admin_referer('update-options');
 
 	if (!$_POST['page_options']) {
@@ -52,11 +52,11 @@ case 'update':
 			$value = trim(stripslashes($_POST[$option]));
 				if( in_array($option, $nonbools) && ( $value == '0' || $value == '') )
 				$value = 'closed';
-
+			
 			if( $option == 'blogdescription' || $option == 'blogname' )
 				if (current_user_can('unfiltered_html') == false)
 					$value = wp_filter_post_kses( $value );
-
+			
 			if (update_option($option, $value) ) {
 				$any_changed++;
 			}
@@ -96,7 +96,7 @@ default:
 $options = $wpdb->get_results("SELECT * FROM $wpdb->options ORDER BY option_name");
 
 foreach ($options as $option) :
-	$value = wp_specialchars($option->option_value, 'single');
+	$value = wp_specialchars($option->option_value);
 	echo "
 <tr>
 	<th scope='row'><label for='$option->option_name'>$option->option_name</label></th>

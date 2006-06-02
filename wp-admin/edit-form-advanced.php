@@ -21,11 +21,11 @@ $messages[3] = __('Custom field deleted.');
 if (0 == $post_ID) {
 	$form_action = 'post';
 	$temp_ID = -1 * time();
-	$form_extra = "<input type='hidden' id='post_ID' name='temp_ID' value='$temp_ID' />";
+	$form_extra = "<input type='hidden' name='temp_ID' value='$temp_ID' />";
 	wp_nonce_field('add-post');
 } else {
 	$form_action = 'editpost';
-	$form_extra = "<input type='hidden' id='post_ID' name='post_ID' value='$post_ID' />";
+	$form_extra = "<input type='hidden' name='post_ID' value='$post_ID' />";
 	wp_nonce_field('update-post_' .  $post_ID);
 }
 
@@ -51,9 +51,8 @@ if (empty($post->post_status)) $post->post_status = 'draft';
 ?>
 
 <input type="hidden" name="user_ID" value="<?php echo $user_ID ?>" />
-<input type="hidden" id="hiddenaction" name="action" value="<?php echo $form_action ?>" />
+<input type="hidden" name="action" value="<?php echo $form_action ?>" />
 <input type="hidden" name="post_author" value="<?php echo $post->post_author ?>" />
-<input type="hidden" name="post_type" value="post" />
 
 <?php echo $form_extra ?>
 <?php if (isset($_GET['message']) && 2 > $_GET['message']) : ?>
@@ -69,13 +68,6 @@ addLoadEvent(focusit);
 
 <div id="moremeta">
 <div id="grabit" class="dbx-group">
-
-<fieldset id="categorydiv" class="dbx-box">
-<h3 class="dbx-handle"><?php _e('Categories') ?></h3>
-<div class="dbx-content">
-<p id="jaxcat"></p>
-<ul id="categorychecklist"><?php dropdown_categories(get_settings('default_category')); ?></ul></div>
-</fieldset>
 
 <fieldset id="commentstatusdiv" class="dbx-box">
 <h3 class="dbx-handle"><?php _e('Discussion') ?></h3>
@@ -98,10 +90,17 @@ addLoadEvent(focusit);
 <div class="dbx-content"><input name="post_name" type="text" size="13" id="post_name" value="<?php echo $post->post_name ?>" /></div>
 </fieldset>
 
+<fieldset id="categorydiv" class="dbx-box">
+<h3 class="dbx-handle"><?php _e('Categories') ?></h3>
+<div class="dbx-content">
+<p id="jaxcat"></p>
+<div id="categorychecklist"><?php dropdown_categories(get_settings('default_category')); ?></div></div>
+</fieldset>
+
 <fieldset class="dbx-box">
 <h3 class="dbx-handle"><?php _e('Post Status') ?></h3> 
 <div class="dbx-content"><?php if ( current_user_can('publish_posts') ) : ?>
-<label for="post_status_publish" class="selectit"><input id="post_status_publish" name="post_status" type="radio" value="publish" <?php checked($post->post_status, 'publish'); checked($post->post_status, 'future'); ?> /> <?php _e('Published') ?></label>
+<label for="post_status_publish" class="selectit"><input id="post_status_publish" name="post_status" type="radio" value="publish" <?php checked($post->post_status, 'publish'); ?> /> <?php _e('Published') ?></label>
 <?php endif; ?>
 	  <label for="post_status_draft" class="selectit"><input id="post_status_draft" name="post_status" type="radio" value="draft" <?php checked($post->post_status, 'draft'); ?> /> <?php _e('Draft') ?></label>
 	  <label for="post_status_private" class="selectit"><input id="post_status_private" name="post_status" type="radio" value="private" <?php checked($post->post_status, 'private'); ?> /> <?php _e('Private') ?></label></div>
@@ -145,7 +144,55 @@ endforeach;
 <fieldset id="<?php echo user_can_richedit() ? 'postdivrich' : 'postdiv'; ?>">
 <legend><?php _e('Post') ?></legend>
 
-	<?php the_editor($post->post_content); ?>
+<?php
+ $rows = get_settings('default_post_edit_rows');
+ if (($rows < 3) || ($rows > 100)) {
+     $rows = 12;
+ }
+?>
+<?php the_quicktags(); ?>
+
+<div><textarea <?php if ( user_can_richedit() ) echo 'title="true" '; ?>rows="<?php echo $rows; ?>" cols="40" name="content" tabindex="2" id="content"><?php echo user_can_richedit() ? wp_richedit_pre($post->post_content) : $post->post_content; ?></textarea></div>
+</fieldset>
+
+<script type="text/javascript">
+<!--
+edCanvas = document.getElementById('content');
+<?php if ( user_can_richedit() ) : ?>
+// This code is meant to allow tabbing from Title to Post (TinyMCE).
+if ( tinyMCE.isMSIE )
+	document.getElementById('title').onkeydown = function (e)
+		{
+			e = e ? e : window.event;
+			if (e.keyCode == 9 && !e.shiftKey && !e.controlKey && !e.altKey) {
+				var i = tinyMCE.selectedInstance;
+				if(typeof i ==  'undefined')
+					return true;
+                                tinyMCE.execCommand("mceStartTyping");
+				this.blur();
+				i.contentWindow.focus();
+				e.returnValue = false;
+				return false;
+			}
+		}
+else
+	document.getElementById('title').onkeypress = function (e)
+		{
+			e = e ? e : window.event;
+			if (e.keyCode == 9 && !e.shiftKey && !e.controlKey && !e.altKey) {
+				var i = tinyMCE.selectedInstance;
+				if(typeof i ==  'undefined')
+					return true;
+                                tinyMCE.execCommand("mceStartTyping");
+				this.blur();
+				i.contentWindow.focus();
+				e.returnValue = false;
+				return false;
+			}
+		}
+<?php endif; ?>
+//-->
+</script>
 
 <?php echo $form_pingback ?>
 <?php echo $form_prevstatus ?>
@@ -202,17 +249,16 @@ if ( ! empty($pings) )
 <fieldset id="postcustom" class="dbx-box">
 <h3 class="dbx-handle"><?php _e('Custom Fields') ?></h3>
 <div id="postcustomstuff" class="dbx-content">
-<table cellpadding="3">
-<?php
-$metadata = has_meta($post_ID);
-list_meta($metadata); 
+<?php 
+if($metadata = has_meta($post_ID)) {
 ?>
-
-</table>
 <?php
+	list_meta($metadata); 
+?>
+<?php
+}
 	meta_form();
 ?>
-<div id="ajax-response"></div>
 </div>
 </fieldset>
 

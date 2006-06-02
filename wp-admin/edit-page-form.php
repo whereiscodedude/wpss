@@ -5,12 +5,12 @@
 <?php
 if (0 == $post_ID) {
 	$form_action = 'post';
-	$nonce_action = 'add-page';
+	$nonce_action = 'add-post';
 	$temp_ID = -1 * time();
-	$form_extra = "<input type='hidden' id='post_ID' name='temp_ID' value='$temp_ID' />";
+	$form_extra = "<input type='hidden' name='temp_ID' value='$temp_ID' />";
 } else {
 	$form_action = 'editpost';
-	$nonce_action = 'update-page_' . $post_ID;
+	$nonce_action = 'update-post_' . $post_ID;
 	$form_extra = "<input type='hidden' id='post_ID' name='post_ID' value='$post_ID' />";
 }
 
@@ -22,7 +22,7 @@ $sendto = wp_specialchars( $sendto );
 
 ?>
 
-<form name="post" action="page.php" method="post" id="post">
+<form name="post" action="post.php" method="post" id="post">
 
 <?php
 wp_nonce_field($nonce_action);
@@ -34,7 +34,7 @@ if (isset($mode) && 'bookmarklet' == $mode) {
 <input type="hidden" name="user_ID" value="<?php echo $user_ID ?>" />
 <input type="hidden" name="action" value='<?php echo $form_action ?>' />
 <?php echo $form_extra ?>
-<input type="hidden" name="post_type" value="page" />
+<input type="hidden" name="post_status" value="static" />
 
 <script type="text/javascript">
 <!--
@@ -59,17 +59,8 @@ addLoadEvent(focusit);
 </div>
 </fieldset>
 
-<fieldset class="dbx-box">
-<h3 class="dbx-handle"><?php _e('Page Status') ?></h3> 
-<div class="dbx-content"><?php if ( current_user_can('publish_pages') ) : ?>
-<label for="post_status_publish" class="selectit"><input id="post_status_publish" name="post_status" type="radio" value="publish" <?php checked($post->post_status, 'publish'); checked($post->post_status, 'future'); ?> /> <?php _e('Published') ?></label>
-<?php endif; ?>
-	  <label for="post_status_draft" class="selectit"><input id="post_status_draft" name="post_status" type="radio" value="draft" <?php checked($post->post_status, 'draft'); ?> /> <?php _e('Draft') ?></label>
-	  <label for="post_status_private" class="selectit"><input id="post_status_private" name="post_status" type="radio" value="private" <?php checked($post->post_status, 'private'); ?> /> <?php _e('Private') ?></label></div>
-</fieldset>
-
 <fieldset id="passworddiv" class="dbx-box">
-<h3 class="dbx-handle"><?php _e('Password-Protect Page') ?></h3> 
+<h3 class="dbx-handle"><?php _e('Password-Protect Post') ?></h3> 
 <div class="dbx-content"><input name="post_password" type="text" size="13" id="post_password" value="<?php echo $post->post_password ?>" /></div>
 </fieldset>
 
@@ -94,13 +85,13 @@ addLoadEvent(focusit);
 <?php } ?>
 
 <fieldset id="slugdiv" class="dbx-box">
-<h3 class="dbx-handle"><?php _e('Page slug') ?></h3> 
+<h3 class="dbx-handle"><?php _e('Post slug') ?></h3> 
 <div class="dbx-content"><input name="post_name" type="text" size="13" id="post_name" value="<?php echo $post->post_name ?>" /></div>
 </fieldset>
 
 <?php if ( $authors = get_editable_authors( $current_user->id ) ) : // TODO: ROLE SYSTEM ?>
 <fieldset id="authordiv" class="dbx-box">
-<h3 class="dbx-handle"><?php _e('Page author'); ?>:</h3>
+<h3 class="dbx-handle"><?php _e('Post author'); ?>:</h3>
 <div class="dbx-content">
 <select name="post_author_override" id="post_author_override">
 <?php 
@@ -134,18 +125,63 @@ endforeach;
 
 <fieldset id="<?php echo user_can_richedit() ? 'postdivrich' : 'postdiv'; ?>">
     <legend><?php _e('Page Content') ?></legend>
-	<?php the_editor($post->post_content); ?>
+<?php
+ $rows = get_settings('default_post_edit_rows');
+ if (($rows < 3) || ($rows > 100)) {
+     $rows = 10;
+ }
+?>
+<?php the_quicktags(); ?>
+
+<div><textarea title="true" rows="<?php echo $rows; ?>" cols="40" name="content" tabindex="4" id="content"><?php echo user_can_richedit() ? wp_richedit_pre($post->post_content) : $post->post_content; ?></textarea></div>
 </fieldset>
 
+<script type="text/javascript">
+<!--
+edCanvas = document.getElementById('content');
+<?php if ( user_can_richedit() ) : ?>
+// This code is meant to allow tabbing from Title to Post (TinyMCE).
+if ( tinyMCE.isMSIE )
+	document.getElementById('title').onkeydown = function (e)
+		{
+			e = e ? e : window.event;
+			if (e.keyCode == 9 && !e.shiftKey && !e.controlKey && !e.altKey) {
+				var i = tinyMCE.selectedInstance;
+				if(typeof i ==  'undefined')
+					return true;
+                                tinyMCE.execCommand("mceStartTyping");
+				this.blur();
+				i.contentWindow.focus();
+				e.returnValue = false;
+				return false;
+			}
+		}
+else
+	document.getElementById('title').onkeypress = function (e)
+		{
+			e = e ? e : window.event;
+			if (e.keyCode == 9 && !e.shiftKey && !e.controlKey && !e.altKey) {
+				var i = tinyMCE.selectedInstance;
+				if(typeof i ==  'undefined')
+					return true;
+                                tinyMCE.execCommand("mceStartTyping");
+				this.blur();
+				i.contentWindow.focus();
+				e.returnValue = false;
+				return false;
+			}
+		}
+<?php endif; ?>
+//-->
+</script>
+
 <p class="submit">
-<input name="save" type="submit" id="save" tabindex="3" value="<?php _e('Save and Continue Editing'); ?>" />
-<input type="submit" name="submit" value="<?php _e('Save') ?>" style="font-weight: bold;" tabindex="4" /> 
-<?php 
-if ('publish' != $post->post_status || 0 == $post_ID):
-?>
-<?php if ( current_user_can('publish_pages') ) : ?>
-	<input name="publish" type="submit" id="publish" tabindex="5" accesskey="p" value="<?php _e('Publish') ?>" /> 
-<?php endif; endif;?>
+<?php if ( $post_ID ) : ?>
+<input name="save" type="submit" id="save" tabindex="5" value=" <?php _e('Save and Continue Editing'); ?> "/> 
+<input name="savepage" type="submit" id="savepage" tabindex="6" value="<?php $post_ID ? _e('Save') : _e('Create New Page') ?> &raquo;" /> 
+<?php else : ?>
+<input name="savepage" type="submit" id="savepage" tabindex="6" value="<?php _e('Create New Page') ?> &raquo;" /> 
+<?php endif; ?>
 <input name="referredby" type="hidden" id="referredby" value="<?php echo $sendto; ?>" />
 </p>
 
@@ -166,14 +202,14 @@ if (current_user_can('upload_files')) {
 <fieldset id="postcustom" class="dbx-box">
 <h3 class="dbx-handle"><?php _e('Custom Fields') ?></h3>
 <div id="postcustomstuff" class="dbx-content">
-<table cellpadding="3">
 <?php 
-$metadata = has_meta($post_ID);
-list_meta($metadata); 
+if($metadata = has_meta($post_ID)) {
 ?>
-
-</table>
 <?php
+	list_meta($metadata); 
+?>
+<?php
+}
 	meta_form();
 ?>
 </div>
@@ -183,8 +219,7 @@ list_meta($metadata);
 
 </div>
 
-<?php if ('edit' == $action) :
-	if ( current_user_can('delete_page', $post->ID) ) ?>
+<?php if ('edit' == $action) : ?>
 		<input name="deletepost" class="delete" type="submit" id="deletepost" tabindex="10" value="<?php _e('Delete this page') ?>" <?php echo "onclick=\"return confirm('" . sprintf(__("You are about to delete this page \'%s\'\\n  \'Cancel\' to stop, \'OK\' to delete."), $wpdb->escape($post->post_title) ) . "')\""; ?> />
 <?php endif; ?>
 </form>

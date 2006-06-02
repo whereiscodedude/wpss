@@ -54,16 +54,16 @@ case 'update':
 break;
 
 default:
-
+	
 	require_once('admin-header.php');
 	if ( !current_user_can('edit_plugins') )
 	die('<p>'.__('You have do not have sufficient permissions to edit plugins for this blog.').'</p>');
 
 	update_recently_edited("wp-content/plugins/$file");
-
+	
 	if (!is_file($real_file))
 		$error = 1;
-
+	
 	if (!$error) {
 		$f = fopen($real_file, 'r');
 		$content = fread($f, filesize($real_file));
@@ -105,7 +105,7 @@ if ($plugin_files) :
 <?php if ( is_writeable($real_file) ) : ?>
      <p class="submit">
 <?php
-	echo "<input type='submit' name='submit' value='	" . __('Update File &raquo;') . "' tabindex='2' />";
+	echo "<input type='submit' name='submit' value='	" . __('Update File') . " &raquo;' tabindex='2' />";
 ?>
 </p>
 <?php else : ?>

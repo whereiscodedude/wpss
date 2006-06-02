@@ -24,8 +24,10 @@ add_filter('pre_comment_author_url', 'strip_tags');
 add_filter('pre_comment_author_url', 'trim');
 add_filter('pre_comment_author_url', 'clean_url');
 
+add_filter('pre_comment_content', 'stripslashes', 1);
 add_filter('pre_comment_content', 'wp_rel_nofollow', 15);
 add_filter('pre_comment_content', 'balanceTags', 30);
+add_filter('pre_comment_content', 'addslashes', 50);
 
 add_filter('pre_comment_author_name', 'wp_filter_kses');
 add_filter('pre_comment_author_email', 'wp_filter_kses');
@@ -71,8 +73,10 @@ add_filter('pre_user_nickname', 'strip_tags');
 add_filter('pre_user_nickname', 'trim');
 add_filter('pre_user_nickname', 'wp_filter_kses');
 add_filter('pre_user_nickname', 'wp_specialchars', 30);
+add_filter('pre_user_description', 'strip_tags');
 add_filter('pre_user_description', 'trim');
 add_filter('pre_user_description', 'wp_filter_kses');
+add_filter('pre_user_description', 'wp_specialchars', 30);
 add_filter('pre_user_url', 'strip_tags');
 add_filter('pre_user_url', 'trim');
 add_filter('pre_user_url', 'clean_url');
@@ -111,20 +115,8 @@ add_filter('comment_text_rss', 'ent2ncr', 8);
 add_filter('bloginfo_rss', 'ent2ncr', 8);
 add_filter('the_author', 'ent2ncr', 8);
 
-// Misc filters
-add_filter('option_ping_sites', 'privacy_ping_filter');
-
 // Actions
+add_action('publish_post', 'generic_ping');
 add_action('wp_head', 'rsd_link');
-add_action('publish_future_post', 'wp_publish_post', 10, 1);
-add_action('wp_head', 'noindex', 1);
-add_action('wp_head', 'wp_print_scripts');
-if(!defined('DOING_CRON'))
-	add_action('init', 'wp_cron');
-add_action('do_feed_rdf', 'do_feed_rdf', 10, 1);
-add_action('do_feed_rss', 'do_feed_rss', 10, 1);
-add_action('do_feed_rss2', 'do_feed_rss2', 10, 1);
-add_action('do_feed_atom', 'do_feed_atom', 10, 1);
-add_action('do_pings', 'do_all_pings', 10, 1);
-add_action('do_robots', 'do_robots');
+
 ?>

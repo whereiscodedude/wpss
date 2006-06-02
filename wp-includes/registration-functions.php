@@ -10,20 +10,14 @@ function username_exists( $username ) {
 	return null;
 }
 
-function email_exists( $email ) {
-	global $wpdb;
-	$email = addslashes( $email );
-	return $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_email = '$email'");
-}
-
 function validate_username( $username ) {
 	$name = sanitize_user($username, true);
 	$valid = true;
 
 	if ( $name != $username )
-		$valid = false;
+		$valid = false;	
 
-	return apply_filters('validate_username', $valid, $username);
+	return apply_filters('validate_username', $valid, $username);	
 }
 
 function wp_insert_user($userdata) {
@@ -40,7 +34,7 @@ function wp_insert_user($userdata) {
 		// Password is not hashed when creating new user.
 		$user_pass = md5($user_pass);
 	}
-
+	
 	$user_login = sanitize_user($user_login, true);
 	$user_login = apply_filters('pre_user_login', $user_login);
 
@@ -93,7 +87,7 @@ function wp_insert_user($userdata) {
 		$wpdb->query( $query );
 		$user_id = $wpdb->insert_id;
 	}
-
+	
 	update_usermeta( $user_id, 'first_name', $first_name);
 	update_usermeta( $user_id, 'last_name', $last_name);
 	update_usermeta( $user_id, 'nickname', $nickname );
@@ -114,22 +108,22 @@ function wp_insert_user($userdata) {
 
 	wp_cache_delete($user_id, 'users');
 	wp_cache_delete($user_login, 'userlogins');
-
+	
 	if ( $update )
 		do_action('profile_update', $user_id);
 	else
 		do_action('user_register', $user_id);
-
-	return $user_id;
+		
+	return $user_id;	
 }
 
 function wp_update_user($userdata) {
 	global $wpdb;
 
 	$ID = (int) $userdata['ID'];
-
+	
 	// First, get all of the original fields
-	$user = get_userdata($ID);
+	$user = get_userdata($ID);	
 
 	// Escape data pulled from DB.
 	$user = add_magic_quotes(get_object_vars($user));
@@ -144,7 +138,7 @@ function wp_update_user($userdata) {
 	$userdata = array_merge($user, $userdata);
 	$user_id = wp_insert_user($userdata);
 
-	// Update the cookies if the password changed.
+	// Update the cookies if the password changed.	
 	$current_user = wp_get_current_user();
 	if( $current_user->id == $ID ) {
 		if ( isset($plaintext_pass) ) {
@@ -152,13 +146,13 @@ function wp_update_user($userdata) {
 			wp_setcookie($userdata['user_login'], $plaintext_pass);
 		}
 	}
-
+	
 	return $user_id;
 }
 
 function wp_create_user( $username, $password, $email = '') {
 	global $wpdb;
-
+	
 	$user_login = $wpdb->escape( $username );
 	$user_email = $wpdb->escape( $email );
 	$user_pass = $password;
@@ -169,7 +163,7 @@ function wp_create_user( $username, $password, $email = '') {
 
 
 function create_user( $username, $password, $email ) {
-	return wp_create_user( $username, $password, $email );
+	return wp_create_user( $username, $password, $email );	
 }
 
 

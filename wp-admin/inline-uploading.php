@@ -64,7 +64,7 @@ $filename = basename($file);
 $attachment = array(
 	'post_title' => $imgtitle ? $imgtitle : $filename,
 	'post_content' => $descr,
-	'post_type' => 'attachment',
+	'post_status' => 'attachment',
 	'post_parent' => $post,
 	'post_mime_type' => $type,
 	'guid' => $url
@@ -128,7 +128,7 @@ if (! current_user_can('edit_others_posts') )
 	$and_user = "AND post_author = " . $user_ID;
 
 if ( $last )
-	$start = $wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_type = 'attachment' $and_user $and_post") - $num;
+	$start = $wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_status = 'attachment' $and_user $and_post") - $num;
 else
 	$start = (int) $start;
 
@@ -138,7 +138,7 @@ if ( $start < 0 )
 if ( '' == $sort )
 	$sort = "post_date_gmt DESC";
 
-$attachments = $wpdb->get_results("SELECT ID, post_date, post_title, post_mime_type, guid FROM $wpdb->posts WHERE post_type = 'attachment' $and_type $and_post $and_user ORDER BY $sort LIMIT $start, $double", ARRAY_A);
+$attachments = $wpdb->get_results("SELECT ID, post_date, post_title, post_mime_type, guid FROM $wpdb->posts WHERE post_status = 'attachment' $and_type $and_post $and_user ORDER BY $sort LIMIT $start, $double", ARRAY_A);
 
 if ( count($attachments) == 0 ) {
 	header("Location: " . basename(__FILE__) ."?post=$post&action=upload" );
@@ -238,7 +238,7 @@ srcb[{$ID}] = '{$image['guid']}';
 			$xpadding = (128 - $image['uwidth']) / 2;
 			$ypadding = (96 - $image['uheight']) / 2;
 			$style .= "#target{$ID} img { padding: {$ypadding}px {$xpadding}px; }\n";
-			$title = wp_specialchars($image['post_title'], ENT_QUOTES);
+			$title = htmlentities($image['post_title'], ENT_QUOTES);
 			$script .= "aa[{$ID}] = '<a id=\"p{$ID}\" rel=\"attachment\" class=\"imagelink\" href=\"$href\" onclick=\"doPopup({$ID});return false;\" title=\"{$title}\">';
 ab[{$ID}] = '<a class=\"imagelink\" href=\"{$image['guid']}\" onclick=\"doPopup({$ID});return false;\" title=\"{$title}\">';
 imga[{$ID}] = '<img id=\"image{$ID}\" src=\"$src\" alt=\"{$title}\" $height_width />';
@@ -258,7 +258,7 @@ imgb[{$ID}] = '<img id=\"image{$ID}\" src=\"{$image['guid']}\" alt=\"{$title}\" 
 </div>
 ";
 		} else {
-			$title = wp_specialchars($attachment['post_title'], ENT_QUOTES);
+			$title = htmlentities($attachment['post_title'], ENT_QUOTES);
 			$filename = basename($attachment['guid']);
 			$icon = get_attachment_icon($ID);
 			$toggle_icon = "<a id=\"I{$ID}\" onclick=\"toggleOtherIcon({$ID});return false;\" href=\"javascript:void()\">$__using_title</a>";
@@ -647,7 +647,7 @@ th {
 <?php if ( $attachments = $wpdb->get_results("SELECT ID FROM $wpdb->posts WHERE post_parent = '$post'") ) { ?>
 <li<?php echo $current_2; ?>><a href="<?php echo basename(__FILE__) . "?action=view&amp;post=$post&amp;all=false"; ?>"><?php _e('Browse'); ?></a></li>
 <?php } ?>
-<?php if ($wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_type = 'attachment'")) { ?>
+<?php if ($wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_status = 'attachment'")) { ?>
 <li<?php echo $current_3; ?>><a href="<?php echo basename(__FILE__) . "?action=view&amp;post=$post&amp;all=true"; ?>"><?php _e('Browse All'); ?></a></li>
 <?php } ?>
 <li> </li>
@@ -663,7 +663,7 @@ th {
 <li><a href="<?php echo basename(__FILE__) . "?action=$action&amp;post=$post&amp;all=$all&amp;start=$next"; ?>"><?php _e('Next &raquo;'); ?></a></li>
 <li><a href="<?php echo basename(__FILE__) . "?action=$action&amp;post=$post&amp;all=$all&amp;last=true"; ?>" title="<?php _e('Last'); ?>">&raquo;|</a></li>
 <?php else : ?>
-<li class="inactive"><?php _e('Next &raquo;'); ?></li>
+<li class="inactive"><?php _e('Next'); ?> &raquo;</li>
 <li class="inactive">&raquo;|</li>
 <?php endif; ?>
 <?php } // endif not upload?>
