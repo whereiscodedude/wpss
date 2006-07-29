@@ -4,9 +4,6 @@ require( dirname(__FILE__) . '/wp-config.php' );
 $action = $_REQUEST['action'];
 $error = '';
 
-if ( isset($_GET['key']) )
-	$action = 'resetpass';
-
 nocache_headers();
 
 header('Content-Type: '.get_bloginfo('html_type').'; charset='.get_bloginfo('charset'));
@@ -31,7 +28,7 @@ case 'logout':
 	$redirect_to = 'wp-login.php';
 	if ( isset($_REQUEST['redirect_to']) )
 		$redirect_to = $_REQUEST['redirect_to'];
-
+			
 	wp_redirect($redirect_to);
 	exit();
 
@@ -76,7 +73,7 @@ if ($error)
 <p><label><?php _e('E-mail:') ?><br />
 <input type="text" name="email" id="email" value="" size="25" tabindex="2" /></label><br />
 </p>
-<p class="submit"><input type="submit" name="submit" id="submit" value="<?php _e('Retrieve Password &raquo;'); ?>" tabindex="3" /></p>
+<p class="submit"><input type="submit" name="submit" id="submit" value="<?php _e('Retrieve Password'); ?> &raquo;" tabindex="3" /></p>
 </form>
 <ul>
 	<li><a href="<?php bloginfo('home'); ?>/" title="<?php _e('Are you lost?') ?>">&laquo; <?php _e('Back to blog') ?></a></li>
@@ -92,26 +89,26 @@ if ($error)
 break;
 
 case 'retrievepassword':
-	$user_data = get_userdatabylogin(trim($_POST['user_login']));
+	$user_data = get_userdatabylogin($_POST['user_login']);
 	// redefining user_login ensures we return the right case in the email
 	$user_login = $user_data->user_login;
 	$user_email = $user_data->user_email;
 
 	if (!$user_email || $user_email != $_POST['email'])
-		wp_die(sprintf(__('Sorry, that user does not seem to exist in our database. Perhaps you have the wrong username or e-mail address? <a href="%s">Try again</a>.'), 'wp-login.php?action=lostpassword'));
+		die(sprintf(__('Sorry, that user does not seem to exist in our database. Perhaps you have the wrong username or e-mail address? <a href="%s">Try again</a>.'), 'wp-login.php?action=lostpassword'));
 
 do_action('retreive_password', $user_login);  // Misspelled and deprecated.
 do_action('retrieve_password', $user_login);
 
 	// Generate something random for a password... md5'ing current time with a rand salt
-	$key = substr( md5( uniqid( microtime() ) ), 0, 8);
+	$key = substr( md5( uniqid( microtime() ) ), 0, 50);
 	// now insert the new pass md5'd into the db
  	$wpdb->query("UPDATE $wpdb->users SET user_activation_key = '$key' WHERE user_login = '$user_login'");
 	$message = __('Someone has asked to reset the password for the following site and username.') . "\r\n\r\n";
 	$message .= get_option('siteurl') . "\r\n\r\n";
 	$message .= sprintf(__('Username: %s'), $user_login) . "\r\n\r\n";
 	$message .= __('To reset your password visit the following address, otherwise just ignore this email and nothing will happen.') . "\r\n\r\n";
-	$message .= get_settings('siteurl') . "/wp-login.php?action=rp&key=$key\r\n";
+	$message .= get_settings('siteurl') . "/wp-login.php?action=resetpass&key=$key\r\n";
 
 	$m = wp_mail($user_email, sprintf(__('[%s] Password Reset'), get_settings('blogname')), $message);
 
@@ -128,21 +125,21 @@ do_action('retrieve_password', $user_login);
 break;
 
 case 'resetpass' :
-case 'rp' :
+
 	// Generate something random for a password... md5'ing current time with a rand salt
 	$key = preg_replace('/a-z0-9/i', '', $_GET['key']);
 	if ( empty($key) )
-		wp_die( __('Sorry, that key does not appear to be valid.') );
+		die( __('Sorry, that key does not appear to be valid.') );
 	$user = $wpdb->get_row("SELECT * FROM $wpdb->users WHERE user_activation_key = '$key'");
 	if ( !$user )
-		wp_die( __('Sorry, that key does not appear to be valid.') );
+		die( __('Sorry, that key does not appear to be valid.') );
 
 	do_action('password_reset');
 
 	$new_pass = substr( md5( uniqid( microtime() ) ), 0, 7);
  	$wpdb->query("UPDATE $wpdb->users SET user_pass = MD5('$new_pass'), user_activation_key = '' WHERE user_login = '$user->user_login'");
 	wp_cache_delete($user->ID, 'users');
-	wp_cache_delete($user->user_login, 'userlogins');
+	wp_cache_delete($user->user_login, 'userlogins');	
 	$message  = sprintf(__('Username: %s'), $user->user_login) . "\r\n";
 	$message .= sprintf(__('Password: %s'), $new_pass) . "\r\n";
 	$message .= get_settings('siteurl') . "/wp-login.php\r\n";
@@ -192,11 +189,11 @@ default:
 
 	if ( $user_login && $user_pass ) {
 		$user = new WP_User(0, $user_login);
-
+	
 		// If the user can't edit posts, send them to their profile.
 		if ( !$user->has_cap('edit_posts') && ( empty( $redirect_to ) || $redirect_to == 'wp-admin/' ) )
 			$redirect_to = get_settings('siteurl') . '/wp-admin/profile.php';
-
+	
 		if ( wp_login($user_login, $user_pass, $using_cookie) ) {
 			if ( !$using_cookie )
 				wp_setcookie($user_login, $user_pass, false, '', '', $rememberme);
@@ -204,7 +201,7 @@ default:
 			wp_redirect($redirect_to);
 			exit;
 		} else {
-			if ( $using_cookie )
+			if ( $using_cookie )			
 				$error = __('Your session has expired.');
 		}
 	} else if ( $user_login || $user_pass ) {

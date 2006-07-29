@@ -135,13 +135,13 @@ class Blogger_Import {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
 		if ($header) curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 		$response = curl_exec ($ch);
-
+	
 		if ($parse) {
 			$response = $this->parse_response($response);
 			$response['url'] = $url;
 			return $response;
 		}
-
+	
 		return $response;
 	}
 
@@ -210,7 +210,7 @@ class Blogger_Import {
 		$this->import['blogs'][$_GET['blog']]['nextstep'] = $step;
 		update_option('import-blogger', $this->import);
 	}
-
+	
 	// Redirects to next step
 	function do_next_step() {
 		wp_redirect("admin.php?import=blogger&noheader=true&blog={$_GET['blog']}");
@@ -224,13 +224,13 @@ class Blogger_Import {
 			if ( ! ( $_POST['user'] && $_POST['pass'] ) ) {
 				$this->login_form(__('The script will log into your Blogger account, change some settings so it can read your blog, and restore the original settings when it\'s done. Here\'s what you do:').'</p><ol><li>'.__('Back up your Blogger template.').'</li><li>'.__('Back up any other Blogger settings you might need later.').'</li><li>'.__('Log out of Blogger').'</li><li>'.__('Log in <em>here</em> with your Blogger username and password.').'</li><li>'.__('On the next screen, click one of your Blogger blogs.').'</li><li>'.__('Do not close this window or navigate away until the process is complete.').'</li></ol>');
 			}
-
-			// Try logging in. If we get an array of cookies back, we at least connected.
+		
+			// Try logging in. If we get an array of cookies back, we at least connected.		
 			$this->import['cookies'] = $this->login_blogger($_POST['user'], $_POST['pass']);
 			if ( !is_array( $this->import['cookies'] ) ) {
 				$this->login_form(__('Login failed. Please enter your credentials again.'));
 			}
-
+			
 			// Save the password so we can log the browser in when it's time to publish.
 			$this->import['pass'] = $_POST['pass'];
 			$this->import['user'] = $_POST['user'];
@@ -241,7 +241,7 @@ class Blogger_Import {
 			$blogsary = array();
 			preg_match_all('#posts\.g\?blogID=(\d+)">([^<]+)</a>#U', $response['body'], $blogsary);
 			if ( ! count( $blogsary[1] < 1 ) )
-				wp_die(__('No blogs found for this user.'));
+				die(__('No blogs found for this user.'));
 			$this->import['blogs'] = array();
 			$template = '<MainPage><br /><br /><br /><p>'.__('Are you looking for %title%? It is temporarily out of service. Please try again in a few minutes. Meanwhile, discover <a href="http://wordpress.org/">a better blogging tool</a>.').'</p><BloggerArchives><a class="archive" href="<$BlogArchiveURL$>"><$BlogArchiveName$></a><br /></BloggerArchives></MainPage><ArchivePage><Blogger><wordpresspost><$BlogItemDateTime$>|W|P|<$BlogItemAuthorNickname$>|W|P|<$BlogItemBody$>|W|P|<$BlogItemNumber$>|W|P|<$BlogItemTitle$>|W|P|<$BlogItemAuthorEmail$><BlogItemCommentsEnabled><BlogItemComments><wordpresscomment><$BlogCommentDateTime$>|W|P|<$BlogCommentAuthor$>|W|P|<$BlogCommentBody$></BlogItemComments></BlogItemCommentsEnabled></Blogger></ArchivePage>';
 			foreach ( $blogsary[1] as $key => $id ) {
@@ -306,7 +306,7 @@ class Blogger_Import {
 						if ( $_POST['publishMode'] > 0 ) {
 							$response = $this->get_blogger("http://www.blogger.com/blog-publishing.g?blogID={$_GET['blog']}&publishMode=0", $headers);
 							if ( $response['code'] >= 400 )
-								wp_die('<h2>'.__('Failed attempt to change publish mode from FTP to BlogSpot.').'</h2><pre>' . addslashes(print_r($headers, 1)) . addslashes(print_r($response, 1)) . '</pre>');
+								die('<h2>'.__('Failed attempt to change publish mode from FTP to BlogSpot.').'</h2><pre>' . addslashes(print_r($headers, 1)) . addslashes(print_r($response, 1)) . '</pre>');
 							$this->import['blogs'][$_GET['blog']]['url'] = 'http://' . $optary['modify']['subdomain'] . '.blogspot.com/';
 							sleep(2);
 						} else {
@@ -321,7 +321,7 @@ class Blogger_Import {
 					}
 					$response = $this->post_blogger($posturl, $headers, $paramary);
 					if ( $response['code'] >= 400 || strstr($response['body'], 'There are errors on this form') )
-						wp_die('<p>'.__('Error on form submission. Retry or reset the importer.').'</p>' . addslashes(print_r($response, 1)));
+						die('<p>'.__('Error on form submission. Retry or reset the importer.').'</p>' . addslashes(print_r($response, 1)));
 				}
 				$output .= "<del><p>$blog_opt</p></del>\n";
 			} elseif ( is_array($this->import['blogs'][$_GET['blog']]['options']["$blog_opt"]['backup']) ) {
@@ -364,7 +364,7 @@ class Blogger_Import {
 	function get_archive_urls() {
 		$bloghtml = $this->get_blogger($this->import['blogs'][$_GET['blog']]['url']);
 		if (! strstr($bloghtml['body'], '<a class="archive"') )
-			wp_die(__('Your Blogger blog did not take the new template or did not respond.'));
+			die(__('Your Blogger blog did not take the new template or did not respond.'));
 		preg_match_all('#<a class="archive" href="([^"]*)"#', $bloghtml['body'], $archives);
 		foreach ($archives[1] as $archive) {
 			$this->import['blogs'][$_GET['blog']]['archives'][$archive] = false;
@@ -395,7 +395,7 @@ class Blogger_Import {
 				update_option('import-blogger', $import);
 				$archive = $this->get_blogger($url);
 				if ( $archive['code'] > 200 )
-					continue;
+					continue;	
 				$posts = explode('<wordpresspost>', $archive['body']);
 				for ($i = 1; $i < count($posts); $i = $i + 1) {
 					$postparts = explode('<wordpresscomment>', $posts[$i]);
@@ -409,7 +409,7 @@ class Blogger_Import {
 					$post_title = ( $postinfo[4] != '' ) ? $postinfo[4] : $postinfo[3];
 					$post_author_name = $wpdb->escape(trim($postinfo[1]));
 					$post_author_email = $postinfo[5] ? $postinfo[5] : 'user@wordpress.org';
-
+	
 					if ( $this->lump_authors ) {
 						// Ignore Blogger authors. Use the current user_ID for all posts imported.
 						$post_author = $GLOBALS['user_ID'];
@@ -435,21 +435,21 @@ class Blogger_Import {
 					$posthour = zeroise($post_date_His[0], 2);
 					$postminute = zeroise($post_date_His[1], 2);
 					$postsecond = zeroise($post_date_His[2], 2);
-
+	
 					if (($post_date[2] == 'PM') && ($posthour != '12'))
 						$posthour = $posthour + 12;
 					else if (($post_date[2] == 'AM') && ($posthour == '12'))
 						$posthour = '00';
-
+	
 					$post_date = "$postyear-$postmonth-$postday $posthour:$postminute:$postsecond";
-
+	
 					$post_content = addslashes($post_content);
 					$post_content = str_replace(array('<br>','<BR>','<br/>','<BR/>','<br />','<BR />'), "\n", $post_content); // the XHTML touch... ;)
-
+	
 					$post_title = addslashes($post_title);
-
+			
 					$post_status = 'publish';
-
+	
 					if ( $ID = post_exists($post_title, '', $post_date) ) {
 						$post_array[$i]['ID'] = $ID;
 						$skippedpostcount++;
@@ -546,7 +546,7 @@ class Blogger_Import {
 						$response = $this->get_blogger("http://www.blogger.com/blog-publishing.g?blogID={$_GET['blog']}&publishMode={$optary['backup']['publishMode']}", $headers);
 						sleep(2);
 						if ( $response['code'] >= 400 )
-							wp_die('<h1>Error restoring publishMode.</h1><p>Please tell the devs.</p>' . addslashes(print_r($response, 1)) );
+							die('<h1>Error restoring publishMode.</h1><p>Please tell the devs.</p>' . addslashes(print_r($response, 1)) );
 					}
 				}
 				if ( $optary['backup'] != $optary['modify'] ) {
@@ -597,7 +597,7 @@ class Blogger_Import {
 		if ( $_GET['restart'] == 'true' ) {
 			$this->restart();
 		}
-
+		
 		if ( isset($_GET['noheader']) ) {
 			header('Content-Type: text/html; charset=utf-8');
 
@@ -615,7 +615,7 @@ class Blogger_Import {
 				$step = 0;
 			}
 //echo "Step $step.";
-//wp_die('<pre>'.print_r($this->import,1).'</pre');
+//die('<pre>'.print_r($this->import,1).'</pre');
 			switch ($step) {
 				case 0 :
 					$this->do_login();
@@ -649,7 +649,7 @@ class Blogger_Import {
 					break;
 			}
 			die;
-
+			
 		} else {
 			$this->greet();
 		}
@@ -662,6 +662,6 @@ class Blogger_Import {
 
 $blogger_import = new Blogger_Import();
 
-register_importer('blogger', 'Blogger and Blogspot', __('Import <strong>posts and comments</strong> from your Blogger account'), array ($blogger_import, 'start'));
+register_importer('blogger', 'Blogger', __('Import posts and comments from a Blogger account'), array ($blogger_import, 'start'));
 
 ?>

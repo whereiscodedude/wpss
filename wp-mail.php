@@ -11,11 +11,13 @@ $phone_delim = '::';
 
 $pop3 = new POP3();
 
-if (!$pop3->connect(get_settings('mailserver_url'), get_settings('mailserver_port')))
-	wp_die($pop3->ERROR);
+if (!$pop3->connect(get_settings('mailserver_url'), get_settings('mailserver_port'))) :
+	echo "Ooops $pop3->ERROR <br />\n";
+	exit;
+endif;
 
 $count = $pop3->login(get_settings('mailserver_login'), get_settings('mailserver_pass'));
-if (0 == $count) wp_die(__('There doesn&#8217;t seem to be any new mail.'));
+if (0 == $count) die(__('There doesn&#8217;t seem to be any new mail.'));
 
 
 for ($i=1; $i <= $count; $i++) :
@@ -79,11 +81,11 @@ for ($i=1; $i <= $count; $i++) :
 				}
 				$date_arr = explode(' ', $ddate);
 				$date_time = explode(':', $date_arr[3]);
-
+				
 				$ddate_H = $date_time[0];
 				$ddate_i = $date_time[1];
 				$ddate_s = $date_time[2];
-
+				
 				$ddate_m = $date_arr[1];
 				$ddate_d = $date_arr[0];
 				$ddate_Y = $date_arr[2];

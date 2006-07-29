@@ -47,10 +47,10 @@ $more = 1;
 		<content:encoded><![CDATA[<?php the_excerpt_rss() ?>]]></content:encoded>
 	<?php endif; ?>
 <?php endif; ?>
-		<wfw:commentRss><?php echo comments_rss(); ?></wfw:commentRss>
+		<wfw:commentRSS><?php echo comments_rss(); ?></wfw:commentRSS>
 <?php rss_enclosure(); ?>
 	<?php do_action('rss2_item'); ?>
 	</item>
-	<?php $items_count++; if (($items_count == get_settings('posts_per_rss')) && !is_date()) { break; } } } ?>
+	<?php $items_count++; if (($items_count == get_settings('posts_per_rss')) && empty($m)) { break; } } } ?>
 </channel>
 </rss>

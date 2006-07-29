@@ -50,7 +50,12 @@ include('./admin-header.php');
 <tr valign="top"> 
 <th scope="row"><?php _e('New User Default Role:') ?></th> 
 <td><label for="default_role"> 
-<select name="default_role" id="default_role"><?php wp_dropdown_roles( get_settings('default_role') ); ?></select></label>
+<select name="default_role" id="default_role"><?php 
+foreach($wp_roles->role_names as $role => $name) {
+	$selected = (get_settings('default_role') == $role) ? 'selected="selected"' : '';
+	echo "<option {$selected} value=\"{$role}\">{$name}</option>";
+}
+?></select></label>
 </td> 
 </tr> 
 </table> 
@@ -85,8 +90,9 @@ include('./admin-header.php');
 <td><select name="start_of_week" id="start_of_week">
 <?php
 for ($day_index = 0; $day_index <= 6; $day_index++) :
-	$selected = (get_settings('start_of_week') == $day_index) ? 'selected="selected"' : '';
-	echo "\n\t<option value='$day_index' $selected>" . $wp_locale->get_weekday($day_index) . '</option>';
+if ($day_index == get_settings('start_of_week')) $selected = " selected='selected'";
+else $selected = '';
+echo "\n\t<option value='$day_index' $selected>$weekday[$day_index]</option>";
 endfor;
 ?>
 </select></td>
@@ -94,9 +100,9 @@ endfor;
 </table>
 </fieldset> 
 
-<p class="submit"><input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
+<p class="submit"><input type="submit" name="Submit" value="<?php _e('Update Options') ?> &raquo;" />
 <input type="hidden" name="action" value="update" /> 
-<input type="hidden" name="page_options" value="blogname,blogdescription,siteurl,admin_email,users_can_register,gmt_offset,date_format,time_format,home,start_of_week,comment_registration,default_role,blog_public" /> 
+<input type="hidden" name="page_options" value="blogname,blogdescription,siteurl,admin_email,users_can_register,gmt_offset,date_format,time_format,home,start_of_week,comment_registration,default_role" /> 
 </p>
 </form>
 

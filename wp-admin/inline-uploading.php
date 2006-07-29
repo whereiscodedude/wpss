@@ -5,9 +5,24 @@ require_once('admin.php');
 header('Content-Type: text/html; charset=' . get_option('blog_charset'));
 
 if (!current_user_can('upload_files'))
-	wp_die(__('You do not have permission to upload files.'));
+	die(__('You do not have permission to upload files.'));
 
-wp_reset_vars(array('action', 'post', 'all', 'last', 'link', 'sort', 'start', 'imgtitle', 'descr', 'attachment'));
+$wpvarstoreset = array('action', 'post', 'all', 'last', 'link', 'sort', 'start', 'imgtitle', 'descr', 'attachment');
+
+for ($i=0; $i<count($wpvarstoreset); $i += 1) {
+	$wpvar = $wpvarstoreset[$i];
+	if (!isset($$wpvar)) {
+		if (empty($_POST["$wpvar"])) {
+			if (empty($_GET["$wpvar"])) {
+				$$wpvar = '';
+			} else {
+			$$wpvar = $_GET["$wpvar"];
+			}
+		} else {
+			$$wpvar = $_POST["$wpvar"];
+		}
+	}
+}
 
 $post = (int) $post;
 $images_width = 1;
@@ -22,7 +37,7 @@ case 'delete':
 check_admin_referer('inlineuploading');
 
 if ( !current_user_can('edit_post', (int) $attachment) )
-	wp_die(__('You are not allowed to delete this attachment.').' <a href="'.basename(__FILE__)."?post=$post&amp;all=$all&amp;action=upload\">".__('Go back').'</a>');
+	die(__('You are not allowed to delete this attachment.').' <a href="'.basename(__FILE__)."?post=$post&amp;all=$all&amp;action=upload\">".__('Go back').'</a>');
 
 wp_delete_attachment($attachment);
 
@@ -38,7 +53,7 @@ $overrides = array('action'=>'save');
 $file = wp_handle_upload($_FILES['image'], $overrides);
 
 if ( isset($file['error']) )
-	wp_die($file['error'] . '<br /><a href="' . basename(__FILE__) . '?action=upload&post=' . $post . '">'.__('Back to Image Uploading').'</a>');
+	die($file['error'] . '<br /><a href="' . basename(__FILE__) . '?action=upload&post=' . $post . '">'.__('Back to Image Uploading').'</a>');
 
 $url = $file['url'];
 $type = $file['type'];
@@ -49,7 +64,7 @@ $filename = basename($file);
 $attachment = array(
 	'post_title' => $imgtitle ? $imgtitle : $filename,
 	'post_content' => $descr,
-	'post_type' => 'attachment',
+	'post_status' => 'attachment',
 	'post_parent' => $post,
 	'post_mime_type' => $type,
 	'guid' => $url
@@ -113,7 +128,7 @@ if (! current_user_can('edit_others_posts') )
 	$and_user = "AND post_author = " . $user_ID;
 
 if ( $last )
-	$start = $wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_type = 'attachment' $and_user $and_post") - $num;
+	$start = $wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_status = 'attachment' $and_user $and_post") - $num;
 else
 	$start = (int) $start;
 
@@ -123,7 +138,7 @@ if ( $start < 0 )
 if ( '' == $sort )
 	$sort = "post_date_gmt DESC";
 
-$attachments = $wpdb->get_results("SELECT ID, post_date, post_title, post_mime_type, guid FROM $wpdb->posts WHERE post_type = 'attachment' $and_type $and_post $and_user ORDER BY $sort LIMIT $start, $double", ARRAY_A);
+$attachments = $wpdb->get_results("SELECT ID, post_date, post_title, post_mime_type, guid FROM $wpdb->posts WHERE post_status = 'attachment' $and_type $and_post $and_user ORDER BY $sort LIMIT $start, $double", ARRAY_A);
 
 if ( count($attachments) == 0 ) {
 	wp_redirect( basename(__FILE__) ."?post=$post&action=upload" );
@@ -276,7 +291,7 @@ $images_width = $uwidth_sum + ( count($images) * 6 ) + 35;
 break;
 
 default:
-wp_die(__('This script was not meant to be called directly.'));
+die(__('This script was not meant to be called directly.'));
 }
 
 ?>
@@ -635,7 +650,7 @@ th {
 <?php if ( $attachments = $wpdb->get_results("SELECT ID FROM $wpdb->posts WHERE post_parent = '$post'") ) { ?>
 <li<?php echo $current_2; ?>><a href="<?php echo basename(__FILE__) . "?action=view&amp;post=$post&amp;all=false"; ?>"><?php _e('Browse'); ?></a></li>
 <?php } ?>
-<?php if ($wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_type = 'attachment'")) { ?>
+<?php if ($wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_status = 'attachment'")) { ?>
 <li<?php echo $current_3; ?>><a href="<?php echo basename(__FILE__) . "?action=view&amp;post=$post&amp;all=true"; ?>"><?php _e('Browse All'); ?></a></li>
 <?php } ?>
 <li> </li>
@@ -651,7 +666,7 @@ th {
 <li><a href="<?php echo basename(__FILE__) . "?action=$action&amp;post=$post&amp;all=$all&amp;start=$next"; ?>"><?php _e('Next &raquo;'); ?></a></li>
 <li><a href="<?php echo basename(__FILE__) . "?action=$action&amp;post=$post&amp;all=$all&amp;last=true"; ?>" title="<?php _e('Last'); ?>">&raquo;|</a></li>
 <?php else : ?>
-<li class="inactive"><?php _e('Next &raquo;'); ?></li>
+<li class="inactive"><?php _e('Next'); ?> &raquo;</li>
 <li class="inactive">&raquo;|</li>
 <?php endif; ?>
 <?php } // endif not upload?>

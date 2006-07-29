@@ -4,13 +4,8 @@
 function write_post() {
 	global $user_ID;
 
-	if ( 'page' == $_POST['post_type'] ) {
-		if ( !current_user_can('edit_pages') )
-			wp_die(__('You are not allowed to create pages on this blog.'));
-	} else {
-		if ( !current_user_can('edit_posts') )
-			wp_die(__('You are not allowed to create posts or drafts on this blog.'));
-	}
+	if (!current_user_can('edit_posts'))
+		die(__('You are not allowed to create posts or drafts on this blog.'));
 
 	// Rename.
 	$_POST['post_content'] = $_POST['content'];
@@ -20,25 +15,15 @@ function write_post() {
 
 	if (!empty ($_POST['post_author_override'])) {
 		$_POST['post_author'] = (int) $_POST['post_author_override'];
-	} else {
+	} else
 		if (!empty ($_POST['post_author'])) {
 			$_POST['post_author'] = (int) $_POST['post_author'];
 		} else {
 			$_POST['post_author'] = (int) $_POST['user_ID'];
 		}
 
-	}
-
-	if ($_POST['post_author'] != $_POST['user_ID']) {
-		if ( 'page' == $_POST['post_type'] ) {
-			if ( !current_user_can('edit_others_pages') )
-				wp_die(__('You cannot create pages as this user.'));
-		} else {
-			if ( !current_user_can('edit_others_posts') )
-				wp_die(__('You cannot post as this user.'));
-
-		}
-	}
+	if (($_POST['post_author'] != $_POST['user_ID']) && !current_user_can('edit_others_posts'))
+		die(__('You cannot post as this user.'));
 
 	// What to do based on which button they pressed
 	if ('' != $_POST['saveasdraft'])
@@ -49,14 +34,14 @@ function write_post() {
 		$_POST['post_status'] = 'publish';
 	if ('' != $_POST['advanced'])
 		$_POST['post_status'] = 'draft';
+	if ('' != $_POST['savepage'])
+		$_POST['post_status'] = 'static';
 
-	if ( 'page' == $_POST['post_type'] ) {
-		if ('publish' == $_POST['post_status'] && !current_user_can('publish_pages'))
-			$_POST['post_status'] = 'draft';
-	} else {
-		if ('publish' == $_POST['post_status'] && !current_user_can('publish_posts'))
-			$_POST['post_status'] = 'draft';
-	}
+	if ('publish' == $_POST['post_status'] && !current_user_can('publish_posts'))
+		$_POST['post_status'] = 'draft';
+
+	if ('static' == $_POST['post_status'] && !current_user_can('edit_pages'))
+		die(__('This user cannot edit pages.'));
 
 	if (!isset ($_POST['comment_status']))
 		$_POST['comment_status'] = 'closed';
@@ -75,8 +60,8 @@ function write_post() {
 		$hh = ($hh > 23) ? $hh -24 : $hh;
 		$mn = ($mn > 59) ? $mn -60 : $mn;
 		$ss = ($ss > 59) ? $ss -60 : $ss;
-		$_POST['post_date'] = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $aa, $mm, $jj, $hh, $mn, $ss);
-		$_POST['post_date_gmt'] = get_gmt_from_date($_POST['post_date']);
+		$_POST['post_date'] = "$aa-$mm-$jj $hh:$mn:$ss";
+		$_POST['post_date_gmt'] = get_gmt_from_date("$aa-$mm-$jj $hh:$mn:$ss");
 	}
 
 	// Create the post.
@@ -149,13 +134,8 @@ function edit_post() {
 
 	$post_ID = (int) $_POST['post_ID'];
 
-	if ( 'page' == $_POST['post_type'] ) {
-		if ( !current_user_can('edit_page', $post_ID) )
-			wp_die(__('You are not allowed to edit this page.'));
-	} else {
-		if ( !current_user_can('edit_post', $post_ID) )
-			wp_die(__('You are not allowed to edit this post.'));
-	}
+	if (!current_user_can('edit_post', $post_ID))
+		die(__('You are not allowed to edit this post.'));
 
 	// Rename.
 	$_POST['ID'] = (int) $_POST['post_ID'];
@@ -173,16 +153,8 @@ function edit_post() {
 			$_POST['post_author'] = (int) $_POST['user_ID'];
 		}
 
-	if ($_POST['post_author'] != $_POST['user_ID']) {
-		if ( 'page' == $_POST['post_type'] ) {
-			if ( !current_user_can('edit_others_pages') )
-				wp_die(__('You cannot edit pages as this user.'));
-		} else {
-			if ( !current_user_can('edit_others_posts') )
-				wp_die(__('You cannot edit posts as this user.'));
-
-		}
-	}
+	if (($_POST['post_author'] != $_POST['user_ID']) && !current_user_can('edit_others_posts'))
+		die(__('You cannot post as this user.'));
 
 	// What to do based on which button they pressed
 	if ('' != $_POST['saveasdraft'])
@@ -193,14 +165,14 @@ function edit_post() {
 		$_POST['post_status'] = 'publish';
 	if ('' != $_POST['advanced'])
 		$_POST['post_status'] = 'draft';
+	if ('' != $_POST['savepage'])
+		$_POST['post_status'] = 'static';
 
-	if ( 'page' == $_POST['post_type'] ) {
-		if ('publish' == $_POST['post_status'] && !current_user_can('edit_published_pages'))
-			$_POST['post_status'] = 'draft';
-	} else {
-		if ('publish' == $_POST['post_status'] && !current_user_can('edit_published_posts'))
-			$_POST['post_status'] = 'draft';
-	}
+	if ('publish' == $_POST['post_status'] && !current_user_can('publish_posts'))
+		$_POST['post_status'] = 'draft';
+
+	if ('static' == $_POST['post_status'] && !current_user_can('edit_pages'))
+		die(__('This user cannot edit pages.'));
 
 	if (!isset ($_POST['comment_status']))
 		$_POST['comment_status'] = 'closed';
@@ -228,7 +200,7 @@ function edit_post() {
 		foreach ($_POST['meta'] as $key => $value)
 			update_meta($key, $value['key'], $value['value']);
 	}
-
+	
 	if ($_POST['deletemeta']) {
 		foreach ($_POST['deletemeta'] as $key => $value)
 			delete_meta($key);
@@ -251,7 +223,7 @@ function edit_comment() {
 	$comment_post_ID = (int) $_POST['comment_post_ID'];
 
 	if (!current_user_can('edit_post', $comment_post_ID))
-		wp_die(__('You are not allowed to edit comments on this post, so you cannot edit this comment.'));
+		die(__('You are not allowed to edit comments on this post, so you cannot edit this comment.'));
 
 	$_POST['comment_author'] = $_POST['newcomment_author'];
 	$_POST['comment_author_email'] = $_POST['newcomment_author_email'];
@@ -293,7 +265,7 @@ function get_post_to_edit($id) {
 	$post->post_title = format_to_edit($post->post_title);
 	$post->post_title = apply_filters('title_edit_pre', $post->post_title);
 
-	if ($post->post_type == 'page')
+	if ($post->post_status == 'static')
 		$post->page_template = get_post_meta($id, '_wp_page_template', true);
 
 	return $post;
@@ -361,39 +333,15 @@ function get_category_to_edit($id) {
 	return $category;
 }
 
-function wp_dropdown_roles( $default = false ) {
-	global $wp_roles;
-	$r = '';
-	foreach($wp_roles->role_names as $role => $name)
-		if ( $default == $role ) // Make default first in list
-			$p = "\n\t<option selected='selected' value='$role'>$name</option>";
-		else
-			$r .= "\n\t<option value='$role'>$name</option>";
-	echo $p . $r;
-}
-
-
 // Creates a new user from the "Users" form using $_POST information.
 
 function add_user() {
-	if ( func_num_args() ) { // The hackiest hack that ever did hack
-		global $current_user, $wp_roles;
-		$user_id = func_get_arg(0);
-
-		if (isset ($_POST['role'])) {
-			if($user_id != $current_user->id || $wp_roles->role_objects[$_POST['role']]->has_cap('edit_users')) {
-				$user = new WP_User($user_id);
-				$user->set_role($_POST['role']);
-			}
-		}
-	} else {
-		add_action('user_register', 'add_user'); // See above
-		return edit_user();
-	}
+	return edit_user();
 }
 
 function edit_user($user_id = 0) {
 	global $current_user, $wp_roles, $wpdb;
+
 	if ($user_id != 0) {
 		$update = true;
 		$user->ID = $user_id;
@@ -413,7 +361,7 @@ function edit_user($user_id = 0) {
 	if (isset ($_POST['pass2']))
 		$pass2 = $_POST['pass2'];
 
-	if (isset ($_POST['role']) && current_user_can('edit_users')) { 
+	if (isset ($_POST['role']) && current_user_can('edit_users')) {
 		if($user_id != $current_user->id || $wp_roles->role_objects[$_POST['role']]->has_cap('edit_users'))
 			$user->role = $_POST['role'];
 	}
@@ -441,49 +389,49 @@ function edit_user($user_id = 0) {
 	if (isset ($_POST['yim']))
 		$user->yim = wp_specialchars(trim($_POST['yim']));
 
-	$errors = new WP_Error();
+	$errors = array ();
 
 	/* checking that username has been typed */
 	if ($user->user_login == '')
-		$errors->add('user_login', __('<strong>ERROR</strong>: Please enter a username.'));
+		$errors['user_login'] = __('<strong>ERROR</strong>: Please enter a username.');
 
 	/* checking the password has been typed twice */
 	do_action('check_passwords', array ($user->user_login, & $pass1, & $pass2));
 
 	if (!$update) {
 		if ($pass1 == '' || $pass2 == '')
-			$errors->add('pass', __('<strong>ERROR</strong>: Please enter your password twice.'));
+			$errors['pass'] = __('<strong>ERROR</strong>: Please enter your password twice.');
 	} else {
 		if ((empty ($pass1) && !empty ($pass2)) || (empty ($pass2) && !empty ($pass1)))
-			$errors->add('pass', __("<strong>ERROR</strong>: you typed your new password only once."));
+			$errors['pass'] = __("<strong>ERROR</strong>: you typed your new password only once.");
 	}
 
 	/* Check for "\" in password */
 	if( strpos( " ".$pass1, "\\" ) )
-		$errors->add('pass', __('<strong>ERROR</strong>: Passwords may not contain the character "\\".'));
+		$errors['pass'] = __('<strong>ERROR</strong>: Passwords may not contain the character "\\".');
 
 	/* checking the password has been typed twice the same */
 	if ($pass1 != $pass2)
-		$errors->add('pass', __('<strong>ERROR</strong>: Please type the same password in the two password fields.'));
+		$errors['pass'] = __('<strong>ERROR</strong>: Please type the same password in the two password fields.');
 
 	if (!empty ($pass1))
 		$user->user_pass = $pass1;
 
 	if ( !validate_username($user->user_login) )
-		$errors->add('user_login', __('<strong>ERROR</strong>: This username is invalid.  Please enter a valid username.'));
+		$errors['user_login'] = __('<strong>ERROR</strong>: This username is invalid.  Please enter a valid username.');
 
 	if (!$update && username_exists($user->user_login))
-		$errors->add('user_login', __('<strong>ERROR</strong>: This username is already registered, please choose another one.'));
+		$errors['user_login'] = __('<strong>ERROR</strong>: This username is already registered, please choose another one.');
 
 	/* checking e-mail address */
 	if (empty ($user->user_email)) {
-		$errors->add('user_email', __("<strong>ERROR</strong>: please type an e-mail address"));
+		$errors['user_email'] = __("<strong>ERROR</strong>: please type an e-mail address");
 	} else
 		if (!is_email($user->user_email)) {
-			$errors->add('user_email', __("<strong>ERROR</strong>: the email address isn't correct"));
+			$errors['user_email'] = __("<strong>ERROR</strong>: the email address isn't correct");
 		}
 
-	if ( $errors->get_error_codes() )
+	if (count($errors) != 0)
 		return $errors;
 
 	if ($update) {
@@ -492,20 +440,20 @@ function edit_user($user_id = 0) {
 		$user_id = wp_insert_user(get_object_vars($user));
 		wp_new_user_notification($user_id);
 	}
-	return $user_id;
+
+	return $errors;
 }
 
 
 function get_link_to_edit($link_id) {
 	$link = get_link($link_id);
-
+	
 	$link->link_url = wp_specialchars($link->link_url, 1);
 	$link->link_name = wp_specialchars($link->link_name, 1);
 	$link->link_description = wp_specialchars($link->link_description);
 	$link->link_notes = wp_specialchars($link->link_notes);
 	$link->link_rss = wp_specialchars($link->link_rss);
-	$link->post_category = $link->link_category;
-
+	
 	return $link;
 }
 
@@ -514,31 +462,36 @@ function get_default_link_to_edit() {
 		$link->link_url = wp_specialchars($_GET['linkurl'], 1);
 	else
 		$link->link_url = '';
-
+	
 	if ( isset($_GET['name']) )
 		$link->link_name = wp_specialchars($_GET['name'], 1);
 	else
 		$link->link_name = '';
-
-	$link->link_visible = 'Y';
-
+		
 	return $link;
 }
 
 function add_link() {
-	return edit_link();
+	return edit_link();	
 }
 
 function edit_link($link_id = '') {
 	if (!current_user_can('manage_links'))
-		wp_die(__("Cheatin' uh ?"));
+		die(__("Cheatin' uh ?"));
 
 	$_POST['link_url'] = wp_specialchars($_POST['link_url']);
 	$_POST['link_url'] = preg_match('/^(https?|ftps?|mailto|news|gopher):/is', $_POST['link_url']) ? $_POST['link_url'] : 'http://' . $_POST['link_url'];
 	$_POST['link_name'] = wp_specialchars($_POST['link_name']);
 	$_POST['link_image'] = wp_specialchars($_POST['link_image']);
 	$_POST['link_rss'] = wp_specialchars($_POST['link_rss']);
-	$_POST['link_category'] = $_POST['post_category'];
+	$auto_toggle = get_autotoggle($_POST['link_category']);
+	
+	// if we are in an auto toggle category and this one is visible then we
+	// need to make the others invisible before we add this new one.
+	// FIXME Add category toggle func.
+	//if (($auto_toggle == 'Y') && ($link_visible == 'Y')) {
+	//	$wpdb->query("UPDATE $wpdb->links set link_visible = 'N' WHERE link_category = $link_category");
+	//}
 
 	if ( !empty($link_id) ) {
 		$_POST['link_id'] = $link_id;
@@ -578,7 +531,7 @@ function sort_cats($cat1, $cat2) {
 }
 
 function get_nested_categories($default = 0, $parent = 0) {
-	global $post_ID, $link_id, $mode, $wpdb;
+	global $post_ID, $mode, $wpdb;
 
 	if ($post_ID) {
 		$checked_categories = $wpdb->get_col("
@@ -591,17 +544,7 @@ function get_nested_categories($default = 0, $parent = 0) {
 			// No selected categories, strange
 			$checked_categories[] = $default;
 		}
-	} else if ($link_id) {
-		$checked_categories = $wpdb->get_col("
-		     SELECT category_id
-		     FROM $wpdb->categories, $wpdb->link2cat
-		     WHERE $wpdb->link2cat.category_id = cat_ID AND $wpdb->link2cat.link_id = '$link_id'
-		     ");
 
-		if (count($checked_categories) == 0) {
-			// No selected categories, strange
-			$checked_categories[] = $default;
-		}	
 	} else {
 		$checked_categories[] = $default;
 	}
@@ -617,7 +560,7 @@ function get_nested_categories($default = 0, $parent = 0) {
 			$result[$cat]['cat_name'] = get_the_category_by_ID($cat);
 		}
 	}
-
+	
 	usort($result, 'sort_cats');
 
 	return $result;
@@ -625,12 +568,12 @@ function get_nested_categories($default = 0, $parent = 0) {
 
 function write_nested_categories($categories) {
 	foreach ($categories as $category) {
-		echo '<li id="category-', $category['cat_ID'], '"><label for="in-category-', $category['cat_ID'], '" class="selectit"><input value="', $category['cat_ID'], '" type="checkbox" name="post_category[]" id="in-category-', $category['cat_ID'], '"', ($category['checked'] ? ' checked="checked"' : ""), '/> ', wp_specialchars($category['cat_name']), "</label></li>\n";
+		echo '<label for="category-', $category['cat_ID'], '" class="selectit"><input value="', $category['cat_ID'], '" type="checkbox" name="post_category[]" id="category-', $category['cat_ID'], '"', ($category['checked'] ? ' checked="checked"' : ""), '/> ', wp_specialchars($category['cat_name']), "</label>\n";
 
-		if ( $category['children'] ) {
-			echo "<ul>\n";
+		if (isset ($category['children'])) {
+			echo "\n<span class='cat-nest'>\n";
 			write_nested_categories($category['children']);
-			echo "</ul>\n";
+			echo "</span>\n";
 		}
 	}
 }
@@ -639,59 +582,36 @@ function dropdown_categories($default = 0) {
 	write_nested_categories(get_nested_categories($default));
 }
 
-function return_link_categories_list($parent = 0) {
-	global $wpdb;
-	return $wpdb->get_col("SELECT cat_ID FROM $wpdb->categories WHERE category_parent = $parent AND link_count > 0");
-}
-
-function get_nested_link_categories( $default = 0, $parent = 0 ) {
-	global $post_ID, $link_id, $mode, $wpdb;
-
-	if ($link_id) {
-		$checked_categories = $wpdb->get_col("
-		     SELECT category_id
-		     FROM $wpdb->categories, $wpdb->link2cat
-		     WHERE $wpdb->link2cat.category_id = cat_ID AND $wpdb->link2cat.link_id = '$link_id'
-		     ");
-
-		if (count($checked_categories) == 0) {
-			// No selected categories, strange
-			$checked_categories[] = $default;
-		}	
-	} else {
-		$checked_categories[] = $default;
-	}
-
-	$cats = return_link_categories_list($parent);
-	$result = array ();
-
-	if (is_array($cats)) {
-		foreach ($cats as $cat) {
-			$result[$cat]['children'] = get_nested_link_categories($default, $cat);
-			$result[$cat]['cat_ID'] = $cat;
-			$result[$cat]['checked'] = in_array($cat, $checked_categories);
-			$result[$cat]['cat_name'] = get_the_category_by_ID($cat);
-		}
-	}
-
-	usort($result, 'sort_cats');
-
-	return $result;
-}
-
-function dropdown_link_categories($default = 0) {
-	write_nested_categories(get_nested_link_categories($default));
-}
-
 // Dandy new recursive multiple category stuff.
 function cat_rows($parent = 0, $level = 0, $categories = 0) {
+	global $wpdb, $class;
+
 	if (!$categories)
-		$categories = get_categories('hide_empty=0');
+		$categories = $wpdb->get_results("SELECT * FROM $wpdb->categories ORDER BY cat_name");
 
 	if ($categories) {
 		foreach ($categories as $category) {
 			if ($category->category_parent == $parent) {
-				echo "\t" . _cat_row( $category, $level );
+				$category->cat_name = wp_specialchars($category->cat_name);
+				$pad = str_repeat('&#8212; ', $level);
+				if ( current_user_can('manage_categories') ) {
+					$edit = "<a href='categories.php?action=edit&amp;cat_ID=$category->cat_ID' class='edit'>".__('Edit')."</a></td>";
+					$default_cat_id = get_option('default_category');
+
+					if ($category->cat_ID != $default_cat_id)
+						$edit .= "<td><a href='" . wp_nonce_url("categories.php?action=delete&amp;cat_ID=$category->cat_ID", 'delete-category_' . $category->cat_ID ) . "' onclick=\"return deleteSomething( 'cat', $category->cat_ID, '" . sprintf(__("You are about to delete the category &quot;%s&quot;.  All of its posts will go to the default category.\\n&quot;OK&quot; to delete, &quot;Cancel&quot; to stop."), js_escape($category->cat_name))."' );\" class='delete'>".__('Delete')."</a>";
+					else
+						$edit .= "<td style='text-align:center'>".__("Default");
+				}
+				else
+					$edit = '';
+
+				$class = ('alternate' == $class) ? '' : 'alternate';
+				echo "<tr id='cat-$category->cat_ID' class='$class'><th scope='row'>$category->cat_ID</th><td>$pad $category->cat_name</td>
+								<td>$category->category_description</td>
+								<td>$category->category_count</td>
+								<td>$edit</td>
+								</tr>";
 				cat_rows($category->cat_ID, $level +1, $categories);
 			}
 		}
@@ -700,111 +620,51 @@ function cat_rows($parent = 0, $level = 0, $categories = 0) {
 	}
 }
 
-function _cat_row( $category, $level, $name_override = false ) {
-	global $class;
-
-	$pad = str_repeat('&#8212; ', $level);
-	if ( current_user_can('manage_categories') ) {
-		$edit = "<a href='categories.php?action=edit&amp;cat_ID=$category->cat_ID' class='edit'>".__('Edit')."</a></td>";
-		$default_cat_id = get_option('default_category');
-		$default_link_cat_id = get_option('default_link_category');
-
-		if ( ($category->cat_ID != $default_cat_id) && ($category->cat_ID != $default_link_cat_id) )
-			$edit .= "<td><a href='" . wp_nonce_url("categories.php?action=delete&amp;cat_ID=$category->cat_ID", 'delete-category_' . $category->cat_ID ) . "' onclick=\"return deleteSomething( 'cat', $category->cat_ID, '" . sprintf(__("You are about to delete the category &quot;%s&quot;.\\nAll of its posts will go into the default category of &quot;%s&quot;\\nAll of its bookmarks will go into the default category of &quot;%s&quot;.\\n&quot;OK&quot; to delete, &quot;Cancel&quot; to stop."), js_escape($category->cat_name), js_escape(get_catname($default_cat_id)), js_escape(get_catname($default_link_cat_id))) . "' );\" class='delete'>".__('Delete')."</a>";
-		else
-			$edit .= "<td style='text-align:center'>".__("Default");
-	} else
-		$edit = '';
-
-	$class = ( ( defined('DOING_AJAX') && DOING_AJAX ) || " class='alternate'" == $class ) ? '' : " class='alternate'";
-
-	$category->category_count = number_format( $category->category_count );
-	$category->link_count = number_format( $category->link_count );
-	return "<tr id='cat-$category->cat_ID'$class>
-		<th scope='row'>$category->cat_ID</th>
-		<td>" . ( $name_override ? $name_override : $pad . ' ' . $category->cat_name ) . "</td>
-		<td>$category->category_description</td>
-		<td align='center'>$category->category_count</td>
-		<td align='center'>$category->link_count</td>
-		<td>$edit</td>\n\t</tr>\n";
-}
-
-function page_rows($parent = 0, $level = 0, $pages = 0, $hierarchy = true) {
+function page_rows($parent = 0, $level = 0, $pages = 0) {
 	global $wpdb, $class, $post;
-
 	if (!$pages)
-		$pages = get_pages('sort_column=menu_order');
+		$pages = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE post_status = 'static' ORDER BY menu_order");
 
-	if (! $pages)
-		return false;
-
-	foreach ($pages as $post) {
-		setup_postdata($post);
-		if ( $hierarchy && ($post->post_parent != $parent) )
-			continue;
-
-		$post->post_title = wp_specialchars($post->post_title);
-		$pad = str_repeat('&#8212; ', $level);
-		$id = $post->ID;
-		$class = ('alternate' == $class) ? '' : 'alternate';
+	if ($pages) {
+		foreach ($pages as $post) {
+			start_wp();
+			if ($post->post_parent == $parent) {
+				$post->post_title = wp_specialchars($post->post_title);
+				$pad = str_repeat('&#8212; ', $level);
+				$id = $post->ID;
+				$class = ('alternate' == $class) ? '' : 'alternate';
 ?>
   <tr id='page-<?php echo $id; ?>' class='<?php echo $class; ?>'> 
     <th scope="row"><?php echo $post->ID; ?></th> 
     <td>
-      <?php echo $pad; ?><?php the_title() ?>
-      <?php if ('private' == $post->post_status) _e(' - <strong>Private</strong>'); ?>
+      <?php echo $pad; ?><?php the_title() ?> 
     </td> 
     <td><?php the_author() ?></td>
     <td><?php echo mysql2date('Y-m-d g:i a', $post->post_modified); ?></td> 
 	<td><a href="<?php the_permalink(); ?>" rel="permalink" class="edit"><?php _e('View'); ?></a></td>
-    <td><?php if ( current_user_can('edit_page', $id) ) { echo "<a href='page.php?action=edit&amp;post=$id' class='edit'>" . __('Edit') . "</a>"; } ?></td> 
-    <td><?php if ( current_user_can('edit_page', $id) ) { echo "<a href='" . wp_nonce_url("page.php?action=delete&amp;post=$id", 'delete-page_' . $id) .  "' class='delete' onclick=\"return deleteSomething( 'page', " . $id . ", '" . sprintf(__("You are about to delete the &quot;%s&quot; page.\\n&quot;OK&quot; to delete, &quot;Cancel&quot; to stop."), js_escape(get_the_title()) ) . "' );\">" . __('Delete') . "</a>"; } ?></td> 
+    <td><?php if ( current_user_can('edit_pages') ) { echo "<a href='post.php?action=edit&amp;post=$id' class='edit'>" . __('Edit') . "</a>"; } ?></td> 
+    <td><?php if ( current_user_can('edit_pages') ) { echo "<a href='" . wp_nonce_url("post.php?action=delete&amp;post=$id", 'delete-post_' . $id) .  "' class='delete' onclick=\"return deleteSomething( 'page', " . $id . ", '" . sprintf(__("You are about to delete the &quot;%s&quot; page.\\n&quot;OK&quot; to delete, &quot;Cancel&quot; to stop."), js_escape(get_the_title()) ) . "' );\">" . __('Delete') . "</a>"; } ?></td> 
   </tr> 
 
 <?php
-		if ( $hierarchy) page_rows($id, $level + 1, $pages);
-	}
-}
 
-function user_row( $user_object, $style = '' ) {
-	if ( !(is_object($user_object) && is_a($user_object, 'WP_User')) )
-		$user_object = new WP_User( (int) $user_object );
-	$email = $user_object->user_email;
-	$url = $user_object->user_url;
-	$short_url = str_replace('http://', '', $url);
-	$short_url = str_replace('www.', '', $short_url);
-	if ('/' == substr($short_url, -1))
-		$short_url = substr($short_url, 0, -1);
-	if (strlen($short_url) > 35)
-		$short_url =  substr($short_url, 0, 32).'...';
-	$numposts = get_usernumposts($user_object->ID);
-	$r = "<tr id='user-$user_object->ID'$style>
-		<td><input type='checkbox' name='users[]' id='user_{$user_object->ID}' value='{$user_object->ID}' /> <label for='user_{$user_object->ID}'>{$user_object->ID}</label></td>
-		<td><label for='user_{$user_object->ID}'><strong>$user_object->user_login</strong></label></td>
-		<td><label for='user_{$user_object->ID}'>$user_object->first_name $user_object->last_name</label></td>
-		<td><a href='mailto:$email' title='" . sprintf(__('e-mail: %s'), $email) . "'>$email</a></td>
-		<td><a href='$url' title='website: $url'>$short_url</a></td>";
-	$r .= "\n\t\t<td align='center'>";
-	if ($numposts > 0) {
-		$r .= "<a href='edit.php?author=$user_object->ID' title='" . __('View posts by this author') . "' class='edit'>";
-		$r .= sprintf(__('View %1$s %2$s'), $numposts, __ngettext('post', 'posts', $numposts));
+				page_rows($id, $level +1, $pages);
+			}
+		}
+	} else {
+		return false;
 	}
-	$r .= "</td>\n\t\t<td>";
-	$edit_link = add_query_arg('wp_http_referer', wp_specialchars(urlencode(stripslashes($_SERVER['REQUEST_URI']))), "user-edit.php?user_id=$user_object->ID");
-	if ( current_user_can('edit_user', $user_object->ID) )
-		$r .= "<a href='$edit_link' class='edit'>".__('Edit')."</a>";
-	$r .= "</td>\n\t</tr>";
-	return $r;
 }
 
 function wp_dropdown_cats($currentcat = 0, $currentparent = 0, $parent = 0, $level = 0, $categories = 0) {
-	global $wpdb;
-	if (!$categories)
-		$categories = get_categories('hide_empty=0');
-
+	global $wpdb, $bgcolor;
+	if (!$categories) {
+		$categories = $wpdb->get_results("SELECT * FROM $wpdb->categories ORDER BY cat_name");
+	}
 	if ($categories) {
 		foreach ($categories as $category) {
 			if ($currentcat != $category->cat_ID && $parent == $category->category_parent) {
+				$count = $wpdb->get_var("SELECT COUNT(post_id) FROM $wpdb->post2cat WHERE category_id = $category->cat_ID");
 				$pad = str_repeat('&#8211; ', $level);
 				$category->cat_name = wp_specialchars($category->cat_name);
 				echo "\n\t<option value='$category->cat_ID'";
@@ -817,6 +677,23 @@ function wp_dropdown_cats($currentcat = 0, $currentparent = 0, $parent = 0, $lev
 	} else {
 		return false;
 	}
+}
+
+function link_category_dropdown($fieldname, $selected = 0) {
+	global $wpdb;
+	
+	$results = $wpdb->get_results("SELECT cat_id, cat_name, auto_toggle FROM $wpdb->linkcategories ORDER BY cat_id");
+	echo "\n<select name='$fieldname' size='1'>\n";
+	foreach ($results as $row) {
+		echo "\n\t<option value='$row->cat_id'";
+		if ($row->cat_id == $selected)
+			echo " selected='selected'";
+		echo ">$row->cat_id : " . wp_specialchars($row->cat_name);
+		if ($row->auto_toggle == 'Y')
+			echo ' (auto toggle)';
+		echo "</option>";
+	}
+	echo "\n</select>\n";
 }
 
 function wp_create_thumbnail($file, $max_side, $effect = '') {
@@ -928,21 +805,19 @@ function has_meta($postid) {
 function list_meta($meta) {
 	global $post_ID;
 	// Exit if no meta
-	if (!$meta) {
-		echo '<tbody id="the-list"></tbody>'; //TBODY needed for list-manipulation JS
+	if (!$meta)
 		return;
-	}
 	$count = 0;
 ?>
-	<thead>
+<table id='meta-list' cellpadding="3">
 	<tr>
 		<th><?php _e('Key') ?></th>
 		<th><?php _e('Value') ?></th>
 		<th colspan='2'><?php _e('Action') ?></th>
 	</tr>
-	</thead>
 <?php
-	$r ="\n\t<tbody id='the-list'>";
+
+
 	foreach ($meta as $entry) {
 		++ $count;
 		if ($count % 2)
@@ -951,20 +826,18 @@ function list_meta($meta) {
 			$style = '';
 		if ('_' == $entry['meta_key'] { 0 })
 			$style .= ' hidden';
-		$key_js = addslashes(wp_specialchars( $entry['meta_key'], 'double' ));
-		$entry['meta_key'] = wp_specialchars( $entry['meta_key'], true );
-		$entry['meta_value'] = wp_specialchars( $entry['meta_value'], true );
-		$r .= "\n\t<tr id='meta-{$entry['meta_id']}' class='$style'>";
-		$r .= "\n\t\t<td valign='top'><input name='meta[{$entry['meta_id']}][key]' tabindex='6' type='text' size='20' value='{$entry['meta_key']}' /></td>";
-		$r .= "\n\t\t<td><textarea name='meta[{$entry['meta_id']}][value]' tabindex='6' rows='2' cols='30'>{$entry['meta_value']}</textarea></td>";
-		$r .= "\n\t\t<td align='center'><input name='updatemeta' type='submit' class='updatemeta' tabindex='6' value='".__('Update')."' /><br />";
-		$r .= "\n\t\t<input name='deletemeta[{$entry['meta_id']}]' type='submit' onclick=\"return deleteSomething( 'meta', {$entry['meta_id']}, '";
-		$r .= sprintf(__("You are about to delete the &quot;%s&quot; custom field on this post.\\n&quot;OK&quot; to delete, &quot;Cancel&quot; to stop."), $key_js);
-		$r .= "' );\" class='deletemeta' tabindex='6' value='".__('Delete')."' /></td>";
-		$r .= "\n\t</tr>";
+		echo "
+			<tr class='$style'>
+				<td valign='top'><input name='meta[{$entry['meta_id']}][key]' tabindex='6' type='text' size='20' value='{$entry['meta_key']}' /></td>
+				<td><textarea name='meta[{$entry['meta_id']}][value]' tabindex='6' rows='2' cols='30'>{$entry['meta_value']}</textarea></td>
+				<td align='center'><input name='updatemeta' type='submit' class='updatemeta' tabindex='6' value='".__('Update')."' /><br />
+				<input name='deletemeta[{$entry['meta_id']}]' type='submit' class='deletemeta' tabindex='6' value='".__('Delete')."' /></td>
+			</tr>
+		";
 	}
-	echo $r;
-	echo "\n\t</tbody>";
+	echo "
+		</table>
+	";
 }
 
 // Get a list of previously defined keys
@@ -990,7 +863,7 @@ function meta_form() {
 			LIMIT 10");
 ?>
 <h3><?php _e('Add a new custom field:') ?></h3>
-<table id="newmeta" cellspacing="3" cellpadding="3">
+<table cellspacing="3" cellpadding="3">
 	<tr>
 <th colspan="2"><?php _e('Key') ?></th>
 <th><?php _e('Value') ?></th>
@@ -1014,14 +887,13 @@ function meta_form() {
 	</tr>
 
 </table>
-<p class="submit"><input type="submit" id="updatemetasub" name="updatemeta" tabindex="9" value="<?php _e('Add Custom Field &raquo;') ?>" /></p>
+<p class="submit"><input type="submit" name="updatemeta" tabindex="9" value="<?php _e('Add Custom Field &raquo;') ?>" /></p>
 <?php
 
 }
 
 function add_meta($post_ID) {
 	global $wpdb;
-	$post_ID = (int) $post_ID;
 
 	$metakeyselect = $wpdb->escape(stripslashes(trim($_POST['metakeyselect'])));
 	$metakeyinput = $wpdb->escape(stripslashes(trim($_POST['metakeyinput'])));
@@ -1031,7 +903,7 @@ function add_meta($post_ID) {
 		// We have a key/value pair. If both the select and the 
 		// input for the key have data, the input takes precedence:
 
- 		if ('#NONE#' != $metakeyselect)
+		if ('#NONE#' != $metakeyselect)
 			$metakey = $metakeyselect;
 
 		if ($metakeyinput)
@@ -1042,34 +914,23 @@ function add_meta($post_ID) {
 						(post_id,meta_key,meta_value) 
 						VALUES ('$post_ID','$metakey','$metavalue')
 					");
-		return $wpdb->insert_id;
 	}
-	return false;
 } // add_meta
 
 function delete_meta($mid) {
 	global $wpdb;
-	$mid = (int) $mid;
 
-	return $wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_id = '$mid'");
+	$result = $wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_id = '$mid'");
 }
 
 function update_meta($mid, $mkey, $mvalue) {
 	global $wpdb;
-	$mid = (int) $mid;
 
 	return $wpdb->query("UPDATE $wpdb->postmeta SET meta_key = '$mkey', meta_value = '$mvalue' WHERE meta_id = '$mid'");
 }
 
-function get_post_meta_by_id($mid) {
-	global $wpdb;
-	$mid = (int) $mid;
-
-	return $wpdb->get_row("SELECT * FROM $wpdb->postmeta WHERE meta_id = '$mid'");
-}
-
 function touch_time($edit = 1, $for_post = 1) {
-	global $wp_locale, $post, $comment;
+	global $month, $post, $comment;
 
 	if ( $for_post )
 		$edit = ( ('draft' == $post->post_status) && (!$post->post_date || '0000-00-00 00:00:00' == $post->post_date) ) ? false : true;
@@ -1085,25 +946,29 @@ function touch_time($edit = 1, $for_post = 1) {
 	$mn = ($edit) ? mysql2date('i', $post_date) : gmdate('i', $time_adj);
 	$ss = ($edit) ? mysql2date('s', $post_date) : gmdate('s', $time_adj);
 
-	echo "<select name=\"mm\" onchange=\"edit_date.checked=true\">\n";
+	echo "<select name=\"mm\">\n";
 	for ($i = 1; $i < 13; $i = $i +1) {
 		echo "\t\t\t<option value=\"$i\"";
 		if ($i == $mm)
-			echo ' selected="selected"';
-		echo '>' . $wp_locale->get_month($i) . "</option>\n";
+			echo " selected='selected'";
+		if ($i < 10) {
+			$ii = "0".$i;
+		} else {
+			$ii = "$i";
+		}
+		echo ">".$month["$ii"]."</option>\n";
 	}
 ?>
 </select>
-<input type="text" id="jj" name="jj" value="<?php echo $jj; ?>" size="2" maxlength="2" onchange="edit_date.checked=true"/>
-<input type="text" id="aa" name="aa" value="<?php echo $aa ?>" size="4" maxlength="5" onchange="edit_date.checked=true" /> @ 
-<input type="text" id="hh" name="hh" value="<?php echo $hh ?>" size="2" maxlength="2" onchange="edit_date.checked=true" /> : 
-<input type="text" id="mn" name="mn" value="<?php echo $mn ?>" size="2" maxlength="2" onchange="edit_date.checked=true" /> 
-<input type="hidden" id="ss" name="ss" value="<?php echo $ss ?>" size="2" maxlength="2" onchange="edit_date.checked=true" /> 
+<input type="text" id="jj" name="jj" value="<?php echo $jj; ?>" size="2" maxlength="2" />
+<input type="text" id="aa" name="aa" value="<?php echo $aa ?>" size="4" maxlength="5" /> @ 
+<input type="text" id="hh" name="hh" value="<?php echo $hh ?>" size="2" maxlength="2" /> : 
+<input type="text" id="mn" name="mn" value="<?php echo $mn ?>" size="2" maxlength="2" /> 
+<input type="hidden" id="ss" name="ss" value="<?php echo $ss ?>" size="2" maxlength="2" /> 
 <?php
 	if ( $edit ) {
 		_e('Existing timestamp');
-		//echo ': ' . $wp_locale->get_month($mm) . "$jj, $aa @ $hh:$mn";
-		echo sprintf(__(': %1$s %2$s, %3$s @ %4$s:%5$s'), $wp_locale->get_month($mm), $jj, $aa, $hh, $mn);
+		echo ": {$month[$mm]} $jj, $aa @ $hh:$mn";
 	}
 ?>
 </fieldset>
@@ -1128,15 +993,11 @@ function insert_with_markers($filename, $marker, $insertion) {
 		$foundit = false;
 		if ($markerdata) {
 			$state = true;
-			foreach ($markerdata as $n => $markerline) {
+			foreach ($markerdata as $markerline) {
 				if (strstr($markerline, "# BEGIN {$marker}"))
 					$state = false;
-				if ($state) {
-					if ( $n + 1 < count($markerdata) )
-						fwrite($f, "{$markerline}\n");
-					else
-						fwrite($f, "{$markerline}");
-				}
+				if ($state)
+					fwrite($f, "{$markerline}\n");
 				if (strstr($markerline, "# END {$marker}")) {
 					fwrite($f, "# BEGIN {$marker}\n");
 					if (is_array($insertion))
@@ -1221,15 +1082,14 @@ function save_mod_rewrite_rules() {
 
 function the_quicktags() {
 	// Browser detection sucks, but until Safari supports the JS needed for this to work people just assume it's a bug in WP
-	if (!strstr($_SERVER['HTTP_USER_AGENT'], 'Safari')) {
+	if (!strstr($_SERVER['HTTP_USER_AGENT'], 'Safari'))
 		echo '
 		<div id="quicktags">
-			';
-		wp_print_scripts( 'quicktags' );
-		echo '			<script type="text/javascript">if ( typeof tinyMCE == "undefined" || tinyMCE.configs.length < 1 ) edToolbar();</script>
+			<script src="../wp-includes/js/quicktags.js" type="text/javascript"></script>
+			<script type="text/javascript">if ( typeof tinyMCE == "undefined" || tinyMCE.configs.length < 1 ) edToolbar();</script>
 		</div>
 ';
-	} else echo '
+	else echo '
 <script type="text/javascript">
 function edInsertContent(myField, myValue) {
 	//IE support
@@ -1256,6 +1116,30 @@ function edInsertContent(myField, myValue) {
 }
 </script>
 ';
+}
+
+function validate_current_theme() {
+	$theme_loc = 'wp-content/themes';
+	$theme_root = ABSPATH.$theme_loc;
+
+	$template = get_settings('template');
+	$stylesheet = get_settings('stylesheet');
+
+	if (($template != 'default') && (!file_exists("$theme_root/$template/index.php"))) {
+		update_option('template', 'default');
+		update_option('stylesheet', 'default');
+		do_action('switch_theme', 'Default');
+		return false;
+	}
+
+	if (($stylesheet != 'default') && (!file_exists("$theme_root/$stylesheet/style.css"))) {
+		update_option('template', 'default');
+		update_option('stylesheet', 'default');
+		do_action('switch_theme', 'Default');
+		return false;
+	}
+
+	return true;
 }
 
 function get_broken_themes() {
@@ -1302,7 +1186,7 @@ function page_template_dropdown($default = '') {
 
 function parent_dropdown($default = 0, $parent = 0, $level = 0) {
 	global $wpdb, $post_ID;
-	$items = $wpdb->get_results("SELECT ID, post_parent, post_title FROM $wpdb->posts WHERE post_parent = $parent AND post_type = 'page' ORDER BY menu_order");
+	$items = $wpdb->get_results("SELECT ID, post_parent, post_title FROM $wpdb->posts WHERE post_parent = $parent AND post_status = 'static' ORDER BY menu_order");
 
 	if ($items) {
 		foreach ($items as $item) {
@@ -1330,41 +1214,41 @@ function user_can_access_admin_page() {
 	global $pagenow;
 	global $menu;
 	global $submenu;
-	global $menu_nopriv;
 	global $plugin_page;
 
 	$parent = get_admin_page_parent();
-	
-	if ( isset($menu_nopriv[$pagenow]) )
-		return false;
-
-	if ( isset($plugin_page) && isset($menu_nopriv[$plugin_page]) )
-		return false;
-	
-	if ( empty($parent) )
-		return true;
-
-	if (isset ($submenu[$parent])) {
-		foreach ($submenu[$parent] as $submenu_array) {
-			if ($submenu_array[2] == $pagenow) {
-				if (current_user_can($submenu_array[1]))
-					return true;
-				else
-					return false;
-			}
-		}
-	}
 
 	foreach ($menu as $menu_array) {
 		//echo "parent array: " . $menu_array[2];
 		if ($menu_array[2] == $parent) {
-			if (current_user_can($menu_array[1]))
-				return true;
-			else
+			if (!current_user_can($menu_array[1])) {
 				return false;
+			} else {
+				break;
+			}
 		}
 	}
-	
+
+	if (isset ($submenu[$parent])) {
+		if ( isset($plugin_page) ) {
+			foreach ($submenu[$parent] as $submenu_array) {
+				if ( $submenu_array[2] == $plugin_page ) {
+					if (!current_user_can($submenu_array[1]))
+						return false;
+				}
+			}
+		}
+
+		foreach ($submenu[$parent] as $submenu_array) {		
+			if ($submenu_array[2] == $pagenow) {
+				if (!current_user_can($submenu_array[1]))
+					return false;
+				else
+					return true;
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -1421,12 +1305,8 @@ function get_admin_page_parent() {
 	global $submenu;
 	global $pagenow;
 	global $plugin_page;
-	global $real_parent_file;
 
-	if ( !empty ($parent_file) ) {
-		if ( isset($real_parent_file[$parent_file]) )
-			$parent_file = $real_parent_file[$parent_file];
-
+	if (isset ($parent_file) && !empty ($parent_file)) {
 		return $parent_file;
 	}
 
@@ -1434,18 +1314,13 @@ function get_admin_page_parent() {
 		foreach ($menu as $parent_menu) {
 			if ($parent_menu[2] == $plugin_page) {
 				$parent_file = $plugin_page;
-				if ( isset($real_parent_file[$parent_file]) )
-					$parent_file = $real_parent_file[$parent_file];
-					
-				return $parent_file;
+				return $plugin_page;
 			}
 		}
 	}
 
 	foreach (array_keys($submenu) as $parent) {
 		foreach ($submenu[$parent] as $submenu_array) {
-			if ( isset($real_parent_file[$parent]) )
-				$parent = $real_parent_file[$parent];
 			if ($submenu_array[2] == $pagenow) {
 				$parent_file = $parent;
 				return $parent;
@@ -1480,12 +1355,8 @@ function add_menu_page($page_title, $menu_title, $access_level, $file, $function
 function add_submenu_page($parent, $page_title, $menu_title, $access_level, $file, $function = '') {
 	global $submenu;
 	global $menu;
-	global $real_parent_file;
 
 	$parent = plugin_basename($parent);
-	if ( isset($real_parent_file[$parent]) )
-		$parent = $real_parent_file[$parent];
-
 	$file = plugin_basename($file);
 
 	// If the parent doesn't already have a submenu, add a link to the parent
@@ -1544,13 +1415,13 @@ function validate_file_to_edit($file, $allowed_files = '') {
 
 	switch ($code) {
 		case 1 :
-			wp_die(__('Sorry, can&#8217;t edit files with ".." in the name. If you are trying to edit a file in your WordPress home directory, you can just type the name of the file in.'));
+			die(__('Sorry, can&#8217;t edit files with ".." in the name. If you are trying to edit a file in your WordPress home directory, you can just type the name of the file in.'));
 
 		case 2 :
-			wp_die(__('Sorry, can&#8217;t call files with their real path.'));
+			die(__('Sorry, can&#8217;t call files with their real path.'));
 
 		case 3 :
-			wp_die(__('Sorry, that file cannot be edited.'));
+			die(__('Sorry, that file cannot be edited.'));
 	}
 }
 
@@ -1588,8 +1459,8 @@ function get_file_description($file) {
 	if (isset ($wp_file_descriptions[basename($file)])) {
 		return $wp_file_descriptions[basename($file)];
 	}
-	elseif ( file_exists( ABSPATH . $file ) && is_file( ABSPATH . $file ) ) {
-		$template_data = implode('', file( ABSPATH . $file ));
+	elseif (file_exists(ABSPATH.$file)) {
+		$template_data = implode('', file(ABSPATH.$file));
 		if (preg_match("|Template Name:(.*)|i", $template_data, $name))
 			return $name[1];
 	}
@@ -1867,7 +1738,7 @@ function wp_handle_upload(&$file, $overrides = false) {
 	// Move the file to the uploads dir
 	$new_file = $uploads['path'] . "/$filename";
 	if ( false === @ move_uploaded_file($file['tmp_name'], $new_file) )
-		wp_die(printf(__('The uploaded file could not be moved to %s.'), $file['path']));
+		die(printf(__('The uploaded file could not be moved to %s.'), $file['path']));
 
 	// Set correct file permissions
 	$stat = stat(dirname($new_file));
@@ -1876,10 +1747,8 @@ function wp_handle_upload(&$file, $overrides = false) {
 
 	// Compute the URL
 	$url = $uploads['url'] . "/$filename";
-	
-	$return = apply_filters( 'wp_handle_upload', array('file' => $new_file, 'url' => $url, 'type' => $type) );
 
-	return $return;
+	return array('file' => $new_file, 'url' => $url, 'type' => $type);
 }
 
 function wp_shrink_dimensions($width, $height, $wmax = 128, $hmax = 96) {
@@ -1897,16 +1766,23 @@ function wp_import_cleanup($id) {
 
 function wp_import_upload_form($action) {
 ?>
-<form enctype="multipart/form-data" id="import-upload-form" method="post" action="<?php echo $action ?>">
-<p>
-<label for="upload"><?php _e('Choose a file from your computer:'); ?></label> <input type="file" id="upload" name="import" size="25" />
+<script type="text/javascript">
+function cancelUpload() {
+o = document.getElementById('uploadForm');
+o.method = 'GET';
+o.action.value = 'view';
+o.submit();
+}
+</script>
+<form enctype="multipart/form-data" id="uploadForm" method="post" action="<?php echo $action ?>">
+<label for="upload"><?php _e('File:'); ?></label><input type="file" id="upload" name="import" />
 <input type="hidden" name="action" value="save" />
-</p>
-<p class="submit">
-<input type="submit" value="<?php _e('Upload file and import'); ?> &raquo;" />
-</p>
+<div id="buttons">
+<input type="submit" value="<?php _e('Import'); ?>" />
+<input type="button" value="<?php _e('Cancel'); ?>" onclick="cancelUpload()" />
+</div>
 </form>
-<?php
+<?php	
 }
 
 function wp_import_handle_upload() {
@@ -1917,7 +1793,7 @@ function wp_import_handle_upload() {
 		return $file;
 
 	$url = $file['url'];
-	$file = addslashes( $file['file'] );
+	$file = $file['file'];
 	$filename = basename($file);
 
 	// Construct the object array
@@ -1948,7 +1824,7 @@ function the_attachment_links($id = false) {
 	$id = (int) $id;
 	$post = & get_post($id);
 
-	if ( $post->post_type != 'attachment' )
+	if ( $post->post_status != 'attachment' )
 		return false;
 
 	$icon = get_attachment_icon($post->ID);
@@ -1974,24 +1850,6 @@ function get_udims($width, $height) {
 		return array(128, (int) ($height / $width * 128));
 	else
 		return array((int) ($width / $height * 96), 96);
-}
-
-function wp_reset_vars($vars) {
-	for ($i=0; $i<count($vars); $i += 1) {
-		$var = $vars[$i];
-		global $$var;
-
-		if (!isset($$var)) {
-			if (empty($_POST["$var"])) {
-				if (empty($_GET["$var"]))
-					$$var = '';
-				else
-					$$var = $_GET["$var"];
-			} else {
-				$$var = $_POST["$var"];
-			}
-		}
-	}
 }
 
 ?>

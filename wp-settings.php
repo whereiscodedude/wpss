@@ -5,11 +5,11 @@ function unregister_GLOBALS() {
 		return;
 
 	if ( isset($_REQUEST['GLOBALS']) )
-		wp_die('GLOBALS overwrite attempt detected');
+		die('GLOBALS overwrite attempt detected');
 
 	// Variables that shouldn't be unset
 	$noUnset = array('GLOBALS', '_GET', '_POST', '_COOKIE', '_REQUEST', '_SERVER', '_ENV', '_FILES', 'table_prefix');
-
+	
 	$input = array_merge($_GET, $_POST, $_COOKIE, $_SERVER, $_ENV, $_FILES, isset($_SESSION) && is_array($_SESSION) ? $_SESSION : array());
 	foreach ( $input as $k => $v ) 
 		if ( !in_array($k, $noUnset) && isset($GLOBALS[$k]) )
@@ -26,7 +26,7 @@ if ( ! isset($blog_id) )
 // Fix for IIS, which doesn't set REQUEST_URI
 if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 	$_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME']; // Does this work under CGI?
-
+	
 	// Append the query string if it exists and isn't null
 	if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
 		$_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
@@ -47,10 +47,10 @@ if ( empty($PHP_SELF) )
 	$_SERVER['PHP_SELF'] = $PHP_SELF = preg_replace("/(\?.*)?$/",'',$_SERVER["REQUEST_URI"]);
 
 if ( !(phpversion() >= '4.1') )
-	wp_die( 'Your server is running PHP version ' . phpversion() . ' but WordPress requires at least 4.1' );
+	die( 'Your server is running PHP version ' . phpversion() . ' but WordPress requires at least 4.1' );
 
 if ( !extension_loaded('mysql') )
-	wp_die( 'Your PHP installation appears to be missing the MySQL which is required for WordPress.' );
+	die( 'Your PHP installation appears to be missing the MySQL which is required for WordPress.' );
 
 function timer_start() {
 	global $timestart;
@@ -77,7 +77,6 @@ $wpdb->users            = $table_prefix . 'users';
 $wpdb->categories       = $table_prefix . 'categories';
 $wpdb->post2cat         = $table_prefix . 'post2cat';
 $wpdb->comments         = $table_prefix . 'comments';
-$wpdb->link2cat         = $table_prefix . 'link2cat';
 $wpdb->links            = $table_prefix . 'links';
 $wpdb->linkcategories   = $table_prefix . 'linkcategories';
 $wpdb->options          = $table_prefix . 'options';
@@ -91,53 +90,57 @@ if ( defined('CUSTOM_USER_TABLE') )
 if ( defined('CUSTOM_USER_META_TABLE') )
 	$wpdb->usermeta = CUSTOM_USER_META_TABLE;
 
-// To be removed in 2.2
-$tableposts = $tableusers = $tablecategories = $tablepost2cat = $tablecomments = $tablelink2cat = $tablelinks = $tablelinkcategories = $tableoptions = $tablepostmeta = '';
+// We're going to need to keep this around for a few months even though we're not using it internally
+
+$tableposts = $wpdb->posts;
+$tableusers = $wpdb->users;
+$tablecategories = $wpdb->categories;
+$tablepost2cat = $wpdb->post2cat;
+$tablecomments = $wpdb->comments;
+$tablelinks = $wpdb->links;
+$tablelinkcategories = $wpdb->linkcategories;
+$tableoptions = $wpdb->options;
+$tablepostmeta = $wpdb->postmeta;
 
 if ( file_exists(ABSPATH . 'wp-content/object-cache.php') )
 	require (ABSPATH . 'wp-content/object-cache.php');
 else
 	require (ABSPATH . WPINC . '/cache.php');
 
+// To disable persistant caching, add the below line to your wp-config.php file, uncommented of course.
+// define('DISABLE_CACHE', true);
+
 wp_cache_init();
 
 require (ABSPATH . WPINC . '/functions.php');
-require (ABSPATH . WPINC . '/plugin.php');
 require (ABSPATH . WPINC . '/default-filters.php');
-require_once (ABSPATH . WPINC . '/l10n.php');
+require_once (ABSPATH . WPINC . '/wp-l10n.php');
 
-if ( !is_blog_installed() && (!strstr($_SERVER['PHP_SELF'], 'install.php') && !defined('WP_INSTALLING')) ) {
+$wpdb->hide_errors();
+$db_check = $wpdb->get_var("SELECT option_value FROM $wpdb->options WHERE option_name = 'siteurl'");
+if ( !$db_check && (!strstr($_SERVER['PHP_SELF'], 'install.php') && !defined('WP_INSTALLING')) ) {
 	if ( strstr($_SERVER['PHP_SELF'], 'wp-admin') )
 		$link = 'install.php';
 	else
 		$link = 'wp-admin/install.php';
-	wp_die(sprintf(__("It doesn't look like you've installed WP yet. Try running <a href='%s'>install.php</a>."), $link));
+	die(sprintf(__("It doesn't look like you've installed WP yet. Try running <a href='%s'>install.php</a>."), $link));
 }
+$wpdb->show_errors();
 
-require (ABSPATH . WPINC . '/formatting.php');
+require (ABSPATH . WPINC . '/functions-formatting.php');
+require (ABSPATH . WPINC . '/functions-post.php');
 require (ABSPATH . WPINC . '/capabilities.php');
 require (ABSPATH . WPINC . '/classes.php');
-require (ABSPATH . WPINC . '/query.php');
-require (ABSPATH . WPINC . '/theme.php');
-require (ABSPATH . WPINC . '/user.php');
-require (ABSPATH . WPINC . '/general-template.php');
-require (ABSPATH . WPINC . '/link-template.php');
-require (ABSPATH . WPINC . '/author-template.php');
-require (ABSPATH . WPINC . '/post.php');
-require (ABSPATH . WPINC . '/post-template.php');
-require (ABSPATH . WPINC . '/category.php');
-require (ABSPATH . WPINC . '/category-template.php');
-require (ABSPATH . WPINC . '/comment.php');
-require (ABSPATH . WPINC . '/comment-template.php');
-require (ABSPATH . WPINC . '/rewrite.php');
-require (ABSPATH . WPINC . '/feed.php');
-require (ABSPATH . WPINC . '/bookmark.php');
-require (ABSPATH . WPINC . '/bookmark-template.php');
+require (ABSPATH . WPINC . '/template-functions-general.php');
+require (ABSPATH . WPINC . '/template-functions-links.php');
+require (ABSPATH . WPINC . '/template-functions-author.php');
+require (ABSPATH . WPINC . '/template-functions-post.php');
+require (ABSPATH . WPINC . '/template-functions-category.php');
+require (ABSPATH . WPINC . '/comment-functions.php');
+require (ABSPATH . WPINC . '/feed-functions.php');
+require (ABSPATH . WPINC . '/links.php');
 require (ABSPATH . WPINC . '/kses.php');
-require (ABSPATH . WPINC . '/cron.php');
 require (ABSPATH . WPINC . '/version.php');
-require (ABSPATH . WPINC . '/deprecated.php');
-require (ABSPATH . WPINC . '/script-loader.php');
 
 if (!strstr($_SERVER['PHP_SELF'], 'install.php')) :
     // Used to guarantee unique hash cookies
@@ -174,7 +177,7 @@ if ( get_settings('active_plugins') ) {
 	}
 }
 
-require (ABSPATH . WPINC . '/pluggable.php');
+require (ABSPATH . WPINC . '/pluggable-functions.php');
 
 if ( defined('WP_CACHE') && function_exists('wp_cache_postload') )
 	wp_cache_postload();
@@ -200,7 +203,6 @@ $wp_query   = new WP_Query();
 $wp_rewrite = new WP_Rewrite();
 $wp         = new WP();
 
-validate_current_theme();
 define('TEMPLATEPATH', get_template_directory());
 
 // Load the default text localization domain.
@@ -208,8 +210,6 @@ load_default_textdomain();
 
 // Pull in locale data after loading text domain.
 require_once(ABSPATH . WPINC . '/locale.php');
-
-$wp_locale = new WP_Locale();
 
 // Load functions for active theme.
 if ( file_exists(TEMPLATEPATH . "/functions.php") )

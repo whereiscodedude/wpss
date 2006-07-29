@@ -3,7 +3,21 @@ require_once('admin.php');
 $title = __('Template &amp; File Editing');
 $parent_file = 	'edit.php';
 
-wp_reset_vars(array('action', 'redirect', 'profile', 'error', 'warning', 'a', 'file'));
+$wpvarstoreset = array('action','redirect','profile','error','warning','a','file');
+for ($i=0; $i<count($wpvarstoreset); $i += 1) {
+	$wpvar = $wpvarstoreset[$i];
+	if (!isset($$wpvar)) {
+		if (empty($_POST["$wpvar"])) {
+			if (empty($_GET["$wpvar"])) {
+				$$wpvar = '';
+			} else {
+				$$wpvar = $_GET["$wpvar"];
+			}
+		} else {
+			$$wpvar = $_POST["$wpvar"];
+		}
+	}
+}
 
 $recents = get_option('recently_edited');
 
@@ -25,7 +39,7 @@ case 'update':
 	check_admin_referer('edit-file_' . $file);
 
 	if ( ! current_user_can('edit_files') )
-		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this blog.').'</p>');
+	die('<p>'.__('You have do not have sufficient permissions to edit templates for this blog.').'</p>');
 
 	$newcontent = stripslashes($_POST['newcontent']);
 	if (is_writeable($real_file)) {
@@ -48,18 +62,18 @@ break;
 default:
 
 	require_once('./admin-header.php');
-
+	
 	if ( ! current_user_can('edit_files') )
-		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this blog.').'</p>');
+	die('<p>'.__('You have do not have sufficient permissions to edit templates for this blog.').'</p>');
 
 	if ( strstr( $file, 'wp-config.php' ) )
-	wp_die('<p>'.__('The config file cannot be edited or viewed through the web interface. Sorry!').'</p>');
+	die('<p>'.__('The config file cannot be edited or viewed through the web interface. Sorry!').'</p>');
 
 	update_recently_edited($file);
 
 	if (!is_file($real_file))
 		$error = true;
-
+	
 	if (!$error) {
 		$f = @ fopen($real_file, 'r');
 		if ( $f ) {
@@ -76,7 +90,7 @@ default:
  <div id="message" class="error"><p><?php _e('Could not save file.') ?></p></div>
 	<?php else: ?>
  <div id="message" class="updated fade"><p><?php _e('File edited successfully.') ?></p></div>
-	<?php endif; ?>
+	<?php endif; ?>	
 <?php endif; ?>
  <div class="wrap"> 
 <?php
@@ -122,7 +136,7 @@ endif;
 <?php if ( is_writeable($real_file) ) : ?>
      <p class="submit">
 <?php
-	echo "<input type='submit' name='submit' value='	" . __('Update File &raquo;') . "' tabindex='2' />";
+	echo "<input type='submit' name='submit' value='	" . __('Update File') . " &raquo;' tabindex='2' />";
 ?>
 </p>
 <?php else : ?>

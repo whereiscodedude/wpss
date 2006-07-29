@@ -17,7 +17,7 @@ Template Name: Archives
 
 <h2>Archives by Subject:</h2>
   <ul>
-     <?php wp_list_categories(); ?>
+     <?php wp_list_cats(); ?>
   </ul>
 
 </div>
