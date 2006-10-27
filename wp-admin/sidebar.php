@@ -4,7 +4,7 @@ $mode = 'sidebar';
 require_once('admin.php');
 
 if ( ! current_user_can('edit_posts') )
-	wp_die(__('Cheatin&#8217; uh?'));
+	die ("Cheatin' uh ?");
 
 if ('b' == $_GET['a']) {
 

@@ -12,10 +12,10 @@ if ( isset($HTTP_RAW_POST_DATA) )
 include('./wp-config.php');
 
 if ( isset( $_GET['rsd'] ) ) { // http://archipelago.phrasewise.com/rsd 
-header('Content-type: text/xml; charset=' . get_option('blog_charset'), true);
+header('Content-type: text/xml; charset=' . get_settings('blog_charset'), true);
 
 ?>
-<?php echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
+<?php echo '<?xml version="1.0" encoding="'.get_settings('blog_charset').'"?'.'>'; ?>
 <rsd version="1.0" xmlns="http://archipelago.phrasewise.com/rsd">
   <service>
     <engineName>WordPress</engineName>
@@ -167,9 +167,9 @@ class wp_xmlrpc_server extends IXR_Server {
 
 	  $struct = array(
 	    'isAdmin'  => $is_admin,
-	    'url'      => get_option('home') . '/',
+	    'url'      => get_settings('home') . '/',
 	    'blogid'   => '1',
-	    'blogName' => get_option('blogname')
+	    'blogName' => get_settings('blogname')
 	  );
 
 	  return array($struct);
@@ -219,7 +219,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	  $user_data = get_userdatabylogin($user_login);
 	  $post_data = wp_get_single_post($post_ID, ARRAY_A);
 
-	  $categories = implode(',', wp_get_post_categories($post_ID));
+	  $categories = implode(',', wp_get_post_cats(1, $post_ID));
 
 	  $content  = '<title>'.stripslashes($post_data['post_title']).'</title>';
 	  $content .= '<category>'.$categories.'</category>';
@@ -262,7 +262,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	  foreach ($posts_list as $entry) {
 	  
 	    $post_date = mysql2date('Ymd\TH:i:s', $entry['post_date']);
-	    $categories = implode(',', wp_get_post_categories($entry['ID']));
+	    $categories = implode(',', wp_get_post_cats(1, $entry['ID']));
 
 	    $content  = '<title>'.stripslashes($entry['post_title']).'</title>';
 	    $content .= '<category>'.$categories.'</category>';
@@ -305,8 +305,8 @@ class wp_xmlrpc_server extends IXR_Server {
 	    return new IXR_Error(401, 'Sorry, this user can not edit the template.');
 	  }
 
-	  /* warning: here we make the assumption that the weblog's URL is on the same server */
-	  $filename = get_option('home') . '/';
+	  /* warning: here we make the assumption that the weblog's URI is on the same server */
+	  $filename = get_settings('home') . '/';
 	  $filename = preg_replace('#https?://.+?/#', $_SERVER['DOCUMENT_ROOT'].'/', $filename);
 
 	  $f = fopen($filename, 'r');
@@ -340,8 +340,8 @@ class wp_xmlrpc_server extends IXR_Server {
 	    return new IXR_Error(401, 'Sorry, this user can not edit the template.');
 	  }
 
-	  /* warning: here we make the assumption that the weblog's URL is on the same server */
-	  $filename = get_option('home') . '/';
+	  /* warning: here we make the assumption that the weblog's URI is on the same server */
+	  $filename = get_settings('home') . '/';
 	  $filename = preg_replace('#https?://.+?/#', $_SERVER['DOCUMENT_ROOT'].'/', $filename);
 
 	  if ($f = fopen($filename, 'w+')) {
@@ -521,11 +521,11 @@ class wp_xmlrpc_server extends IXR_Server {
 	  $post_more = $content_struct['mt_text_more'];
 
 	  $comment_status = (empty($content_struct['mt_allow_comments'])) ?
-	    get_option('default_comment_status')
+	    get_settings('default_comment_status')
 	    : $content_struct['mt_allow_comments'];
 
 	  $ping_status = (empty($content_struct['mt_allow_pings'])) ?
-	    get_option('default_ping_status')
+	    get_settings('default_ping_status')
 	    : $content_struct['mt_allow_pings'];
 
 	  if ($post_more) {
@@ -554,7 +554,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	      $post_category[] = get_cat_ID($cat);
 	    }
 	  }
-
+		
 	  // We've got all the data -- post it:
 	  $postdata = compact('post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt', 'comment_status', 'ping_status', 'to_ping');
 
@@ -600,7 +600,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	  $catnames = $content_struct['categories'];
 
 	  $post_category = array();
-
+		
 	  if (is_array($catnames)) {
 	    foreach ($catnames as $cat) {
 	      $post_category[] = get_cat_ID($cat);
@@ -618,11 +618,11 @@ class wp_xmlrpc_server extends IXR_Server {
 		$to_ping = $content_struct['mt_tb_ping_urls'];
 
 	  $comment_status = (empty($content_struct['mt_allow_comments'])) ?
-	    get_option('default_comment_status')
+	    get_settings('default_comment_status')
 	    : $content_struct['mt_allow_comments'];
 
 	  $ping_status = (empty($content_struct['mt_allow_pings'])) ?
-	    get_option('default_ping_status')
+	    get_settings('default_ping_status')
 	    : $content_struct['mt_allow_pings'];
 
 	  // Do some timestamp voodoo
@@ -672,7 +672,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	    $post_date = mysql2date('Ymd\TH:i:s', $postdata['post_date']);
 
 	    $categories = array();
-	    $catids = wp_get_post_categories($post_ID);
+	    $catids = wp_get_post_cats('', $post_ID);
 	    foreach($catids as $catid) {
 	      $categories[] = get_cat_name($catid);
 	    }
@@ -732,7 +732,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	  
 	    $post_date = mysql2date('Ymd\TH:i:s', $entry['post_date']);
 	    $categories = array();
-	    $catids = wp_get_post_categories($entry['ID']);
+	    $catids = wp_get_post_cats('', $entry['ID']);
 	    foreach($catids as $catid) {
 	      $categories[] = get_cat_name($catid);
 	    }
@@ -838,7 +838,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			logIO('O', '(MW) Could not write file '.$name);
 			return new IXR_Error(500, 'Could not write file '.$name);
 		}
-
+		
 		return array('url' => $upload['url']);
 	}
 
@@ -935,7 +935,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	  }
 
 	  $categories = array();
-	  $catids = wp_get_post_categories(intval($post_ID));
+	  $catids = wp_get_post_cats('', intval($post_ID));
 	  // first listed category will be the primary category
 	  $isPrimary = true;
 	  foreach($catids as $catid) {
@@ -972,8 +972,8 @@ class wp_xmlrpc_server extends IXR_Server {
 	  foreach($categories as $cat) {
 	    $catids[] = $cat['categoryId'];
 	  }
-
-	  wp_set_post_categories($post_ID, $catids);
+	
+	  wp_set_post_cats('', $post_ID, $catids);
 
 	  return true;
 	}
@@ -1056,7 +1056,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	  $postdata['post_status'] = 'publish';
 
 	  // retain old cats
-	  $cats = wp_get_post_categories($post_ID);
+	  $cats = wp_get_post_cats('',$post_ID);
 	  $postdata['post_category'] = $cats;
 		$this->escape($postdata);
 
@@ -1088,7 +1088,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		$error_code = -1;
 
 		// Check if the page linked to is in our site
-		$pos1 = strpos($pagelinkedto, str_replace(array('http://www.','http://','https://www.','https://'), '', get_option('home')));
+		$pos1 = strpos($pagelinkedto, str_replace(array('http://www.','http://','https://www.','https://'), '', get_settings('home')));
 		if( !$pos1 )
 	  		return new IXR_Error(0, 'Is there no link to us?');
 
@@ -1130,24 +1130,24 @@ class wp_xmlrpc_server extends IXR_Server {
 			}
 		} else {
 			// TODO: Attempt to extract a post ID from the given URL
-	  		return new IXR_Error(33, 'The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
+	  		return new IXR_Error(33, 'The specified target URI cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
 		}
 		$post_ID = (int) $post_ID;
 
 
-		logIO("O","(PB) URL='$pagelinkedto' ID='$post_ID' Found='$way'");
+		logIO("O","(PB) URI='$pagelinkedto' ID='$post_ID' Found='$way'");
 
 		$post = get_post($post_ID);
 
 		if ( !$post ) // Post_ID not found
-	  		return new IXR_Error(33, 'The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
+	  		return new IXR_Error(33, 'The specified target URI cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
 
 		if ( $post_ID == url_to_postid($pagelinkedfrom) )
-			return new IXR_Error(0, 'The source URL and the target URL cannot both point to the same resource.');
+			return new IXR_Error(0, 'The source URI and the target URI cannot both point to the same resource.');
 
 		// Check if pings are on
 		if ( 'closed' == $post->ping_status )
-	  		return new IXR_Error(33, 'The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
+	  		return new IXR_Error(33, 'The specified target URI cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
 
 		// Let's check that the remote site didn't already pingback this entry
 		$result = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = '$post_ID' AND comment_author_url = '$pagelinkedfrom'");
@@ -1161,7 +1161,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		// Let's check the remote site
 		$linea = wp_remote_fopen( $pagelinkedfrom );
 		if ( !$linea )
-	  		return new IXR_Error(16, 'The source URL does not exist.');
+	  		return new IXR_Error(16, 'The source URI does not exist.');
 
 		// Work around bug in strip_tags():
 		$linea = str_replace('<!DOC', '<DOC', $linea);
@@ -1176,11 +1176,11 @@ class wp_xmlrpc_server extends IXR_Server {
 		$linea = strip_tags( $linea, '<a>' ); // just keep the tag we need
 
 		$p = explode( "\n\n", $linea );
-
+		
 		$sem_regexp_pb = "/(\\/|\\\|\*|\?|\+|\.|\^|\\$|\(|\)|\[|\]|\||\{|\})/";
 		$sem_regexp_fix = "\\\\$1";
 		$link = preg_replace( $sem_regexp_pb, $sem_regexp_fix, $pagelinkedfrom );
-
+		
 		$finished = false;
 		foreach ( $p as $para ) {
 			if ( $finished )
@@ -1196,7 +1196,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		}
 
 		if ( empty($context) ) // URL pattern not found
-			return new IXR_Error(17, 'The source URL does not contain a link to the target URL, and so cannot be used as a source.');
+			return new IXR_Error(17, 'The source URI does not contain a link to the target URI, and so cannot be used as a source.');
 
 		$pagelinkedfrom = preg_replace('#&([^amp\;])#is', '&amp;$1', $pagelinkedfrom);
 
@@ -1217,7 +1217,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		wp_new_comment($commentdata);
 		do_action('pingback_post', $wpdb->insert_id);
-
+		
 		return "Pingback from $pagelinkedfrom to $pagelinkedto registered. Keep the web talking! :-)";
 	}
 
@@ -1236,14 +1236,14 @@ class wp_xmlrpc_server extends IXR_Server {
 		$post_ID = url_to_postid($url);
 		if (!$post_ID) {
 			// We aren't sure that the resource is available and/or pingback enabled
-	  		return new IXR_Error(33, 'The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
+	  		return new IXR_Error(33, 'The specified target URI cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
 		}
 
 		$actual_post = wp_get_single_post($post_ID, ARRAY_A);
 
 		if (!$actual_post) {
 			// No such post = resource not found
-	  		return new IXR_Error(32, 'The specified target URL does not exist.');
+	  		return new IXR_Error(32, 'The specified target URI does not exist.');
 		}
 
 		$comments = $wpdb->get_results("SELECT comment_author_url, comment_content, comment_author_IP, comment_type FROM $wpdb->comments WHERE comment_post_ID = $post_ID");

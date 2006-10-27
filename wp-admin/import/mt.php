@@ -11,7 +11,7 @@ class MT_Import {
 
 	function header() {
 		echo '<div class="wrap">';
-		echo '<h2>'.__('Import Movable Type and TypePad').'</h2>';
+		echo '<h2>'.__('Import Movable Type and Typepad').'</h2>';
 	}
 
 	function footer() {
@@ -21,11 +21,9 @@ class MT_Import {
 	function greet() {
 		$this->header();
 ?>
-<div class="narrow">
 <p><?php _e('Howdy! We&#8217;re about to begin the process to import all of your Movable Type entries into WordPress. To begin, select a file to upload and click Import.'); ?></p>
 <?php wp_import_upload_form( add_query_arg('step', 1) ); ?>
 	<p><?php _e('The importer is smart enough not to import duplicates, so you can run this multiple times without worry if&#8212;for whatever reason&#8212;it doesn\'t finish. If you get an <strong>out of memory</strong> error try splitting up the import file into pieces.'); ?> </p>
-</div>
 <?php
 		$this->footer();
 	}
@@ -432,5 +430,5 @@ class MT_Import {
 
 $mt_import = new MT_Import();
 
-register_importer('mt', __('Movable Type and TypePad'), __('Imports <strong>posts and comments</strong> from your Movable Type or TypePad blog'), array ($mt_import, 'dispatch'));
+register_importer('mt', __('Movable Type and Typepad'), __('Imports <strong>posts and comments</strong> from your Movable Type or Typepad blog'), array ($mt_import, 'dispatch'));
 ?>

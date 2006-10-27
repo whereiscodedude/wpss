@@ -11,11 +11,11 @@ foreach ($menu as $item) {
 	// 0 = name, 1 = capability, 2 = file
 	if (( strcmp($self, $item[2]) == 0 && empty($parent_file)) || ($parent_file && ($item[2] == $parent_file))) $class = ' class="current"';
     
-	if ( !empty($submenu[$item[2]]) || current_user_can($item[1]) ) {
-		if ( file_exists(ABSPATH . PLUGINDIR . "/{$item[2]}") )
-			echo "\n\t<li><a href='" . get_option('siteurl') . "/wp-admin/admin.php?page={$item[2]}'$class>{$item[0]}</a></li>";
+	if ( current_user_can($item[1]) ) {
+		if ( file_exists(ABSPATH . "wp-content/plugins/{$item[2]}") )
+			echo "\n\t<li><a href='" . get_settings('siteurl') . "/wp-admin/admin.php?page={$item[2]}'$class>{$item[0]}</a></li>";			
 		else
-			echo "\n\t<li><a href='" . get_option('siteurl') . "/wp-admin/{$item[2]}'$class>{$item[0]}</a></li>";
+			echo "\n\t<li><a href='" . get_settings('siteurl') . "/wp-admin/{$item[2]}'$class>{$item[0]}</a></li>";
 	}
 }
 
@@ -40,22 +40,18 @@ else $class = '';
 
 $menu_hook = get_plugin_page_hook($item[2], $parent_file);
 
-if (file_exists(ABSPATH . PLUGINDIR . "/{$item[2]}") || ! empty($menu_hook)) {
+if (file_exists(ABSPATH . "wp-content/plugins/{$item[2]}") || ! empty($menu_hook)) {
  	if ( 'admin.php' == $pagenow )
-		echo "\n\t<li><a href='" . get_option('siteurl') . "/wp-admin/admin.php?page={$item[2]}'$class>{$item[0]}</a></li>";
+		echo "\n\t<li><a href='" . get_settings('siteurl') . "/wp-admin/admin.php?page={$item[2]}'$class>{$item[0]}</a></li>";
 	else
-		echo "\n\t<li><a href='" . get_option('siteurl') . "/wp-admin/{$parent_file}?page={$item[2]}'$class>{$item[0]}</a></li>";
+		echo "\n\t<li><a href='" . get_settings('siteurl') . "/wp-admin/{$parent_file}?page={$item[2]}'$class>{$item[0]}</a></li>";
  } else {
-	echo "\n\t<li><a href='" . get_option('siteurl') . "/wp-admin/{$item[2]}'$class>{$item[0]}</a></li>";
+	echo "\n\t<li><a href='" . get_settings('siteurl') . "/wp-admin/{$item[2]}'$class>{$item[0]}</a></li>";
  }
 endforeach;
 ?>
 
 </ul>
-<?php
-else :
-?>
-<div id="minisub"></div>
 <?php
 
 endif; 

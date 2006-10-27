@@ -1,25 +1,22 @@
+/**
+ * $RCSfile: tiny_mce_popup.js,v $
+ * $Revision: 1.18 $
+ * $Date: 2005/10/29 19:13:20 $
+ *
+ * @author Moxiecode
+ * @copyright Copyright © 2004, Moxiecode Systems AB, All rights reserved.
+ */
 
-
-// Some global instances, this will be filled later
 var tinyMCE = null, tinyMCELang = null;
 
-
-function TinyMCE_Popup() {
+function TinyMCEPopup() {
 };
 
-
-TinyMCE_Popup.prototype.init = function() {
+TinyMCEPopup.prototype.init = function() {
 	var win = window.opener ? window.opener : window.dialogArguments;
-	var inst;
 
-	if (!win) {
-		// Try parent
-		win = parent.parent;
-
-		// Try top
-		if (typeof(win.tinyMCE) == "undefined")
-			win = top;
-	}
+	if (!win)
+		win = top;
 
 	window.opener = win;
 	this.windowOpener = win;
@@ -34,16 +31,15 @@ TinyMCE_Popup.prototype.init = function() {
 		return;
 	}
 
-	inst = tinyMCE.selectedInstance;
 	this.isWindow = tinyMCE.getWindowArg('mce_inside_iframe', false) == false;
-	this.storeSelection = (tinyMCE.isMSIE && !tinyMCE.isOpera) && !this.isWindow && tinyMCE.getWindowArg('mce_store_selection', true);
+	this.storeSelection = tinyMCE.isMSIE && !this.isWindow && tinyMCE.getWindowArg('mce_store_selection', true);
 
 	if (this.isWindow)
 		window.focus();
 
 	// Store selection
 	if (this.storeSelection)
-		inst.selectionBookmark = inst.selection.getBookmark(true);
+		tinyMCE.selectedInstance.execCommand('mceStoreSelection');
 
 	// Setup dir
 	if (tinyMCELang['lang_dir'])
@@ -67,24 +63,23 @@ TinyMCE_Popup.prototype.init = function() {
 	tinyMCE.addEvent(window, "load", this.onLoad);
 };
 
-
-TinyMCE_Popup.prototype.onLoad = function() {
-	var dir, i, elms, body = document.body;
+TinyMCEPopup.prototype.onLoad = function() {
+	var body = document.body;
 
 	body.onkeydown = function (e) {
 		e = e ? e : window.event;
 		if ( e.keyCode == 27 && !e.shiftKey && !e.controlKey && !e.altKey ) {
-			tinyMCE.closeWindow(window);
+			tinyMCEPopup.close();
 		}
 	}
 
 	if (tinyMCE.getWindowArg('mce_replacevariables', true))
 		body.innerHTML = tinyMCE.applyTemplate(body.innerHTML, tinyMCE.windowArgs);
 
-	dir = tinyMCE.selectedInstance.settings['directionality'];
-	if (dir == "rtl" && document.forms && document.forms.length > 0) {
-		elms = document.forms[0].elements;
-		for (i=0; i<elms.length; i++) {
+	var dir = tinyMCE.selectedInstance.settings['directionality'];
+	if (dir == "rtl") {
+		var elms = document.forms[0].elements;
+		for (var i=0; i<elms.length; i++) {
 			if ((elms[i].type == "text" || elms[i].type == "textarea") && elms[i].getAttribute("dir") != "ltr")
 				elms[i].dir = dir;
 		}
@@ -94,20 +89,19 @@ TinyMCE_Popup.prototype.onLoad = function() {
 		body.style.display = 'block';
 
 	// Execute real onload (Opera fix)
-	if (tinyMCEPopup.onLoadEval != "")
+	if (tinyMCEPopup.onLoadEval != "") {
 		eval(tinyMCEPopup.onLoadEval);
+	}
 };
 
-
-TinyMCE_Popup.prototype.executeOnLoad = function(str) {
+TinyMCEPopup.prototype.executeOnLoad = function(str) {
 	if (tinyMCE.isOpera)
 		this.onLoadEval = str;
 	else
 		eval(str);
 };
 
-
-TinyMCE_Popup.prototype.resizeToInnerSize = function() {
+TinyMCEPopup.prototype.resizeToInnerSize = function() {
 	// Netscape 7.1 workaround
 	if (this.isWindow && tinyMCE.isNS71) {
 		window.resizeBy(0, 10);
@@ -124,13 +118,13 @@ TinyMCE_Popup.prototype.resizeToInnerSize = function() {
 
 		// Remove margin
 		oldMargin = body.style.margin;
-		body.style.margin = '0';
+		body.style.margin = '0px';
 
 		// Create wrapper
 		wrapper = doc.createElement("div");
 		wrapper.id = 'mcBodyWrapper';
 		wrapper.style.display = 'none';
-		wrapper.style.margin = '0';
+		wrapper.style.margin = '0px';
 
 		// Wrap body elements
 		nodes = doc.body.childNodes;
@@ -152,7 +146,7 @@ TinyMCE_Popup.prototype.resizeToInnerSize = function() {
 		iframe.src = document.location.href.toLowerCase().indexOf('https') == -1 ? "about:blank" : tinyMCE.settings['default_document'];
 		iframe.width = "100%";
 		iframe.height = "100%";
-		iframe.style.margin = '0';
+		iframe.style.margin = '0px';
 
 		// Add iframe
 		doc.body.appendChild(iframe);
@@ -173,8 +167,7 @@ TinyMCE_Popup.prototype.resizeToInnerSize = function() {
 	}
 };
 
-
-TinyMCE_Popup.prototype.resizeToContent = function() {
+TinyMCEPopup.prototype.resizeToContent = function() {
 	var isMSIE = (navigator.appName == "Microsoft Internet Explorer");
 	var isOpera = (navigator.userAgent.indexOf("Opera") != -1);
 
@@ -204,42 +197,31 @@ TinyMCE_Popup.prototype.resizeToContent = function() {
 	}
 };
 
-
-TinyMCE_Popup.prototype.getWindowArg = function(name, default_value) {
+TinyMCEPopup.prototype.getWindowArg = function(name, default_value) {
 	return tinyMCE.getWindowArg(name, default_value);
 };
 
-
-TinyMCE_Popup.prototype.restoreSelection = function() {
-	if (this.storeSelection) {
-		var inst = tinyMCE.selectedInstance;
-
-		inst.getWin().focus();
-
-		if (inst.selectionBookmark)
-			inst.selection.moveToBookmark(inst.selectionBookmark);
-	}
-};
-
-
-TinyMCE_Popup.prototype.execCommand = function(command, user_interface, value) {
+TinyMCEPopup.prototype.execCommand = function(command, user_interface, value) {
 	var inst = tinyMCE.selectedInstance;
 
-	this.restoreSelection();
+	// Restore selection
+	if (this.storeSelection) {
+		inst.getWin().focus();
+		inst.execCommand('mceRestoreSelection');
+	}
+
 	inst.execCommand(command, user_interface, value);
 
 	// Store selection
 	if (this.storeSelection)
-		inst.selectionBookmark = inst.selection.getBookmark(true);
+		inst.execCommand('mceStoreSelection');
 };
 
-
-TinyMCE_Popup.prototype.close = function() {
+TinyMCEPopup.prototype.close = function() {
 	tinyMCE.closeWindow(window);
 };
 
-
-TinyMCE_Popup.prototype.pickColor = function(e, element_id) {
+TinyMCEPopup.prototype.pickColor = function(e, element_id) {
 	tinyMCE.selectedInstance.execCommand('mceColorPicker', true, {
 		element_id : element_id,
 		document : document,
@@ -248,8 +230,7 @@ TinyMCE_Popup.prototype.pickColor = function(e, element_id) {
 	});
 };
 
-
-TinyMCE_Popup.prototype.openBrowser = function(element_id, type, option) {
+TinyMCEPopup.prototype.openBrowser = function(element_id, type, option) {
 	var cb = tinyMCE.getParam(option, tinyMCE.getParam("file_browser_callback"));
 	var url = document.getElementById(element_id).value;
 
@@ -263,16 +244,7 @@ TinyMCE_Popup.prototype.openBrowser = function(element_id, type, option) {
 		eval("tinyMCEPopup.windowOpener." + cb + "(element_id, url, type, window);");
 };
 
-TinyMCE_Popup.prototype.importClass = function(c) {
-	window[c] = function() {};
-
-	for (var n in window.opener[c].prototype)
-		window[c].prototype[n] = window.opener[c].prototype[n];
-
-	window[c].constructor = window.opener[c].constructor;
-};
-
 // Setup global instance
-var tinyMCEPopup = new TinyMCE_Popup();
+var tinyMCEPopup = new TinyMCEPopup();
 
 tinyMCEPopup.init();

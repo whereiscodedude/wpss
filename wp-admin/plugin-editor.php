@@ -4,7 +4,21 @@ require_once('admin.php');
 $title = __("Edit Plugins");
 $parent_file = 'plugins.php';
 
-wp_reset_vars(array('action', 'redirect', 'profile', 'error', 'warning', 'a', 'file'));
+$wpvarstoreset = array('action','redirect','profile','error','warning','a','file');
+for ($i=0; $i<count($wpvarstoreset); $i += 1) {
+	$wpvar = $wpvarstoreset[$i];
+	if (!isset($$wpvar)) {
+		if (empty($_POST["$wpvar"])) {
+			if (empty($_GET["$wpvar"])) {
+				$$wpvar = '';
+			} else {
+				$$wpvar = $_GET["$wpvar"];
+			}
+		} else {
+			$$wpvar = $_POST["$wpvar"];
+		}
+	}
+}
 
 $plugins = get_plugins();
 $plugin_files = array_keys($plugins);
@@ -14,7 +28,7 @@ if (empty($file)) {
 }
 
 $file = validate_file_to_edit($file, $plugin_files);
-$real_file = get_real_file_to_edit( PLUGINDIR . "/$file");
+$real_file = get_real_file_to_edit("wp-content/plugins/$file");
 
 switch($action) {
 
@@ -23,7 +37,7 @@ case 'update':
 	check_admin_referer('edit-plugin_' . $file);
 
 	if ( !current_user_can('edit_plugins') )
-		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this blog.').'</p>');
+	die('<p>'.__('You have do not have sufficient permissions to edit templates for this blog.').'</p>');
 
 	$newcontent = stripslashes($_POST['newcontent']);
 	if (is_writeable($real_file)) {
@@ -40,17 +54,16 @@ case 'update':
 break;
 
 default:
-
-	if ( !current_user_can('edit_plugins') )
-		wp_die('<p>'.__('You do not have sufficient permissions to edit plugins for this blog.').'</p>');
-
+	
 	require_once('admin-header.php');
+	if ( !current_user_can('edit_plugins') )
+	die('<p>'.__('You have do not have sufficient permissions to edit plugins for this blog.').'</p>');
 
-	update_recently_edited(PLUGINDIR . "/$file");
-
+	update_recently_edited("wp-content/plugins/$file");
+	
 	if (!is_file($real_file))
 		$error = 1;
-
+	
 	if (!$error) {
 		$f = fopen($real_file, 'r');
 		$content = fread($f, filesize($real_file));
@@ -92,7 +105,7 @@ if ($plugin_files) :
 <?php if ( is_writeable($real_file) ) : ?>
      <p class="submit">
 <?php
-	echo "<input type='submit' name='submit' value='	" . __('Update File &raquo;') . "' tabindex='2' />";
+	echo "<input type='submit' name='submit' value='	" . __('Update File') . " &raquo;' tabindex='2' />";
 ?>
 </p>
 <?php else : ?>

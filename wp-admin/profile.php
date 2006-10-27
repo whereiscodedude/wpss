@@ -3,10 +3,7 @@ require_once('admin.php');
 
 $title = __('Profile');
 
-if ( current_user_can('edit_users') )
-	$parent_file = 'users.php';
-else
-	$parent_file = 'profile.php';
+$parent_file = 'profile.php';
 include_once('admin-header.php');
 $profileuser = get_user_to_edit($user_ID);
 
@@ -27,17 +24,6 @@ $bookmarklet_height= 440;
 <input type="hidden" name="from" value="profile" />
 <input type="hidden" name="checkuser_id" value="<?php echo $user_ID ?>" />
 </p>
-
-<h3><?php _e('Personal Options'); ?></h3>
-
-<?php if ( rich_edit_exists() ) : // don't bother showing the option if the editor has been removed ?>
-<p><label for="rich_editing"><input name="rich_editing" type="checkbox" id="rich_editing" value="true" <?php checked('true', get_user_option('rich_editing')); ?> />
-<?php _e('Use the visual editor when writing') ?></label></p>
-<?php endif; ?>
-
-<?php do_action('profile_personal_options'); ?>
-
-<p class="submit"><input type="submit" value="<?php _e('Update Profile &raquo;') ?>" name="submit" /></p>
 
 <fieldset>
 <legend><?php _e('Name'); ?></legend>
@@ -96,8 +82,8 @@ $bookmarklet_height= 440;
 </fieldset>
 <br clear="all" />
 <fieldset>
-<legend><?php _e('About Yourself'); ?></legend>
-<p class="desc"><?php _e('Share a little biographical information. '); ?></p>
+<legend><?php _e('About yourself'); ?></legend>
+<p class="desc"><?php _e('Share a little biographical information to fill out your profile. This may be shown publicly.'); ?></p>
 <p><textarea name="description" rows="5" cols="30"><?php echo $profileuser->description ?></textarea></p>
 </fieldset>
 
@@ -121,6 +107,13 @@ if ( $show_password_fields ) :
 
 <br clear="all" />
 
+<h3><?php _e('Personal Options'); ?></h3>
+
+<p><label for="rich_editing"><input name="rich_editing" type="checkbox" id="rich_editing" value="true" <?php checked('true', get_user_option('rich_editing')); ?> />
+<?php _e('Use the visual rich editor when writing') ?></label></p>
+
+<?php do_action('profile_personal_options'); ?>
+
   <table width="99%"  border="0" cellspacing="2" cellpadding="3" class="editform">
     <?php
     if(count($profileuser->caps) > count($profileuser->roles)):
@@ -142,7 +135,9 @@ if ( $show_password_fields ) :
     endif;
     ?>
   </table>
-<p class="submit"><input type="submit" value="<?php _e('Update Profile &raquo;') ?>" name="submit" /></p>
+<p class="submit">
+<input type="submit" value="<?php _e('Update Profile &raquo;') ?>" name="submit" />
+</p>
 </form>
 
 </div>

@@ -4,7 +4,21 @@ require_once('admin.php');
 $title = __("Edit Themes");
 $parent_file = 'themes.php';
 
-wp_reset_vars(array('action', 'redirect', 'profile', 'error', 'warning', 'a', 'file', 'theme'));
+$wpvarstoreset = array('action','redirect','profile','error','warning','a','file', 'theme');
+for ($i=0; $i<count($wpvarstoreset); $i += 1) {
+	$wpvar = $wpvarstoreset[$i];
+	if (!isset($$wpvar)) {
+		if (empty($_POST["$wpvar"])) {
+			if (empty($_GET["$wpvar"])) {
+				$$wpvar = '';
+			} else {
+				$$wpvar = $_GET["$wpvar"];
+			}
+		} else {
+			$$wpvar = $_POST["$wpvar"];
+		}
+	}
+}
 
 $themes = get_themes();
 
@@ -16,7 +30,7 @@ if (empty($theme)) {
 
 
 if ( ! isset($themes[$theme]) )
-	wp_die(__('The requested theme does not exist.'));
+	die(__('The requested theme does not exist.'));
 
 $allowed_files = array_merge($themes[$theme]['Stylesheet Files'], $themes[$theme]['Template Files']);
 
@@ -36,7 +50,7 @@ case 'update':
 	check_admin_referer('edit-theme_' . $file . $theme);
 
 	if ( !current_user_can('edit_themes') )
-		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this blog.').'</p>');
+	die('<p>'.__('You have do not have sufficient permissions to edit templates for this blog.').'</p>');
 
 	$newcontent = stripslashes($_POST['newcontent']);
 	$theme = urlencode($theme);
@@ -58,17 +72,16 @@ case 'update':
 break;
 
 default:
-
-	if ( !current_user_can('edit_themes') )
-		wp_die('<p>'.__('You do not have sufficient permissions to edit themes for this blog.').'</p>');
-
+	
 	require_once('admin-header.php');
+	if ( !current_user_can('edit_themes') )
+	die('<p>'.__('You have do not have sufficient permissions to edit themes for this blog.').'</p>');
 
 	update_recently_edited($file);
-
+	
 	if (!is_file($real_file))
 		$error = 1;
-
+	
 	if (!$error && filesize($real_file) > 0) {
 		$f = fopen($real_file, 'r');
 		$content = fread($f, filesize($real_file));
@@ -93,7 +106,7 @@ default:
 	}
 ?>
  </select>
- <input type="submit" name="Submit" value="<?php _e('Select &raquo;') ?>" class="button" />
+ <input type="submit" name="Submit" value="<?php _e('Select') ?> &raquo;" />
  </form>
  </div>
 
@@ -131,7 +144,7 @@ if ($allowed_files) :
 <?php if ( is_writeable($real_file) ) : ?>
      <p class="submit">
 <?php
-	echo "<input type='submit' name='submit' value='	" . __('Update File &raquo;') . "' tabindex='2' />";
+	echo "<input type='submit' name='submit' value='	" . __('Update File') . " &raquo;' tabindex='2' />";
 ?>
 </p>
 <?php else : ?>

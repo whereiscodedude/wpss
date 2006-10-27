@@ -87,10 +87,10 @@ class GM_Import {
 		}
 
 		if (!chdir($archivespath))
-			wp_die(sprintf(__("Wrong path, %s\ndoesn't exist\non the server"), $archivespath));
+			die(sprintf(__("Wrong path, %s\ndoesn't exist\non the server"), $archivespath));
 
 		if (!chdir($gmpath))
-			wp_die(sprintf(__("Wrong path, %s\ndoesn't exist\non the server"), $gmpath));
+			die(sprintf(__("Wrong path, %s\ndoesn't exist\non the server"), $gmpath));
 			
 		$this->header();
 ?>

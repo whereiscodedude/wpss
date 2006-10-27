@@ -1,27 +1,24 @@
 <?php
 
-$parent_file = 'profile.php';
-$submenu_file = 'profile.php';
 require_once('admin.php');
 
 check_admin_referer('update-profile_' . $user_ID);
 
 if ( !$_POST )
-	wp_die( __('No post?') );
+	die( __('No post?') );
 
 $errors = edit_user($user_ID);
 
-if ( is_wp_error( $errors ) ) {
-	foreach( $errors->get_error_messages() as $message )
-		echo "$message<br />";
+if (count($errors) != 0) {
+	foreach ($errors as $id => $error) {
+		echo $error . '<br/>';
+	}
 	exit;
 }
 
-if ( rich_edit_exists() ) {
-	if ( !isset( $_POST['rich_editing'] ) )
-		$_POST['rich_editing'] = 'false';
-	update_user_option( $current_user->id, 'rich_editing', $_POST['rich_editing'], true );
-}
+if ( !isset( $_POST['rich_editing'] ) )
+	$_POST['rich_editing'] = 'false';
+update_user_option( $current_user->id, 'rich_editing', $_POST['rich_editing'], true );
 
 do_action('personal_options_update');
 

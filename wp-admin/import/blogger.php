@@ -241,7 +241,7 @@ class Blogger_Import {
 			$blogsary = array();
 			preg_match_all('#posts\.g\?blogID=(\d+)">([^<]+)</a>#U', $response['body'], $blogsary);
 			if ( ! count( $blogsary[1] < 1 ) )
-				wp_die(__('No blogs found for this user.'));
+				die(__('No blogs found for this user.'));
 			$this->import['blogs'] = array();
 			$template = '<MainPage><br /><br /><br /><p>'.__('Are you looking for %title%? It is temporarily out of service. Please try again in a few minutes. Meanwhile, discover <a href="http://wordpress.org/">a better blogging tool</a>.').'</p><BloggerArchives><a class="archive" href="<$BlogArchiveURL$>"><$BlogArchiveName$></a><br /></BloggerArchives></MainPage><ArchivePage><Blogger><wordpresspost><$BlogItemDateTime$>|W|P|<$BlogItemAuthorNickname$>|W|P|<$BlogItemBody$>|W|P|<$BlogItemNumber$>|W|P|<$BlogItemTitle$>|W|P|<$BlogItemAuthorEmail$><BlogItemCommentsEnabled><BlogItemComments><wordpresscomment><$BlogCommentDateTime$>|W|P|<$BlogCommentAuthor$>|W|P|<$BlogCommentBody$></BlogItemComments></BlogItemCommentsEnabled></Blogger></ArchivePage>';
 			foreach ( $blogsary[1] as $key => $id ) {
@@ -306,7 +306,7 @@ class Blogger_Import {
 						if ( $_POST['publishMode'] > 0 ) {
 							$response = $this->get_blogger("http://www.blogger.com/blog-publishing.g?blogID={$_GET['blog']}&publishMode=0", $headers);
 							if ( $response['code'] >= 400 )
-								wp_die('<h2>'.__('Failed attempt to change publish mode from FTP to BlogSpot.').'</h2><pre>' . addslashes(print_r($headers, 1)) . addslashes(print_r($response, 1)) . '</pre>');
+								die('<h2>'.__('Failed attempt to change publish mode from FTP to BlogSpot.').'</h2><pre>' . addslashes(print_r($headers, 1)) . addslashes(print_r($response, 1)) . '</pre>');
 							$this->import['blogs'][$_GET['blog']]['url'] = 'http://' . $optary['modify']['subdomain'] . '.blogspot.com/';
 							sleep(2);
 						} else {
@@ -321,7 +321,7 @@ class Blogger_Import {
 					}
 					$response = $this->post_blogger($posturl, $headers, $paramary);
 					if ( $response['code'] >= 400 || strstr($response['body'], 'There are errors on this form') )
-						wp_die('<p>'.__('Error on form submission. Retry or reset the importer.').'</p>' . addslashes(print_r($response, 1)));
+						die('<p>'.__('Error on form submission. Retry or reset the importer.').'</p>' . addslashes(print_r($response, 1)));
 				}
 				$output .= "<del><p>$blog_opt</p></del>\n";
 			} elseif ( is_array($this->import['blogs'][$_GET['blog']]['options']["$blog_opt"]['backup']) ) {
@@ -364,7 +364,7 @@ class Blogger_Import {
 	function get_archive_urls() {
 		$bloghtml = $this->get_blogger($this->import['blogs'][$_GET['blog']]['url']);
 		if (! strstr($bloghtml['body'], '<a class="archive"') )
-			wp_die(__('Your Blogger blog did not take the new template or did not respond.'));
+			die(__('Your Blogger blog did not take the new template or did not respond.'));
 		preg_match_all('#<a class="archive" href="([^"]*)"#', $bloghtml['body'], $archives);
 		foreach ($archives[1] as $archive) {
 			$this->import['blogs'][$_GET['blog']]['archives'][$archive] = false;
@@ -546,7 +546,7 @@ class Blogger_Import {
 						$response = $this->get_blogger("http://www.blogger.com/blog-publishing.g?blogID={$_GET['blog']}&publishMode={$optary['backup']['publishMode']}", $headers);
 						sleep(2);
 						if ( $response['code'] >= 400 )
-							wp_die('<h1>'.__('Error restoring publishMode').'</h1><p>'.__('Please tell the devs.').'</p>' . addslashes(print_r($response, 1)) );
+							die('<h1>'.__('Error restoring publishMode').'</h1><p>'.__('Please tell the devs.').'</p>' . addslashes(print_r($response, 1)) );
 					}
 				}
 				if ( $optary['backup'] != $optary['modify'] ) {
@@ -615,7 +615,7 @@ class Blogger_Import {
 				$step = 0;
 			}
 //echo "Step $step.";
-//wp_die('<pre>'.print_r($this->import,1).'</pre');
+//die('<pre>'.print_r($this->import,1).'</pre');
 			switch ($step) {
 				case 0 :
 					$this->do_login();
@@ -662,6 +662,6 @@ class Blogger_Import {
 
 $blogger_import = new Blogger_Import();
 
-register_importer('blogger', __('Blogger and Blog*Spot'), __('Import <strong>posts and comments</strong> from your Blogger account'), array ($blogger_import, 'start'));
+register_importer('blogger', __('Blogger and Blogspot'), __('Import <strong>posts and comments</strong> from your Blogger account'), array ($blogger_import, 'start'));
 
 ?>
