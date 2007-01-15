@@ -1,4 +1,21 @@
-<?php wp_reset_vars(array('action', 'standalone', 'option_group_id')); ?>
+<?php
+
+$wpvarstoreset = array('action','standalone', 'option_group_id');
+for ($i=0; $i<count($wpvarstoreset); $i += 1) {
+	$wpvar = $wpvarstoreset[$i];
+	if (!isset($$wpvar)) {
+		if (empty($_POST["$wpvar"])) {
+			if (empty($_GET["$wpvar"])) {
+				$$wpvar = '';
+			} else {
+				$$wpvar = $_GET["$wpvar"];
+			}
+		} else {
+			$$wpvar = $_POST["$wpvar"];
+		}
+	}
+}
+?>
 
 <br clear="all" />
 
