@@ -302,11 +302,7 @@ class gettext_reader {
     $string = str_replace('nplurals',"\$total",$string);
     $string = str_replace("n",$n,$string);
     $string = str_replace('plural',"\$plural",$string);
-
-    # poEdit doesn't put any semicolons, which
-    # results in parse error in eval
-    $string .= ';';
-	
+    
     $total = 0;
     $plural = 0;
 

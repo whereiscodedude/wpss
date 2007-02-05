@@ -5,47 +5,41 @@ if (empty($wp)) {
 	wp('feed=atom');
 }
 
-header('Content-type: application/atom+xml; charset=' . get_option('blog_charset'), true);
+header('Content-type: application/atom+xml; charset=' . get_settings('blog_charset'), true);
 $more = 1;
 
 ?>
-<?php echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
-<feed
-  xmlns="http://www.w3.org/2005/Atom"
-  xmlns:thr="http://purl.org/syndication/thread/1.0"
+<?php echo '<?xml version="1.0" encoding="'.get_settings('blog_charset').'"?'.'>'; ?>
+<feed version="0.3"
+  xmlns="http://purl.org/atom/ns#"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
   xml:lang="<?php echo get_option('rss_language'); ?>"
-  xml:base="<?php bloginfo_rss('home') ?>/wp-atom.php"
   <?php do_action('atom_ns'); ?>
- >
-	<title type="text"><?php bloginfo_rss('name') ?></title>
-	<subtitle type="text"><?php bloginfo_rss("description") ?></subtitle>
-	
-	<updated><?php echo mysql2date('Y-m-d\TH:i:s\Z', get_lastpostmodified('GMT')); ?></updated>
-	<generator uri="http://wordpress.org/" version="<?php bloginfo_rss('version'); ?>">WordPress</generator>
-
+  >
+	<title><?php bloginfo_rss('name') ?></title>
 	<link rel="alternate" type="text/html" href="<?php bloginfo_rss('home') ?>" />
-	<id><?php bloginfo('atom_url'); ?></id>
-	<link rel="self" type="application/atom+xml" href="<?php bloginfo('atom_url'); ?>" />
-
+	<tagline><?php bloginfo_rss("description") ?></tagline>
+	<modified><?php echo mysql2date('Y-m-d\TH:i:s\Z', get_lastpostmodified('GMT'), false); ?></modified>
+	<copyright>Copyright <?php echo mysql2date('Y', get_lastpostdate('blog'), 0); ?></copyright>
+	<generator url="http://wordpress.org/" version="<?php bloginfo_rss('version'); ?>">WordPress</generator>
 	<?php do_action('atom_head'); ?>
-	<?php while (have_posts()) : the_post(); ?>
+	<?php $items_count = 0; if ($posts) { foreach ($posts as $post) { start_wp(); ?>
 	<entry>
-		<author>
+	  	<author>
 			<name><?php the_author() ?></name>
-			<uri><?php the_author_url()?></uri>
 		</author>
-		<title type="<?php html_type_rss(); ?>"><![CDATA[<?php the_title_rss() ?>]]></title>
+		<title type="text/html" mode="escaped"><![CDATA[<?php the_title_rss() ?>]]></title>
 		<link rel="alternate" type="text/html" href="<?php permalink_single_rss() ?>" />
 		<id><?php the_guid(); ?></id>
-		<updated><?php echo get_post_time('Y-m-d\TH:i:s\Z', true); ?></updated>
-		<published><?php echo get_post_time('Y-m-d\TH:i:s\Z', true); ?></published>
-		<?php the_category_rss('atom') ?>
-		<summary type="<?php html_type_rss(); ?>"><![CDATA[<?php the_excerpt_rss(); ?>]]></summary>
-<?php if ( !get_option('rss_use_excerpt') ) : ?>
-		<content type="<?php html_type_rss(); ?>" xml:base="<?php permalink_single_rss() ?>"><![CDATA[<?php the_content('', 0, '') ?>]]></content>
+		<modified><?php echo get_post_time('Y-m-d\TH:i:s\Z', true); ?></modified>
+		<issued><?php echo get_post_time('Y-m-d\TH:i:s\Z', true); ?></issued>
+		<?php the_category_rss('rdf') ?> 
+		<summary type="text/plain" mode="escaped"><![CDATA[<?php the_excerpt_rss(); ?>]]></summary>
+<?php if ( !get_settings('rss_use_excerpt') ) : ?>
+		<content type="<?php bloginfo('html_type'); ?>" mode="escaped" xml:base="<?php permalink_single_rss() ?>"><![CDATA[<?php the_content('', 0, '') ?>]]></content>
 <?php endif; ?>
 <?php rss_enclosure(); ?>
 <?php do_action('atom_entry'); ?>
 	</entry>
-	<?php endwhile ; ?>
+	<?php $items_count++; if (($items_count == get_settings('posts_per_rss')) && empty($m)) { break; } } } ?>
 </feed>
