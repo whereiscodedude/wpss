@@ -1,7 +1,6 @@
 <?php
 function wp_cache_add($key, $data, $flag = '', $expire = 0) {
 	global $wp_object_cache;
-	$data = unserialize(serialize($data));
 
 	return $wp_object_cache->add($key, $data, $flag, $expire);
 }
@@ -38,14 +37,12 @@ function wp_cache_init() {
 
 function wp_cache_replace($key, $data, $flag = '', $expire = 0) {
 	global $wp_object_cache;
-	$data = unserialize(serialize($data));
 
 	return $wp_object_cache->replace($key, $data, $flag, $expire);
 }
 
 function wp_cache_set($key, $data, $flag = '', $expire = 0) {
 	global $wp_object_cache;
-	$data = unserialize(serialize($data));
 
 	return $wp_object_cache->set($key, $data, $flag, $expire);
 }
@@ -70,7 +67,7 @@ class WP_Object_Cache {
 	var $secret = '';
 
 	function acquire_lock() {
-		// Acquire a write lock.
+		// Acquire a write lock. 
 		$this->mutex = @fopen($this->cache_dir.$this->flock_filename, 'w');
 		if ( false == $this->mutex)
 			return false;
@@ -112,7 +109,7 @@ class WP_Object_Cache {
 		$this->cache = array ();
 		$this->dirty_objects = array ();
 		$this->non_existant_objects = array ();
-
+		
 		$this->release_lock();
 
 		return true;
@@ -193,9 +190,32 @@ class WP_Object_Cache {
 			if ($dogs = $wpdb->get_results("SELECT * FROM $wpdb->categories")) {
 				foreach ($dogs as $catt)
 					$this->cache['category'][$catt->cat_ID] = $catt;
-			}
-		}
 
+				foreach ($this->cache['category'] as $catt) {
+					$curcat = $catt->cat_ID;
+					$fullpath = '/'.$this->cache['category'][$catt->cat_ID]->category_nicename;
+					while ($this->cache['category'][$curcat]->category_parent != 0) {
+						$curcat = $this->cache['category'][$curcat]->category_parent;
+						$fullpath = '/'.$this->cache['category'][$curcat]->category_nicename.$fullpath;
+					}
+					$this->cache['category'][$catt->cat_ID]->fullpath = $fullpath;
+				}
+			}
+		} else
+			if ('options' == $group) {
+				$wpdb->hide_errors();
+				if (!$options = $wpdb->get_results("SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'")) {
+					$options = $wpdb->get_results("SELECT option_name, option_value FROM $wpdb->options");
+				}
+				$wpdb->show_errors();
+
+				if ( ! $options )
+					return;
+
+				foreach ($options as $option) {
+					$this->cache['options'][$option->option_name] = $option->option_value;
+				}
+			}
 	}
 
 	function make_group_dir($group, $perms) {
@@ -229,15 +249,15 @@ class WP_Object_Cache {
 		while ($index < count($stack)) {
 			# Get indexed directory from stack
 			$dir = $stack[$index];
-
+      
 			$dh = @ opendir($dir);
 			if (!$dh)
 				return false;
-
+      
 			while (($file = @ readdir($dh)) !== false) {
 				if ($file == '.' or $file == '..')
 					continue;
-
+					
 				if (@ is_dir($dir . DIRECTORY_SEPARATOR . $file))
 					$stack[] = $dir . DIRECTORY_SEPARATOR . $file;
 				else if (@ is_file($dir . DIRECTORY_SEPARATOR . $file))
@@ -343,7 +363,7 @@ class WP_Object_Cache {
 					if (@ copy($temp_file, $cache_file))
 						@ unlink($temp_file);
 					else
-						$errors++;
+						$errors++;	
 				}
 				@ chmod($cache_file, $file_perms);
 			}
@@ -352,7 +372,7 @@ class WP_Object_Cache {
 		$this->dirty_objects = array();
 
 		$this->release_lock();
-
+		
 		if ( $errors )
 			return false;
 

@@ -39,7 +39,7 @@ if (!CUSTOM_TAGS) {
 		//	'ul' => array(),
 	);
 }
-function wp_kses($string, $allowed_html, $allowed_protocols = array ('http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet'))
+function wp_kses($string, $allowed_html, $allowed_protocols = array ('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'feed', 'gopher', 'mailto'))
 	###############################################################################
 		# This function makes sure that only the allowed HTML element names, attribute
 		# names and attribute values plus only sane HTML entities will occur in
@@ -515,16 +515,12 @@ function wp_kses_decode_entities($string)
 
 function wp_filter_kses($data) {
 	global $allowedtags;
-	return addslashes( wp_kses(stripslashes( $data ), $allowedtags) );
+	return wp_kses($data, $allowedtags);
 }
 
 function wp_filter_post_kses($data) {
 	global $allowedposttags;
 	return addslashes ( wp_kses(stripslashes( $data ), $allowedposttags) );
-}
-
-function wp_filter_nohtml_kses($data) {
-	return addslashes ( wp_kses(stripslashes( $data ), array()) );
 }
 
 function kses_init_filters() {
