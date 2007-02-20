@@ -32,9 +32,7 @@ Object.extend(listMan.prototype, {
 		var ajaxAdd = new WPAjax( this.ajaxHandler, this.ajaxRespEl );
 		if ( ajaxAdd.notInitialized() )
 			return true;
-		var action = ( update ? 'update-' : 'add-' ) + what;
-		ajaxAdd.options.parameters = $H(ajaxAdd.options.parameters).merge({action: action}).merge(this.inputData.toQueryParams()).merge(this.grabInputs( where, ajaxAdd ).toQueryParams());
-
+		ajaxAdd.options.parameters += '&action=' + ( update ? 'update-' : 'add-' ) + what + '&' + this.grabInputs( where, ajaxAdd ) + this.inputData;
 		var tempObj=this;
 		ajaxAdd.addOnComplete( function(transport) {
 			var newItems = $A(transport.responseXML.getElementsByTagName(what));
@@ -81,19 +79,18 @@ Object.extend(listMan.prototype, {
 		if( ajaxDel.notInitialized() )
 			return true;
 		var tempObj = this;
-		var action = 'delete-' + what;
-		var actionId = action + '&id=' + id;
+		var action = 'delete-' + what + '&id=' + id;
 		var idName = what.replace('-as-spam','') + '-' + id;
 		ajaxDel.addOnComplete( function(transport) {
 			Element.update(ajaxDel.myResponseElement,'');
-			tempObj.destore(actionId);
+			tempObj.destore(action);
 			if( tempObj.delComplete && typeof tempObj.delComplete == 'function' )
 				tempObj.delComplete( what, id, transport );
 		});
-		ajaxDel.addOnWPError( function(transport) { tempObj.restore(actionId, true); });
-		ajaxDel.options.parameters = $H(ajaxDel.options.parameters).merge({action: action, id: id}).merge(this.inputData.toQueryParams());
+		ajaxDel.addOnWPError( function(transport) { tempObj.restore(action, true); });
+		ajaxDel.options.parameters += '&action=' + action + this.inputData;
 		ajaxDel.request(ajaxDel.url);
-		this.store(actionId, idName);
+		this.store(action, idName);
 		tempObj.removeListItem( idName );
 		return false;
 	},
@@ -105,19 +102,18 @@ Object.extend(listMan.prototype, {
 		if ( ajaxDim.notInitialized() )
 			return true;
 		var tempObj = this;
-		var action = 'dim-' + what;
-		var actionId = action + '&id=' + id;
+		var action = 'dim-' + what + '&id=' + id;
 		var idName = what + '-' + id;
 		ajaxDim.addOnComplete( function(transport) {
 			Element.update(ajaxDim.myResponseElement,'');
-			tempObj.destore(actionId);
+			tempObj.destore(action);
 			if ( tempObj.dimComplete && typeof tempObj.dimComplete == 'function' )
 				tempObj.dimComplete( what, id, dimClass, transport );
 		});
-		ajaxDim.addOnWPError( function(transport) { tempObj.restore(actionId, true); });
-		ajaxDim.options.parameters = $H(ajaxDim.options.parameters).merge({action: action, id: id}).merge(this.inputData.toQueryParams());
+		ajaxDim.addOnWPError( function(transport) { tempObj.restore(action, true); });
+		ajaxDim.options.parameters += '&action=' + action + this.inputData;
 		ajaxDim.request(ajaxDim.url);
-		this.store(actionId, idName);
+		this.store(action, idName);
 		this.dimItem( idName, dimClass );
 		return false;
 	},

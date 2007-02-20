@@ -105,10 +105,10 @@ function &get_post(&$post, $output = OBJECT) {
 			$post_cache[$blog_id][$post->ID] = &$post;
 		$_post = & $post_cache[$blog_id][$post->ID];
 	} else {
-		if ( isset($post_cache[$blog_id][$post]) )
-			$_post = & $post_cache[$blog_id][$post];
-		elseif ( $_post = wp_cache_get($post, 'pages') )
+		if ( $_post = wp_cache_get($post, 'pages') )
 			return get_page($_post, $output);
+		elseif ( isset($post_cache[$blog_id][$post]) )
+			$_post = & $post_cache[$blog_id][$post];
 		else {
 			$query = "SELECT * FROM $wpdb->posts WHERE ID = '$post' LIMIT 1";
 			$_post = & $wpdb->get_row($query);
@@ -672,8 +672,6 @@ function wp_insert_post($postarr = array()) {
 		do_action('publish_post', $post_ID);
 		if ( defined('XMLRPC_REQUEST') )
 			do_action('xmlrpc_publish_post', $post_ID);
-		if ( defined('APP_REQUEST') )
-			do_action('app_publish_post', $post_ID);
 
 		if ( !defined('WP_IMPORTING') ) {
 			if ( $post_pingback )

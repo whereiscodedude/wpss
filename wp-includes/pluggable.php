@@ -96,7 +96,8 @@ function get_userdata( $user_id ) {
 		$user->user_description = $user->description;
 
 	wp_cache_add($user_id, $user, 'users');
-	wp_cache_add($user->user_login, $user_id, 'userlogins');
+	wp_cache_add($user->user_login, $user, 'userlogins');
+
 	return $user;
 }
 endif;
@@ -115,9 +116,7 @@ function get_userdatabylogin($user_login) {
 	if ( empty( $user_login ) )
 		return false;
 
-	$user_id = wp_cache_get($user_login, 'userlogins');
-	$userdata = wp_cache_get($user_id, 'users');
-
+	$userdata = wp_cache_get($user_login, 'userlogins');
 	if ( $userdata )
 		return $userdata;
 
@@ -148,7 +147,8 @@ function get_userdatabylogin($user_login) {
 		$user->user_description = $user->description;
 
 	wp_cache_add($user->ID, $user, 'users');
-	wp_cache_add($user->user_login, $user->ID, 'userlogins');
+	wp_cache_add($user->user_login, $user, 'userlogins');
+
 	return $user;
 
 }
@@ -370,8 +370,8 @@ function wp_notify_postauthor($comment_id, $comment_type='') {
 		$subject = sprintf( __('[%1$s] Pingback: "%2$s"'), $blogname, $post->post_title );
 	}
 	$notify_message .= get_permalink($comment->comment_post_ID) . "#comments\r\n\r\n";
-	$notify_message .= sprintf( __('Delete it: %s'), get_option('siteurl')."/wp-admin/comment.php?action=cdc&c=$comment_id" ) . "\r\n";
-	$notify_message .= sprintf( __('Spam it: %s'), get_option('siteurl')."/wp-admin/comment.php?action=cdc&dt=spam&c=$comment_id" ) . "\r\n";
+	$notify_message .= sprintf( __('To delete this comment, visit: %s'), get_option('siteurl')."/wp-admin/comment.php?action=cdc&c=$comment_id" ) . "\r\n";
+	$notify_message .= sprintf( __('To mark this comment as spam, visit: %s'), get_option('siteurl')."/wp-admin/comment.php?action=cdc&dt=spam&c=$comment_id" ) . "\r\n";
 
 	$wp_email = 'wordpress@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME']));
 
