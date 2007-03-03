@@ -10,12 +10,6 @@ function get_query_var($var) {
 	return $wp_query->get($var);
 }
 
-function set_query_var($var, $value) {
-	global $wp_query;
-
-	return $wp_query->set($var, $value);
-}
-
 function &query_posts($query) {
 	unset($GLOBALS['wp_query']);
 	$GLOBALS['wp_query'] =& new WP_Query();
@@ -200,7 +194,7 @@ function is_single ($post = '') {
 function is_singular() {
 	global $wp_query;
 
-	return $wp_query->is_singular;
+	return $wp_query->is_singular;	
 }
 
 function is_time () {
@@ -256,20 +250,6 @@ function the_post() {
 }
 
 /*
- * Comments loop. 
- */ 
-
-function have_comments() { 
-	global $wp_query; 
-	return $wp_query->have_comments(); 
-} 
-
-function the_comment() { 
-	global $wp_query; 
-	return $wp_query->the_comment(); 
-}  
-
-/*
  * WP_Query
  */
 
@@ -285,11 +265,6 @@ class WP_Query {
 	var $current_post = -1;
 	var $in_the_loop = false;
 	var $post;
-
-	var $comments;
-	var $comment_count = 0;
-	var $current_comment = -1;
-	var $comment;
 
 	var $found_posts = 0;
 	var $max_num_pages = 0;
@@ -307,7 +282,6 @@ class WP_Query {
 	var $is_category = false;
 	var $is_search = false;
 	var $is_feed = false;
-	var $is_comment_feed = false;
 	var $is_trackback = false;
 	var $is_home = false;
 	var $is_404 = false;
@@ -331,7 +305,6 @@ class WP_Query {
 		$this->is_category = false;
 		$this->is_search = false;
 		$this->is_feed = false;
-		$this->is_comment_feed = false;
 		$this->is_trackback = false;
 		$this->is_home = false;
 		$this->is_404 = false;
@@ -360,7 +333,7 @@ class WP_Query {
 	function parse_query_vars() {
 		$this->parse_query('');
 	}
-
+	
 	function fill_query_vars($array) {
 		$keys = array(
 			'error'
@@ -395,7 +368,7 @@ class WP_Query {
 			if ( !isset($array[$key]))
 				$array[$key] = '';
 		}
-
+		
 		return $array;
 	}
 
@@ -410,9 +383,9 @@ class WP_Query {
 			$this->query = $query;
 			$this->query_vars = $qv;
 		}
-
+		
 		$qv = $this->fill_query_vars($qv);
-
+		
 		if ( ! empty($qv['robots']) ) {
 			$this->is_robots = true;
 			return;
@@ -561,55 +534,12 @@ class WP_Query {
 			$this->is_admin = true;
 		}
 
-		if ( false !== strpos($qv['feed'], 'comments-') ) {
-			$this->query_vars['feed'] = $qv['feed'] = str_replace('comments-', '', $qv['feed']);
-			$qv['withcomments'] = 1;
-		}
+		if ( $this->is_single || $this->is_page || $this->is_attachment )
+			$this->is_singular = true;
 
-		$this->is_singular = $this->is_single || $this->is_page || $this->is_attachment;
-
-		if ( $this->is_feed && ( !empty($qv['withcomments']) || ( empty($qv['withoutcomments']) && $this->is_singular ) ) )
-			$this->is_comment_feed = true;
-
-		if ( !( $this->is_singular || $this->is_archive || $this->is_search || $this->is_feed || $this->is_trackback || $this->is_404 || $this->is_admin || $this->is_comments_popup ) ) {
+		if ( ! ($this->is_singular || $this->is_archive || $this->is_search || $this->is_feed || $this->is_trackback || $this->is_404 || $this->is_admin || $this->is_comments_popup)) {
 			$this->is_home = true;
 		}
-
-		// Correct is_* for page_on_front and page_for_posts
-		if ( $this->is_home && ( empty($this->query) || $qv['preview'] == 'true' ) && 'page' == get_option('show_on_front') && get_option('page_on_front') ) {
-			$this->is_page = true;
-			$this->is_home = false;
-			$this->query_vars['page_id'] = get_option('page_on_front');
-		}
-
-		if ( '' != $qv['pagename'] ) {
-			$this->queried_object =& get_page_by_path($qv['pagename']);
-			if ( !empty($this->queried_object) )
-				$this->queried_object_id = $this->queried_object->ID;
-			else
-				unset($this->queried_object);
-
-			if  ( 'page' == get_option('show_on_front') && isset($this->queried_object_id) && $this->queried_object_id == get_option('page_for_posts') ) {
-				$this->is_page = false;
-				$this->is_home = true;
-				$this->is_posts_page = true;
-			}
-		}
-
-		if ( '' != $qv['page_id'] && 0 != intval($qv['page_id']) ) {
-			$this->query_vars['page_id'] = intval($qv['page_id']);
-			if  ( 'page' == get_option('show_on_front') && $qv['page_id'] == get_option('page_for_posts') ) {
-				$this->is_page = false;
-				$this->is_home = true;
-				$this->is_posts_page = true;
-			}
-		}
-
-		if ( $this->is_posts_page && !$qv['withcomments'] )
-			$this->is_comment_feed = false;
-
-		$this->is_singular = $this->is_single || $this->is_page || $this->is_attachment;
-		// Done correcting is_* for page_on_front and page_for_posts
 
 		if ( !empty($query) ) {
 			do_action_ref_array('parse_query', array(&$this));
@@ -644,7 +574,7 @@ class WP_Query {
 
 		// Shorthand.
 		$q = &$this->query_vars;
-
+		
 		$q = $this->fill_query_vars($q);
 
 		// First let's clear some variables
@@ -759,17 +689,18 @@ class WP_Query {
 			$q['name'] = sanitize_title($q['name']);
 			$where .= " AND post_name = '" . $q['name'] . "'";
 		} else if ('' != $q['pagename']) {
-			if ( isset($this->queried_object_id) )
-				$reqpage = $this->queried_object_id;
-			else {
-				$reqpage = get_page_by_path($q['pagename']);
-				if ( !empty($reqpage) )
-					$reqpage = $reqpage->ID;
-				else
-					$reqpage = 0;
-			}
+			$reqpage = get_page_by_path($q['pagename']);
+			if ( !empty($reqpage) )
+				$reqpage = $reqpage->ID;
+			else
+				$reqpage = 0;
 
-			if  ( ('page' != get_option('show_on_front') ) || ( $reqpage != get_option('page_for_posts') ) ) {
+			if  ( ('page' == get_option('show_on_front') ) && ( $reqpage == get_option('page_for_posts') ) ) {
+				$this->is_singular = false;
+				$this->is_page = false;
+				$this->is_home = true;
+				$this->is_posts_page = true;
+			} else {
 				$q['pagename'] = str_replace('%2F', '/', urlencode(urldecode($q['pagename'])));
 				$page_paths = '/' . trim($q['pagename'], '/');
 				$q['pagename'] = sanitize_title(basename($page_paths));
@@ -804,7 +735,12 @@ class WP_Query {
 
 		if (($q['page_id'] != '') && (intval($q['page_id']) != 0)) {
 			$q['page_id'] = intval($q['page_id']);
-			if  ( ('page' != get_option('show_on_front') ) || ( $q['page_id'] != get_option('page_for_posts') ) ) {
+			if  ( ('page' == get_option('show_on_front') ) && ( $q['page_id'] == get_option('page_for_posts') ) ) {
+				$this->is_singular = false;
+				$this->is_page = false;
+				$this->is_home = true;
+				$this->is_posts_page = true;
+			} else {
 				$q['p'] = $q['page_id'];
 				$where = ' AND ID = '.$q['page_id'];
 			}
@@ -995,9 +931,9 @@ class WP_Query {
 
 			if ( is_user_logged_in() ) {
 				if ( 'post' == $post_type )
-					$cap = 'read_private_posts';
+					$cap = 'edit_private_posts';
 				else
-					$cap = 'read_private_pages';
+					$cap = 'edit_private_pages';
 
 				if ( current_user_can($cap) )
 					$where .= " OR post_status = 'private'";
@@ -1031,38 +967,6 @@ class WP_Query {
 			}
 		}
 
-		// Comments feeds
-		if ( $this->is_comment_feed && ( $this->is_archive || $this->is_search || !$this->is_singular ) ) {
-			if ( $this->is_archive || $this->is_search ) {
-				$cjoin = "LEFT JOIN $wpdb->posts ON ($wpdb->comments.comment_post_ID = $wpdb->posts.ID) $join ";
-				$cwhere = "WHERE comment_approved = '1' $where";
-				$cgroupby = "GROUP BY $wpdb->comments.comment_id";
-			} else { // Other non singular e.g. front
-				$cjoin = "LEFT JOIN $wpdb->posts ON ( $wpdb->comments.comment_post_ID = $wpdb->posts.ID )";
-				$cwhere = "WHERE post_status = 'publish' AND comment_approved = '1'";
-				$cgroupby = '';
-			}
-
-			$cjoin = apply_filters('comment_feed_join', $cjoin);
-			$cwhere = apply_filters('comment_feed_where', $cwhere);
-			$cgroupby = apply_filters('comment_feed_groupby', $cgroupby);
-
-			$this->comments = (array) $wpdb->get_results("SELECT $distinct $wpdb->comments.* FROM $wpdb->comments $cjoin $cwhere $cgroupby ORDER BY comment_date_gmt DESC LIMIT " . get_settings('posts_per_rss'));
-			$this->comment_count = count($this->comments);
-
-			$post_ids = array();
-
-			foreach ($this->comments as $comment)
-				$post_ids[] = (int) $comment->comment_post_ID;
-
-			$post_ids = join(',', $post_ids);
-			$join = '';
-			if ( $post_ids )
-				$where = "AND $wpdb->posts.ID IN ($post_ids) ";
-			else
-				$where = "AND 0";
-		}
-
 		// Apply post-paging filters on where and join.  Only plugins that
 		// manipulate paging queries should use these hooks.
 		$where = apply_filters('posts_where_paged', $where);
@@ -1082,22 +986,12 @@ class WP_Query {
 		$this->request = apply_filters('posts_request', $request);
 
 		$this->posts = $wpdb->get_results($this->request);
-
-		if ( $this->is_comment_feed && $this->is_singular ) {
-			$cjoin = apply_filters('comment_feed_join', '');
-			$cwhere = apply_filters('comment_feed_where', "WHERE comment_post_ID = {$this->posts[0]->ID} AND comment_approved = '1'");
-			$comments_request = "SELECT $wpdb->comments.* FROM $wpdb->comments $cjoin $cwhere ORDER BY comment_date_gmt DESC LIMIT " . get_settings('posts_per_rss');
-			$this->comments = $wpdb->get_results($comments_request);
-			$this->comment_count = count($this->comments);
-		}
-
 		if ( !empty($limits) ) {
 			$found_posts_query = apply_filters( 'found_posts_query', 'SELECT FOUND_ROWS()' );
 			$this->found_posts = $wpdb->get_var( $found_posts_query );
 			$this->found_posts = apply_filters( 'found_posts', $this->found_posts );
 			$this->max_num_pages = ceil($this->found_posts / $q['posts_per_page']);
 		}
-
 		// Check post status to determine if post should be displayed.
 		if ( !empty($this->posts) && ($this->is_single || $this->is_page) ) {
 			$status = get_post_status($this->posts[0]);
@@ -1175,40 +1069,6 @@ class WP_Query {
 		$this->current_post = -1;
 		if ($this->post_count > 0) {
 			$this->post = $this->posts[0];
-		}
-	}
-
-	function next_comment() {
-		$this->current_comment++;
-
-		$this->comment = $this->comments[$this->current_comment];
-		return $this->comment;
-	}
-
-	function the_comment() {
-		global $comment;
-
-		$comment = $this->next_comment();
-
-		if ($this->current_comment == 0) {
-			do_action('comment_loop_start');
-		}
-	}
-
-	function have_comments() {
-		if ($this->current_comment + 1 < $this->comment_count) {
-			return true;
-		} elseif ($this->current_comment + 1 == $this->comment_count) {
-			$this->rewind_comments();
-		}
-
-		return false;
-	}
-
-	function rewind_comments() {
-		$this->current_comment = -1;
-		if ($this->comment_count > 0) {
-			$this->comment = $this->comments[0];
 		}
 	}
 

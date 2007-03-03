@@ -80,7 +80,7 @@ function get_extended($post) {
 		$main = $post;
 		$extended = '';
 	}
-
+	
 	// Strip leading and trailing whitespace
 	$main = preg_replace('/^[\s]*(.*)[\s]*$/', '\\1', $main);
 	$extended = preg_replace('/^[\s]*(.*)[\s]*$/', '\\1', $extended);
@@ -105,10 +105,10 @@ function &get_post(&$post, $output = OBJECT) {
 			$post_cache[$blog_id][$post->ID] = &$post;
 		$_post = & $post_cache[$blog_id][$post->ID];
 	} else {
-		if ( isset($post_cache[$blog_id][$post]) )
-			$_post = & $post_cache[$blog_id][$post];
-		elseif ( $_post = wp_cache_get($post, 'pages') )
+		if ( $_post = wp_cache_get($post, 'pages') )
 			return get_page($_post, $output);
+		elseif ( isset($post_cache[$blog_id][$post]) )
+			$_post = & $post_cache[$blog_id][$post];
 		else {
 			$query = "SELECT * FROM $wpdb->posts WHERE ID = '$post' LIMIT 1";
 			$_post = & $wpdb->get_row($query);
@@ -555,7 +555,7 @@ function wp_insert_post($postarr = array()) {
 		if ( 'draft' != $post_status )
 			$post_date_gmt = get_gmt_from_date($post_date);
 	}
-
+		
 	if ( 'publish' == $post_status ) {
 		$now = gmdate('Y-m-d H:i:59');
 		if ( mysql2date('U', $post_date_gmt) > mysql2date('U', $now) )
@@ -672,8 +672,6 @@ function wp_insert_post($postarr = array()) {
 		do_action('publish_post', $post_ID);
 		if ( defined('XMLRPC_REQUEST') )
 			do_action('xmlrpc_publish_post', $post_ID);
-		if ( defined('APP_REQUEST') )
-			do_action('app_publish_post', $post_ID);
 
 		if ( !defined('WP_IMPORTING') ) {
 			if ( $post_pingback )
@@ -704,7 +702,7 @@ function wp_insert_post($postarr = array()) {
 	// Schedule publication.
 	if ( 'future' == $post_status )
 		wp_schedule_single_event(strtotime($post_date_gmt. ' GMT'), 'publish_future_post', array($post_ID));
-
+		
 	do_action('save_post', $post_ID);
 	do_action('wp_insert_post', $post_ID);
 
@@ -1107,7 +1105,7 @@ function &get_pages($args = '') {
 	$author_query = '';
 	if (!empty($authors)) {
 		$post_authors = preg_split('/[\s,]+/',$authors);
-
+		
 		if ( count($post_authors) ) {
 			foreach ( $post_authors as $post_author ) {
 				//Do we have an author id or an author login?

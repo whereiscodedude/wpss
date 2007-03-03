@@ -14,7 +14,7 @@
 	}
 
 	/* This variable is for alternating comment background */
-	$oddcomment = 'class="alt" ';
+	$oddcomment = 'alt';
 ?>
 
 <!-- You can start editing here. -->
@@ -26,7 +26,7 @@
 
 	<?php foreach ($comments as $comment) : ?>
 
-		<li <?php echo $oddcomment; ?>id="comment-<?php comment_ID() ?>">
+		<li class="<?php echo $oddcomment; ?>" id="comment-<?php comment_ID() ?>">
 			<cite><?php comment_author_link() ?></cite> Says:
 			<?php if ($comment->comment_approved == '0') : ?>
 			<em>Your comment is awaiting moderation.</em>
@@ -39,9 +39,9 @@
 
 		</li>
 
-	<?php
-		/* Changes every other comment to a different class */
-		$oddcomment = ( empty( $oddcomment ) ) ? 'class="alt" ' : '';
+	<?php /* Changes every other comment to a different class */
+		if ('alt' == $oddcomment) $oddcomment = '';
+		else $oddcomment = 'alt';
 	?>
 
 	<?php endforeach; /* end for each comment */ ?>
@@ -88,7 +88,7 @@
 
 <?php endif; ?>
 
-<!--<p><small><strong>XHTML:</strong> You can use these tags: <code><?php echo allowed_tags(); ?></code></small></p>-->
+<!--<p><small><strong>XHTML:</strong> You can use these tags: <?php echo allowed_tags(); ?></small></p>-->
 
 <p><textarea name="comment" id="comment" cols="100%" rows="10" tabindex="4"></textarea></p>
 

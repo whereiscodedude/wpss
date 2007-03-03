@@ -226,7 +226,7 @@ function get_trackback_url() {
 	$tb_url = get_option('siteurl') . '/wp-trackback.php?p=' . $id;
 
 	if ( '' != get_option('permalink_structure') )
-		$tb_url = trailingslashit(get_permalink()) . user_trailingslashit('trackback');
+		$tb_url = trailingslashit(get_permalink()) . 'trackback/';
 
 	return $tb_url;
 }
@@ -290,9 +290,7 @@ function comments_template( $file = '/comments.php' ) {
 		$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = '$post->ID' AND ( comment_approved = '1' OR ( comment_author = '$author_db' AND comment_author_email = '$email_db' AND comment_approved = '0' ) ) ORDER BY comment_date");
 	}
 
-	// keep $comments for legacy's sake (remember $table*? ;) )
-	$comments = $wp_query->comments = apply_filters( 'comments_array', $comments, $post->ID );
-	$wp_query->comment_count = count($wp_query->comments);
+	$comments = apply_filters( 'comments_array', $comments, $post->ID );
 
 	define('COMMENTS_TEMPLATE', true);
 	$include = apply_filters('comments_template', TEMPLATEPATH . $file );

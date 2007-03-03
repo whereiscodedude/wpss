@@ -99,8 +99,6 @@ function get_bloginfo($show='') {
 		case 'atom_url':
 			$output = get_feed_link('atom');
 			break;
-		case 'comments_atom_url':
-			$output = get_feed_link('comments_atom');
 		case 'comments_rss2_url':
 			$output = get_feed_link('comments_rss2');
 			break;
@@ -351,15 +349,15 @@ function wp_get_archives($args = '') {
 	} elseif ('yearly' == $type) {
          $arcresults = $wpdb->get_results("SELECT DISTINCT YEAR(post_date) AS `year`, count(ID) as posts FROM $wpdb->posts WHERE post_type ='post' AND post_status = 'publish' GROUP BY YEAR(post_date) ORDER BY post_date DESC" . $limit);
 		if ($arcresults) {
-			$afterafter = $after;
-			foreach ($arcresults as $arcresult) {
-				$url = get_year_link($arcresult->year);
-				$text = sprintf('%d', $arcresult->year);
+            $afterafter = $after;
+            foreach ($arcresults as $arcresult) {
+			    $url = get_year_link($arcresult->year);
+                $text = sprintf('%d', $arcresult->year);
 				if ($show_post_count)
-					$after = '&nbsp;('.$arcresult->posts.')' . $afterafter;
-				echo get_archives_link($url, $text, $format, $before, $after);
-			}
-		}
+                    $after = '&nbsp;('.$arcresult->posts.')' . $afterafter;
+                echo get_archives_link($url, $text, $format, $before, $after);
+            }
+		}		  	
 	} elseif ( 'daily' == $type ) {
 		$arcresults = $wpdb->get_results("SELECT DISTINCT YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, DAYOFMONTH(post_date) AS `dayofmonth`, count(ID) as posts FROM $wpdb->posts WHERE post_type = 'post' AND post_status = 'publish' GROUP BY YEAR(post_date), MONTH(post_date), DAYOFMONTH(post_date) ORDER BY post_date DESC" . $limit);
 		if ( $arcresults ) {
@@ -486,7 +484,7 @@ function get_calendar($initial = true) {
 			ORDER	BY post_date ASC
 			LIMIT 1");
 
-	echo '<table id="wp-calendar" summary="' . __('Calendar') . '">
+	echo '<table id="wp-calendar">
 	<caption>' . $wp_locale->get_month($thismonth) . ' ' . date('Y', $unixmonth) . '</caption>
 	<thead>
 	<tr>';

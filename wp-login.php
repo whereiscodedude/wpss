@@ -96,7 +96,7 @@ case 'retrievepassword' :
 			$errors['user_email'] = __('<strong>ERROR</strong>: The e-mail field is empty.');
 
 		do_action('lostpassword_post');
-
+		
 		if ( empty( $errors ) ) {
 			$user_data = get_userdatabylogin(trim($_POST['user_login']));
 			// redefining user_login ensures we return the right case in the email
@@ -194,11 +194,8 @@ case 'rp' :
 		die('<p>' . __('The e-mail could not be sent.') . "<br />\n" . __('Possible reason: your host may have disabled the mail() function...') . '</p>');
 	} else {
 		// send a copy of password change notification to the admin
-		// but check to see if it's the admin whose password we're changing, and skip this
-		if ($user->user_email != get_settings('admin_email')) {
-			$message = sprintf(__('Password Lost and Changed for user: %s'), $user->user_login) . "\r\n";
-			wp_mail(get_option('admin_email'), sprintf(__('[%s] Password Lost/Changed'), get_option('blogname')), $message);
-		}
+		$message = sprintf(__('Password Lost and Changed for user: %s'), $user->user_login) . "\r\n";
+		wp_mail(get_option('admin_email'), sprintf(__('[%s] Password Lost/Changed'), get_option('blogname')), $message);
 
 		wp_redirect('wp-login.php?checkemail=newpass');
 		exit();
@@ -328,7 +325,7 @@ default:
 				$errors['expiredsession'] = __('Your session has expired.');
 		}
 	}
-
+	
 	if ( $_POST && empty( $user_login ) )
 		$errors['user_login'] = __('<strong>ERROR</strong>: The username field is empty.');
 	if ( $_POST && empty( $user_pass ) )

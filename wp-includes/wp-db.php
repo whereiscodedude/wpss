@@ -35,9 +35,6 @@ class wpdb {
 	var $optiongroup_options;
 	var $postmeta;
 
-	var $charset;
-	var $collate;
-
 	/**
 	 * Connects to the database server and selects a database
 	 * @param string $dbuser
@@ -48,15 +45,9 @@ class wpdb {
 	function wpdb($dbuser, $dbpassword, $dbname, $dbhost) {
 		return $this->__construct($dbuser, $dbpassword, $dbname, $dbhost);
 	}
-
+	
 	function __construct($dbuser, $dbpassword, $dbname, $dbhost) {
 		register_shutdown_function(array(&$this, "__destruct"));
-
-		if ( defined('DB_CHARSET') )
-			$this->charset = DB_CHARSET;
-
-		if ( defined('DB_COLLATE') )
-			$this->collate = DB_COLLATE;
 
 		$this->dbh = @mysql_connect($dbhost, $dbuser, $dbpassword);
 		if (!$this->dbh) {
@@ -72,14 +63,11 @@ class wpdb {
 ");
 		}
 
-		if ( !empty($this->charset) && version_compare(mysql_get_server_info(), '4.1.0', '>=') )
- 			$this->query("SET NAMES '$this->charset'");
-
 		$this->select($dbname);
 	}
 
 	function __destruct() {
-		return true;	
+		return true;		
 	}
 
 	/**
@@ -181,7 +169,7 @@ class wpdb {
 
 		$this->result = @mysql_query($query, $this->dbh);
 		++$this->num_queries;
-
+	
 		if (SAVEQUERIES)
 			$this->queries[] = array( $query, $this->timer_stop() );
 
@@ -255,7 +243,7 @@ class wpdb {
 		$this->func_call = "\$db->get_row(\"$query\",$output,$y)";
 		if ( $query )
 			$this->query($query);
-	
+		
 		if ( !isset($this->last_result[$y]) )
 			return null;
 

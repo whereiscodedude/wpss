@@ -4,7 +4,6 @@ $title = __('Create New Post');
 $parent_file = 'post-new.php';
 $editing = true;
 wp_enqueue_script('prototype');
-wp_enqueue_script('interface');
 wp_enqueue_script('autosave');
 require_once ('./admin-header.php');
 

@@ -96,7 +96,8 @@ function get_userdata( $user_id ) {
 		$user->user_description = $user->description;
 
 	wp_cache_add($user_id, $user, 'users');
-	wp_cache_add($user->user_login, $user_id, 'userlogins');
+	wp_cache_add($user->user_login, $user, 'userlogins');
+
 	return $user;
 }
 endif;
@@ -115,9 +116,7 @@ function get_userdatabylogin($user_login) {
 	if ( empty( $user_login ) )
 		return false;
 
-	$user_id = wp_cache_get($user_login, 'userlogins');
-	$userdata = wp_cache_get($user_id, 'users');
-
+	$userdata = wp_cache_get($user_login, 'userlogins');
 	if ( $userdata )
 		return $userdata;
 
@@ -148,7 +147,8 @@ function get_userdatabylogin($user_login) {
 		$user->user_description = $user->description;
 
 	wp_cache_add($user->ID, $user, 'users');
-	wp_cache_add($user->user_login, $user->ID, 'userlogins');
+	wp_cache_add($user->user_login, $user, 'userlogins');
+
 	return $user;
 
 }
@@ -156,65 +156,13 @@ endif;
 
 if ( !function_exists('wp_mail') ) :
 function wp_mail($to, $subject, $message, $headers = '') {
-	global $phpmailer;
-
-	if ( !is_object( $phpmailer ) ) {
-		require_once(ABSPATH . WPINC . '/class-phpmailer.php');
-		require_once(ABSPATH . WPINC . '/class-smtp.php');
-		$phpmailer = new PHPMailer();
-	}
-
-	$mail = compact('to', 'subject', 'message', 'headers');
-	$mail = apply_filters('wp_mail', $mail);
-	extract($mail);
-
-	if ( $headers == '' ) {
+	if( $headers == '' ) {
 		$headers = "MIME-Version: 1.0\n" .
 			"From: wordpress@" . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME'])) . "\n" . 
 			"Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
 	}
 
-	$phpmailer->ClearAddresses();
-	$phpmailer->ClearCCs();
-	$phpmailer->ClearBCCs();
-	$phpmailer->ClearReplyTos();
-	$phpmailer->ClearAllRecipients();
-	$phpmailer->ClearCustomHeaders();
-
-	$phpmailer->FromName = "WordPress";
-	$phpmailer->AddAddress("$to", "");
-	$phpmailer->Subject = $subject;
-	$phpmailer->Body    = $message;
-	$phpmailer->IsHTML(false);
-	$phpmailer->IsMail(); // set mailer to use php mail()
-
-	do_action_ref_array('phpmailer_init', array(&$phpmailer));
-
-	$mailheaders = (array) explode( "\n", $headers );
-	foreach ( $mailheaders as $line ) {
-		$header = explode( ":", $line );
-		switch ( trim( $header[0] ) ) {
-			case "From":
-				$from = trim( str_replace( '"', '', $header[1] ) );
-				if ( strpos( $from, '<' ) ) {
-					$phpmailer->FromName = str_replace( '"', '', substr( $header[1], 0, strpos( $header[1], '<' ) - 1 ) );
-					$from = trim( substr( $from, strpos( $from, '<' ) + 1 ) );
-					$from = str_replace( '>', '', $from );
-				} else {
-					$phpmailer->FromName = $from;
-				}
-				$phpmailer->From = trim( $from );
-				break;
-			default:
-				if ( $line != '' && $header[0] != 'MIME-Version' && $header[0] != 'Content-Type' )
-					$phpmailer->AddCustomHeader( $line );
-				break;
-		}
-	}
-
-	$result = @$phpmailer->Send();
-
-	return $result;
+	return @mail($to, $subject, $message, $headers);
 }
 endif;
 
@@ -422,8 +370,8 @@ function wp_notify_postauthor($comment_id, $comment_type='') {
 		$subject = sprintf( __('[%1$s] Pingback: "%2$s"'), $blogname, $post->post_title );
 	}
 	$notify_message .= get_permalink($comment->comment_post_ID) . "#comments\r\n\r\n";
-	$notify_message .= sprintf( __('Delete it: %s'), get_option('siteurl')."/wp-admin/comment.php?action=cdc&c=$comment_id" ) . "\r\n";
-	$notify_message .= sprintf( __('Spam it: %s'), get_option('siteurl')."/wp-admin/comment.php?action=cdc&dt=spam&c=$comment_id" ) . "\r\n";
+	$notify_message .= sprintf( __('To delete this comment, visit: %s'), get_option('siteurl')."/wp-admin/comment.php?action=cdc&c=$comment_id" ) . "\r\n";
+	$notify_message .= sprintf( __('To mark this comment as spam, visit: %s'), get_option('siteurl')."/wp-admin/comment.php?action=cdc&dt=spam&c=$comment_id" ) . "\r\n";
 
 	$wp_email = 'wordpress@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME']));
 

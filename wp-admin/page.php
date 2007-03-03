@@ -52,7 +52,6 @@ case 'edit':
 
 	if($post->post_status == 'draft') {
 		wp_enqueue_script('prototype');
-		wp_enqueue_script('interface');
 		wp_enqueue_script('autosave');
 	}
 	require_once('admin-header.php');
@@ -107,7 +106,7 @@ case 'editpost':
 		}
 
 		if ( isset($_POST['save']) )
-			$location = "page.php?action=edit&post=$page_ID";
+			$location = "page.php?action=edit&post=$page_ID";		
 	} else {
 		if ($_POST['save']) {
 			$location = "page.php?action=edit&post=$page_ID";
