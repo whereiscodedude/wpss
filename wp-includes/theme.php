@@ -78,7 +78,6 @@ function get_theme_data( $theme_file ) {
 	$name = $theme_name[1];
 	$name = trim( $name );
 	$theme = $name;
-	$theme_uri = trim( $theme_uri[1] );
 
 	if ( '' == $author_uri[1] ) {
 		$author = trim( $author_name[1] );
@@ -86,7 +85,7 @@ function get_theme_data( $theme_file ) {
 		$author = '<a href="' . trim( $author_uri[1] ) . '" title="' . __('Visit author homepage') . '">' . trim( $author_name[1] ) . '</a>';
 	}
 
-	return array( 'Name' => $name, 'Title' => $theme, 'URI' => $theme_uri, 'Description' => $description, 'Author' => $author, 'Version' => $version, 'Template' => $template[1], 'Status' => $status );
+	return array( 'Name' => $name, 'Title' => $theme, 'Description' => $description, 'Author' => $author, 'Version' => $version, 'Template' => $template[1], 'Status' => $status );
 }
 
 function get_themes() {
@@ -187,7 +186,7 @@ function get_themes() {
 		if ( !file_exists("$theme_root/$template/index.php") ) {
 			$parent_dir = dirname(dirname($theme_file));
 			if ( file_exists("$theme_root/$parent_dir/$template/index.php") ) {
-				$template = "$parent_dir/$template"; 
+				$template = "$parent_dir/$template"; 	
 			} else {
 				$wp_broken_themes[$name] = array('Name' => $name, 'Title' => $title, 'Description' => __('Template is missing.'));
 				continue;
@@ -328,17 +327,6 @@ function get_category_template() {
 	return apply_filters('category_template', $template);
 }
 
-function get_tag_template() {
-	$template = '';
-	if ( file_exists(TEMPLATEPATH . "/tag-" . get_query_var('tag') . '.php') )
-		$template = TEMPLATEPATH . "/tag-" . get_query_var('tag') . '.php';
-	elseif ( file_exists(TEMPLATEPATH . "/tag.php") )
-		$template = TEMPLATEPATH . "/tag.php";
-
-	return apply_filters('tag_template', $template);
-}
-
-
 function get_date_template() {
 	return get_query_template('date');
 }
@@ -452,9 +440,9 @@ function get_theme_mod($name, $default = false) {
 	$mods = get_option("mods_$theme");
 
 	if ( isset($mods[$name]) )
-		return apply_filters( "theme_mod_$name", $mods[$name] );
+		return $mods[$name];
 
-	return apply_filters( "theme_mod_$name", sprintf($default, get_template_directory_uri()) );
+	return sprintf($default, get_template_directory_uri());
 }
 
 function set_theme_mod($name, $value) {
@@ -496,7 +484,7 @@ function get_header_textcolor() {
 }
 
 function header_textcolor() {
-	echo get_header_textcolor();
+	echo get_header_textcolor();	
 }
 
 function get_header_image() {
@@ -504,7 +492,7 @@ function get_header_image() {
 }
 
 function header_image() {
-	echo get_header_image();
+	echo get_header_image();	
 }
 
 function add_custom_image_header($header_callback, $admin_header_callback) {

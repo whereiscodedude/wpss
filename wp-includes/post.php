@@ -80,7 +80,7 @@ function get_extended($post) {
 		$main = $post;
 		$extended = '';
 	}
-
+	
 	// Strip leading and trailing whitespace
 	$main = preg_replace('/^[\s]*(.*)[\s]*$/', '\\1', $main);
 	$extended = preg_replace('/^[\s]*(.*)[\s]*$/', '\\1', $extended);
@@ -106,10 +106,10 @@ function &get_post(&$post, $output = OBJECT) {
 		$_post = & $post_cache[$blog_id][$post->ID];
 	} else {
 		$post = (int) $post;
-		if ( isset($post_cache[$blog_id][$post]) )
-			$_post = & $post_cache[$blog_id][$post];
-		elseif ( $_post = wp_cache_get($post, 'pages') )
+		if ( $_post = wp_cache_get($post, 'pages') )
 			return get_page($_post, $output);
+		elseif ( isset($post_cache[$blog_id][$post]) )
+			$_post = & $post_cache[$blog_id][$post];
 		else {
 			$query = "SELECT * FROM $wpdb->posts WHERE ID = '$post' LIMIT 1";
 			$_post = & $wpdb->get_row($query);
@@ -443,8 +443,6 @@ function wp_delete_post($postid = 0) {
 		$wp_rewrite->flush_rules();
 	}
 
-	do_action('deleted_post', $postid);
-	
 	return $post;
 }
 
@@ -519,7 +517,6 @@ function wp_insert_post($postarr = array()) {
 		$post_name       = apply_filters('name_save_pre',      $post_name);
 		$comment_status  = apply_filters('comment_status_pre', $comment_status);
 		$ping_status     = apply_filters('ping_status_pre',    $ping_status);
-		$tags_input      = apply_filters('tags_input_pre',     $tags_input);
 	}
 
 	if ( ('' == $post_content) && ('' == $post_title) && ('' == $post_excerpt) )
@@ -564,7 +561,7 @@ function wp_insert_post($postarr = array()) {
 		if ( 'draft' != $post_status )
 			$post_date_gmt = get_gmt_from_date($post_date);
 	}
-
+		
 	if ( 'publish' == $post_status ) {
 		$now = gmdate('Y-m-d H:i:59');
 		if ( mysql2date('U', $post_date_gmt) > mysql2date('U', $now) )
@@ -654,8 +651,7 @@ function wp_insert_post($postarr = array()) {
 		$wpdb->query( "UPDATE $wpdb->posts SET post_name = '$post_name' WHERE ID = '$post_ID'" );
 	}
 
-	wp_set_post_categories( $post_ID, $post_category );
-	wp_set_post_tags( $post_ID, $tags_input );
+	wp_set_post_categories($post_ID, $post_category);
 
 	if ( 'page' == $post_type ) {
 		clean_page_cache($post_ID);
@@ -682,8 +678,6 @@ function wp_insert_post($postarr = array()) {
 		do_action('publish_post', $post_ID);
 		if ( defined('XMLRPC_REQUEST') )
 			do_action('xmlrpc_publish_post', $post_ID);
-		if ( defined('APP_REQUEST') )
-			do_action('app_publish_post', $post_ID);
 
 		if ( !defined('WP_IMPORTING') ) {
 			if ( $post_pingback )
@@ -714,7 +708,7 @@ function wp_insert_post($postarr = array()) {
 	// Schedule publication.
 	if ( 'future' == $post_status )
 		wp_schedule_single_event(strtotime($post_date_gmt. ' GMT'), 'publish_future_post', array($post_ID));
-
+		
 	do_action('save_post', $post_ID);
 	do_action('wp_insert_post', $post_ID);
 
@@ -773,79 +767,6 @@ function wp_publish_post($post_id) {
 	return wp_update_post(array('post_status' => 'publish', 'ID' => $post_id, 'no_filter' => true));
 }
 
-function wp_set_post_tags( $post_id = 0, $tags = '' ) {
-	global $wpdb;
-	
-	$post_id = (int) $post_id;
-	
-	if ( !$post_id )
-		return false;
-
-	$tags = explode( ',', $tags );
-	foreach ( $tags as $tag ) {
-		$tag = trim( $tag );
-		if ( !$tag_slug = sanitize_title( $tag ) )
-			continue; // discard
-		if ( !$tag_id = category_exists( $tag ) )
-			$tag_id = wp_create_category( $tag );
-		$tag_ids[] = $tag_id;
-	}
-
-	if ( !is_array( $tag_ids ) )
-		return false;
-
-	$tag_ids = array_unique( $tag_ids );
-
-	// First the old tags
-	$old_tags = $wpdb->get_col("
-		SELECT category_id
-		FROM $wpdb->post2cat
-		WHERE post_id = '$post_id' AND rel_type = 'tag'");
-
-	if ( !$old_tags ) {
-		$old_tags = array();
-	} else {
-		$old_tags = array_unique( $old_tags );
-	}
-
-	// Delete any?
-	$delete_tags = array_diff( $old_tags, $tag_ids);
-	if ( $delete_tags ) {
-		foreach ( $delete_tags as $del ) {
-			$wpdb->query("
-				DELETE FROM $wpdb->post2cat
-				WHERE category_id = '$del'
-					AND post_id = '$post_id'
-					AND rel_type = 'tag'
-				");
-		}
-	}
-
-	// Add any?
-	$add_tags = array_diff( $tag_ids, $old_tags );
-	if ( $add_tags ) {
-		foreach ( $add_tags as $new_tag ) {
-			$new_tag = (int) $new_tag;
-			if ( !empty($new_tag) )
-				$wpdb->query("
-					INSERT INTO $wpdb->post2cat (post_id, category_id, rel_type) 
-					VALUES ('$post_id', '$new_tag', 'tag')");
-		}
-	}
-
-	// Update category counts.
-	$all_affected_tags = array_unique( array_merge( $tag_ids, $old_tags ) );
-	foreach ( $all_affected_tags as $tag_id ) {
-		$count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->post2cat, $wpdb->posts WHERE $wpdb->posts.ID=$wpdb->post2cat.post_id AND post_status = 'publish' AND post_type = 'post' AND category_id = '$tag_id' AND rel_type = 'tag'" );
-		$wpdb->query( "UPDATE $wpdb->categories SET tag_count = '$count' WHERE cat_ID = '$tag_id'" );
-		if ( $count == 0 )
-			$wpdb->query( "UPDATE $wpdb->categories SET tag_count = '-1' WHERE cat_ID = '$tag_id'" );
-		clean_category_cache( $tag_id );
-		do_action( 'edit_category', $tag_id );
-		do_action( 'edit_tag', $tag_id );
-	}
-}
-
 function wp_set_post_categories($post_ID = 0, $post_categories = array()) {
 	global $wpdb;
 
@@ -860,7 +781,7 @@ function wp_set_post_categories($post_ID = 0, $post_categories = array()) {
 	$old_categories = $wpdb->get_col("
 		SELECT category_id
 		FROM $wpdb->post2cat
-		WHERE post_id = '$post_ID' AND rel_type = 'category'");
+		WHERE post_id = '$post_ID'");
 
 	if (!$old_categories) {
 		$old_categories = array();
@@ -897,7 +818,7 @@ function wp_set_post_categories($post_ID = 0, $post_categories = array()) {
 	// Update category counts.
 	$all_affected_cats = array_unique(array_merge($post_categories, $old_categories));
 	foreach ( $all_affected_cats as $cat_id ) {
-		$count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->post2cat, $wpdb->posts WHERE $wpdb->posts.ID=$wpdb->post2cat.post_id AND post_status = 'publish' AND post_type = 'post' AND category_id = '$cat_id' AND rel_type = 'category'");
+		$count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->post2cat, $wpdb->posts WHERE $wpdb->posts.ID=$wpdb->post2cat.post_id AND post_status = 'publish' AND post_type = 'post' AND category_id = '$cat_id'");
 		$wpdb->query("UPDATE $wpdb->categories SET category_count = '$count' WHERE cat_ID = '$cat_id'");
 		clean_category_cache($cat_id);
 		do_action('edit_category', $cat_id);
@@ -1194,7 +1115,7 @@ function &get_pages($args = '') {
 	$author_query = '';
 	if (!empty($authors)) {
 		$post_authors = preg_split('/[\s,]+/',$authors);
-
+		
 		if ( count($post_authors) ) {
 			foreach ( $post_authors as $post_author ) {
 				//Do we have an author id or an author login?
@@ -1285,9 +1206,9 @@ function generate_page_uri_index() {
 //
 
 function is_local_attachment($url) {
-	if (strpos($url, get_bloginfo('url')) === false)
+	if ( !strstr($url, get_bloginfo('home') ) )
 		return false;
-	if (strpos($url, get_bloginfo('url') . '/?attachment_id=') !== false)
+	if ( strstr($url, get_bloginfo('home') . '/?attachment_id=') )
 		return true;
 	if ( $id = url_to_postid($url) ) {
 		$post = & get_post($id);

@@ -145,8 +145,6 @@ add_filter('the_author', 'ent2ncr', 8);
 // Misc filters
 add_filter('option_ping_sites', 'privacy_ping_filter');
 add_filter('option_blog_charset', 'wp_specialchars');
-add_filter('option_home', '_config_wp_home');
-add_filter('option_siteurl', '_config_wp_siteurl');
 add_filter('mce_plugins', '_mce_load_rtl_plugin');
 add_filter('mce_buttons', '_mce_add_direction_buttons');
 
@@ -172,5 +170,4 @@ add_action('do_robots', 'do_robots');
 add_action('sanitize_comment_cookies', 'sanitize_comment_cookies');
 add_action('admin_print_scripts', 'wp_print_scripts', 20);
 add_action('mce_options', '_mce_set_direction');
-add_action('init', 'smilies_init', 5);
 ?>

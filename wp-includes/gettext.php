@@ -108,12 +108,10 @@ class gettext_reader {
     $MAGIC1 = (int) - 1794895138;
     // $MAGIC2 = (int)0xde120495; //bug
     $MAGIC2 = (int) - 569244523;
-    // 64-bit fix
-    $MAGIC3 = (int) 2500072158;
 
     $this->STREAM = $Reader;
     $magic = $this->readint();
-    if ($magic == ($MAGIC1 & 0xFFFFFFFF) || $magic == ($MAGIC3 & 0xFFFFFFFF)) { // to make sure it works for 64-bit platforms
+    if ($magic == ($MAGIC1 & 0xFFFFFFFF)) { // to make sure it works for 64-bit platforms
       $this->BYTEORDER = 0;
     } elseif ($magic == ($MAGIC2 & 0xFFFFFFFF)) {
       $this->BYTEORDER = 1;
@@ -308,7 +306,7 @@ class gettext_reader {
     # poEdit doesn't put any semicolons, which
     # results in parse error in eval
     $string .= ';';
-
+	
     $total = 0;
     $plural = 0;
 

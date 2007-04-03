@@ -21,12 +21,7 @@ function wp_install($blog_title, $user_name, $user_email, $public, $meta='') {
 	update_option('admin_email', $user_email);
 	update_option('blog_public', $public);
 	$schema = ( isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on' ) ? 'https://' : 'http://';
-
-	if ( defined('WP_SITEURL') && '' != WP_SITEURL )
-		$guessurl = WP_SITEURL;
-	else
-		$guessurl = preg_replace('|/wp-admin/.*|i', '', $schema . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-
+	$guessurl = preg_replace('|/wp-admin/.*|i', '', $schema . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
 	update_option('siteurl', $guessurl);
 
 	// If not a public blog, don't ping.
@@ -927,7 +922,7 @@ function make_site_theme_from_oldschool($theme_name, $template) {
 
 		if ($oldfile == 'index.php') { // Check to make sure it's not a new index
 			$index = implode('', file("$oldpath/$oldfile"));
-			if (strpos($index, 'WP_USE_THEMES') !== false) {
+			if ( strstr( $index, 'WP_USE_THEMES' ) ) {
 				if (! @copy(ABSPATH . 'wp-content/themes/default/index.php', "$site_dir/$newfile"))
 					return false;
 				continue; // Don't copy anything
@@ -999,12 +994,12 @@ function make_site_theme_from_default($theme_name, $template) {
 		$f = fopen("$site_dir/style.css", 'w');
 
 		foreach ($stylelines as $line) {
-			if (strpos($line, 'Theme Name:') !== false) $line = 'Theme Name: ' . $theme_name;
-			elseif (strpos($line, 'Theme URI:') !== false) $line = 'Theme URI: ' . __get_option('url');
-			elseif (strpos($line, 'Description:') !== false) $line = 'Description: Your theme.';
-			elseif (strpos($line, 'Version:') !== false) $line = 'Version: 1';
-			elseif (strpos($line, 'Author:') !== false) $line = 'Author: You';
-			fwrite($f, $line . "\n");
+			if (strstr($line, "Theme Name:")) $line = "Theme Name: $theme_name";
+			elseif (strstr($line, "Theme URI:")) $line = "Theme URI: " . __get_option('siteurl');
+			elseif (strstr($line, "Description:")) $line = "Description: Your theme";
+			elseif (strstr($line, "Version:")) $line = "Version: 1";
+			elseif (strstr($line, "Author:")) $line = "Author: You";
+			fwrite($f, "{$line}\n");
 		}
 		fclose($f);
 	}

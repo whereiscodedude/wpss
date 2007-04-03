@@ -168,7 +168,7 @@ function edShowButton(button, i) {
 }
 
 function edShowLinks() {
-	var tempStr = '<select onchange="edQuickLink(this.options[this.selectedIndex].value, this);"><option value="-1" selected>' + quicktagsL10n.quickLinks + '</option>';
+	var tempStr = '<select onchange="edQuickLink(this.options[this.selectedIndex].value, this);"><option value="-1" selected>(Quick Links)</option>';
 	for (i = 0; i < edLinks.length; i++) {
 		tempStr += '<option value="' + i + '">' + edLinks[i].display + '</option>';
 	}
@@ -248,7 +248,7 @@ function edSpell(myField) {
 		}
 	}
 	if (word == '') {
-		word = prompt(quicktagsL10n.wordLookup, '');
+		word = prompt('Enter a word to look up:', '');
 	}
 	if (word !== null && /^\w[\w ]*$/.test(word)) {
 		window.open('http://www.answers.com/' + escape(word));
@@ -260,8 +260,8 @@ function edToolbar() {
 	for (i = 0; i < edButtons.length; i++) {
 		edShowButton(edButtons[i], i);
 	}
-	document.write('<input type="button" id="ed_spell" class="ed_button" onclick="edSpell(edCanvas);" title="' + quicktagsL10n.dictionaryLookup + '" value="' + quicktagsL10n.lookup + '" />');
-	document.write('<input type="button" id="ed_close" class="ed_button" onclick="edCloseAllTags();" title="' + quicktagsL10n.closeAllOpenTags + '" value="' + quicktagsL10n.closeTags + '" />');
+	document.write('<input type="button" id="ed_spell" class="ed_button" onclick="edSpell(edCanvas);" title="Dictionary lookup" value="lookup" />');
+	document.write('<input type="button" id="ed_close" class="ed_button" onclick="edCloseAllTags();" title="Close all open tags" value="Close Tags" />');
 //	edShowLinks(); // disabled by default
 	document.write('</div>');
 }
@@ -366,7 +366,7 @@ function edInsertLink(myField, i, defaultValue) {
 		defaultValue = 'http://';
 	}
 	if (!edCheckOpenTags(i)) {
-		var URL = prompt(quicktagsL10n.enterURL, defaultValue);
+		var URL = prompt('Enter the URL' ,defaultValue);
 		if (URL) {
 			edButtons[i].tagStart = '<a href="' + URL + '">';
 			edInsertTag(myField, i);
@@ -378,11 +378,11 @@ function edInsertLink(myField, i, defaultValue) {
 }
 
 function edInsertImage(myField) {
-	var myValue = prompt(quicktagsL10n.enterImageURL, 'http://');
+	var myValue = prompt('Enter the URL of the image', 'http://');
 	if (myValue) {
 		myValue = '<img src="' 
 				+ myValue 
-				+ '" alt="' + prompt(quicktagsL10n.enterImageDescription, '') 
+				+ '" alt="' + prompt('Enter a description of the image', '') 
 				+ '" />';
 		edInsertContent(myField, myValue);
 	}

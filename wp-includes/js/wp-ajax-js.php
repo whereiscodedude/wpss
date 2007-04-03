@@ -1,13 +1,9 @@
+<?php @require_once('../../wp-config.php'); cache_javascript_headers(); ?>
 var WPAjax = Class.create();
 Object.extend(WPAjax.prototype, Ajax.Request.prototype);
 Object.extend(WPAjax.prototype, {
 	WPComplete: false, // onComplete function
 	WPError: false, // onWPError function
-	defaultUrl: '', // We get these from WPAjaxL10n
-	permText: '',
-	strangeText: '',
-	whoaText: '',
-
 	initialize: function(url, responseEl) {
 		var tempObj = this;
 		this.transport = Ajax.getTransport();
@@ -23,13 +19,15 @@ Object.extend(WPAjax.prototype, {
 					tempObj.WPError(transport);
 			}
 		});
-		this.url = url ? url : this.defaultUrl;
+		this.url = url ? url : '<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php';
 		this.getResponseElement(responseEl);
 	},
 	addArg: function(key, value) {
-		var a = [];
+		var a = $H(this.options.parameters.parseQuery());
 		a[encodeURIComponent(key)] = encodeURIComponent(value);
-		this.options.parameters = $H(this.options.parameters).merge($H(a));
+		this.options.parameters = a.map(function(pair) {
+			return pair.join('=');
+		}).join('&');
 	},
 	getResponseElement: function(r) {
 		var p = $(r + '-p');
@@ -56,10 +54,10 @@ Object.extend(WPAjax.prototype, {
 		}
 		var r = parseInt(r,10);
 		if ( -1 == r ) {
-			Element.update(this.myResponseElement,"<div class='error'><p>" + this.permText + "</p></div>");
+			Element.update(this.myResponseElement,"<div class='error'><p><?php _e("You don't have permission to do that."); ?></p></div>");
 			return false;
 		} else if ( 0 == r ) {
-			Element.update(this.myResponseElement,"<div class='error'><p>" + this.strangeText + "</p></div>");
+			Element.update(this.myResponseElement,"<div class='error'><p><?php _e("Something strange happened.  Try refreshing the page."); ?></p></div>");
 			return false;
 		}
 		return true;
@@ -75,8 +73,6 @@ Object.extend(WPAjax.prototype, {
 	}
 });
 
-Event.observe( window, 'load', function() { Object.extend(WPAjax.prototype, WPAjaxL10n); }, false )
-
 Ajax.activeSendCount = 0;
 Ajax.Responders.register( {
 	onCreate: function() {
@@ -85,7 +81,7 @@ Ajax.Responders.register( {
 			return;
 		wpBeforeUnload = window.onbeforeunload;
 		window.onbeforeunload = function() {
-			return WPAjax.whoaText;
+			return "<?php js_escape(__("Slow down, I'm still sending your data!")); ?>";
 		}
 	},
 	onLoading: function() { // Can switch to onLoaded if we lose data

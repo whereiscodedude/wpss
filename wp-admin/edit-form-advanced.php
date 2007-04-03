@@ -107,7 +107,7 @@ addLoadEvent(focusit);
 
 <?php if ( current_user_can('edit_posts') ) : ?>
 <fieldset id="posttimestampdiv" class="dbx-box">
-<h3 class="dbx-handle"><?php _e('Post Timestamp'); ?></h3>
+<h3 class="dbx-handle"><?php _e('Post Timestamp'); ?>:</h3>
 <div class="dbx-content"><?php touch_time(($action == 'edit')); ?></div>
 </fieldset>
 <?php endif; ?>
@@ -117,7 +117,7 @@ $authors = get_editable_authors( $current_user->id ); // TODO: ROLE SYSTEM
 if ( $authors && count( $authors ) > 1 ) :
 ?>
 <fieldset id="authordiv" class="dbx-box">
-<h3 class="dbx-handle"><?php _e('Post Author'); ?></h3>
+<h3 class="dbx-handle"><?php _e('Post Author'); ?>:</h3>
 <div class="dbx-content">
 <select name="post_author_override" id="post_author_override">
 <?php
@@ -144,14 +144,7 @@ endforeach;
 </fieldset>
 
 <fieldset id="<?php echo user_can_richedit() ? 'postdivrich' : 'postdiv'; ?>">
-<legend><?php _e('Post') ?>
-
-<?php if ( 'publish' == $post->post_status ) { ?>
-<a href="<?php echo clean_url(get_permalink($post->ID)); ?>" style="position: absolute; right: 2em; margin-right: 19em; text-decoration: underline;" target="_blank"><?php _e('View &raquo;'); ?></a>
-<?php } elseif ( 'edit' == $action ) { ?>
-<a href="<?php echo clean_url(apply_filters('preview_post_link', add_query_arg('preview', 'true', get_permalink($post->ID)))); ?>" style="position: absolute; right: 2em; margin-right: 19em; text-decoration: underline;" target="_blank"><?php _e('Preview &raquo;'); ?></a>
-<?php } ?>
-</legend>
+<legend><?php _e('Post') ?></legend>
 
 	<?php the_editor($post->post_content); ?>
 </fieldset>
@@ -159,9 +152,6 @@ endforeach;
 <?php echo $form_pingback ?>
 <?php echo $form_prevstatus ?>
 
-<div class="tagdiv"><p><?php _e('Enter tags (keywords) that you feel describe this post separated by commas: (ex: dogs, san francisco, cats.)'); ?><br />
-<input type="text" name="tags_input" id="tags_input" size="30" tabindex="3" value="<?php echo get_tags_to_edit( $post_ID ); ?>" />
-</p></div>
 
 <p class="submit">
 <span id="autosave"></span>
@@ -254,7 +244,7 @@ list_meta($metadata);
 </div>
 
 <?php if ('edit' == $action) : $delete_nonce = wp_create_nonce( 'delete-post_' . $post_ID ); ?>
-<input name="deletepost" class="button delete" type="submit" id="deletepost" tabindex="10" value="<?php echo ( 'draft' == $post->post_status ) ? __('Delete this draft') : __('Delete this post'); ?>" <?php echo "onclick=\"if ( confirm('" . js_escape(sprintf( ('draft' == $post->post_status) ? __("You are about to delete this draft '%s'\n  'Cancel' to stop, 'OK' to delete.") : __("You are about to delete this post '%s'\n  'Cancel' to stop, 'OK' to delete."), $post->post_title )) . "') ) { document.forms.post._wpnonce.value = '$delete_nonce'; return true;}return false;\""; ?> />
+<input name="deletepost" class="button delete" type="submit" id="deletepost" tabindex="10" value="<?php _e('Delete this post') ?>" <?php echo "onclick=\"if ( confirm('" . js_escape(sprintf(__("You are about to delete this post '%s'\n  'Cancel' to stop, 'OK' to delete."), $post->post_title )) . "') ) { document.forms.post._wpnonce.value = '$delete_nonce'; return true;}return false;\""; ?> />
 <?php endif; ?>
 
 </div>

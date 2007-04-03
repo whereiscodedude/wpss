@@ -121,10 +121,6 @@ function wp_insert_category($catarr) {
 	else
 		$links_private = 0;
 
-	// Let's check if we have this category already, if so just do an update
-	if ( $cat_ID = category_exists( $category_nicename ) )
-		$update = true;
-
 	if (!$update) {
 		$wpdb->query("INSERT INTO $wpdb->categories (cat_ID, cat_name, category_nicename, category_description, category_parent, links_private, posts_private) VALUES ('0', '$cat_name', '$category_nicename', '$category_description', '$category_parent', '$links_private', '$posts_private')");
 		$cat_ID = (int) $wpdb->insert_id;
@@ -152,11 +148,6 @@ function wp_insert_category($catarr) {
 
 	clean_category_cache($cat_ID);
 
-	if ($update)
-		do_action('edited_category', $cat_ID);
-	else
-		do_action('created_category', $cat_ID);
-	
 	return $cat_ID;
 }
 

@@ -1,11 +1,4 @@
 <?php
-if ( function_exists('register_sidebar') )
-    register_sidebar(array(
-        'before_widget' => '<li id="%1$s" class="widget %2$s">',
-        'after_widget' => '</li>',
-        'before_title' => '<h2 class="widgettitle">',
-        'after_title' => '</h2>',
-    ));
 
 function kubrick_head() {
 	$head = "<style type='text/css'>\n<!--";
@@ -32,7 +25,7 @@ function kubrick_header_image() {
 }
 
 function kubrick_upper_color() {
-	if (strpos($url = kubrick_header_image_url(), 'header-img.php?') !== false) {
+	if ( strstr( $url = kubrick_header_image_url(), 'header-img.php?' ) ) {
 		parse_str(substr($url, strpos($url, '?') + 1), $q);
 		return $q['upper'];
 	} else
@@ -40,7 +33,7 @@ function kubrick_upper_color() {
 }
 
 function kubrick_lower_color() {
-	if (strpos($url = kubrick_header_image_url(), 'header-img.php?') !== false) {
+	if ( strstr( $url = kubrick_header_image_url(), 'header-img.php?' ) ) {
 		parse_str(substr($url, strpos($url, '?') + 1), $q);
 		return $q['lower'];
 	} else

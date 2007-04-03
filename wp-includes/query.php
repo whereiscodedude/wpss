@@ -10,12 +10,6 @@ function get_query_var($var) {
 	return $wp_query->get($var);
 }
 
-function set_query_var($var, $value) {
-	global $wp_query;
-
-	return $wp_query->set($var, $value);
-}
-
 function &query_posts($query) {
 	unset($GLOBALS['wp_query']);
 	$GLOBALS['wp_query'] =& new WP_Query();
@@ -29,7 +23,7 @@ function &query_posts($query) {
 function is_admin () {
 	global $wp_query;
 
-	return ($wp_query->is_admin || (strpos($_SERVER['REQUEST_URI'], 'wp-admin/') !== false));
+	return ( $wp_query->is_admin || strstr($_SERVER['REQUEST_URI'], 'wp-admin/') );
 }
 
 function is_archive () {
@@ -83,20 +77,6 @@ function is_category ($category = '') {
 	elseif ( $category == $cat_obj->category_nicename )
 		return true;
 
-	return false;
-}
-
-function is_tag( $slug = '' ) {
-	global $wp_query;
-	if ( !$wp_query->is_tag )
-		return false;
-
-	if ( empty( $slug ) )
-		return true;
-
-	$cat_obj = $wp_query->get_queried_object();
-	if ( $category == $cat_obj->category_nicename )
-		return true;
 	return false;
 }
 
@@ -214,7 +194,7 @@ function is_single ($post = '') {
 function is_singular() {
 	global $wp_query;
 
-	return $wp_query->is_singular;
+	return $wp_query->is_singular;	
 }
 
 function is_time () {
@@ -270,20 +250,6 @@ function the_post() {
 }
 
 /*
- * Comments loop. 
- */ 
-
-function have_comments() { 
-	global $wp_query; 
-	return $wp_query->have_comments(); 
-} 
-
-function the_comment() { 
-	global $wp_query; 
-	return $wp_query->the_comment(); 
-}  
-
-/*
  * WP_Query
  */
 
@@ -300,11 +266,6 @@ class WP_Query {
 	var $in_the_loop = false;
 	var $post;
 
-	var $comments;
-	var $comment_count = 0;
-	var $current_comment = -1;
-	var $comment;
-
 	var $found_posts = 0;
 	var $max_num_pages = 0;
 
@@ -319,10 +280,8 @@ class WP_Query {
 	var $is_time = false;
 	var $is_author = false;
 	var $is_category = false;
-	var $is_tag = false;
 	var $is_search = false;
 	var $is_feed = false;
-	var $is_comment_feed = false;
 	var $is_trackback = false;
 	var $is_home = false;
 	var $is_404 = false;
@@ -344,10 +303,8 @@ class WP_Query {
 		$this->is_time = false;
 		$this->is_author = false;
 		$this->is_category = false;
-		$this->is_tag = false;
 		$this->is_search = false;
 		$this->is_feed = false;
-		$this->is_comment_feed = false;
 		$this->is_trackback = false;
 		$this->is_home = false;
 		$this->is_404 = false;
@@ -376,7 +333,7 @@ class WP_Query {
 	function parse_query_vars() {
 		$this->parse_query('');
 	}
-
+	
 	function fill_query_vars($array) {
 		$keys = array(
 			'error'
@@ -399,7 +356,6 @@ class WP_Query {
 			, 'year'
 			, 'w'
 			, 'category_name'
-			, 'tag'
 			, 'author_name'
 			, 'feed'
 			, 'tb'
@@ -412,7 +368,7 @@ class WP_Query {
 			if ( !isset($array[$key]))
 				$array[$key] = '';
 		}
-
+		
 		return $array;
 	}
 
@@ -421,15 +377,15 @@ class WP_Query {
 		if ( !empty($query) || !isset($this->query) ) {
 			$this->init();
 			if ( is_array($query) )
-				$this->query_vars = $query;
+				$qv = & $query;
 			else
-				parse_str($query, $this->query_vars);
+				parse_str($query, $qv);
 			$this->query = $query;
+			$this->query_vars = $qv;
 		}
-
-		$this->query_vars = $this->fill_query_vars($this->query_vars);
-		$qv = &$this->query_vars;
-
+		
+		$qv = $this->fill_query_vars($qv);
+		
 		if ( ! empty($qv['robots']) ) {
 			$this->is_robots = true;
 			return;
@@ -443,16 +399,8 @@ class WP_Query {
 			return;
 		}
 
-		$qv['p'] =  (int) $qv['p'];
-		$qv['page_id'] =  (int) $qv['page_id'];
-		$qv['year'] = (int) $qv['year'];
-		$qv['monthnum'] = (int) $qv['monthnum'];
-		$qv['day'] = (int) $qv['day'];
-		$qv['w'] = (int) $qv['w'];
 		$qv['m'] =  (int) $qv['m'];
-		if ( '' != $qv['hour'] ) $qv['hour'] = (int) $qv['hour'];
-		if ( '' != $qv['minute'] ) $qv['minute'] = (int) $qv['minute'];
-		if ( '' != $qv['second'] ) $qv['second'] = (int) $qv['second'];
+		$qv['p'] =  (int) $qv['p'];
 
 		// Compat.  Map subpost to attachment.
 		if ( '' != $qv['subpost'] )
@@ -460,64 +408,62 @@ class WP_Query {
 		if ( '' != $qv['subpost_id'] )
 			$qv['attachment_id'] = $qv['subpost_id'];
 
-		$qv['attachment_id'] = (int) $qv['attachment_id'];
-		
-		if ( ('' != $qv['attachment']) || !empty($qv['attachment_id']) ) {
+		if ( ('' != $qv['attachment']) || (int) $qv['attachment_id'] ) {
 			$this->is_single = true;
 			$this->is_attachment = true;
-		} elseif ( '' != $qv['name'] ) {
+		} elseif ('' != $qv['name']) {
 			$this->is_single = true;
 		} elseif ( $qv['p'] ) {
 			$this->is_single = true;
-		} elseif ( ('' != $qv['hour']) && ('' != $qv['minute']) &&('' != $qv['second']) && ('' != $qv['year']) && ('' != $qv['monthnum']) && ('' != $qv['day']) ) {
+		} elseif (('' != $qv['hour']) && ('' != $qv['minute']) &&('' != $qv['second']) && ('' != $qv['year']) && ('' != $qv['monthnum']) && ('' != $qv['day'])) {
 			// If year, month, day, hour, minute, and second are set, a single
 			// post is being queried.
 			$this->is_single = true;
-		} elseif ( '' != $qv['static'] || '' != $qv['pagename'] || !empty($qv['page_id']) ) {
+		} elseif ('' != $qv['static'] || '' != $qv['pagename'] || (int) $qv['page_id']) {
 			$this->is_page = true;
 			$this->is_single = false;
-		} elseif ( !empty($qv['s']) ) {
+		} elseif (!empty($qv['s'])) {
 			$this->is_search = true;
 		} else {
 		// Look for archive queries.  Dates, categories, authors.
 
-			if ( '' != $qv['second'] ) {
+			if ( (int) $qv['second']) {
 				$this->is_time = true;
 				$this->is_date = true;
 			}
 
-			if ( '' != $qv['minute'] ) {
+			if ( (int) $qv['minute']) {
 				$this->is_time = true;
 				$this->is_date = true;
 			}
 
-			if ( '' != $qv['hour'] ) {
+			if ( (int) $qv['hour']) {
 				$this->is_time = true;
 				$this->is_date = true;
 			}
 
-			if ( $qv['day'] ) {
+			if ( (int) $qv['day']) {
 				if (! $this->is_date) {
 					$this->is_day = true;
 					$this->is_date = true;
 				}
 			}
 
-			if ( $qv['monthnum'] ) {
+			if ( (int)  $qv['monthnum']) {
 				if (! $this->is_date) {
 					$this->is_month = true;
 					$this->is_date = true;
 				}
 			}
 
-			if ( $qv['year'] ) {
+			if ( (int)  $qv['year']) {
 				if (! $this->is_date) {
 					$this->is_year = true;
 					$this->is_date = true;
 				}
 			}
 
-			if ( $qv['m'] ) {
+			if ( (int)  $qv['m']) {
 				$this->is_date = true;
 				if (strlen($qv['m']) > 9) {
 					$this->is_time = true;
@@ -534,106 +480,70 @@ class WP_Query {
 				$this->is_date = true;
 			}
 
-			if ( empty($qv['cat']) || ($qv['cat'] == '0') ) {
+			if (empty($qv['cat']) || ($qv['cat'] == '0')) {
 				$this->is_category = false;
 			} else {
-				if (strpos($qv['cat'], '-') !== false) {
+				if (stristr($qv['cat'],'-')) {
 					$this->is_category = false;
 				} else {
 					$this->is_category = true;
 				}
 			}
 
-			if ( '' != $qv['category_name'] ) {
+			if ('' != $qv['category_name']) {
 				$this->is_category = true;
 			}
 
-			if (  '' != $qv['tag'] )
-				$this->is_tag = true;
-
-			if ( empty($qv['author']) || ($qv['author'] == '0') ) {
+			if ((empty($qv['author'])) || ($qv['author'] == '0')) {
 				$this->is_author = false;
 			} else {
 				$this->is_author = true;
 			}
 
-			if ( '' != $qv['author_name'] ) {
+			if ('' != $qv['author_name']) {
 				$this->is_author = true;
 			}
 
-			if ( ($this->is_date || $this->is_author || $this->is_category || $this->is_tag ) )
+			if ( ($this->is_date || $this->is_author || $this->is_category)) {
 				$this->is_archive = true;
+			}
 		}
 
-		if ( '' != $qv['feed'] )
+		if ('' != $qv['feed']) {
 			$this->is_feed = true;
+		}
 
-		if ( '' != $qv['tb'] )
+		if ('' != $qv['tb']) {
 			$this->is_trackback = true;
+		}
 
-		if ( '' != $qv['paged'] )
+		if ('' != $qv['paged']) {
 			$this->is_paged = true;
+		}
 
-		if ( '' != $qv['comments_popup'] )
+		if ('' != $qv['comments_popup']) {
 			$this->is_comments_popup = true;
+		}
 
-		// if we're previewing inside the write screen
-		if ('' != $qv['preview'])
+		//if we're previewing inside the write screen
+		if ('' != $qv['preview']) {
 			$this->is_preview = true;
+		}
 
-		if ( strpos($_SERVER['PHP_SELF'], 'wp-admin/') !== false )
+		if (strstr($_SERVER['PHP_SELF'], 'wp-admin/')) {
 			$this->is_admin = true;
-
-		if ( false !== strpos($qv['feed'], 'comments-') ) {
-			$qv['feed'] = str_replace('comments-', '', $qv['feed']);
-			$qv['withcomments'] = 1;
 		}
 
-		$this->is_singular = $this->is_single || $this->is_page || $this->is_attachment;
+		if ( $this->is_single || $this->is_page || $this->is_attachment )
+			$this->is_singular = true;
 
-		if ( $this->is_feed && ( !empty($qv['withcomments']) || ( empty($qv['withoutcomments']) && $this->is_singular ) ) )
-			$this->is_comment_feed = true;
-
-		if ( !( $this->is_singular || $this->is_archive || $this->is_search || $this->is_feed || $this->is_trackback || $this->is_404 || $this->is_admin || $this->is_comments_popup ) )
+		if ( ! ($this->is_singular || $this->is_archive || $this->is_search || $this->is_feed || $this->is_trackback || $this->is_404 || $this->is_admin || $this->is_comments_popup)) {
 			$this->is_home = true;
-
-		// Correct is_* for page_on_front and page_for_posts
-		if ( $this->is_home && ( empty($this->query) || $qv['preview'] == 'true' ) && 'page' == get_option('show_on_front') && get_option('page_on_front') ) {
-			$this->is_page = true;
-			$this->is_home = false;
-			$qv['page_id'] = get_option('page_on_front');
 		}
 
-		if ( '' != $qv['pagename'] ) {
-			$this->queried_object =& get_page_by_path($qv['pagename']);
-			if ( !empty($this->queried_object) )
-				$this->queried_object_id = (int) $this->queried_object->ID;
-			else
-				unset($this->queried_object);
-
-			if  ( 'page' == get_option('show_on_front') && isset($this->queried_object_id) && $this->queried_object_id == get_option('page_for_posts') ) {
-				$this->is_page = false;
-				$this->is_home = true;
-				$this->is_posts_page = true;
-			}
-		}
-
-		if ( $qv['page_id'] ) {
-			if  ( 'page' == get_option('show_on_front') && $qv['page_id'] == get_option('page_for_posts') ) {
-				$this->is_page = false;
-				$this->is_home = true;
-				$this->is_posts_page = true;
-			}
-		}
-
-		if ( $this->is_posts_page && !$qv['withcomments'] )
-			$this->is_comment_feed = false;
-
-		$this->is_singular = $this->is_single || $this->is_page || $this->is_attachment;
-		// Done correcting is_* for page_on_front and page_for_posts
-
-		if ( !empty($query) )
+		if ( !empty($query) ) {
 			do_action_ref_array('parse_query', array(&$this));
+		}
 	}
 
 	function set_404() {
@@ -664,7 +574,7 @@ class WP_Query {
 
 		// Shorthand.
 		$q = &$this->query_vars;
-
+		
 		$q = $this->fill_query_vars($q);
 
 		// First let's clear some variables
@@ -724,7 +634,7 @@ class WP_Query {
 		$wp_posts_post_date_field = "post_date"; // "DATE_ADD(post_date, INTERVAL '$add_hours:$add_minutes' HOUR_MINUTE)";
 
 		// If a month is specified in the querystring, load that month
-		if ( $q['m'] ) {
+		if ( (int) $q['m'] ) {
 			$q['m'] = '' . preg_replace('|[^0-9]|', '', $q['m']);
 			$where .= ' AND YEAR(post_date)=' . substr($q['m'], 0, 4);
 			if (strlen($q['m'])>5)
@@ -739,39 +649,58 @@ class WP_Query {
 				$where .= ' AND SECOND(post_date)=' . substr($q['m'], 12, 2);
 		}
 
-		if ( '' != $q['hour'] )
+		if ( (int) $q['hour'] ) {
+			$q['hour'] = '' . intval($q['hour']);
 			$where .= " AND HOUR(post_date)='" . $q['hour'] . "'";
+		}
 
-		if ( '' != $q['minute'] )
+		if ( (int) $q['minute'] ) {
+			$q['minute'] = '' . intval($q['minute']);
 			$where .= " AND MINUTE(post_date)='" . $q['minute'] . "'";
+		}
 
-		if ( '' != $q['second'] )
+		if ( (int) $q['second'] ) {
+			$q['second'] = '' . intval($q['second']);
 			$where .= " AND SECOND(post_date)='" . $q['second'] . "'";
+		}
 
-		if ( $q['year'] )
+		if ( (int) $q['year'] ) {
+			$q['year'] = '' . intval($q['year']);
 			$where .= " AND YEAR(post_date)='" . $q['year'] . "'";
+		}
 
-		if ( $q['monthnum'] )
+		if ( (int) $q['monthnum'] ) {
+			$q['monthnum'] = '' . intval($q['monthnum']);
 			$where .= " AND MONTH(post_date)='" . $q['monthnum'] . "'";
+		}
 
-		if ( $q['day'] )
+		if ( (int) $q['day'] ) {
+			$q['day'] = '' . intval($q['day']);
 			$where .= " AND DAYOFMONTH(post_date)='" . $q['day'] . "'";
+		}
+
+		// Compat.  Map subpost to attachment.
+		if ( '' != $q['subpost'] )
+			$q['attachment'] = $q['subpost'];
+		if ( '' != $q['subpost_id'] )
+			$q['attachment_id'] = $q['subpost_id'];
 
 		if ('' != $q['name']) {
 			$q['name'] = sanitize_title($q['name']);
 			$where .= " AND post_name = '" . $q['name'] . "'";
 		} else if ('' != $q['pagename']) {
-			if ( isset($this->queried_object_id) )
-				$reqpage = $this->queried_object_id;
-			else {
-				$reqpage = get_page_by_path($q['pagename']);
-				if ( !empty($reqpage) )
-					$reqpage = $reqpage->ID;
-				else
-					$reqpage = 0;
-			}
+			$reqpage = get_page_by_path($q['pagename']);
+			if ( !empty($reqpage) )
+				$reqpage = $reqpage->ID;
+			else
+				$reqpage = 0;
 
-			if  ( ('page' != get_option('show_on_front') ) || ( $reqpage != get_option('page_for_posts') ) ) {
+			if  ( ('page' == get_option('show_on_front') ) && ( $reqpage == get_option('page_for_posts') ) ) {
+				$this->is_singular = false;
+				$this->is_page = false;
+				$this->is_home = true;
+				$this->is_posts_page = true;
+			} else {
 				$q['pagename'] = str_replace('%2F', '/', urlencode(urldecode($q['pagename'])));
 				$page_paths = '/' . trim($q['pagename'], '/');
 				$q['pagename'] = sanitize_title(basename($page_paths));
@@ -786,29 +715,39 @@ class WP_Query {
 			$where .= " AND post_name = '" . $q['attachment'] . "'";
 		}
 
-		if ( $q['w'] )
+		if ( (int) $q['w'] ) {
+			$q['w'] = ''.intval($q['w']);
 			$where .= " AND WEEK(post_date, 1)='" . $q['w'] . "'";
+		}
 
 		if ( intval($q['comments_popup']) )
 			$q['p'] = intval($q['comments_popup']);
 
-		// If an attachment is requested by number, let it supercede any post number.
-		if ( $q['attachment_id'] )
-			$q['p'] = $q['attachment_id'];
+		// If a attachment is requested by number, let it supercede any post number.
+		if ( ($q['attachment_id'] != '') && (intval($q['attachment_id']) != 0) )
+			$q['p'] = (int) $q['attachment_id'];
 
 		// If a post number is specified, load that post
-		if ( $q['p'] )
+		if (($q['p'] != '') && intval($q['p']) != 0) {
+			$q['p'] =  (int) $q['p'];
 			$where = ' AND ID = ' . $q['p'];
+		}
 
-		if ( $q['page_id'] ) {
-			if  ( ('page' != get_option('show_on_front') ) || ( $q['page_id'] != get_option('page_for_posts') ) ) {
+		if (($q['page_id'] != '') && (intval($q['page_id']) != 0)) {
+			$q['page_id'] = intval($q['page_id']);
+			if  ( ('page' == get_option('show_on_front') ) && ( $q['page_id'] == get_option('page_for_posts') ) ) {
+				$this->is_singular = false;
+				$this->is_page = false;
+				$this->is_home = true;
+				$this->is_posts_page = true;
+			} else {
 				$q['p'] = $q['page_id'];
-				$where = ' AND ID = ' . $q['page_id'];
+				$where = ' AND ID = '.$q['page_id'];
 			}
 		}
 
 		// If a search pattern is specified, load the posts that match
-		if ( !empty($q['s']) ) {
+		if (!empty($q['s'])) {
 			// added slashes screw with quote grouping when done early, so done later
 			$q['s'] = stripslashes($q['s']);
 			if ($q['sentence']) {
@@ -835,10 +774,10 @@ class WP_Query {
 
 		// Category stuff
 
-		if ( empty($q['cat']) || ($q['cat'] == '0') ||
+		if ((empty($q['cat'])) || ($q['cat'] == '0') ||
 				// Bypass cat checks if fetching specific posts
-				$this->is_singular ) {
-			$whichcat = '';
+				( $this->is_single || $this->is_page )) {
+			$whichcat='';
 		} else {
 			$q['cat'] = ''.urldecode($q['cat']).'';
 			$q['cat'] = addslashes_gpc($q['cat']);
@@ -847,7 +786,7 @@ class WP_Query {
 			$in_cats = $out_cats = $out_posts = '';
 			foreach ( $cat_array as $cat ) {
 				$cat = intval($cat);
-				$in = (strpos($cat, '-') !== false) ? false : true;
+				$in = strstr($cat, '-') ? false : true;
 				$cat = trim($cat, '-');
 				if ( $in )
 					$in_cats .= "$cat, " . get_category_children($cat, '', ', ');
@@ -857,7 +796,7 @@ class WP_Query {
 			$in_cats = substr($in_cats, 0, -2);
 			$out_cats = substr($out_cats, 0, -2);
 			if ( strlen($in_cats) > 0 )
-				$in_cats = " AND $wpdb->post2cat.category_id IN ($in_cats) AND rel_type = 'category' ";
+				$in_cats = " AND $wpdb->post2cat.category_id IN ($in_cats)";
 			if ( strlen($out_cats) > 0 ) {
 				$ids = $wpdb->get_col("SELECT post_id FROM $wpdb->post2cat WHERE $wpdb->post2cat.category_id IN ($out_cats)");
 				if ( is_array($ids) && count($ids > 0) ) {
@@ -874,23 +813,8 @@ class WP_Query {
 			$groupby = "{$wpdb->posts}.ID";
 		}
 
-		if ( '' != $q['tag'] ) {
-			$reqcat= get_category_by_slug( $q['tag'] );
-			if ( !empty($reqcat) )
-				$reqcat = $reqcat->cat_ID;
-			else
-				$reqcat = 0;
-
-			$q['cat'] = $reqcat;
-
-			$tables = ", $wpdb->post2cat, $wpdb->categories";
-			$join = " LEFT JOIN $wpdb->post2cat ON ($wpdb->posts.ID = $wpdb->post2cat.post_id) LEFT JOIN $wpdb->categories ON ($wpdb->post2cat.category_id = $wpdb->categories.cat_ID) ";
-			$whichcat = " AND category_id IN ({$q['cat']}) AND rel_type = 'tag' ";
-			$groupby = "{$wpdb->posts}.ID";
-		}
-
 		// Category stuff for nice URLs
-		if ( '' != $q['category_name'] ) {
+		if ('' != $q['category_name']) {
 			$reqcat = get_category_by_path($q['category_name']);
 			$q['category_name'] = str_replace('%2F', '/', urlencode(urldecode($q['category_name'])));
 			$cat_paths = '/' . trim($q['category_name'], '/');
@@ -919,20 +843,18 @@ class WP_Query {
 			$whichcat = " AND category_id IN ({$q['cat']}, ";
 			$whichcat .= get_category_children($q['cat'], '', ', ');
 			$whichcat = substr($whichcat, 0, -2);
-			$whichcat .= ") AND rel_type = 'category'";
+			$whichcat .= ")";
 			$groupby = "{$wpdb->posts}.ID";
 		}
 
-
-
 		// Author/user stuff
 
-		if ( empty($q['author']) || ($q['author'] == '0') ) {
+		if ((empty($q['author'])) || ($q['author'] == '0')) {
 			$whichauthor='';
 		} else {
 			$q['author'] = ''.urldecode($q['author']).'';
 			$q['author'] = addslashes_gpc($q['author']);
-			if (strpos($q['author'], '-') !== false) {
+			if (stristr($q['author'], '-')) {
 				$eq = '!=';
 				$andor = 'AND';
 				$q['author'] = explode('-', $q['author']);
@@ -952,7 +874,7 @@ class WP_Query {
 		// Author stuff for nice URLs
 
 		if ('' != $q['author_name']) {
-			if (strpos($q['author_name'], '/') !== false) {
+			if (stristr($q['author_name'],'/')) {
 				$q['author_name'] = explode('/',$q['author_name']);
 				if ($q['author_name'][count($q['author_name'])-1]) {
 					$q['author_name'] = $q['author_name'][count($q['author_name'])-1];#no trailing slash
@@ -967,11 +889,12 @@ class WP_Query {
 
 		$where .= $search.$whichcat.$whichauthor;
 
-		if ( empty($q['order']) || ((strtoupper($q['order']) != 'ASC') && (strtoupper($q['order']) != 'DESC')) )
-			$q['order'] = 'DESC';
+		if ((empty($q['order'])) || ((strtoupper($q['order']) != 'ASC') && (strtoupper($q['order']) != 'DESC'))) {
+			$q['order']='DESC';
+		}
 
 		// Order by
-		if ( empty($q['orderby']) ) {
+		if (empty($q['orderby'])) {
 			$q['orderby'] = 'post_date '.$q['order'];
 		} else {
 			// Used to filter values
@@ -1027,7 +950,7 @@ class WP_Query {
 		$join = apply_filters('posts_join', $join);
 
 		// Paging
-		if ( empty($q['nopaging']) && !$this->is_singular ) {
+		if (empty($q['nopaging']) && !$this->is_singular) {
 			$page = abs(intval($q['paged']));
 			if (empty($page)) {
 				$page = 1;
@@ -1042,38 +965,6 @@ class WP_Query {
 				$pgstrt = $q['offset'] . ', ';
 				$limits = 'LIMIT ' . $pgstrt . $q['posts_per_page'];
 			}
-		}
-
-		// Comments feeds
-		if ( $this->is_comment_feed && ( $this->is_archive || $this->is_search || !$this->is_singular ) ) {
-			if ( $this->is_archive || $this->is_search ) {
-				$cjoin = "LEFT JOIN $wpdb->posts ON ($wpdb->comments.comment_post_ID = $wpdb->posts.ID) $join ";
-				$cwhere = "WHERE comment_approved = '1' $where";
-				$cgroupby = "GROUP BY $wpdb->comments.comment_id";
-			} else { // Other non singular e.g. front
-				$cjoin = "LEFT JOIN $wpdb->posts ON ( $wpdb->comments.comment_post_ID = $wpdb->posts.ID )";
-				$cwhere = "WHERE post_status = 'publish' AND comment_approved = '1'";
-				$cgroupby = '';
-			}
-
-			$cjoin = apply_filters('comment_feed_join', $cjoin);
-			$cwhere = apply_filters('comment_feed_where', $cwhere);
-			$cgroupby = apply_filters('comment_feed_groupby', $cgroupby);
-
-			$this->comments = (array) $wpdb->get_results("SELECT $distinct $wpdb->comments.* FROM $wpdb->comments $cjoin $cwhere $cgroupby ORDER BY comment_date_gmt DESC LIMIT " . get_settings('posts_per_rss'));
-			$this->comment_count = count($this->comments);
-
-			$post_ids = array();
-
-			foreach ($this->comments as $comment)
-				$post_ids[] = (int) $comment->comment_post_ID;
-
-			$post_ids = join(',', $post_ids);
-			$join = '';
-			if ( $post_ids )
-				$where = "AND $wpdb->posts.ID IN ($post_ids) ";
-			else
-				$where = "AND 0";
 		}
 
 		// Apply post-paging filters on where and join.  Only plugins that
@@ -1095,22 +986,12 @@ class WP_Query {
 		$this->request = apply_filters('posts_request', $request);
 
 		$this->posts = $wpdb->get_results($this->request);
-
-		if ( $this->is_comment_feed && $this->is_singular ) {
-			$cjoin = apply_filters('comment_feed_join', '');
-			$cwhere = apply_filters('comment_feed_where', "WHERE comment_post_ID = {$this->posts[0]->ID} AND comment_approved = '1'");
-			$comments_request = "SELECT $wpdb->comments.* FROM $wpdb->comments $cjoin $cwhere ORDER BY comment_date_gmt DESC LIMIT " . get_settings('posts_per_rss');
-			$this->comments = $wpdb->get_results($comments_request);
-			$this->comment_count = count($this->comments);
-		}
-
 		if ( !empty($limits) ) {
 			$found_posts_query = apply_filters( 'found_posts_query', 'SELECT FOUND_ROWS()' );
 			$this->found_posts = $wpdb->get_var( $found_posts_query );
 			$this->found_posts = apply_filters( 'found_posts', $this->found_posts );
 			$this->max_num_pages = ceil($this->found_posts / $q['posts_per_page']);
 		}
-
 		// Check post status to determine if post should be displayed.
 		if ( !empty($this->posts) && ($this->is_single || $this->is_page) ) {
 			$status = get_post_status($this->posts[0]);
@@ -1191,40 +1072,6 @@ class WP_Query {
 		}
 	}
 
-	function next_comment() {
-		$this->current_comment++;
-
-		$this->comment = $this->comments[$this->current_comment];
-		return $this->comment;
-	}
-
-	function the_comment() {
-		global $comment;
-
-		$comment = $this->next_comment();
-
-		if ($this->current_comment == 0) {
-			do_action('comment_loop_start');
-		}
-	}
-
-	function have_comments() {
-		if ($this->current_comment + 1 < $this->comment_count) {
-			return true;
-		} elseif ($this->current_comment + 1 == $this->comment_count) {
-			$this->rewind_comments();
-		}
-
-		return false;
-	}
-
-	function rewind_comments() {
-		$this->current_comment = -1;
-		if ($this->comment_count > 0) {
-			$this->comment = $this->comments[0];
-		}
-	}
-
 	function &query($query) {
 		$this->parse_query($query);
 		return $this->get_posts();
@@ -1242,18 +1089,18 @@ class WP_Query {
 			$cat = $this->get('cat');
 			$category = &get_category($cat);
 			$this->queried_object = &$category;
-			$this->queried_object_id = (int) $cat;
+			$this->queried_object_id = $cat;
 		} else if ($this->is_posts_page) {
 			$this->queried_object = & get_page(get_option('page_for_posts'));
-			$this->queried_object_id = (int) $this->queried_object->ID;
+			$this->queried_object_id = $this->queried_object->ID;
 		} else if ($this->is_single) {
 			$this->queried_object = $this->post;
-			$this->queried_object_id = (int) $this->post->ID;
+			$this->queried_object_id = $this->post->ID;
 		} else if ($this->is_page) {
 			$this->queried_object = $this->post;
-			$this->queried_object_id = (int) $this->post->ID;
+			$this->queried_object_id = $this->post->ID;
 		} else if ($this->is_author) {
-			$author_id = (int) $this->get('author');
+			$author_id = $this->get('author');
 			$author = get_userdata($author_id);
 			$this->queried_object = $author;
 			$this->queried_object_id = $author_id;
@@ -1322,7 +1169,7 @@ function setup_postdata($post) {
 	global $id, $postdata, $authordata, $day, $page, $pages, $multipage, $more, $numpages, $wp_query;
 	global $pagenow;
 
-	$id = (int) $post->ID;
+	$id = $post->ID;
 
 	$authordata = get_userdata($post->post_author);
 

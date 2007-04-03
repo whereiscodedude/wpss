@@ -203,38 +203,20 @@ function is_serialized_string($data) {
 function get_option($setting) {
 	global $wpdb;
 
-	// Allow plugins to short-circuit options.
-	$pre = apply_filters( 'pre_option_' . $setting, false ); 
-	if ( $pre ) 
-		return $pre; 
+	$value = wp_cache_get($setting, 'options');
 
-	// prevent non-existent options from triggering multiple queries
-	$notoptions = wp_cache_get('notoptions', 'options');
-	if ( isset($notoptions[$setting]) )
-		return false;
+	if ( false === $value ) {
+		if ( defined('WP_INSTALLING') )
+			$wpdb->hide_errors();
+		$row = $wpdb->get_row("SELECT option_value FROM $wpdb->options WHERE option_name = '$setting' LIMIT 1");
+		if ( defined('WP_INSTALLING') )
+			$wpdb->show_errors();
 
-	$alloptions = wp_load_alloptions();
-
-	if ( isset($alloptions[$setting]) ) {
-		$value = $alloptions[$setting];
-	} else {
-		$value = wp_cache_get($setting, 'options');
-
-		if ( false === $value ) {
-			if ( defined('WP_INSTALLING') )
-				$wpdb->hide_errors();
-			$row = $wpdb->get_row("SELECT option_value FROM $wpdb->options WHERE option_name = '$setting' LIMIT 1");
-			if ( defined('WP_INSTALLING') )
-				$wpdb->show_errors();
-
-			if( is_object( $row) ) { // Has to be get_row instead of get_var because of funkiness with 0, false, null values
-				$value = $row->option_value;
-				wp_cache_set($setting, $value, 'options');
-			} else { // option does not exist, so we must cache its non-existence
-				$notoptions[$setting] = true;
-				wp_cache_set('notoptions', $notoptions, 'options');
-				return false;
-			}
+		if( is_object( $row) ) { // Has to be get_row instead of get_var because of funkiness with 0, false, null values
+			$value = $row->option_value;
+			wp_cache_set($setting, $value, 'options');
+		} else {
+			return false;
 		}
 	}
 
@@ -246,12 +228,6 @@ function get_option($setting) {
 		$value = preg_replace('|/+$|', '', $value);
 
 	return apply_filters( 'option_' . $setting, maybe_unserialize($value) );
-}
-
-function wp_protect_special_option($option) {
-	$protected = array('alloptions', 'notoptions');
-	if ( in_array($option, $protected) )
-		die(sprintf(__('%s is a protected WP option and may not be modified'), wp_specialchars($option)));
 }
 
 function form_option($option) {
@@ -281,35 +257,15 @@ function get_alloptions() {
 	return apply_filters('all_options', $all_options);
 }
 
-function wp_load_alloptions() {
-	global $wpdb;
-
-	$alloptions = wp_cache_get('alloptions', 'options');
-
-	if ( !$alloptions ) {
-		$wpdb->hide_errors();
-		if ( !$alloptions_db = $wpdb->get_results("SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'") )
-			$alloptions_db = $wpdb->get_results("SELECT option_name, option_value FROM $wpdb->options");
-		$wpdb->show_errors();
-		$alloptions = array();
-		foreach ( (array) $alloptions_db as $o )
-			$alloptions[$o->option_name] = $o->option_value;
-		wp_cache_set('alloptions', $alloptions, 'options');
-	}
-	return $alloptions;
-}
-
 function update_option($option_name, $newvalue) {
 	global $wpdb;
-
-	wp_protect_special_option($option_name);
 
 	if ( is_string($newvalue) )
 		$newvalue = trim($newvalue);
 
 	// If the new and old values are the same, no need to update.
 	$oldvalue = get_option($option_name);
-	if ( $newvalue === $oldvalue ) {
+	if ( $newvalue == $oldvalue ) {
 		return false;
 	}
 
@@ -318,22 +274,10 @@ function update_option($option_name, $newvalue) {
 		return true;
 	}
 
-	$notoptions = wp_cache_get('notoptions', 'options');
-	if ( isset($notoptions[$option_name]) ) {
-		unset($notoptions[$option_name]);
-		wp_cache_set('notoptions', $notoptions, 'options');
-	}
-
 	$_newvalue = $newvalue;
 	$newvalue = maybe_serialize($newvalue);
 
-	$alloptions = wp_load_alloptions();
-	if ( isset($alloptions[$option_name]) ) {
-		$alloptions[$option_name] = $newvalue;
-		wp_cache_set('alloptions', $alloptions, 'options');
-	} else {
-		wp_cache_set($option_name, $newvalue, 'options');
-	}
+	wp_cache_set($option_name, $newvalue, 'options');
 
 	$newvalue = $wpdb->escape($newvalue);
 	$option_name = $wpdb->escape($option_name);
@@ -349,26 +293,13 @@ function update_option($option_name, $newvalue) {
 function add_option($name, $value = '', $description = '', $autoload = 'yes') {
 	global $wpdb;
 
-	wp_protect_special_option($name);
-
-	// Make sure the option doesn't already exist we can check the cache before we ask for a db query
-	$notoptions = wp_cache_get('notoptions', 'options');
-	if ( isset($notoptions[$name]) ) {
-		unset($notoptions[$name]);
-		wp_cache_set('notoptions', $notoptions, 'options');
-	} elseif ( false !== get_option($name) ) {
-			return;
-	}
+	// Make sure the option doesn't already exist
+	if ( false !== get_option($name) )
+		return;
 
 	$value = maybe_serialize($value);
 
-	if ( 'yes' == $autoload ) {
-		$alloptions = wp_load_alloptions();
-		$alloptions[$name] = $value;
-		wp_cache_set('alloptions', $alloptions, 'options');
-	} else {
-		wp_cache_set($name, $value, 'options');
-	}
+	wp_cache_set($name, $value, 'options');
 
 	$name = $wpdb->escape($name);
 	$value = $wpdb->escape($value);
@@ -380,22 +311,11 @@ function add_option($name, $value = '', $description = '', $autoload = 'yes') {
 
 function delete_option($name) {
 	global $wpdb;
-
-	wp_protect_special_option($name);
-
 	// Get the ID, if no ID then return
-	$option = $wpdb->get_row("SELECT option_id, autoload FROM $wpdb->options WHERE option_name = '$name'");
-	if ( !$option->option_id ) return false;
+	$option_id = $wpdb->get_var("SELECT option_id FROM $wpdb->options WHERE option_name = '$name'");
+	if ( !$option_id ) return false;
 	$wpdb->query("DELETE FROM $wpdb->options WHERE option_name = '$name'");
-	if ( 'yes' == $option->autoload ) {
-		$alloptions = wp_load_alloptions();
-		if ( isset($alloptions[$name]) ) {
-			unset($alloptions[$name]);
-			wp_cache_set('alloptions', $alloptions, 'options');
-		}
-	} else {
-		wp_cache_delete($name, 'options');
-	}
+	wp_cache_delete($name, 'options');
 	return true;
 }
 
@@ -599,7 +519,7 @@ function update_post_cache(&$posts) {
 }
 
 function clean_post_cache($id) {
-	global $post_cache, $post_meta_cache, $category_cache, $tag_cache, $blog_id;
+	global $post_cache, $post_meta_cache, $category_cache, $blog_id;
 
 	if ( isset( $post_cache[$blog_id][$id] ) )
 		unset( $post_cache[$blog_id][$id] );
@@ -609,9 +529,6 @@ function clean_post_cache($id) {
 
 	if ( isset( $category_cache[$blog_id][$id]) )
 		unset ( $category_cache[$blog_id][$id] );
-
-	if ( isset( $tag_cache[$blog_id][$id]) )
-		unset ( $tag_cache[$blog_id][$id] );
 }
 
 function update_page_cache(&$pages) {
@@ -638,7 +555,7 @@ function clean_page_cache($id) {
 }
 
 function update_post_category_cache($post_ids) {
-	global $wpdb, $category_cache, $tag_cache, $blog_id;
+	global $wpdb, $category_cache, $blog_id;
 
 	if ( empty($post_ids) )
 		return;
@@ -659,21 +576,17 @@ function update_post_category_cache($post_ids) {
 		return;
 	$post_id_list = join( ',', $post_id_array ); // with already cached stuff removed
 
-	$dogs = $wpdb->get_results("SELECT post_id, category_id, rel_type FROM $wpdb->post2cat WHERE post_id IN ($post_id_list)");
+	$dogs = $wpdb->get_results("SELECT post_id, category_id FROM $wpdb->post2cat WHERE post_id IN ($post_id_list)");
 
 	if ( empty($dogs) )
 		return;
 
-	foreach ($dogs as $catt) {
-		if ( 'category' == $catt->rel_type )
-			$category_cache[$blog_id][$catt->post_id][$catt->category_id] = &get_category($catt->category_id);
-		elseif ( 'tag' == $catt->rel_type )
-			$tag_cache[$blog_id][$catt->post_id][$catt->category_id] = &get_category($catt->category_id);
-	}
+	foreach ($dogs as $catt)
+		$category_cache[$blog_id][$catt->post_id][$catt->category_id] = &get_category($catt->category_id);
 }
 
 function update_post_caches(&$posts) {
-	global $post_cache, $category_cache, $post_meta_cache, $tag_cache;
+	global $post_cache, $category_cache, $post_meta_cache;
 	global $wpdb, $blog_id;
 
 	// No point in doing all this work if we didn't match any posts.
@@ -787,7 +700,7 @@ function add_query_arg() {
 		$protocol = '';
 	}
 
-	if (strpos($uri, '?') !== false) {
+	if ( strstr($uri, '?') ) {
 		$parts = explode('?', $uri, 2);
 		if ( 1 == count($parts) ) {
 			$base = '?';
@@ -796,7 +709,7 @@ function add_query_arg() {
 			$base = $parts[0] . '?';
 			$query = $parts[1];
 		}
-	} elseif (!empty($protocol) || strpos($uri, '/') !== false) {
+	} else if ( !empty($protocol) || strstr($uri, '/') ) {
 		$base = $uri . '?';
 		$query = '';
 	} else {
@@ -946,49 +859,46 @@ function bool_from_yn($yn) {
 }
 
 function do_feed() {
-	global $wp_query;
-
 	$feed = get_query_var('feed');
 
 	// Remove the pad, if present.
 	$feed = preg_replace('/^_+/', '', $feed);
 
-	if ( $feed == '' || $feed == 'feed' )
+	if ($feed == '' || $feed == 'feed')
+    	$feed = 'rss2';
+
+	$for_comments = false;
+	if ( 1 != get_query_var('withoutcomments') && ( is_singular() || get_query_var('withcomments') == 1 || $feed == 'comments-rss2' ) ) {
 		$feed = 'rss2';
+		$for_comments = true;	
+	}
 
 	$hook = 'do_feed_' . $feed;
-	do_action($hook, $wp_query->is_comment_feed);
+	do_action($hook, $for_comments);
 }
 
 function do_feed_rdf() {
-	load_template(ABSPATH . WPINC . '/feed-rdf.php');
+	load_template(ABSPATH . 'wp-rdf.php');
 }
 
 function do_feed_rss() {
-	load_template(ABSPATH . WPINC . '/feed-rss.php');
+	load_template(ABSPATH . 'wp-rss.php');
 }
 
 function do_feed_rss2($for_comments) {
 	if ( $for_comments ) {
-		load_template(ABSPATH . WPINC . '/feed-rss2-comments.php');
+		load_template(ABSPATH . 'wp-commentsrss2.php');
 	} else {
-		load_template(ABSPATH . WPINC . '/feed-rss2.php');
+		load_template(ABSPATH . 'wp-rss2.php');
 	}
 }
 
-function do_feed_atom($for_comments) {
-	if ($for_comments) {
-		load_template(ABSPATH . WPINC . '/feed-atom-comments.php');
-	} else {
-		load_template(ABSPATH . WPINC . '/feed-atom.php');
-	}
+function do_feed_atom() {
+	load_template(ABSPATH . 'wp-atom.php');
 }
 
 function do_robots() {
-	header('Content-type: text/plain; charset=utf-8');
-
 	do_action('do_robotstxt');
-
 	if ( '0' == get_option('blog_public') ) {
 		echo "User-agent: *\n";
 		echo "Disallow: /\n";
@@ -1003,9 +913,7 @@ function is_blog_installed() {
 	$wpdb->hide_errors();
 	$installed = $wpdb->get_var("SELECT option_value FROM $wpdb->options WHERE option_name = 'siteurl'");
 	$wpdb->show_errors();
-
-	$install_status = !empty( $installed ) ? TRUE : FALSE;
-	return $install_status;
+	return $installed;
 }
 
 function wp_nonce_url($actionurl, $action = -1) {
@@ -1234,10 +1142,10 @@ function wp_explain_nonce($action) {
 		$trans['bulk']['comments'] = array(__('Are you sure you want to bulk modify comments?'), false);
 		$trans['moderate']['comments'] = array(__('Are you sure you want to moderate comments?'), false);
 
-		$trans['add']['bookmark'] = array(__('Are you sure you want to add this link?'), false);
-		$trans['delete']['bookmark'] = array(__('Are you sure you want to delete this link: &quot;%s&quot;?'), 'use_id');
-		$trans['update']['bookmark'] = array(__('Are you sure you want to edit this link: &quot;%s&quot;?'), 'use_id');
-		$trans['bulk']['bookmarks'] = array(__('Are you sure you want to bulk modify links?'), false);
+		$trans['add']['bookmark'] = array(__('Are you sure you want to add this bookmark?'), false);
+		$trans['delete']['bookmark'] = array(__('Are you sure you want to delete this bookmark: &quot;%s&quot;?'), 'use_id');
+		$trans['update']['bookmark'] = array(__('Are you sure you want to edit this bookmark: &quot;%s&quot;?'), 'use_id');
+		$trans['bulk']['bookmarks'] = array(__('Are you sure you want to bulk modify bookmarks?'), false);
 
 		$trans['add']['page'] = array(__('Are you sure you want to add this page?'), false);
 		$trans['delete']['page'] = array(__('Are you sure you want to delete this page: &quot;%s&quot;?'), 'get_the_title');
@@ -1307,37 +1215,15 @@ function wp_nonce_ays($action) {
 	wp_die($html, $title);
 }
 
-function wp_die( $message, $title = '' ) {
+function wp_die($message, $title = '') {
 	global $wp_locale;
-
-	if ( is_wp_error( $message ) ) {
-		if ( empty($title) ) {
-			$error_data = $message->get_error_data();
-			if ( is_array($error_data) && isset($error_data['title']) )
-				$title = $error_data['title'];
-		}
-		$errors = $message->get_error_messages();
-		switch ( count($errors) ) :
-		case 0 :
-			$message = '';
-			break;
-		case 1 :
-			$message = "<p>{$errors[0]}</p>";
-			break;
-		default :
-			$message = "<ul>\n\t\t<li>" . join( "</li>\n\t\t<li>", $errors ) . "</li>\n\t</ul>";
-			break;
-		endswitch;
-	} elseif ( is_string($message) ) {
-		$message = "<p>$message</p>";
-	}
 
 	header('Content-Type: text/html; charset=utf-8');
 
 	if ( empty($title) )
 		$title = __('WordPress &rsaquo; Error');
 
-	if (strpos($_SERVER['PHP_SELF'], 'wp-admin') !== false)
+	if ( strstr($_SERVER['PHP_SELF'], 'wp-admin') )
 		$admin_dir = '';
 	else
 		$admin_dir = 'wp-admin/';
@@ -1349,31 +1235,18 @@ function wp_die( $message, $title = '' ) {
 	<title><?php echo $title ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link rel="stylesheet" href="<?php echo $admin_dir; ?>install.css" type="text/css" />
-<?php 
-if ( ( $wp_locale ) && ('rtl' == $wp_locale->text_direction) ) : ?>
+<?php if ( ('rtl' == $wp_locale->text_direction) ) : ?>
 	<link rel="stylesheet" href="<?php echo $admin_dir; ?>install-rtl.css" type="text/css" />
 <?php endif; ?>
 </head>
 <body>
 	<h1 id="logo"><img alt="WordPress" src="<?php echo $admin_dir; ?>images/wordpress-logo.png" /></h1>
-	<?php echo $message; ?>
-
+	<p><?php echo $message; ?></p>
 </body>
 </html>
 <?php
+
 	die();
-}
-
-function _config_wp_home($url = '') {
-	if ( defined( 'WP_HOME' ) ) 
-		return WP_HOME;
-	else return $url;
-}
-
-function _config_wp_siteurl($url = '') {
-	if ( defined( 'WP_SITEURL' ) ) 
-		return WP_SITEURL;
-	else return $url;
 }
 
 function _mce_set_direction() {
@@ -1404,68 +1277,4 @@ function _mce_add_direction_buttons($input) {
 
 	return $input;
 }
-
-function smilies_init() {
-	global $wpsmiliestrans, $wp_smiliessearch, $wp_smiliesreplace;
-
-	// don't bother setting up smilies if they are disabled
-	if ( !get_option('use_smilies') )
-		return;
-
-	if (!isset($wpsmiliestrans)) {
-		$wpsmiliestrans = array(
-		':mrgreen:' => 'icon_mrgreen.gif',
-		':neutral:' => 'icon_neutral.gif',
-		':twisted:' => 'icon_twisted.gif',
-		  ':arrow:' => 'icon_arrow.gif',
-		  ':shock:' => 'icon_eek.gif',
-		  ':smile:' => 'icon_smile.gif',
-		    ':???:' => 'icon_confused.gif',
-		   ':cool:' => 'icon_cool.gif',
-		   ':evil:' => 'icon_evil.gif',
-		   ':grin:' => 'icon_biggrin.gif',
-		   ':idea:' => 'icon_idea.gif',
-		   ':oops:' => 'icon_redface.gif',
-		   ':razz:' => 'icon_razz.gif',
-		   ':roll:' => 'icon_rolleyes.gif',
-		   ':wink:' => 'icon_wink.gif',
-		    ':cry:' => 'icon_cry.gif',
-		    ':eek:' => 'icon_surprised.gif',
-		    ':lol:' => 'icon_lol.gif',
-		    ':mad:' => 'icon_mad.gif',
-		    ':sad:' => 'icon_sad.gif',
-		      '8-)' => 'icon_cool.gif',
-		      '8-O' => 'icon_eek.gif',
-		      ':-(' => 'icon_sad.gif',
-		      ':-)' => 'icon_smile.gif',
-		      ':-?' => 'icon_confused.gif',
-		      ':-D' => 'icon_biggrin.gif',
-		      ':-P' => 'icon_razz.gif',
-		      ':-o' => 'icon_surprised.gif',
-		      ':-x' => 'icon_mad.gif',
-		      ':-|' => 'icon_neutral.gif',
-		      ';-)' => 'icon_wink.gif',
-		       '8)' => 'icon_cool.gif',
-		       '8O' => 'icon_eek.gif',
-		       ':(' => 'icon_sad.gif',
-		       ':)' => 'icon_smile.gif',
-		       ':?' => 'icon_confused.gif',
-		       ':D' => 'icon_biggrin.gif',
-		       ':P' => 'icon_razz.gif',
-		       ':o' => 'icon_surprised.gif',
-		       ':x' => 'icon_mad.gif',
-		       ':|' => 'icon_neutral.gif',
-		       ';)' => 'icon_wink.gif',
-		      ':!:' => 'icon_exclaim.gif',
-		      ':?:' => 'icon_question.gif',
-		);
-	}
-
-	foreach ( (array) $wpsmiliestrans as $smiley => $img ) {
-		$wp_smiliessearch[] = '/(\s|^)'.preg_quote($smiley, '/').'(\s|$)/';
-		$smiley_masked = htmlspecialchars(trim($smiley), ENT_QUOTES);
-		$wp_smiliesreplace[] = " <img src='" . get_option('siteurl') . "/wp-includes/images/smilies/$img' alt='$smiley_masked' class='wp-smiley' /> ";
-	}
-}
-
 ?>
