@@ -1,11 +1,4 @@
 <?php
-if ( function_exists('register_sidebar') )
-    register_sidebar(array(
-        'before_widget' => '<li id="%1$s" class="widget %2$s">',
-        'after_widget' => '</li>',
-        'before_title' => '<h2 class="widgettitle">',
-        'after_title' => '</h2>',
-    ));
 
 function kubrick_head() {
 	$head = "<style type='text/css'>\n<!--";
@@ -28,11 +21,11 @@ function kubrick_head() {
 add_action('wp_head', 'kubrick_head');
 
 function kubrick_header_image() {
-	return apply_filters('kubrick_header_image', get_option('kubrick_header_image'));
+	return apply_filters('kubrick_header_image', get_settings('kubrick_header_image'));
 }
 
 function kubrick_upper_color() {
-	if (strpos($url = kubrick_header_image_url(), 'header-img.php?') !== false) {
+	if ( strstr( $url = kubrick_header_image_url(), 'header-img.php?' ) ) {
 		parse_str(substr($url, strpos($url, '?') + 1), $q);
 		return $q['upper'];
 	} else
@@ -40,7 +33,7 @@ function kubrick_upper_color() {
 }
 
 function kubrick_lower_color() {
-	if (strpos($url = kubrick_header_image_url(), 'header-img.php?') !== false) {
+	if ( strstr( $url = kubrick_header_image_url(), 'header-img.php?' ) ) {
 		parse_str(substr($url, strpos($url, '?') + 1), $q);
 		return $q['lower'];
 	} else
@@ -57,7 +50,7 @@ function kubrick_header_image_url() {
 }
 
 function kubrick_header_color() {
-	return apply_filters('kubrick_header_color', get_option('kubrick_header_color'));
+	return apply_filters('kubrick_header_color', get_settings('kubrick_header_color'));
 }
 
 function kubrick_header_color_string() {
@@ -69,7 +62,7 @@ function kubrick_header_color_string() {
 }
 
 function kubrick_header_display() {
-	return apply_filters('kubrick_header_display', get_option('kubrick_header_display'));
+	return apply_filters('kubrick_header_display', get_settings('kubrick_header_display'));
 }
 
 function kubrick_header_display_string() {
@@ -100,7 +93,7 @@ function kubrick_add_theme_page() {
 					}
 
 					if ( isset($_REQUEST['toggledisplay']) ) {
-						if ( false === get_option('kubrick_header_display') )
+						if ( false === get_settings('kubrick_header_display') )
 							update_option('kubrick_header_display', 'none');
 						else
 							delete_option('kubrick_header_display');
@@ -380,13 +373,13 @@ function kubrick_theme_page() {
 				<input type="button" onclick="tgt=document.getElementById('lowercolor');colorSelect(tgt,'pick3');return false;" name="pick3" id="pick3" value="Lower Color"></input>
 				<input type="button" name="revert" value="Revert" onclick="kRevert()" />
 				<input type="button" value="Advanced" onclick="toggleAdvanced()" />
+				<input type="submit" name="submitform" class="defbutton" value="Save" onclick="cp.hidePopup('prettyplease')" />
 				<input type="hidden" name="action" value="save" />
 				<input type="hidden" name="fontdisplay" id="fontdisplay" value="<?php echo kubrick_header_display(); ?>" />
 				<input type="hidden" name="fontcolor" id="fontcolor" value="<?php echo kubrick_header_color(); ?>" />
 				<input type="hidden" name="uppercolor" id="uppercolor" value="<?php echo kubrick_upper_color(); ?>" />
 				<input type="hidden" name="lowercolor" id="lowercolor" value="<?php echo kubrick_lower_color(); ?>" />
 				<input type="hidden" name="headerimage" id="headerimage" value="<?php echo kubrick_header_image(); ?>" />
-				<p class="submit"><input type="submit" name="submitform" class="defbutton" value="<?php _e('Update Header &raquo;'); ?>" onclick="cp.hidePopup('prettyplease')" /></p>
 			</form>
 			<div id="colorPickerDiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;visibility:hidden;"> </div>
 			<div id="advanced">

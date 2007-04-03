@@ -41,7 +41,7 @@ Dolly'll never go away again";
 // Here we split it into lines
 $lyrics = explode("\n", $lyrics);
 // And then randomly choose a line
-$chosen = wptexturize( $lyrics[ mt_rand(0, count($lyrics) - 1) ] );
+$chosen = wptexturize( $lyrics[ mt_rand(0, count($lyrics) ) ] );
 
 // This just echoes the chosen line, we'll position it later
 function hello_dolly() {

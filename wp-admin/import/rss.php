@@ -19,17 +19,15 @@ class RSS_Import {
 		$trans_tbl = array_flip($trans_tbl);
 		return strtr($string, $trans_tbl);
 	}
-
+	
 	function greet() {
-		echo '<div class="narrow">';
-		echo '<p>'.__('Howdy! This importer allows you to extract posts from an RSS 2.0 file into your blog. This is useful if you want to import your posts from a system that is not handled by a custom import tool. Pick an RSS file to upload and click Import.').'</p>';
+		echo '<p>'.__('Howdy! This importer allows you to extract posts from any RSS 2.0 file into your blog. This is useful if you want to import your posts from a system that is not handled by a custom import tool. Pick an RSS file to upload and click Import.').'</p>';
 		wp_import_upload_form("admin.php?import=rss&amp;step=1");
-		echo '</div>';
 	}
 
 	function get_posts() {
 		global $wpdb;
-
+		
 		set_magic_quotes_runtime(0);
 		$datalines = file($this->file); // Read the file into an array
 		$importdata = implode('', $datalines); // squish it
@@ -137,7 +135,7 @@ class RSS_Import {
 		$this->get_posts();
 		$this->import_posts();
 		wp_import_cleanup($file['id']);
-
+		
 		echo '<h3>';
 		printf(__('All done. <a href="%s">Have fun!</a>'), get_option('home'));
 		echo '</h3>';
@@ -150,7 +148,7 @@ class RSS_Import {
 			$step = (int) $_GET['step'];
 
 		$this->header();
-
+		
 		switch ($step) {
 			case 0 :
 				$this->greet();
@@ -159,12 +157,12 @@ class RSS_Import {
 				$this->import();
 				break;
 		}
-
+		
 		$this->footer();
 	}
 
 	function RSS_Import() {
-		// Nothing.
+		// Nothing.	
 	}
 }
 

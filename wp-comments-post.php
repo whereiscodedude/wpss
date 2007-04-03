@@ -1,10 +1,4 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
-    header('Allow: POST');
-	header("HTTP/1.1 405 Method Not Allowed");
-	header("Content-type: text/plain");
-    exit;
-}
 require( dirname(__FILE__) . '/wp-config.php' );
 
 nocache_headers();
@@ -18,13 +12,13 @@ if ( empty($status->comment_status) ) {
 	exit;
 } elseif ( 'closed' ==  $status->comment_status ) {
 	do_action('comment_closed', $comment_post_ID);
-	wp_die( __('Sorry, comments are closed for this item.') );
+	die( __('Sorry, comments are closed for this item.') );
 } elseif ( 'draft' == $status->post_status ) {
 	do_action('comment_on_draft', $comment_post_ID);
 	exit;
 }
 
-$comment_author       = trim(strip_tags($_POST['author']));
+$comment_author       = trim($_POST['author']);
 $comment_author_email = trim($_POST['email']);
 $comment_author_url   = trim($_POST['url']);
 $comment_content      = trim($_POST['comment']);
@@ -43,27 +37,27 @@ if ( $user->ID ) {
 	}
 } else {
 	if ( get_option('comment_registration') )
-		wp_die( __('Sorry, you must be logged in to post a comment.') );
+		die( __('Sorry, you must be logged in to post a comment.') );
 }
 
 $comment_type = '';
 
-if ( get_option('require_name_email') && !$user->ID ) {
+if ( get_settings('require_name_email') && !$user->ID ) {
 	if ( 6 > strlen($comment_author_email) || '' == $comment_author )
-		wp_die( __('Error: please fill the required fields (name, email).') );
+		die( __('Error: please fill the required fields (name, email).') );
 	elseif ( !is_email($comment_author_email))
-		wp_die( __('Error: please enter a valid email address.') );
+		die( __('Error: please enter a valid email address.') );
 }
 
 if ( '' == $comment_content )
-	wp_die( __('Error: please type a comment.') );
+	die( __('Error: please type a comment.') );
 
 $commentdata = compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'user_ID');
 
 $comment_id = wp_new_comment( $commentdata );
 
-$comment = get_comment($comment_id);
 if ( !$user->ID ) :
+	$comment = get_comment($comment_id);
 	setcookie('comment_author_' . COOKIEHASH, $comment->comment_author, time() + 30000000, COOKIEPATH, COOKIE_DOMAIN);
 	setcookie('comment_author_email_' . COOKIEHASH, $comment->comment_author_email, time() + 30000000, COOKIEPATH, COOKIE_DOMAIN);
 	setcookie('comment_author_url_' . COOKIEHASH, clean_url($comment->comment_author_url), time() + 30000000, COOKIEPATH, COOKIE_DOMAIN);

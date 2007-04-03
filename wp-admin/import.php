@@ -1,13 +1,13 @@
 <?php
 require_once ('admin.php');
 $title = __('Import');
-$parent_file = 'edit.php';
+$parent_file = 'import.php';
 require_once ('admin-header.php');
 ?>
 
 <div class="wrap">
 <h2><?php _e('Import'); ?></h2>
-<p><?php _e('If you have posts or comments in another system, WordPress can import those into this blog. To get started, choose a system to import from below:'); ?></p>
+<p><?php _e('If you have posts or comments in another system WordPress can import them into your current blog. To get started, choose a system to import from below:'); ?></p>
 
 <?php
 
@@ -30,7 +30,7 @@ if (empty ($importers)) {
 	echo '<p>'.__('No importers are available.').'</p>'; // TODO: make more helpful
 } else {
 ?>
-<table class="widefat">
+<table width="100%" cellpadding="3" cellspacing="3">
 
 <?php
 	$style = '';
@@ -42,8 +42,8 @@ if (empty ($importers)) {
 			$style = 'class="'.$style.'"';
 		echo "
 			<tr $style>
-				<td class='import-system'>$action</td>
-				<td class='desc'>{$data[1]}</td>
+				<td class=\"togl\">$action</td>
+				<td class=\"desc\">{$data[1]}</td>
 			</tr>";
 	}
 ?>
