@@ -83,14 +83,6 @@ function date_i18n($dateformatstring, $unixtimestamp) {
 	return $j;
 }
 
-function number_format_i18n($number, $decimals = null) {
-	global $wp_locale;
-	// let the user override the precision only
-	$decimals = is_null($decimals)? $wp_locale->number_format['decimals'] : intval($decimals);
-
-	return number_format($number, $decimals, $wp_locale->number_format['decimal_point'], $wp_locale->number_format['thousands_sep']);
-}
-
 function get_weekstartend($mysqlstring, $start_of_week) {
 	$my = substr($mysqlstring,0,4);
 	$mm = substr($mysqlstring,8,2);
@@ -610,7 +602,7 @@ function update_post_cache(&$posts) {
 }
 
 function clean_post_cache($id) {
-	global $post_cache, $post_meta_cache, $category_cache, $tag_cache, $blog_id;
+	global $post_cache, $post_meta_cache, $category_cache, $blog_id;
 
 	if ( isset( $post_cache[$blog_id][$id] ) )
 		unset( $post_cache[$blog_id][$id] );
@@ -620,9 +612,6 @@ function clean_post_cache($id) {
 
 	if ( isset( $category_cache[$blog_id][$id]) )
 		unset ( $category_cache[$blog_id][$id] );
-
-	if ( isset( $tag_cache[$blog_id][$id]) )
-		unset ( $tag_cache[$blog_id][$id] );
 }
 
 function update_page_cache(&$pages) {
@@ -649,7 +638,7 @@ function clean_page_cache($id) {
 }
 
 function update_post_category_cache($post_ids) {
-	global $wpdb, $category_cache, $tag_cache, $blog_id;
+	global $wpdb, $category_cache, $blog_id;
 
 	if ( empty($post_ids) )
 		return;
@@ -670,21 +659,17 @@ function update_post_category_cache($post_ids) {
 		return;
 	$post_id_list = join( ',', $post_id_array ); // with already cached stuff removed
 
-	$dogs = $wpdb->get_results("SELECT post_id, category_id, rel_type FROM $wpdb->post2cat WHERE post_id IN ($post_id_list)");
+	$dogs = $wpdb->get_results("SELECT post_id, category_id FROM $wpdb->post2cat WHERE post_id IN ($post_id_list)");
 
 	if ( empty($dogs) )
 		return;
 
-	foreach ($dogs as $catt) {
-		if ( 'category' == $catt->rel_type )
-			$category_cache[$blog_id][$catt->post_id][$catt->category_id] = &get_category($catt->category_id);
-		elseif ( 'tag' == $catt->rel_type )
-			$tag_cache[$blog_id][$catt->post_id][$catt->category_id] = &get_category($catt->category_id);
-	}
+	foreach ($dogs as $catt)
+		$category_cache[$blog_id][$catt->post_id][$catt->category_id] = &get_category($catt->category_id);
 }
 
 function update_post_caches(&$posts) {
-	global $post_cache, $category_cache, $post_meta_cache, $tag_cache;
+	global $post_cache, $category_cache, $post_meta_cache;
 	global $wpdb, $blog_id;
 
 	// No point in doing all this work if we didn't match any posts.
@@ -916,23 +901,19 @@ function wp($query_vars = '') {
 	$wp->main($query_vars);
 }
 
-function get_status_header_desc( $code ) {
-	global $wp_header_to_desc;
-	
-	$code = (int) $code;
-	
-	if ( isset( $wp_header_to_desc[$code] ) ) {
-		return $wp_header_to_desc[$code];
-	} else {
-		return '';
-	}
-}
-
 function status_header( $header ) {
-	$text = get_status_header_desc( $header );
-	
-	if ( empty( $text ) )
-		return false;
+	if ( 200 == $header )
+		$text = 'OK';
+	elseif ( 301 == $header )
+		$text = 'Moved Permanently';
+	elseif ( 302 == $header )
+		$text = 'Moved Temporarily';
+	elseif ( 304 == $header )
+		$text = 'Not Modified';
+	elseif ( 404 == $header )
+		$text = 'Not Found';
+	elseif ( 410 == $header )
+		$text = 'Gone';
 
 	$protocol = $_SERVER["SERVER_PROTOCOL"];
 	if ( ('HTTP/1.1' != $protocol) && ('HTTP/1.0' != $protocol) )
@@ -1213,7 +1194,6 @@ function wp_check_filetype($filename, $mimes = null) {
 		'js' => 'application/javascript',
 		'pdf' => 'application/pdf',
 		'doc' => 'application/msword',
-		'odt' => 'application/vnd.oasis.opendocument.text',
 		'pot|pps|ppt' => 'application/vnd.ms-powerpoint',
 		'wri' => 'application/vnd.ms-write',
 		'xla|xls|xlt|xlw' => 'application/vnd.ms-excel',
@@ -1501,20 +1481,21 @@ function smilies_init() {
 }
 
 function wp_parse_args( $args, $defaults = '' ) {
-	if ( is_array( $args ) ) {
+	if ( is_array($args) ) :
 		$r =& $args;
-	} else {
+	else :
 		parse_str( $args, $r );
-		if ( get_magic_quotes_gpc() ) {
+		if ( get_magic_quotes_gpc() )
 			$r = stripslashes_deep( $r );
-		}
-	}
-	
-	if ( is_array( $defaults ) ) {
-		return array_merge( $defaults, $r );
-	} else {
+	endif;
+
+	if ( is_array($defaults) ) :
+		extract($defaults);
+		extract($r);
+		return compact(array_keys($defaults)); // only those options defined in $defaults
+	else :
 		return $r;
-	}
+	endif;
 }
 
 function wp_maybe_load_widgets() {

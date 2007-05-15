@@ -175,6 +175,8 @@ function upgrade_all() {
 		upgrade_110();
 		upgrade_130();
 	}
+	
+	maybe_disable_automattic_widgets();
 
 	if ( $wp_current_db_version < 3308 )
 		upgrade_160();
@@ -184,12 +186,6 @@ function upgrade_all() {
 
 	if ( $wp_current_db_version < 4351 )
 		upgrade_old_slugs();
-	
-	if ( $wp_current_db_version < 5200 ) {
-		upgrade_230();
-	}
-	
-	maybe_disable_automattic_widgets();
 
 	$wp_rewrite->flush_rules();
 
@@ -568,14 +564,6 @@ function upgrade_210() {
 	if ( $wp_current_db_version < 4772 ) {
 		// Obsolete linkcategories table
 		$wpdb->query('DROP TABLE IF EXISTS ' . $wpdb->prefix . 'linkcategories');
-	}
-}
-
-function upgrade_230() {
-	global $wp_current_db_version;
-	
-	if ( $wp_current_db_version < 5200 ) {
-		populate_roles_230();
 	}
 }
 

@@ -69,7 +69,7 @@ function timer_stop($display = 0, $precision = 3) { //if called like timer_stop(
 	$mtime = $mtime[1] + $mtime[0];
 	$timeend = $mtime;
 	$timetotal = $timeend-$timestart;
-	$r = number_format_i18n($timetotal, $precision);
+	$r = number_format($timetotal, $precision);
 	if ( $display )
 		echo $r;
 	return $r;
@@ -123,9 +123,9 @@ if ( defined('CUSTOM_USER_META_TABLE') )
 	$wpdb->usermeta = CUSTOM_USER_META_TABLE;
 
 if ( file_exists(ABSPATH . 'wp-content/object-cache.php') )
-	require_once (ABSPATH . 'wp-content/object-cache.php');
+	require (ABSPATH . 'wp-content/object-cache.php');
 else
-	require_once (ABSPATH . WPINC . '/cache.php');
+	require (ABSPATH . WPINC . '/cache.php');
 
 wp_cache_init();
 

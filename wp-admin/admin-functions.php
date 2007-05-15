@@ -647,7 +647,7 @@ function checked( $checked, $current) {
 
 function return_categories_list( $parent = 0 ) {
 	global $wpdb;
-	return $wpdb->get_col( "SELECT cat_ID FROM $wpdb->categories WHERE category_parent = $parent AND ( type & " . TAXONOMY_CATEGORY . " != 0 ) AND ( link_count = 0 OR category_count != 0 ) ORDER BY category_count DESC" );
+	return $wpdb->get_col( "SELECT cat_ID FROM $wpdb->categories WHERE category_parent = $parent AND ( link_count = 0 OR category_count != 0 OR ( link_count = 0 AND category_count = 0 ) ) ORDER BY category_count DESC" );
 }
 
 function sort_cats( $cat1, $cat2 ) {
@@ -657,29 +657,6 @@ function sort_cats( $cat1, $cat2 ) {
 		return strcasecmp( $cat1['cat_name'], $cat2['cat_name'] );
 }
 
-function get_tags_to_edit( $post_id ) {
-	global $wpdb;
-
-	$post_id = (int) $post_id;
-	if ( !$post_id )
-		return false;
-
-	$tags = $wpdb->get_results( "
-		     SELECT category_id, cat_name
-		     FROM $wpdb->categories, $wpdb->post2cat
-		     WHERE $wpdb->post2cat.category_id = cat_ID AND $wpdb->post2cat.post_id = '$post_id' AND rel_type = 'tag'
-		     " );
-	if ( !$tags )
-		return false;
-
-	foreach ( $tags as $tag )
-		$tag_names[] = $tag->cat_name;
-	$tags_to_edit = join( ', ', $tag_names );
-	$tags_to_edit = attribute_escape( $tags_to_edit );
-	$tags_to_edit = apply_filters( 'tags_to_edit', $tags_to_edit );
-	return $tags_to_edit;
-}
-
 function get_nested_categories( $default = 0, $parent = 0 ) {
 	global $post_ID, $link_id, $mode, $wpdb;
 
@@ -687,7 +664,7 @@ function get_nested_categories( $default = 0, $parent = 0 ) {
 		$checked_categories = $wpdb->get_col( "
 		     SELECT category_id
 		     FROM $wpdb->categories, $wpdb->post2cat
-		     WHERE $wpdb->post2cat.category_id = cat_ID AND $wpdb->post2cat.post_id = '$post_ID' AND rel_type = 'category'
+		     WHERE $wpdb->post2cat.category_id = cat_ID AND $wpdb->post2cat.post_id = '$post_ID'
 		     " );
 
 		if ( count( $checked_categories ) == 0 ) {
@@ -721,7 +698,6 @@ function get_nested_categories( $default = 0, $parent = 0 ) {
 		}
 	}
 
-	$result = apply_filters('get_nested_categories', $result);
 	usort( $result, 'sort_cats' );
 
 	return $result;
@@ -745,7 +721,7 @@ function dropdown_categories( $default = 0 ) {
 
 function return_link_categories_list( $parent = 0 ) {
 	global $wpdb;
-	return $wpdb->get_col( "SELECT cat_ID FROM $wpdb->categories WHERE category_parent = $parent AND ( type & " . TAXONOMY_CATEGORY . " != 0 ) AND ( category_count = 0 OR link_count != 0 ) ORDER BY link_count DESC" );
+	return $wpdb->get_col( "SELECT cat_ID FROM $wpdb->categories WHERE category_parent = $parent AND ( category_count = 0  OR link_count != 0 OR ( link_count = 0 AND category_count = 0 ) ) ORDER BY link_count DESC" );
 }
 
 function get_nested_link_categories( $default = 0, $parent = 0 ) {
@@ -832,8 +808,8 @@ function _cat_row( $category, $level, $name_override = false ) {
 
 	$class = ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || " class='alternate'" == $class ) ? '' : " class='alternate'";
 
-	$category->category_count = number_format_i18n( $category->category_count );
-	$category->link_count = number_format_i18n( $category->link_count );
+	$category->category_count = number_format( $category->category_count );
+	$category->link_count = number_format( $category->link_count );
 	$posts_count = ( $category->category_count > 0 ) ? "<a href='edit.php?cat=$category->cat_ID'>$category->category_count</a>" : $category->category_count;
 	return "<tr id='cat-$category->cat_ID'$class>
 		<th scope='row' style='text-align: center'>$category->cat_ID</th>
@@ -1355,7 +1331,6 @@ function get_page_templates() {
 
 function page_template_dropdown( $default = '' ) {
 	$templates = get_page_templates();
-	ksort( $templates );
 	foreach (array_keys( $templates ) as $template )
 		: if ( $default == $templates[$template] )
 			$selected = " selected='selected'";
@@ -1955,11 +1930,8 @@ function wp_handle_upload( &$file, $overrides = false ) {
 
 		extract( $wp_filetype );
 
-		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) )
+		if ( !$type || !$ext )
 			return $upload_error_handler( $file, __( 'File type does not meet security guidelines. Try another.' ));
-		
-		if ( !$ext )
-			$ext = strrchr($file['name'], '.');
 	}
 
 	// A writable uploads dir will pass this test. Again, there's no point overriding this one.
