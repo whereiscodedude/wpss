@@ -26,16 +26,15 @@ function get_link($bookmark_id, $output = OBJECT) {
 function get_bookmarks($args = '') {
 	global $wpdb;
 
-	$defaults = array(
-		'orderby' => 'name', 'order' => 'ASC', 
-		'limit' => -1, 'category' => '', 
-		'category_name' => '', 'hide_invisible' => 1, 
-		'show_updated' => 0, 'include' => '', 
-		'exclude' => ''
-	);
+	if ( is_array($args) )
+		$r = &$args;
+	else
+		parse_str($args, $r);
 
-	$r = wp_parse_args( $args, $defaults );
-	extract( $r, EXTR_SKIP );
+	$defaults = array('orderby' => 'name', 'order' => 'ASC', 'limit' => -1, 'category' => '',
+		'category_name' => '', 'hide_invisible' => 1, 'show_updated' => 0, 'include' => '', 'exclude' => '');
+	$r = array_merge($defaults, $r);
+	extract($r, EXTR_SKIP);
 
 	$key = md5( serialize( $r ) );
 	if ( $cache = wp_cache_get( 'get_bookmarks', 'bookmark' ) )
@@ -76,8 +75,8 @@ function get_bookmarks($args = '') {
 		$exclusions .= ')';
 
 	if ( ! empty($category_name) ) {
-		if ( $category = get_term_by('name', $category_name, 'link_category') ) 
-			$category = $category->term_id;
+		if ( $cat_id = $wpdb->get_var("SELECT cat_ID FROM $wpdb->categories WHERE cat_name='$category_name' LIMIT 1") )
+			$category = $cat_id;
 	}
 
 	$category_query = '';
@@ -87,15 +86,15 @@ function get_bookmarks($args = '') {
 		if ( count($incategories) ) {
 			foreach ( $incategories as $incat ) {
 				if (empty($category_query))
-					$category_query = ' AND ( tt.term_id = ' . intval($incat) . ' ';
+					$category_query = ' AND ( category_id = ' . intval($incat) . ' ';
 				else
-					$category_query .= ' OR tt.term_id = ' . intval($incat) . ' ';
+					$category_query .= ' OR category_id = ' . intval($incat) . ' ';
 			}
 		}
 	}
 	if (!empty($category_query)) {
-		$category_query .= ") AND taxonomy = 'link_category'";
-		$join = " LEFT JOIN $wpdb->term_relationships AS tr ON ($wpdb->links.link_id = tr.object_id) LEFT JOIN $wpdb->term_taxonomy as tt ON tt.term_taxonomy_id = tr.term_taxonomy_id";
+		$category_query .= ')';
+		$join = " LEFT JOIN $wpdb->link2cat ON ($wpdb->links.link_id = $wpdb->link2cat.link_id) ";
 	}
 
 	if (get_option('links_recently_updated_time')) {

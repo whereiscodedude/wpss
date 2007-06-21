@@ -2,7 +2,7 @@
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
     header('Allow: POST');
 	header("HTTP/1.1 405 Method Not Allowed");
-	header("Content-Type: text/plain");
+	header("Content-type: text/plain");
     exit;
 }
 require( dirname(__FILE__) . '/wp-config.php' );
@@ -19,7 +19,7 @@ if ( empty($status->comment_status) ) {
 } elseif ( 'closed' ==  $status->comment_status ) {
 	do_action('comment_closed', $comment_post_ID);
 	wp_die( __('Sorry, comments are closed for this item.') );
-} elseif ( in_array($status->post_status, array('draft', 'pending') ) ) {
+} elseif ( 'draft' == $status->post_status ) {
 	do_action('comment_on_draft', $comment_post_ID);
 	exit;
 }

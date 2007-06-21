@@ -10,7 +10,7 @@ require_once ('./admin-header.php');
 
 if ( ! current_user_can('edit_posts') ) { ?>
 <div class="wrap">
-<p><?php printf(__('Since you&#8217;re a newcomer, you&#8217;ll have to wait for an admin to add the <code>edit_posts</code> capability to your user, in order to be authorized to post.<br />
+<p><?php printf(__('Since you&#8217;re a newcomer, you&#8217;ll have to wait for an admin to raise your level to 1, in order to be authorized to post.<br />
 You can also <a href="mailto:%s?subject=Promotion?">e-mail the admin</a> to ask for a promotion.<br />
 When you&#8217;re promoted, just reload this page and you&#8217;ll be able to blog. :)'), get_option('admin_email')); ?>
 </p>
@@ -21,86 +21,34 @@ When you&#8217;re promoted, just reload this page and you&#8217;ll be able to bl
 }
 
 if ( isset($_GET['posted']) && $_GET['posted'] ) : ?>
-<div id="message" class="updated fade"><p><strong><?php _e('Post saved.'); ?></strong> <a href="<?php echo get_permalink( $_GET['posted'] ); ?>"><?php _e('View post &raquo;'); ?></a></p></div>
+<div id="message" class="updated fade"><p><strong><?php _e('Post saved.'); ?></strong> <a href="<?php echo get_permalink( $_GET['posted'] ); ?>"><?php _e('View post'); ?> &raquo;</a></p></div>
 <?php
 endif;
-?>
 
-
+if ( $drafts = get_users_drafts( $user_ID ) ) { ?>
+<div class="wrap">
+<p><strong><?php _e('Your Drafts:') ?></strong>
 <?php
-$my_drafts = get_users_drafts($user_ID);
-$pending = get_others_pending($user_ID);
-$others_drafts = get_others_drafts($user_ID);
-
-if ( !empty($my_drafts) || !empty($pending) || !empty($others_drafts) ) {
-	echo '<div class="wrap" id="draft-nag">';
-
-	if ( $my_drafts ) {
-		echo '<p><strong>' . __( 'Your Drafts:' ) . '</strong> ';
-		if ( count($my_drafts) < 3 ) {
-			$i = 0;
-			foreach ( $my_drafts as $post ) {
-				if ( $i++ != 0 )
-					echo ', ';
-				echo '<a href="post.php?action=edit&amp;post=' . $post->ID . '">';
-				the_title();
-				echo '</a>';
-			}
-			echo '.</p>';
-		} else {
-			printf(
-				__( 'You have <a href="%s">%d drafts</a>.' ) . '</p>', 
-				'edit.php?post_status=draft&author=' . $user_ID, count($my_drafts)
-			);
-		}
+// Show drafts.
+	$num_drafts = count($drafts);
+	if ( $num_drafts > 15 ) $num_drafts = 15;
+	for ( $i = 0; $i < $num_drafts; $i++ ) {
+		$draft = $drafts[$i];
+		if ( 0 != $i )
+			echo ', ';
+		if ( empty($draft->post_title) )
+			$draft->post_title = sprintf(__('Post # %s'), $draft->ID);
+		echo "<a href='post.php?action=edit&amp;post=$draft->ID' title='" . __('Edit this draft') . "'>$draft->post_title</a>";
 	}
 
-	if ( $pending ) {
-		echo '<p><strong>' . __( 'Pending Review:' ) . '</strong> ';
-		if ( count($pending) < 3 ) {
-			$i = 0;
-			foreach ( $pending as $post ) {
-				if ( $i++ != 0 )
-					echo ', ';
-				echo '<a href="post.php?action=edit&amp;post=' . $post->ID . '">';
-				the_title();
-				echo '</a>';
-			}
-			echo '.</p>';
-		} else {
-			printf(
-				__( 'There are <a href="%s">%d drafts pending review</a>.' ) . '</p>', 
-				'edit.php?post_status=pending', count($pending)
-			);
-		}
-	}
-
-	if ( $others_drafts ) {
-		echo '<p><strong>' . __( 'Others&#8217; Drafts:' ) . '</strong> ';
-		if ( count($others_drafts) < 3 ) {
-			$i = 0;
-			foreach ( $others_drafts as $post ) {
-				if ( $i++ != 0 )
-					echo ', ';
-				echo '<a href="post.php?action=edit&amp;post=' . $post->ID . '">';
-				the_title();
-				echo '</a>';
-			}
-			echo '.</p>';
-		} else {
-			printf(
-				__( 'There are <a href="%s">%d in-progress drafts by other authors</a>.' ) . '</p>', 
-				'edit.php?post_status=pending&author=-' . $user_ID, count($others_drafts)
-			);
-		}
-	}
-
-	echo "</div>\n";
+	if ( 15 < count($drafts) ) { ?>
+		, <a href="edit.php"><?php echo sprintf(__('and %s more'), (count($drafts) - 15) ); ?> &raquo;</a>
+	<?php } ?>
+.</p>
+</div>
+<?php
 }
-?>
 
-
-<?php
 // Show post form.
 $post = get_default_post_to_edit();
 include('edit-form-advanced.php');
@@ -109,7 +57,7 @@ include('edit-form-advanced.php');
 <?php if ( $is_NS4 || $is_gecko || $is_winIE ) { ?>
 <div id="wp-bookmarklet" class="wrap">
 <h3><?php _e('WordPress Bookmarklet'); ?></h3>
-<p><?php _e('Right click on the following link and choose &#0147;Bookmark This Link...&#0148; or &#0147;Add to Favorites...&#0148; to create a posting shortcut.'); ?></p>
+<p><?php _e('Right click on the following link and choose "Add to favorites" to create a posting shortcut.'); ?></p>
 <p>
 
 <?php

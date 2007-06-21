@@ -37,14 +37,13 @@ class WP_Import {
 	function get_tag( $string, $tag ) {
 		global $wpdb;
 		preg_match("|<$tag.*?>(.*?)</$tag>|is", $string, $return);
-		$return = preg_replace('|^<!\[CDATA\[(.*)\]\]>$|s', '$1', $return[1]);
-		$return = $wpdb->escape( trim( $return ) );
+		$return = $wpdb->escape( trim( $return[1] ) );
 		return $return;
 	}
 
 	function users_form($n) {
 		global $wpdb, $testing;
-		$users = $wpdb->get_results("SELECT user_login FROM $wpdb->users ORDER BY user_login");
+		$users = $wpdb->get_results("SELECT * FROM $wpdb->users ORDER BY ID");
 ?><select name="userselect[<?php echo $n; ?>]">
 	<option value="#NONE#">- Select -</option>
 	<?php
@@ -216,7 +215,7 @@ class WP_Import {
 		$cat_names = (array) $wpdb->get_col("SELECT cat_name FROM $wpdb->categories");
 
 		while ( $c = array_shift($this->categories) ) {
-			$cat_name = trim($this->get_tag( $c, 'wp:cat_name' ));
+			$cat_name = trim(str_replace(array ('<![CDATA[', ']]>'), '', $this->get_tag( $c, 'wp:cat_name' )));
 
 			// If the category exists we leave it alone
 			if ( in_array($cat_name, $cat_names) )
@@ -252,14 +251,14 @@ class WP_Import {
 
 		echo '<h3>'.sprintf(__('All done.').' <a href="%s">'.__('Have fun!').'</a>', get_option('home')).'</h3>';
 	}
-
+  
 	function process_post($post) {
 		global $wpdb;
 
 		$post_ID = (int) $this->get_tag( $post, 'wp:post_id' );
   		if ( $post_ID && !empty($this->posts_processed[$post_ID][1]) ) // Processed already
 			return 0;
-
+      
 		// There are only ever one of these
 		$post_title     = $this->get_tag( $post, 'title' );
 		$post_date      = $this->get_tag( $post, 'wp:post_date' );
@@ -275,6 +274,7 @@ class WP_Import {
 		$post_author    = $this->get_tag( $post, 'dc:creator' );
 
 		$post_content = $this->get_tag( $post, 'content:encoded' );
+		$post_content = str_replace(array ('<![CDATA[', ']]>'), '', $post_content);
 		$post_content = preg_replace('|<(/?[A-Z]+)|e', "'<' . strtolower('$1')", $post_content);
 		$post_content = str_replace('<br>', '<br />', $post_content);
 		$post_content = str_replace('<hr>', '<hr />', $post_content);
@@ -311,7 +311,7 @@ class WP_Import {
 			// Memorize old and new ID.
 			if ( $post_id && $post_ID && $this->posts_processed[$post_ID] )
 				$this->posts_processed[$post_ID][1] = $post_id; // New ID.
-
+			
 			// Add categories.
 			if (count($categories) > 0) {
 				$post_cats = array();

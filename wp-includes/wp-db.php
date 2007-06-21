@@ -34,9 +34,6 @@ class wpdb {
 	var $optiongroups;
 	var $optiongroup_options;
 	var $postmeta;
-	var $terms;
-	var $term_taxonomy;
-	var $term_relationships;
 
 	var $charset;
 	var $collate;
@@ -258,7 +255,7 @@ class wpdb {
 		$this->func_call = "\$db->get_row(\"$query\",$output,$y)";
 		if ( $query )
 			$this->query($query);
-
+	
 		if ( !isset($this->last_result[$y]) )
 			return null;
 

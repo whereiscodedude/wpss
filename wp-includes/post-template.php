@@ -99,7 +99,7 @@ function get_the_content($more_link_text = '(more...)', $stripteaser = 0, $more_
 		} else {
 			$output = balanceTags($output);
 			if ( ! empty($more_link_text) )
-				$output .= ' <a href="' . get_permalink() . '#more-' . $id . '" class="morelink">' . $more_link_text . '</a>';
+				$output .= ' <a href="'. get_permalink() . "#more-$id\" class=\"more-link\">$more_link_text</a>";
 		}
 
 	}
@@ -129,23 +129,21 @@ function get_the_excerpt($fakeit = true) {
 	return apply_filters('get_the_excerpt', $output);
 }
 
-function has_excerpt( $id = 0 ) {
-	$post = &get_post( $id );
-	return ( !empty( $post->post_excerpt ) );
-}
 
 function wp_link_pages($args = '') {
-	$defaults = array(
-		'before' => '<p>' . __('Pages:'), 'after' => '</p>', 
-		'next_or_number' => 'number', 'nextpagelink' => __('Next page'), 
-		'previouspagelink' => __('Previous page'), 'pagelink' => '%', 
-		'more_file' => '', 'echo' => 1
-	);
+	global $post;
 
-	$r = wp_parse_args( $args, $defaults );
-	extract( $r, EXTR_SKIP );
+	if ( is_array($args) )
+		$r = &$args;
+	else
+		parse_str($args, $r);
 
-	global $post, $id, $page, $numpages, $multipage, $more, $pagenow;
+	$defaults = array('before' => '<p>' . __('Pages:'), 'after' => '</p>', 'next_or_number' => 'number', 'nextpagelink' => __('Next page'),
+			'previouspagelink' => __('Previous page'), 'pagelink' => '%', 'more_file' => '', 'echo' => 1);
+	$r = array_merge($defaults, $r);
+	extract($r, EXTR_SKIP);
+
+	global $id, $page, $numpages, $multipage, $more, $pagenow;
 	if ( $more_file != '' )
 		$file = $more_file;
 	else
@@ -162,7 +160,7 @@ function wp_link_pages($args = '') {
 					if ( 1 == $i ) {
 						$output .= '<a href="' . get_permalink() . '">';
 					} else {
-						if ( '' == get_option('permalink_structure') || in_array($post->post_status, array('draft', 'pending')) )
+						if ( '' == get_option('permalink_structure') || 'draft' == $post->post_status )
 							$output .= '<a href="' . get_permalink() . '&amp;page=' . $i . '">';
 						else
 							$output .= '<a href="' . trailingslashit(get_permalink()) . user_trailingslashit($i, 'single_paged') . '">';
@@ -181,7 +179,7 @@ function wp_link_pages($args = '') {
 					if ( 1 == $i ) {
 						$output .= '<a href="' . get_permalink() . '">' . $previouspagelink . '</a>';
 					} else {
-						if ( '' == get_option('permalink_structure') || in_array($post->post_status, array('draft', 'pending')) )
+						if ( '' == get_option('permalink_structure') || 'draft' == $post->post_status )
 							$output .= '<a href="' . get_permalink() . '&amp;page=' . $i . '">' . $previouspagelink . '</a>';
 						else
 							$output .= '<a href="' . trailingslashit(get_permalink()) . user_trailingslashit($i, 'single_paged') . '">' . $previouspagelink . '</a>';
@@ -192,7 +190,7 @@ function wp_link_pages($args = '') {
 					if ( 1 == $i ) {
 						$output .= '<a href="' . get_permalink() . '">' . $nextpagelink . '</a>';
 					} else {
-						if ( '' == get_option('permalink_structure') || in_array($post->post_status, array('draft', 'pending')) )
+						if ( '' == get_option('permalink_structure') || 'draft' == $post->post_status )
 							$output .= '<a href="' . get_permalink() . '&amp;page=' . $i . '">' . $nextpagelink . '</a>';
 						else
 							$output .= '<a href="' . trailingslashit(get_permalink()) . user_trailingslashit($i, 'single_paged') . '">' . $nextpagelink . '</a>';
@@ -249,14 +247,15 @@ function the_meta() {
 //
 
 function wp_dropdown_pages($args = '') {
-	$defaults = array(
-		'depth' => 0, 'child_of' => 0, 
-		'selected' => 0, 'echo' => 1, 
-		'name' => 'page_id', 'show_option_none' => ''
-	);
+	if ( is_array($args) )
+		$r = &$args;
+	else
+		parse_str($args, $r);
 
-	$r = wp_parse_args( $args, $defaults );
-	extract( $r, EXTR_SKIP );
+	$defaults = array('depth' => 0, 'child_of' => 0, 'selected' => 0, 'echo' => 1,
+		'name' => 'page_id', 'show_option_none' => '');
+	$r = array_merge($defaults, $r);
+	extract($r, EXTR_SKIP);
 
 	$pages = get_pages($r);
 	$output = '';
@@ -278,16 +277,14 @@ function wp_dropdown_pages($args = '') {
 }
 
 function wp_list_pages($args = '') {
-	$defaults = array(
-		'depth' => 0, 'show_date' => '', 
-		'date_format' => get_option('date_format'), 
-		'child_of' => 0, 'exclude' => '', 
-		'title_li' => __('Pages'), 'echo' => 1, 
-		'authors' => '', 'sort_column' => 'menu_order, post_title'
-	);
+	if ( is_array($args) )
+		$r = &$args;
+	else
+		parse_str($args, $r);
 
-	$r = wp_parse_args( $args, $defaults );
-	extract( $r, EXTR_SKIP );
+	$defaults = array('depth' => 0, 'show_date' => '', 'date_format' => get_option('date_format'),
+		'child_of' => 0, 'exclude' => '', 'title_li' => __('Pages'), 'echo' => 1, 'authors' => '', 'sort_column' => 'menu_order, post_title');
+	$r = array_merge($defaults, $r);
 
 	$output = '';
 	$current_page = 0;

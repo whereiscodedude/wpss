@@ -9,7 +9,9 @@ if ( get_option('db_version') != $wp_db_version ) {
 	exit;
 }
 
-require_once(ABSPATH . 'wp-admin/includes/admin.php');
+require_once(ABSPATH . 'wp-admin/admin-functions.php');
+require_once(ABSPATH . 'wp-admin/admin-db.php');
+require_once(ABSPATH . WPINC . '/registration.php');
 
 auth_redirect();
 
@@ -89,7 +91,7 @@ if (isset($plugin_page)) {
 	if (! isset($_GET['noheader']))
 		require_once(ABSPATH . 'wp-admin/admin-header.php');
 
-	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+	require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 
 	define('WP_IMPORTING', true);
 

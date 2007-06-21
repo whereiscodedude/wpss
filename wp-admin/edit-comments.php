@@ -151,14 +151,13 @@ if ( $extra_comments ) : ?>
   </tr>
 </thead>';
 		foreach ($comments as $comment) {
-		$post = get_post($comment->comment_post_ID);
-		$authordata = get_userdata($post->post_author);
+		$authordata = get_userdata($wpdb->get_var("SELECT post_author FROM $wpdb->posts WHERE ID = $comment->comment_post_ID"));
 		$comment_status = wp_get_comment_status($comment->comment_ID);
 		$class = ('alternate' == $class) ? '' : 'alternate';
 		$class .= ('unapproved' == $comment_status) ? ' unapproved' : '';
 ?>
   <tr id="comment-<?php echo $comment->comment_ID; ?>" class='<?php echo $class; ?>'>
-    <td style="text-align: center"><?php if ( current_user_can('edit_post', $comment->comment_post_ID) ) { ?><input type="checkbox" name="delete_comments[]" value="<?php echo $comment->comment_ID; ?>" /><?php } ?></td>
+    <td><?php if ( current_user_can('edit_post', $comment->comment_post_ID) ) { ?><input type="checkbox" name="delete_comments[]" value="<?php echo $comment->comment_ID; ?>" /><?php } ?></td>
     <td><?php comment_author_link() ?></td>
     <td><?php comment_author_email_link() ?></td>
     <td><a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a></td>

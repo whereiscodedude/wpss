@@ -63,7 +63,6 @@ class WP_Object_Cache {
 	var $dirty_objects = array ();
 	var $non_existant_objects = array ();
 	var $global_groups = array ('users', 'userlogins', 'usermeta');
-	var $non_persistent_groups = array('comment');
 	var $blog_id;
 	var $cold_cache_hits = 0;
 	var $warm_cache_hits = 0;
@@ -187,7 +186,16 @@ class WP_Object_Cache {
 	}
 
 	function load_group_from_db($group) {
-		return;
+		global $wpdb;
+
+		if ('category' == $group) {
+			$this->cache['category'] = array ();
+			if ($dogs = $wpdb->get_results("SELECT * FROM $wpdb->categories")) {
+				foreach ($dogs as $catt)
+					$this->cache['category'][$catt->cat_ID] = $catt;
+			}
+		}
+
 	}
 
 	function make_group_dir($group, $perms) {
@@ -309,9 +317,6 @@ class WP_Object_Cache {
 		// Loop over dirty objects and save them.
 		$errors = 0;
 		foreach ($this->dirty_objects as $group => $ids) {
-			if ( in_array($group, $this->non_persistent_groups) )
-				continue;
-
 			$group_dir = $this->make_group_dir($group, $dir_perms);
 
 			$ids = array_unique($ids);

@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/rdf+xml; charset=' . get_option('blog_charset'), true);
+header('Content-type: application/rdf+xml; charset=' . get_option('blog_charset'), true);
 $more = 1;
 
 ?>

@@ -18,7 +18,7 @@ if ( isset($HTTP_RAW_POST_DATA) )
 include('./wp-config.php');
 
 if ( isset( $_GET['rsd'] ) ) { // http://archipelago.phrasewise.com/rsd 
-header('Content-Type: text/xml; charset=' . get_option('blog_charset'), true);
+header('Content-type: text/xml; charset=' . get_option('blog_charset'), true);
 
 ?>
 <?php echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
@@ -28,8 +28,8 @@ header('Content-Type: text/xml; charset=' . get_option('blog_charset'), true);
     <engineLink>http://wordpress.org/</engineLink>
     <homePageLink><?php bloginfo_rss('url') ?></homePageLink>
     <apis>
-      <api name="WordPress" blogID="1" preferred="true" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
-      <api name="Movable Type" blogID="1" preferred="false" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
+      <api name="WordPress" blogID="1" preferred="false" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
+      <api name="Movable Type" blogID="1" preferred="true" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
       <api name="MetaWeblog" blogID="1" preferred="false" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
       <api name="Blogger" blogID="1" preferred="false" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
     </apis>
@@ -39,7 +39,7 @@ header('Content-Type: text/xml; charset=' . get_option('blog_charset'), true);
 exit;
 }
 
-include_once(ABSPATH . 'wp-admin/includes/admin.php');
+include_once(ABSPATH . 'wp-admin/admin-functions.php');
 include_once(ABSPATH . WPINC . '/class-IXR.php');
 
 // Turn off all warnings and errors.
@@ -490,6 +490,10 @@ class wp_xmlrpc_server extends IXR_Server {
 			return(new IXR_Error(401, __("Sorry, you do not have the right to add a category.")));
 		}
 
+		// We need this to make use of the wp_insert_category()
+		// funciton.
+		require_once(ABSPATH . "wp-admin/admin-db.php");
+
 		// If no slug was provided make it empty so that
 		// WordPress will generate one.
 		if(empty($category["slug"])) {
@@ -505,7 +509,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		if(empty($category["description"])) {
 			$category["description"] = "";
 		}
-
+	
 		$new_category = array(
 			"cat_name"				=> $category["name"],
 			"category_nicename"		=> $category["slug"],
@@ -784,7 +788,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	  if (!$this->login_pass_ok($user_login, $user_pass)) {
 	    return $this->error;
 	  }
-
+	  
 	  $cap = ($publish) ? 'publish_posts' : 'edit_posts';
 	  $user = set_current_user(0, $user_login);
 	  if ( !current_user_can($cap) )
@@ -971,12 +975,14 @@ class wp_xmlrpc_server extends IXR_Server {
 			switch($post_type) {
 				case "post":
 					if(!current_user_can("edit_others_posts")) {
-						return(new IXR_Error(401, __("You are not allowed to post as this user")));
+						return(new IXR_Error(401, "You are not allowed to " .
+							"post as this user"));
 					}
 					break;
 				case "page":
 					if(!current_user_can("edit_others_pages")) {
-						return(new IXR_Error(401, __("You are not allowed to create pages as this user")));
+						return(new IXR_Error(401, "You are not allowed to " .
+							"create pages as this user"));
 					}
 					break;
 				default:
@@ -1030,7 +1036,7 @@ class wp_xmlrpc_server extends IXR_Server {
 				switch($content["mt_allow_pings"]) {
 					case "closed":
 						$ping_status = "closed";
-						break;	
+						break;
 					case "open":
 						$ping_status = "open";
 						break;
@@ -1191,12 +1197,14 @@ class wp_xmlrpc_server extends IXR_Server {
 			switch($post_type) {
 				case "post":
 					if(!current_user_can("edit_others_posts")) {
-						return(new IXR_Error(401, __("You are not allowed to change the post author as this user.")));
+						return(new IXR_Error(401, "You are not allowed to " .
+							"change the post author as this user."));
 					}
 					break;
 				case "page":
 					if(!current_user_can("edit_others_pages")) {
-						return(new IXR_Error(401, __("You are not allowed to change the page author as this user.")));
+						return(new IXR_Error(401, "You are not allowed to " .
+							"change the page author as this user."));
 					}
 					break;
 				default:
@@ -1240,7 +1248,7 @@ class wp_xmlrpc_server extends IXR_Server {
 				switch($content["mt_allow_pings"]) {
 					case "closed":
 						$ping_status = "closed";
-						break;	
+						break;
 					case "open":
 						$ping_status = "open";
 						break;
@@ -1261,18 +1269,6 @@ class wp_xmlrpc_server extends IXR_Server {
 						$ping_status = get_option("default_ping_status");
 						break;
 				}
-			}
-		}
-
-		// Only set ping_status if it was provided.
-		if(isset($content_struct["mt_allow_pings"])) {
-			switch((int) $content_struct["mt_allow_pings"]) {
-				case 0:
-					$ping_status = "closed";
-					break;
-				case 1:
-					$ping_status = "open";
-					break;
 			}
 		}
 
@@ -1554,7 +1550,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$upload = wp_upload_bits($name, $type, $bits, $overwrite);
 		if ( ! empty($upload['error']) ) {
-			$errorString = sprintf(__('Could not write file %1$s (%2$s)'), $name, $upload['error']);
+			$errorString = 'Could not write file ' . $name . ' (' . $upload['error'] . ')';
 			logIO('O', '(MW) ' . $errorString);
 			return new IXR_Error(500, $errorString);
 		}
@@ -1643,10 +1639,10 @@ class wp_xmlrpc_server extends IXR_Server {
 		$categories_struct = array();
 
 		// FIXME: can we avoid using direct SQL there?
-		if ( $cats = get_categories('hide_empty=0&hierarchical=0') ) {
+		if ($cats = $wpdb->get_results("SELECT cat_ID, cat_name FROM $wpdb->categories", ARRAY_A)) {
 			foreach ($cats as $cat) {
-				$struct['categoryId'] = $cat->term_id;
-				$struct['categoryName'] = $cat->name;
+				$struct['categoryId'] = $cat['cat_ID'];
+				$struct['categoryName'] = $cat['cat_name'];
 
 				$categories_struct[] = $struct;
 			}
@@ -1865,7 +1861,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			}
 		} else {
 			// TODO: Attempt to extract a post ID from the given URL
-	  		return new IXR_Error(33, __('The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.'));
+	  		return new IXR_Error(33, 'The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
 		}
 		$post_ID = (int) $post_ID;
 
@@ -1875,14 +1871,14 @@ class wp_xmlrpc_server extends IXR_Server {
 		$post = get_post($post_ID);
 
 		if ( !$post ) // Post_ID not found
-	  		return new IXR_Error(33, __('The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.'));
+	  		return new IXR_Error(33, 'The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
 
 		if ( $post_ID == url_to_postid($pagelinkedfrom) )
 			return new IXR_Error(0, __('The source URL and the target URL cannot both point to the same resource.'));
 
 		// Check if pings are on
 		if ( 'closed' == $post->ping_status )
-	  		return new IXR_Error(33, __('The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.'));
+	  		return new IXR_Error(33, 'The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
 
 		// Let's check that the remote site didn't already pingback this entry
 		$result = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = '$post_ID' AND comment_author_url = '$pagelinkedfrom'");
@@ -1964,7 +1960,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		$comment_ID = wp_new_comment($commentdata);
 		do_action('pingback_post', $comment_ID);
 
-		return sprintf(__('Pingback from %1$s to %2$s registered. Keep the web talking! :-)'), $pagelinkedfrom, $pagelinkedto);
+		return "Pingback from $pagelinkedfrom to $pagelinkedto registered. Keep the web talking! :-)";
 	}
 
 
@@ -1982,7 +1978,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		$post_ID = url_to_postid($url);
 		if (!$post_ID) {
 			// We aren't sure that the resource is available and/or pingback enabled
-	  		return new IXR_Error(33, __('The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.'));
+	  		return new IXR_Error(33, 'The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.');
 		}
 
 		$actual_post = wp_get_single_post($post_ID, ARRAY_A);

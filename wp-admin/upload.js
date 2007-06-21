@@ -5,38 +5,18 @@ addLoadEvent( function() {
 		tab: '',
 		postID: 0,
 
-		toQueryParams: function(qryStrOrig) {
-			var params = new Object();
-			var qryStr = qryStrOrig;
-			var i = 0;
-			do {
-				params[qryStr.split("=")[0].replace(/&/, "")] = ( qryStr.split("=")[1] ) ? qryStr.split("=")[1].split(/&|$/)[0] : '';
-				qryStr = ( qryStr.split("=")[1] ) ? qryStr.split(qryStr.split("=")[1].split(/&|$/)[0])[1] : '';
-				i++;
-			} 
-			while(i < (qryStrOrig.split("=").length - 1));
-			return params;
-		},
-
-		toQueryString: function(params) {
-			var qryStr = '';
-			for ( var key in params )
-				qryStr += key + '=' + params[key] + '&';
-			return qryStr;
-		},
-
 		initializeVars: function() {
 			this.urlData  = document.location.href.split('?');
-			this.params = this.toQueryParams(this.urlData[1]);
+			this.params = this.urlData[1].toQueryParams();
 			this.postID = this.params['post_id'];
 			this.tab = this.params['tab'];
 			this.style = this.params['style'];
 			this.ID = this.params['ID'];
 			if ( !this.style )
 				this.style = 'default';
-			var nonceEl = jQuery('#nonce-value');
+			var nonceEl = $('nonce-value');
 			if ( nonceEl )
-				this.nonce = jQuery(nonceEl).val();
+				this.nonce = nonceEl.value;
 			if ( this.ID ) {
 				this.grabImageData( this.ID );
 				this.imageView( this.ID );
@@ -46,38 +26,36 @@ addLoadEvent( function() {
 		initializeLinks: function() {
 			if ( this.ID )
 				return;
-			jQuery('a.file-link').each(function() {
-				var id = jQuery(this).attr('id').split('-').pop();
-				jQuery(this).attr('href','javascript:void(0)').click(function(e) {
-					theFileList[ 'inline' == theFileList.style ? 'imageView' : 'editView' ](id, e);
-				});
-			});
+			$$('a.file-link').each( function(i) {
+				var id = i.id.split('-').pop();
+				i.onclick = function(e) { theFileList[ 'inline' == theFileList.style ? 'imageView' : 'editView' ](id, e); }
+			} );
 		},
 
 		grabImageData: function(id) {
 			if ( id == this.currentImage.ID )
 				return;
-			var thumbEl = jQuery('#attachment-thumb-url-' + id);
+			var thumbEl = $('attachment-thumb-url-' + id);
 			if ( thumbEl ) {
-				this.currentImage.thumb = ( 0 == id ? '' : jQuery(thumbEl).val() );
-				this.currentImage.thumbBase = ( 0 == id ? '' : jQuery('#attachment-thumb-url-base-' + id).val() );
+				this.currentImage.thumb = ( 0 == id ? '' : thumbEl.value );
+				this.currentImage.thumbBase = ( 0 == id ? '' : $('attachment-thumb-url-base-' + id).value );
 			} else {
 				this.currentImage.thumb = false;
 			}
-			this.currentImage.src = ( 0 == id ? '' : jQuery('#attachment-url-' + id).val() );
-			this.currentImage.srcBase = ( 0 == id ? '' : jQuery('#attachment-url-base-' + id).val() );
-			this.currentImage.page = ( 0 == id ? '' : jQuery('#attachment-page-url-' + id).val() );
-			this.currentImage.title = ( 0 == id ? '' : jQuery('#attachment-title-' + id).val() );
-			this.currentImage.description = ( 0 == id ? '' : jQuery('#attachment-description-' + id).val() );
-			var widthEl = jQuery('#attachment-width-' + id);
+			this.currentImage.src = ( 0 == id ? '' : $('attachment-url-' + id).value );
+			this.currentImage.srcBase = ( 0 == id ? '' : $('attachment-url-base-' + id).value );
+			this.currentImage.page = ( 0 == id ? '' : $('attachment-page-url-' + id).value );
+			this.currentImage.title = ( 0 == id ? '' : $('attachment-title-' + id).value );
+			this.currentImage.description = ( 0 == id ? '' : $('attachment-description-' + id).value );
+			var widthEl = $('attachment-width-' + id);
 			if ( widthEl ) {
-				this.currentImage.width = ( 0 == id ? '' : jQuery(widthEl).val() );
-				this.currentImage.height = ( 0 == id ? '' : jQuery('#attachment-height-' + id).val() );
+				this.currentImage.width = ( 0 == id ? '' : widthEl.value );
+				this.currentImage.height = ( 0 == id ? '' : $('attachment-height-' + id).value );
 			} else {
 				this.currentImage.width = false;
 				this.currentImage.height = false;
 			}
-			this.currentImage.isImage = ( 0 == id ? 0 : jQuery('#attachment-is-image-' + id).val() );
+			this.currentImage.isImage = ( 0 == id ? 0 : $('attachment-is-image-' + id).value );
 			this.currentImage.ID = id;
 		},
 
@@ -87,10 +65,10 @@ addLoadEvent( function() {
 
 			h += "<div id='upload-file'>"
 			if ( this.ID ) {
-				var params = this.params;
+				var params = $H(this.params);
 				params.ID = '';
 				params.action = '';
-				h += "<a href='" + this.urlData[0] + '?' + this.toQueryString(params) + "'";
+				h += "<a href='" + this.urlData[0] + '?' + params.toQueryString() + "'";
 			} else {
 				h += "<a href='#' onclick='return theFileList.cancelView();'";
 			}
@@ -130,7 +108,7 @@ addLoadEvent( function() {
 			if ( display.length ) {
 				display.push("<br /><label for='display-title'><input type='radio' name='display' id='display-title' value='title' /> " + this.title + "</label>");
 				h += "<tr><th style='padding-bottom:.5em'>" + this.show + "</th><td style='padding-bottom:.5em'>";
-				jQuery(display).each( function() { h += this; } );
+				$A(display).each( function(i) { h += i; } );
 				h += "</td></tr>";
 			}
 
@@ -147,9 +125,12 @@ addLoadEvent( function() {
 
 			h += "</div>";
 
-			jQuery(h).prependTo('#upload-content');
-			jQuery('#' + checked).attr('checked','checked');
-			if (e) return e.stopPropagation();
+			new Insertion.Top('upload-content', h);
+			var displayEl = $(checked);
+			if ( displayEl )
+				displayEl.checked = true;
+
+			if (e) Event.stop(e);
 			return false;
 		},
 
@@ -163,10 +144,10 @@ addLoadEvent( function() {
 
 			h += "<form id='upload-file' method='post' action='" + action + "'>";
 			if ( this.ID ) {
-				var params = this.params;
+				var params = $H(this.params);
 				params.ID = '';
 				params.action = '';
-				h += "<a href='" + this.urlData[0] + '?' + this.toQueryString(params) + "'";
+				h += "<a href='" + this.urlData[0] + '?' + params.toQueryString() + "'";
 			} else {
 				h += "<a href='#' onclick='return theFileList.cancelView();'";
 			}
@@ -207,17 +188,17 @@ addLoadEvent( function() {
 			h += "<div class='submit'><input type='submit' value='" + this.saveText + "' /></div>";
 			h += "</td></tr></table></form>";
 
-			jQuery(h).prependTo('#upload-content');
-			if (e) e.stopPropagation();
+			new Insertion.Top('upload-content', h);
+			if (e) Event.stop(e);
 			return false;
 		},
 
 		prepView: function(id) {
 			this.cancelView( true );
-			var filesEl = jQuery('#upload-files');
+			var filesEl = $('upload-files');
 			if ( filesEl )
 				filesEl.hide();
-			var navEl = jQuery('#current-tab-nav');
+			var navEl = $('current-tab-nav');
 			if ( navEl )
 				navEl.hide();
 			this.grabImageData(id);
@@ -225,18 +206,18 @@ addLoadEvent( function() {
 
 		cancelView: function( prep ) {
 			if ( !prep ) {
-				var filesEl = jQuery('#upload-files');
+				var filesEl = $('upload-files');
 				if ( filesEl )
-					jQuery(filesEl).show();
-				var navEl = jQuery('#current-tab-nav');
+					Element.show(filesEl);
+				var navEl = $('current-tab-nav');
 				if ( navEl )
-					jQuery(navEl).show();
+					Element.show(navEl);
 			}
 			if ( !this.ID )
 				this.grabImageData(0);
-			var div = jQuery('#upload-file');
+			var div = $('upload-file');
 			if ( div )
-				jQuery(div).remove();
+				Element.remove(div);
 			return false;
 		},
 
@@ -246,10 +227,10 @@ addLoadEvent( function() {
 			var display = '';
 			var h = '';
 
-			link = jQuery('input[@type=radio][@name="link"][@checked]','#uploadoptions').val();
-			displayEl = jQuery('input[@type=radio][@name="display"][@checked]','#uploadoptions');
+			link = $A(document.forms.uploadoptions.elements.link).detect( function(i) { return i.checked; } ).value;
+			displayEl = $A(document.forms.uploadoptions.elements.display).detect( function(i) { return i.checked; } )
 			if ( displayEl )
-				display = jQuery(displayEl).val();
+				display = displayEl.value;
 			else if ( 1 == this.currentImage.isImage )
 				display = 'full';
 
@@ -278,17 +259,15 @@ addLoadEvent( function() {
 
 		deleteFile: function(id) {
 			if ( confirm( this.confirmText.replace(/%title%/g, this.currentImage.title) ) ) {
-				jQuery('#action-value').attr('value','delete');
-				jQuery('#upload-file').submit();
+				$('action-value').value = 'delete';
+				$('upload-file').submit();
 				return true;
 			}
 			return false;
 		}
 
 	};
-
-	for ( var property in uploadL10n ) 
-		theFileList[property] = uploadL10n[property];
+	Object.extend( theFileList, uploadL10n );
 	theFileList.initializeVars();
 	theFileList.initializeLinks();
 } );

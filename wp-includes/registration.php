@@ -1,47 +1,34 @@
 <?php
 
-/**
- * Checks whether the given username exists.
- * @param string $username Username.
- * @return mixed The user's ID on success, and null on failure.
- */
 function username_exists( $username ) {
-	if ( $user = get_userdatabylogin( sanitize_user( $username ) ) ) {
+	global $wpdb;
+	$username = sanitize_user( $username );
+	$user = get_userdatabylogin($username);
+	if ( $user )
 		return $user->ID;
-	} else {
-		return null;
-	}
+
+	return null;
 }
 
-/**
- * Checks whether the given email exists.
- * @global object $wpdb WordPress database layer.
- * @param string $email Email.
- * @return mixed The user's ID on success, and false on failure.
- */
+
 function email_exists( $email ) {
 	global $wpdb;
-	$email = $wpdb->escape( $email );
-	return $wpdb->get_var( "SELECT ID FROM $wpdb->users WHERE user_email = '$email'" );
+	$email = addslashes( $email );
+	return $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_email = '$email'");
 }
 
-/**
- * Checks whether an username is valid.
- * @param string $username Username.
- * @return bool A filtered boolean.
- */
+
 function validate_username( $username ) {
-	$sanitized = sanitize_user( $username, true );
-	$valid = ( $sanitized == $username );
-	return apply_filters( 'validate_username', $valid, $username );
+	$name = sanitize_user($username, true);
+	$valid = true;
+
+	if ( $name != $username )
+		$valid = false;
+
+	return apply_filters('validate_username', $valid, $username);
 }
 
-/**
- * Insert an user into the database.
- * @global object $wpdb WordPress database layer.
- * @param array $userdata An array of user data.
- * @return int The newly created user's ID.
- */
+
 function wp_insert_user($userdata) {
 	global $wpdb;
 
@@ -143,12 +130,7 @@ function wp_insert_user($userdata) {
 	return $user_id;
 }
 
-/**
- * Update an user in the database.
- * @global object $wpdb WordPress database layer.
- * @param array $userdata An array of user data.
- * @return int The updated user's ID.
- */
+
 function wp_update_user($userdata) {
 	global $wpdb;
 
@@ -182,15 +164,7 @@ function wp_update_user($userdata) {
 	return $user_id;
 }
 
-/**
- * A simpler way of inserting an user into the database.
- * See also: wp_insert_user().
- * @global object $wpdb WordPress database layer.
- * @param string $username The user's username.
- * @param string $password The user's password.
- * @param string $email The user's email (optional).
- * @return int The new user's ID.
- */
+
 function wp_create_user($username, $password, $email = '') {
 	global $wpdb;
 
@@ -202,14 +176,7 @@ function wp_create_user($username, $password, $email = '') {
 	return wp_insert_user($userdata);
 }
 
-/**
- * An alias of wp_create_user().
- * @param string $username The user's username.
- * @param string $password The user's password.
- * @param string $email The user's email (optional).
- * @return int The new user's ID.
- * @deprecated
- */
+
 function create_user($username, $password, $email) {
 	return wp_create_user($username, $password, $email);
 }
