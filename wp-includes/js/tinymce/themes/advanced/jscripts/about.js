@@ -1,8 +1,5 @@
 function init() {
-	var inst;
-
 	tinyMCEPopup.resizeToInnerSize();
-	inst = tinyMCE.selectedInstance;
 
 	// Give FF some time
 	window.setTimeout('insertHelpIFrame();', 10);
@@ -23,8 +20,8 @@ function init() {
 	html += '</thead>';
 	html += '<tbody>';
 
-	for (var i=0; i<inst.plugins.length; i++) {
-		var info = getPluginInfo(inst.plugins[i]);
+	for (var i=0; i<plugins.length; i++) {
+		var info = getPluginInfo(plugins[i]);
 
 		html += '<tr>';
 
@@ -49,8 +46,10 @@ function init() {
 }
 
 function getPluginInfo(name) {
-	if (tinyMCE.plugins[name].getInfo)
-		return tinyMCE.plugins[name].getInfo();
+	var fn = eval('tinyMCEPopup.windowOpener.TinyMCE_' + name + '_getInfo');
+
+	if (typeof(fn) != 'undefined')
+		return fn();
 
 	return {
 		longname : name,
