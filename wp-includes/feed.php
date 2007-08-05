@@ -22,6 +22,7 @@ function wp_title_rss($sep = '&#187;') {
 
 function get_the_title_rss() {
 	$title = get_the_title();
+	$title = apply_filters('the_title', $title);
 	$title = apply_filters('the_title_rss', $title);
 	return $title;
 }
@@ -150,11 +151,11 @@ function get_the_category_rss($type = 'rss') {
 	$home = get_bloginfo_rss('home');
 	$the_list = '';
 	foreach ( (array) $categories as $category ) {
-		$cat_name = convert_chars($category->name);
+		$cat_name = convert_chars($category->cat_name);
 		if ( 'rdf' == $type )
 			$the_list .= "\n\t\t<dc:subject><![CDATA[$cat_name]]></dc:subject>\n";
 		if ( 'atom' == $type )
-			$the_list .= sprintf( '<category scheme="%1$s" term="%2$s" />', attribute_escape( apply_filters( 'get_bloginfo_rss', get_bloginfo( 'url' ) ) ), attribute_escape( $category->name ) );
+			$the_list .= sprintf( '<category scheme="%1$s" term="%2$s" />', attribute_escape( apply_filters( 'get_bloginfo_rss', get_bloginfo( 'url' ) ) ), attribute_escape( $category->cat_name ) );
 		else
 			$the_list .= "\n\t\t<category><![CDATA[$cat_name]]></category>\n";
 	}

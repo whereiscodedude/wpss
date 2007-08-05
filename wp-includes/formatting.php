@@ -413,14 +413,8 @@ function funky_javascript_fix($text) {
 	return $text;
 }
 
-function balanceTags( $text, $force = false ) {
-	if ( !$force && get_option('use_balanceTags') == 0 )
-		return $text;
-	return force_balance_tags( $text );
-}
-
 /*
- force_balance_tags
+ balanceTags
 
  Balances Tags of string using a modified stack.
 
@@ -439,10 +433,12 @@ function balanceTags( $text, $force = false ) {
 	     Added Cleaning Hooks
 	1.0  First Version
 */
-function force_balance_tags( $text ) {
+function balanceTags($text, $force = false) {
+
+	if ( !$force && get_option('use_balanceTags') == 0 )
+		return $text;
+
 	$tagstack = array(); $stacksize = 0; $tagqueue = ''; $newtext = '';
-	$single_tags = array('br', 'hr', 'img', 'input'); //Known single-entity/self-closing tags
-	$nestable_tags = array('blockquote', 'div', 'span'); //Tags that can be immediately nested within themselves
 
 	# WP bug fix for comments - in case you REALLY meant to type '< !--'
 	$text = str_replace('< !--', '<    !--', $text);
@@ -493,11 +489,11 @@ function force_balance_tags( $text ) {
 			if((substr($regex[2],-1) == '/') || ($tag == '')) {
 			}
 			// ElseIf it's a known single-entity tag but it doesn't close itself, do so
-			elseif ( in_array($tag, $single_tags) ) {
+			elseif ($tag == 'br' || $tag == 'img' || $tag == 'hr' || $tag == 'input') {
 				$regex[2] .= '/';
 			} else {	// Push the tag onto the stack
 				// If the top of the stack is the same as the tag we want to push, close previous tag
-				if (($stacksize > 0) && !in_array($tag, $nestable_tags) && ($tagstack[$stacksize - 1] == $tag)) {
+				if (($stacksize > 0) && ($tag != 'div') && ($tagstack[$stacksize - 1] == $tag)) {
 					$tagqueue = '</' . array_pop ($tagstack) . '>';
 					$stacksize--;
 				}
@@ -536,6 +532,10 @@ function force_balance_tags( $text ) {
 	$newtext = str_replace("<    !--","< !--",$newtext);
 
 	return $newtext;
+}
+
+function force_balance_tags($text) {
+	return balanceTags($text, true);
 }
 
 function format_to_edit($content, $richedit = false) {
@@ -1083,7 +1083,7 @@ function clean_url( $url, $protocols = null ) {
 	if ( strpos($url, '://') === false &&
 		substr( $url, 0, 1 ) != '/' && !preg_match('/^[a-z0-9-]+?\.php/i', $url) )
 		$url = 'http://' . $url;
-
+	
 	$url = preg_replace('/&([^#])(?![a-z]{2,8};)/', '&#038;$1', $url);
 	if ( !is_array($protocols) )
 		$protocols = array('http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet'); 
@@ -1118,90 +1118,11 @@ function wp_make_link_relative( $link ) {
 	return preg_replace('|https?://[^/]+(/.*)|i', '$1', $link );
 }
 
-function sanitize_option($option, $value) { // Remember to call stripslashes!
-
-	switch ($option) {
-		case 'admin_email':
-			$value = sanitize_email($value);
-			break;
-
-		case 'default_post_edit_rows':
-		case 'mailserver_port':
-		case 'comment_max_links':
-			$value = abs((int) $value);
-			break;
-
-		case 'posts_per_page':
-		case 'posts_per_rss':
-			$value = (int) $value;
-			if ( empty($value) ) $value = 1;
-			if ( $value < -1 ) $value = abs($value);
-			break;
-
-		case 'default_ping_status':
-		case 'default_comment_status':
-			// Options that if not there have 0 value but need to be something like "closed"
-			if ( $value == '0' || $value == '')
-				$value = 'closed';
-			break;
-
-		case 'blogdescription':
-		case 'blogname':
-			$value = addslashes($value);
-			$value = wp_filter_post_kses( $value ); // calls stripslashes then addslashes
-			$value = stripslashes($value);
-			$value = wp_specialchars( $value );
-			break;
-
-		case 'blog_charset':
-			$value = preg_replace('/[^a-zA-Z0-9_-]/', '', $value); // strips slashes
-			break;
-
-		case 'date_format':
-		case 'time_format':
-		case 'mailserver_url':
-		case 'mailserver_login':
-		case 'mailserver_pass':
-		case 'ping_sites':
-		case 'upload_path':
-			$value = strip_tags($value);
-			$value = addslashes($value);
-			$value = wp_filter_kses($value); // calls stripslashes then addslashes
-			$value = stripslashes($value);
-			break;
-
-		case 'gmt_offset':
-			$value = preg_replace('/[^0-9:.-]/', '', $value); // strips slashes
-			break;
-
-		case 'siteurl':
-		case 'home':
-			$value = stripslashes($value);
-			$value = clean_url($value);
-			break;
-		default :
-			break;
-	}
-
-	return $value;
-}
-
 function wp_parse_str( $string, &$array ) {
 	parse_str( $string, $array );
 	if ( get_magic_quotes_gpc() )
 		$array = stripslashes_deep( $array ); // parse_str() adds slashes if magicquotes is on.  See: http://php.net/parse_str
 	$array = apply_filters( 'wp_parse_str', $array );
-}
-
-// Convert lone less than signs.  KSES already converts lone greater than signs.
-function wp_pre_kses_less_than( $text ) {
-	return preg_replace_callback('%<[^>]*?((?=<)|>|$)%', 'wp_pre_kses_less_than_callback', $text);
-}
-
-function wp_pre_kses_less_than_callback( $matches ) {
-	if ( false === strpos($matches[0], '>') )
-		return wp_specialchars($matches[0]);
-	return $matches[0];
 }
 
 ?>

@@ -1,9 +1,9 @@
 <?php
 
 class WP {
-	var $public_query_vars = array('m', 'p', 'posts', 'w', 'cat', 'withcomments', 'withoutcomments', 's', 'search', 'exact', 'sentence', 'debug', 'calendar', 'page', 'paged', 'more', 'tb', 'pb', 'author', 'order', 'orderby', 'year', 'monthnum', 'day', 'hour', 'minute', 'second', 'name', 'category_name', 'tag', 'feed', 'author_name', 'static', 'pagename', 'page_id', 'error', 'comments_popup', 'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview', 'robots');
+	var $public_query_vars = array('m', 'p', 'posts', 'w', 'cat', 'withcomments', 'withoutcomments', 's', 'search', 'exact', 'sentence', 'debug', 'calendar', 'page', 'paged', 'more', 'tb', 'pb', 'author', 'order', 'orderby', 'year', 'monthnum', 'day', 'hour', 'minute', 'second', 'name', 'category_name', 'feed', 'author_name', 'static', 'pagename', 'page_id', 'error', 'comments_popup', 'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview', 'robots');
 
-	var $private_query_vars = array('offset', 'posts_per_page', 'posts_per_archive_page', 'what_to_show', 'showposts', 'nopaging', 'post_type', 'post_status');
+	var $private_query_vars = array('offset', 'posts_per_page', 'posts_per_archive_page', 'what_to_show', 'showposts', 'nopaging', 'post_type');
 	var $extra_query_vars = array();
 
 	var $query_vars;
@@ -176,9 +176,9 @@ class WP {
 			status_header( 404 );
 			if ( !is_user_logged_in() )
 				nocache_headers();
-			@header('Content-Type: ' . get_option('html_type') . '; charset=' . get_option('blog_charset'));
+			@header('Content-type: ' . get_option('html_type') . '; charset=' . get_option('blog_charset'));
 		} else if ( empty($this->query_vars['feed']) ) {
-			@header('Content-Type: ' . get_option('html_type') . '; charset=' . get_option('blog_charset'));
+			@header('Content-type: ' . get_option('html_type') . '; charset=' . get_option('blog_charset'));
 		} else {
 			// We're showing a feed, so WP is indeed the only thing that last changed
 			if ( $this->query_vars['withcomments']
@@ -557,7 +557,7 @@ class Walker_PageDropdown extends Walker {
 
 class Walker_Category extends Walker {
 	var $tree_type = 'category';
-	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id'); //TODO: decouple this
+	var $db_fields = array ('parent' => 'category_parent', 'id' => 'cat_ID'); //TODO: decouple this
 
 	function start_lvl($output, $depth, $args) {
 		if ( 'list' != $args['style'] )
@@ -580,13 +580,13 @@ class Walker_Category extends Walker {
 	function start_el($output, $category, $depth, $args) {
 		extract($args);
 
-		$cat_name = attribute_escape( $category->name);
+		$cat_name = attribute_escape( $category->cat_name);
 		$cat_name = apply_filters( 'list_cats', $cat_name, $category );
-		$link = '<a href="' . get_category_link( $category->term_id ) . '" ';
-		if ( $use_desc_for_title == 0 || empty($category->description) )
+		$link = '<a href="' . get_category_link( $category->cat_ID ) . '" ';
+		if ( $use_desc_for_title == 0 || empty($category->category_description) )
 			$link .= 'title="' . sprintf(__( 'View all posts filed under %s' ), $cat_name) . '"';
 		else
-			$link .= 'title="' . attribute_escape( apply_filters( 'category_description', $category->description, $category )) . '"';
+			$link .= 'title="' . attribute_escape( apply_filters( 'category_description', $category->category_description, $category )) . '"';
 		$link .= '>';
 		$link .= $cat_name . '</a>';
 
@@ -596,7 +596,7 @@ class Walker_Category extends Walker {
 			if ( empty($feed_image) )
 				$link .= '(';
 
-			$link .= '<a href="' . get_category_rss_link( 0, $category->term_id, $category->slug ) . '"';
+			$link .= '<a href="' . get_category_rss_link( 0, $category->cat_ID, $category->category_nicename ) . '"';
 
 			if ( empty($feed) )
 				$alt = ' alt="' . sprintf(__( 'Feed for all posts filed under %s' ), $cat_name ) . '"';
@@ -619,7 +619,7 @@ class Walker_Category extends Walker {
 		}
 
 		if ( isset($show_count) && $show_count )
-			$link .= ' (' . intval($category->count) . ')';
+			$link .= ' (' . intval($category->category_count) . ')';
 
 		if ( isset($show_date) && $show_date ) {
 			$link .= ' ' . gmdate('Y-m-d', $category->last_update_timestamp);
@@ -630,9 +630,9 @@ class Walker_Category extends Walker {
 
 		if ( 'list' == $args['style'] ) {
 			$output .= "\t<li";
-			if ( $current_category && ($category->term_id == $current_category) )
+			if ( $current_category && ($category->cat_ID == $current_category) )
 				$output .=  ' class="current-cat"';
-			elseif ( $_current_category && ($category->term_id == $_current_category->parent) )
+			elseif ( $_current_category && ($category->cat_ID == $_current_category->category_parent) )
 				$output .=  ' class="current-cat-parent"';
 			$output .= ">$link\n";
 		} else {
@@ -654,19 +654,19 @@ class Walker_Category extends Walker {
 
 class Walker_CategoryDropdown extends Walker {
 	var $tree_type = 'category';
-	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id'); //TODO: decouple this
+	var $db_fields = array ('parent' => 'category_parent', 'id' => 'cat_ID'); //TODO: decouple this
 
 	function start_el($output, $category, $depth, $args) {
 		$pad = str_repeat('&nbsp;', $depth * 3);
 
-		$cat_name = apply_filters('list_cats', $category->name, $category);
-		$output .= "\t<option value=\"".$category->term_id."\"";
-		if ( $category->term_id == $args['selected'] )
+		$cat_name = apply_filters('list_cats', $category->cat_name, $category);
+		$output .= "\t<option value=\"".$category->cat_ID."\"";
+		if ( $category->cat_ID == $args['selected'] )
 			$output .= ' selected="selected"';
 		$output .= '>';
 		$output .= $pad.$cat_name;
 		if ( $args['show_count'] )
-			$output .= '&nbsp;&nbsp;('. $category->count .')';
+			$output .= '&nbsp;&nbsp;('. $category->category_count .')';
 		if ( $args['show_last_update'] ) {
 			$format = 'Y-m-d';
 			$output .= '&nbsp;&nbsp;' . gmdate($format, $category->last_update_timestamp);
@@ -687,14 +687,16 @@ class WP_Ajax_Response {
 
 	// a WP_Error object can be passed in 'id' or 'data'
 	function add( $args = '' ) {
-		$defaults = array(
-			'what' => 'object', 'action' => false, 
-			'id' => '0', 'old_id' => false, 
-			'data' => '', 'supplemental' => array()
-		);
+		if ( is_array($args) )
+			$r = &$args;
+		else
+			parse_str($args, $r);
 
-		$r = wp_parse_args( $args, $defaults );
-		extract( $r, EXTR_SKIP );
+		$defaults = array('what' => 'object', 'action' => false, 'id' => '0', 'old_id' => false,
+				'data' => '', 'supplemental' => array());
+
+		$r = array_merge($defaults, $r);
+		extract($r, EXTR_SKIP);
 
 		if ( is_wp_error($id) ) {
 			$data = $id;
@@ -729,7 +731,7 @@ class WP_Ajax_Response {
 	}
 
 	function send() {
-		header('Content-Type: text/xml');
+		header('Content-type: text/xml');
 		echo "<?xml version='1.0' standalone='yes'?><wp_ajax>";
 		foreach ( $this->responses as $response )
 			echo $response;

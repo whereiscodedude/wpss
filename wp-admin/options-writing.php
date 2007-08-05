@@ -31,11 +31,11 @@ include('admin-header.php');
 <th scope="row"><?php _e('Default post category:') ?></th>
 <td><select name="default_category" id="default_category">
 <?php
-$categories = get_categories('get=all');
+$categories = $wpdb->get_results("SELECT * FROM $wpdb->categories ORDER BY cat_name");
 foreach ($categories as $category) :
-if ($category->term_id == get_option('default_category')) $selected = " selected='selected'";
+if ($category->cat_ID == get_option('default_category')) $selected = " selected='selected'";
 else $selected = '';
-echo "\n\t<option value='$category->term_id' $selected>$category->name</option>";
+echo "\n\t<option value='$category->cat_ID' $selected>$category->cat_name</option>";
 endforeach;
 ?>
 </select></td>
@@ -44,11 +44,10 @@ endforeach;
 <th scope="row"><?php _e('Default link category:') ?></th>
 <td><select name="default_link_category" id="default_link_category">
 <?php
-$categories = get_terms('link_category', 'get=all');
 foreach ($categories as $category) :
-if ($category->term_id == get_option('default_link_category')) $selected = " selected='selected'";
+if ($category->cat_ID == get_option('default_link_category')) $selected = " selected='selected'";
 else $selected = '';
-echo "\n\t<option value='$category->term_id' $selected>$category->name</option>";
+echo "\n\t<option value='$category->cat_ID' $selected>$category->cat_name</option>";
 endforeach;
 ?>
 </select></td>

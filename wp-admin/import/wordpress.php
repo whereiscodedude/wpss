@@ -44,7 +44,7 @@ class WP_Import {
 
 	function users_form($n) {
 		global $wpdb, $testing;
-		$users = $wpdb->get_results("SELECT user_login FROM $wpdb->users ORDER BY user_login");
+		$users = $wpdb->get_results("SELECT * FROM $wpdb->users ORDER BY ID");
 ?><select name="userselect[<?php echo $n; ?>]">
 	<option value="#NONE#">- Select -</option>
 	<?php
@@ -85,46 +85,39 @@ class WP_Import {
 
 	function get_entries() {
 		set_magic_quotes_runtime(0);
+		$importdata = array_map('rtrim', file($this->file)); // Read the file into an array
 
 		$this->posts = array();
 		$this->categories = array();
 		$num = 0;
 		$doing_entry = false;
-
-		$fp = fopen($this->file, 'r');
-		if ($fp) {
-			while ( !feof($fp) ) {
-				$importline = rtrim(fgets($fp));
-
-				if ( false !== strpos($importline, '<wp:category>') ) {
-					preg_match('|<wp:category>(.*?)</wp:category>|is', $importline, $category);
-					$this->categories[] = $category[1];
-					continue;
-				}
-				if ( false !== strpos($importline, '<item>') ) {
-					$this->posts[$num] = '';
-					$doing_entry = true;
-					continue;	
-				}
-				if ( false !== strpos($importline, '</item>') ) {
-					$num++;
-					$doing_entry = false;
-					continue;	
-				}
-				if ( $doing_entry ) {
-					$this->posts[$num] .= $importline . "\n";
-				}
+		foreach ($importdata as $importline) {
+			if ( false !== strpos($importline, '<wp:category>') ) {
+				preg_match('|<wp:category>(.*?)</wp:category>|is', $importline, $category);
+				$this->categories[] = $category[1];
+				continue;
 			}
-
-			foreach ($this->posts as $post) {
-				$post_ID = (int) $this->get_tag( $post, 'wp:post_id' );
-				if ($post_ID) {
-					$this->posts_processed[$post_ID][0] = &$post;
-					$this->posts_processed[$post_ID][1] = 0;
-				}
+			if ( false !== strpos($importline, '<item>') ) {
+				$this->posts[$num] = '';
+				$doing_entry = true;
+				continue;	
 			}
+			if ( false !== strpos($importline, '</item>') ) {
+				$num++;
+				$doing_entry = false;
+				continue;	
+			}
+			if ( $doing_entry ) {
+				$this->posts[$num] .= $importline . "\n";
+			}
+		}
 
-			fclose($fp);
+		foreach ($this->posts as $post) {
+			$post_ID = (int) $this->get_tag( $post, 'wp:post_id' );
+			if ($post_ID) {
+				$this->posts_processed[$post_ID][0] = &$post;
+				$this->posts_processed[$post_ID][1] = 0;
+			}
 		}
 	}
 
@@ -259,14 +252,14 @@ class WP_Import {
 
 		echo '<h3>'.sprintf(__('All done.').' <a href="%s">'.__('Have fun!').'</a>', get_option('home')).'</h3>';
 	}
-
+  
 	function process_post($post) {
 		global $wpdb;
 
 		$post_ID = (int) $this->get_tag( $post, 'wp:post_id' );
   		if ( $post_ID && !empty($this->posts_processed[$post_ID][1]) ) // Processed already
 			return 0;
-
+      
 		// There are only ever one of these
 		$post_title     = $this->get_tag( $post, 'title' );
 		$post_date      = $this->get_tag( $post, 'wp:post_date' );
@@ -318,7 +311,7 @@ class WP_Import {
 			// Memorize old and new ID.
 			if ( $post_id && $post_ID && $this->posts_processed[$post_ID] )
 				$this->posts_processed[$post_ID][1] = $post_id; // New ID.
-
+			
 			// Add categories.
 			if (count($categories) > 0) {
 				$post_cats = array();

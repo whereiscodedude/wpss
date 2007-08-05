@@ -34,9 +34,6 @@ class wpdb {
 	var $optiongroups;
 	var $optiongroup_options;
 	var $postmeta;
-	var $terms;
-	var $term_taxonomy;
-	var $term_relationships;
 
 	var $charset;
 	var $collate;
@@ -114,29 +111,6 @@ class wpdb {
 			return mysql_escape_string( $string );
 		else
 			return mysql_real_escape_string( $string, $this->dbh );
-	}
-
-	/**
-	 * Escapes content by reference for insertion into the database, for security
-	 * @param string $s
-	 */
-	function escape_by_ref(&$s) {
-		$s = $this->escape($s);
-	}
-
-	/**
-	 * Prepares a SQL query for safe use, using sprintf() syntax
-	 */
-	function prepare($args=NULL) {
-		if ( NULL === $args )
-			return;
-		$args = func_get_args();
-		$query = array_shift($args);
-		$query = str_replace("'%s'", '%s', $query); // in case someone mistakenly already singlequoted it
-		$query = str_replace('"%s"', '%s', $query); // doublequote unquoting
-		$query = str_replace('%s', "'%s'", $query); // quote the strings
-		array_walk($args, array(&$this, 'escape_by_ref'));
-		return @vsprintf($query, $args);
 	}
 
 	// ==================================================================
@@ -281,7 +255,7 @@ class wpdb {
 		$this->func_call = "\$db->get_row(\"$query\",$output,$y)";
 		if ( $query )
 			$this->query($query);
-
+	
 		if ( !isset($this->last_result[$y]) )
 			return null;
 

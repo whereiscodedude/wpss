@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: text/xml; charset=' . get_option('blog_charset'), true);
+header('Content-type: text/xml; charset=' . get_option('blog_charset'), true);
 $more = 1;
 
 ?>

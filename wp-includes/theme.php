@@ -56,51 +56,35 @@ function get_template_directory_uri() {
 }
 
 function get_theme_data( $theme_file ) {
-	$themes_allowed_tags = array(
-		'a' => array(
-			'href' => array(),'title' => array()
-			),
-		'abbr' => array(
-			'title' => array()
-			),
-		'acronym' => array(
-			'title' => array()
-			),
-		'code' => array(),
-		'em' => array(),
-		'strong' => array()
-	);
-
 	$theme_data = implode( '', file( $theme_file ) );
 	$theme_data = str_replace ( '\r', '\n', $theme_data ); 
-	preg_match( '|Theme Name:(.*)$|mi', $theme_data, $theme_name );
-	preg_match( '|Theme URI:(.*)$|mi', $theme_data, $theme_uri );
-	preg_match( '|Description:(.*)$|mi', $theme_data, $description );
-	preg_match( '|Author:(.*)$|mi', $theme_data, $author_name );
-	preg_match( '|Author URI:(.*)$|mi', $theme_data, $author_uri );
-	preg_match( '|Template:(.*)$|mi', $theme_data, $template );
-
+	preg_match( '|Theme Name:(.*)|i', $theme_data, $theme_name );
+	preg_match( '|Theme URI:(.*)|i', $theme_data, $theme_uri );
+	preg_match( '|Description:(.*)|i', $theme_data, $description );
+	preg_match( '|Author:(.*)|i', $theme_data, $author_name );
+	preg_match( '|Author URI:(.*)|i', $theme_data, $author_uri );
+	preg_match( '|Template:(.*)|i', $theme_data, $template );
 	if ( preg_match( '|Version:(.*)|i', $theme_data, $version ) )
-		$version = wp_kses( trim( $version[1] ), $themes_allowed_tags );
+		$version = trim( $version[1] );
 	else
-		$version = '';
-
+		$version ='';
 	if ( preg_match('|Status:(.*)|i', $theme_data, $status) )
-		$status = wp_kses( trim( $status[1] ), $themes_allowed_tags );
+		$status = trim($status[1]);
 	else
 		$status = 'publish';
 
-	$name = $theme = wp_kses( trim( $theme_name[1] ), $themes_allowed_tags );
-	$theme_uri = clean_url( trim( $theme_uri[1] ) );
-	$description = wptexturize( wp_kses( trim( $description[1] ), $themes_allowed_tags ) );
-	$template = wp_kses( trim( $template[1] ), $themes_allowed_tags );
+	$description = wptexturize( trim( $description[1] ) );
 
-	$author_uri = clean_url( trim( $author_uri[1] ) );
+	$name = $theme_name[1];
+	$name = trim( $name );
+	$theme = $name;
+	$theme_uri = trim( $theme_uri[1] );
+	$template = trim( $template[1] );
 
-	if ( empty( $author_uri[1] ) ) {
-		$author = wp_kses( trim( $author_name[1] ), $themes_allowed_tags );
+	if ( '' == $author_uri[1] ) {
+		$author = trim( $author_name[1] );
 	} else {
-		$author = sprintf( '<a href="%1$s" title="%2$s">%3$s</a>', $author_uri, __( 'Visit author homepage' ), wp_kses( trim( $author_name[1] ), $themes_allowed_tags ) );
+		$author = '<a href="' . trim( $author_uri[1] ) . '" title="' . __('Visit author homepage') . '">' . trim( $author_name[1] ) . '</a>';
 	}
 
 	return array( 'Name' => $name, 'Title' => $theme, 'URI' => $theme_uri, 'Description' => $description, 'Author' => $author, 'Version' => $version, 'Template' => $template, 'Status' => $status );
@@ -346,17 +330,6 @@ function get_category_template() {
 	return apply_filters('category_template', $template);
 }
 
-function get_tag_template() {
-	$template = '';
-	if ( file_exists(TEMPLATEPATH . "/tag-" . get_query_var('tag') . '.php') )
-		$template = TEMPLATEPATH . "/tag-" . get_query_var('tag') . '.php';
-	elseif ( file_exists(TEMPLATEPATH . "/tag.php") )
-		$template = TEMPLATEPATH . "/tag.php";
-
-	return apply_filters('tag_template', $template);
-}
-
-
 function get_date_template() {
 	return get_query_template('date');
 }
@@ -427,7 +400,7 @@ function get_comments_popup_template() {
 
 function load_template($_template_file) {
 	global $posts, $post, $wp_did_header, $wp_did_template_redirect, $wp_query,
-		$wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment, $user_ID;
+		$wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment;
 
 	if ( is_array($wp_query->query_vars) )
 		extract($wp_query->query_vars, EXTR_SKIP);
