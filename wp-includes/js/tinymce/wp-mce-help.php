@@ -6,7 +6,10 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 <head>
 <meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php echo get_option('blog_charset'); ?>" />
 <title><?php _e('Rich Editor Help') ?></title>
-<?php wp_admin_css(); ?>
+<link rel="stylesheet" href="<?php echo get_option('siteurl') ?>/wp-admin/wp-admin.css?version=<?php bloginfo('version'); ?>" type="text/css" />
+<?php if ( ('rtl' == $wp_locale->text_direction) ) : ?>
+<link rel="stylesheet" href="<?php echo get_option('siteurl') ?>/wp-admin/rtl.css?version=<?php bloginfo('version'); ?>" type="text/css" />
+<?php endif; ?> 
 <style type="text/css">
 	#wphead {
 		padding-top: 5px;
@@ -90,7 +93,7 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 	#keys .right { text-align: left; }
 	td b { font-family: Tahoma, "Times New Roman", Times, serif }
 </style>
-<?php endif; ?>
+<?php endif; ?> 
 <script type="text/javascript">
 	window.onkeydown = window.onkeypress = function (e) {
 		e = e ? e : window.event;
@@ -180,3 +183,4 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 
 </body>
 </html>
+

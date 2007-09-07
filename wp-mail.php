@@ -108,7 +108,7 @@ for ($i=1; $i <= $count; $i++) :
 		}
 	endforeach;
 
-	$subject = trim($subject);
+	$subject = trim(str_replace(get_option('subjectprefix'), '', $subject));
 
 	if ($content_type == 'multipart/alternative') {
 		$content = explode('--'.$boundary, $content);
@@ -117,7 +117,7 @@ for ($i=1; $i <= $count; $i++) :
 		$content = strip_tags($content[1], '<img><p><br><i><b><u><em><strong><strike><font><span><div>');
 	}
 	$content = trim($content);
-
+	
 	if (stripos($content_transfer_encoding, "quoted-printable") !== false) {
 		$content = quoted_printable_decode($content);
 	}

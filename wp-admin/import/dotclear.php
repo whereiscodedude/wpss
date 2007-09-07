@@ -7,6 +7,18 @@
 /**
 	Add These Functions to make our lives easier
 **/
+if(!function_exists('get_catbynicename'))
+{
+	function get_catbynicename($category_nicename)
+	{
+	global $wpdb;
+
+	$cat_id -= 0; 	// force numeric
+	$name = $wpdb->get_var('SELECT cat_ID FROM '.$wpdb->categories.' WHERE category_nicename="'.$category_nicename.'"');
+
+	return $name;
+	}
+}
 
 if(!function_exists('get_comment_count'))
 {
@@ -14,6 +26,15 @@ if(!function_exists('get_comment_count'))
 	{
 		global $wpdb;
 		return $wpdb->get_var('SELECT count(*) FROM '.$wpdb->comments.' WHERE comment_post_ID = '.$post_ID);
+	}
+}
+
+if(!function_exists('link_cat_exists'))
+{
+	function link_cat_exists($catname)
+	{
+		global $wpdb;
+		return $wpdb->get_var('SELECT cat_id FROM '.$wpdb->linkcategories.' WHERE cat_name = "'.$wpdb->escape($catname).'"');
 	}
 }
 
@@ -109,19 +130,19 @@ function textconv ($s) {
 **/
 class Dotclear_Import {
 
-	function header()
+	function header() 
 	{
 		echo '<div class="wrap">';
 		echo '<h2>'.__('Import DotClear').'</h2>';
 		echo '<p>'.__('Steps may take a few minutes depending on the size of your database. Please be patient.').'</p>';
 	}
 
-	function footer()
+	function footer() 
 	{
 		echo '</div>';
 	}
 
-	function greet()
+	function greet() 
 	{
 		echo '<div class="narrow"><p>'.__('Howdy! This importer allows you to extract posts from a DotClear database into your blog.  Mileage may vary.').'</p>';
 		echo '<p>'.__('Your DotClear Configuration settings are as follows:').'</p>';
@@ -387,10 +408,7 @@ class Dotclear_Import {
 
 				// Make Post-to-Category associations
 				$cats = array();
-				$category1 = get_category_by_slug($post_cat_name);
-				$category1 = $category1->term_id;
-
-				if($cat1 = $category1) { $cats[1] = $cat1; }
+				if($cat1 = get_catbynicename($post_cat_name)) { $cats[1] = $cat1; }
 
 				if(!empty($cats)) { wp_set_post_categories($ret_id, $cats); }
 			}
@@ -491,11 +509,12 @@ class Dotclear_Import {
 				extract($link);
 
 				if ($title != "") {
-					if ($cinfo = is_term(csc ($title), 'link_category')) {
-						$category = $cinfo['term_id'];
+					if ($cinfo = link_cat_exists (csc ($title))) {
+						$category = $cinfo;
 					} else {
-						$category = wp_insert_term($wpdb->escape (csc ($title)), 'link_category');
-						$category = $category['term_id'];
+						$wpdb->query ("INSERT INTO $wpdb->linkcategories (cat_name) VALUES ('".
+							$wpdb->escape (csc ($title))."')");
+						$category = $wpdb->insert_id;
 					}
 				} else {
 					$linkname = $wpdb->escape(csc ($label));

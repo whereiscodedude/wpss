@@ -14,9 +14,9 @@ require_once ('admin-header.php');
 // Load all importers so that they can register.
 $import_loc = 'wp-admin/import';
 $import_root = ABSPATH.$import_loc;
-$imports_dir = @ opendir($import_root);
+$imports_dir = @ dir($import_root);
 if ($imports_dir) {
-	while (($file = readdir($imports_dir)) !== false) {
+	while (($file = $imports_dir->read()) !== false) {
 		if ($file{0} == '.') {
 			continue;
 		} elseif (substr($file, -4) == '.php') {
@@ -24,7 +24,6 @@ if ($imports_dir) {
 		}
 	}
 }
-@closedir($imports_dir);
 
 $importers = get_importers();
 

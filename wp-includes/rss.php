@@ -1,6 +1,4 @@
 <?php
-do_action('load_feed_engine');
-
 /*
  * Project:     MagpieRSS: a simple RSS integration tool
  * File:        A compiled file for RSS syndication
@@ -377,7 +375,6 @@ class MagpieRSS {
 }
 require_once( dirname(__FILE__) . '/class-snoopy.php');
 
-if ( !function_exists('fetch_rss') ) :
 function fetch_rss ($url) {
 	// initialize constants
 	init();
@@ -504,7 +501,6 @@ function fetch_rss ($url) {
 
 	} // end if ( !MAGPIE_CACHE_ON ) {
 } // end fetch_rss()
-endif;
 
 function _fetch_remote_file ($url, $headers = "" ) {
 	// Snoopy is an HTTP client in PHP
@@ -779,7 +775,6 @@ class RSSCache {
 	}
 }
 
-if ( !function_exists('parse_w3cdtf') ) :
 function parse_w3cdtf ( $date_str ) {
 
 	# regex to match wc3dtf
@@ -820,35 +815,27 @@ function parse_w3cdtf ( $date_str ) {
 	else {
 		return -1;
 	}
-}
-endif;
-
-if ( !function_exists('wp_rss') ) :
-function wp_rss( $url, $num_items = -1 ) {
-	if ( $rss = fetch_rss( $url ) ) {
-		echo '<ul>';
-
-		if ( $num_items !== -1 ) {
-			$rss->items = array_slice( $rss->items, 0, $num_items );
-		}
-
-		foreach ( $rss->items as $item ) {
-			printf(
-				'<li><a href="%1$s" title="%2$s">%3$s</a></li>',
-				clean_url( $item['link'] ),
-				attribute_escape( strip_tags( $item['description'] ) ),
-				htmlentities( $item['title'] )
-			);
-		}
-
-		echo '</ul>';
-	} else {
-		_e( 'An error has occurred, which probably means the feed is down. Try again later.' );
+	}
+function wp_rss ($url, $num_items) {
+	//ini_set("display_errors", false); uncomment to suppress php errors thrown if the feed is not returned.
+	$rss = fetch_rss($url);
+		if ( $rss ) {
+			echo "<ul>";
+			$rss->items = array_slice($rss->items, 0, $num_items);
+				foreach ($rss->items as $item ) {
+					echo "<li>\n";
+					echo "<a href='$item[link]' title='$item[description]'>";
+					echo htmlentities($item['title']);
+					echo "</a><br />\n";
+					echo "</li>\n";
+				}
+			echo "</ul>";
+	}
+		else {
+			echo "an error has occured the feed is probably down, try again later.";
 	}
 }
-endif;
 
-if ( !function_exists('get_rss') ) :
 function get_rss ($url, $num_items = 5) { // Like get posts, but for RSS
 	$rss = fetch_rss($url);
 	if ( $rss ) {
@@ -864,6 +851,4 @@ function get_rss ($url, $num_items = 5) { // Like get posts, but for RSS
 		return false;
 	}
 }
-endif;
-
 ?>

@@ -16,7 +16,6 @@
 				<?php the_content('<p class="serif">Read the rest of this entry &raquo;</p>'); ?>
 
 				<?php wp_link_pages(array('before' => '<p><strong>Pages:</strong> ', 'after' => '</p>', 'next_or_number' => 'number')); ?>
-				<?php the_tags( '<p>Tags: ', ', ', '</p>'); ?>
 
 				<p class="postmetadata alt">
 					<small>
@@ -31,11 +30,11 @@
 
 						<?php if (('open' == $post-> comment_status) && ('open' == $post->ping_status)) {
 							// Both Comments and Pings are open ?>
-							You can <a href="#respond">leave a response</a>, or <a href="<?php trackback_url(); ?>" rel="trackback">trackback</a> from your own site.
+							You can <a href="#respond">leave a response</a>, or <a href="<?php trackback_url(true); ?>" rel="trackback">trackback</a> from your own site.
 
 						<?php } elseif (!('open' == $post-> comment_status) && ('open' == $post->ping_status)) {
 							// Only Pings are Open ?>
-							Responses are currently closed, but you can <a href="<?php trackback_url(); ?> " rel="trackback">trackback</a> from your own site.
+							Responses are currently closed, but you can <a href="<?php trackback_url(true); ?> " rel="trackback">trackback</a> from your own site.
 
 						<?php } elseif (('open' == $post-> comment_status) && !('open' == $post->ping_status)) {
 							// Comments are open, Pings are not ?>

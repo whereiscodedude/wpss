@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: text/xml; charset=' . get_option('blog_charset'), true);
+header('Content-type: text/xml; charset=' . get_option('blog_charset'), true);
 $more = 1;
 
 ?>
@@ -23,7 +23,7 @@ $more = 1;
 <?php } else { // use content ?>
 		<description><?php the_content_rss('', 0, '', get_option('rss_excerpt_length')) ?></description>
 <?php } ?>
-		<link><?php the_permalink_rss() ?></link>
+		<link><?php permalink_single_rss() ?></link>
 		<?php do_action('rss_item'); ?>
 	</item>
 <?php endwhile; ?>

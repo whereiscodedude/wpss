@@ -84,7 +84,7 @@ class Blogger_Import {
 		if ( empty($this->blogs) ) {
 			$headers = array(
 				"GET /feeds/default/blogs HTTP/1.0",
-				"Host: www.blogger.com",
+				"Host: www2.blogger.com",
 				"Authorization: AuthSub token=\"$this->token\""
 			);
 			$request = join( "\r\n", $headers ) . "\r\n\r\n";
@@ -509,10 +509,10 @@ class Blogger_Import {
 		$post_content = str_replace('<hr>', '<hr />', $post_content);
 
 		// Checks for duplicates
-		if ( isset( $this->blogs[$importing_blog]['posts'][$entry->old_permalink] ) ) {
-			++$this->blogs[$importing_blog]['posts_skipped'];
-		} elseif ( $post_id = post_exists( $post_title, $post_content, $post_date ) ) {
-			$this->blogs[$importing_blog]['posts'][$entry->old_permalink] = $post_id;
+		if (
+			isset( $this->blogs[$importing_blog]['posts'][$entry->old_permalink] ) ||
+			post_exists( $post_title, $post_content, $post_date )
+		) {
 			++$this->blogs[$importing_blog]['posts_skipped'];
 		} else {
 			$post = compact('post_date', 'post_content', 'post_title', 'post_status');
@@ -915,11 +915,11 @@ class AtomParser {
 			if(count($this->in_content) == 2) {
 				array_push($this->in_content, ">");
 			}
-
+		 
 			array_push($this->in_content, "<". $this->ns_to_prefix($name) ."{$xmlns_str}{$attrs_str}");
 		} else if(in_array($tag, $this->ATOM_CONTENT_ELEMENTS) || in_array($tag, $this->ATOM_SIMPLE_ELEMENTS)) {
 			$this->in_content = array();
-			$this->is_xhtml = $attrs['type'] == 'xhtml';
+			$this->is_xhtml = $attrs['type'] == 'xhtml'; 
 			array_push($this->in_content, array($tag,$this->depth));
 		} else if($tag == 'link') {
 			array_push($this->entry->links, $attrs);
@@ -935,7 +935,7 @@ class AtomParser {
 		$tag = array_pop(split(":", $name));
 
 		if(!empty($this->in_content)) {
-			if($this->in_content[0][0] == $tag &&
+			if($this->in_content[0][0] == $tag && 
 			$this->in_content[0][1] == $this->depth) {
 				array_shift($this->in_content);
 				if($this->is_xhtml) {
@@ -998,14 +998,14 @@ class AtomParser {
 					}
 				}
 			}
-		}
+		} 
 		return $name;
 	}
 
 	function xml_escape($string)
 	{
-			 return str_replace(array('&','"',"'",'<','>'),
-				array('&amp;','&quot;','&apos;','&lt;','&gt;'),
+			 return str_replace(array('&','"',"'",'<','>'), 
+				array('&amp;','&quot;','&apos;','&lt;','&gt;'), 
 				$string );
 	}
 }

@@ -51,7 +51,7 @@ if ( !empty($content) ) {
 <head>
 <title><?php bloginfo('name') ?> &rsaquo; Bookmarklet &#8212; WordPress</title>
 <meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php echo get_option('blog_charset'); ?>" />
-<?php wp_admin_css(); ?>
+<link rel="stylesheet" href="wp-admin.css" type="text/css" />
 
 <style type="text/css">
 <!--
