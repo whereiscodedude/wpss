@@ -20,7 +20,7 @@ function wp_unregister_GLOBALS() {
 
 wp_unregister_GLOBALS();
 
-unset( $wp_filter, $cache_lastcommentmodified, $cache_lastpostdate );
+unset( $wp_filter, $cache_userdata, $cache_lastcommentmodified, $cache_lastpostdate, $cache_settings, $category_cache, $cache_categories );
 
 if ( ! isset($blog_id) )
 	$blog_id = 1;
@@ -36,10 +36,12 @@ if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 	else if (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
 		$_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_REWRITE_URL'];
 	}
-	else
-	{
-		// Some IIS + PHP configurations puts the script-name in the path-info (No need to append it twice)
-		if ( $_SERVER['PATH_INFO'] == $_SERVER['SCRIPT_NAME'] )
+	else {
+		// If root then simulate that no script-name was specified
+		if (empty($_SERVER['PATH_INFO']))
+			$_SERVER['REQUEST_URI'] = substr($_SERVER['SCRIPT_NAME'], 0, strrpos($_SERVER['SCRIPT_NAME'], '/')) . '/';
+		elseif ( $_SERVER['PATH_INFO'] == $_SERVER['SCRIPT_NAME'] )
+			// Some IIS + PHP configurations puts the script-name in the path-info (No need to append it twice)
 			$_SERVER['REQUEST_URI'] = $_SERVER['PATH_INFO'];
 		else
 			$_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] . $_SERVER['PATH_INFO'];
@@ -93,12 +95,8 @@ function timer_stop($display = 0, $precision = 3) { //if called like timer_stop(
 }
 timer_start();
 
-// Add define('WP_DEBUG',true); to wp-config.php to enable display of notices during development.
-if (defined('WP_DEBUG') and WP_DEBUG == true) {
-   error_reporting(E_ALL);
-} else {
-   error_reporting(E_ALL ^ E_NOTICE);
-}
+// Change to E_ALL for development/debugging
+error_reporting(E_ALL ^ E_NOTICE);
 
 // For an advanced caching plugin to use, static because you would only want one
 if ( defined('WP_CACHE') )
@@ -119,7 +117,11 @@ if ( !defined('PLUGINDIR') )
 require (ABSPATH . WPINC . '/compat.php');
 require (ABSPATH . WPINC . '/functions.php');
 
-require_wp_db();
+if ( file_exists(ABSPATH . 'wp-content/db.php') )
+	require_once (ABSPATH . 'wp-content/db.php');
+else
+	require_once (ABSPATH . WPINC . '/wp-db.php');
+
 // $table_prefix is deprecated as of 2.1
 $wpdb->prefix = $table_prefix;
 
