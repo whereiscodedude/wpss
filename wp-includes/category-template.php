@@ -66,7 +66,7 @@ function get_category_parents($id, $link = FALSE, $separator = '/', $nicename = 
 }
 
 function get_the_category($id = false) {
-	global $post, $term_cache;
+	global $post, $term_cache, $blog_id;
 
 	$id = (int) $id;
 	if ( !$id )
@@ -168,7 +168,7 @@ function get_the_category_list($separator = '', $parents='') {
 }
 
 function in_category( $category ) { // Check if the current post is in the given category
-	global $post;
+	global $post, $blog_id;
 
 	$categories = get_object_term_cache($post->ID, 'category');
 	if ( false === $categories )
@@ -247,7 +247,7 @@ function wp_list_categories($args = '') {
 		'order' => 'ASC', 'show_last_update' => 0,
 		'style' => 'list', 'show_count' => 0,
 		'hide_empty' => 1, 'use_desc_for_title' => 1,
-		'child_of' => 0, 'feed' => '', 'feed_type' => '',
+		'child_of' => 0, 'feed' => '',
 		'feed_image' => '', 'exclude' => '',
 		'hierarchical' => true, 'title_li' => __('Categories'),
 		'echo' => 1
@@ -376,7 +376,7 @@ function wp_generate_tag_cloud( $tags, $args = '' ) {
 		$tag_id = $tag_ids[$tag];
 		$tag_link = clean_url($tag_links[$tag]);
 		$tag = str_replace(' ', '&nbsp;', wp_specialchars( $tag ));
-		$a[] = "<a href='$tag_link' class='tag-link-$tag_id' title='" . attribute_escape( sprintf( __ngettext('%d topic','%d topics',$count), $count ) ) . "'$rel style='font-size: " .
+		$a[] = "<a href='$tag_link' class='tag-link-$tag_id' title='" . attribute_escape( sprintf( __('%d topics'), $count ) ) . "'$rel style='font-size: " .
 			( $smallest + ( ( $count - $min_count ) * $font_step ) )
 			. "$unit;'>$tag</a>";
 	}

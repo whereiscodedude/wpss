@@ -82,41 +82,37 @@ function edit_user( $user_id = 0 ) {
 	/* checking the password has been typed twice */
 	do_action_ref_array( 'check_passwords', array ( $user->user_login, & $pass1, & $pass2 ));
 
-	if ( $update ) {
-		if ( empty($pass1) && !empty($pass2) )
-			$errors->add( 'pass', __( '<strong>ERROR</strong>: You entered your new password only once.' ), array( 'form-field' => 'pass1' ) );
-		elseif ( !empty($pass1) && empty($pass2) )
-			$errors->add( 'pass', __( '<strong>ERROR</strong>: You entered your new password only once.' ), array( 'form-field' => 'pass2' ) );
+	if (!$update ) {
+		if ( $pass1 == '' || $pass2 == '' )
+			$errors->add( 'pass', __( '<strong>ERROR</strong>: Please enter your password twice.' ));
 	} else {
-		if ( empty($pass1) )
-			$errors->add( 'pass', __( '<strong>ERROR</strong>: Please enter your password.' ), array( 'form-field' => 'pass1' ) );
-		elseif ( empty($pass2) )
-			$errors->add( 'pass', __( '<strong>ERROR</strong>: Please enter your password twice.' ), array( 'form-field' => 'pass2' ) );
+		if ((empty ( $pass1 ) && !empty ( $pass2 ) ) || (empty ( $pass2 ) && !empty ( $pass1 ) ) )
+			$errors->add( 'pass', __( "<strong>ERROR</strong>: you typed your new password only once." ));
 	}
 
 	/* Check for "\" in password */
 	if( strpos( " ".$pass1, "\\" ) )
-		$errors->add( 'pass', __( '<strong>ERROR</strong>: Passwords may not contain the character "\\".' ), array( 'form-field' => 'pass1' ) );
+		$errors->add( 'pass', __( '<strong>ERROR</strong>: Passwords may not contain the character "\\".' ));
 
 	/* checking the password has been typed twice the same */
 	if ( $pass1 != $pass2 )
-		$errors->add( 'pass', __( '<strong>ERROR</strong>: Please enter the same password in the two password fields.' ), array( 'form-field' => 'pass1' ) );
+		$errors->add( 'pass', __( '<strong>ERROR</strong>: Please type the same password in the two password fields.' ));
 
 	if (!empty ( $pass1 ))
 		$user->user_pass = $pass1;
 
 	if ( !$update && !validate_username( $user->user_login ) )
-		$errors->add( 'user_login', __( '<strong>ERROR</strong>: This username is invalid. Please enter a valid username.' ));
+		$errors->add( 'user_login', __( '<strong>ERROR</strong>: This username is invalid.  Please enter a valid username.' ));
 
 	if (!$update && username_exists( $user->user_login ))
-		$errors->add( 'user_login', __( '<strong>ERROR</strong>: This username is already registered. Please choose another one.' ));
+		$errors->add( 'user_login', __( '<strong>ERROR</strong>: This username is already registered, please choose another one.' ));
 
 	/* checking e-mail address */
 	if ( empty ( $user->user_email ) ) {
-		$errors->add( 'user_email', __( '<strong>ERROR</strong>: Please enter an e-mail address.' ), array( 'form-field' => 'email' ) );
+		$errors->add( 'user_email', __( "<strong>ERROR</strong>: please type an e-mail address" ));
 	} else
 		if (!is_email( $user->user_email ) ) {
-			$errors->add( 'user_email', __( "<strong>ERROR</strong>: The e-mail address isn't correct." ), array( 'form-field' => 'email' ) );
+			$errors->add( 'user_email', __( "<strong>ERROR</strong>: the email address isn't correct" ));
 		}
 
 	if ( $errors->get_error_codes() )
@@ -187,6 +183,8 @@ function get_nonauthor_user_ids() {
 
 function get_others_unpublished_posts($user_id, $type='any') {
 	global $wpdb;
+	$user = get_userdata( $user_id );
+	$level_key = $wpdb->prefix . 'user_level';
 
 	$editable = get_editable_user_ids( $user_id );
 
@@ -244,6 +242,7 @@ function wp_delete_user($id, $reassign = 'novalue') {
 	global $wpdb;
 
 	$id = (int) $id;
+	$user = get_userdata($id);
 
 	if ($reassign == 'novalue') {
 		$post_ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_author = $id");
@@ -269,7 +268,6 @@ function wp_delete_user($id, $reassign = 'novalue') {
 
 	wp_cache_delete($id, 'users');
 	wp_cache_delete($user->user_login, 'userlogins');
-	wp_cache_delete($user->user_email, 'useremail');
 
 	return true;
 }

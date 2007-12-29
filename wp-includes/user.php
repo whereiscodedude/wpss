@@ -15,8 +15,13 @@ function get_usernumposts($userid) {
 
 // TODO: xmlrpc only.  Maybe move to xmlrpc.php.
 function user_pass_ok($user_login,$user_pass) {
-	$userdata = get_userdatabylogin($user_login);
-	return wp_check_password($user_pass, $userdata->user_pass);
+	global $cache_userdata;
+	if ( empty($cache_userdata[$user_login]) ) {
+		$userdata = get_userdatabylogin($user_login);
+	} else {
+		$userdata = $cache_userdata[$user_login];
+	}
+	return (md5($user_pass) == $userdata->user_pass);
 }
 
 //
@@ -75,7 +80,9 @@ function delete_usermeta( $user_id, $meta_key, $meta_value = '' ) {
 	else
 		$wpdb->query("DELETE FROM $wpdb->usermeta WHERE user_id = '$user_id' AND meta_key = '$meta_key'");
 
+	$user = get_userdata($user_id);
 	wp_cache_delete($user_id, 'users');
+	wp_cache_delete($user->user_login, 'userlogins');
 
 	return true;
 }
@@ -137,7 +144,9 @@ function update_usermeta( $user_id, $meta_key, $meta_value ) {
 		return false;
 	}
 
+	$user = get_userdata($user_id);
 	wp_cache_delete($user_id, 'users');
+	wp_cache_delete($user->user_login, 'userlogins');
 
 	return true;
 }
@@ -231,37 +240,6 @@ function wp_dropdown_users( $args = '' ) {
 		echo $output;
 
 	return $output;
-}
-
-function _fill_user( &$user ) {
-	global $wpdb;
-
-	$show = $wpdb->hide_errors();
-	$metavalues = $wpdb->get_results($wpdb->prepare("SELECT meta_key, meta_value FROM $wpdb->usermeta WHERE user_id = %d", $user->ID));
-	$wpdb->show_errors($show);
-
-	if ( $metavalues ) {
-		foreach ( $metavalues as $meta ) {
-			$value = maybe_unserialize($meta->meta_value);
-			$user->{$meta->meta_key} = $value;
-		}
-	}
-
-	$level = $wpdb->prefix . 'user_level';
-	if ( isset( $user->{$level} ) )
-		$user->user_level = $user->{$level};
-
-	// For backwards compat.
-	if ( isset($user->first_name) )
-		$user->user_firstname = $user->first_name;
-	if ( isset($user->last_name) )
-		$user->user_lastname = $user->last_name;
-	if ( isset($user->description) )
-		$user->user_description = $user->description;
-
-	wp_cache_add($user->ID, $user, 'users');
-	wp_cache_add($user->user_login, $user->ID, 'userlogins');
-	wp_cache_add($user->user_email, $user->ID, 'useremail');
 }
 
 ?>

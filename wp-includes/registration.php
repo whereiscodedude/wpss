@@ -6,7 +6,7 @@
  * @return mixed The user's ID on success, and null on failure.
  */
 function username_exists( $username ) {
-	if ( $user = get_userdatabylogin( $username ) ) {
+	if ( $user = get_userdatabylogin( sanitize_user( $username ) ) ) {
 		return $user->ID;
 	} else {
 		return null;
@@ -20,10 +20,9 @@ function username_exists( $username ) {
  * @return mixed The user's ID on success, and false on failure.
  */
 function email_exists( $email ) {
-	if ( $user = get_user_by_email($email) )
-		return $user->ID;
-
-	return false;
+	global $wpdb;
+	$email = $wpdb->escape( $email );
+	return $wpdb->get_var( "SELECT ID FROM $wpdb->users WHERE user_email = '$email'" );
 }
 
 /**
@@ -54,8 +53,8 @@ function wp_insert_user($userdata) {
 		$update = true;
 	} else {
 		$update = false;
-		// Hash the password
-		$user_pass = wp_hash_password($user_pass);
+		// Password is not hashed when creating new user.
+		$user_pass = md5($user_pass);
 	}
 
 	$user_login = sanitize_user($user_login, true);
@@ -99,13 +98,18 @@ function wp_insert_user($userdata) {
 	if ( empty($user_registered) )
 		$user_registered = gmdate('Y-m-d H:i:s');
 
-	$data = compact( 'user_pass', 'user_email', 'user_url', 'user_nicename', 'display_name', 'user_registered' );
-
 	if ( $update ) {
-		$wpdb->update( $wpdb->users, $data, compact( 'ID' ) );
+		$query = "UPDATE $wpdb->users SET user_pass='$user_pass', user_email='$user_email', user_url='$user_url', user_nicename = '$user_nicename', display_name = '$display_name' WHERE ID = '$ID'";
+		$query = apply_filters('update_user_query', $query);
+		$wpdb->query( $query );
 		$user_id = (int) $ID;
 	} else {
-		$wpdb->insert( $wpdb->users, $data + compact( 'user_login' ) );
+		$query = "INSERT INTO $wpdb->users
+		(user_login, user_pass, user_email, user_url, user_registered, user_nicename, display_name)
+	VALUES
+		('$user_login', '$user_pass', '$user_email', '$user_url', '$user_registered', '$user_nicename', '$display_name')";
+		$query = apply_filters('create_user_query', $query);
+		$wpdb->query( $query );
 		$user_id = (int) $wpdb->insert_id;
 	}
 
@@ -141,10 +145,13 @@ function wp_insert_user($userdata) {
 
 /**
  * Update an user in the database.
+ * @global object $wpdb WordPress database layer.
  * @param array $userdata An array of user data.
  * @return int The updated user's ID.
  */
 function wp_update_user($userdata) {
+	global $wpdb;
+
 	$ID = (int) $userdata['ID'];
 
 	// First, get all of the original fields
@@ -156,7 +163,7 @@ function wp_update_user($userdata) {
 	// If password is changing, hash it now.
 	if ( ! empty($userdata['user_pass']) ) {
 		$plaintext_pass = $userdata['user_pass'];
-		$userdata['user_pass'] = wp_hash_password($userdata['user_pass']);
+		$userdata['user_pass'] = md5($userdata['user_pass']);
 	}
 
 	// Merge old and new fields with new fields overwriting old ones.
@@ -167,8 +174,8 @@ function wp_update_user($userdata) {
 	$current_user = wp_get_current_user();
 	if ( $current_user->id == $ID ) {
 		if ( isset($plaintext_pass) ) {
-			wp_clear_auth_cookie();
-			wp_set_auth_cookie($ID);
+			wp_clearcookie();
+			wp_setcookie($userdata['user_login'], $plaintext_pass);
 		}
 	}
 
@@ -177,7 +184,7 @@ function wp_update_user($userdata) {
 
 /**
  * A simpler way of inserting an user into the database.
- * @see wp_insert_user().
+ * See also: wp_insert_user().
  * @global object $wpdb WordPress database layer.
  * @param string $username The user's username.
  * @param string $password The user's password.
@@ -193,6 +200,18 @@ function wp_create_user($username, $password, $email = '') {
 
 	$userdata = compact('user_login', 'user_email', 'user_pass');
 	return wp_insert_user($userdata);
+}
+
+/**
+ * An alias of wp_create_user().
+ * @param string $username The user's username.
+ * @param string $password The user's password.
+ * @param string $email The user's email (optional).
+ * @return int The new user's ID.
+ * @deprecated
+ */
+function create_user($username, $password, $email) {
+	return wp_create_user($username, $password, $email);
 }
 
 ?>

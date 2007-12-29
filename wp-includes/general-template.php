@@ -31,9 +31,9 @@ function get_sidebar() {
 
 function wp_loginout() {
 	if ( ! is_user_logged_in() )
-		$link = '<a href="' . get_option('siteurl') . '/wp-login.php">' . __('Log in') . '</a>';
+		$link = '<a href="' . get_option('siteurl') . '/wp-login.php">' . __('Login') . '</a>';
 	else
-		$link = '<a href="' . get_option('siteurl') . '/wp-login.php?action=logout">' . __('Log out') . '</a>';
+		$link = '<a href="' . get_option('siteurl') . '/wp-login.php?action=logout">' . __('Logout') . '</a>';
 
 	echo apply_filters('loginout', $link);
 }
@@ -164,6 +164,8 @@ function wp_title($sep = '&raquo;', $display = true) {
 
 	$cat = get_query_var('cat');
 	$tag = get_query_var('tag_id');
+	$p = get_query_var('p');
+	$name = get_query_var('name');
 	$category_name = get_query_var('category_name');
 	$author = get_query_var('author');
 	$author_name = get_query_var('author_name');
@@ -206,7 +208,7 @@ function wp_title($sep = '&raquo;', $display = true) {
 	}
 	if ( !empty($author_name) ) {
 		// We do a direct query here because we don't cache by nicename.
-		$title = $wpdb->get_var($wpdb->prepare("SELECT display_name FROM $wpdb->users WHERE user_nicename = %s", $author_name));
+		$title = $wpdb->get_var("SELECT display_name FROM $wpdb->users WHERE user_nicename = '$author_name'");
 	}
 
 	// If there's a month
@@ -253,7 +255,7 @@ function single_post_title($prefix = '', $display = true) {
 
 	if ( intval($p) || '' != $name ) {
 		if ( !$p )
-			$p = $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_name = %s", $name));
+			$p = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_name = '$name'");
 		$post = & get_post($p);
 		$title = $post->post_title;
 		$title = apply_filters('single_post_title', $title);
@@ -361,7 +363,7 @@ function wp_get_archives($args = '') {
 		$type = 'monthly';
 
 	if ( '' != $limit ) {
-		$limit = abs(intval($limit));
+		$limit = (int) $limit;
 		$limit = ' LIMIT '.$limit;
 	}
 
@@ -384,21 +386,15 @@ function wp_get_archives($args = '') {
 		$archive_week_end_date_format = get_option('date_format');
 	}
 
+	$add_hours = intval(get_option('gmt_offset'));
+	$add_minutes = intval(60 * (get_option('gmt_offset') - $add_hours));
+
 	//filters
 	$where = apply_filters('getarchives_where', "WHERE post_type = 'post' AND post_status = 'publish'", $r );
 	$join = apply_filters('getarchives_join', "", $r);
 
 	if ( 'monthly' == $type ) {
-		$query = "SELECT DISTINCT YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, count(ID) as posts FROM $wpdb->posts $join $where GROUP BY YEAR(post_date), MONTH(post_date) ORDER BY post_date DESC $limit";
-		$key = md5($query);
-		$cache = wp_cache_get( 'wp_get_archives' , 'general');
-		if ( !isset( $cache[ $key ] ) ) {
-			$arcresults = $wpdb->get_results($query);
-			$cache[ $key ] = $arcresults;
-			wp_cache_add( 'wp_get_archives', $cache, 'general' );
-		} else {
-			$arcresults = $cache[ $key ];
-		}
+		$arcresults = $wpdb->get_results("SELECT DISTINCT YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, count(ID) as posts FROM $wpdb->posts $join $where GROUP BY YEAR(post_date), MONTH(post_date) ORDER BY post_date DESC" . $limit);
 		if ( $arcresults ) {
 			$afterafter = $after;
 			foreach ( $arcresults as $arcresult ) {
@@ -410,16 +406,7 @@ function wp_get_archives($args = '') {
 			}
 		}
 	} elseif ('yearly' == $type) {
-		$query = "SELECT DISTINCT YEAR(post_date) AS `year`, count(ID) as posts FROM $wpdb->posts $join $where GROUP BY YEAR(post_date) ORDER BY post_date DESC $limit";
-		$key = md5($query);
-		$cache = wp_cache_get( 'wp_get_archives' , 'general');
-		if ( !isset( $cache[ $key ] ) ) {
-			$arcresults = $wpdb->get_results($query);
-			$cache[ $key ] = $arcresults;
-			wp_cache_add( 'wp_get_archives', $cache, 'general' );
-		} else {
-			$arcresults = $cache[ $key ];
-		}
+         $arcresults = $wpdb->get_results("SELECT DISTINCT YEAR(post_date) AS `year`, count(ID) as posts FROM $wpdb->posts $join $where GROUP BY YEAR(post_date) ORDER BY post_date DESC" . $limit);
 		if ($arcresults) {
 			$afterafter = $after;
 			foreach ($arcresults as $arcresult) {
@@ -431,16 +418,7 @@ function wp_get_archives($args = '') {
 			}
 		}
 	} elseif ( 'daily' == $type ) {
-		$query = "SELECT DISTINCT YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, DAYOFMONTH(post_date) AS `dayofmonth`, count(ID) as posts FROM $wpdb->posts $join $where GROUP BY YEAR(post_date), MONTH(post_date), DAYOFMONTH(post_date) ORDER BY post_date DESC $limit";
-		$key = md5($query);
-		$cache = wp_cache_get( 'wp_get_archives' , 'general');
-		if ( !isset( $cache[ $key ] ) ) {
-			$arcresults = $wpdb->get_results($query);
-			$cache[ $key ] = $arcresults;
-			wp_cache_add( 'wp_get_archives', $cache, 'general' );
-		} else {
-			$arcresults = $cache[ $key ];
-		}
+		$arcresults = $wpdb->get_results("SELECT DISTINCT YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, DAYOFMONTH(post_date) AS `dayofmonth`, count(ID) as posts FROM $wpdb->posts $join $where GROUP BY YEAR(post_date), MONTH(post_date), DAYOFMONTH(post_date) ORDER BY post_date DESC" . $limit);
 		if ( $arcresults ) {
 			$afterafter = $after;
 			foreach ( $arcresults as $arcresult ) {
@@ -454,16 +432,7 @@ function wp_get_archives($args = '') {
 		}
 	} elseif ( 'weekly' == $type ) {
 		$start_of_week = get_option('start_of_week');
-		$query = "SELECT DISTINCT WEEK(post_date, $start_of_week) AS `week`, YEAR(post_date) AS yr, DATE_FORMAT(post_date, '%Y-%m-%d') AS yyyymmdd, count(ID) as posts FROM $wpdb->posts $join $where GROUP BY WEEK(post_date, $start_of_week), YEAR(post_date) ORDER BY post_date DESC $limit";
-		$key = md5($query);
-		$cache = wp_cache_get( 'wp_get_archives' , 'general');
-		if ( !isset( $cache[ $key ] ) ) {
-			$arcresults = $wpdb->get_results($query);
-			$cache[ $key ] = $arcresults;
-			wp_cache_add( 'wp_get_archives', $cache, 'general' );
-		} else {
-			$arcresults = $cache[ $key ];
-		}
+		$arcresults = $wpdb->get_results("SELECT DISTINCT WEEK(post_date, $start_of_week) AS `week`, YEAR(post_date) AS yr, DATE_FORMAT(post_date, '%Y-%m-%d') AS yyyymmdd, count(ID) as posts FROM $wpdb->posts $join $where GROUP BY WEEK(post_date, $start_of_week), YEAR(post_date) ORDER BY post_date DESC" . $limit);
 		$arc_w_last = '';
 		$afterafter = $after;
 		if ( $arcresults ) {
@@ -484,16 +453,7 @@ function wp_get_archives($args = '') {
 		}
 	} elseif ( ( 'postbypost' == $type ) || ('alpha' == $type) ) {
 		('alpha' == $type) ? $orderby = "post_title ASC " : $orderby = "post_date DESC ";
-		$query = "SELECT * FROM $wpdb->posts $join $where ORDER BY $orderby $limit";
-		$key = md5($query);
-		$cache = wp_cache_get( 'wp_get_archives' , 'general');
-		if ( !isset( $cache[ $key ] ) ) {
-			$arcresults = $wpdb->get_results($query);
-			$cache[ $key ] = $arcresults;
-			wp_cache_add( 'wp_get_archives', $cache, 'general' );
-		} else {
-			$arcresults = $cache[ $key ];
-		}
+		$arcresults = $wpdb->get_results("SELECT * FROM $wpdb->posts $join $where ORDER BY $orderby $limit");
 		if ( $arcresults ) {
 			foreach ( $arcresults as $arcresult ) {
 				if ( $arcresult->post_date != '0000-00-00 00:00:00' ) {
@@ -519,7 +479,7 @@ function calendar_week_mod($num) {
 
 
 function get_calendar($initial = true) {
-	global $wpdb, $m, $monthnum, $year, $wp_locale, $posts;
+	global $wpdb, $m, $monthnum, $year, $timedifference, $wp_locale, $posts;
 
 	$key = md5( $m . $monthnum . $year );
 	if ( $cache = wp_cache_get( 'get_calendar', 'calendar' ) ) {
@@ -542,6 +502,8 @@ function get_calendar($initial = true) {
 
 	// week_begins = 0 stands for Sunday
 	$week_begins = intval(get_option('start_of_week'));
+	$add_hours = intval(get_option('gmt_offset'));
+	$add_minutes = intval(60 * (get_option('gmt_offset') - $add_hours));
 
 	// Let's figure out when we are
 	if ( !empty($monthnum) && !empty($year) ) {
@@ -553,6 +515,7 @@ function get_calendar($initial = true) {
 		$d = (($w - 1) * 7) + 6; //it seems MySQL's weeks disagree with PHP's
 		$thismonth = $wpdb->get_var("SELECT DATE_FORMAT((DATE_ADD('${thisyear}0101', INTERVAL $d DAY) ), '%m')");
 	} elseif ( !empty($m) ) {
+		$calendar = substr($m, 0, 6);
 		$thisyear = ''.intval(substr($m, 0, 4));
 		if ( strlen($m) < 6 )
 				$thismonth = '01';
@@ -747,7 +710,7 @@ function the_date_xml() {
 
 
 function the_date($d='', $before='', $after='', $echo = true) {
-	global $post, $day, $previousday;
+	global $id, $post, $day, $previousday;
 	$the_date = '';
 	if ( $day != $previousday ) {
 		$the_date .= $before;
@@ -834,7 +797,7 @@ function get_post_modified_time( $d = 'U', $gmt = false ) { // returns timestamp
 
 
 function the_weekday() {
-	global $wp_locale, $post;
+	global $wp_locale, $id, $post;
 	$the_weekday = $wp_locale->get_weekday(mysql2date('w', $post->post_date));
 	$the_weekday = apply_filters('the_weekday', $the_weekday);
 	echo $the_weekday;
@@ -842,7 +805,7 @@ function the_weekday() {
 
 
 function the_weekday_date($before='',$after='') {
-	global $wp_locale, $post, $day, $previousweekday;
+	global $wp_locale, $id, $post, $day, $previousweekday;
 	$the_weekday_date = '';
 	if ( $day != $previousweekday ) {
 		$the_weekday_date .= $before;
@@ -1000,23 +963,17 @@ function the_search_query() {
 	echo attribute_escape( apply_filters( 'the_search_query', get_search_query() ) );
 }
 
-function language_attributes($doctype = 'html') {
-	$attributes = array();
+function language_attributes() {
 	$output = '';
-		
 	if ( $dir = get_bloginfo('text_direction') )
-		$attributes[] = "dir=\"$dir\"";
-	
+		$output = "dir=\"$dir\"";
 	if ( $lang = get_bloginfo('language') ) {
-		if ( get_option('html_type') == 'text/html' || $doctype == 'xhtml' )
-			$attributes[] = "lang=\"$lang\"";
-		
-		if ( get_option('html_type') != 'text/html' || $doctype == 'xhtml' )
-			$attributes[] = "xml:lang=\"$lang\"";
+		if ( $dir ) $output .= ' ';
+		if ( get_option('html_type') == 'text/html' )
+			$output .= "lang=\"$lang\"";
+		else $output .= "xml:lang=\"$lang\"";
 	}
-	
-	$output = implode(' ', $attributes);
-	$output = apply_filters('language_attributes', $output);
+
 	echo $output;
 }
 
@@ -1118,50 +1075,4 @@ function wp_admin_css( $file = 'wp-admin' ) {
 	}
 }
 
-/**
- * Outputs the XHTML generator that is generated on the wp_head hook.
- */
-function wp_generator()
-{
-	the_generator( apply_filters( 'wp_generator_type', 'xhtml' ) );
-}
-
-/**
- * Outputs the generator XML or Comment for RSS, ATOM, etc.
- * @param {String} $type The type of generator to return.
- */
-function the_generator ( $type ) {
-	echo apply_filters('the_generator',get_the_generator($type),$type) . "\n";
-}
-
-/**
- * Creates the generator XML or Comment for RSS, ATOM, etc.
- * @param {String} $type The type of generator to return.
- */
-function get_the_generator ( $type ) {
-	switch ($type) {
-		case 'html':
-			$gen = '<meta name="generator" content="WordPress/' . get_bloginfo( 'version' ) . '">';
-			break;
-		case 'xhtml':
-			$gen = '<meta name="generator" content="WordPress/' . get_bloginfo( 'version' ) . '" />';
-			break;
-		case 'atom':
-			$gen = '<generator uri="http://wordpress.org/" version="' . get_bloginfo_rss( 'version' ) . '">WordPress</generator>';
-			break;
-		case 'rss2':
-			$gen = '<generator>http://wordpress.org/?v=' . get_bloginfo_rss( 'version' ) . '</generator>';
-			break;
-		case 'rdf':
-			$gen = '<admin:generatorAgent rdf:resource="http://wordpress.org/?v=' . get_bloginfo_rss( 'version' ) . '" />';
-			break;
-		case 'comment':
-			$gen = '<!-- generator="WordPress/' . get_bloginfo( 'version' ) . '" -->';
-			break;
-		case 'export':
-			$gen = '<!-- generator="wordpress/' . get_bloginfo_rss('version') . '" created="'. date('Y-m-d H:i') . '"-->';
-			break;
-	}
-	return apply_filters( "get_the_generator_{$type}", $gen, $type );
-}
 ?>

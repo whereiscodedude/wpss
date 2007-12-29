@@ -13,32 +13,23 @@ $wp_register_widget_defaults = false;
 /* Template tags & API functions */
 
 function register_sidebars($number = 1, $args = array()) {
-	global $wp_registered_sidebars;
 	$number = (int) $number;
 
 	if ( is_string($args) )
 		parse_str($args, $args);
 
-	for ( $i=1; $i <= $number; $i++ ) {
-		$_args = $args;
+	$i = 1;
 
+	while ( $i <= $number ) {
+		$_args = $args;
 		if ( $number > 1 ) {
-			$_args['name'] = isset($args['name']) ? sprintf($args['name'], $i) : sprintf(__('Sidebar %d'), $i);
+			$_args['name'] = isset($args['name']) ? $args['name'] : sprintf(__('Sidebar %d'), $i);
 		} else {
 			$_args['name'] = isset($args['name']) ? $args['name'] : __('Sidebar');
 		}
-
-		if (isset($args['id'])) {
-			$_args['id'] = $args['id'];
-		} else {
-			$n = count($wp_registered_sidebars);
-			do {
-				$n++;
-				$_args['id'] = "sidebar-$n";
-			} while (isset($wp_registered_sidebars[$_args['id']]));
-		}
-
+		$_args['id'] = isset($args['id']) ? $args['id'] : "sidebar-$i";
 		register_sidebar($_args);
+		++$i;
 	}
 }
 
@@ -98,6 +89,8 @@ function wp_register_sidebar_widget($id, $name, $output_callback, $options = arr
 
 	global $wp_registered_widgets, $wp_register_widget_defaults;
 
+	$id = sanitize_title($id);
+
 	if ( empty($output_callback) ) {
 		unset($wp_registered_widgets[$id]);
 		return;
@@ -152,6 +145,8 @@ function register_widget_control($name, $control_callback, $width = '', $height 
 function wp_register_widget_control($id, $name, $control_callback, $options = array()) {
 	global $wp_registered_widget_controls, $wp_register_widget_defaults;
 
+	$id = sanitize_title($id);
+
 	if ( empty($control_callback) ) {
 		unset($wp_registered_widget_controls[$id]);
 		return;
@@ -203,7 +198,7 @@ function dynamic_sidebar($index = 1) {
 
 	$sidebars_widgets = wp_get_sidebars_widgets();
 
-	if ( empty($wp_registered_sidebars[$index]) || !array_key_exists($index, $sidebars_widgets) || !is_array($sidebars_widgets[$index]) || empty($sidebars_widgets[$index]) )
+	if ( empty($wp_registered_sidebars[$index]) || !is_array($sidebars_widgets[$index]) || empty($sidebars_widgets[$index]) )
 		return false;
 
 	$sidebar = $wp_registered_sidebars[$index];
@@ -239,7 +234,7 @@ function is_active_widget($callback) {
 
 	$sidebars_widgets = wp_get_sidebars_widgets(false);
 
-	if ( is_array($sidebars_widgets) ) foreach ( $sidebars_widgets as $widgets )
+	if ( is_array($sidebars_widgets) ) foreach ( $sidebars_widgets as $sidebar => $widgets )
 		if ( is_array($widgets) ) foreach ( $widgets as $widget )
 			if ( $wp_registered_widgets[$widget]['callback'] == $callback )
 				return true;
@@ -584,7 +579,7 @@ function wp_widget_text_setup() {
 }
 
 function wp_widget_text_page() {
-	$options = get_option('widget_text');
+	$options = $newoptions = get_option('widget_text');
 ?>
 	<div class="wrap">
 		<form method="POST">
@@ -635,7 +630,7 @@ function wp_widget_categories($args, $number = 1) {
 		wp_dropdown_categories($cat_args . '&show_option_none= ' . __('Select Category'));
 ?>
 
-<script type='text/javascript'><!--
+<script lang='javascript'><!--
     var dropdown = document.getElementById("cat");
     function onCatChange() {
 		if ( dropdown.options[dropdown.selectedIndex].value > 0 ) {
@@ -1017,6 +1012,7 @@ function wp_widget_rss_control($number) {
 			} else {
 				$newoptions[$number]['error'] = true;
 				$newoptions[$number]['url'] = wp_specialchars(__('Error: could not find an RSS or ATOM feed at that URL.'), 1);
+				$error = sprintf(__('Error in RSS %1$d: %2$s'), $number, $newoptions[$number]['error']);
 			}
 		}
 	}
@@ -1034,7 +1030,7 @@ function wp_widget_rss_control($number) {
 			<p style="text-align:center;"><?php _e('Give the feed a title (optional):'); ?></p>
 			<input style="width: 400px;" id="rss-title-<?php echo "$number"; ?>" name="rss-title-<?php echo "$number"; ?>" type="text" value="<?php echo $title; ?>" />
 			<p style="text-align:center; line-height: 30px;"><?php _e('How many items would you like to display?'); ?> <select id="rss-items-<?php echo $number; ?>" name="rss-items-<?php echo $number; ?>"><?php for ( $i = 1; $i <= 10; ++$i ) echo "<option value='$i' ".($items==$i ? "selected='selected'" : '').">$i</option>"; ?></select></p>
-			<input type="hidden" id="rss-submit-<?php echo "$number"; ?>" name="rss-submit-<?php echo $number; ?>" value="1" />
+			<input type="hidden" id="rss-submit-<?php echo "$number"; ?>" name="rss-submit-<?php echo "$number"; ?>" value="1" />
 <?php
 }
 
@@ -1054,7 +1050,7 @@ function wp_widget_rss_setup() {
 }
 
 function wp_widget_rss_page() {
-	$options = get_option('widget_rss');
+	$options = $newoptions = get_option('widget_rss');
 ?>
 	<div class="wrap">
 		<form method="POST">

@@ -1,10 +1,7 @@
 <?php
-/**
- * WordPress implementation for PHP functions missing from older PHP versions.
- *
- * @package PHP
- * @access private
- */
+
+/* Functions missing from older PHP versions */
+
 
 /* Added in PHP 4.2.0 */
 
@@ -149,42 +146,5 @@ if (!function_exists('stripos')) {
 		return strpos(strtolower($haystack), strtolower($needle), $offset);
 	}
 }
-
-if ( ! function_exists('hash_hmac') ):
-function hash_hmac($algo, $data, $key, $raw_output = false) {
-	$packs = array('md5' => 'H32', 'sha1' => 'H40');
-
-	if ( !isset($packs[$algo]) )
-		return false;
-
-	$pack = $packs[$algo];
-
-	if (strlen($key) > 64)
-		$key = pack($pack, $algo($key));
-	else if (strlen($key) < 64)
-		$key = str_pad($key, 64, chr(0));
-        
-	$ipad = (substr($key, 0, 64) ^ str_repeat(chr(0x36), 64));
-	$opad = (substr($key, 0, 64) ^ str_repeat(chr(0x5C), 64));
-
-	return $algo($opad . pack($pack, $algo($ipad . $data)));
-}
-endif;
-
-// Added in PHP 4.3.0?
-if (!defined('IMAGETYPE_GIF'))
-    define('IMAGETYPE_GIF', 1);
-
-if (!defined('IMAGETYPE_JPEG'))
-    define('IMAGETYPE_JPEG', 2);
-
-if (!defined('IMAGETYPE_PNG'))
-    define('IMAGETYPE_PNG', 3);
-
-if (!defined('IMAGETYPE_TIFF_MM'))
-	define('IMAGETYPE_TIFF_MM',7);
-
-if (!defined('IMAGETYPE_TIFF_MM'))
-	define('IMAGETYPE_TIFF_MM',8);
 
 ?>

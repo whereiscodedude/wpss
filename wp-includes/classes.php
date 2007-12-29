@@ -238,7 +238,8 @@ class WP {
 		}
 
 		// query_string filter deprecated.  Use request filter instead.
-		if ( has_filter('query_string') ) {  // Don't bother filtering and parsing if no plugins are hooked in.
+		global $wp_filter;
+		if ( isset($wp_filter['query_string']) ) {  // Don't bother filtering and parsing if no plugins are hooked in.
 			$this->query_string = apply_filters('query_string', $this->query_string);
 			parse_str($this->query_string, $this->query_vars);
 		}
@@ -386,10 +387,9 @@ function is_wp_error($thing) {
 	return false;
 }
 
-/* 
- * A class for displaying various tree-like structures. 
- * Extend the Walker class to use it, see examples at the bottom
- */
+
+// A class for displaying various tree-like structures. Extend the Walker class to use it, see examples at the bottom
+
 class Walker {
 	var $tree_type;
 	var $db_fields;
@@ -400,129 +400,94 @@ class Walker {
 	function start_el($output)  { return $output; }
 	function end_el($output)    { return $output; }
 
-	/*
- 	 * display one element if the element doesn't have any children
- 	 * otherwise, display the element and its children
- 	 */
-	function display_element( $element, &$children_elements, $max_depth, $depth=0, $args, $output ) {
-	
-		if ( !$element)
-			return $output; 
-			
-		if ( $max_depth != 0 ) {
-			if ($depth >= $max_depth)
-				return $output; 
-		}
-		
+	function walk($elements, $to_depth) {
+		$args = array_slice(func_get_args(), 2); $parents = array(); $depth = 1; $previous_element = ''; $output = '';
+
+		//padding at the end
+		$last_element->post_parent = 0;
+		$last_element->post_id = 0;
+		$elements[] = $last_element;
+
 		$id_field = $this->db_fields['id'];
 		$parent_field = $this->db_fields['parent'];
-	
-		if ($depth > 0) {
-			//start the child delimiter
-			$cb_args = array_merge( array($output, $depth), $args);
-			$output = call_user_func_array(array(&$this, 'start_lvl'), $cb_args);
-		} 
-			
-		//display this element
-		$cb_args = array_merge( array($output, $element, $depth), $args);
-		$output = call_user_func_array(array(&$this, 'start_el'), $cb_args);
 
-		for ( $i = 0; $i < sizeof( $children_elements ); $i++ ) {
-			
-			$child = $children_elements[$i];
-			if ( $child->$parent_field == $element->$id_field ) {
-				
-				array_splice( $children_elements, $i, 1 );
-				$output = $this->display_element( $child, $children_elements, $max_depth, $depth + 1, $args, $output );
-				$i--; 
+		$flat = ($to_depth == -1) ? true : false;
+
+		foreach ( $elements as $element ) {
+			// If flat, start and end the element and skip the level checks.
+			if ( $flat) {
+				// Start the element.
+				if ( isset($element->$id_field) && $element->$id_field != 0 ) {
+					$cb_args = array_merge( array($output, $element, $depth - 1), $args);
+					$output = call_user_func_array(array(&$this, 'start_el'), $cb_args);
+				}
+
+				// End the element.
+				if ( isset($element->$id_field) && $element->$id_field != 0 ) {
+					$cb_args = array_merge( array($output, $element, $depth - 1), $args);
+					$output = call_user_func_array(array(&$this, 'end_el'), $cb_args);
+				}
+
+				continue;
 			}
-		}
-		
-		//end this element
-		$cb_args = array_merge( array($output, $element, $depth), $args);
-		$output = call_user_func_array(array(&$this, 'end_el'), $cb_args);
-		
-		if ($depth > 0) {
-			//end the child delimiter
-			$cb_args = array_merge( array($output, $depth), $args);
-			$output = call_user_func_array(array(&$this, 'end_lvl'), $cb_args);
-		}
-		
-		return $output; 
-	}
 
-	/*
- 	* displays array of elements hierarchically
- 	* it is a generic function which does not assume any existing order of elements
- 	* max_depth = -1 means flatly display every element 
- 	* max_depth = 0  means display all levels 
- 	* max_depth > 0  specifies the number of display levels. 
- 	*/
-	function walk( $elements, $max_depth) {
-	
-		$args = array_slice(func_get_args(), 2);
-		$output = '';
+			// Walk the tree.
+			if ( !empty($previous_element) && ($element->$parent_field == $previous_element->$id_field) ) {
+				// Previous element is my parent. Descend a level.
+				array_unshift($parents, $previous_element);
+				if ( !$to_depth || ($depth < $to_depth) ) { //only descend if we're below $to_depth
+					$cb_args = array_merge( array($output, $depth), $args);
+					$output = call_user_func_array(array(&$this, 'start_lvl'), $cb_args);
+				} else if ( $to_depth && $depth == $to_depth  ) {  // If we've reached depth, end the previous element.
+					$cb_args = array_merge( array($output, $previous_element, $depth), $args);
+					$output = call_user_func_array(array(&$this, 'end_el'), $cb_args);
+				}
+				$depth++; //always do this so when we start the element further down, we know where we are
+			} else if ( $element->$parent_field == $previous_element->$parent_field) {
+				// On the same level as previous element.
+				if ( !$to_depth || ($depth <= $to_depth) ) {
+					$cb_args = array_merge( array($output, $previous_element, $depth - 1), $args);
+					$output = call_user_func_array(array(&$this, 'end_el'), $cb_args);
+				}
+			} else if ( $depth > 1 ) {
+				// Ascend one or more levels.
+				if ( !$to_depth || ($depth <= $to_depth) ) {
+					$cb_args = array_merge( array($output, $previous_element, $depth - 1), $args);
+					$output = call_user_func_array(array(&$this, 'end_el'), $cb_args);
+				}
 
-		if ($max_depth < -1) //invalid parameter
-			return $output; 
-			
-		if (empty($elements)) //nothing to walk
-			return $output; 
-			
-		$id_field = $this->db_fields['id'];
-		$parent_field = $this->db_fields['parent'];
-	
-		// flat display
-		if ( -1 == $max_depth ) {
-			$empty_array = array(); 
-			foreach ( $elements as $e ) 	
-				$output = $this->display_element( $e, $empty_array, 1, 0, $args, $output );
-			return $output; 
-		}
-	
-		/* 
-		 * need to display in hierarchical order 
-		 * splice elements into two buckets: those without parent and those with parent
-		 */
-		$top_level_elements = array();
-		$children_elements  = array();
-		foreach ( $elements as $e) {
-			if ( 0 == $e->$parent_field )
-				$top_level_elements[] = $e; 
-			else
-				$children_elements[] = $e; 
-		}
-		
-		/* 
-		 * none of the elements is top level
-		 * the first one must be root of the sub elements
-		 */
-		if ( !$top_level_elements ) {
-			
-			$root = $children_elements[0];
-			for ( $i = 0; $i < sizeof( $children_elements ); $i++ ) {
-			
-				$child = $children_elements[$i];
-				if ($root->$parent_field == $child->$parent_field )
-					$top_level_elements[] = $child; 
-					array_splice( $children_elements, $i, 1 );
-					$i--; 
+				while ( $parent = array_shift($parents) ) {
+					$depth--;
+					if ( !$to_depth || ($depth < $to_depth) ) {
+						$cb_args = array_merge( array($output, $depth), $args);
+						$output = call_user_func_array(array(&$this, 'end_lvl'), $cb_args);
+						$cb_args = array_merge( array($output, $parent, $depth - 1), $args);
+						$output = call_user_func_array(array(&$this, 'end_el'), $cb_args);
+					}
+					if ( $element->$parent_field == $parents[0]->$id_field ) {
+						break;
+					}
+				}
+			} else if ( !empty($previous_element) ) {
+				// Close off previous element.
+				if ( !$to_depth || ($depth <= $to_depth) ) {
+					$cb_args = array_merge( array($output, $previous_element, $depth - 1), $args);
+					$output = call_user_func_array(array(&$this, 'end_el'), $cb_args);
+				}
 			}
+
+			// Start the element.
+			if ( !$to_depth || ($depth <= $to_depth) ) {
+				if ( $element->$id_field != 0 ) {
+					$cb_args = array_merge( array($output, $element, $depth - 1), $args);
+					$output = call_user_func_array(array(&$this, 'start_el'), $cb_args);
+				}
+			}
+
+			$previous_element = $element;
 		}
-		
-		foreach ( $top_level_elements as $e )
-			$output = $this->display_element( $e, $children_elements, $max_depth, 0, $args, $output );
-			
-		/* 
-		* if we are displaying all levels, and remaining children_elements is not empty, 
-		* then we got orphans, which should be displayed regardless
-	 	*/
-		if ( ( $max_depth == 0 ) && sizeof( $children_elements ) > 0 ) {
-			$empty_array = array(); 
-			foreach ( $children_elements as $orphan_e )
-				$output = $this->display_element( $orphan_e, $empty_array, 1, 0, $args, $output );
-		 }
-		 return $output;
+
+		return $output;
 	}
 }
 
@@ -545,9 +510,6 @@ class Walker_Page extends Walker {
 	function start_el($output, $page, $depth, $current_page, $args) {
 		if ( $depth )
 			$indent = str_repeat("\t", $depth);
-		else
-			$indent = '';
-			
 		extract($args, EXTR_SKIP);
 		$css_class = 'page_item page-item-'.$page->ID;
 		$_current_page = get_page( $current_page );
@@ -638,7 +600,7 @@ class Walker_Category extends Walker {
 			if ( empty($feed_image) )
 				$link .= '(';
 
-			$link .= '<a href="' . get_category_feed_link($category->term_id, $feed_type) . '"';
+			$link .= '<a href="' . get_category_rss_link( 0, $category->term_id, $category->slug ) . '"';
 
 			if ( empty($feed) )
 				$alt = ' alt="' . sprintf(__( 'Feed for all posts filed under %s' ), $cat_name ) . '"';
@@ -667,15 +629,15 @@ class Walker_Category extends Walker {
 			$link .= ' ' . gmdate('Y-m-d', $category->last_update_timestamp);
 		}
 
-		if ( isset($current_category) && $current_category )
+		if ( $current_category )
 			$_current_category = get_category( $current_category );
 
 		if ( 'list' == $args['style'] ) {
 			$output .= "\t<li";
 			$class = 'cat-item cat-item-'.$category->term_id;
-			if ( isset($current_category) && $current_category && ($category->term_id == $current_category) )
+			if ( $current_category && ($category->term_id == $current_category) )
 				$class .=  ' current-cat';
-			elseif ( isset($_current_category) && $_current_category && ($category->term_id == $_current_category->parent) )
+			elseif ( $_current_category && ($category->term_id == $_current_category->parent) )
 				$class .=  ' current-cat-parent';
 			$output .=  ' class="'.$class.'"';
 			$output .= ">$link\n";
@@ -734,13 +696,11 @@ class WP_Ajax_Response {
 		$defaults = array(
 			'what' => 'object', 'action' => false,
 			'id' => '0', 'old_id' => false,
-			'position' => 1, // -1 = top, 1 = bottom, html ID = after, -html ID = before
 			'data' => '', 'supplemental' => array()
 		);
 
 		$r = wp_parse_args( $args, $defaults );
 		extract( $r, EXTR_SKIP );
-		$postition = preg_replace( '/[^a-z0-9:_-]/i', '', $position );
 
 		if ( is_wp_error($id) ) {
 			$data = $id;
@@ -748,31 +708,11 @@ class WP_Ajax_Response {
 		}
 
 		$response = '';
-		if ( is_wp_error($data) ) {
-			foreach ( $data->get_error_codes() as $code ) { 
+		if ( is_wp_error($data) )
+			foreach ( $data->get_error_codes() as $code )
 				$response .= "<wp_error code='$code'><![CDATA[" . $data->get_error_message($code) . "]]></wp_error>";
-				if ( !$error_data = $data->get_error_data($code) )
-					continue;
-				$class = '';
-				if ( is_object($error_data) ) {
-					$class = ' class="' . get_class($error_data) . '"';
-					$error_data = get_object_vars($error_data);
-				}
-
-				$response .= "<wp_error_data code='$code'$class>";
-
-				if ( is_scalar($error_data) ) {
-					$response .= "<![CDATA[$v]]>";
-				} elseif ( is_array($error_data) ) {
-					foreach ( $error_data as $k => $v )
-						$response .= "<$k><![CDATA[$v]]></$k>";
-				}
-
-				$response .= "</wp_error_data>";
-			}
-		} else {
+		else
 			$response = "<response_data><![CDATA[$data]]></response_data>";
-		}
 
 		$s = '';
 		if ( (array) $supplemental )
@@ -784,7 +724,7 @@ class WP_Ajax_Response {
 
 		$x = '';
 		$x .= "<response action='{$action}_$id'>"; // The action attribute in the xml output is formatted like a nonce action
-		$x .=	"<$what id='$id' " . ( false === $old_id ? '' : "old_id='$old_id' " ) . "position='$position'>";
+		$x .=	"<$what id='$id'" . ( false !== $old_id ? "old_id='$old_id'>" : '>' );
 		$x .=		$response;
 		$x .=		$s;
 		$x .=	"</$what>";

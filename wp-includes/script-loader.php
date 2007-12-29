@@ -36,7 +36,7 @@ class WP_Scripts {
 		$mce_config = apply_filters('tiny_mce_config_url', '/wp-includes/js/tinymce/tiny_mce_config.php');
 		$this->add( 'wp_tiny_mce', $mce_config, array('tiny_mce'), '20070528' );
 
-		$this->add( 'prototype', '/wp-includes/js/prototype.js', false, '1.6');
+		$this->add( 'prototype', '/wp-includes/js/prototype.js', false, '1.5.1.1');
 
 		$this->add( 'autosave', '/wp-includes/js/autosave.js', array('prototype', 'sack'), '20070306');
 		$this->localize( 'autosave', 'autosaveL10n', array(
@@ -61,19 +61,14 @@ class WP_Scripts {
 			'delText' => __('Are you sure you want to delete this %thing%?')
 		) );
 
-		$this->add( 'wp-lists', '/wp-includes/js/wp-lists.js', array('jquery'), '20071101' );
-		$this->localize( 'wp-lists', 'wpListL10n', array(
-			'url' => get_option( 'siteurl' ) . '/wp-admin/admin-ajax.php'
-		) );
-
-		$this->add( 'scriptaculous-root', '/wp-includes/js/scriptaculous/scriptaculous.js', array('prototype'), '1.8.0');
-		$this->add( 'scriptaculous-builder', '/wp-includes/js/scriptaculous/builder.js', array('scriptaculous-root'), '1.8.0');
-		$this->add( 'scriptaculous-dragdrop', '/wp-includes/js/scriptaculous/dragdrop.js', array('scriptaculous-builder', 'scriptaculous-effects'), '1.8.0');
-		$this->add( 'scriptaculous-effects', '/wp-includes/js/scriptaculous/effects.js', array('scriptaculous-root'), '1.8.0');
-		$this->add( 'scriptaculous-slider', '/wp-includes/js/scriptaculous/slider.js', array('scriptaculous-effects'), '1.8.0');
-		$this->add( 'scriptaculous-sound', '/wp-includes/js/scriptaculous/sound.js', array( 'scriptaculous-root' ), '1.8.0' );
-		$this->add( 'scriptaculous-controls', '/wp-includes/js/scriptaculous/controls.js', array('scriptaculous-root'), '1.8.0');
-		$this->add( 'scriptaculous', '', array('scriptaculous-dragdrop', 'scriptaculous-slider', 'scriptaculous-controls'), '1.8.0');
+		$this->add( 'scriptaculous-root', '/wp-includes/js/scriptaculous/scriptaculous.js', array('prototype'), '1.7.1-b3');
+		$this->add( 'scriptaculous-builder', '/wp-includes/js/scriptaculous/builder.js', array('scriptaculous-root'), '1.7.1-b3');
+		$this->add( 'scriptaculous-dragdrop', '/wp-includes/js/scriptaculous/dragdrop.js', array('scriptaculous-builder', 'scriptaculous-effects'), '1.7.1-b3');
+		$this->add( 'scriptaculous-effects', '/wp-includes/js/scriptaculous/effects.js', array('scriptaculous-root'), '1.7.1-b3');
+		$this->add( 'scriptaculous-slider', '/wp-includes/js/scriptaculous/slider.js', array('scriptaculous-effects'), '1.7.1-b3');
+		$this->add( 'scriptaculous-sound', '/wp-includes/js/scriptaculous/sound.js', array( 'scriptaculous-root' ), '1.7.1-b3' );
+		$this->add( 'scriptaculous-controls', '/wp-includes/js/scriptaculous/controls.js', array('scriptaculous-root'), '1.7.1-b3');
+		$this->add( 'scriptaculous', '', array('scriptaculous-dragdrop', 'scriptaculous-slider', 'scriptaculous-controls'), '1.7.1-b3');
 
 		$this->add( 'cropper', '/wp-includes/js/crop/cropper.js', array('scriptaculous-dragdrop'), '20070118');
 
@@ -110,23 +105,20 @@ class WP_Scripts {
 					'toggleKey' => __(', or press the enter key to %toggle% it'),
 				) );
 			}
-			$this->add( 'ajaxcat', '/wp-admin/js/cat.js', array( 'wp-lists' ), '20071101' );
+			$this->add( 'ajaxcat', '/wp-admin/js/cat.js', array('listman'), '20070724' );
 			$this->localize( 'ajaxcat', 'catL10n', array(
 				'add' => attribute_escape(__('Add')),
 				'how' => __('Separate multiple categories with commas.')
 			) );
-			$this->add( 'admin-categories', '/wp-admin/js/categories.js', array('wp-lists'), '20071031' );
-			$this->add( 'admin-custom-fields', '/wp-admin/js/custom-fields.js', array('wp-lists'), '20070823' );
-			$this->add( 'password-strength-meter', '/wp-admin/js/password-strength-meter.js', array('jquery'), '20070405' ); 
-			$this->localize( 'password-strength-meter', 'pwsL10n', array( 
-				'short' => __('Too short'), 
-				'bad' => __('Bad'), 
-				'good' => __('Good'), 
-				'strong' => __('Strong') 
+			$this->add( 'ajaxlinkcat', '/wp-admin/js/link-cat.js', array('listman'), '200700601' );
+			$this->localize( 'ajaxlinkcat', 'linkcatL10n', array(
+				'add' => attribute_escape(__('Add')),
+				'how' => __('Separate multiple categories with commas.')
 			) );
-			$this->add( 'admin-comments', '/wp-admin/js/edit-comments.js', array('wp-lists'), '20071104' );
-			$this->add( 'admin-posts', '/wp-admin/js/edit-posts.js', array('wp-lists'), '20071023' );
-			$this->add( 'admin-users', '/wp-admin/js/users.js', array('wp-lists'), '20070823' );
+			$this->add( 'admin-categories', '/wp-admin/js/categories.js', array('listman'), '3684' );
+			$this->add( 'admin-custom-fields', '/wp-admin/js/custom-fields.js', array('listman'), '3733' );
+			$this->add( 'admin-comments', '/wp-admin/js/edit-comments.js', array('listman'), '20070327' );
+			$this->add( 'admin-users', '/wp-admin/js/users.js', array('listman'), '4583' );
 			$this->add( 'xfn', '/wp-admin/js/xfn.js', false, '3517' );
 			$this->add( 'upload', '/wp-admin/js/upload.js', array('jquery'), '20070518' );
 			$this->localize( 'upload', 'uploadL10n', array(
@@ -186,8 +178,8 @@ class WP_Scripts {
 
 					$src = add_query_arg('ver', $ver, $src);
 					$src = clean_url(apply_filters( 'script_loader_src', $src ));
-					$this->print_scripts_l10n( $handle );
 					echo "<script type='text/javascript' src='$src'></script>\n";
+					$this->print_scripts_l10n( $handle );
 				}
 				$this->printed[] = $handle;
 			}

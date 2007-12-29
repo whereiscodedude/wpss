@@ -94,8 +94,7 @@ function wpautop($pee, $br = 1) {
 
 
 function seems_utf8($Str) { # by bmorel at ssi dot fr
-	$length = strlen($Str);
-	for ($i=0; $i < $length; $i++) {
+	for ($i=0; $i<strlen($Str); $i++) {
 		if (ord($Str[$i]) < 0x80) continue; # 0bbbbbbb
 		elseif ((ord($Str[$i]) & 0xE0) == 0xC0) $n=1; # 110bbbbb
 		elseif ((ord($Str[$i]) & 0xF0) == 0xE0) $n=2; # 1110bbbb
@@ -104,7 +103,7 @@ function seems_utf8($Str) { # by bmorel at ssi dot fr
 		elseif ((ord($Str[$i]) & 0xFE) == 0xFC) $n=5; # 1111110b
 		else return false; # Does not match any model
 		for ($j=0; $j<$n; $j++) { # n bytes matching 10bbbbbb follow ?
-			if ((++$i == $length) || ((ord($Str[$i]) & 0xC0) != 0x80))
+			if ((++$i == strlen($Str)) || ((ord($Str[$i]) & 0xC0) != 0x80))
 			return false;
 		}
 	}
@@ -133,32 +132,27 @@ function utf8_uri_encode( $utf8_string, $length = 0 ) {
 	$unicode = '';
 	$values = array();
 	$num_octets = 1;
-	$unicode_length = 0;
 
-	$string_length = strlen( $utf8_string );
-	for ($i = 0; $i < $string_length; $i++ ) {
+	for ($i = 0; $i < strlen( $utf8_string ); $i++ ) {
 
 		$value = ord( $utf8_string[ $i ] );
 
 		if ( $value < 128 ) {
-			if ( $length && ( $unicode_length >= $length ) )
+			if ( $length && ( strlen($unicode) + 1 > $length ) )
 				break;
 			$unicode .= chr($value);
-			$unicode_length++;
 		} else {
 			if ( count( $values ) == 0 ) $num_octets = ( $value < 224 ) ? 2 : 3;
 
 			$values[] = $value;
 
-			if ( $length && ( $unicode_length + ($num_octets * 3) ) > $length )
+			if ( $length && ( (strlen($unicode) + ($num_octets * 3)) > $length ) )
 				break;
 			if ( count( $values ) == $num_octets ) {
 				if ($num_octets == 3) {
 					$unicode .= '%' . dechex($values[0]) . '%' . dechex($values[1]) . '%' . dechex($values[2]);
-					$unicode_length += 9;
 				} else {
 					$unicode .= '%' . dechex($values[0]) . '%' . dechex($values[1]);
-					$unicode_length += 6;
 				}
 
 				$values = array();
@@ -329,8 +323,9 @@ function sanitize_title($title, $fallback_title = '') {
 	$title = strip_tags($title);
 	$title = apply_filters('sanitize_title', $title);
 
-	if ( '' === $title || false === $title )
+	if (empty($title)) {
 		$title = $fallback_title;
+	}
 
 	return $title;
 }
@@ -362,7 +357,7 @@ function sanitize_title_with_dashes($title) {
 	return $title;
 }
 
-function convert_chars($content, $deprecated = '') {
+function convert_chars($content, $flag = 'obsolete') {
 	// Translation of invalid Unicode references range to valid range
 	$wp_htmltranswinuni = array(
 	'&#128;' => '&#8364;', // the Euro sign
@@ -559,6 +554,7 @@ function format_to_edit($content, $richedit = false) {
 }
 
 function format_to_post($content) {
+	global $wpdb;
 	$content = apply_filters('format_to_post', $content);
 	return $content;
 }
@@ -679,7 +675,7 @@ function wp_rel_nofollow_callback( $matches ) {
 function convert_smilies($text) {
 	global $wp_smiliessearch, $wp_smiliesreplace;
     $output = '';
-	if ( get_option('use_smilies') && !empty($wp_smiliessearch) && !empty($wp_smiliesreplace) ) {
+	if (get_option('use_smilies')) {
 		// HTML loop taken from texturize function, could possible be consolidated
 		$textarr = preg_split("/(<.*>)/U", $text, -1, PREG_SPLIT_DELIM_CAPTURE); // capture the tags as well as in between
 		$stop = count($textarr);// loop stuff
@@ -798,7 +794,7 @@ function human_time_diff( $from, $to = '' ) {
 	} else if (($diff <= 86400) && ($diff > 3600)) {
 		$hours = round($diff / 3600);
 		if ($hours <= 1) {
-			$hours = 1;
+			$hour = 1;
 		}
 		$since = sprintf(__ngettext('%s hour', '%s hours', $hours), $hours);
 	} elseif ($diff >= 86400) {
@@ -812,6 +808,7 @@ function human_time_diff( $from, $to = '' ) {
 }
 
 function wp_trim_excerpt($text) { // Fakes an excerpt if needed
+	global $post;
 	if ( '' == $text ) {
 		$text = get_the_content('');
 		$text = apply_filters('the_content', $text);

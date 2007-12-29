@@ -294,9 +294,6 @@ function get_theme($theme) {
 }
 
 function get_current_theme() {
-	if ( $theme = get_option('current_theme') )
-		return $theme;
-
 	$themes = get_themes();
 	$theme_names = array_keys($themes);
 	$current_template = get_option('template');
@@ -312,8 +309,6 @@ function get_current_theme() {
 			}
 		}
 	}
-
-	update_option('current_theme', $current_theme);
 
 	return $current_theme;
 }
@@ -436,7 +431,8 @@ function get_comments_popup_template() {
 }
 
 function load_template($_template_file) {
-	global $posts, $post, $wp_did_header, $wp_did_template_redirect, $wp_query, $wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment, $user_ID;
+	global $posts, $post, $wp_did_header, $wp_did_template_redirect, $wp_query,
+		$wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment, $user_ID;
 
 	if ( is_array($wp_query->query_vars) )
 		extract($wp_query->query_vars, EXTR_SKIP);
@@ -451,26 +447,22 @@ function locale_stylesheet() {
 	echo '<link rel="stylesheet" href="' . $stylesheet . '" type="text/css" media="screen" />';
 }
 
-function switch_theme($template, $stylesheet) {
-	update_option('template', $template);
-	update_option('stylesheet', $stylesheet);
-	delete_option('current_theme');
-	$theme = get_current_theme();
-	do_action('switch_theme', $theme);
-}
-
 function validate_current_theme() {
 	// Don't validate during an install/upgrade.
 	if ( defined('WP_INSTALLING') )
 		return true;
 
 	if ( get_template() != 'default' && !file_exists(get_template_directory() . '/index.php') ) {
-		switch_theme('default', 'default');
+		update_option('template', 'default');
+		update_option('stylesheet', 'default');
+		do_action('switch_theme', 'Default');
 		return false;
 	}
 
 	if ( get_stylesheet() != 'default' && !file_exists(get_template_directory() . '/style.css') ) {
-		switch_theme('default', 'default');
+		update_option('template', 'default');
+		update_option('stylesheet', 'default');
+		do_action('switch_theme', 'Default');
 		return false;
 	}
 
@@ -485,7 +477,7 @@ function get_theme_mod($name, $default = false) {
 	if ( isset($mods[$name]) )
 		return apply_filters( "theme_mod_$name", $mods[$name] );
 
-	return apply_filters( "theme_mod_$name", sprintf($default, get_template_directory_uri(), get_stylesheet_directory_uri()) );
+	return apply_filters( "theme_mod_$name", sprintf($default, get_template_directory_uri()) );
 }
 
 function set_theme_mod($name, $value) {

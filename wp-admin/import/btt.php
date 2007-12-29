@@ -14,7 +14,7 @@ class BunnyTags_Import {
 
 	function greet() {
 		echo '<div class="narrow">';
-		echo '<p>'.__('Howdy! This imports tags from an existing Bunny&#8217;s Technorati Tags installation into this blog using the WordPress native tagging structure.').'</p>';
+		echo '<p>'.__('Howdy! This imports tags from an existing Bunny&#8217;s Technorati Tags installation into this blog using the new WordPress native tagging structure.').'</p>';
 		echo '<p>'.__('This is suitable for Bunny&#8217;s Technorati Tags version 0.6.').'</p>';
 		echo '<p><strong>'.__('All existing Bunny&#8217;s Technorati Tags will be removed after import.').'</strong></p>';
 		echo '<p><strong>'.__('Don&#8217;t be stupid - backup your database before proceeding!').'</strong></p>';
@@ -68,7 +68,7 @@ class BunnyTags_Import {
 			return false;
 		} else {
 			$count = count($metakeys);
-			echo '<p>' . sprintf( __ngettext('Done! <strong>%s</strong> post with tags were read.', 'Done! <strong>%s</strong> posts with tags were read.', $count), $count ) . '<br /></p>';
+			echo '<p>' . sprintf( __('Done! <strong>%s</strong> posts with tags were read.'), $count ) . '<br /></p>';
 			echo '<ul>';
 			foreach ( $metakeys as $post_meta ) {
 				if ( $post_meta->meta_value != '' ) {
@@ -110,6 +110,6 @@ class BunnyTags_Import {
 $btt_import = new BunnyTags_Import();
 
 // add it to the import page!
-register_importer('btt', 'Bunny&#8217;s Technorati Tags', __('Import Bunny&#8217;s Technorati Tags into the native tagging structure.'), array($btt_import, 'dispatch'));
+register_importer('btt', 'Bunny&#8217;s Technorati Tags', __('Import Bunny&#8217;s Technorati Tags into the new native tagging structure.'), array($btt_import, 'dispatch'));
 
 ?>

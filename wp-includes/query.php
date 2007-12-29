@@ -152,13 +152,11 @@ function is_page ($page = '') {
 
 	$page_obj = $wp_query->get_queried_object();
 
-	$page = (array) $page;
-    
-    if ( in_array( $page_obj->ID, $page ) )
+	if ( $page == $page_obj->ID )
 		return true;
-	elseif ( in_array( $page_obj->post_title, $page ) )
+	elseif ( $page == $page_obj->post_title )
 		return true;
-	else if ( in_array( $page_obj->post_name, $page ) )
+	else if ( $page == $page_obj->post_name )
 		return true;
 
 	return false;
@@ -560,7 +558,7 @@ class WP_Query {
 				$this->is_category = true;
 			}
 
-			if ( !is_array($qv['category__not_in']) || empty($qv['category__not_in']) ) {
+			if ( !is_array($qv['category___not_in']) || empty($qv['category__not_in']) ) {
 				$qv['category__not_in'] = array();
 			} else {
 				$qv['category__not_in'] = array_map('intval', $qv['category__not_in']);
@@ -587,7 +585,7 @@ class WP_Query {
 				$this->is_tag = true;
 			}
 
-			if ( !is_array($qv['tag__not_in']) || empty($qv['tag__not_in']) ) {
+			if ( !is_array($qv['tag___not_in']) || empty($qv['tag__not_in']) ) {
 				$qv['tag__not_in'] = array();
 			} else {
 				$qv['tag__not_in'] = array_map('intval', $qv['tag__not_in']);
@@ -730,7 +728,7 @@ class WP_Query {
 	}
 
 	function &get_posts() {
-		global $wpdb, $user_ID;
+		global $wpdb, $pagenow, $user_ID;
 
 		do_action_ref_array('pre_get_posts', array(&$this));
 
@@ -743,18 +741,16 @@ class WP_Query {
 		$distinct = '';
 		$whichcat = '';
 		$whichauthor = '';
+		$whichpage = '';
+		$result = '';
 		$where = '';
 		$limits = '';
 		$join = '';
 		$search = '';
 		$groupby = '';
 
-		if ( !isset($q['post_type']) ) {
-			if ( $this->is_search )
-				$q['post_type'] = 'any';
-			else
-				$q['post_type'] = 'post';
-		}
+		if ( !isset($q['post_type']) )
+			$q['post_type'] = 'post';
 		$post_type = $q['post_type'];
 		if ( !isset($q['posts_per_page']) || $q['posts_per_page'] == 0 )
 			$q['posts_per_page'] = get_option('posts_per_page');
@@ -792,6 +788,10 @@ class WP_Query {
 			$q['page'] = (int) $q['page'];
 			$q['page'] = abs($q['page']);
 		}
+
+		$add_hours = intval(get_option('gmt_offset'));
+		$add_minutes = intval(60 * (get_option('gmt_offset') - $add_hours));
+		$wp_posts_post_date_field = "post_date"; // "DATE_ADD(post_date, INTERVAL '$add_hours:$add_minutes' HOUR_MINUTE)";
 
 		// If a month is specified in the querystring, load that month
 		if ( $q['m'] ) {
@@ -847,12 +847,6 @@ class WP_Query {
 				$q['pagename'] = sanitize_title(basename($page_paths));
 				$q['name'] = $q['pagename'];
 				$where .= " AND (ID = '$reqpage')";
-				$reqpage_obj = get_page($reqpage);
-				if ( 'attachment' == $reqpage_obj->post_type ) {
-					$this->is_attachment = true;
-					$this->is_page = false;
-					$q['attachment_id'] = $reqpage;
-				}
 			}
 		} elseif ('' != $q['attachment']) {
 			$q['attachment'] = str_replace('%2F', '/', urlencode(urldecode($q['attachment'])));
@@ -874,12 +868,12 @@ class WP_Query {
 
 		// If a post number is specified, load that post
 		if ( $q['p'] )
-			$where = " AND {$wpdb->posts}.ID = " . $q['p'];
+			$where = ' AND ID = ' . $q['p'];
 
 		if ( $q['page_id'] ) {
 			if  ( ('page' != get_option('show_on_front') ) || ( $q['page_id'] != get_option('page_for_posts') ) ) {
 				$q['p'] = $q['page_id'];
-				$where = " AND {$wpdb->posts}.ID = " . $q['page_id'];
+				$where = ' AND ID = ' . $q['page_id'];
 			}
 		}
 
@@ -889,7 +883,8 @@ class WP_Query {
 			$q['s'] = stripslashes($q['s']);
 			if ($q['sentence']) {
 				$q['search_terms'] = array($q['s']);
-			} else {
+			}
+			else {
 				preg_match_all('/".*?("|$)|((?<=[\\s",+])|^)[^\\s",+]+/', $q[s], $matches);
 				$q['search_terms'] = array_map(create_function('$a', 'return trim($a, "\\"\'\\n\\r ");'), $matches[0]);
 			}
@@ -900,7 +895,7 @@ class WP_Query {
 				$search .= "{$searchand}((post_title LIKE '{$n}{$term}{$n}') OR (post_content LIKE '{$n}{$term}{$n}'))";
 				$searchand = ' AND ';
 			}
-			$term = $wpdb->escape($q['s']);
+			$term = addslashes_gpc($q['s']);
 			if (!$q['sentence'] && count($q['search_terms']) > 1 && $q['search_terms'][0] != $q['s'] )
 				$search .= " OR (post_title LIKE '{$n}{$term}{$n}') OR (post_content LIKE '{$n}{$term}{$n}')";
 
@@ -1003,7 +998,14 @@ class WP_Query {
 				}
 			} else {
 				$q['tag'] = sanitize_term_field('slug', $q['tag'], 0, 'post_tag', 'db');
-				$q['tag_slug__in'][] = $q['tag'];
+				$reqtag = is_term( $q['tag'], 'post_tag' );
+				if ( !empty($reqtag) )
+					$reqtag = $reqtag['term_id'];
+				else
+					$reqtag = 0;
+
+				$q['tag_id'] = $reqtag;
+				$q['tag__in'][] = $reqtag;
 			}
 		}
 
@@ -1118,7 +1120,7 @@ class WP_Query {
 			$q['orderby'] = 'post_date '.$q['order'];
 		} else {
 			// Used to filter values
-			$allowed_keys = array('author', 'date', 'category', 'title', 'modified', 'menu_order', 'parent', 'ID');
+			$allowed_keys = array('author', 'date', 'category', 'title', 'modified', 'menu_order');
 			$q['orderby'] = urldecode($q['orderby']);
 			$q['orderby'] = addslashes_gpc($q['orderby']);
 			$orderby_array = explode(' ',$q['orderby']);
@@ -1128,16 +1130,11 @@ class WP_Query {
 			for ($i = 0; $i < count($orderby_array); $i++) {
 				// Only allow certain values for safety
 				$orderby = $orderby_array[$i];
-				if ( !('menu_order' == $orderby || 'ID' == $orderby ))
+				if ( 'menu_order' != $orderby )
 					$orderby = 'post_' . $orderby;
 				if ( in_array($orderby_array[$i], $allowed_keys) )
-					$q['orderby'] .= (($i == 0) ? '' : ',') . $orderby;
+					$q['orderby'] .= (($i == 0) ? '' : ',') . "$orderby {$q['order']}";
 			}
-			/* append ASC or DESC at the end */ 
-			if ( !empty($q['orderby'])){
-				$q['orderby'] .= " {$q['order']}";
-			}
-			
 			if ( empty($q['orderby']) )
 				$q['orderby'] = 'post_date '.$q['order'];
 		}
@@ -1148,8 +1145,6 @@ class WP_Query {
 			$where .= " AND post_type = 'page'";
 		} elseif ($this->is_single) {
 			$where .= " AND post_type = 'post'";
-		} elseif ( 'any' == $post_type ) {
-			$where .= '';
 		} else {
 			$where .= " AND post_type = '$post_type'";
 		}
@@ -1242,30 +1237,20 @@ class WP_Query {
 		// Apply post-paging filters on where and join.  Only plugins that
 		// manipulate paging queries should use these hooks.
 
+		// Announce current selection parameters.  For use by caching plugins.
+		do_action( 'posts_selection', $where . $groupby . $q['orderby'] . $limits . $join );
+
 		$where = apply_filters('posts_where_paged', $where);
 		$groupby = apply_filters('posts_groupby', $groupby);
+		if ( ! empty($groupby) )
+			$groupby = 'GROUP BY ' . $groupby;
 		$join = apply_filters('posts_join_paged', $join);
 		$orderby = apply_filters('posts_orderby', $q['orderby']);
+		if ( !empty( $orderby ) )
+			$orderby = 'ORDER BY ' . $orderby;
 		$distinct = apply_filters('posts_distinct', $distinct);
 		$fields = apply_filters('posts_fields', "$wpdb->posts.*");
 		$limits = apply_filters( 'post_limits', $limits );
-
-		// Announce current selection parameters.  For use by caching plugins.
-		do_action( 'posts_selection', $where . $groupby . $orderby . $limits . $join );
-
-		// Filter again for the benefit of caching plugins.  Regular plugins should use the hooks above.
-		$where = apply_filters('posts_where_request', $where);
-		$groupby = apply_filters('posts_groupby_request', $groupby);
-		$join = apply_filters('posts_join_request', $join);
-		$orderby = apply_filters('posts_orderby_request', $orderby);
-		$distinct = apply_filters('posts_distinct_request', $distinct);
-		$fields = apply_filters('posts_fields_request', $fields);
-		$limits = apply_filters( 'post_limits_request', $limits );
-
-		if ( ! empty($groupby) )
-			$groupby = 'GROUP BY ' . $groupby;
-		if ( !empty( $orderby ) )
-			$orderby = 'ORDER BY ' . $orderby;
 		$found_rows = '';
 		if ( !empty($limits) )
 			$found_rows = 'SQL_CALC_FOUND_ROWS';
@@ -1507,7 +1492,8 @@ function wp_old_slug_redirect () {
 
 // Setup global post data.
 function setup_postdata($post) {
-	global $id, $authordata, $day, $currentmonth, $page, $pages, $multipage, $more, $numpages;
+	global $id, $postdata, $authordata, $day, $currentmonth, $page, $pages, $multipage, $more, $numpages, $wp_query;
+	global $pagenow;
 
 	$id = (int) $post->ID;
 

@@ -20,7 +20,6 @@ class wpdb {
 	var $last_query;
 	var $col_info;
 	var $queries;
-	var $prefix = '';
 	var $ready = false;
 
 	// Our tables
@@ -31,13 +30,16 @@ class wpdb {
 	var $comments;
 	var $links;
 	var $options;
+	var $optiontypes;
+	var $optionvalues;
+	var $optiongroups;
+	var $optiongroup_options;
 	var $postmeta;
 	var $usermeta;
 	var $terms;
 	var $term_taxonomy;
 	var $term_relationships;
-	var $tables = array('users', 'usermeta', 'posts', 'categories', 'post2cat', 'comments', 'links', 'link2cat', 'options',
-			'postmeta', 'terms', 'term_taxonomy', 'term_relationships');
+
 	var $charset;
 	var $collate;
 
@@ -91,26 +93,6 @@ class wpdb {
 		return true;
 	}
 
-	function set_prefix($prefix) {
-
-		if ( preg_match('|[^a-z0-9_]|i', $prefix) )
-			return new WP_Error('invalid_db_prefix', 'Invalid database prefix'); // No gettext here
-
-		$old_prefix = $this->prefix;
-		$this->prefix = $prefix;
-
-		foreach ( $this->tables as $table )
-			$this->$table = $this->prefix . $table;
-
-		if ( defined('CUSTOM_USER_TABLE') )
-			$this->users = CUSTOM_USER_TABLE;
-
-		if ( defined('CUSTOM_USER_META_TABLE') )
-			$this->usermeta = CUSTOM_USER_META_TABLE;
-
-		return $old_prefix;
-	}
-
 	/**
 	 * Selects a database using the current class's $this->dbh
 	 * @param string $db name
@@ -138,14 +120,11 @@ class wpdb {
 	 * @return string query safe string
 	 */
 	function escape($string) {
-		return addslashes( $string );
-		// Disable rest for now, causing problems
-		/*
+		return addslashes( $string ); // Disable rest for now, causing problems
 		if( !$this->dbh || version_compare( phpversion(), '4.3.0' ) == '-1' )
 			return mysql_escape_string( $string );
 		else
 			return mysql_real_escape_string( $string, $this->dbh );
-		*/
 	}
 
 	/**
@@ -181,8 +160,6 @@ class wpdb {
 		array ('query' => $this->last_query, 'error_str' => $str);
 
 		$error_str = "WordPress database error $str for query $this->last_query";
-		if ( $caller = $this->get_caller() )
-			$error_str .= " made by $caller";
 		error_log($error_str, 0);
 
 		// Is error output turned on or not..
@@ -253,7 +230,7 @@ class wpdb {
 		++$this->num_queries;
 
 		if (SAVEQUERIES)
-			$this->queries[] = array( $query, $this->timer_stop(), $this->get_caller() );
+			$this->queries[] = array( $query, $this->timer_stop() );
 
 		// If there is an error then take note of it..
 		if ( mysql_error($this->dbh) ) {
@@ -291,39 +268,6 @@ class wpdb {
 		}
 
 		return $return_val;
-	}
-
-	/**
-	 * Insert an array of data into a table
-	 * @param string $table WARNING: not sanitized!
-	 * @param array $data should not already be SQL-escaped
-	 * @return mixed results of $this->query()
-	 */
-	function insert($table, $data) {
-		$data = add_magic_quotes($data);
-		$fields = array_keys($data);
-		return $this->query("INSERT INTO $table (`" . implode('`,`',$fields) . "`) VALUES ('".implode("','",$data)."')");
-	}
-
-	/**
-	 * Update a row in the table with an array of data
-	 * @param string $table WARNING: not sanitized!
-	 * @param array $data should not already be SQL-escaped
-	 * @param array $where a named array of WHERE column => value relationships.  Multiple member pairs will be joined with ANDs.  WARNING: the column names are not currently sanitized!
-	 * @return mixed results of $this->query()
-	 */
-	function update($table, $data, $where){
-		$data = add_magic_quotes($data);
-		$bits = $wheres = array();
-		foreach ( array_keys($data) as $k )
-			$bits[] = "`$k` = '$data[$k]'";
-
-		if ( is_array( $where ) )
-			foreach ( $where as $c => $v )
-				$wheres[] = "$c = '" . $this->escape( $v ) . "'";
-		else
-			return false;
-		return $this->query( "UPDATE $table SET " . implode( ', ', $bits ) . ' WHERE ' . implode( ' AND ', $wheres ) . ' LIMIT 1' );
 	}
 
 	/**
@@ -484,57 +428,6 @@ class wpdb {
 		}
 		wp_die($message);
 	}
-
-	/**
-	 * Checks wether of not the database version is high enough to support the features WordPress uses
-	 * @global $wp_version
-	 */
-	function check_database_version()
-	{
-		global $wp_version;
-		// Make sure the server has MySQL 4.0
-		$mysql_version = preg_replace('|[^0-9\.]|', '', @mysql_get_server_info());
-		if ( version_compare($mysql_version, '4.0.0', '<') )
-			return new WP_Error('database_version',sprintf(__('<strong>ERROR</strong>: WordPress %s requires MySQL 4.0.0 or higher'), $wp_version));
-	}
-
-	/**
-	 * This function is called when WordPress is generating the table schema to determine wether or not the current database
-	 * supports or needs the collation statements.
-	 */
-	function supports_collation()
-	{
-		return ( version_compare(mysql_get_server_info(), '4.1.0', '>=') );
-	}
-
-	/**
-	 * Get the name of the function that called wpdb.
-	 * @return string the name of the calling function
-	 */
-	function get_caller() {
-		// requires PHP 4.3+
-		if ( !is_callable('debug_backtrace') )
-			return '';
-
-		$bt = debug_backtrace();
-		$caller = '';
-
-		foreach ( $bt as $trace ) {
-			if ( @$trace['class'] == __CLASS__ )
-				continue;
-			elseif ( strtolower(@$trace['function']) == 'call_user_func_array' )
-				continue;
-			elseif ( strtolower(@$trace['function']) == 'apply_filters' )
-				continue;
-			elseif ( strtolower(@$trace['function']) == 'do_action' )
-				continue;
-	
-			$caller = $trace['function'];
-			break;
-		}
-		return $caller;
-	}
-
 }
 
 if ( ! isset($wpdb) )

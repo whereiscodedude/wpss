@@ -27,7 +27,7 @@ if ( SITECOOKIEPATH != COOKIEPATH )
 
 // Rather than duplicating this HTML all over the place, we'll stick it in function
 function login_header($title = 'Login', $message = '') {
-	global $errors, $error;
+	global $errors, $error, $wp_locale;
 
 	?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -68,7 +68,7 @@ function login_header($title = 'Login', $message = '') {
 	}
 } // End of login_header()
 
-$http_post = ('POST' == $_SERVER['REQUEST_METHOD']);
+
 switch ($action) {
 
 case 'logout' :
@@ -90,7 +90,7 @@ case 'retrievepassword' :
 	$user_login = '';
 	$user_pass = '';
 
-	if ( $http_post ) {
+	if ( $_POST ) {
 		if ( empty( $_POST['user_login'] ) )
 			$errors['user_login'] = __('<strong>ERROR</strong>: The username field is empty.');
 		if ( empty( $_POST['user_email'] ) )
@@ -110,9 +110,9 @@ case 'retrievepassword' :
 				do_action('retreive_password', $user_login);  // Misspelled and deprecated
 				do_action('retrieve_password', $user_login);
 
-				// Generate something random for a key...
+				// Generate something random for a password... md5'ing current time with a rand salt
 				$key = substr( md5( uniqid( microtime() ) ), 0, 8);
-				// Now insert the new md5 key into the db
+				// Now insert the new pass md5'd into the db
 				$wpdb->query("UPDATE $wpdb->users SET user_activation_key = '$key' WHERE user_login = '$user_login'");
 				$message = __('Someone has asked to reset the password for the following site and username.') . "\r\n\r\n";
 				$message .= get_option('siteurl') . "\r\n\r\n";
@@ -152,12 +152,12 @@ case 'retrievepassword' :
 
 <ul>
 <?php if (get_option('users_can_register')) : ?>
-	<li><a href="<?php bloginfo('url'); ?>/" title="<?php _e('Are you lost?') ?>"><?php printf(__('Back to %s'), get_bloginfo('title', 'display' )); ?></a></li>
-	<li><a href="<?php bloginfo('wpurl'); ?>/wp-login.php"><?php _e('Log in') ?></a></li>
+	<li><a href="<?php bloginfo('wpurl'); ?>/wp-login.php"><?php _e('Login') ?></a></li>
 	<li><a href="<?php bloginfo('wpurl'); ?>/wp-login.php?action=register"><?php _e('Register') ?></a></li>
+	<li><a href="<?php bloginfo('url'); ?>/" title="<?php _e('Are you lost?') ?>"><?php printf(__('Back to %s'), get_bloginfo('title', 'display' )); ?></a></li>
 <?php else : ?>
 	<li><a href="<?php bloginfo('url'); ?>/" title="<?php _e('Are you lost?') ?>"><?php printf(__('Back to %s'), get_bloginfo('title', 'display' )); ?></a></li>
-	<li><a href="<?php bloginfo('wpurl'); ?>/wp-login.php"><?php _e('Log in') ?></a></li>
+	<li><a href="<?php bloginfo('wpurl'); ?>/wp-login.php"><?php _e('Login') ?></a></li>
 <?php endif; ?>
 </ul>
 
@@ -182,9 +182,11 @@ case 'rp' :
 
 	do_action('password_reset');
 
-	// Generate something random for a password...
-	$new_pass = wp_generate_password();
-	wp_set_password($new_pass, $user->ID);
+	// Generate something random for a password... md5'ing current time with a rand salt
+	$new_pass = substr( md5( uniqid( microtime() ) ), 0, 7);
+	$wpdb->query("UPDATE $wpdb->users SET user_pass = MD5('$new_pass'), user_activation_key = '' WHERE user_login = '$user->user_login'");
+	wp_cache_delete($user->ID, 'users');
+	wp_cache_delete($user->user_login, 'userlogins');
 	$message  = sprintf(__('Username: %s'), $user->user_login) . "\r\n";
 	$message .= sprintf(__('Password: %s'), $new_pass) . "\r\n";
 	$message .= get_option('siteurl') . "/wp-login.php\r\n";
@@ -210,7 +212,7 @@ case 'register' :
 		exit();
 	}
 
-	if ( $http_post ) {
+	if ( $_POST ) {
 		require_once( ABSPATH . WPINC . '/registration.php');
 
 		$user_login = sanitize_user( $_POST['user_login'] );
@@ -239,7 +241,7 @@ case 'register' :
 		$errors = apply_filters( 'registration_errors', $errors );
 
 		if ( empty( $errors ) ) {
-			$user_pass = wp_generate_password();
+			$user_pass = substr( md5( uniqid( microtime() ) ), 0, 7);
 
 			$user_id = wp_create_user( $user_login, $user_pass, $user_email );
 			if ( !$user_id )
@@ -272,9 +274,9 @@ case 'register' :
 </div>
 
 <ul>
-	<li><a href="<?php bloginfo('url'); ?>/" title="<?php _e('Are you lost?') ?>"><?php printf(__('Back to %s'), get_bloginfo('title', 'display')); ?></a></li>
-	<li><a href="<?php bloginfo('wpurl'); ?>/wp-login.php"><?php _e('Log in') ?></a></li>
+	<li><a href="<?php bloginfo('wpurl'); ?>/wp-login.php"><?php _e('Login') ?></a></li>
 	<li><a href="<?php bloginfo('wpurl'); ?>/wp-login.php?action=lostpassword" title="<?php _e('Password Lost and Found') ?>"><?php _e('Lost your password?') ?></a></li>
+	<li><a href="<?php bloginfo('url'); ?>/" title="<?php _e('Are you lost?') ?>"><?php printf(__('Back to %s'), get_bloginfo('title', 'display')); ?></a></li>
 </ul>
 
 </body>
@@ -286,38 +288,32 @@ case 'login' :
 default:
 	$user_login = '';
 	$user_pass = '';
+	$using_cookie = FALSE;
 
 	if ( !isset( $_REQUEST['redirect_to'] ) || is_user_logged_in() )
 		$redirect_to = 'wp-admin/';
 	else
 		$redirect_to = $_REQUEST['redirect_to'];
 
-	if ( $http_post ) {
-		// If cookies are disabled we can't log in even with a valid user+pass
-		if ( empty($_COOKIE[TEST_COOKIE]) )
-			$errors['test_cookie'] = __('<strong>ERROR</strong>: WordPress requires Cookies but your browser does not support them or they are blocked.');
-		
+	if ( $_POST ) {
 		$user_login = $_POST['log'];
 		$user_login = sanitize_user( $user_login );
 		$user_pass  = $_POST['pwd'];
 		$rememberme = $_POST['rememberme'];
-
-		do_action_ref_array('wp_authenticate', array(&$user_login, &$user_pass));
 	} else {
-		$user = wp_validate_auth_cookie();
-		if ( !$user ) {
-			if ( empty($_GET['loggedout']) && !empty($_COOKIE[AUTH_COOKIE]) )
-				$errors['expiredsession'] = __('Your session has expired.');
-		} else {
-			$user = new WP_User($user);
-
-			// If the user can't edit posts, send them to their profile.
-			if ( !$user->has_cap('edit_posts') && ( empty( $redirect_to ) || $redirect_to == 'wp-admin/' ) )
-				$redirect_to = get_option('siteurl') . '/wp-admin/profile.php';
-			wp_safe_redirect($redirect_to);
-			exit();
+		$cookie_login = wp_get_cookie_login();
+		if ( ! empty($cookie_login) ) {
+			$using_cookie = true;
+			$user_login = $cookie_login['login'];
+			$user_pass = $cookie_login['password'];
 		}
 	}
+
+	do_action_ref_array('wp_authenticate', array(&$user_login, &$user_pass));
+
+	// If cookies are disabled we can't log in even with a valid user+pass
+	if ( $_POST && empty($_COOKIE[TEST_COOKIE]) )
+		$errors['test_cookie'] = __('<strong>ERROR</strong>: WordPress requires Cookies but your browser does not support them or they are blocked.');
 
 	if ( $user_login && $user_pass && empty( $errors ) ) {
 		$user = new WP_User(0, $user_login);
@@ -326,17 +322,21 @@ default:
 		if ( !$user->has_cap('edit_posts') && ( empty( $redirect_to ) || $redirect_to == 'wp-admin/' ) )
 			$redirect_to = get_option('siteurl') . '/wp-admin/profile.php';
 
-		if ( wp_login($user_login, $user_pass) ) {
-			wp_set_auth_cookie($user->ID, $rememberme);
+		if ( wp_login($user_login, $user_pass, $using_cookie) ) {
+			if ( !$using_cookie )
+				wp_setcookie($user_login, $user_pass, false, '', '', $rememberme);
 			do_action('wp_login', $user_login);
 			wp_safe_redirect($redirect_to);
 			exit();
+		} else {
+			if ( $using_cookie )
+				$errors['expiredsession'] = __('Your session has expired.');
 		}
 	}
 
-	if ( $http_post && empty( $user_login ) )
+	if ( $_POST && empty( $user_login ) )
 		$errors['user_login'] = __('<strong>ERROR</strong>: The username field is empty.');
-	if ( $http_post && empty( $user_pass ) )
+	if ( $_POST && empty( $user_pass ) )
 		$errors['user_pass'] = __('<strong>ERROR</strong>: The password field is empty.');
 
 	// Some parts of this script use the main login form to display a message
@@ -362,7 +362,7 @@ default:
 <?php do_action('login_form'); ?>
 	<p><label><input name="rememberme" type="checkbox" id="rememberme" value="forever" tabindex="90" /> <?php _e('Remember me'); ?></label></p>
 	<p class="submit">
-		<input type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Log in'); ?> &raquo;" tabindex="100" />
+		<input type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Login'); ?> &raquo;" tabindex="100" />
 		<input type="hidden" name="redirect_to" value="<?php echo attribute_escape($redirect_to); ?>" />
 	</p>
 <?php else : ?>

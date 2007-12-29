@@ -34,21 +34,20 @@ function cat_rows( $parent = 0, $level = 0, $categories = 0 ) {
 function _cat_row( $category, $level, $name_override = false ) {
 	global $class;
 
-	$category = get_category( $category );
-
 	$pad = str_repeat( '&#8212; ', $level );
 	if ( current_user_can( 'manage_categories' ) ) {
 		$edit = "<a href='categories.php?action=edit&amp;cat_ID=$category->term_id' class='edit'>".__( 'Edit' )."</a></td>";
 		$default_cat_id = (int) get_option( 'default_category' );
+		$default_link_cat_id = (int) get_option( 'default_link_category' );
 
 		if ( $category->term_id != $default_cat_id )
-			$edit .= "<td><a href='" . wp_nonce_url( "categories.php?action=delete&amp;cat_ID=$category->term_id", 'delete-category_' . $category->term_id ) . "' class='delete:the-list:cat-$category->term_id delete'>".__( 'Delete' )."</a>";
+			$edit .= "<td><a href='" . wp_nonce_url( "categories.php?action=delete&amp;cat_ID=$category->term_id", 'delete-category_' . $category->term_id ) . "' onclick=\"return deleteSomething( 'cat', $category->term_id, '" . js_escape(sprintf( __("You are about to delete the category '%s'.\nAll posts that were only assigned to this category will be assigned to the '%s' category.\nAll links that were only assigned to this category will be assigned to the '%s' category.\n'OK' to delete, 'Cancel' to stop." ), $category->name, get_catname( $default_cat_id ), get_catname( $default_link_cat_id ) )) . "' );\" class='delete'>".__( 'Delete' )."</a>";
 		else
 			$edit .= "<td style='text-align:center'>".__( "Default" );
 	} else
 		$edit = '';
 
-	$class = " class='alternate'" == $class ? '' : " class='alternate'";
+	$class = ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || " class='alternate'" == $class ) ? '' : " class='alternate'";
 
 	$category->count = number_format_i18n( $category->count );
 	$posts_count = ( $category->count > 0 ) ? "<a href='edit.php?cat=$category->term_id'>$category->count</a>" : $category->count;
@@ -60,41 +59,6 @@ function _cat_row( $category, $level, $name_override = false ) {
 		<td>$edit</td>\n\t</tr>\n";
 
 	return apply_filters('cat_row', $output);
-}
-
-function link_cat_row( $category ) {
-	global $class;
-
-	if ( !$category = get_term( $category, 'link_category' ) )
-		return false;
-	if ( is_wp_error( $category ) )
-		return $category;
-
-	if ( current_user_can( 'manage_categories' ) ) {
-		$edit = "<a href='link-category.php?action=edit&amp;cat_ID=$category->term_id' class='edit'>".__( 'Edit' )."</a></td>";
-		$default_cat_id = (int) get_option( 'default_link_category' );
-
-		$delete_url = wp_nonce_url( "link-category.php?action=delete&amp;cat_ID=$category->term_id", "delete-link-category_$category->term_id" );
-		if ( $category->term_id != $default_cat_id )
-			$edit .= "<td><a href='$delete_url' class='delete:the-list:link-cat-$category->term_id delete'>" . __( 'Delete' ) . "</a>";
-		else
-			$edit .= "<td style='text-align:center'>" . __( "Default" );
-	} else {
-		$edit = '';
-	}
-
-	$class = " class='alternate'" == $class ? '' : " class='alternate'";
-
-	$category->count = number_format_i18n( $category->count );
-	$count = ( $category->count > 0 ) ? "<a href='link-manager.php?cat_id=$category->term_id'>$category->count</a>" : $category->count;
-	$output = "<tr id='link-cat-$category->term_id'$class>
-		<th scope='row' style='text-align: center'>$category->term_id</th>
-		<td>" . ( $name_override ? $name_override : $category->name ) . "</td>
-		<td>$category->description</td>
-		<td align='center'>$count</td>
-		<td>$edit</td>\n\t</tr>\n";
-
-	return apply_filters( 'link_cat_row', $output );
 }
 
 function checked( $checked, $current) {
@@ -124,7 +88,7 @@ function sort_cats( $cat1, $cat2 ) {
 }
 
 function get_nested_categories( $default = 0, $parent = 0 ) {
-	global $post_ID, $checked_categories;
+	global $post_ID, $mode, $wpdb, $checked_categories;
 
 	if ( empty($checked_categories) ) {
 		if ( $post_ID ) {
@@ -159,14 +123,13 @@ function get_nested_categories( $default = 0, $parent = 0 ) {
 
 function write_nested_categories( $categories ) {
 	foreach ( $categories as $category ) {
-		echo "\n", '<li id="category-', $category['cat_ID'], '"><label for="in-category-', $category['cat_ID'], '" class="selectit"><input value="', $category['cat_ID'], '" type="checkbox" name="post_category[]" id="in-category-', $category['cat_ID'], '"', ($category['checked'] ? ' checked="checked"' : "" ), '/> ', wp_specialchars( apply_filters('the_category', $category['cat_name'] )), '</label>';
+		echo '<li id="category-', $category['cat_ID'], '"><label for="in-category-', $category['cat_ID'], '" class="selectit"><input value="', $category['cat_ID'], '" type="checkbox" name="post_category[]" id="in-category-', $category['cat_ID'], '"', ($category['checked'] ? ' checked="checked"' : "" ), '/> ', wp_specialchars( apply_filters('the_category', $category['cat_name'] )), "</label></li>";
 
 		if ( $category['children'] ) {
-			echo "\n<ul>";
+			echo "<ul>\n";
 			write_nested_categories( $category['children'] );
-			echo "\n</ul>";
+			echo "</ul>\n";
 		}
-		echo '</li>';
 	}
 }
 
@@ -201,117 +164,44 @@ function dropdown_link_categories( $default = 0 ) {
 	}
 }
 
-// define the columns to display, the syntax is 'internal name' => 'display name'
-function wp_manage_posts_columns() {
-	$posts_columns = array();
-	$posts_columns['id'] = '<div style="text-align: center">' . __('ID') . '</div>';
-	if ( 'draft' === $_GET['post_status'] )
-		$posts_columns['modified'] = __('Modified');
-	elseif ( 'pending' === $_GET['post_status'] )
-		$posts_columns['modified'] = __('Submitted');
-	else
-		$posts_columns['date'] = __('When');
-	$posts_columns['title'] = __('Title');
-	$posts_columns['categories'] = __('Categories');
-	if ( !in_array($_GET['post_status'], array('pending', 'draft', 'future')) )
-		$posts_columns['comments'] = '<div style="text-align: center">' . __('Comments') . '</div>';
-	$posts_columns['author'] = __('Author');
-	$posts_columns = apply_filters('manage_posts_columns', $posts_columns);
+function page_rows( $parent = 0, $level = 0, $pages = 0, $hierarchy = true ) {
+	global $wpdb, $class, $post;
 
-	// you can not edit these at the moment
-	$posts_columns['control_view']   = '';
-	$posts_columns['control_edit']   = '';
-	$posts_columns['control_delete'] = '';
+	if (!$pages )
+		$pages = get_pages( 'sort_column=menu_order' );
 
-	return $posts_columns;
-}
+	if (! $pages )
+		return false;
 
-/*
- * display one row if the page doesn't have any children
- * otherwise, display the row and its children in subsequent rows
- */
-function display_page_row( $page, &$children_pages, $level = 0 ) {
-	global $post;
-	static $class;
-	
-	$post = $page;
-	setup_postdata($page);
+	foreach ( $pages as $post) {
+		setup_postdata( $post);
+		if ( $hierarchy && ($post->post_parent != $parent) )
+			continue;
 
-	$page->post_title = wp_specialchars( $page->post_title );
-	$pad = str_repeat( '&#8212; ', $level );
-	$id = (int) $page->ID;
-	$class = ('alternate' == $class ) ? '' : 'alternate';
-
+		$post->post_title = wp_specialchars( $post->post_title );
+		$pad = str_repeat( '&#8212; ', $level );
+		$id = (int) $post->ID;
+		$class = ('alternate' == $class ) ? '' : 'alternate';
 ?>
   <tr id='page-<?php echo $id; ?>' class='<?php echo $class; ?>'>
-    <th scope="row" style="text-align: center"><?php echo $page->ID; ?></th>
+    <th scope="row" style="text-align: center"><?php echo $post->ID; ?></th>
     <td>
-      <?php echo $pad; ?><?php the_title(); ?>
+      <?php echo $pad; ?><?php the_title() ?>
     </td>
     <td><?php the_author() ?></td>
-    <td><?php if ( '0000-00-00 00:00:00' ==$page->post_modified ) _e('Unpublished'); else echo mysql2date( __('Y-m-d g:i a'), $page->post_modified ); ?></td>
-    <td><a href="<?php the_permalink(); ?>" rel="permalink" class="view"><?php _e( 'View' ); ?></a></td>
+    <td><?php if ( '0000-00-00 00:00:00' ==$post->post_modified ) _e('Unpublished'); else echo mysql2date( __('Y-m-d g:i a'), $post->post_modified ); ?></td>
+	<td><a href="<?php the_permalink(); ?>" rel="permalink" class="view"><?php _e( 'View' ); ?></a></td>
     <td><?php if ( current_user_can( 'edit_page', $id ) ) { echo "<a href='page.php?action=edit&amp;post=$id' class='edit'>" . __( 'Edit' ) . "</a>"; } ?></td>
-    <td><?php if ( current_user_can( 'delete_page', $id ) ) { echo "<a href='" . wp_nonce_url( "page.php?action=delete&amp;post=$id", 'delete-page_' . $id ) .  "' class='delete:the-list:page-$id delete'>" . __( 'Delete' ) . "</a>"; } ?></td>
+    <td><?php if ( current_user_can( 'delete_page', $id ) ) { echo "<a href='" . wp_nonce_url( "page.php?action=delete&amp;post=$id", 'delete-page_' . $id ) .  "' class='delete' onclick=\"return deleteSomething( 'page', " . $id . ", '" . js_escape(sprintf( __("You are about to delete the '%s' page.\n'OK' to delete, 'Cancel' to stop." ), get_the_title() ) ) . "' );\">" . __( 'Delete' ) . "</a>"; } ?></td>
   </tr>
 
 <?php
-
-	if ( ! $children_pages )
-		return true; 
-
-	for ( $i = 0; $i < count($children_pages); $i++ ) {
-
-		$child = $children_pages[$i];
-			
-		if ( $child->post_parent == $id ) {
-			array_splice($children_pages, $i, 1); 
-			display_page_row($child, $children_pages, $level+1);
-			$i = -1; //as numeric keys in $children_pages are not preserved after splice
-		}
+		if ( $hierarchy ) page_rows( $id, $level + 1, $pages );
 	}
-}
-
-/*
- * displays pages in hierarchical order 
- */
-function page_rows( $pages ) {
-	if ( ! $pages )
-		$pages = get_pages( 'sort_column=menu_order' );
-
-	if ( ! $pages )
-		return false;
-
-	// splice pages into two parts: those without parent and those with parent
-
-	$top_level_pages = array();
-	$children_pages  = array();
-
-	foreach ( $pages as $page ) {
-		if ( 0 == $page->post_parent )
-			$top_level_pages[] = $page; 
-		else
-			$children_pages[] = $page; 
-	}
-
-	foreach ( $top_level_pages as $page )
-		display_page_row($page, $children_pages, 0);
-	
-	/* 
-	 * display the remaining children_pages which are orphans
-	 * having orphan requires parental attention
-	 */
-	 if ( count($children_pages) > 0 ) {
-	 	$empty_array = array(); 
-	 	foreach ( $children_pages as $orphan_page ) { 
-			clean_page_cache( $orphan_page->ID);
-			display_page_row( $orphan_page, $empty_array, 0 );
-		} 
-	 }
 }
 
 function user_row( $user_object, $style = '' ) {
-	if ( !( is_object( $user_object) && is_a( $user_object, 'WP_User' ) ) )
+	if ( !(is_object( $user_object) && is_a( $user_object, 'WP_User' ) ) )
 		$user_object = new WP_User( (int) $user_object );
 	$email = $user_object->user_email;
 	$url = $user_object->user_url;
@@ -371,51 +261,45 @@ function _wp_get_comment_list( $s = false, $start, $num ) {
 }
 
 function _wp_comment_list_item( $id, $alt = 0 ) {
-	global $authordata, $comment;
+	global $authordata, $comment, $wpdb;
+	$id = (int) $id;
 	$comment =& get_comment( $id );
-	$id = (int) $comment->comment_ID;
 	$class = '';
 	$post = get_post($comment->comment_post_ID);
 	$authordata = get_userdata($post->post_author);
-	$comment_status = wp_get_comment_status($id);
+	$comment_status = wp_get_comment_status($comment->comment_ID);
 	if ( 'unapproved' == $comment_status )
 		$class .= ' unapproved';
 	if ( $alt % 2 )
 		$class .= ' alternate';
-	echo "<li id='comment-$id' class='$class'>";
+	echo "<li id='comment-$comment->comment_ID' class='$class'>";
 ?>
-<p><strong class="comment-author"><?php comment_author(); ?></strong> <?php if ($comment->comment_author_email) { ?>| <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <?php comment_author_url_link() ?> <?php } ?>| <?php _e('IP:') ?> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a></p>
+<p><strong><?php comment_author(); ?></strong> <?php if ($comment->comment_author_email) { ?>| <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <?php comment_author_url_link() ?> <?php } ?>| <?php _e('IP:') ?> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a></p>
 
 <?php comment_text() ?>
 
 <p><?php comment_date(__('M j, g:i A'));  ?> &#8212; [
 <?php
 if ( current_user_can('edit_post', $comment->comment_post_ID) ) {
-	echo " <a href='comment.php?action=editcomment&amp;c=$id'>" .  __('Edit') . '</a>';
-	$url = clean_url( wp_nonce_url( "comment.php?action=deletecomment&p=$comment->comment_post_ID&c=$id", "delete-comment_$id" ) );
-	echo " | <a href='$url' class='delete:the-comment-list:comment-$id'>" . __('Delete') . '</a> ';
+	echo " <a href='comment.php?action=editcomment&amp;c=".$comment->comment_ID."'>" .  __('Edit') . '</a>';
+	echo ' | <a href="' . wp_nonce_url('comment.php?action=deletecomment&amp;p=' . $comment->comment_post_ID . '&amp;c=' . $comment->comment_ID, 'delete-comment_' . $comment->comment_ID) . '" onclick="return deleteSomething( \'comment\', ' . $comment->comment_ID . ', \'' . js_escape(sprintf(__("You are about to delete this comment by '%s'.\n'Cancel' to stop, 'OK' to delete."), $comment->comment_author)) . "', theCommentList );\">" . __('Delete') . '</a> ';
 	if ( ('none' != $comment_status) && ( current_user_can('moderate_comments') ) ) {
-		$url = clean_url( wp_nonce_url( "comment.php?action=unapprovecomment&p=$comment->comment_post_ID&c=$id", "unapprove-comment_$id" ) );
-		echo "<span class='unapprove'> | <a href='$url' class='dim:the-comment-list:comment-$id:unapproved:FFFF33'>" . __('Unapprove') . '</a> </span>';
-		$url = clean_url( wp_nonce_url( "comment.php?action=approvecomment&p=$comment->comment_post_ID&c=$id", "approve-comment_$id" ) );
-		echo "<span class='approve'> | <a href='$url' class='dim:the-comment-list:comment-$id:unapproved:33FF33:33FF33'>" . __('Approve') . '</a> </span>';
+		echo '<span class="unapprove"> | <a href="' . wp_nonce_url('comment.php?action=unapprovecomment&amp;p=' . $comment->comment_post_ID . '&amp;c=' . $comment->comment_ID, 'unapprove-comment_' . $comment->comment_ID) . '" onclick="return dimSomething( \'comment\', ' . $comment->comment_ID . ', \'unapproved\', theCommentList );">' . __('Unapprove') . '</a> </span>';
+		echo '<span class="approve"> | <a href="' . wp_nonce_url('comment.php?action=approvecomment&amp;p=' . $comment->comment_post_ID . '&amp;c=' . $comment->comment_ID, 'approve-comment_' . $comment->comment_ID) . '" onclick="return dimSomething( \'comment\', ' . $comment->comment_ID . ', \'unapproved\', theCommentList );">' . __('Approve') . '</a> </span>';
 	}
-	$url = clean_url( wp_nonce_url( "comment.php?action=deletecomment&dt=spam&p=$comment->comment_post_ID&c=$id", "delete-comment_$id" ) );
-	echo " | <a href='$url' class='delete:the-comment-list:comment-$id::spam=1'>" . __('Spam') . '</a> ';
+	echo " | <a href=\"" . wp_nonce_url("comment.php?action=deletecomment&amp;dt=spam&amp;p=" . $comment->comment_post_ID . "&amp;c=" . $comment->comment_ID, 'delete-comment_' . $comment->comment_ID) . "\" onclick=\"return deleteSomething( 'comment-as-spam', $comment->comment_ID, '" . js_escape(sprintf(__("You are about to mark as spam this comment by '%s'.\n'Cancel' to stop, 'OK' to mark as spam."), $comment->comment_author))  . "', theCommentList );\">" . __('Spam') . "</a> ";
 }
-if ( !is_single() ) {
-	$post = get_post($comment->comment_post_ID, OBJECT, 'display');
-	$post_title = wp_specialchars( $post->post_title, 'double' );
-	$post_title = ('' == $post_title) ? "# $comment->comment_post_ID" : $post_title;
+$post = get_post($comment->comment_post_ID, OBJECT, 'display');
+$post_title = wp_specialchars( $post->post_title, 'double' );
+$post_title = ('' == $post_title) ? "# $comment->comment_post_ID" : $post_title;
 ?>
- ] &#8212; <a href="<?php echo get_permalink($comment->comment_post_ID); ?>"><?php echo $post_title; ?></a>
-<?php } ?>
-</p>
+ ] &#8212; <a href="<?php echo get_permalink($comment->comment_post_ID); ?>"><?php echo $post_title; ?></a></p>
 		</li>
 <?php
 }
 
 function wp_dropdown_cats( $currentcat = 0, $currentparent = 0, $parent = 0, $level = 0, $categories = 0 ) {
+	global $wpdb;
 	if (!$categories )
 		$categories = get_categories( 'hide_empty=0' );
 
@@ -437,9 +321,10 @@ function wp_dropdown_cats( $currentcat = 0, $currentparent = 0, $parent = 0, $le
 }
 
 function list_meta( $meta ) {
+	global $post_ID;
 	// Exit if no meta
 	if (!$meta ) {
-		echo '<tbody id="the-list" class="list:meta"><tr style="display: none;"><td>&nbsp;</td></tr></tbody>'; //TBODY needed for list-manipulation JS
+		echo '<tbody id="the-list"><tr style="display: none;"><td>&nbsp;</td></tr></tbody>'; //TBODY needed for list-manipulation JS
 		return;
 	}
 	$count = 0;
@@ -451,45 +336,43 @@ function list_meta( $meta ) {
 		<th colspan='2'><?php _e( 'Action' ) ?></th>
 	</tr>
 	</thead>
-	<tbody id='the-list' class='list:meta'>
 <?php
-	foreach ( $meta as $entry )
-		echo _list_meta_row( $entry, $count );
-	echo "\n\t</tbody>";
-}
+	$r ="\n\t<tbody id='the-list'>";
+	foreach ( $meta as $entry ) {
+		++ $count;
+		if ( $count % 2 )
+			$style = 'alternate';
+		else
+			$style = '';
+		if ('_' == $entry['meta_key'] { 0 } )
+			$style .= ' hidden';
 
-function _list_meta_row( $entry, &$count ) {
-	$r = '';
-	++ $count;
-	if ( $count % 2 )
-		$style = 'alternate';
-	else
-		$style = '';
-	if ('_' == $entry['meta_key'] { 0 } )
-		$style .= ' hidden';
-
-	if ( is_serialized( $entry['meta_value'] ) ) {
-		if ( is_serialized_string( $entry['meta_value'] ) ) {
-			// this is a serialized string, so we should display it
-			$entry['meta_value'] = maybe_unserialize( $entry['meta_value'] );
-		} else {
-			// this is a serialized array/object so we should NOT display it
-			--$count;
-			return;
+		if ( is_serialized( $entry['meta_value'] ) ) {
+			if ( is_serialized_string( $entry['meta_value'] ) ) {
+				// this is a serialized string, so we should display it
+				$entry['meta_value'] = maybe_unserialize( $entry['meta_value'] );
+			} else {
+				// this is a serialized array/object so we should NOT display it
+				--$count;
+				continue;
+			}
 		}
-	}
 
-	$entry['meta_key']   = attribute_escape($entry['meta_key']);
-	$entry['meta_value'] = attribute_escape($entry['meta_value']);
-	$entry['meta_id'] = (int) $entry['meta_id'];
-	$r .= "\n\t<tr id='meta-{$entry['meta_id']}' class='$style'>";
-	$r .= "\n\t\t<td valign='top'><input name='meta[{$entry['meta_id']}][key]' tabindex='6' type='text' size='20' value='{$entry['meta_key']}' /></td>";
-	$r .= "\n\t\t<td><textarea name='meta[{$entry['meta_id']}][value]' tabindex='6' rows='2' cols='30'>{$entry['meta_value']}</textarea></td>";
-	$r .= "\n\t\t<td align='center'><input name='updatemeta' type='submit' tabindex='6' value='".attribute_escape(__( 'Update' ))."' class='add:the-list:meta-{$entry['meta_id']} updatemeta' /><br />";
-	$r .= "\n\t\t<input name='deletemeta[{$entry['meta_id']}]' type='submit' ";
-	$r .= "class='delete:the-list:meta-{$entry['meta_id']} deletemeta' tabindex='6' value='".attribute_escape(__( 'Delete' ))."' />";
-	$r .= "</td>\n\t</tr>";
-	return $r;
+		$key_js = js_escape( $entry['meta_key'] );
+		$entry['meta_key']   = attribute_escape($entry['meta_key']);
+		$entry['meta_value'] = attribute_escape($entry['meta_value']);
+		$entry['meta_id'] = (int) $entry['meta_id'];
+		$r .= "\n\t<tr id='meta-{$entry['meta_id']}' class='$style'>";
+		$r .= "\n\t\t<td valign='top'><input name='meta[{$entry['meta_id']}][key]' tabindex='6' type='text' size='20' value='{$entry['meta_key']}' /></td>";
+		$r .= "\n\t\t<td><textarea name='meta[{$entry['meta_id']}][value]' tabindex='6' rows='2' cols='30'>{$entry['meta_value']}</textarea></td>";
+		$r .= "\n\t\t<td align='center'><input name='updatemeta' type='submit' class='updatemeta' tabindex='6' value='".attribute_escape(__( 'Update' ))."' /><br />";
+		$r .= "\n\t\t<input name='deletemeta[{$entry['meta_id']}]' type='submit' onclick=\"return deleteSomething( 'meta', {$entry['meta_id']}, '";
+		$r .= js_escape(sprintf( __("You are about to delete the '%s' custom field on this post.\n'OK' to delete, 'Cancel' to stop." ), $key_js ) );
+		$r .= "' );\" class='deletemeta' tabindex='6' value='".attribute_escape(__( 'Delete' ))."' /></td>";
+		$r .= "\n\t</tr>";
+	}
+	echo $r;
+	echo "\n\t</tbody>";
 }
 
 function meta_form() {
@@ -530,11 +413,8 @@ function meta_form() {
 		<td><textarea id="metavalue" name="metavalue" rows="3" cols="25" tabindex="8"></textarea></td>
 	</tr>
 
-<tr class="submit"><td colspan="3">
-	<?php wp_nonce_field( 'change_meta', '_ajax_nonce', false ); ?>
-	<input type="submit" id="addmetasub" name="addmeta" class="add:the-list:newmeta" tabindex="9" value="<?php _e( 'Add Custom Field &raquo;' ) ?>" />
-</td></tr>
 </table>
+<p class="submit"><input type="submit" id="updatemetasub" name="updatemeta" tabindex="9" value="<?php _e( 'Add Custom Field &raquo;' ) ?>" /></p>
 <?php
 
 }
