@@ -462,7 +462,7 @@ class Textpattern_Import {
 			}
 			add_option('txplinks2wplinks',$txplinks2wplinks);
 			echo '<p>';
-			printf(__ngettext('Done! <strong>%s</strong> link imported', 'Done! <strong>%s</strong> links imported', $count), $count);
+			printf(__('Done! <strong>%s</strong> Links imported'), $count);
 			echo '<br /><br /></p>';
 			return true;
 		}
@@ -550,7 +550,6 @@ class Textpattern_Import {
 		delete_option('txppass');
 		delete_option('txpname');
 		delete_option('txphost');
-		do_action('import_done', 'textpattern');
 		$this->tips();
 	}
 

@@ -6,8 +6,7 @@
 
 require_once ('admin.php');
 
-wp_enqueue_script( 'wp-lists' );
-wp_enqueue_script('admin-forms');
+wp_enqueue_script( 'listman' );
 
 wp_reset_vars(array('action', 'cat_id', 'linkurl', 'name', 'image', 'description', 'visible', 'target', 'category', 'link_id', 'submit', 'order_by', 'links_show_cat_id', 'rating', 'rel', 'notes', 'linkcheck[]'));
 
@@ -17,8 +16,8 @@ if (empty ($cat_id))
 if (empty ($order_by))
 	$order_by = 'order_name';
 
-$title = __('Manage Links');
-$this_file = $parent_file = 'edit.php';
+$title = __('Manage Blogroll');
+$this_file = $parent_file = 'link-manager.php';
 include_once ("./admin-header.php");
 
 if (!current_user_can('manage_links'))
@@ -46,7 +45,22 @@ switch ($order_by) {
 		break;
 }
 ?>
-<script type="text/javascript" src="js/edit-comments.js"></script>
+<script type="text/javascript">
+<!--
+function checkAll(form)
+{
+	for (i = 0, n = form.elements.length; i < n; i++) {
+		if(form.elements[i].type == "checkbox") {
+			if(form.elements[i].checked == true)
+				form.elements[i].checked = false;
+			else
+				form.elements[i].checked = true;
+		}
+	}
+}
+//-->
+</script>
+
 <?php
 if ( isset($_GET['deleted']) ) {
 	echo '<div style="background-color: rgb(207, 235, 247);" id="message" class="updated fade"><p>';
@@ -58,8 +72,7 @@ if ( isset($_GET['deleted']) ) {
 
 <div class="wrap">
 
-<h2><?php _e('Manage Links'); ?></h2>
-<p><a href="link-add.php"><?php _e('Add Link'); ?></a> | <a href="edit-link-categories.php"><?php _e('Link Categories'); ?></a> | <a href="link-import.php"><?php _e('Import Links'); ?></a></p>
+<h2><?php _e('Blogroll Management'); ?></h2>
 <p><?php _e('Here you <a href="link-add.php">add links</a> to sites that you visit often and share them on your blog. When you have a list of links in your sidebar to other blogs, it&#8217;s called a &#8220;blogroll.&#8221;'); ?></p>
 <form id="cats" method="get" action="">
 <p><?php
@@ -115,7 +128,7 @@ if ( $links ) {
 	<th style="text-align: center"><input type="checkbox" onclick="checkAll(document.getElementById('links'));" /></th>
 	</tr>
 	</thead>
-	<tbody id="the-list" class="list:link">
+	<tbody id="the-list">
 <?php
 	foreach ($links as $link) {
 		$link = sanitize_bookmark($link);
@@ -163,8 +176,8 @@ if ( $links ) {
 					?><td align='center'><?php echo $visible; ?></td><?php
 					break;
 				case 'action':
-					echo "<td><a href='link.php?link_id=$link->link_id&amp;action=edit' class='edit'>" . __('Edit') . '</a></td>';
-					echo "<td><a href='" . wp_nonce_url('link.php?link_id='.$link->link_id.'&amp;action=delete', 'delete-bookmark_' . $link->link_id ) . "' class='delete:the-list:link-$link->link_id delete'>" . __('Delete') . '</a></td>';
+					echo '<td><a href="link.php?link_id='.$link->link_id.'&amp;action=edit" class="edit">'.__('Edit').'</a></td>';
+					echo '<td><a href="' . wp_nonce_url('link.php?link_id='.$link->link_id.'&amp;action=delete', 'delete-bookmark_' . $link->link_id ) . '"'." onclick=\"return deleteSomething( 'link', $link->link_id , '".js_escape(sprintf(__("You are about to delete the '%s' link to %s.\n'Cancel' to stop, 'OK' to delete."), $link->link_name, $link->link_url )).'\' );" class="delete">'.__('Delete').'</a></td>';
 					break;
 				default:
 					?>

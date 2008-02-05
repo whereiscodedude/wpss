@@ -71,7 +71,7 @@ class RSS_Import {
 				$cat_index++;
 			}
 
-			preg_match('|<guid.*?>(.*?)</guid>|is', $post, $guid);
+			preg_match('|<guid.+?>(.*?)</guid>|is', $post, $guid);
 			if ($guid)
 				$guid = $wpdb->escape(trim($guid[1]));
 			else
@@ -141,7 +141,6 @@ class RSS_Import {
 		if ( is_wp_error( $result ) )
 			return $result;
 		wp_import_cleanup($file['id']);
-		do_action('import_done', 'rss');
 
 		echo '<h3>';
 		printf(__('All done. <a href="%s">Have fun!</a>'), get_option('home'));

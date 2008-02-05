@@ -19,6 +19,7 @@ include('./wp-config.php');
 
 if ( isset( $_GET['rsd'] ) ) { // http://archipelago.phrasewise.com/rsd
 header('Content-Type: text/xml; charset=' . get_option('blog_charset'), true);
+
 ?>
 <?php echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
 <rsd version="1.0" xmlns="http://archipelago.phrasewise.com/rsd">
@@ -31,7 +32,6 @@ header('Content-Type: text/xml; charset=' . get_option('blog_charset'), true);
       <api name="Movable Type" blogID="1" preferred="false" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
       <api name="MetaWeblog" blogID="1" preferred="false" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
       <api name="Blogger" blogID="1" preferred="false" apiLink="<?php bloginfo_rss('wpurl') ?>/xmlrpc.php" />
-      <api name="Atom" blogID="" preferred="false" apiLink="<?php echo apply_filters('atom_service_url', (get_bloginfo('url')."/wp-app.php/service"))?>" /> 
     </apis>
   </service>
 </rsd>
@@ -69,6 +69,7 @@ function starify($string) {
 if ( isset($HTTP_RAW_POST_DATA) )
   logIO("I", $HTTP_RAW_POST_DATA);
 
+
 class wp_xmlrpc_server extends IXR_Server {
 
 	function wp_xmlrpc_server() {
@@ -83,12 +84,8 @@ class wp_xmlrpc_server extends IXR_Server {
 			'wp.getAuthors'			=> 'this:wp_getAuthors',
 			'wp.getCategories'		=> 'this:mw_getCategories',		// Alias
 			'wp.newCategory'		=> 'this:wp_newCategory',
-			'wp.deleteCategory'		=> 'this:wp_deleteCategory',
 			'wp.suggestCategories'	=> 'this:wp_suggestCategories',
 			'wp.uploadFile'			=> 'this:mw_newMediaObject',	// Alias
-			'wp.getCommentCount'	=> 'this:wp_getCommentCount',
-			'wp.getPostStatusList'	=> 'this:wp_getPostStatusList',
-			'wp.getPageStatusList'	=> 'this:wp_getPageStatusList',
 
 			// Blogger API
 			'blogger.getUsersBlogs' => 'this:blogger_getUsersBlogs',
@@ -174,49 +171,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		}
 	}
 
-	function get_custom_fields($post_id) { 
-		$post_id = (int) $post_id; 
-
-		$custom_fields = array(); 
-
-		foreach ( (array) has_meta($post_id) as $meta ) { 
-			// Don't expose protected fields. 
-			if ( strpos($meta['meta_key'], '_wp_') === 0 ) { 
-				continue; 
-			} 
-
-			$custom_fields[] = array( 
-				"id"    => $meta['meta_id'], 
-				"key"   => $meta['meta_key'], 
-				"value" => $meta['meta_value'] 
-			); 
-		} 
-
-		return $custom_fields; 
-	} 
-
-	function set_custom_fields($post_id, $fields) { 
-		$post_id = (int) $post_id; 
-
-		foreach ( (array) $fields as $meta ) { 
-			if ( isset($meta['id']) ) { 
-				$meta['id'] = (int) $meta['id']; 
-
-				if ( isset($meta['key']) ) { 
-					update_meta($meta['id'], $meta['key'], $meta['value']); 
-				} 
-				else { 
-					delete_meta($meta['id']); 
-				} 
-			} 
-			else { 
-				$_POST['metakeyinput'] = $meta['key']; 
-				$_POST['metavalue'] = $meta['value']; 
-				add_meta($post_id); 
-			} 
-		} 
-	} 
-
 	/**
 	 * WordPress XML-RPC API
 	 * wp_getPage
@@ -294,8 +248,7 @@ class wp_xmlrpc_server extends IXR_Server {
 				"wp_page_order"			=> $page->menu_order,
 				"wp_author_id"			=> $author->ID,
 				"wp_author_display_name"	=> $author->display_name,
-				"date_created_gmt"		=> new IXR_Date($page_date_gmt),
-				"custom_fields"			=> $this->get_custom_fields($page_id)
+				"date_created_gmt"		=> new IXR_Date($page_date_gmt)
 			);
 
 			return($page_struct);
@@ -365,8 +318,6 @@ class wp_xmlrpc_server extends IXR_Server {
 			return($this->error);
 		}
 
-		do_action('xmlrpc_call', 'wp.newPage');
-
 		// Set the user context and check if they are allowed
 		// to add new pages.
 		$user = set_current_user(0, $username);
@@ -396,8 +347,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if(!$this->login_pass_ok($username, $password)) {
 			return($this->error);
 		}
-
-		do_action('xmlrpc_call', 'wp.deletePage');
 
 		// Get the current page based on the page_id and
 		// make sure it is a page and not a post.
@@ -440,8 +389,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if(!$this->login_pass_ok($username, $password)) {
 			return($this->error);
 		}
-
-		do_action('xmlrpc_call', 'wp.editPage');
 
 		// Get the page data and make sure it is a page.
 		$actual_page = wp_get_single_post($page_id, ARRAY_A);
@@ -576,8 +523,6 @@ class wp_xmlrpc_server extends IXR_Server {
 			return($this->error);
 		}
 
-		do_action('xmlrpc_call', 'wp.newCategory');
-
 		// Set the user context and make sure they are
 		// allowed to add a category.
 		set_current_user(0, $username);
@@ -618,36 +563,11 @@ class wp_xmlrpc_server extends IXR_Server {
 
 	/**
 	 * WordPress XML-RPC API
-	 * wp_deleteCategory
-	 */
-	function wp_deleteCategory($args) {
-		$this->escape($args);
-
-		$blog_id		= (int) $args[0];
-		$username		= $args[1];
-		$password		= $args[2];
-		$category_id	= (int) $args[3];
-
-		if( !$this->login_pass_ok( $username, $password ) ) {
-			return $this->error;
-		}
-
-		do_action('xmlrpc_call', 'wp.deleteCategory');
-
-		set_current_user(0, $username);
-		if( !current_user_can("manage_categories") ) {
-			return new IXR_Error( 401, __( "Sorry, you do not the right to delete a category." ) );
-		}
-
-		return wp_delete_category( $category_id );
-	}
-
-
-	/**
-	 * WordPress XML-RPC API
 	 * wp_suggestCategories
 	 */
 	function wp_suggestCategories($args) {
+		global $wpdb;
+
 		$this->escape($args);
 
 		$blog_id				= (int) $args[0];
@@ -662,86 +582,14 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		set_current_user(0, $username);
 		if( !current_user_can( 'edit_posts' ) ) 
-			return new IXR_Error( 401, __( 'Sorry, you must be able to edit posts to this blog in order to view categories.' ) );
+			return new IXR_Error( 401, __( 'Sorry, you must be able to publish to this blog in order to view categories.' ) );
 
 		do_action('xmlrpc_call', 'wp.suggestCategories');
 
-		$category_suggestions = array();
 		$args = array('get' => 'all', 'number' => $max_results, 'name__like' => $category);
-		foreach ( (array) get_categories($args) as $cat ) {
-			$category_suggestions[] = array(
-				"category_id"	=> $cat->cat_ID,
-				"category_name"	=> $cat->cat_name
-			);
-		}
+		$category_suggestions = get_categories($args);
 
 		return($category_suggestions);
-	}
-
-	function wp_getCommentCount( $args ) {
-		$this->escape($args); 
-
-		$blog_id	= (int) $args[0]; 
-		$username	= $args[1]; 
-		$password	= $args[2]; 
-		$post_id	= (int) $args[3];  
-
-		if( !$this->login_pass_ok( $username, $password ) ) {  
-			return new IXR_Error( 403, __( 'Bad login/pass combination.' ) ); 
-		}  
-
-		set_current_user( 0, $username );  
-		if( !current_user_can( 'edit_posts' ) ) {  
-			return new IXR_Error( 403, __( 'You are not allowed details about comments.' ) );  
-		} 
-
-		do_action('xmlrpc_call', 'wp.getCommentCount');
-
-		return get_comment_count( $post_id );
-	}
-
-
-	function wp_getPostStatusList( $args ) {
-		$this->escape( $args );
-
-		$blog_id	= (int) $args[0];
-		$username	= $args[1];
-		$password	= $args[2];
-
-		if( !$this->login_pass_ok( $username, $password ) ) {
-			return new IXR_Error( 403, __( 'Bad login/pass combination.' ) );
-		}
-
-		set_current_user( 0, $username );
-		if( !current_user_can( 'edit_posts' ) ) {
-			return new IXR_Error( 403, __( 'You are not allowed access to details about this blog.' ) );
-		}
-
-		do_action('xmlrpc_call', 'wp.getPostStatusList');
-
-		return get_post_statuses( );
-	}
-
-
-	function wp_getPageStatusList( $args ) {
-		$this->escape( $args );
-
-		$blog_id	= (int) $args[0];
-		$username	= $args[1];
-		$password	= $args[2];
-
-		if( !$this->login_pass_ok( $username, $password ) ) {
-			return new IXR_Error( 403, __( 'Bad login/pass combination.' ) );
-		}
-
-		set_current_user( 0, $username );
-		if( !current_user_can( 'edit_posts' ) ) {
-			return new IXR_Error( 403, __( 'You are not allowed access to details about this blog.' ) );
-		}
-
-		do_action('xmlrpc_call', 'wp.getPageStatusList');
-
-		return get_page_statuses( );
 	}
 
 
@@ -761,8 +609,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if (!$this->login_pass_ok($user_login, $user_pass)) {
 			return $this->error;
 		}
-
-		do_action('xmlrpc_call', 'blogger.getUsersBlogs');
 
 		set_current_user(0, $user_login);
 		$is_admin = current_user_can('level_8');
@@ -851,6 +697,8 @@ class wp_xmlrpc_server extends IXR_Server {
 	/* blogger.getRecentPosts ...gets recent posts */
 	function blogger_getRecentPosts($args) {
 
+		global $wpdb;
+
 		$this->escape($args);
 
 		$blog_ID    = (int) $args[1]; /* though we don't use it yet */
@@ -861,8 +709,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if (!$this->login_pass_ok($user_login, $user_pass)) {
 			return $this->error;
 		}
-
-		do_action('xmlrpc_call', 'blogger.getRecentPosts');
 
 		$posts_list = wp_get_recent_posts($num_posts);
 
@@ -916,8 +762,6 @@ class wp_xmlrpc_server extends IXR_Server {
 	    return $this->error;
 	  }
 
-	  do_action('xmlrpc_call', 'blogger.getTemplate');
-
 	  set_current_user(0, $user_login);
 	  if ( !current_user_can('edit_themes') ) {
 	    return new IXR_Error(401, __('Sorry, this user can not edit the template.'));
@@ -943,170 +787,170 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$this->escape($args);
 
-		$blog_ID    = (int) $args[1];
-		$user_login = $args[2];
-		$user_pass  = $args[3];
-		$content    = $args[4];
-		$template   = $args[5]; /* could be 'main' or 'archiveIndex', but we don't use it */
+	  $blog_ID    = (int) $args[1];
+	  $user_login = $args[2];
+	  $user_pass  = $args[3];
+	  $content    = $args[4];
+	  $template   = $args[5]; /* could be 'main' or 'archiveIndex', but we don't use it */
 
-		if (!$this->login_pass_ok($user_login, $user_pass)) {
-			return $this->error;
-		}
+	  if (!$this->login_pass_ok($user_login, $user_pass)) {
+	    return $this->error;
+	  }
 
-		do_action('xmlrpc_call', 'blogger.setTemplate');
+	  set_current_user(0, $user_login);
+	  if ( !current_user_can('edit_themes') ) {
+	    return new IXR_Error(401, __('Sorry, this user can not edit the template.'));
+	  }
 
-		set_current_user(0, $user_login);
-		if ( !current_user_can('edit_themes') ) {
-			return new IXR_Error(401, __('Sorry, this user can not edit the template.'));
-		}
+	  /* warning: here we make the assumption that the blog's URL is on the same server */
+	  $filename = get_option('home') . '/';
+	  $filename = preg_replace('#https?://.+?/#', $_SERVER['DOCUMENT_ROOT'].'/', $filename);
 
-		/* warning: here we make the assumption that the blog's URL is on the same server */
-		$filename = get_option('home') . '/';
-		$filename = preg_replace('#https?://.+?/#', $_SERVER['DOCUMENT_ROOT'].'/', $filename);
+	  if ($f = fopen($filename, 'w+')) {
+	    fwrite($f, $content);
+	    fclose($f);
+	  } else {
+	    return new IXR_Error(500, __('Either the file is not writable, or something wrong happened. The file has not been updated.'));
+	  }
 
-		if ($f = fopen($filename, 'w+')) {
-			fwrite($f, $content);
-			fclose($f);
-		} else {
-			return new IXR_Error(500, __('Either the file is not writable, or something wrong happened. The file has not been updated.'));
-		}
-
-		return true;
+	  return true;
 	}
 
 
 	/* blogger.newPost ...creates a new post */
 	function blogger_newPost($args) {
 
+	  global $wpdb;
+
 		$this->escape($args);
 
-		$blog_ID    = (int) $args[1]; /* though we don't use it yet */
-		$user_login = $args[2];
-		$user_pass  = $args[3];
-		$content    = $args[4];
-		$publish    = $args[5];
-		
-		if (!$this->login_pass_ok($user_login, $user_pass)) {
-			return $this->error;
-		}
+	  $blog_ID    = (int) $args[1]; /* though we don't use it yet */
+	  $user_login = $args[2];
+	  $user_pass  = $args[3];
+	  $content    = $args[4];
+	  $publish    = $args[5];
 
-		do_action('xmlrpc_call', 'blogger.newPost');
+	  if (!$this->login_pass_ok($user_login, $user_pass)) {
+	    return $this->error;
+	  }
 
-		$cap = ($publish) ? 'publish_posts' : 'edit_posts';
-		$user = set_current_user(0, $user_login);
-		if ( !current_user_can($cap) )
-			return new IXR_Error(401, __('Sorry, you are not allowed to post on this blog.'));
-		
-		$post_status = ($publish) ? 'publish' : 'draft';
-		
-		$post_author = $user->ID;
-		
-		$post_title = xmlrpc_getposttitle($content);
-		$post_category = xmlrpc_getpostcategory($content);
-		$post_content = xmlrpc_removepostdata($content);
-		
-		$post_date = current_time('mysql');
-		$post_date_gmt = current_time('mysql', 1);
-		
-		$post_data = compact('blog_ID', 'post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_title', 'post_category', 'post_status');
-		
-		$post_ID = wp_insert_post($post_data);
-		if ( is_wp_error( $post_ID ) )
-			return new IXR_Error(500, $post_ID->get_error_message());
+	  $cap = ($publish) ? 'publish_posts' : 'edit_posts';
+	  $user = set_current_user(0, $user_login);
+	  if ( !current_user_can($cap) )
+	    return new IXR_Error(401, __('Sorry, you are not allowed to post on this blog.'));
 
-		if (!$post_ID)
-			return new IXR_Error(500, __('Sorry, your entry could not be posted. Something wrong happened.'));
+	  $post_status = ($publish) ? 'publish' : 'draft';
 
-		$this->attach_uploads( $post_ID, $post_content );
+	  $post_author = $user->ID;
 
-		logIO('O', "Posted ! ID: $post_ID");
+	  $post_title = xmlrpc_getposttitle($content);
+	  $post_category = xmlrpc_getpostcategory($content);
+	  $post_content = xmlrpc_removepostdata($content);
 
-		return $post_ID;
+	  $post_date = current_time('mysql');
+	  $post_date_gmt = current_time('mysql', 1);
+
+	  $post_data = compact('blog_ID', 'post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_title', 'post_category', 'post_status');
+
+	  $post_ID = wp_insert_post($post_data);
+	  if ( is_wp_error( $post_ID ) )
+	  	return new IXR_Error(500, $post_ID->get_error_message());
+
+	  if (!$post_ID) {
+	    return new IXR_Error(500, __('Sorry, your entry could not be posted. Something wrong happened.'));
+	  }
+	  $this->attach_uploads( $post_ID, $post_content );
+
+	  logIO('O', "Posted ! ID: $post_ID");
+
+	  return $post_ID;
 	}
+
 
 	/* blogger.editPost ...edits a post */
 	function blogger_editPost($args) {
 
+	  global $wpdb;
+
 		$this->escape($args);
-		
-		$post_ID     = (int) $args[1];
-		$user_login  = $args[2];
-		$user_pass   = $args[3];
-		$content     = $args[4];
-		$publish     = $args[5];
-		
-		if (!$this->login_pass_ok($user_login, $user_pass)) {
-			return $this->error;
-		}
 
-		do_action('xmlrpc_call', 'blogger.editPost');
+	  $post_ID     = (int) $args[1];
+	  $user_login  = $args[2];
+	  $user_pass   = $args[3];
+	  $content     = $args[4];
+	  $publish     = $args[5];
 
-		$actual_post = wp_get_single_post($post_ID,ARRAY_A);
-		
-		if (!$actual_post) {
-			return new IXR_Error(404, __('Sorry, no such post.'));
-		}
-		
+	  if (!$this->login_pass_ok($user_login, $user_pass)) {
+	    return $this->error;
+	  }
+
+	  $actual_post = wp_get_single_post($post_ID,ARRAY_A);
+
+	  if (!$actual_post) {
+	  	return new IXR_Error(404, __('Sorry, no such post.'));
+	  }
+
 		$this->escape($actual_post);
-		
-		set_current_user(0, $user_login);
-		if ( !current_user_can('edit_post', $post_ID) )
-			return new IXR_Error(401, __('Sorry, you do not have the right to edit this post.'));
-		
-		extract($actual_post, EXTR_SKIP);
-		
-		if ( ('publish' == $post_status) && !current_user_can('publish_posts') )
-			return new IXR_Error(401, __('Sorry, you do not have the right to publish this post.'));
-		
-		$post_title = xmlrpc_getposttitle($content);
-		$post_category = xmlrpc_getpostcategory($content);
-		$post_content = xmlrpc_removepostdata($content);
-		
-		$postdata = compact('ID', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt');
-		
-		$result = wp_update_post($postdata);
-		
-		if (!$result) {
-			return new IXR_Error(500, __('For some strange yet very annoying reason, this post could not be edited.'));
-		}
-		$this->attach_uploads( $ID, $post_content );
-		
-		return true;
+
+	  set_current_user(0, $user_login);
+	  if ( !current_user_can('edit_post', $post_ID) )
+	    return new IXR_Error(401, __('Sorry, you do not have the right to edit this post.'));
+
+	  extract($actual_post, EXTR_SKIP);
+
+	  if ( ('publish' == $post_status) && !current_user_can('publish_posts') )
+	  	return new IXR_Error(401, __('Sorry, you do not have the right to publish this post.'));
+
+	  $post_title = xmlrpc_getposttitle($content);
+	  $post_category = xmlrpc_getpostcategory($content);
+	  $post_content = xmlrpc_removepostdata($content);
+
+	  $postdata = compact('ID', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt');
+
+	  $result = wp_update_post($postdata);
+
+	  if (!$result) {
+	  	return new IXR_Error(500, __('For some strange yet very annoying reason, this post could not be edited.'));
+	  }
+	  $this->attach_uploads( $ID, $post_content );
+
+	  return true;
 	}
 
 
 	/* blogger.deletePost ...deletes a post */
 	function blogger_deletePost($args) {
+
+	  global $wpdb;
+
 		$this->escape($args);
-		
-		$post_ID     = (int) $args[1];
-		$user_login  = $args[2];
-		$user_pass   = $args[3];
-		$publish     = $args[4];
-		
-		if (!$this->login_pass_ok($user_login, $user_pass)) {
-			return $this->error;
-		}
 
-		do_action('xmlrpc_call', 'blogger.deletePost');
+	  $post_ID     = (int) $args[1];
+	  $user_login  = $args[2];
+	  $user_pass   = $args[3];
+	  $publish     = $args[4];
 
-		$actual_post = wp_get_single_post($post_ID,ARRAY_A);
-		
-		if (!$actual_post) {
-			return new IXR_Error(404, __('Sorry, no such post.'));
-		}
-		
-		set_current_user(0, $user_login);
-		if ( !current_user_can('edit_post', $post_ID) )
-			return new IXR_Error(401, __('Sorry, you do not have the right to delete this post.'));
-		
-		$result = wp_delete_post($post_ID);
-		
-		if (!$result) {
-			return new IXR_Error(500, __('For some strange yet very annoying reason, this post could not be deleted.'));
-		}
-		
-		return true;
+	  if (!$this->login_pass_ok($user_login, $user_pass)) {
+	    return $this->error;
+	  }
+
+	  $actual_post = wp_get_single_post($post_ID,ARRAY_A);
+
+	  if (!$actual_post) {
+	  	return new IXR_Error(404, __('Sorry, no such post.'));
+	  }
+
+	  set_current_user(0, $user_login);
+	  if ( !current_user_can('edit_post', $post_ID) )
+	    return new IXR_Error(401, __('Sorry, you do not have the right to delete this post.'));
+
+	  $result = wp_delete_post($post_ID);
+
+	  if (!$result) {
+	  	return new IXR_Error(500, __('For some strange yet very annoying reason, this post could not be deleted.'));
+	  }
+
+	  return true;
 	}
 
 
@@ -1117,20 +961,21 @@ class wp_xmlrpc_server extends IXR_Server {
 
 	/* metaweblog.newPost creates a post */
 	function mw_newPost($args) {
+
+	  global $wpdb, $post_default_category;
+
 		$this->escape($args);
 
-		$blog_ID     = (int) $args[0]; // we will support this in the near future
-		$user_login  = $args[1];
-		$user_pass   = $args[2];
-		$content_struct = $args[3];
-		$publish     = $args[4];
-		
-		if (!$this->login_pass_ok($user_login, $user_pass)) {
-			return $this->error;
-		}
-		$user = set_current_user(0, $user_login);
+	  $blog_ID     = (int) $args[0]; // we will support this in the near future
+	  $user_login  = $args[1];
+	  $user_pass   = $args[2];
+	  $content_struct = $args[3];
+	  $publish     = $args[4];
 
-		do_action('xmlrpc_call', 'metaWeblog.newPost');
+	  if (!$this->login_pass_ok($user_login, $user_pass)) {
+	    return $this->error;
+	  }
+	  $user = set_current_user(0, $user_login);
 
 		$cap = ( $publish ) ? 'publish_posts' : 'edit_posts';
 		$error_message = __( 'Sorry, you are not allowed to publish posts on this blog.' );
@@ -1176,7 +1021,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			$menu_order = $content_struct["wp_page_order"];
 		}
 
-		$post_author = $user->ID;
+	  $post_author = $user->ID;
 
 		// If an author id was provided then use it instead.
 		if(
@@ -1201,32 +1046,12 @@ class wp_xmlrpc_server extends IXR_Server {
 			$post_author = $content_struct["wp_author_id"];
 		}
 
-		$post_title = $content_struct['title'];
-		$post_content = apply_filters( 'content_save_pre', $content_struct['description'] );
+	  $post_title = $content_struct['title'];
+	  $post_content = apply_filters( 'content_save_pre', $content_struct['description'] );
+	  $post_status = $publish ? 'publish' : 'draft';
 
-		$post_status = $publish ? 'publish' : 'draft';
-
-		if( isset( $content_struct["{$post_type}_status"] ) ) {
-			switch( $content_struct["{$post_type}_status"] ) {
-				case 'draft':
-				case 'private':
-				case 'publish':
-					$post_status = $content_struct["{$post_type}_status"];
-					break;
-				case 'pending':
-					// Pending is only valid for posts, not pages.
-					if( $post_type === 'post' ) {
-						$post_status = $content_struct["{$post_type}_status"];
-					}
-					break;
-				default:
-					$post_status = $publish ? 'publish' : 'draft';
-					break;
-			}
-		}
-		
-		$post_excerpt = $content_struct['mt_excerpt'];
-		$post_more = $content_struct['mt_text_more'];
+	  $post_excerpt = $content_struct['mt_excerpt'];
+	  $post_more = $content_struct['mt_text_more'];
 
 		$tags_input = $content_struct['mt_keywords'];
 
@@ -1247,7 +1072,6 @@ class wp_xmlrpc_server extends IXR_Server {
 			else {
 				switch((int) $content_struct["mt_allow_comments"]) {
 					case 0:
-					case 2:
 						$comment_status = "closed";
 						break;
 					case 1:
@@ -1295,21 +1119,18 @@ class wp_xmlrpc_server extends IXR_Server {
 			$ping_status = get_option("default_ping_status");
 		}
 
-		if ($post_more) {
-			$post_content = $post_content . "\n<!--more-->\n" . $post_more;
-		}
-		
-		$to_ping = $content_struct['mt_tb_ping_urls'];
-		if ( is_array($to_ping) )
-			$to_ping = implode(' ', $to_ping);
+	  if ($post_more) {
+	    $post_content = $post_content . "\n<!--more-->\n" . $post_more;
+	  }
+
+	  $to_ping = $content_struct['mt_tb_ping_urls'];
+	  if ( is_array($to_ping) )
+	  	$to_ping = implode(' ', $to_ping);
 
 		// Do some timestamp voodoo
-		if ( !empty( $content_struct['date_created_gmt'] ) )
-			$dateCreated = str_replace( 'Z', '', $content_struct['date_created_gmt']->getIso() ) . 'Z'; // We know this is supposed to be GMT, so we're going to slap that Z on there by force
-		elseif ( !empty( $content_struct['dateCreated']) )
-			$dateCreated = $content_struct['dateCreated']->getIso();
-
-		if ( !empty( $dateCreated ) ) {
+		$dateCreatedd = $content_struct['dateCreated'];
+		if (!empty($dateCreatedd)) {
+			$dateCreated = $dateCreatedd->getIso();
 			$post_date = get_date_from_gmt(iso8601_to_datetime($dateCreated));
 			$post_date_gmt = iso8601_to_datetime($dateCreated, GMT);
 		} else {
@@ -1317,36 +1138,32 @@ class wp_xmlrpc_server extends IXR_Server {
 			$post_date_gmt = current_time('mysql', 1);
 		}
 
-		$catnames = $content_struct['categories'];
-		logIO('O', 'Post cats: ' . var_export($catnames,true));
-		$post_category = array();
-		
-		if (is_array($catnames)) {
-			foreach ($catnames as $cat) {
-				$post_category[] = get_cat_ID($cat);
-			}
-		}
+	  $catnames = $content_struct['categories'];
+	  logIO('O', 'Post cats: ' . printr($catnames,true));
+	  $post_category = array();
 
-		// We've got all the data -- post it:
-		$postdata = compact('post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt', 'comment_status', 'ping_status', 'to_ping', 'post_type', 'post_name', 'post_password', 'post_parent', 'menu_order', 'tags_input');
-		
-		$post_ID = wp_insert_post($postdata);
-		if ( is_wp_error( $post_ID ) )
-			return new IXR_Error(500, $post_ID->get_error_message());
-		
-		if (!$post_ID) {
-			return new IXR_Error(500, __('Sorry, your entry could not be posted. Something wrong happened.'));
-		}
+	  if (is_array($catnames)) {
+	    foreach ($catnames as $cat) {
+	      $post_category[] = get_cat_ID($cat);
+	    }
+	  }
 
-		if ( isset($content_struct['custom_fields']) ) { 
-			$this->set_custom_fields($post_ID, $content_struct['custom_fields']); 
-		} 
-		
-		$this->attach_uploads( $post_ID, $post_content );
-		
-		logIO('O', "Posted ! ID: $post_ID");
-		
-		return strval($post_ID);
+	  // We've got all the data -- post it:
+	  $postdata = compact('post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt', 'comment_status', 'ping_status', 'to_ping', 'post_type', 'post_name', 'post_password', 'post_parent', 'menu_order', 'tags_input');
+
+	  $post_ID = wp_insert_post($postdata);
+	  if ( is_wp_error( $post_ID ) )
+	  	return new IXR_Error(500, $post_ID->get_error_message());
+
+	  if (!$post_ID) {
+	    return new IXR_Error(500, __('Sorry, your entry could not be posted. Something wrong happened.'));
+	  }
+
+	  $this->attach_uploads( $post_ID, $post_content );
+
+	  logIO('O', "Posted ! ID: $post_ID");
+
+	  return strval($post_ID);
 	}
 
 	function attach_uploads( $post_ID, $post_content ) {
@@ -1366,20 +1183,20 @@ class wp_xmlrpc_server extends IXR_Server {
 	/* metaweblog.editPost ...edits a post */
 	function mw_editPost($args) {
 
+	  global $wpdb, $post_default_category;
+
 		$this->escape($args);
 
-		$post_ID     = (int) $args[0];
-		$user_login  = $args[1];
-		$user_pass   = $args[2];
-		$content_struct = $args[3];
-		$publish     = $args[4];
-		
-		if (!$this->login_pass_ok($user_login, $user_pass)) {
-			return $this->error;
-		}
-		$user = set_current_user(0, $user_login);
+	  $post_ID     = (int) $args[0];
+	  $user_login  = $args[1];
+	  $user_pass   = $args[2];
+	  $content_struct = $args[3];
+	  $publish     = $args[4];
 
-		do_action('xmlrpc_call', 'metaWeblog.editPost');
+	  if (!$this->login_pass_ok($user_login, $user_pass)) {
+	    return $this->error;
+	  }
+		$user = set_current_user(0, $user_login);
 
 		$cap = ( $publish ) ? 'publish_posts' : 'edit_posts';
 		$error_message = __( 'Sorry, you are not allowed to publish posts on this blog.' );
@@ -1403,7 +1220,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error( 401, $error_message );
 		}
 
-		$postdata = wp_get_single_post($post_ID, ARRAY_A);
+	  $postdata = wp_get_single_post($post_ID, ARRAY_A);
 
 		// If there is no post data for the give post id, stop
 		// now and return an error.  Other wise a new post will be
@@ -1478,7 +1295,6 @@ class wp_xmlrpc_server extends IXR_Server {
 			else {
 				switch((int) $content_struct["mt_allow_comments"]) {
 					case 0:
-					case 2:
 						$comment_status = "closed";
 						break;
 					case 1:
@@ -1520,101 +1336,76 @@ class wp_xmlrpc_server extends IXR_Server {
 			}
 		}
 
-		$post_title = $content_struct['title'];
-		$post_content = apply_filters( 'content_save_pre', $content_struct['description'] );
-		$catnames = $content_struct['categories'];
-		
-		$post_category = array();
-		
-		if (is_array($catnames)) {
-			foreach ($catnames as $cat) {
-		 		$post_category[] = get_cat_ID($cat);
-			}
-		}
-		
-		$post_excerpt = $content_struct['mt_excerpt'];
-		$post_more = $content_struct['mt_text_more'];
+	  $post_title = $content_struct['title'];
+	  $post_content = apply_filters( 'content_save_pre', $content_struct['description'] );
+	  $catnames = $content_struct['categories'];
 
-		$post_status = $publish ? 'publish' : 'draft';
-		if( isset( $content_struct["{$post_type}_status"] ) ) {
-			switch( $content_struct["{$post_type}_status"] ) {
-				case 'draft':
-				case 'private':
-				case 'publish':
-					$post_status = $content_struct["{$post_type}_status"];
-					break;
-				case 'pending':
-					// Pending is only valid for posts, not pages.
-					if( $post_type === 'post' ) {
-						$post_status = $content_struct["{$post_type}_status"];
-					}
-					break;
-				default:
-					$post_status = $publish ? 'publish' : 'draft';
-					break;
-			}
-		}
-		
-		$tags_input = $content_struct['mt_keywords'];
+	  $post_category = array();
 
-		if ( ('publish' == $post_status) ) {
-			if ( ( 'page' == $post_type ) && !current_user_can('publish_pages') )
-				return new IXR_Error(401, __('Sorry, you do not have the right to publish this page.'));
-			else if ( !current_user_can('publish_posts') )
-				return new IXR_Error(401, __('Sorry, you do not have the right to publish this post.'));
-		}
-		
-		if ($post_more) {
-			$post_content = $post_content . "\n<!--more-->\n" . $post_more;
-		}
+	  if (is_array($catnames)) {
+	    foreach ($catnames as $cat) {
+	      $post_category[] = get_cat_ID($cat);
+	    }
+	  }
 
-		$to_ping = $content_struct['mt_tb_ping_urls'];
-		if ( is_array($to_ping) )
-			$to_ping = implode(' ', $to_ping);
+	  $post_excerpt = $content_struct['mt_excerpt'];
+	  $post_more = $content_struct['mt_text_more'];
+	  $post_status = $publish ? 'publish' : 'draft';
 
-		// Do some timestamp voodoo
-		if ( !empty( $content_struct['date_created_gmt'] ) )
-			$dateCreated = str_replace( 'Z', '', $content_struct['date_created_gmt']->getIso() ) . 'Z'; // We know this is supposed to be GMT, so we're going to slap that Z on there by force
-		elseif ( !empty( $content_struct['dateCreated']) )
-			$dateCreated = $content_struct['dateCreated']->getIso();
+	  $tags_input = $content_struct['mt_keywords'];
 
-		if ( !empty( $dateCreated ) ) {
-			$post_date = get_date_from_gmt(iso8601_to_datetime($dateCreated));
-			$post_date_gmt = iso8601_to_datetime($dateCreated, GMT);
-		} else {
-			$post_date     = $postdata['post_date'];
-			$post_date_gmt = $postdata['post_date_gmt'];
-		}
+	  if ( ('publish' == $post_status) ) {
+	  	if ( ( 'page' == $post_type ) && !current_user_can('publish_pages') )
+	  		return new IXR_Error(401, __('Sorry, you do not have the right to publish this page.'));
+	  	else if ( !current_user_can('publish_posts') )
+		  	return new IXR_Error(401, __('Sorry, you do not have the right to publish this post.'));
+	  }
 
-		// We've got all the data -- post it:
-		$newpost = compact('ID', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt', 'comment_status', 'ping_status', 'post_date', 'post_date_gmt', 'to_ping', 'post_name', 'post_password', 'post_parent', 'menu_order', 'post_author', 'tags_input');
-		
-		$result = wp_update_post($newpost);
-		if (!$result) {
-			return new IXR_Error(500, __('Sorry, your entry could not be edited. Something wrong happened.'));
-		}
+	  if ($post_more) {
+	    $post_content = $post_content . "\n<!--more-->\n" . $post_more;
+	  }
 
-		if ( isset($content_struct['custom_fields']) ) { 
-			$this->set_custom_fields($post_ID, $content_struct['custom_fields']); 
-		} 
+	  $to_ping = $content_struct['mt_tb_ping_urls'];
+	  if ( is_array($to_ping) )
+	  	$to_ping = implode(' ', $to_ping);
 
-		$this->attach_uploads( $ID, $post_content );
-		
-		logIO('O',"(MW) Edited ! ID: $post_ID");
-		
-		return true;
+	  // Do some timestamp voodoo
+	  $dateCreatedd = $content_struct['dateCreated'];
+	  if (!empty($dateCreatedd)) {
+	    $dateCreated = $dateCreatedd->getIso();
+	    $post_date     = get_date_from_gmt(iso8601_to_datetime($dateCreated));
+	    $post_date_gmt = iso8601_to_datetime($dateCreated . "Z", GMT);
+	  } else {
+	    $post_date     = $postdata['post_date'];
+	    $post_date_gmt = $postdata['post_date_gmt'];
+	  }
+
+	  // We've got all the data -- post it:
+	  $newpost = compact('ID', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt', 'comment_status', 'ping_status', 'post_date', 'post_date_gmt', 'to_ping', 'post_name', 'post_password', 'post_parent', 'menu_order', 'post_author', 'tags_input');
+
+	  $result = wp_update_post($newpost);
+	  if (!$result) {
+	    return new IXR_Error(500, __('Sorry, your entry could not be edited. Something wrong happened.'));
+	  }
+	  $this->attach_uploads( $ID, $post_content );
+
+	  logIO('O',"(MW) Edited ! ID: $post_ID");
+
+	  return true;
 	}
 
 
 	/* metaweblog.getPost ...returns a post */
 	function mw_getPost($args) {
 
+		global $wpdb;
+
 		$this->escape($args);
-		
+
 		$post_ID     = (int) $args[0];
 		$user_login  = $args[1];
 		$user_pass   = $args[2];
-		
+
 		if (!$this->login_pass_ok($user_login, $user_pass)) {
 			return $this->error;
 		}
@@ -1626,42 +1417,39 @@ class wp_xmlrpc_server extends IXR_Server {
 		do_action('xmlrpc_call', 'metaWeblog.getPost');
 
 		$postdata = wp_get_single_post($post_ID, ARRAY_A);
-		
+
 		if ($postdata['post_date'] != '') {
 			$post_date = mysql2date('Ymd\TH:i:s', $postdata['post_date']);
 			$post_date_gmt = mysql2date('Ymd\TH:i:s', $postdata['post_date_gmt']);
-		
+
 			$categories = array();
 			$catids = wp_get_post_categories($post_ID);
-			foreach($catids as $catid)
+			foreach($catids as $catid) {
 				$categories[] = get_cat_name($catid);
-			
+			}
+
 			$tagnames = array();
 			$tags = wp_get_post_tags( $post_ID );
 			if ( !empty( $tags ) ) {
-				foreach ( $tags as $tag )
+				foreach ( $tags as $tag ) {
 					$tagnames[] = $tag->name;
+				}
 				$tagnames = implode( ', ', $tagnames );
 			} else {
 				$tagnames = '';
 			}
-			
+
 			$post = get_extended($postdata['post_content']);
 			$link = post_permalink($postdata['ID']);
-			
+
 			// Get the author info.
 			$author = get_userdata($postdata['post_author']);
-			
+
 			$allow_comments = ('open' == $postdata['comment_status']) ? 1 : 0;
 			$allow_pings = ('open' == $postdata['ping_status']) ? 1 : 0;
 
-			// Consider future posts as published
-			if( $postdata['post_status'] === 'future' ) {
-				$postdata['post_status'] = 'publish';
-			}
-			
 			$resp = array(
-				'dateCreated' => new IXR_Date($post_date),
+	      		'dateCreated' => new IXR_Date($post_date),
 				'userid' => $postdata['post_author'],
 				'postid' => $postdata['ID'],
 				'description' => $post['main'],
@@ -1680,11 +1468,9 @@ class wp_xmlrpc_server extends IXR_Server {
 				'wp_password' => $postdata['post_password'],
 				'wp_author_id' => $author->ID,
 				'wp_author_display_name'	=> $author->display_name,
-				'date_created_gmt' => new IXR_Date($post_date_gmt),
-				'post_status' => $postdata['post_status'],
-				'custom_fields' => $this->get_custom_fields($post_ID)
+				'date_created_gmt' => new IXR_Date($post_date_gmt)
 			);
-			
+
 			return $resp;
 		} else {
 			return new IXR_Error(404, __('Sorry, no such post.'));
@@ -1705,8 +1491,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if (!$this->login_pass_ok($user_login, $user_pass)) {
 			return $this->error;
 		}
-
-		do_action('xmlrpc_call', 'metaWeblog.getRecentPosts');
 
 		$posts_list = wp_get_recent_posts($num_posts);
 
@@ -1750,11 +1534,6 @@ class wp_xmlrpc_server extends IXR_Server {
 			$allow_comments = ('open' == $entry['comment_status']) ? 1 : 0;
 			$allow_pings = ('open' == $entry['ping_status']) ? 1 : 0;
 
-			// Consider future posts as published
-			if( $entry['post_status'] === 'future' ) {
-				$entry['post_status'] = 'publish';
-			}
-
 			$struct[] = array(
 				'dateCreated' => new IXR_Date($post_date),
 				'userid' => $entry['post_author'],
@@ -1775,9 +1554,7 @@ class wp_xmlrpc_server extends IXR_Server {
 				'wp_password' => $entry['post_password'],
 				'wp_author_id' => $author->ID,
 				'wp_author_display_name' => $author->display_name,
-				'date_created_gmt' => new IXR_Date($post_date_gmt),
-				'post_status' => $entry['post_status'],
-				'custom_fields' => $this->get_custom_fields($entry['ID'])
+				'date_created_gmt' => new IXR_Date($post_date_gmt)
 			);
 
 		}
@@ -1793,6 +1570,8 @@ class wp_xmlrpc_server extends IXR_Server {
 
 	/* metaweblog.getCategories ...returns the list of categories on a given blog */
 	function mw_getCategories($args) {
+
+		global $wpdb;
 
 		$this->escape($args);
 
@@ -1850,8 +1629,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( !$this->login_pass_ok($user_login, $user_pass) )
 			return $this->error;
 
-		do_action('xmlrpc_call', 'metaWeblog.newMediaObject');
-
 		set_current_user(0, $user_login);
 		if ( !current_user_can('upload_files') ) {
 			logIO('O', '(MW) User does not have upload_files capability');
@@ -1880,7 +1657,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			$name = "wpid{$old_file->ID}-{$filename}";
 		}
 
-		$upload = wp_upload_bits($name, $type, $bits);
+		$upload = wp_upload_bits($name, $type, $bits, $overwrite);
 		if ( ! empty($upload['error']) ) {
 			$errorString = sprintf(__('Could not write file %1$s (%2$s)'), $name, $upload['error']);
 			logIO('O', '(MW) ' . $errorString);
@@ -1924,8 +1701,6 @@ class wp_xmlrpc_server extends IXR_Server {
 			return $this->error;
 		}
 
-		do_action('xmlrpc_call', 'mt.getRecentPostTitles');
-
 		$posts_list = wp_get_recent_posts($num_posts);
 
 		if (!$posts_list) {
@@ -1963,6 +1738,8 @@ class wp_xmlrpc_server extends IXR_Server {
 
 	/* mt.getCategoryList ...returns the list of categories on a given blog */
 	function mt_getCategoryList($args) {
+
+		global $wpdb;
 
 		$this->escape($args);
 
@@ -2045,8 +1822,6 @@ class wp_xmlrpc_server extends IXR_Server {
 			return $this->error;
 		}
 
-		do_action('xmlrpc_call', 'mt.setPostCategories');
-
 		set_current_user(0, $user_login);
 		if ( !current_user_can('edit_post', $post_ID) )
 			return new IXR_Error(401, __('Sorry, you can not edit this post.'));
@@ -2064,8 +1839,6 @@ class wp_xmlrpc_server extends IXR_Server {
 	/* mt.supportedMethods ...returns an array of methods supported by this server */
 	function mt_supportedMethods($args) {
 
-		do_action('xmlrpc_call', 'mt.supportedMethods');
-
 		$supported_methods = array();
 		foreach($this->methods as $key=>$value) {
 			$supported_methods[] = $key;
@@ -2078,7 +1851,6 @@ class wp_xmlrpc_server extends IXR_Server {
 	/* mt.supportedTextFilters ...returns an empty array because we don't
 		 support per-post text filters yet */
 	function mt_supportedTextFilters($args) {
-		do_action('xmlrpc_call', 'mt.supportedTextFilters');
 		return apply_filters('xmlrpc_text_filters', array());
 	}
 
@@ -2089,8 +1861,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		global $wpdb;
 
 		$post_ID = intval($args);
-
-		do_action('xmlrpc_call', 'mt.getTrackbackPings');
 
 		$actual_post = wp_get_single_post($post_ID, ARRAY_A);
 
@@ -2134,8 +1904,6 @@ class wp_xmlrpc_server extends IXR_Server {
 			return $this->error;
 		}
 
-		do_action('xmlrpc_call', 'mt.publishPost');
-
 		set_current_user(0, $user_login);
 		if ( !current_user_can('edit_post', $post_ID) )
 			return new IXR_Error(401, __('Sorry, you can not edit this post.'));
@@ -2162,9 +1930,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 	/* pingback.ping gets a pingback and registers it */
 	function pingback_ping($args) {
-		global $wpdb;
-
-		do_action('xmlrpc_call', 'pingback.ping');
+		global $wpdb, $wp_version;
 
 		$this->escape($args);
 
@@ -2177,10 +1943,12 @@ class wp_xmlrpc_server extends IXR_Server {
 		$pagelinkedto = str_replace('&amp;', '&', $pagelinkedto);
 		$pagelinkedto = str_replace('&', '&amp;', $pagelinkedto);
 
+		$error_code = -1;
+
 		// Check if the page linked to is in our site
 		$pos1 = strpos($pagelinkedto, str_replace(array('http://www.','http://','https://www.','https://'), '', get_option('home')));
 		if( !$pos1 )
-			return new IXR_Error(0, __('Is there no link to us?'));
+				return new IXR_Error(0, __('Is there no link to us?'));
 
 		// let's find which post is linked to
 		// FIXME: does url_to_postid() cover all these cases already?
@@ -2240,7 +2008,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	  		return new IXR_Error(33, __('The specified target URL cannot be used as a target. It either doesn\'t exist, or it is not a pingback-enabled resource.'));
 
 		// Let's check that the remote site didn't already pingback this entry
-		$wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = '$post_ID' AND comment_author_url = '$pagelinkedfrom'");
+		$result = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = '$post_ID' AND comment_author_url = '$pagelinkedfrom'");
 
 		if ( $wpdb->num_rows ) // We already have a Pingback from this URL
 	  		return new IXR_Error(48, __('The pingback has already been registered.'));
@@ -2302,7 +2070,9 @@ class wp_xmlrpc_server extends IXR_Server {
 		$pagelinkedfrom = str_replace('&', '&amp;', $pagelinkedfrom);
 
 		$context = '[...] ' . wp_specialchars( $excerpt ) . ' [...]';
+		$original_pagelinkedfrom = $pagelinkedfrom;
 		$pagelinkedfrom = $wpdb->escape( $pagelinkedfrom );
+		$original_title = $title;
 
 		$comment_post_ID = (int) $post_ID;
 		$comment_author = $title;
@@ -2327,8 +2097,6 @@ class wp_xmlrpc_server extends IXR_Server {
 	function pingback_extensions_getPingbacks($args) {
 
 		global $wpdb;
-
-		do_action('xmlrpc_call', 'pingback.extensions.getPingsbacks');
 
 		$this->escape($args);
 

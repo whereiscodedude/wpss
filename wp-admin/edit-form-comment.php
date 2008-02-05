@@ -6,9 +6,9 @@ $form_extra = "' />\n<input type='hidden' name='comment_ID' value='" . $comment-
 ?>
 
 <form name="post" action="comment.php" method="post" id="post">
+<h2><?php echo $toprow_title; ?></h2>
 <?php wp_nonce_field('update-comment_' . $comment->comment_ID) ?>
 <div class="wrap">
-<h2><?php echo $toprow_title; ?></h2>
 <input type="hidden" name="user_ID" value="<?php echo (int) $user_ID ?>" />
 <input type="hidden" name="action" value='<?php echo $form_action . $form_extra ?>' />
 
@@ -42,16 +42,9 @@ addLoadEvent(focusit);
 	<?php the_editor($comment->comment_content, 'content', 'newcomment_author_url'); ?>
 </fieldset>
 
-<?php
-    $post = get_post($comment->comment_post_ID); //get the post
-    $post_title = $post->post_title; // and its title
-?>
-    <div>
-        <a href="<?php echo get_permalink($comment->comment_post_ID); ?>" class="view-comment-post-link" target="_blank"><?php echo sprintf('%s &raquo;',$post_title); ?></a>
-        <p class="submit"><input type="submit" name="editcomment" id="editcomment" value="<?php echo $submitbutton_text ?>" style="font-weight: bold;" tabindex="6" />
-        <input name="referredby" type="hidden" id="referredby" value="<?php echo wp_get_referer(); ?>" />
-        </p>
-    </div>
+<p class="submit"><input type="submit" name="editcomment" id="editcomment" value="<?php echo $submitbutton_text ?>" style="font-weight: bold;" tabindex="6" />
+  <input name="referredby" type="hidden" id="referredby" value="<?php echo wp_get_referer(); ?>" />
+</p>
 
 </div>
 

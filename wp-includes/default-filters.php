@@ -1,16 +1,4 @@
 <?php
-/**
- * Sets up the default filters and actions for most
- * of the WordPress hooks.
- *
- * If you need to remove a default hook, this file will
- * give you the priority for which to use to remove the
- * hook.
- *
- * Not all of the default hooks are found in default-filters.php
- *
- * @package WordPress
- */
 
 // Strip, trim, kses, special chars for string saves
 $filters = array('pre_term_name', 'pre_comment_author_name', 'pre_link_name', 'pre_link_target',
@@ -60,12 +48,6 @@ foreach ( $filters as $filter ) {
 $filters = array('pre_term_slug');
 foreach ( $filters as $filter ) {
 	add_filter($filter, 'sanitize_title');
-}
-
-// Keys
-$filters = array('pre_post_type');
-foreach ( $filters as $filter ) {
-	add_filter($filter, 'sanitize_user');
 }
 
 // Places to balance tags on input
@@ -152,9 +134,6 @@ add_filter('comment_flood_filter', 'wp_throttle_comment_flood', 10, 3);
 add_filter('pre_comment_content', 'wp_rel_nofollow', 15);
 add_filter('comment_email', 'antispambot');
 
-//Atom SSL support
-add_filter('atom_service_url','atom_service_url_filter');
-
 // Actions
 add_action('wp_head', 'rsd_link');
 add_action('wp_head', 'wlwmanifest_link');
@@ -162,7 +141,6 @@ add_action('wp_head', 'locale_stylesheet');
 add_action('publish_future_post', 'wp_publish_post', 10, 1);
 add_action('wp_head', 'noindex', 1);
 add_action('wp_head', 'wp_print_scripts');
-add_action('wp_head', 'wp_generator');
 if(!defined('DOING_CRON'))
 	add_action('init', 'wp_cron');
 add_action('do_feed_rdf', 'do_feed_rdf', 10, 1);

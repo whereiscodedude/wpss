@@ -12,12 +12,14 @@ if ( isset( $_POST['deletepost'] ) )
 switch($action) {
 case 'postajaxpost':
 case 'post':
+	$parent_file = 'post-new.php';
+	$submenu_file = 'post-new.php';
 	check_admin_referer('add-post');
 
 	$post_ID = 'post' == $action ? write_post() : edit_post();
 
 	// Redirect.
-	if ( !empty( $_POST['mode'] ) ) {
+	if (!empty($_POST['mode'])) {
 	switch($_POST['mode']) {
 		case 'bookmarklet':
 			$location = $_POST['referredby'];
@@ -33,13 +35,13 @@ case 'post':
 		$location = "post-new.php?posted=$post_ID";
 	}
 
-	if ( isset( $_POST['save'] ) )
+	if ( isset($_POST['save']) )
 		$location = "post.php?action=edit&post=$post_ID";
 
-	if ( empty( $post_ID ) )
+	if ( empty($post_ID) )
 		$location = 'post-new.php';
 
-	wp_redirect( $location );
+	wp_redirect($location);
 	exit();
 	break;
 
@@ -56,13 +58,10 @@ case 'edit':
 		exit();
 	}
 
-	wp_enqueue_script('post');
-	wp_enqueue_script('thickbox');
-	wp_enqueue_script('media-upload');
-
-	if ( 'draft' == $post->post_status )
+	if($post->post_status == 'draft') {
+		wp_enqueue_script('prototype');
 		wp_enqueue_script('autosave');
-
+	}
 	require_once('admin-header.php');
 
 	if ( !current_user_can('edit_post', $post_ID) )
@@ -122,14 +121,10 @@ case 'editpost':
 
 		if ($_POST['save']) {
 			$location = "post.php?action=edit&post=$post_ID";
-		} elseif ($_POST['addemeta']) {
-			$location = add_query_arg( 'message', 2, wp_get_referer() );
-			$location = explode('#', $location);
-			$location = $location[0] . '#postcustom';
+		} elseif ($_POST['updatemeta']) {
+			$location = wp_get_referer() . '&message=2#postcustom';
 		} elseif ($_POST['deletemeta']) {
-			$location = add_query_arg( 'message', 3, wp_get_referer() );
-			$location = explode('#', $location);
-			$location = $location[0] . '#postcustom';
+			$location = wp_get_referer() . '&message=3#postcustom';
 		} elseif (!empty($referredby) && $referredby != $referer) {
 			$location = $_POST['referredby'];
 			if ( $_POST['referredby'] == 'redo' )
@@ -137,7 +132,7 @@ case 'editpost':
 		} elseif ($action == 'editattachment') {
 			$location = 'attachments.php';
 		} else {
-			$location = 'edit.php?posted=' . $post_ID;
+			$location = 'post-new.php';
 		}
 	}
 

@@ -82,12 +82,12 @@ if ( isset( $_GET['approved'] ) || isset( $_GET['deleted'] ) || isset( $_GET['sp
 		echo '<div id="moderated" class="updated fade"><p>';
 
 		if ( $approved > 0 ) {
-			printf( __ngettext( '%s comment approved', '%s comments approved', $approved ), $approved );
+			printf( __ngettext( '%s comment approved.', '%s comments approved.', $approved ), $approved );
 			echo '<br />';
 		}
 
 		if ( $deleted > 0 ) {
-			printf( __ngettext( '%s comment deleted', '%s comments deleted', $deleted ), $deleted );
+			printf( __ngettext( '%s comment deleted', '%s comments deleted.', $deleted ), $deleted );
 			echo '<br />';
 		}
 
@@ -147,7 +147,7 @@ $comments = array_slice( $comments, $start, $stop );
 	<form name="approval" id="approval" action="<?php echo basename( __FILE__ ); ?>" method="post">
 		<?php wp_nonce_field( 'moderate-comments' ); ?>
 		<input type="hidden" name="action" value="update" />
-		<ol id="the-comment-list" class="list:comment commentlist">
+		<ol id="the-comments-list" class="commentlist">
 	<?php
 		$i = 0;
 
@@ -157,11 +157,6 @@ $comments = array_slice( $comments, $start, $stop );
 			if ( $i++ % 2 ) {
 				$class .= ' alternate';
 			}
-
-			$delete_url  = clean_url( wp_nonce_url( "comment.php?action=deletecomment&p=$comment->comment_post_ID&c=$comment->comment_ID", "delete-comment_$comment->comment_ID" ) );
-			$approve_url = clean_url( wp_nonce_url( "comment.php?action=approvecomment&p=$comment->comment_post_ID&c=$comment->comment_ID", "approve-comment_$comment->comment_ID" ) );
-			$spam_url    = clean_url( wp_nonce_url( "comment.php?action=deletecomment&dt=spam&p=$comment->comment_post_ID&c=$comment->comment_ID", "delete-comment_$comment->comment_ID" ) );
-
 		?>
 			<li id="comment-<?php comment_ID(); ?>" class="<?php echo $class; ?>">
 				<p>
@@ -175,29 +170,20 @@ $comments = array_slice( $comments, $start, $stop );
 					<?php comment_text(); ?>
 				</p>
 
-				<p>
-					<?php comment_date( __( 'M j, g:i A' ) ); ?>
-					&#8212;
-					[
-					<a href="comment.php?action=editcomment&amp;c=<?php comment_ID(); ?>" title="<?php _e( 'Edit this comment' ); ?>"><?php _e( 'Edit' ); ?></a>
-					|
-					<a href="<?php echo $delete_url; ?>" class="delete:the-comment-list:comment-<?php comment_ID(); ?>" title="<?php _e( 'Delete this comment' ); ?>"><?php _e( 'Delete' ); ?></a>
-					|
-					<a href="<?php echo $approve_url; ?>" class="delete:the-comment-list:comment-<?php comment_ID(); ?>:33FF33:action=dim-comment" title="<?php _e( 'Approve this comment' ); ?>"><?php _e( 'Approve' ); ?></a>
-					|
-					<a href="<?php echo $spam_url; ?>" class="delete:the-comment-list:comment-<?php comment_ID(); ?>::spam=1" title="<?php _e( 'Mark this comment as spam' ); ?>"><?php _e( 'Spam' ); ?></a>
-					]
-					&#8212;
+				<p><small>
+					<?php comment_date( __( 'M j, g:i A' ) ); ?> &#8212;
+					[ <a href="comment.php?action=editcomment&amp;c=<?php comment_ID(); ?>" title="<?php _e( 'Edit this comment' ); ?>"><?php _e( 'Edit' ); ?></a> |
+					<a href="post.php?action=deletecomment&amp;p=<?php echo $comment->comment_post_ID; ?>" title="<?php _e( 'Delete this comment' ); ?>" onclick="return deleteSomething( 'comment', <?php comment_ID(); ?>, '<?php echo js_escape( sprintf( __( "You are about to delete this comment by '%s'.\n'OK' to delete, 'Cancel' to stop." ), get_comment_author() ) ); ?>', theCommentList );"><?php _e( 'Delete' ); ?></a> ] &#8212;
 					<a href="<?php echo get_permalink( $comment->comment_post_ID ); ?>" title="<?php _e( 'View the post' ); ?>"><?php printf( __( 'View post &#8220;%s&#8221;' ), get_the_title( $comment->comment_post_ID ) ); ?></a>
-				</p>
+				</small></p>
 
-				<p>
+				<p><small>
 					<?php _e( 'Bulk action:' ); ?>
 					<label for="comment-<?php comment_ID(); ?>-approve"><input type="radio" name="comment[<?php comment_ID(); ?>]" id="comment-<?php comment_ID(); ?>-approve" value="approve" /> <?php _e( 'Approve' ); ?></label> &nbsp;
 					<label for="comment-<?php comment_ID(); ?>-spam"><input type="radio" name="comment[<?php comment_ID(); ?>]" id="comment-<?php comment_ID(); ?>-spam" value="spam" /> <?php _e( 'Spam' ); ?></label> &nbsp;
 					<label for="comment-<?php comment_ID(); ?>-delete"><input type="radio" name="comment[<?php comment_ID(); ?>]" id="comment-<?php comment_ID(); ?>-delete" value="delete" /> <?php _e( 'Delete' ); ?></label> &nbsp;
 					<label for="comment-<?php comment_ID(); ?>-nothing"><input type="radio" name="comment[<?php comment_ID(); ?>]" id="comment-<?php comment_ID(); ?>-nothing" value="later" checked="checked" /> <?php _e( 'No action' ); ?></label>
-				</p>
+				</small></p>
 			</li>
 		<?php
 		}

@@ -83,9 +83,9 @@ switch ($action) {
 		break;
 
 	case 'edit' :
-		wp_enqueue_script('link');
-		wp_enqueue_script('thickbox');
-
+		wp_enqueue_script( array('xfn', 'dbx-admin-key?pagenow=link.php') );
+		if ( current_user_can( 'manage_categories' ) )
+			wp_enqueue_script( 'ajaxlinkcat' );
 		$parent_file = 'link-manager.php';
 		$submenu_file = 'link-manager.php';
 		$title = __('Edit Link');

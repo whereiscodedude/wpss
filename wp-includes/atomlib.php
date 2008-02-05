@@ -1,67 +1,26 @@
 <?php
 /*
- * Atom Syndication Format PHP Library
+ * atomlib.php - Atom Syndication Format PHP Library
  *
- * @package AtomLib
- * @link http://code.google.com/p/phpatomlib/
+ * Project: http://code.google.com/p/phpatomlib/
  *
- * @author: Elias Torres <elias@torrez.us>
- * @version: 0.4
- * @since 2.3
+ * Author: Elias Torres <elias@torrez.us>
+ * Version: 0.4
+ *
  */
 
-/**
- * Structure that store common Atom Feed Properties
- *
- * @package AtomLib
- */
 class AtomFeed {
-	/**
-	 * Stores Links
-	 * @var array
-	 * @access public
-	 */
     var $links = array();
-    /**
-     * Stores Categories
-     * @var array
-     * @access public
-     */
     var $categories = array();
-	/**
-	 * Stores Entries
-	 *
-	 * @var array
-	 * @access public
-	 */
+
     var $entries = array();
 }
 
-/**
- * Structure that store Atom Entry Properties
- *
- * @package AtomLib
- */
 class AtomEntry {
-	/**
-	 * Stores Links
-	 * @var array
-	 * @access public
-	 */
     var $links = array();
-    /**
-     * Stores Categories
-     * @var array
-	 * @access public
-     */
     var $categories = array();
 }
 
-/**
- * AtomLib Atom Parser API
- *
- * @package AtomLib
- */
 class AtomParser {
 
     var $NS = 'http://www.w3.org/2005/Atom';

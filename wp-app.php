@@ -12,7 +12,6 @@ define('APP_REQUEST', true);
 require_once('./wp-config.php');
 require_once(ABSPATH . WPINC . '/post-template.php');
 require_once(ABSPATH . WPINC . '/atomlib.php');
-require_once(ABSPATH . WPINC . '/feed.php');
 
 $_SERVER['PATH_INFO'] = preg_replace( '/.*\/wp-app\.php/', '', $_SERVER['REQUEST_URI'] );
 
@@ -68,6 +67,7 @@ class AtomServer {
 	var $MEDIA_SINGLE_PATH = "attachment";
 
 	var $params = array();
+	var $script_name = "wp-app.php";
 	var $media_content_types = array('image/*','audio/*','video/*');
 	var $atom_content_types = array('application/atom+xml');
 
@@ -79,10 +79,6 @@ class AtomServer {
 	function AtomServer() {
 
 		$this->script_name = array_pop(explode('/',$_SERVER['SCRIPT_NAME']));
-		$this->app_base = get_bloginfo('url') . '/' . $this->script_name . '/';
-		if ( isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on' ) {
-			$this->app_base = preg_replace( '/^http:\/\//', 'https://', $this->app_base );
-		}
 
 		$this->selectors = array(
 			'@/service$@' =>
@@ -222,7 +218,7 @@ EOD;
 	 * Create Post (No arguments)
 	 */
 	function create_post() {
-		global $blog_id, $user_ID;
+		global $blog_id, $wpdb;
 		$this->get_accepted_content_type($this->atom_content_types);
 
 		$parser = new AtomParser();
@@ -256,11 +252,11 @@ EOD;
 
 		$blog_ID = (int ) $blog_id;
 		$post_status = ($publish) ? 'publish' : 'draft';
-		$post_author = (int) $user_ID;
+		$post_author = (int) $user->ID;
 		$post_title = $entry->title[1];
 		$post_content = $entry->content[1];
 		$post_excerpt = $entry->summary[1];
-		$pubtimes = $this->get_publish_time($entry->published);
+		$pubtimes = $this->get_publish_time($entry);
 		$post_date = $pubtimes[0];
 		$post_date_gmt = $pubtimes[1];
 
@@ -276,8 +272,9 @@ EOD;
 		if ( is_wp_error( $postID ) )
 			$this->internal_error($postID->get_error_message());
 
-		if (!$postID)
+		if (!$postID) {
 			$this->internal_error(__('Sorry, your entry could not be posted. Something wrong happened.'));
+		}
 
 		// getting warning here about unable to set headers
 		// because something in the cache is printing to the buffer
@@ -305,6 +302,8 @@ EOD;
 	}
 
 	function put_post($postID) {
+		global $wpdb;
+
 		// checked for valid content-types (atom+xml)
 		// quick check and exit
 		$this->get_accepted_content_type($this->atom_content_types);
@@ -320,6 +319,7 @@ EOD;
 
 		// check for not found
 		global $entry;
+		$entry = $GLOBALS['entry'];
 		$this->set_current_entry($postID);
 
 		if(!current_user_can('edit_post', $entry['ID']))
@@ -332,12 +332,9 @@ EOD;
 		$post_title = $parsed->title[1];
 		$post_content = $parsed->content[1];
 		$post_excerpt = $parsed->summary[1];
-		$pubtimes = $this->get_publish_time($entry->published);
+		$pubtimes = $this->get_publish_time($entry);
 		$post_date = $pubtimes[0];
 		$post_date_gmt = $pubtimes[1];
-		$pubtimes = $this->get_publish_time($parsed->updated);
-		$post_modified = $pubtimes[0];
-		$post_modified_gmt = $pubtimes[1];
 
 		// let's not go backwards and make something draft again.
 		if(!$publish && $post_status == 'draft') {
@@ -346,7 +343,7 @@ EOD;
 			$post_status = 'publish';
 		}
 
-		$postdata = compact('ID', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt', 'post_date', 'post_date_gmt', 'post_modified', 'post_modified_gmt');
+		$postdata = compact('ID', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt', 'post_date', 'post_date_gmt');
 		$this->escape($postdata);
 
 		$result = wp_update_post($postdata);
@@ -399,6 +396,7 @@ EOD;
 	}
 
 	function create_attachment() {
+		global $wp, $wpdb, $wp_query, $blog_id;
 
 		$type = $this->get_accepted_content_type();
 
@@ -419,7 +417,7 @@ EOD;
 			$slug = sanitize_file_name( $_SERVER['HTTP_TITLE'] );
 		elseif ( empty( $slug ) ) // just make a random name
 			$slug = substr( md5( uniqid( microtime() ) ), 0, 7);
-		$ext = preg_replace( '|.*/([a-z0-9]+)|', '$1', $_SERVER['CONTENT_TYPE'] );
+		$ext = preg_replace( '|.*/([a-z]+)|', '$1', $_SERVER['CONTENT_TYPE'] );
 		$slug = "$slug.$ext";
 		$file = wp_upload_bits( $slug, NULL, $bits);
 
@@ -427,8 +425,9 @@ EOD;
 
 		$url = $file['url'];
 		$file = $file['file'];
+		$filename = basename($file);
 
-		do_action('wp_create_file_in_uploads', $file); // replicate
+		$header = apply_filters('wp_create_file_in_uploads', $file); // replicate
 
 		// Construct the attachment array
 		$attachment = array(
@@ -441,10 +440,11 @@ EOD;
 			);
 
 		// Save the data
-		$postID = wp_insert_attachment($attachment, $file);
+		$postID = wp_insert_attachment($attachment, $file, $post);
 
-		if (!$postID)
+		if (!$postID) {
 			$this->internal_error(__('Sorry, your entry could not be posted. Something wrong happened.'));
+		}
 
 		$output = $this->get_entry($postID, 'attachment');
 
@@ -453,6 +453,8 @@ EOD;
 	}
 
 	function put_attachment($postID) {
+		global $wpdb;
+
 		// checked for valid content-types (atom+xml)
 		// quick check and exit
 		$this->get_accepted_content_type($this->atom_content_types);
@@ -471,15 +473,14 @@ EOD;
 		if(!current_user_can('edit_post', $entry['ID']))
 			$this->auth_required(__('Sorry, you do not have the right to edit this post.'));
 
+		$publish = (isset($parsed->draft) && trim($parsed->draft) == 'yes') ? false : true;
+
 		extract($entry);
 
 		$post_title = $parsed->title[1];
 		$post_content = $parsed->content[1];
-		$pubtimes = $this->get_publish_time($parsed->updated);
-		$post_modified = $pubtimes[0];
-		$post_modified_gmt = $pubtimes[1];
 
-		$postdata = compact('ID', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt', 'post_modified', 'post_modified_gmt');
+		$postdata = compact('ID', 'post_content', 'post_title', 'post_category', 'post_status', 'post_excerpt');
 		$this->escape($postdata);
 
 		$result = wp_update_post($postdata);
@@ -556,6 +557,8 @@ EOD;
 
 	function put_file($postID) {
 
+		$type = $this->get_accepted_content_type();
+
 		// first check if user can upload
 		if(!current_user_can('upload_files'))
 			$this->auth_required(__('You do not have permission to upload files.'));
@@ -584,14 +587,11 @@ EOD;
 		fclose($localfp);
 
 		$ID = $entry['ID'];
-		$pubtimes = $this->get_publish_time($entry->published);
+		$pubtimes = $this->get_publish_time($entry);
 		$post_date = $pubtimes[0];
 		$post_date_gmt = $pubtimes[1];
-		$pubtimes = $this->get_publish_time($parsed->updated);
-		$post_modified = $pubtimes[0];
-		$post_modified_gmt = $pubtimes[1];
 
-		$post_data = compact('ID', 'post_date', 'post_date_gmt', 'post_modified', 'post_modified_gmt');
+		$post_data = compact('ID', 'post_date', 'post_date_gmt');
 		$result = wp_update_post($post_data);
 
 		if (!$result) {
@@ -608,7 +608,7 @@ EOD;
 		} else {
 			$path = $this->ENTRIES_PATH;
 		}
-		$url = $this->app_base . $path;
+		$url = get_bloginfo('url') . '/' . $this->script_name . '/' . $path;
 		if(isset($page) && is_int($page)) {
 			$url .= "/$page";
 		}
@@ -616,19 +616,21 @@ EOD;
 	}
 
 	function the_entries_url($page = NULL) {
-		echo $this->get_entries_url($page);
+		$url = $this->get_entries_url($page);
+		echo $url;
 	}
 
-	function get_categories_url($deprecated = '') {
-		return $this->app_base . $this->CATEGORIES_PATH;
+	function get_categories_url($page = NULL) {
+		return get_bloginfo('url') . '/' . $this->script_name . '/' . $this->CATEGORIES_PATH;
 	}
 
 	function the_categories_url() {
-		echo $this->get_categories_url();
+		$url = $this->get_categories_url();
+		echo $url;
 	}
 
 	function get_attachments_url($page = NULL) {
-		$url = $this->app_base . $this->MEDIA_PATH;
+		$url = get_bloginfo('url') . '/' . $this->script_name . '/' . $this->MEDIA_PATH;
 		if(isset($page) && is_int($page)) {
 			$url .= "/$page";
 		}
@@ -636,43 +638,46 @@ EOD;
 	}
 
 	function the_attachments_url($page = NULL) {
-		echo $this->get_attachments_url($page);
+		$url = $this->get_attachments_url($page);
+		echo $url;
 	}
 
 	function get_service_url() {
-		return $this->app_base . $this->SERVICE_PATH;
+		return get_bloginfo('url') . '/' . $this->script_name . '/' . $this->SERVICE_PATH;
 	}
 
 	function get_entry_url($postID = NULL) {
 		if(!isset($postID)) {
 			global $post;
-			$postID = (int) $post->ID;
+			$postID = (int) $GLOBALS['post']->ID;
 		}
 
-		$url = $this->app_base . $this->ENTRY_PATH . "/$postID";
+		$url = get_bloginfo('url') . '/' . $this->script_name . '/' . $this->ENTRY_PATH . "/$postID";
 
 		log_app('function',"get_entry_url() = $url");
 		return $url;
 	}
 
 	function the_entry_url($postID = NULL) {
-		echo $this->get_entry_url($postID);
+		$url = $this->get_entry_url($postID);
+		echo $url;
 	}
 
 	function get_media_url($postID = NULL) {
 		if(!isset($postID)) {
 			global $post;
-			$postID = (int) $post->ID;
+			$postID = (int) $GLOBALS['post']->ID;
 		}
 
-		$url = $this->app_base . $this->MEDIA_SINGLE_PATH ."/file/$postID";
+		$url = get_bloginfo('url') . '/' . $this->script_name . '/' . $this->MEDIA_SINGLE_PATH ."/file/$postID";
 
 		log_app('function',"get_media_url() = $url");
 		return $url;
 	}
 
 	function the_media_url($postID = NULL) {
-		echo $this->get_media_url($postID);
+		$url = $this->get_media_url($postID);
+		echo $url;
 	}
 
 	function set_current_entry($postID) {
@@ -706,7 +711,7 @@ EOD;
 	}
 
 	function get_feed($page = 1, $post_type = 'post') {
-		global $post, $wp, $wp_query, $posts, $wpdb, $blog_id;
+		global $post, $wp, $wp_query, $posts, $wpdb, $blog_id, $post_cache;
 		log_app('function',"get_feed($page, '$post_type')");
 		ob_start();
 
@@ -717,7 +722,7 @@ EOD;
 
 		$count = get_option('posts_per_rss');
 
-		wp('what_to_show=posts&posts_per_page=' . $count . '&offset=' . ($count * ($page-1) . '&orderby=modified'));
+		wp('what_to_show=posts&posts_per_page=' . $count . '&offset=' . ($count * ($page-1) ));
 
 		$post = $GLOBALS['post'];
 		$posts = $GLOBALS['posts'];
@@ -725,6 +730,7 @@ EOD;
 		$wp_query = $GLOBALS['wp_query'];
 		$wpdb = $GLOBALS['wpdb'];
 		$blog_id = (int) $GLOBALS['blog_id'];
+		$post_cache = $GLOBALS['post_cache'];
 		log_app('function',"query_posts(# " . print_r($wp_query, true) . "#)");
 
 		log_app('function',"total_count(# $wp_query->max_num_pages #)");
@@ -748,7 +754,7 @@ EOD;
 <link rel="last" type="<?php echo $this->ATOM_CONTENT_TYPE ?>" href="<?php $this->the_entries_url($last_page) ?>" />
 <link rel="self" type="<?php echo $this->ATOM_CONTENT_TYPE ?>" href="<?php $this->the_entries_url($self_page) ?>" />
 <rights type="text">Copyright <?php echo mysql2date('Y', get_lastpostdate('blog')); ?></rights>
-<?php the_generator( 'atom' ); ?>
+<generator uri="http://wordpress.com/" version="1.0.5-dc">WordPress.com Atom API</generator>
 <?php if ( have_posts() ) {
 			while ( have_posts() ) {
 				the_post();
@@ -765,6 +771,7 @@ EOD;
 	function get_entry($postID, $post_type = 'post') {
 		log_app('function',"get_entry($postID, '$post_type')");
 		ob_start();
+		global $posts, $post, $wp_query, $wp, $wpdb, $blog_id, $post_cache;
 		switch($post_type) {
 			case 'post':
 				$varname = 'p';
@@ -793,7 +800,7 @@ EOD;
 <entry xmlns="<?php echo $this->ATOM_NS ?>"
        xmlns:app="<?php echo $this->ATOMPUB_NS ?>" xml:lang="<?php echo get_option('rss_language'); ?>">
 	<id><?php the_guid($GLOBALS['post']->ID); ?></id>
-<?php list($content_type, $content) = prep_atom_text_construct(get_the_title()); ?>
+<?php list($content_type, $content) = $this->prep_content(get_the_title()); ?>
 	<title type="<?php echo $content_type ?>"><?php echo $content ?></title>
 	<updated><?php echo get_post_modified_time('Y-m-d\TH:i:s\Z', true); ?></updated>
 	<published><?php echo get_post_time('Y-m-d\TH:i:s\Z', true); ?></published>
@@ -813,7 +820,7 @@ EOD;
 <?php } else { ?>
 	<link href="<?php the_permalink_rss() ?>" />
 <?php if ( strlen( $GLOBALS['post']->post_content ) ) :
-list($content_type, $content) = prep_atom_text_construct(get_the_content()); ?>
+list($content_type, $content) = $this->prep_content(get_the_content()); ?>
 	<content type="<?php echo $content_type ?>"><?php echo $content ?></content>
 <?php endif; ?>
 <?php } ?>
@@ -821,10 +828,36 @@ list($content_type, $content) = prep_atom_text_construct(get_the_content()); ?>
 <?php foreach(get_the_category() as $category) { ?>
 	<category scheme="<?php bloginfo_rss('home') ?>" term="<?php echo $category->name?>" />
 <?php } ?>
-<?php list($content_type, $content) = prep_atom_text_construct(get_the_excerpt()); ?>
+<?php list($content_type, $content) = $this->prep_content(get_the_excerpt()); ?>
 	<summary type="<?php echo $content_type ?>"><?php echo $content ?></summary>
 </entry>
 <?php }
+
+	function prep_content($data) {
+		if (strpos($data, '<') === false && strpos($data, '&') === false) {
+			return array('text', $data);
+		}
+
+		$parser = xml_parser_create();
+		xml_parse($parser, '<div>' . $data . '</div>', true);
+		$code = xml_get_error_code($parser);
+		xml_parser_free($parser);
+
+		if (!$code) {
+		        if (strpos($data, '<') === false) {
+			        return array('text', $data);
+                        } else {
+			        $data = "<div xmlns='http://www.w3.org/1999/xhtml'>$data</div>";
+			        return array('xhtml', $data);
+                        }
+		}
+
+		if (strpos($data, ']]>') == false) {
+			return array('html', "<![CDATA[$data]]>");
+		} else {
+			return array('html', htmlspecialchars($data));
+		}
+	}
 
 	function ok() {
 		log_app('Status','200: OK');
@@ -926,7 +959,7 @@ EOD;
 				$ctloc = $this->get_entry_url($post_ID);
 				break;
 			case 'attachment':
-				$edit = $this->app_base . "attachments/$post_ID";
+				$edit = get_bloginfo('url') . '/' . $this->script_name . "/attachments/$post_ID";
 				break;
 		}
 		header("Content-Type: $this->ATOM_CONTENT_TYPE");
@@ -1107,9 +1140,9 @@ EOD;
 	    return strtotime($match[1] . " " . $match[2] . " " . $match[3]);
 	}
 
-	function get_publish_time($published) {
+	function get_publish_time($entry) {
 
-	    $pubtime = $this->rfc3339_str2time($published);
+	    $pubtime = $this->rfc3339_str2time($entry->published);
 
 	    if(!$pubtime) {
 			return array(current_time('mysql'),current_time('mysql',1));

@@ -14,7 +14,7 @@ class JeromesKeyword_Import {
 
 	function greet() {
 		echo '<div class="narrow">';
-		echo '<p>'.__('Howdy! This imports tags from an existing Jerome&#8217;s Keywords installation into this blog using the WordPress native tagging structure.').'</p>';
+		echo '<p>'.__('Howdy! This imports tags from an existing Jerome&#8217;s Keywords installation into this blog using the new WordPress native tagging structure.').'</p>';
 		echo '<p>'.__('This is suitable for Jerome&#8217;s Keywords version 1.x and 2.0a.').'</p>';
 		echo '<p><strong>'.__('All existing Jerome&#8217;s Keywords will be removed after import.').'</strong></p>';
 		echo '<p><strong>'.__('Don&#8217;t be stupid - backup your database before proceeding!').'</strong></p>';
@@ -33,7 +33,7 @@ class JeromesKeyword_Import {
 		if ( empty($_GET['step']) )
 			$step = 0;
 		else
-			$step = absint($_GET['step']);
+			$step = abs(intval($_GET['step']));
 
 		// load the header
 		$this->header();
@@ -84,7 +84,7 @@ class JeromesKeyword_Import {
 			return false;
 		} else {
 			$count = count($metakeys);
-			echo '<p>' . sprintf( __ngettext('Done! <strong>%s</strong> post with tags were read.', 'Done! <strong>%s</strong> posts with tags were read.', $count), $count ) . '<br /></p>';
+			echo '<p>' . sprintf( __('Done! <strong>%s</strong> posts with tags were read.'), $count ) . '<br /></p>';
 			echo '<ul>';
 			foreach ( $metakeys as $post_meta ) {
 				if ( $post_meta->meta_value != '' ) {
@@ -125,7 +125,7 @@ class JeromesKeyword_Import {
 			return false;
 		} else {
 			$count = count($metakeys);
-			echo '<p>' . sprintf( __ngettext('Done! <strong>%s</strong> tag were read.', 'Done! <strong>%s</strong> tags were read.', $count), $count ) . '<br /></p>';
+			echo '<p>' . sprintf( __('Done! <strong>%s</strong> tags were read.'), $count ) . '<br /></p>';
 			echo '<ul>';
 			foreach ( $metakeys as $post_meta ) {
 				$keyword = addslashes(trim($post_meta->tag_name));
@@ -173,6 +173,6 @@ class JeromesKeyword_Import {
 $jkw_import = new JeromesKeyword_Import();
 
 // add it to the import page!
-register_importer('jkw', 'Jerome&#8217;s Keywords', __('Import Jerome&#8217;s Keywords into the native tagging structure.'), array($jkw_import, 'dispatch'));
+register_importer('jkw', 'Jerome&#8217;s Keywords', __('Import Jerome&#8217;s Keywords into the new native tagging structure.'), array($jkw_import, 'dispatch'));
 
 ?>

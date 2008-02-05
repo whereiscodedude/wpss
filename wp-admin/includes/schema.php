@@ -3,7 +3,7 @@
 
 $charset_collate = '';
 
-if ( $wpdb->supports_collation() ) {
+if ( version_compare(mysql_get_server_info(), '4.1.0', '>=') ) {
 	if ( ! empty($wpdb->charset) )
 		$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
 	if ( ! empty($wpdb->collate) )
@@ -224,7 +224,7 @@ function populate_options() {
 	}
 
 	// 2.0.3
-	add_option('secret', wp_generate_password());
+	add_option('secret', md5(uniqid(microtime())));
 
 	// 2.1
 	add_option('blog_public', '1');
@@ -251,16 +251,17 @@ function populate_roles() {
 	populate_roles_160();
 	populate_roles_210();
 	populate_roles_230();
-	populate_roles_250();
 }
 
 function populate_roles_160() {
+	global $wp_roles;
+
 	// Add roles
-	add_role('administrator', _c('Administrator|User role'));
-	add_role('editor', _c('Editor|User role'));
-	add_role('author', _c('Author|User role'));
-	add_role('contributor', _c('Contributor|User role'));
-	add_role('subscriber', _c('Subscriber|User role'));
+	add_role('administrator', __('Administrator'));
+	add_role('editor', __('Editor'));
+	add_role('author', __('Author'));
+	add_role('contributor', __('Contributor'));
+	add_role('subscriber', __('Subscriber'));
 
 	// Add caps for Administrator role
 	$role = get_role('administrator');
@@ -388,14 +389,6 @@ function populate_roles_230() {
 
 	if ( !empty( $role ) ) {
 		$role->add_cap( 'unfiltered_upload' );
-	}
-}
-
-function populate_roles_250() {
-	$role = get_role( 'administrator' );
-
-	if ( !empty( $role ) ) {
-		$role->add_cap( 'edit_dashboard' );
 	}
 }
 

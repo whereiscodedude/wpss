@@ -4,12 +4,39 @@ require_once('admin.php');
 $title = __('Edit Comments');
 $parent_file = 'edit-comments.php';
 wp_enqueue_script( 'admin-comments' );
-wp_enqueue_script('admin-forms');
 
 require_once('admin-header.php');
 if (empty($_GET['mode'])) $mode = 'view';
 else $mode = attribute_escape($_GET['mode']);
 ?>
+
+<script type="text/javascript">
+<!--
+function checkAll(form)
+{
+	for (i = 0, n = form.elements.length; i < n; i++) {
+		if(form.elements[i].type == "checkbox") {
+			if(form.elements[i].checked == true)
+				form.elements[i].checked = false;
+			else
+				form.elements[i].checked = true;
+		}
+	}
+}
+
+function getNumChecked(form)
+{
+	var num = 0;
+	for (i = 0, n = form.elements.length; i < n; i++) {
+		if(form.elements[i].type == "checkbox") {
+			if(form.elements[i].checked == true)
+				num++;
+		}
+	}
+	return num;
+}
+//-->
+</script>
 <div class="wrap">
 <h2><?php _e('Comments'); ?></h2>
 <form name="searchform" action="" method="get" id="editcomments">
@@ -41,7 +68,7 @@ if ( !empty( $_POST['delete_comments'] ) ) :
 	endforeach;
 	echo '<div style="background-color: rgb(207, 235, 247);" id="message" class="updated fade"><p>';
 	if ( !empty( $_POST['spam_button'] ) ) {
-		printf(__ngettext('%s comment marked as spam.', '%s comments marked as spam.', $i), $i);
+		printf(__ngettext('%s comment marked as spam', '%s comments marked as spam.', $i), $i);
 	} else {
 		printf(__ngettext('%s comment deleted.', '%s comments deleted.', $i), $i);
 	}
@@ -75,27 +102,24 @@ if ('view' == $mode) {
 		$offset = $offset + 1;
 		$start = " start='$offset'";
 
-		echo "<ol id='the-comment-list' class='list:comment commentlist' $start>\n";
+		echo "<ol id='the-comment-list' class='commentlist' $start>\n";
 		$i = 0;
 		foreach ( $comments as $comment ) {
+			get_comment( $comment ); // Cache it
 			_wp_comment_list_item( $comment->comment_ID, ++$i );
 		}
 		echo "</ol>\n\n";
 
 if ( $extra_comments ) : ?>
 <div id="extra-comments" style="display:none">
-<ol id="the-extra-comment-list" class="list:comment commentlist" style="color:red">
+<ul id="the-extra-comment-list" class="commentlist">
 <?php
 	foreach ( $extra_comments as $comment ) {
 		get_comment( $comment ); // Cache it
-		_wp_comment_list_item( $comment->comment_ID, 0 );
+		_wp_comment_list_item( $comment->comment_ID, ++$i );
 	}
 ?>
-</ol>
-<form action="" method="get" id="get-extra-comments" class="add:the-extra-comment-list:">
-<input type="hidden" name="page" value="<?php echo $page; ?>" />
-<input type="hidden" name="s" value="<?php echo attribute_escape(@$_GET['s']); ?>" />
-<?php wp_nonce_field( 'add-comment', '_ajax_nonce', false ); ?>
+</ul>
 </div>
 <?php endif; // $extra_comments ?>
 
@@ -125,8 +149,7 @@ if ( $extra_comments ) : ?>
     <th scope="col">' . __('Comment Excerpt') . '</th>
 	<th scope="col" colspan="3" style="text-align: center">' .  __('Actions') . '</th>
   </tr>
-</thead>
-<tbody id="the-comment-list" class="list:comment">';
+</thead>';
 		foreach ($comments as $comment) {
 		$post = get_post($comment->comment_post_ID);
 		$authordata = get_userdata($post->post_author);
@@ -136,7 +159,7 @@ if ( $extra_comments ) : ?>
 ?>
   <tr id="comment-<?php echo $comment->comment_ID; ?>" class='<?php echo $class; ?>'>
     <td style="text-align: center"><?php if ( current_user_can('edit_post', $comment->comment_post_ID) ) { ?><input type="checkbox" name="delete_comments[]" value="<?php echo $comment->comment_ID; ?>" /><?php } ?></td>
-    <td class="comment-author"><?php comment_author_link() ?></td>
+    <td><?php comment_author_link() ?></td>
     <td><?php comment_author_email_link() ?></td>
     <td><a href="edit-comments.php?s=<?php comment_author_IP() ?>&amp;mode=edit"><?php comment_author_IP() ?></a></td>
     <td><?php comment_excerpt(); ?></td>
@@ -150,14 +173,12 @@ if ( $extra_comments ) : ?>
     <td><?php if ( current_user_can('edit_post', $comment->comment_post_ID) ) {
 	echo "<a href='comment.php?action=editcomment&amp;c=$comment->comment_ID' class='edit'>" .  __('Edit') . "</a>"; } ?></td>
     <td><?php if ( current_user_can('edit_post', $comment->comment_post_ID) ) {
-		$url = clean_url( wp_nonce_url( "comment.php?action=deletecomment&p=$comment->comment_post_ID&c=$comment->comment_ID", "delete-comment_$comment->comment_ID" ) );
-		echo "<a href='$url' class='delete:the-comment-list:comment-$comment->comment_ID delete'>" . __('Delete') . "</a> ";
+		echo "<a href=\"comment.php?action=deletecomment&amp;p=".$comment->comment_post_ID."&amp;c=".$comment->comment_ID."\" onclick=\"return deleteSomething( 'comment', $comment->comment_ID, '" . js_escape(sprintf(__("You are about to delete this comment by '%s'. \n  'Cancel' to stop, 'OK' to delete."), $comment->comment_author ))  . "', theCommentList );\" class='delete'>" . __('Delete') . "</a> ";
 		} ?></td>
   </tr>
 		<?php
 		} // end foreach
-	?></tbody>
-</table>
+	?></table>
 <p class="submit"><input type="submit" name="delete_button" class="delete" value="<?php _e('Delete Checked Comments &raquo;') ?>" onclick="var numchecked = getNumChecked(document.getElementById('deletecomments')); if(numchecked < 1) { alert('<?php echo js_escape(__("Please select some comments to delete")); ?>'); return false } return confirm('<?php echo sprintf(js_escape(__("You are about to delete %s comments permanently \n  'Cancel' to stop, 'OK' to delete.")), "' + numchecked + '"); ?>')" />
 			<input type="submit" name="spam_button" value="<?php _e('Mark Checked Comments as Spam &raquo;') ?>" onclick="var numchecked = getNumChecked(document.getElementById('deletecomments')); if(numchecked < 1) { alert('<?php echo js_escape(__("Please select some comments to mark as spam")); ?>'); return false } return confirm('<?php echo sprintf(js_escape(__("You are about to mark %s comments as spam \n  'Cancel' to stop, 'OK' to mark as spam.")), "' + numchecked + '"); ?>')" /></p>
   </form>

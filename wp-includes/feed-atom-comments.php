@@ -1,10 +1,4 @@
 <?php
-/**
- * Atom Feed Template for displaying Atom Comments feed.
- *
- * @package WordPress
- */
-
 header('Content-Type: application/atom+xml; charset=' . get_option('blog_charset'), true);
 echo '<?xml version="1.0" encoding="' . get_option('blog_charset') . '" ?' . '>';
 ?>
@@ -24,17 +18,11 @@ echo '<?xml version="1.0" encoding="' . get_option('blog_charset') . '" ?' . '>'
 	<subtitle type="text"><?php bloginfo_rss('description'); ?></subtitle>
 
 	<updated><?php echo mysql2date('Y-m-d\TH:i:s\Z', get_lastcommentmodified('GMT')); ?></updated>
-	<?php the_generator( 'atom' ); ?>
-	
-<?php if ( is_singular() ) { ?>
-	<link rel="alternate" type="<?php bloginfo_rss('html_type'); ?>" href="<?php echo get_comments_link() ?>" />
-	<link rel="self" type="application/atom+xml" href="<?php echo get_post_comments_feed_link('', 'atom'); ?>" />
-	<id><?php echo get_post_comments_feed_link('', 'atom'); ?></id>
-<?php } else { ?>
+	<generator uri="http://wordpress.org/" version="<?php bloginfo('version'); ?>">WordPress</generator>
+
 	<link rel="alternate" type="<?php bloginfo_rss('html_type'); ?>" href="<?php bloginfo_rss('home'); ?>" />
 	<link rel="self" type="application/atom+xml" href="<?php bloginfo_rss('comments_atom_url'); ?>" />
 	<id><?php bloginfo_rss('comments_atom_url'); ?></id>
-<?php } ?>
 
 <?php
 if ( have_comments() ) : while ( have_comments() ) : the_comment();

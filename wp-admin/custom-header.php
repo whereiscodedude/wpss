@@ -224,11 +224,13 @@ Event.observe( window, 'load', hide_text );
 		// Save the data
 		$id = wp_insert_attachment($object, $file);
 
+		$upload = array('file' => $file, 'id' => $id);
+
 		list($width, $height, $type, $attr) = getimagesize( $file );
 
 		if ( $width == HEADER_IMAGE_WIDTH && $height == HEADER_IMAGE_HEIGHT ) {
 			set_theme_mod('header_image', clean_url($url));
-			do_action('wp_create_file_in_uploads', $file, $id); // For replication
+			$header = apply_filters('wp_create_file_in_uploads', $file, $id); // For replication
 			return $this->finished();
 		} elseif ( $width > HEADER_IMAGE_WIDTH ) {
 			$oitar = $width / HEADER_IMAGE_WIDTH;

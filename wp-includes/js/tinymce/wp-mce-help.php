@@ -6,28 +6,22 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 <head>
 <meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php echo get_option('blog_charset'); ?>" />
 <title><?php _e('Rich Editor Help') ?></title>
-<script type="text/javascript" src="tiny_mce_popup.js"></script>
 <?php wp_admin_css(); ?>
 <style type="text/css">
-	body {
-        background-color: #eaf3ea;
-    }
-    #wphead {
-		padding-top: 2px;
+	#wphead {
+		padding-top: 5px;
+		padding-bottom: 5px;
 		padding-left: 15px;
-		font-size: 80%;
-		border-top: 0;
-		background-color: #eaf3ea;
+		font-size: 90%;
 	}
 	#adminmenu {
 		padding-top: 2px;
+		padding-bottom: 2px;
 		padding-left: 15px;
-		font-size: 80%;
-		background-color: #eaf3ea;
+		font-size: 94%;
 	}
 	#user_info {
-		right: 5%;
-		top: 5px;
+		margin-top: 15px;
 	}
 	h2 {
 		font-size: 2em;
@@ -41,16 +35,8 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 		margin-bottom: 0px;
 	}
 	#flipper {
-		margin: 0;
-		padding: 5px 20px 10px;
-		background-color: #fff;
-		border-left: 1px solid #c6d9e9;
-		border-bottom: 1px solid #c6d9e9;
+		margin: 5px 10px 3px;
 	}
-	* html {
-        overflow-x: hidden;
-        overflow-y: scroll;
-    }
 	#flipper div p {
 		margin-top: 0.4em;
 		margin-bottom: 0.8em;
@@ -86,7 +72,6 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 	}
 	#buttoncontainer {
 		text-align: center;
-		margin-bottom: 20px;
 	}
 	#buttoncontainer a, #buttoncontainer a:hover {
 		border-bottom: 0px;
@@ -129,22 +114,12 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 			}
 		}
 	}
-    
-    function init() {
-        document.getElementById('version').innerHTML = tinymce.majorVersion + "." + tinymce.minorVersion;
-        document.getElementById('date').innerHTML = tinymce.releaseDate;
-    }
-    tinyMCEPopup.onInit.add(init);
-    
-    // For modal dialogs in IE
-    if (tinymce.isIE)
-	   document.write('<base target="_self" />');
 </script>
 </head>
 <body>
 <div class="zerosize"></div>
 <div id="wphead"><h1><?php echo get_bloginfo('blogtitle'); ?></h1></div>
-
+<div id="user_info"><p><strong><?php _e('Rich Editor Help') ?></strong></p></div>
 <ul id="adminmenu">
 	<li><a id="tab1" href="javascript:flipTab(1)" title="<?php _e('Basics of Rich Editing') ?>" accesskey="1" class="current"><?php _e('Basics') ?></a></li>
 	<li><a id="tab2" href="javascript:flipTab(2)" title="<?php _e('Advanced use of the Rich Editor') ?>" accesskey="2"><?php _e('Advanced') ?></a></li>
@@ -157,9 +132,7 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 <div id="content1">
 	<h2><?php _e('Rich Editing Basics') ?></h2>
 	<p><?php _e('<em>Rich editing</em>, also called WYSIWYG for What You See Is What You Get, means your text is formatted as you type. The rich editor creates HTML code behind the scenes while you concentrate on writing. Font styles, links and images all appear approximately as they will on the internet.') ?></p>
-	<p><?php _e('WordPress includes a rich HTML editor that works well in most web browsers used today. It is powerful but it has limitations. Pasting text from other word processors may not give the results you expect. For best compatibility, use the "Paste as Plain Text" or "Paste from Word" buttons located on the extended (second) toolbar row.') ?></p>
-	<p><?php _e('While using the editor, most basic keyboard shortcuts work like in any other text editor. For example: Shift+Enter inserts line break, Ctrl+C = copy, Ctrl+X = cut, Ctrl+Z = undo, Ctrl+Y = redo, Ctrl+B = bold, Ctrl+I = italic, Ctrl+U = underline, etc. (on Mac use the Apple key instead of Ctrl).') ?></p>
-    <p><?php _e('If you do not like the way the rich editor works, you may turn it off in the Your Profile and Personal Options form, under Users in the admin menu.') ?></p>
+	<p><?php _e('WordPress includes a rich HTML editor that works well in most web browsers used today. It is powerful but it has limitations. Pasting text from other word processors may not give the results you expect. If you do not like the way the rich editor works, you may turn it off in the Your Profile and Personal Options form, under Users in the admin menu.') ?></p>
 </div>
 
 <div id="content2" class="hidden">
@@ -173,7 +146,7 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 
 <div id="content3" class="hidden">
 	<h2><?php _e('Writing at Full Speed') ?></h2>
-    <p><?php _e('Rather than reaching for your mouse to click on the toolbar, use these access keys. Windows and Linux use Alt+&lt;letter>. Macintosh uses Ctrl+&lt;letter>.') ?></p>
+	<p><?php _e('Rather than reaching for your mouse to click on the toolbar, use these access keys. Windows and Linux use Alt+&lt;letter>. Macintosh uses Ctrl+&lt;letter>.') ?></p>
 	<table id="keys" width="100%" border="0">
 		<tr class="top"><th class="key center"><?php _e('Letter') ?></th><th class="left"><?php _e('Action') ?></th><th class="key center"><?php _e('Letter') ?></th><th class="left"><?php _e('Action') ?></th></tr>
 		<tr><th>n</th><td><?php _e('Check Spelling') ?></td><th>f</th><td class="align left"><?php _e('Align Left') ?></td></tr>
@@ -190,25 +163,19 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 
 <div id="content4" class="hidden">
 	<h2><?php _e('About TinyMCE'); ?></h2>
-	
-    <p><?php _e('Version:'); ?> <span id="version"></span> (<span id="date"></span>)</p>
+	<p><?php printf(__('Version: %s'), '2.0.9') ?></p>
 	<p><?php printf(__('TinyMCE is a platform independent web based Javascript HTML WYSIWYG editor control released as Open Source under %sLGPL</a>	by Moxiecode Systems AB. It has the ability to convert HTML TEXTAREA fields or other HTML elements to editor instances.'), '<a href="'.get_bloginfo('url').'/wp-includes/js/tinymce/license.txt" target="_blank" title="'.__('GNU Library General Public Licence').'">') ?></p>
-	<p><?php _e('Copyright &copy; 2003-2007, <a href="http://www.moxiecode.com" target="_blank">Moxiecode Systems AB</a>, All rights reserved.') ?></p>
+	<p><?php _e('Copyright &copy; 2005, <a href="http://www.moxiecode.com" target="_blank">Moxiecode Systems AB</a>, All rights reserved.') ?></p>
 	<p><?php _e('For more information about this software visit the <a href="http://tinymce.moxiecode.com" target="_blank">TinyMCE website</a>.') ?></p>
 
 	<div id="buttoncontainer">
-		<a href="http://www.moxiecode.com" target="_new"><img src="themes/advanced/img/gotmoxie.png" alt="<?php _e('Got Moxie?') ?>" border="0" /></a>
-		<a href="http://sourceforge.net/projects/tinymce/" target="_blank"><img src="themes/advanced/img/sflogo.png" alt="<?php _e('Hosted By Sourceforge') ?>" border="0" /></a>
-		<a href="http://www.freshmeat.net/projects/tinymce" target="_blank"><img src="themes/advanced/img/fm.gif" alt="<?php _e('Also on freshmeat') ?>" border="0" /></a>
+		<a href="http://www.moxiecode.com" target="_new"><img src="http://tinymce.moxiecode.com/images/gotmoxie.png" alt="<?php _e('Got Moxie?') ?>" border="0" /></a>
+		<a href="http://sourceforge.net/projects/tinymce/" target="_blank"><img src="http://sourceforge.net/sflogo.php?group_id=103281" alt="<?php _e('Hosted By Sourceforge') ?>" border="0" /></a>
+		<a href="http://www.freshmeat.net/projects/tinymce" target="_blank"><img src="http://tinymce.moxiecode.com/images/fm.gif" alt="<?php _e('Also on freshmeat') ?>" border="0" /></a>
 	</div>
 
 </div>
-</div>
 
-<div class="mceActionPanel">
-	<div style="margin: 8px auto; text-align: center;padding-bottom: 10px;">
-		<input type="button" id="cancel" name="cancel" value="<?php _e('Close'); ?>" title="<?php _e('Close'); ?>" onclick="tinyMCEPopup.close();" />
-	</div>
 </div>
 
 </body>

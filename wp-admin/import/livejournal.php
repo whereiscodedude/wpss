@@ -119,7 +119,7 @@ class LJ_Import {
 			}
 			if ( $num_comments ) {
 				echo ' ';
-				printf(__ngettext('(%s comment)', '(%s comments)', $num_comments), $num_comments);
+				printf(__('(%s comments)'), $num_comments);
 			}
 			echo '</li>';
 		}
@@ -138,7 +138,6 @@ class LJ_Import {
 		if ( is_wp_error( $result ) )
 			return $result;
 		wp_import_cleanup($file['id']);
-		do_action('import_done', 'livejournal');
 
 		echo '<h3>';
 		printf(__('All done. <a href="%s">Have fun!</a>'), get_option('home'));

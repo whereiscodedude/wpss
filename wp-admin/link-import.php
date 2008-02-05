@@ -3,8 +3,9 @@
 // Copyright (C) 2002 Mike Little -- mike@zed1.com
 
 require_once('admin.php');
-$parent_file = 'edit.php';
+$parent_file = 'link-manager.php';
 $title = __('Import Blogroll');
+$this_file = 'link-import.php';
 
 $step = $_POST['step'];
 if (!$step) $step = 0;
@@ -122,7 +123,7 @@ else
 } // end else
 
 if ( ! $blogrolling )
-	do_action( 'wp_delete_file', $opml_url);
+	apply_filters( 'wp_delete_file', $opml_url);
 	@unlink($opml_url);
 ?>
 </div>

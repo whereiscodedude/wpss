@@ -4,87 +4,56 @@ require_once (ABSPATH . WPINC . '/rss.php');
 
 @header('Content-Type: ' . get_option('html_type') . '; charset=' . get_option('blog_charset'));
 
-$widgets = get_option( 'dashboard_widget_options' );
-
-
 switch ( $_GET['jax'] ) {
 
 case 'incominglinks' :
-@extract( @$widgets['dashboard_incoming_links'], EXTR_SKIP );
-$rss = @fetch_rss( $url );
+
+$rss_feed = apply_filters( 'dashboard_incoming_links_feed', 'http://blogsearch.google.com/blogsearch_feeds?hl=en&scoring=d&ie=utf-8&num=10&output=rss&partner=wordpress&q=link:' . trailingslashit( get_option('home') ) );
+$more_link = apply_filters( 'dashboard_incoming_links_link', 'http://blogsearch.google.com/blogsearch?hl=en&scoring=d&partner=wordpress&q=link:' . trailingslashit( get_option('home') ) );
+
+$rss = @fetch_rss( $rss_feed );
 if ( isset($rss->items) && 1 < count($rss->items) ) { // Technorati returns a 1-item feed when it has no results
 ?>
-
+<h3><?php _e('Incoming Links'); ?> <cite><a href="<?php echo htmlspecialchars( $more_link ); ?>"><?php _e('More &raquo;'); ?></a></cite></h3>
 <ul>
 <?php
-$rss->items = array_slice($rss->items, 0, $items);
+$rss->items = array_slice($rss->items, 0, 10);
 foreach ($rss->items as $item ) {
-	$publisher = '';
-	$site_link = '';
-	$link = '';
-	$content = '';
-	$date = '';
-	$link = clean_url( strip_tags( $item['link'] ) );
-
-	if ( isset( $item['author_uri'] ) )
-		$site_link = clean_url( strip_tags( $item['author_uri'] ) );
-
-	if ( !$publisher = wp_specialchars( strip_tags( isset($item['dc']['publisher']) ? $item['dc']['publisher'] : $item['author_name'] ) ) )
-		$publisher = __( 'Somebody' );
-	if ( $site_link )
-		$publisher = "<a href='$site_link'>$publisher</a>";
-	else
-		$publisher = "<strong>$publisher</strong>";
-
-	if ( isset($item['description']) )
-		$content = $item['description'];
-	elseif ( isset($item['summary']) )
-		$content = $item['summary'];
-	elseif ( isset($item['atom_content']) )
-		$content = $item['atom_content'];
-	else
-		$content = __( 'something' );
-	$content = strip_tags( $content );
-	if ( 50 < strlen($content) )
-		$content = substr($content, 0, 50) . ' ...';
-	$content = wp_specialchars( $content );
-	if ( $link )
-		$text = _c( '%1$s linked here <a href="%2$s">saying</a>, "%3$s"|feed_display' );
-	else
-		$text = _c( '%1$s linked here saying, "%3$s"|feed_display' );
-
-	if ( $show_date ) {
-		if ( $show_author || $show_summary )
-			$text .= _c( ' on %4$s|feed_display' );
-		$date = wp_specialchars( strip_tags( isset($item['pubdate']) ? $item['pubdate'] : $item['published'] ) );
-		$date = strtotime( $date );
-		$date = gmdate( get_option( 'date_format' ), $date );
-	}
-
 ?>
-	<li><?php printf( _c( "$text|feed_display" ), $publisher, $link, $content, $date ); ?></li>
+	<li><a href="<?php echo wp_filter_kses($item['link']); ?>"><?php echo wptexturize(wp_specialchars($item['title'])); ?></a></li>
 <?php } ?>
 </ul>
-<?php
-} else {
-?>
-<p><?php _e('No incoming links found... yet.'); ?></p>
 <?php
 }
 break;
 
 case 'devnews' :
-wp_widget_rss_output( $widgets['dashboard_primary'] );
+$rss = @fetch_rss(apply_filters( 'dashboard_primary_feed', 'http://wordpress.org/development/feed/' ));
+if ( isset($rss->items) && 0 != count($rss->items) ) {
+?>
+<h3><?php echo apply_filters( 'dashboard_primary_title', __('WordPress Development Blog') ); ?></h3>
+<?php
+$rss->items = array_slice($rss->items, 0, 3);
+foreach ($rss->items as $item ) {
+?>
+<h4><a href='<?php echo wp_filter_kses($item['link']); ?>'><?php echo wp_specialchars($item['title']); ?></a> &#8212; <?php printf(__('%s ago'), human_time_diff(strtotime($item['pubdate'], time() ) ) ); ?></h4>
+<p><?php echo $item['description']; ?></p>
+<?php
+	}
+}
+?>
+
+<?php
 break;
 
 case 'planetnews' :
-extract( $widgets['dashboard_secondary'], EXTR_SKIP );
-$rss = @fetch_rss( $url );
+$rss = @fetch_rss(apply_filters( 'dashboard_secondary_feed', 'http://planet.wordpress.org/feed/' ));
 if ( isset($rss->items) && 0 != count($rss->items) ) {
 ?>
+<h3><?php echo apply_filters( 'dashboard_secondary_title', __('Other WordPress News') ); ?></h3>
 <ul>
 <?php
-$rss->items = array_slice($rss->items, 0, $items);
+$rss->items = array_slice($rss->items, 0, 20);
 foreach ($rss->items as $item ) {
 $title = wp_specialchars($item['title']);
 $author = preg_replace( '|(.+?):.+|s', '$1', $item['title'] );
@@ -95,6 +64,7 @@ $post = preg_replace( '|.+?:(.+)|s', '$1', $item['title'] );
 	}
 ?>
 </ul>
+<p class="readmore"><a href="<?php echo apply_filters( 'dashboard_secondary_link', 'http://planet.wordpress.org/' ); ?>"><?php _e('Read more &raquo;'); ?></a></p>
 <?php
 }
 break;

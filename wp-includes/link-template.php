@@ -32,7 +32,7 @@ function permalink_anchor($mode = 'id') {
 	global $post;
 	switch ( strtolower($mode) ) {
 		case 'title':
-			$title = sanitize_title($post->post_title) . '-' . $post->ID;
+			$title = sanitize_title($post->post_title) . '-' . $id;
 			echo '<a id="'.$title.'"></a>';
 			break;
 		case 'id':
@@ -43,7 +43,7 @@ function permalink_anchor($mode = 'id') {
 }
 
 
-function get_permalink($id = 0, $leavename=false) {
+function get_permalink($id = 0) {
 	$rewritecode = array(
 		'%year%',
 		'%monthnum%',
@@ -51,11 +51,11 @@ function get_permalink($id = 0, $leavename=false) {
 		'%hour%',
 		'%minute%',
 		'%second%',
-		$leavename? '' : '%postname%',
+		'%postname%',
 		'%post_id%',
 		'%category%',
 		'%author%',
-		$leavename? '' : '%pagename%',
+		'%pagename%'
 	);
 
 	$post = &get_post($id);
@@ -73,7 +73,7 @@ function get_permalink($id = 0, $leavename=false) {
 		$unixtime = strtotime($post->post_date);
 
 		$category = '';
-		if ( strpos($permalink, '%category%') !== false ) {
+		if (strpos($permalink, '%category%') !== false) {
 			$cats = get_the_category($post->ID);
 			if ( $cats )
 				usort($cats, '_usort_terms_by_ID'); // order by ID
@@ -82,12 +82,8 @@ function get_permalink($id = 0, $leavename=false) {
 				$category = get_category_parents($parent, FALSE, '/', TRUE) . $category;
 		}
 
-		$author = '';
-		if ( strpos($permalink, '%author%') !== false ) {
-			$authordata = get_userdata($post->post_author);
-			$author = $authordata->user_nicename;
-		}
-
+		$authordata = get_userdata($post->post_author);
+		$author = $authordata->user_nicename;
 		$date = explode(" ",date('Y m d H i s', $unixtime));
 		$rewritereplace =
 		array(
@@ -142,7 +138,7 @@ function _get_page_link( $id = false ) {
 
 	$pagestruct = $wp_rewrite->get_page_permastruct();
 
-	if ( '' != $pagestruct && isset($post->post_status) && 'draft' != $post->post_status ) {
+	if ( '' != $pagestruct && 'draft' != $post->post_status ) {
 		$link = get_page_uri($id);
 		$link = str_replace('%pagename%', $link, $pagestruct);
 		$link = get_option('home') . "/$link";
@@ -230,8 +226,11 @@ function get_day_link($year, $month, $day) {
 	}
 }
 
-function get_feed_link($feed = '') {
+function get_feed_link($feed='rss2') {
 	global $wp_rewrite;
+	$do_perma = 0;
+	$feed_url = get_option('siteurl');
+	$comment_feed_url = $feed_url;
 
 	$permalink = $wp_rewrite->get_feed_permastruct();
 	if ( '' != $permalink ) {
@@ -240,16 +239,13 @@ function get_feed_link($feed = '') {
 			$permalink = $wp_rewrite->get_comment_feed_permastruct();
 		}
 
-		if ( get_default_feed() == $feed )
+		if ( 'rss2' == $feed )
 			$feed = '';
 
 		$permalink = str_replace('%feed%', $feed, $permalink);
 		$permalink = preg_replace('#/+#', '/', "/$permalink");
 		$output =  get_option('home') . user_trailingslashit($permalink, 'feed');
 	} else {
-		if ( empty($feed) )
-			$feed = get_default_feed();
-
 		if ( false !== strpos($feed, 'comments_') )
 			$feed = str_replace('comments_', 'comments-', $feed);
 
@@ -259,18 +255,15 @@ function get_feed_link($feed = '') {
 	return apply_filters('feed_link', $output, $feed);
 }
 
-function get_post_comments_feed_link($post_id = '', $feed = '') {
+function get_post_comments_feed_link($post_id = '', $feed = 'rss2') {
 	global $id;
 
 	if ( empty($post_id) )
 		$post_id = (int) $id;
 
-	if ( empty($feed) )
-		$feed = get_default_feed();
-
 	if ( '' != get_option('permalink_structure') ) {
 		$url = trailingslashit( get_permalink($post_id) ) . 'feed';
-		if ( $feed != get_default_feed() )
+		if ( 'rss2' != $feed )
 			$url .= "/$feed";
 		$url = user_trailingslashit($url, 'single_feed');
 	} else {
@@ -282,151 +275,6 @@ function get_post_comments_feed_link($post_id = '', $feed = '') {
 	}
 
 	return apply_filters('post_comments_feed_link', $url);
-}
-
-/** post_comments_feed_link() - Output the comment feed link for a post.
- *
- * Prints out the comment feed link for a post.  Link text is placed in the
- * anchor.  If no link text is specified, default text is used.  If no post ID
- * is specified, the current post is used.
- *
- * @package WordPress
- * @subpackage Feed
- * @since 2.4
- *
- * @param string Descriptive text
- * @param int Optional post ID.  Default to current post.
- * @return string Link to the comment feed for the current post
-*/
-function post_comments_feed_link( $link_text = '', $post_id = '', $feed = '' ) {
-	$url = get_post_comments_feed_link($post_id, $feed);
-	if ( empty($link_text) )
-		$link_text = __('Comments Feed');
-
-	echo "<a href='$url'>$link_text</a>";
-}
-
-function get_author_feed_link( $author_id, $feed = '' ) {
-	$author_id = (int) $author_id;
-	$permalink_structure = get_option('permalink_structure');
-
-	if ( empty($feed) )
-		$feed = get_default_feed();
-
-	if ( '' == $permalink_structure ) {
-		$link = get_option('home') . '?feed=rss2&amp;author=' . $author_id;
-	} else {
-		$link = get_author_posts_url($author_id);
-		$link = trailingslashit($link) . user_trailingslashit('feed', 'feed');
-	}
-
-	$link = apply_filters('author_feed_link', $link);
-
-	return $link;
-}
-
-/** get_category_feed_link() - Get the feed link for a given category
- *
- * Returns a link to the feed for all post in a given category.  A specific feed can be requested
- * or left blank to get the default feed.
- *
- * @package WordPress
- * @subpackage Feed
- * @since 2.4
- *
- * @param int $cat_id ID of a category
- * @param string $feed Feed type
- * @return string Link to the feed for the category specified by $cat_id
-*/
-function get_category_feed_link($cat_id, $feed = '') {
-	$cat_id = (int) $cat_id;
-	
-	$category = get_category($cat_id);
-	
-	if ( empty($category) || is_wp_error($category) )
-		return false;
-
-	if ( empty($feed) )
-		$feed = get_default_feed();
-
-	$permalink_structure = get_option('permalink_structure');
-
-	if ( '' == $permalink_structure ) {
-		$link = get_option('home') . "?feed=$feed&amp;cat=" . $cat_id;
-	} else {
-		$link = get_category_link($cat_id);
-		if( $feed == get_default_feed() )
-			$feed_link = 'feed';
-		else
-			$feed_link = "feed/$feed";
-		
-		$link = trailingslashit($link) . user_trailingslashit($feed_link, 'feed');
-	}
-
-	$link = apply_filters('category_feed_link', $link, $feed);
-	
-	return $link;
-}
-
-function get_tag_feed_link($tag_id, $feed = '') {
-	$tag_id = (int) $tag_id;
-
-	$tag = get_tag($tag_id);
-
-	if ( empty($tag) || is_wp_error($tag) )
-		return false;
-
-	$permalink_structure = get_option('permalink_structure');
-
-	if ( empty($feed) )
-		$feed = get_default_feed();
-
-	if ( '' == $permalink_structure ) {
-		$link = get_option('home') . "?feed=$feed&amp;tag=" . $tag->slug;
-	} else {
-		$link = get_tag_link($tag->term_id);
-		if ( $feed == get_default_feed() )
-			$feed_link = 'feed';
-		else
-			$feed_link = "feed/$feed";
-		$link = $link . user_trailingslashit($feed_link, 'feed');
-	}
-
-	$link = apply_filters('tag_feed_link', $link, $feed);
-
-	return $link;
-}
-
-function get_search_feed_link($search_query = '', $feed = '') {
-	if ( empty($search_query) )
-		$search = attribute_escape(get_search_query());
-	else
-		$search = attribute_escape(stripslashes($search_query));
-	
-	if ( empty($feed) )
-		$feed = get_default_feed();
-	
-	$link = get_option('home') . "?s=$search&amp;feed=$feed";
-	
-	$link = apply_filters('search_feed_link', $link);
-	
-	return $link;
-}
-
-function get_search_comments_feed_link($search_query = '', $feed = '') {
-	if ( empty($search_query) )
-		$search = attribute_escape(get_search_query());
-	else
-		$search = attribute_escape(stripslashes($search_query));
-	
-	if ( empty($feed) )
-		$feed = get_default_feed();
-	
-	$link = get_option('home') . "?s=$search&amp;feed=comments-$feed";
-	
-	$link = apply_filters('search_feed_link', $link);
-	
-	return $link;
 }
 
 function get_edit_post_link( $id = 0 ) {
@@ -508,14 +356,6 @@ function edit_comment_link( $link = 'Edit This', $before = '', $after = '' ) {
 // Navigation links
 
 function get_previous_post($in_same_cat = false, $excluded_categories = '') {
-	return get_adjacent_post($in_same_cat, $excluded_categories);
-}
-
-function get_next_post($in_same_cat = false, $excluded_categories = '') {
-	return get_adjacent_post($in_same_cat, $excluded_categories, false);
-}
-
-function get_adjacent_post($in_same_cat = false, $excluded_categories = '', $previous = true) {
 	global $post, $wpdb;
 
 	if( empty($post) || !is_single() || is_attachment() )
@@ -524,53 +364,70 @@ function get_adjacent_post($in_same_cat = false, $excluded_categories = '', $pre
 	$current_post_date = $post->post_date;
 
 	$join = '';
-	$posts_in_ex_cats_sql = '';
-	if ( $in_same_cat || !empty($excluded_categories) ) {
-		$join = " INNER JOIN $wpdb->term_relationships AS tr ON p.ID = tr.object_id INNER JOIN $wpdb->term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id";
-
-		if ( $in_same_cat ) {
-			$cat_array = wp_get_object_terms($post->ID, 'category', 'fields=ids');
-			$join .= " AND tt.taxonomy = 'category' AND tt.term_id IN (" . implode($cat_array, ',') . ')';
+	if ( $in_same_cat ) {
+		$join = " INNER JOIN $wpdb->term_relationships AS tr ON p.ID = tr.object_id ";
+		$cat_array = wp_get_object_terms($post->ID, 'category', 'fields=tt_ids');
+		$join .= ' AND (tr.term_taxonomy_id = ' . intval($cat_array[0]);
+		for ( $i = 1; $i < (count($cat_array)); $i++ ) {
+			$join .= ' OR tr.term_taxonomy_id = ' . intval($cat_array[$i]);
 		}
-
-		$posts_in_ex_cats_sql = "AND tt.taxonomy = 'category'";
-		if ( !empty($excluded_categories) ) {
-			$excluded_categories = array_map('intval', explode(' and ', $excluded_categories));
-			if ( !empty($cat_array) ) {
-				$excluded_categories = array_diff($excluded_categories, $cat_array);
-				$posts_in_ex_cats_sql = '';
-			}
-
-			if ( !empty($excluded_categories) ) {
-				$posts_in_ex_cats_sql = " AND tt.term_id NOT IN (" . implode($excluded_categories, ',') . ')';
-			}
-		}
+		$join .= ')';
 	}
 
-	$adjacent = $previous ? 'previous' : 'next';
-	$op = $previous ? '<' : '>';
-	$order = $previous ? 'DESC' : 'ASC';
+	$sql_exclude_cats = '';
+	if ( !empty($excluded_categories) ) {
+		$blah = explode(' and ', $excluded_categories);
+		$posts_in_ex_cats = get_objects_in_term($blah, 'category');
+		$posts_in_ex_cats_sql = 'AND p.ID NOT IN (' . implode($posts_in_ex_cats, ',') . ')';
+	}
 
-	$join  = apply_filters( "get_{$adjacent}_post_join", $join, $in_same_cat, $excluded_categories );
-	$where = apply_filters( "get_{$adjacent}_post_where", $wpdb->prepare("WHERE p.post_date $op %s AND p.post_type = 'post' AND p.post_status = 'publish' $posts_in_ex_cats_sql", $current_post_date), $in_same_cat, $excluded_categories );
-	$sort  = apply_filters( "get_{$adjacent}_post_sort", "ORDER BY p.post_date $order LIMIT 1" );
+	$join  = apply_filters( 'get_previous_post_join', $join, $in_same_cat, $excluded_categories );
+	$where = apply_filters( 'get_previous_post_where', "WHERE p.post_date < '$current_post_date' AND p.post_type = 'post' AND p.post_status = 'publish' $posts_in_ex_cats_sql", $in_same_cat, $excluded_categories );
+	$sort  = apply_filters( 'get_previous_post_sort', 'ORDER BY p.post_date DESC LIMIT 1' );
 
-	return $wpdb->get_row("SELECT p.* FROM $wpdb->posts AS p $join $where $sort");
+	return @$wpdb->get_row("SELECT p.ID, p.post_title FROM $wpdb->posts AS p $join $where $sort");
 }
+
+function get_next_post($in_same_cat = false, $excluded_categories = '') {
+	global $post, $wpdb;
+
+	if( empty($post) || !is_single() || is_attachment() )
+		return null;
+
+	$current_post_date = $post->post_date;
+
+	$join = '';
+	if ( $in_same_cat ) {
+		$join = " INNER JOIN $wpdb->term_relationships AS tr ON p.ID = tr.object_id ";
+		$cat_array = wp_get_object_terms($post->ID, 'category', 'fields=tt_ids');
+		$join .= ' AND (tr.term_taxonomy_id = ' . intval($cat_array[0]);
+		for ( $i = 1; $i < (count($cat_array)); $i++ ) {
+			$join .= ' OR tr.term_taxonomy_id = ' . intval($cat_array[$i]);
+		}
+		$join .= ')';
+	}
+
+	$sql_exclude_cats = '';
+	if ( !empty($excluded_categories) ) {
+		$blah = explode(' and ', $excluded_categories);
+		$posts_in_ex_cats = get_objects_in_term($blah, 'category');
+		$posts_in_ex_cats_sql = 'AND p.ID NOT IN (' . implode($posts_in_ex_cats, ',') . ')';
+	}
+
+	$join  = apply_filters( 'get_next_post_join', $join, $in_same_cat, $excluded_categories );
+	$where = apply_filters( 'get_next_post_where', "WHERE p.post_date > '$current_post_date' AND p.post_type = 'post' AND p.post_status = 'publish' $posts_in_ex_cats_sql AND p.ID != $post->ID", $in_same_cat, $excluded_categories );
+	$sort  = apply_filters( 'get_next_post_sort', 'ORDER BY p.post_date ASC LIMIT 1' );
+
+	return @$wpdb->get_row("SELECT p.ID, p.post_title FROM $wpdb->posts AS p $join $where $sort");
+}
+
 
 function previous_post_link($format='&laquo; %link', $link='%title', $in_same_cat = false, $excluded_categories = '') {
-	adjacent_post_link($format, $link, $in_same_cat, $excluded_categories, true);
-}
 
-function next_post_link($format='%link &raquo;', $link='%title', $in_same_cat = false, $excluded_categories = '') {
-	adjacent_post_link($format, $link, $in_same_cat, $excluded_categories, false);
-}
-
-function adjacent_post_link($format, $link, $in_same_cat = false, $excluded_categories = '', $previous = true) {
-	if ( $previous && is_attachment() )
+	if ( is_attachment() )
 		$post = & get_post($GLOBALS['post']->post_parent);
 	else
-		$post = get_adjacent_post($in_same_cat, $excluded_categories, $previous);
+		$post = get_previous_post($in_same_cat, $excluded_categories);
 
 	if ( !$post )
 		return;
@@ -578,13 +435,33 @@ function adjacent_post_link($format, $link, $in_same_cat = false, $excluded_cate
 	$title = $post->post_title;
 
 	if ( empty($post->post_title) )
-		$title = $previous ? __('Previous Post') : __('Next Post');
+		$title = __('Previous Post');
 
 	$title = apply_filters('the_title', $title, $post);
-	$string = '<a href="'.get_permalink($post).'">';
+	$string = '<a href="'.get_permalink($post->ID).'">';
+	$link = str_replace('%title', $title, $link);
+	$link = $pre . $string . $link . '</a>';
+
+	$format = str_replace('%link', $link, $format);
+
+	echo $format;
+}
+
+function next_post_link($format='%link &raquo;', $link='%title', $in_same_cat = false, $excluded_categories = '') {
+	$post = get_next_post($in_same_cat, $excluded_categories);
+
+	if ( !$post )
+		return;
+
+	$title = $post->post_title;
+
+	if ( empty($post->post_title) )
+		$title = __('Next Post');
+
+	$title = apply_filters('the_title', $title, $post);
+	$string = '<a href="'.get_permalink($post->ID).'">';
 	$link = str_replace('%title', $title, $link);
 	$link = $string . $link . '</a>';
-
 	$format = str_replace('%link', $link, $format);
 
 	echo $format;
@@ -598,7 +475,7 @@ function get_pagenum_link($pagenum = 1) {
 	$request = remove_query_arg( 'paged' );
 
 	$home_root = parse_url(get_option('home'));
-	$home_root = ( isset($home_root['path']) ) ? $home_root['path'] : '';
+	$home_root = $home_root['path'];
 	$home_root = preg_quote( trailingslashit( $home_root ), '|' );
 
 	$request = preg_replace('|^'. $home_root . '|', '', $request);
@@ -616,14 +493,14 @@ function get_pagenum_link($pagenum = 1) {
 		$qs_regex = '|\?.*?$|';
 		preg_match( $qs_regex, $request, $qs_match );
 
-		if ( !empty( $qs_match[0] ) ) {
+		if ( $qs_match[0] ) {
 			$query_string = $qs_match[0];
 			$request = preg_replace( $qs_regex, '', $request );
 		} else {
 			$query_string = '';
 		}
 
-		$request = preg_replace( '|page/\d+/?$|', '', $request);
+		$request = preg_replace( '|page/(.+)/?$|', '', $request);
 		$request = preg_replace( '|^index\.php|', '', $request);
 		$request = ltrim($request, '/');
 
@@ -643,7 +520,7 @@ function get_pagenum_link($pagenum = 1) {
 }
 
 function get_next_posts_page_link($max_page = 0) {
-	global $paged;
+	global $paged, $pagenow;
 
 	if ( !is_single() ) {
 		if ( !$paged )
@@ -659,7 +536,7 @@ function next_posts($max_page = 0) {
 }
 
 function next_posts_link($label='Next Page &raquo;', $max_page=0) {
-	global $paged, $wp_query;
+	global $paged, $wpdb, $wp_query;
 	if ( !$max_page ) {
 		$max_page = $wp_query->max_num_pages;
 	}
@@ -674,7 +551,7 @@ function next_posts_link($label='Next Page &raquo;', $max_page=0) {
 }
 
 function get_previous_posts_page_link() {
-	global $paged;
+	global $paged, $pagenow;
 
 	if ( !is_single() ) {
 		$nextpage = intval($paged) - 1;

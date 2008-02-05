@@ -56,7 +56,7 @@ function get_the_title( $id = 0 ) {
 	$title = $post->post_title;
 	if ( !empty($post->post_password) )
 		$title = sprintf(__('Protected: %s'), $title);
-	else if ( isset($post->post_status) && 'private' == $post->post_status )
+	else if ( 'private' == $post->post_status )
 		$title = sprintf(__('Private: %s'), $title);
 
 	return apply_filters( 'the_title', $title );
@@ -81,12 +81,13 @@ function the_content($more_link_text = '(more...)', $stripteaser = 0, $more_file
 
 
 function get_the_content($more_link_text = '(more...)', $stripteaser = 0, $more_file = '') {
-	global $id, $post, $more, $page, $pages, $multipage, $preview, $pagenow;
-
+	global $id, $post, $more, $single, $withcomments, $page, $pages, $multipage, $numpages;
+	global $preview;
+	global $pagenow;
 	$output = '';
 
 	if ( !empty($post->post_password) ) { // if there's a password
-		if ( !isset($_COOKIE['wp-postpass_'.COOKIEHASH]) || stripslashes($_COOKIE['wp-postpass_'.COOKIEHASH]) != $post->post_password ) {	// and it doesn't match the cookie
+		if ( stripslashes($_COOKIE['wp-postpass_'.COOKIEHASH]) != $post->post_password ) {	// and it doesn't match the cookie
 			$output = get_the_password_form();
 			return $output;
 		}
@@ -136,12 +137,12 @@ function the_excerpt() {
 }
 
 
-function get_the_excerpt($deprecated = '') {
-	global $post;
+function get_the_excerpt($deprecated = true) {
+	global $id, $post;
 	$output = '';
 	$output = $post->post_excerpt;
 	if ( !empty($post->post_password) ) { // if there's a password
-		if ( !isset($_COOKIE['wp-postpass_'.COOKIEHASH]) || $_COOKIE['wp-postpass_'.COOKIEHASH] != $post->post_password ) {  // and it doesn't match the cookie
+		if ( $_COOKIE['wp-postpass_'.COOKIEHASH] != $post->post_password ) {  // and it doesn't match the cookie
 			$output = __('There is no excerpt because this is a protected post.');
 			return $output;
 		}
@@ -166,7 +167,7 @@ function wp_link_pages($args = '') {
 	$r = wp_parse_args( $args, $defaults );
 	extract( $r, EXTR_SKIP );
 
-	global $post, $page, $numpages, $multipage, $more, $pagenow;
+	global $post, $id, $page, $numpages, $multipage, $more, $pagenow;
 	if ( $more_file != '' )
 		$file = $more_file;
 	else
@@ -248,6 +249,8 @@ function post_custom( $key = '' ) {
 
 // this will probably change at some point...
 function the_meta() {
+	global $id;
+
 	if ( $keys = get_post_custom_keys() ) {
 		echo "<ul class='post-meta'>\n";
 		foreach ( $keys as $key ) {
@@ -318,7 +321,6 @@ function wp_list_pages($args = '') {
 	$r['exclude'] = implode(',', apply_filters('wp_list_pages_excludes', explode(',', $r['exclude'])));
 
 	// Query pages.
-	$r['hierarchical'] = 0;
 	$pages = get_pages($r);
 
 	if ( !empty($pages) ) {
@@ -384,6 +386,8 @@ function get_attachment_icon_src( $id = 0, $fullsize = false ) {
 	if ( !$post = & get_post($id) )
 		return false;
 
+	$imagedata = wp_get_attachment_metadata( $post->ID );
+
 	$file = get_attached_file( $post->ID );
 
 	if ( !$fullsize && $thumbfile = wp_get_attachment_thumb_file( $post->ID ) ) {
@@ -441,10 +445,7 @@ function get_attachment_icon( $id = 0, $fullsize = false, $max_dims = false ) {
 			}
 		} else {
 			$post->iconsize = array($imagesize[0], $imagesize[1]);
-			$constraint = '';
 		}
-	} else {
-		$constraint = '';
 	}
 
 	$post_title = attribute_escape($post->post_title);
@@ -482,48 +483,12 @@ function prepend_attachment($content) {
 //
 
 function get_the_password_form() {
-	global $post;
-	$label = 'pwbox-'.(empty($post->ID) ? rand() : $post->ID);
 	$output = '<form action="' . get_option('siteurl') . '/wp-pass.php" method="post">
 	<p>' . __("This post is password protected. To view it please enter your password below:") . '</p>
-	<p><label for="' . $label . '">' . __("Password:") . ' <input name="post_password" id="' . $label . '" type="password" size="20" /></label> <input type="submit" name="Submit" value="' . __("Submit") . '" /></p>
+	<p><label>' . __("Password:") . ' <input name="post_password" type="password" size="20" /></label> <input type="submit" name="Submit" value="' . __("Submit") . '" /></p>
 	</form>
 	';
 	return $output;
-}
-
-/**
- * is_page_template() - Determine wether or not we are in a page template
- *
- * This template tag allows you to determine wether or not you are in a page template.
- * You can optional provide a template name and then the check will be specific to
- * that template.
- *
- * @package Template Tags
- * @global object $wp_query
- * @param string $template The specific template name if specific matching is required
- */
-function is_page_template($template = '') {
-	if (!is_page()) {
-		return false;
-	}
-
-	global $wp_query;
-
-	$page = $wp_query->get_queried_object();
-	$custom_fields = get_post_custom_values('_wp_page_template',$page->ID);
-	$page_template = $custom_fields[0];
-
-	// We have no argument passed so just see if a page_template has been specified
-	if ( empty( $template ) ) {
-		if (!empty( $page_template ) ) {
-			return true;
-		}
-	} elseif ( $template == $page_template) {
-		return true;
-	}
-
-	return false;
 }
 
 ?>

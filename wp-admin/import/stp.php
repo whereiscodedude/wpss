@@ -12,7 +12,7 @@ class STP_Import {
 
 	function greet() {
 		echo '<div class="narrow">';
-		echo '<p>'.__('Howdy! This imports tags from an existing Simple Tagging 1.6.2 installation into this blog using the WordPress native tagging structure.').'</p>';
+		echo '<p>'.__('Howdy! This imports tags from an existing Simple Tagging 1.6.2 installation into this blog using the new WordPress native tagging structure.').'</p>';
 		echo '<p>'.__('This has not been tested on any other versions of Simple Tagging. Mileage may vary.').'</p>';
 		echo '<p>'.__('To accommodate larger databases for those tag-crazy authors out there, we have made this into an easy 4-step program to help you kick that nasty Simple Tagging habit. Just keep clicking along and we will let you know when you are in the clear!').'</p>';
 		echo '<p><strong>'.__('Don&#8217;t be stupid - backup your database before proceeding!').'</strong></p>';
@@ -73,7 +73,7 @@ class STP_Import {
 			
 			add_option('stpimp_posts', $posts);
 			$count = count($posts);
-			echo '<p>' . sprintf( __ngettext('Done! <strong>%s</strong> tag to post relationships were read.', 'Done! <strong>%s</strong> tags to post relationships were read.', $count), $count ) . '<br /></p>';
+			echo '<p>' . sprintf( __('Done! <strong>%s</strong> tag to post relationships were read.'), $count ) . '<br /></p>';
 		}
 
 		echo '<form action="admin.php?import=stp&amp;step=2" method="post">';
@@ -91,7 +91,7 @@ class STP_Import {
 		// run that funky magic!
 		$tags_added = $this->tag2post();
 		
-		echo '<p>' . sprintf( __ngettext('Done! <strong>%s</strong> tags where added!', 'Done! <strong>%s</strong> tags where added!', $tags_added), $tags_added ) . '<br /></p>';
+		echo '<p>' . sprintf( __('Done! <strong>%s</strong> tags where added!'), $tags_added ) . '<br /></p>';
 		echo '<form action="admin.php?import=stp&amp;step=3" method="post">';
 		wp_nonce_field('import-stp');
 		echo '<p class="submit"><input type="submit" name="submit" value="'.__('Step 3 &raquo;').'" /></p>';
@@ -151,5 +151,5 @@ class STP_Import {
 $stp_import = new STP_Import();
 
 // add it to the import page!
-register_importer('stp', 'Simple Tagging', __('Import Simple Tagging tags into the native tagging structure.'), array($stp_import, 'dispatch'));
+register_importer('stp', 'Simple Tagging', __('Import Simple Tagging tags into the new native tagging structure.'), array($stp_import, 'dispatch'));
 ?>

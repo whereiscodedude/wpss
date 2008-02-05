@@ -3,7 +3,7 @@ require_once('admin.php');
 
 $title = __('Add Link');
 $this_file = 'link-manager.php';
-$parent_file = 'post-new.php';
+$parent_file = 'link-manager.php';
 
 
 wp_reset_vars(array('action', 'cat_id', 'linkurl', 'name', 'image',
@@ -11,9 +11,9 @@ wp_reset_vars(array('action', 'cat_id', 'linkurl', 'name', 'image',
 	'submit', 'order_by', 'links_show_cat_id', 'rating', 'rel',
 	'notes', 'linkcheck[]'));
 
-wp_enqueue_script('link');
-wp_enqueue_script('thickbox');
-
+wp_enqueue_script( array('xfn', 'dbx-admin-key?pagenow=link.php') );
+if ( current_user_can( 'manage_categories' ) )
+	wp_enqueue_script( 'ajaxlinkcat' );
 require('admin-header.php');
 ?>
 

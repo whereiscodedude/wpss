@@ -3,11 +3,9 @@ require_once('admin.php');
 $title = __('New Page');
 $parent_file = 'post-new.php';
 $editing = true;
+wp_enqueue_script('prototype');
+wp_enqueue_script('interface');
 wp_enqueue_script('autosave');
-wp_enqueue_script('post');
-wp_enqueue_script('thickbox');
-wp_enqueue_script('media-upload');
-
 require_once('admin-header.php');
 ?>
 
@@ -18,7 +16,8 @@ require_once('admin-header.php');
 <?php
 if ( current_user_can('edit_pages') ) {
 	$action = 'post';
-	$post = get_default_page_to_edit();
+	$post = get_default_post_to_edit();
+	$post->post_type = 'page';
 
 	include('edit-page-form.php');
 }

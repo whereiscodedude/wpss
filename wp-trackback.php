@@ -69,7 +69,9 @@ if (empty($title) && empty($tb_url) && empty($blog_name)) {
 if ( !empty($tb_url) && !empty($title) ) {
 	header('Content-Type: text/xml; charset=' . get_option('blog_charset') );
 
-	if ( !pings_open($tb_id) )
+	$pingstatus = $wpdb->get_var("SELECT ping_status FROM $wpdb->posts WHERE ID = $tb_id");
+
+	if ( 'open' != $pingstatus )
 		trackback_response(1, 'Sorry, trackbacks are closed for this item.');
 
 	$title =  wp_specialchars( strip_tags( $title ) );

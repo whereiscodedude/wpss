@@ -11,7 +11,10 @@ class WP_Scripts {
 	}
 
 	function default_scripts() {
-		$this->add( 'common', '/wp-admin/js/common.js', false, '1.0' );
+		$this->add( 'dbx', '/wp-includes/js/dbx.js', false, '2.05' );
+
+		$this->add( 'fat', '/wp-includes/js/fat.js', false, '1.0-RC1_3660' );
+
 		$this->add( 'sack', '/wp-includes/js/tw-sack.js', false, '1.6.1' );
 
 		$this->add( 'quicktags', '/wp-includes/js/quicktags.js', false, '3958' );
@@ -29,19 +32,16 @@ class WP_Scripts {
 
 		$this->add( 'colorpicker', '/wp-includes/js/colorpicker.js', false, '3517' );
 
-		// Modify this version when tinyMCE plugins are changed
-		$this->add( 'tiny_mce', '/wp-includes/js/tinymce/tiny_mce_gzip.php', false, '20080129' );
-
+		$this->add( 'tiny_mce', '/wp-includes/js/tinymce/tiny_mce_gzip.php', false, '20070528' );
 		$mce_config = apply_filters('tiny_mce_config_url', '/wp-includes/js/tinymce/tiny_mce_config.php');
-		$this->add( 'wp_tiny_mce', $mce_config, array('tiny_mce'), '20080129' );
+		$this->add( 'wp_tiny_mce', $mce_config, array('tiny_mce'), '20070528' );
 
-		$this->add( 'prototype', '/wp-includes/js/prototype.js', false, '1.6');
+		$this->add( 'prototype', '/wp-includes/js/prototype.js', false, '1.5.1.1');
 
-		$this->add( 'autosave', '/wp-includes/js/autosave.js', array('jquery', 'schedule'), '20080104');
+		$this->add( 'autosave', '/wp-includes/js/autosave.js', array('prototype', 'sack'), '20070306');
 		$this->localize( 'autosave', 'autosaveL10n', array(
 			'autosaveInterval' => apply_filters('autosave_interval', '120'),
 			'errorText' => __('Error: %response%'),
-			'failText' => __('Error: Autosave Failed.'),
 			'saveText' => __('Saved at %time%.'),
 			'requestFile' => get_option( 'siteurl' ) . '/wp-admin/admin-ajax.php',
 			'savingText' => __('Saving Draft...')
@@ -55,98 +55,72 @@ class WP_Scripts {
 			'whoaText' => __("Slow down, I'm still sending your data!")
 		) );
 
-		$this->add( 'listman', '/wp-includes/js/list-manipulation.js', array('wp-ajax', 'jquery-color'), '20070306' );
+		$this->add( 'listman', '/wp-includes/js/list-manipulation.js', array('wp-ajax', 'fat'), '20070306' );
 		$this->localize( 'listman', 'listManL10n', array(
 			'jumpText' => __('Jump to new item'),
 			'delText' => __('Are you sure you want to delete this %thing%?')
 		) );
 
-		$this->add( 'wp-lists', '/wp-includes/js/wp-lists.js', array('jquery'), '20080110' );
-		$this->localize( 'wp-lists', 'wpListL10n', array(
-			'url' => get_option( 'siteurl' ) . '/wp-admin/admin-ajax.php'
-		) );
-
-		$this->add( 'scriptaculous-root', '/wp-includes/js/scriptaculous/scriptaculous.js', array('prototype'), '1.8.0');
-		$this->add( 'scriptaculous-builder', '/wp-includes/js/scriptaculous/builder.js', array('scriptaculous-root'), '1.8.0');
-		$this->add( 'scriptaculous-dragdrop', '/wp-includes/js/scriptaculous/dragdrop.js', array('scriptaculous-builder', 'scriptaculous-effects'), '1.8.0');
-		$this->add( 'scriptaculous-effects', '/wp-includes/js/scriptaculous/effects.js', array('scriptaculous-root'), '1.8.0');
-		$this->add( 'scriptaculous-slider', '/wp-includes/js/scriptaculous/slider.js', array('scriptaculous-effects'), '1.8.0');
-		$this->add( 'scriptaculous-sound', '/wp-includes/js/scriptaculous/sound.js', array( 'scriptaculous-root' ), '1.8.0' );
-		$this->add( 'scriptaculous-controls', '/wp-includes/js/scriptaculous/controls.js', array('scriptaculous-root'), '1.8.0');
-		$this->add( 'scriptaculous', '', array('scriptaculous-dragdrop', 'scriptaculous-slider', 'scriptaculous-controls'), '1.8.0');
+		$this->add( 'scriptaculous-root', '/wp-includes/js/scriptaculous/scriptaculous.js', array('prototype'), '1.7.1-b3');
+		$this->add( 'scriptaculous-builder', '/wp-includes/js/scriptaculous/builder.js', array('scriptaculous-root'), '1.7.1-b3');
+		$this->add( 'scriptaculous-dragdrop', '/wp-includes/js/scriptaculous/dragdrop.js', array('scriptaculous-builder', 'scriptaculous-effects'), '1.7.1-b3');
+		$this->add( 'scriptaculous-effects', '/wp-includes/js/scriptaculous/effects.js', array('scriptaculous-root'), '1.7.1-b3');
+		$this->add( 'scriptaculous-slider', '/wp-includes/js/scriptaculous/slider.js', array('scriptaculous-effects'), '1.7.1-b3');
+		$this->add( 'scriptaculous-sound', '/wp-includes/js/scriptaculous/sound.js', array( 'scriptaculous-root' ), '1.7.1-b3' );
+		$this->add( 'scriptaculous-controls', '/wp-includes/js/scriptaculous/controls.js', array('scriptaculous-root'), '1.7.1-b3');
+		$this->add( 'scriptaculous', '', array('scriptaculous-dragdrop', 'scriptaculous-slider', 'scriptaculous-controls'), '1.7.1-b3');
 
 		$this->add( 'cropper', '/wp-includes/js/crop/cropper.js', array('scriptaculous-dragdrop'), '20070118');
 
-		$this->add( 'jquery', '/wp-includes/js/jquery/jquery.js', false, '1.2.2');
-		$this->add( 'jquery-form', '/wp-includes/js/jquery/jquery.form.js', array('jquery'), '2.02');
-		$this->add( 'jquery-color', '/wp-includes/js/jquery/jquery.color.js', array('jquery'), '2.0');
-		$this->add( 'interface', '/wp-includes/js/jquery/interface.js', array('jquery'), '1.2' );
-		$this->add( 'dimensions', '/wp-includes/js/jquery/jquery.dimensions.min.js', array('jquery'), '1.1.2');
-		$this->add( 'suggest', '/wp-includes/js/jquery/suggest.js', array('dimensions'), '1.1');
-		$this->add( 'schedule', '/wp-includes/js/jquery/jquery.schedule.js', array('jquery'), '20');
-		$this->add( 'thickbox', '/wp-includes/js/thickbox/thickbox.js', array('jquery'), '3.1');
-		$this->add( 'swfupload', '/wp-includes/js/swfupload/swfupload.js', false, '2.0.2');
-		$this->add( 'swfupload-degrade', '/wp-includes/js/swfupload/plugins/swfupload.graceful_degradation.js', array('swfupload'), '2.0.2');
-		$this->add( 'swfupload-queue', '/wp-includes/js/swfupload/plugins/swfupload.queue.js', array('swfupload'), '2.0.2');
-		$this->add( 'swfupload-handlers', '/wp-includes/js/swfupload/handlers.js', array('swfupload'), '2.0.2-20080128');
-		// these error messages came from the sample swfupload js, they might need changing.
-		$this->localize( 'swfupload-handlers', 'swfuploadL10n', array(
-				'queue_limit_exceeded' => 'You have attempted to queue too many files.',
-				'file_exceeds_size_limit' => 'The file you have selected is too big.',
-				'zero_byte_file' => 'The file you selected is empty.  Please select another file.',
-				'invalid_filetype' => 'The file you choose is not an allowed file type.',
-				'default_error' => 'An error occurred in the upload. Please try again later.',
-				'missing_upload_url' => 'There was a configuration error.  Please contact the server administrator.',
-				'upload_limit_exceeded' => 'You may only upload 1 file.',
-				'http_error' => 'HTTP error.',
-				'upload_failed' => 'Upload failed.',
-				'io_error' => 'IO error.',
-				'security_error' => 'Security error.',
-				'file_cancelled' => 'File cancelled.',
-				'upload_stopped' => 'Upload stopped.',
-				
-		) );
-
-		$this->add( 'jquery-ui-tabs', '/wp-includes/js/jquery/ui.tabs.js', array('jquery'), '3' );
+		$this->add( 'jquery', '/wp-includes/js/jquery/jquery.js', false, '1.1.4');
+		$this->add( 'jquery-form', '/wp-includes/js/jquery/jquery.form.js', array('jquery'), '1.0.3');
+		$this->add( 'interface', '/wp-includes/js/jquery/interface.js', array('jquery'), '1.2');
 
 		if ( is_admin() ) {
-			$this->add( 'ajaxcat', '/wp-admin/js/cat.js', array( 'wp-lists' ), '20071101' );
+			global $pagenow;
+			$man = false;
+			switch ( $pagenow ) :
+			case 'post.php' :
+			case 'post-new.php' :
+				$man = 'postmeta';
+				break;
+			case 'page.php' :
+			case 'page-new.php' :
+				$man = 'pagemeta';
+				break;
+			case 'link-add.php' :
+			case 'link.php' :
+				$man = 'linkmeta';
+				break;
+			endswitch;
+			if ( $man ) {
+				$this->add( 'dbx-admin-key', '/wp-admin/js/dbx-admin-key.js', array('dbx'), '20070417' );
+				$this->localize( 'dbx-admin-key', 'dbxL10n', array(
+					'manager' => $man,
+					'open' => __('open'),
+					'close' => __('close'),
+					'moveMouse' => __('click-down and drag to move this box'),
+					'toggleMouse' => __('click to %toggle% this box'),
+					'moveKey' => __('use the arrow keys to move this box'),
+					'toggleKey' => __(', or press the enter key to %toggle% it'),
+				) );
+			}
+			$this->add( 'ajaxcat', '/wp-admin/js/cat.js', array('listman'), '20070724' );
 			$this->localize( 'ajaxcat', 'catL10n', array(
 				'add' => attribute_escape(__('Add')),
 				'how' => __('Separate multiple categories with commas.')
 			) );
-			$this->add( 'admin-categories', '/wp-admin/js/categories.js', array('wp-lists'), '20071031' );
-			$this->add( 'admin-tags', '/wp-admin/js/tags.js', array('wp-lists'), '20071031' );
-			$this->add( 'admin-custom-fields', '/wp-admin/js/custom-fields.js', array('wp-lists'), '20070823' );
-			$this->add( 'password-strength-meter', '/wp-admin/js/password-strength-meter.js', array('jquery'), '20070405' ); 
-			$this->localize( 'password-strength-meter', 'pwsL10n', array( 
-				'short' => __('Too short'), 
-				'bad' => __('Bad'), 
-				'good' => __('Good'), 
-				'strong' => __('Strong') 
+			$this->add( 'ajaxlinkcat', '/wp-admin/js/link-cat.js', array('listman'), '200700601' );
+			$this->localize( 'ajaxlinkcat', 'linkcatL10n', array(
+				'add' => attribute_escape(__('Add')),
+				'how' => __('Separate multiple categories with commas.')
 			) );
-			$this->add( 'admin-comments', '/wp-admin/js/edit-comments.js', array('wp-lists'), '20071104' );
-			$this->add( 'admin-posts', '/wp-admin/js/edit-posts.js', array('wp-lists'), '20071023' );
-			$this->add( 'admin-users', '/wp-admin/js/users.js', array('wp-lists'), '20070823' );
-			$this->add( 'admin-forms', '/wp-admin/js/forms.js', array('wp-lists'), '20080108' );
+			$this->add( 'admin-categories', '/wp-admin/js/categories.js', array('listman'), '3684' );
+			$this->add( 'admin-custom-fields', '/wp-admin/js/custom-fields.js', array('listman'), '3733' );
+			$this->add( 'admin-comments', '/wp-admin/js/edit-comments.js', array('listman'), '20070327' );
+			$this->add( 'admin-users', '/wp-admin/js/users.js', array('listman'), '4583' );
 			$this->add( 'xfn', '/wp-admin/js/xfn.js', false, '3517' );
 			$this->add( 'upload', '/wp-admin/js/upload.js', array('jquery'), '20070518' );
-			$this->add( 'postbox', '/wp-admin/js/postbox.js', array('jquery'), '20080128' );
-			$this->localize( 'postbox', 'postboxL10n', array(
-				'requestFile' => get_option( 'siteurl' ) . '/wp-admin/admin-ajax.php',
-			) );
-			$this->add( 'post', '/wp-admin/js/post.js', array('suggest', 'jquery-ui-tabs', 'wp-lists', 'postbox'), '20080128' );
-			$this->localize( 'post', 'postL10n', array(
-				'tagsUsed' =>  __('Tags used on this post:'),
-				'add' => attribute_escape(__('Add')),
-				'addTag' => attribute_escape(__('Add new tag')),
-				'separate' => __('Separate tags with commas'),
-				'save' => __('Save'),
-				'cancel' => __('Cancel'),
-				'requestFile' => get_option( 'siteurl' ) . '/wp-admin/admin-ajax.php',
-			) );
-			$this->add( 'link', '/wp-admin/js/link.js', array('jquery-ui-tabs', 'wp-lists', 'postbox'), '20080131' );
-			$this->add( 'media-upload', '/wp-admin/js/media-upload.js', false, '20080109' );
 			$this->localize( 'upload', 'uploadL10n', array(
 				'browseTitle' => attribute_escape(__('Browse your files')),
 				'back' => __('&laquo; Back'),
@@ -169,12 +143,6 @@ class WP_Scripts {
 				'saveText' => attribute_escape(__('Save &raquo;')),
 				'confirmText' => __("Are you sure you want to delete the file '%title%'?\nClick ok to delete or cancel to go back.")
 			) );
-			$this->add( 'admin-widgets', '/wp-admin/js/widgets.js', array( 'interface' ), '20080109' );
-			$this->localize( 'admin-widgets', 'widgetsL10n', array(
-				'add' => __('Add'),
-				'edit' => __('Edit'),
-				'cancel' => __('Cancel'),
-			));
 		}
 	}
 
@@ -210,8 +178,8 @@ class WP_Scripts {
 
 					$src = add_query_arg('ver', $ver, $src);
 					$src = clean_url(apply_filters( 'script_loader_src', $src ));
-					$this->print_scripts_l10n( $handle );
 					echo "<script type='text/javascript' src='$src'></script>\n";
+					$this->print_scripts_l10n( $handle );
 				}
 				$this->printed[] = $handle;
 			}
@@ -471,12 +439,6 @@ function wp_prototype_before_jquery( $js_array ) {
 	return $js_array;
 }
 
-// These localizations require information that may not be loaded even by init
-function wp_just_in_time_script_localization() {
-	wp_localize_script( 'wp_tiny_mce', 'wpTinyMCEConfig', array( 'defaultEditor' => wp_default_editor() ) );
-}
-
-add_filter( 'wp_print_scripts', 'wp_just_in_time_script_localization' );
 add_filter( 'print_scripts_array', 'wp_prototype_before_jquery' );
 
 ?>

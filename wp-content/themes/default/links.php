@@ -10,7 +10,7 @@ Template Name: Links
 
 <h2>Links:</h2>
 <ul>
-<?php wp_list_bookmarks(); ?>
+<?php get_links_list(); ?>
 </ul>
 
 </div>

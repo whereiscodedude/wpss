@@ -3,11 +3,9 @@ require_once('admin.php');
 $title = __('Create New Post');
 $parent_file = 'post-new.php';
 $editing = true;
+wp_enqueue_script('prototype');
+wp_enqueue_script('interface');
 wp_enqueue_script('autosave');
-wp_enqueue_script('post');
-wp_enqueue_script('thickbox');
-wp_enqueue_script('media-upload');
-
 require_once ('./admin-header.php');
 
 if ( ! current_user_can('edit_posts') ) { ?>
@@ -22,7 +20,7 @@ When you&#8217;re promoted, just reload this page and you&#8217;ll be able to bl
 	exit();
 }
 
-if ( isset($_GET['posted']) && $_GET['posted'] ) : $_GET['posted'] = (int) $_GET['posted']; ?>
+if ( isset($_GET['posted']) && $_GET['posted'] ) : ?>
 <div id="message" class="updated fade"><p><strong><?php _e('Post saved.'); ?></strong> <a href="<?php echo get_permalink( $_GET['posted'] ); ?>"><?php _e('View post &raquo;'); ?></a></p></div>
 <?php
 endif;

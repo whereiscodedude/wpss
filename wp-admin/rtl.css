@@ -1,4 +1,5 @@
 html,
+.dbx-handle,
 #post_name,
 input[name=link_url],
 input[name=link_image],
@@ -29,6 +30,9 @@ body.login,
 	direction: rtl;
 	}
 p.submit,
+.dbx-handle {
+	text-align: left;
+	}
 html *,
 select,
 input,
@@ -75,7 +79,9 @@ table * {
 	border-right: 0;
 	border-left: 2px solid #045290;
 	}
-
+.dbx-content input, .dbx-content select {
+	margin-right: 8px;
+	}
 #newcat {
 	width: 100px;
 	}

@@ -526,7 +526,7 @@ class Dotclear_Import {
 			}
 			add_option('dclinks2wplinks',$dclinks2wplinks);
 			echo '<p>';
-			printf(__ngettext('Done! <strong>%s</strong> link or link category imported.', 'Done! <strong>%s</strong> links or link categories imported.', $count), $count);
+			printf(__('Done! <strong>%s</strong> links or link categories imported'), $count);
 			echo '<br /><br /></p>';
 			return true;
 		}
@@ -615,7 +615,6 @@ class Dotclear_Import {
 		delete_option('dcname');
 		delete_option('dchost');
 		delete_option('dccharset');
-		do_action('import_done', 'dotclear');
 		$this->tips();
 	}
 

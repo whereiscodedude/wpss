@@ -20,6 +20,102 @@ if ( empty($_POST) ) {
 	$redirect = 'users.php';
 }
 
+
+// WP_User_Search class
+// by Mark Jaquith
+
+
+class WP_User_Search {
+	var $results;
+	var $search_term;
+	var $page;
+	var $raw_page;
+	var $users_per_page = 50;
+	var $first_user;
+	var $last_user;
+	var $query_limit;
+	var $query_from_where;
+	var $total_users_for_query = 0;
+	var $too_many_total_users = false;
+	var $search_errors;
+
+	function WP_User_Search ($search_term = '', $page = '') { // constructor
+		$this->search_term = $search_term;
+		$this->raw_page = ( '' == $page ) ? false : (int) $page;
+		$this->page = (int) ( '' == $page ) ? 1 : $page;
+
+		$this->prepare_query();
+		$this->query();
+		$this->prepare_vars_for_template_usage();
+		$this->do_paging();
+	}
+
+	function prepare_query() {
+		global $wpdb;
+		$this->first_user = ($this->page - 1) * $this->users_per_page;
+		$this->query_limit = 'LIMIT ' . $this->first_user . ',' . $this->users_per_page;
+		if ( $this->search_term ) {
+			$searches = array();
+			$search_sql = 'AND (';
+			foreach ( array('user_login', 'user_nicename', 'user_email', 'user_url', 'display_name') as $col )
+				$searches[] = $col . " LIKE '%$this->search_term%'";
+			$search_sql .= implode(' OR ', $searches);
+			$search_sql .= ')';
+		}
+		$this->query_from_where = "FROM $wpdb->users WHERE 1=1 $search_sql";
+
+	}
+
+	function query() {
+		global $wpdb;
+		$this->results = $wpdb->get_col('SELECT ID ' . $this->query_from_where . $this->query_limit);
+
+		if ( $this->results )
+			$this->total_users_for_query = $wpdb->get_var('SELECT COUNT(ID) ' . $this->query_from_where); // no limit
+		else
+			$this->search_errors = new WP_Error('no_matching_users_found', __('No matching users were found!'));
+	}
+
+	function prepare_vars_for_template_usage() {
+		$this->search_term = stripslashes($this->search_term); // done with DB, from now on we want slashes gone
+	}
+
+	function do_paging() {
+		if ( $this->total_users_for_query > $this->users_per_page ) { // have to page the results
+			$this->paging_text = paginate_links( array(
+				'total' => ceil($this->total_users_for_query / $this->users_per_page),
+				'current' => $this->page,
+				'prev_text' => __('&laquo; Previous Page'),
+				'next_text' => __('Next Page &raquo;'),
+				'base' => 'users.php?%_%',
+				'format' => 'userspage=%#%',
+				'add_args' => array( 'usersearch' => urlencode($this->search_term) )
+			) );
+		}
+	}
+
+	function get_results() {
+		return (array) $this->results;
+	}
+
+	function page_links() {
+		echo $this->paging_text;
+	}
+
+	function results_are_paged() {
+		if ( $this->paging_text )
+			return true;
+		return false;
+	}
+
+	function is_search() {
+		if ( $this->search_term )
+			return true;
+		return false;
+	}
+}
+
+
 switch ($action) {
 
 case 'promote':
@@ -113,7 +209,6 @@ case 'delete':
 <form action="" method="post" name="updateusers" id="updateusers">
 <?php wp_nonce_field('delete-users') ?>
 <?php echo $referer; ?>
-
 <div class="wrap">
 <h2><?php _e('Delete Users'); ?></h2>
 <p><?php _e('You have specified these users for deletion:'); ?></p>
@@ -175,8 +270,7 @@ case 'adduser':
 
 default:
 	wp_enqueue_script('admin-users');
-	wp_enqueue_script('admin-forms');
-	
+
 	include('admin-header.php');
 
 	// Query the users
@@ -291,7 +385,6 @@ foreach($roleclasses as $role => $roleclass) {
 <?php endif; ?>
 </tr>
 <tr class="thead">
-	<th><input type="checkbox" onclick="checkAllUsers('<?php echo $role; ?>')"/></th>
 	<th><?php _e('ID') ?></th>
 	<th><?php _e('Username') ?></th>
 	<th><?php _e('Name') ?></th>
@@ -300,11 +393,11 @@ foreach($roleclasses as $role => $roleclass) {
 	<th colspan="2" style="text-align: center"><?php _e('Actions') ?></th>
 </tr>
 </tbody>
-<tbody id="role-<?php echo $role; ?>" class="list:user user-list"><?php
+<tbody id="role-<?php echo $role; ?>"><?php
 $style = '';
 foreach ( (array) $roleclass as $user_object ) {
 	$style = ( ' class="alternate"' == $style ) ? '' : ' class="alternate"';
-	echo "\n\t" . user_row($user_object, $style, $role);
+	echo "\n\t" . user_row($user_object, $style);
 }
 ?>
 
@@ -361,34 +454,34 @@ foreach ( (array) $roleclass as $user_object ) {
 	if ( get_option('users_can_register') )
 		echo '<p>' . sprintf(__('Users can <a href="%1$s">register themselves</a> or you can manually create users here.'), get_option('siteurl').'/wp-register.php') . '</p>';
 	else
-	        echo '<p>' . sprintf(__('Users cannot currently <a href="%1$s">register themselves</a>, but you can manually create users here.'), get_option('siteurl').'/wp-admin/options-general.php#users_can_register') . '</p>';
+        echo '<p>' . sprintf(__('Users cannot currently <a href="%1$s">register themselves</a>, but you can manually create users here.'), get_option('siteurl').'/wp-admin/options-general.php#users_can_register') . '</p>';
 ?>
-<form action="#add-new-user" method="post" name="adduser" id="adduser" class="add:user-list:">
+<form action="#add-new-user" method="post" name="adduser" id="adduser">
 <?php wp_nonce_field('add-user') ?>
 <table class="editform" width="100%" cellspacing="2" cellpadding="5">
-	<tr class="form-field form-required">
+	<tr>
 		<th scope="row" width="33%"><?php _e('Username (required)') ?><input name="action" type="hidden" id="action" value="adduser" /></th>
 		<td width="66%"><input name="user_login" type="text" id="user_login" value="<?php echo $new_user_login; ?>" /></td>
 	</tr>
-	<tr class="form-field">
+	<tr>
 		<th scope="row"><?php _e('First Name') ?> </th>
 		<td><input name="first_name" type="text" id="first_name" value="<?php echo $new_user_firstname; ?>" /></td>
 	</tr>
-	<tr class="form-field">
+	<tr>
 		<th scope="row"><?php _e('Last Name') ?> </th>
 		<td><input name="last_name" type="text" id="last_name" value="<?php echo $new_user_lastname; ?>" /></td>
 	</tr>
-	<tr class="form-field form-required">
+	<tr>
 		<th scope="row"><?php _e('E-mail (required)') ?></th>
 		<td><input name="email" type="text" id="email" value="<?php echo $new_user_email; ?>" /></td>
 	</tr>
-	<tr class="form-field">
+	<tr>
 		<th scope="row"><?php _e('Website') ?></th>
 		<td><input name="url" type="text" id="url" value="<?php echo $new_user_uri; ?>" /></td>
 	</tr>
 
 <?php if ( apply_filters('show_password_fields', true) ) : ?>
-	<tr class="form-field form-required">
+	<tr>
 		<th scope="row"><?php _e('Password (twice)') ?> </th>
 		<td><input name="pass1" type="password" id="pass1" />
 		<br />
@@ -396,7 +489,7 @@ foreach ( (array) $roleclass as $user_object ) {
 	</tr>
 <?php endif; ?>
 
-	<tr class="form-field">
+	<tr>
 		<th scope="row"><?php _e('Role'); ?></th>
 		<td><select name="role" id="role">
 			<?php
@@ -413,11 +506,6 @@ foreach ( (array) $roleclass as $user_object ) {
 	<input name="adduser" type="submit" id="addusersub" value="<?php _e('Add User &raquo;') ?>" />
 </p>
 </form>
-
-<table style="color:red">
-<tbody id="user-list" class="list:user">
-</tbody>
-</table>
 
 </div>
 </div>

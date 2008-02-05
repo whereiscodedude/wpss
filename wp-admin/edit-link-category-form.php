@@ -9,7 +9,7 @@ if ( ! empty($cat_ID) ) {
 } else {
 	$heading = __('Add Category');
 	$submit_text = __('Add Category &raquo;');
-	$form = '<form name="addcat" id="addcat" class="add:the-list:" method="post" action="link-category.php">';
+	$form = '<form name="addcat" id="addcat" method="post" action="link-category.php">';
 	$action = 'addcat';
 	$nonce_action = 'add-link-category';
 	do_action('add_link_category_form_pre', $category);
@@ -24,15 +24,15 @@ if ( ! empty($cat_ID) ) {
 <input type="hidden" name="cat_ID" value="<?php echo $category->term_id ?>" />
 <?php wp_nonce_field($nonce_action); ?>
 	<table class="editform" width="100%" cellspacing="2" cellpadding="5">
-		<tr class="form-field form-required">
+		<tr>
 			<th width="33%" scope="row" valign="top"><label for="name"><?php _e('Category name:') ?></label></th>
 			<td width="67%"><input name="name" id="name" type="text" value="<?php echo $category->name; ?>" size="40" /></td>
 		</tr>
-		<tr class="form-field">
+		<tr>
 			<th scope="row" valign="top"><label for="slug"><?php _e('Category slug:') ?></label></th>
 			<td><input name="slug" id="slug" type="text" value="<?php echo $category->slug; ?>" size="40" /></td>
 		</tr>
-		<tr class="form-field">
+		<tr>
 			<th scope="row" valign="top"><label for="description"><?php _e('Description: (optional)') ?></label></th>
 			<td><textarea name="description" id="description" rows="5" cols="50" style="width: 97%;"><?php echo $category->description; ?></textarea></td>
 		</tr>

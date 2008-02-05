@@ -1,22 +1,13 @@
 <?php
-/**
- * MagpieRSS: a simple RSS integration tool
- *
- * A compiled file for RSS syndication
- *
- * @author Kellan Elliott-McCrea <kellan@protest.net>
- * @version 0.51
- * @license GPL
- *
- * @package External
- * @subpackage MagpieRSS
- */
-
-/*
- * Hook to use another RSS object instead of MagpieRSS
- */
 do_action('load_feed_engine');
 
+/*
+ * Project:     MagpieRSS: a simple RSS integration tool
+ * File:        A compiled file for RSS syndication
+ * Author:      Kellan Elliott-McCrea <kellan@protest.net>
+ * Version:		0.51
+ * License:		GPL
+ */
 
 define('RSS', 'RSS');
 define('ATOM', 'Atom');
@@ -676,10 +667,9 @@ class RSSCache {
 		$cache_option = 'rss_' . $this->file_name( $url );
 		$cache_timestamp = 'rss_' . $this->file_name( $url ) . '_ts';
 
-		// shouldn't these be using get_option() ?
-		if ( !$wpdb->get_var( $wpdb->prepare( "SELECT option_name FROM $wpdb->options WHERE option_name = %s", $cache_option ) ) )
+		if ( !$wpdb->get_var("SELECT option_name FROM $wpdb->options WHERE option_name = '$cache_option'") )
 			add_option($cache_option, '', '', 'no');
-		if ( !$wpdb->get_var( $wpdb->prepare( "SELECT option_name FROM $wpdb->options WHERE option_name = %s", $cache_timestamp ) ) )
+		if ( !$wpdb->get_var("SELECT option_name FROM $wpdb->options WHERE option_name = '$cache_timestamp'") )
 			add_option($cache_timestamp, '', '', 'no');
 
 		update_option($cache_option, $rss);

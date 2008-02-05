@@ -2,7 +2,7 @@
 require_once('admin.php');
 $title = __('Pages');
 $parent_file = 'edit.php';
-wp_enqueue_script( 'wp-lists' );
+wp_enqueue_script( 'listman' );
 require_once('admin-header.php');
 
 $post_stati  = array(	//	array( adj, noun )
@@ -20,12 +20,9 @@ if ( isset($_GET['post_status']) && in_array( $_GET['post_status'], array_keys($
 }
 
 ?>
-<script>
-/* <![CDATA[ */
-jQuery(function($){$('#the-list').wpList();});
-/* ]]> */
-</script>
+
 <div class="wrap">
+
 <h2><?php
 // Use $_GET instead of is_ since they can override each other
 $h2_search = isset($_GET['s']) && $_GET['s'] ? ' ' . sprintf(__('matching &#8220;%s&#8221;'), wp_specialchars( stripslashes( $_GET['s'] ) ) ) : '';
@@ -68,9 +65,7 @@ printf( _c( '%1$s%2$s%3$s|You can reorder these: 1: Pages, 2: by {s}, 3: matchin
 <br style="clear:both;" />
 
 <?php
-$query_str = "post_type=page&orderby=menu_order title&what_to_show=posts$post_status_q&posts_per_page=-1&posts_per_archive_page=-1&order=asc";
-$query_str = apply_filters('manage_pages_query', $query_str);
-wp($query_str);
+wp("post_type=page&orderby=menu_order&what_to_show=posts$post_status_q&posts_per_page=-1&posts_per_archive_page=-1&order=asc");
 
 $all = !( $h2_search || $post_status_q );
 
@@ -86,8 +81,8 @@ if ($posts) {
 	<th scope="col" colspan="3" style="text-align: center"><?php _e('Action'); ?></th>
   </tr>
   </thead>
-  <tbody id="the-list" class="list:page">
-  <?php page_rows($posts); ?>  
+  <tbody id="the-list">
+<?php page_rows(0, 0, $posts, $all); ?>
   </tbody>
 </table>
 

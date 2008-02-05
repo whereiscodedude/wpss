@@ -15,12 +15,6 @@ function wp_upload_display( $dims = false, $href = '' ) {
 	}
 	if ( isset($attachment_data['width']) )
 		list($width,$height) = wp_shrink_dimensions($attachment_data['width'], $attachment_data['height'], 171, 128);
-	// check for extended metadata from exif/iptc
-	if ( !isset($attachment_data['image_meta']) && $is_image ) {
-		$image_meta = wp_read_image_metadata( $filesystem_path );
-		$attachment_data['image_meta'] = $image_meta;
-		wp_update_attachment_metadata( $id, $attachment_data );
-	}
 
 	$post_title = attribute_escape( the_title( '', '', false ) );
 	$post_content = attribute_escape(apply_filters( 'content_edit_pre', $post->post_content ));
@@ -78,7 +72,7 @@ function wp_upload_display( $dims = false, $href = '' ) {
 }
 
 function wp_upload_view() {
-	global $style;
+	global $style, $post_id, $style;
 	$id = get_the_ID();
 	$attachment_data = wp_get_attachment_metadata( $id );
 ?>
@@ -169,45 +163,6 @@ function wp_upload_form() {
 				<th scope="row"><label for="post_content"><?php _e('Description'); ?></label></th>
 				<td><textarea name="post_content" id="post_content"><?php echo $attachment->post_content; ?></textarea></td>
 			</tr>
-			<?php if (isset($attachment_data['image_meta'])) { ?>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('Aperture'); ?></label></th>
-					<td>f/<?php echo $attachment_data['image_meta']['aperture']; ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('Credit'); ?></label></th>
-					<td><?php echo $attachment_data['image_meta']['credit']; ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('Camera'); ?></label></th>
-					<td><?php echo $attachment_data['image_meta']['camera']; ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('Created'); ?></label></th>
-					<td><?php echo date_i18n(get_option('date_format').' '.get_option('time_format'), $attachment_data['image_meta']['created_timestamp']); ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('Copyright'); ?></label></th>
-					<td><?php echo $attachment_data['image_meta']['copyright']; ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('Focal Length'); ?></label></th>
-					<td><?php echo $attachment_data['image_meta']['focal_length']; ?>mm</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('ISO'); ?></label></th>
-					<td><?php echo $attachment_data['image_meta']['iso']; ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('Shutter Speed'); ?></label></th>
-					<td><?php $secs = $attachment_data['image_meta']['shutter_speed'];
-						echo ($secs > 0.0 and $secs < 1.0) ? ("1/" . round(1/$secs)) : ($secs); ?>s</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="url"><?php _e('Title'); ?></label></th>
-					<td><?php echo $attachment_data['image_meta']['title']; ?></td>
-				</tr>
-			<?php } ?>
 			<tr id="buttons" class="submit">
 				<td colspan='2'>
 <?php	if ( $id ) : ?>
@@ -268,6 +223,7 @@ function wp_upload_tab_upload_action() {
 		$url = $file['url'];
 		$type = $file['type'];
 		$file = $file['file'];
+		$filename = basename($file);
 
 		// Construct the attachment array
 		$attachment = array(
