@@ -84,19 +84,9 @@ class wpdb {
 
 		$this->ready = true;
 
-		if ( $this->supports_collation() ) {
-			$collation_query = '';
-			if ( !empty($this->charset) ) {
-				$collation_query = "SET NAMES '{$this->charset}'";
-				if (!empty($this->collate) )
-					$collation_query .= " COLLATE '{$this->collate}'";
-			}
-			
-			if ( !empty($collation_query) )
-				$this->query($collation_query);
-			
-		}
-		
+		if ( !empty($this->charset) && version_compare(mysql_get_server_info($this->dbh), '4.1.0', '>=') )
+ 			$this->query("SET NAMES '$this->charset'");
+
 		$this->select($dbname);
 	}
 

@@ -80,8 +80,8 @@ case 'edit':
 
 	if ( empty($post->ID) ) wp_die( __("You attempted to edit a post that doesn't exist. Perhaps it was deleted?") );
 
-	if ( 'post' != $post->post_type ) {
-		wp_redirect( get_edit_post_link( $post->ID, 'url' ) );
+	if ( 'page' == $post->post_type ) {
+		wp_redirect("page.php?action=edit&post=$post_ID");
 		exit();
 	}
 

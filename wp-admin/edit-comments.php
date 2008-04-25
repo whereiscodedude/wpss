@@ -12,7 +12,8 @@ if ( !empty( $_REQUEST['delete_comments'] ) ) {
 	$comments_deleted = $comments_approved = $comments_unapproved = $comments_spammed = 0;
 	foreach ($_REQUEST['delete_comments'] as $comment) : // Check the permissions on each
 		$comment = (int) $comment;
-		$post_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT comment_post_ID FROM $wpdb->comments WHERE comment_ID = %d", $comment) );
+		$post_id = (int) $wpdb->get_var("SELECT comment_post_ID FROM $wpdb->comments WHERE comment_ID = $comment");
+		// $authordata = get_userdata( $wpdb->get_var("SELECT post_author FROM $wpdb->posts WHERE ID = $post_id") );
 		if ( !current_user_can('edit_post', $post_id) )
 			continue;
 		if ( !empty( $_REQUEST['spamit'] ) ) {
@@ -185,7 +186,7 @@ if ($comments) {
 <table class="widefat">
 <thead>
   <tr>
-    <th scope="col" class="check-column"><input type="checkbox" /></th>
+    <th scope="col" class="check-column"><input type="checkbox" onclick="checkAll(document.getElementById('comments-form'));" /></th>
     <th scope="col"><?php _e('Comment') ?></th>
     <th scope="col"><?php _e('Date') ?></th>
     <th scope="col" class="action-links"><?php _e('Actions') ?></th>

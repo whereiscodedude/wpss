@@ -286,7 +286,7 @@ function tag_rows( $page = 1, $pagesize = 20, $searchterms = '' ) {
 // define the columns to display, the syntax is 'internal name' => 'display name'
 function wp_manage_posts_columns() {
 	$posts_columns = array();
-	$posts_columns['cb'] = '<input type="checkbox" />';
+	$posts_columns['cb'] = '<input type="checkbox" onclick="checkAll(document.getElementById(\'posts-filter\'));" />';
 	if ( 'draft' === $_GET['post_status'] )
 		$posts_columns['modified'] = __('Modified');
 	elseif ( 'pending' === $_GET['post_status'] )
@@ -308,7 +308,7 @@ function wp_manage_posts_columns() {
 // define the columns to display, the syntax is 'internal name' => 'display name'
 function wp_manage_media_columns() {
 	$posts_columns = array();
-	$posts_columns['cb'] = '<input type="checkbox" />';
+	$posts_columns['cb'] = '<input type="checkbox" onclick="checkAll(document.getElementById(\'posts-filter\'));" />';
 	$posts_columns['icon'] = '';
 	$posts_columns['media'] = _c('Media|media column header');
 	$posts_columns['desc'] = _c('Description|media column header');
@@ -323,7 +323,7 @@ function wp_manage_media_columns() {
 
 function wp_manage_pages_columns() {
 	$posts_columns = array();
-	$posts_columns['cb'] = '<input type="checkbox" />';
+	$posts_columns['cb'] = '<input type="checkbox" onclick="checkAll(document.getElementById(\'posts-filter\'));" />';
 	if ( 'draft' === $_GET['post_status'] )
 		$posts_columns['modified'] = __('Modified');
 	elseif ( 'pending' === $_GET['post_status'] )
@@ -888,7 +888,7 @@ function page_template_dropdown( $default = '' ) {
 
 function parent_dropdown( $default = 0, $parent = 0, $level = 0 ) {
 	global $wpdb, $post_ID;
-	$items = $wpdb->get_results( $wpdb->prepare("SELECT ID, post_parent, post_title FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'page' ORDER BY menu_order", $parent) );
+	$items = $wpdb->get_results( "SELECT ID, post_parent, post_title FROM $wpdb->posts WHERE post_parent = $parent AND post_type = 'page' ORDER BY menu_order" );
 
 	if ( $items ) {
 		foreach ( $items as $item ) {

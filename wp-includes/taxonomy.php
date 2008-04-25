@@ -751,7 +751,7 @@ function is_term($term, $taxonomy = '') {
 	}
 
 	if ( !empty($taxonomy) )
-		return $wpdb->get_row( $wpdb->prepare("SELECT tt.term_id, tt.term_taxonomy_id FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy as tt ON tt.term_id = t.term_id WHERE $where AND tt.taxonomy = %s", $taxonomy), ARRAY_A);
+		return $wpdb->get_row("SELECT tt.term_id, tt.term_taxonomy_id FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy as tt ON tt.term_id = t.term_id WHERE $where AND tt.taxonomy = '$taxonomy'", ARRAY_A);
 
 	return $wpdb->get_var("SELECT term_id FROM $wpdb->terms as t WHERE $where");
 }
@@ -890,7 +890,8 @@ function wp_count_terms( $taxonomy, $args = array() ) {
 	if ( $ignore_empty )
 		$where = 'AND count > 0';
 
-	return $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $wpdb->term_taxonomy WHERE taxonomy = %s $where", $taxonomy) );
+	$taxonomy = $wpdb->escape( $taxonomy );
+	return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->term_taxonomy WHERE taxonomy = '$taxonomy' $where");
 }
 
 /**
@@ -919,7 +920,7 @@ function wp_delete_object_term_relationships( $object_id, $taxonomies ) {
 	foreach ( $taxonomies as $taxonomy ) {
 		$terms = wp_get_object_terms($object_id, $taxonomy, 'fields=tt_ids');
 		$in_terms = "'" . implode("', '", $terms) . "'";
-		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->term_relationships WHERE object_id = %d AND term_taxonomy_id IN ($in_terms)", $object_id) );
+		$wpdb->query("DELETE FROM $wpdb->term_relationships WHERE object_id = '$object_id' AND term_taxonomy_id IN ($in_terms)");
 		wp_update_term_count($terms, $taxonomy);
 	}
 }
@@ -1294,7 +1295,7 @@ function wp_set_object_terms($object_id, $terms, $taxonomy, $append = false) {
 		$delete_terms = array_diff($old_terms, $tt_ids);
 		if ( $delete_terms ) {
 			$in_delete_terms = "'" . implode("', '", $delete_terms) . "'";
-			$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->term_relationships WHERE object_id = %d AND term_taxonomy_id IN ($in_delete_terms)", $object_id) );
+			$wpdb->query("DELETE FROM $wpdb->term_relationships WHERE object_id = '$object_id' AND term_taxonomy_id IN ($in_delete_terms)");
 			wp_update_term_count($delete_terms, $taxonomy);
 		}
 	}

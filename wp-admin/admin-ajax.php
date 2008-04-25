@@ -15,7 +15,7 @@ if ( isset($_GET['action']) && 'ajax-tag-search' == $_GET['action'] ) {
 
 	if ( strstr( $s, ',' ) )
 		die; // it's a multiple tag insert, we won't find anything
-	$results = $wpdb->get_col( $wpdb->prepare("SELECT name FROM $wpdb->terms WHERE name LIKE (%s)", '%' . $s . '%') );
+	$results = $wpdb->get_col( "SELECT name FROM $wpdb->terms WHERE name LIKE ('%$s%')" );
 	echo join( $results, "\n" );
 	die;
 }
@@ -459,8 +459,6 @@ case 'add-user' :
 	$x->send();
 	break;
 case 'autosave' : // The name of this action is hardcoded in edit_post()
-	define( 'DOING_AUTOSAVE', true );
-
 	$nonce_age = check_ajax_referer( 'autosave', 'autosavenonce');
 	global $current_user;
 

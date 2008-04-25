@@ -205,7 +205,7 @@ if ( $page_links )
 
 if ( 1 == count($posts) && is_singular() ) :
 
-	$comments = $wpdb->get_results( $wpdb->prepare("SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND comment_approved != 'spam' ORDER BY comment_date", $id) );
+	$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = $id AND comment_approved != 'spam' ORDER BY comment_date");
 	if ( $comments ) :
 		// Make sure comments, post, and post_author are cached
 		update_comment_cache($comments);

@@ -57,13 +57,13 @@ function get_profile($field, $user = false) {
 	global $wpdb;
 	if ( !$user )
 		$user = $wpdb->escape($_COOKIE[USER_COOKIE]);
-	return $wpdb->get_var( $wpdb->prepare("SELECT $field FROM $wpdb->users WHERE user_login = %s", $user) );
+	return $wpdb->get_var("SELECT $field FROM $wpdb->users WHERE user_login = '$user'");
 }
 
 function get_usernumposts($userid) {
 	global $wpdb;
 	$userid = (int) $userid;
-	return $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $wpdb->posts WHERE post_author = %d AND post_type = 'post' AND ", $userid) . get_private_posts_cap_sql('post'));
+	return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_author = '$userid' AND post_type = 'post' AND " . get_private_posts_cap_sql('post'));
 }
 
 // TODO: xmlrpc only.  Maybe move to xmlrpc.php.
@@ -130,9 +130,9 @@ function delete_usermeta( $user_id, $meta_key, $meta_value = '' ) {
 	$meta_value = trim( $meta_value );
 
 	if ( ! empty($meta_value) )
-		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->usermeta WHERE user_id = %d AND meta_key = %s AND meta_value = %s", $userid, $meta_key, $meta_value) );
+		$wpdb->query("DELETE FROM $wpdb->usermeta WHERE user_id = '$user_id' AND meta_key = '$meta_key' AND meta_value = '$meta_value'");
 	else
-		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->usermeta WHERE user_id = %d AND meta_key = %s", $user_id, $meta_key) );
+		$wpdb->query("DELETE FROM $wpdb->usermeta WHERE user_id = '$user_id' AND meta_key = '$meta_key'");
 
 	wp_cache_delete($user_id, 'users');
 
@@ -183,18 +183,19 @@ function update_usermeta( $user_id, $meta_key, $meta_value ) {
 	if ( is_string($meta_value) )
 		$meta_value = stripslashes($meta_value);
 	$meta_value = maybe_serialize($meta_value);
+	$meta_value = $wpdb->escape($meta_value);
 
 	if (empty($meta_value)) {
 		return delete_usermeta($user_id, $meta_key);
 	}
 
-	$cur = $wpdb->get_row( $wpdb->prepare("SELECT * FROM $wpdb->usermeta WHERE user_id = %d AND meta_key = %s", $user_id, $meta_key) );
+	$cur = $wpdb->get_row("SELECT * FROM $wpdb->usermeta WHERE user_id = '$user_id' AND meta_key = '$meta_key'");
 	if ( !$cur ) {
-		$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->usermeta ( user_id, meta_key, meta_value )
+		$wpdb->query("INSERT INTO $wpdb->usermeta ( user_id, meta_key, meta_value )
 		VALUES
-		( %d, %s, %s )", $user_id, $meta_key, $meta_value) );
+		( '$user_id', '$meta_key', '$meta_value' )");
 	} else if ( $cur->meta_value != $meta_value ) {
-		$wpdb->query( $wpdb->prepare("UPDATE $wpdb->usermeta SET meta_value = %s WHERE user_id = %d AND meta_key = %s", $meta_value, $user_id, $meta_key) );
+		$wpdb->query("UPDATE $wpdb->usermeta SET meta_value = '$meta_value' WHERE user_id = '$user_id' AND meta_key = '$meta_key'");
 	} else {
 		return false;
 	}

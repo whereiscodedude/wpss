@@ -17,12 +17,6 @@ case 'editattachment' :
 
 	$errors = media_upload_form_handler();
 
-
-	check_admin_referer('media-form');
-
-	if ( !current_user_can('edit_post', $attachment_id) )
-		wp_die ( __('You are not allowed to edit this attachment.') );
-
 	if ( empty($errors) ) {
 		$location = 'media.php';
 		if ( $referer = wp_get_original_referer() ) {

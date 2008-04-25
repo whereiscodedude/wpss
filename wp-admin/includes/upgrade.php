@@ -221,7 +221,7 @@ function upgrade_100() {
 		foreach($posts as $post) {
 			if ('' == $post->post_name) {
 				$newtitle = sanitize_title($post->post_title);
-				$wpdb->query( $wpdb->prepare("UPDATE $wpdb->posts SET post_name = %s WHERE ID = %d", $newtitle, $post->ID) );
+				$wpdb->query("UPDATE $wpdb->posts SET post_name = '$newtitle' WHERE ID = '$post->ID'");
 			}
 		}
 	}
@@ -230,7 +230,7 @@ function upgrade_100() {
 	foreach ($categories as $category) {
 		if ('' == $category->category_nicename) {
 			$newtitle = sanitize_title($category->cat_name);
-			$wpdb->query( $wpdb->prepare("UPDATE $wpdb->categories SET category_nicename = %s WHERE cat_ID = %d", $newtitle, $category->cat_ID) );
+			$wpdb->query("UPDATE $wpdb->categories SET category_nicename = '$newtitle' WHERE cat_ID = '$category->cat_ID'");
 		}
 	}
 
@@ -253,12 +253,14 @@ function upgrade_100() {
 	if ($allposts) :
 		foreach ($allposts as $post) {
 			// Check to see if it's already been imported
-			$cat = $wpdb->get_row( $wpdb->prepare("SELECT * FROM $wpdb->post2cat WHERE post_id = %d AND category_id = %d", $post->ID, $post->post_category) );
+			$cat = $wpdb->get_row("SELECT * FROM $wpdb->post2cat WHERE post_id = $post->ID AND category_id = $post->post_category");
 			if (!$cat && 0 != $post->post_category) { // If there's no result
-				$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->post2cat
+				$wpdb->query("
+					INSERT INTO $wpdb->post2cat
 					(post_id, category_id)
-					VALUES (%s, %s)
-					", $post->ID, $post->post_category) );
+					VALUES
+					('$post->ID', '$post->post_category')
+					");
 			}
 		}
 	endif;
@@ -286,7 +288,7 @@ function upgrade_110() {
 	foreach ($users as $user) {
 		if ('' == $user->user_nicename) {
 			$newname = sanitize_title($user->user_nickname);
-			$wpdb->query( $wpdb->prepare("UPDATE $wpdb->users SET user_nicename = %s WHERE ID = %d", $newname, $user->ID) );
+			$wpdb->query("UPDATE $wpdb->users SET user_nicename = '$newname' WHERE ID = '$user->ID'");
 		}
 	}
 
@@ -402,7 +404,7 @@ function upgrade_130() {
 	foreach ( $options as $option ) {
 		if ( 1 != $option->dupes ) { // Could this be done in the query?
 			$limit = $option->dupes - 1;
-			$dupe_ids = $wpdb->get_col( $wpdb->prepare("SELECT option_id FROM $wpdb->options WHERE option_name = %s LIMIT %d", $option->option_name, $limit) );
+			$dupe_ids = $wpdb->get_col("SELECT option_id FROM $wpdb->options WHERE option_name = '$option->option_name' LIMIT $limit");
 			$dupe_ids = join($dupe_ids, ',');
 			$wpdb->query("DELETE FROM $wpdb->options WHERE option_id IN ($dupe_ids)");
 		}
@@ -446,7 +448,8 @@ function upgrade_160() {
 			if ($idmode == 'namefl') $id = $user->user_firstname.' '.$user->user_lastname;
 			if ($idmode == 'namelf') $id = $user->user_lastname.' '.$user->user_firstname;
 			if (!$idmode) $id = $user->user_nickname;
-			$wpdb->query( $wpdb->prepare("UPDATE $wpdb->users SET display_name = %s WHERE ID = %d", $id, $user->ID) );
+			$id = $wpdb->escape( $id );
+			$wpdb->query("UPDATE $wpdb->users SET display_name = '$id' WHERE ID = '$user->ID'");
 		endif;
 
 		// FIXME: RESET_CAPS is temporary code to reset roles and caps if flag is set.
@@ -468,7 +471,7 @@ function upgrade_160() {
 	$comments = $wpdb->get_results( "SELECT comment_post_ID, COUNT(*) as c FROM $wpdb->comments WHERE comment_approved = '1' GROUP BY comment_post_ID" );
 	if( is_array( $comments ) ) {
 		foreach ($comments as $comment) {
-			$wpdb->query( $wpdb->prepare("UPDATE $wpdb->posts SET comment_count = %d WHERE ID = %d", $comment->c, $comment->comment_post_ID) );
+			$wpdb->query( "UPDATE $wpdb->posts SET comment_count = $comment->c WHERE ID = '$comment->comment_post_ID'" );
 		}
 	}
 
@@ -477,10 +480,10 @@ function upgrade_160() {
 	if ( $wp_current_db_version > 2541 && $wp_current_db_version <= 3091 ) {
 		$objects = $wpdb->get_results("SELECT ID, post_type FROM $wpdb->posts WHERE post_status = 'object'");
 		foreach ($objects as $object) {
-			$wpdb->query( $wpdb->prepare("UPDATE $wpdb->posts SET post_status = 'attachment',
-			post_mime_type = %s,
+			$wpdb->query("UPDATE $wpdb->posts SET post_status = 'attachment',
+			post_mime_type = '$object->post_type',
 			post_type = ''
-			WHERE ID = %d", $object->post_type, $object->ID) );
+			WHERE ID = $object->ID");
 
 			$meta = get_post_meta($object->ID, 'imagedata', true);
 			if ( ! empty($meta['file']) )
@@ -508,7 +511,7 @@ function upgrade_210() {
 				$type = 'attachment';
 			}
 
-			$wpdb->query( $wpdb->prepare("UPDATE $wpdb->posts SET post_status = %s, post_type = %s WHERE ID = %d", $status, $type, $post->ID) );
+			$wpdb->query("UPDATE $wpdb->posts SET post_status = '$status', post_type = '$type' WHERE ID = '$post->ID'");
 		}
 	}
 
@@ -541,42 +544,45 @@ function upgrade_230() {
 	$categories = $wpdb->get_results("SELECT * FROM $wpdb->categories ORDER BY cat_ID");
 	foreach ($categories as $category) {
 		$term_id = (int) $category->cat_ID;
+		$name = $wpdb->escape($category->cat_name);
+		$description = $wpdb->escape($category->category_description);
+		$slug = $wpdb->escape($category->category_nicename);
+		$parent = $wpdb->escape($category->category_parent);
 		$term_group = 0;
 
 		// Associate terms with the same slug in a term group and make slugs unique.
-		if ( $exists = $wpdb->get_results( $wpdb->prepare("SELECT term_id, term_group FROM $wpdb->terms WHERE slug = %s", $slug) ) ) {
+		if ( $exists = $wpdb->get_results("SELECT term_id, term_group FROM $wpdb->terms WHERE slug = '$slug'") ) {
 			$term_group = $exists[0]->term_group;
 			$id = $exists[0]->term_id;
 			$num = 2;
 			do {
 				$alt_slug = $slug . "-$num";
 				$num++;
-				$slug_check = $wpdb->get_var( $wpdb->prepare("SELECT slug FROM $wpdb->terms WHERE slug = %s", $alt_slug) );
+				$slug_check = $wpdb->get_var("SELECT slug FROM $wpdb->terms WHERE slug = '$alt_slug'");
 			} while ( $slug_check );
 
 			$slug = $alt_slug;
 
 			if ( empty( $term_group ) ) {
 				$term_group = $wpdb->get_var("SELECT MAX(term_group) FROM $wpdb->terms GROUP BY term_group") + 1;
-				$wpdb->query( $wpdb->prepare("UPDATE $wpdb->terms SET term_group = %d WHERE term_id = %d", $term_group, $id) );
+				$wpdb->query("UPDATE $wpdb->terms SET term_group = '$term_group' WHERE term_id = '$id'");
 			}
 		}
 
-		$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->terms (term_id, name, slug, term_group) VALUES 
-		(%d, %s, %s, %d)", $term_id, $name, $slug, $term_group) );
+		$wpdb->query("INSERT INTO $wpdb->terms (term_id, name, slug, term_group) VALUES ('$term_id', '$name', '$slug', '$term_group')");
 
 		$count = 0;
 		if ( !empty($category->category_count) ) {
 			$count = (int) $category->category_count;
 			$taxonomy = 'category';
-			$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ( %d, %s, %s, %d, %d)", $term_id, $taxonomy, $description, $parent, $count) );
+			$wpdb->query("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ('$term_id', '$taxonomy', '$description', '$parent', '$count')");
 			$tt_ids[$term_id][$taxonomy] = (int) $wpdb->insert_id;
 		}
 
 		if ( !empty($category->link_count) ) {
 			$count = (int) $category->link_count;
 			$taxonomy = 'link_category';
-			$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ( %d, %s, %s, %d, %d)", $term_id, $taxonomy, $description, $parent, $count) );
+			$wpdb->query("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ('$term_id', '$taxonomy', '$description', '$parent', '$count')");
 			$tt_ids[$term_id][$taxonomy] = (int) $wpdb->insert_id;
 		}
 
@@ -584,14 +590,14 @@ function upgrade_230() {
 			$have_tags = true;
 			$count = (int) $category->tag_count;
 			$taxonomy = 'post_tag';
-			$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ( %d, %s, %s, %d, %d)", $term_id, $taxonomy, $description, $parent, $count) );
+			$wpdb->query("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ('$term_id', '$taxonomy', '$description', '$parent', '$count')");
 			$tt_ids[$term_id][$taxonomy] = (int) $wpdb->insert_id;
 		}
 
 		if ( empty($count) ) {
 			$count = 0;
 			$taxonomy = 'category';
-			$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ( %d, %s, %s, %d, %d)", $term_id, $taxonomy, $description, $parent, $count) );
+			$wpdb->query("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ('$term_id', '$taxonomy', '$description', '$parent', '$count')");
 			$tt_ids[$term_id][$taxonomy] = (int) $wpdb->insert_id;
 		}
 	}
@@ -611,7 +617,7 @@ function upgrade_230() {
 		if ( empty($tt_id) )
 			continue;
 
-		$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id) VALUES ( %d, %d)", $post_id, $tt_id) );
+		$wpdb->query("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id) VALUES ('$post_id', '$tt_id')");
 	}
 
 	// < 3570 we used linkcategories.  >= 3570 we used categories and link2cat.
@@ -630,20 +636,20 @@ function upgrade_230() {
 			$term_group = 0;
 
 			// Associate terms with the same slug in a term group and make slugs unique.
-			if ( $exists = $wpdb->get_results( $wpdb->prepare("SELECT term_id, term_group FROM $wpdb->terms WHERE slug = %s", $slug) ) ) {
+			if ( $exists = $wpdb->get_results("SELECT term_id, term_group FROM $wpdb->terms WHERE slug = '$slug'") ) {
 				$term_group = $exists[0]->term_group;
 				$term_id = $exists[0]->term_id;
 			}
 
 			if ( empty($term_id) ) {
-				$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->terms (name, slug, term_group) VALUES (%s, %s, %d)", $name, $slug, $term_group) );
+				$wpdb->query("INSERT INTO $wpdb->terms (name, slug, term_group) VALUES ('$name', '$slug', '$term_group')");
 				$term_id = (int) $wpdb->insert_id;
 			}
 
 			$link_cat_id_map[$cat_id] = $term_id;
 			$default_link_cat = $term_id;
 
-			$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES (%d, 'link_category', '', '0', '0')", $term_id) );
+			$wpdb->query("INSERT INTO $wpdb->term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ('$term_id', 'link_category', '', '0', '0')");
 			$tt_ids[$term_id] = (int) $wpdb->insert_id;
 		}
 
@@ -659,7 +665,7 @@ function upgrade_230() {
 			if ( empty($tt_id) )
 				continue;
 
-			$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id) VALUES ( %d, %d)", $link->link_id, $tt_id) );
+			$wpdb->query("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id) VALUES ('$link->link_id', '$tt_id')");
 		}
 
 		// Set default to the last category we grabbed during the upgrade loop.
@@ -674,7 +680,7 @@ function upgrade_230() {
 			if ( empty($tt_id) )
 				continue;
 
-			$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id) VALUES ( %d, %d)", $link_id, $tt_id) );
+			$wpdb->query("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id) VALUES ('$link_id', '$tt_id')");
 		}
 	}
 
@@ -687,10 +693,10 @@ function upgrade_230() {
 	$terms = $wpdb->get_results("SELECT term_taxonomy_id, taxonomy FROM $wpdb->term_taxonomy");
 	foreach ( (array) $terms as $term ) {
 		if ( ('post_tag' == $term->taxonomy) || ('category' == $term->taxonomy) )
-			$count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $wpdb->term_relationships, $wpdb->posts WHERE $wpdb->posts.ID = $wpdb->term_relationships.object_id AND post_status = 'publish' AND post_type = 'post' AND term_taxonomy_id = %d", $term->term_taxonomy_id) );
+			$count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->term_relationships, $wpdb->posts WHERE $wpdb->posts.ID = $wpdb->term_relationships.object_id AND post_status = 'publish' AND post_type = 'post' AND term_taxonomy_id = '$term->term_taxonomy_id'");
 		else
-			$count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id = %d", $term->term_taxonomy_id) );
-		$wpdb->query( $wpdb->prepare("UPDATE $wpdb->term_taxonomy SET count = %d WHERE term_taxonomy_id = %d", $count, $term->term_taxonomy_id) );
+			$count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id = '$term->term_taxonomy_id'");
+		$wpdb->query("UPDATE $wpdb->term_taxonomy SET count = '$count' WHERE term_taxonomy_id = '$term->term_taxonomy_id'");
 	}
 }
 
@@ -827,7 +833,7 @@ function __get_option($setting) {
 		return preg_replace( '|/+$|', '', constant( 'WP_SITEURL' ) );
 	}
 
-	$option = $wpdb->get_var( $wpdb->prepare("SELECT option_value FROM $wpdb->options WHERE option_name = %s", $setting) );
+	$option = $wpdb->get_var("SELECT option_value FROM $wpdb->options WHERE option_name = '$setting'");
 
 	if ( 'home' == $setting && '' == $option )
 		return __get_option('siteurl');
