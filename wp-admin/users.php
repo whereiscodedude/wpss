@@ -8,7 +8,7 @@ if ( !current_user_can('edit_users') )
 $title = __('Users');
 $parent_file = 'users.php';
 
-$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+$action = $_REQUEST['action'];
 $update = '';
 
 if ( empty($action) ) {
@@ -25,7 +25,6 @@ if ( empty($_REQUEST) ) {
 	$referer = '<input type="hidden" name="wp_http_referer" value="' . attribute_escape($redirect) . '" />';
 } else {
 	$redirect = 'users.php';
-	$referer = '';
 }
 
 switch ($action) {
@@ -193,19 +192,15 @@ default:
 
 	include('admin-header.php');
 
-	$usersearch = isset($_GET['usersearch']) ? $_GET['usersearch'] : null;
-	$userspage = isset($_GET['userspage']) ? $_GET['userspage'] : null;
-	$role = isset($_GET['role']) ? $_GET['role'] : null;
-	
 	// Query the users
-	$wp_user_search = new WP_User_Search($usersearch, $userspage, $role);
+	$wp_user_search = new WP_User_Search($_GET['usersearch'], $_GET['userspage'], $_GET['role']);
 
 	if ( isset($_GET['update']) ) :
 		switch($_GET['update']) {
 		case 'del':
 		case 'del_many':
 		?>
-			<?php $delete_count = isset($_GET['delete_count']) ? (int) $_GET['delete_count'] : 0; ?>
+			<?php $delete_count = (int) $_GET['delete_count']; ?>
 			<div id="message" class="updated fade"><p><?php printf(__ngettext('%s user deleted', '%s users deleted', $delete_count), $delete_count); ?></p></div>
 		<?php
 			break;
@@ -234,7 +229,7 @@ default:
 		}
 	endif; ?>
 
-<?php if ( isset($errors) && is_wp_error( $errors ) ) : ?>
+<?php if ( is_wp_error( $errors ) ) : ?>
 	<div class="error">
 		<ul>
 		<?php
@@ -270,22 +265,22 @@ foreach ( (array) $users_of_blog as $b_user ) {
 unset($users_of_blog);
 
 $current_role = false;
-$class = empty($role) ? ' class="current"' : '';
+$class = empty($_GET['role']) ? ' class="current"' : '';
 $role_links[] = "<li><a href=\"users.php\"$class>" . __('All Users') . "</a>";
-foreach ( $wp_roles->get_names() as $this_role => $name ) {
+foreach ( $wp_roles->get_names() as $role => $name ) {
 	if ( !isset($avail_roles[$role]) )
 		continue;
 
 	$class = '';
 
-	if ( $this_role == $role ) {
-		$current_role = $role;
+	if ( $role == $_GET['role'] ) {
+		$current_role = $_GET['role'];
 		$class = ' class="current"';
 	}
 
 	$name = translate_with_context($name);
-	$name = sprintf(_c('%1$s (%2$s)|user role with count'), $name, $avail_roles[$this_role]);
-	$role_links[] = "<li><a href=\"users.php?role=$this_role\"$class>" . $name . '</a>';
+	$name = sprintf(_c('%1$s (%2$s)|user role with count'), $name, $avail_roles[$role]);
+	$role_links[] = "<li><a href=\"users.php?role=$role\"$class>" . $name . '</a>';
 }
 echo implode(' |</li>', $role_links) . '</li>';
 unset($role_links);
@@ -374,11 +369,13 @@ foreach ( $wp_user_search->get_results() as $userid ) {
 </div>
 
 <?php
-	foreach ( array('user_login' => 'user_login', 'first_name' => 'user_firstname', 'last_name' => 'user_lastname', 'email' => 'user_email', 'url' => 'user_uri', 'role' => 'user_role') as $formpost => $var ) {
-		$var = 'new_' . $var;
-		$$var = isset($_REQUEST[$formpost]) ? attribute_escape(stripslashes($_REQUEST[$formpost])) : '';
+	if ( is_wp_error($add_user_errors) ) {
+		foreach ( array('user_login' => 'user_login', 'first_name' => 'user_firstname', 'last_name' => 'user_lastname', 'email' => 'user_email', 'url' => 'user_uri', 'role' => 'user_role') as $formpost => $var ) {
+			$var = 'new_' . $var;
+			$$var = attribute_escape(stripslashes($_REQUEST[$formpost]));
+		}
+		unset($name);
 	}
-	unset($name);
 ?>
 
 <br class="clear" />
@@ -387,7 +384,7 @@ foreach ( $wp_user_search->get_results() as $userid ) {
 <div class="wrap">
 <h2 id="add-new-user"><?php _e('Add New User') ?></h2>
 
-<?php if ( isset($add_user_errors) && is_wp_error( $add_user_errors ) ) : ?>
+<?php if ( is_wp_error( $add_user_errors ) ) : ?>
 	<div class="error">
 		<?php
 			foreach ( $add_user_errors->get_error_messages() as $message )

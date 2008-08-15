@@ -20,12 +20,9 @@ function redirect_page($page_ID) {
 		$location = 'sidebar.php?a=b';
 	} elseif ( isset($_POST['save']) && ( empty($referredby) || $referredby == $referer || 'redo' != $referredby ) ) {
 		if ( $_POST['_wp_original_http_referer'] && strpos( $_POST['_wp_original_http_referer'], '/wp-admin/page.php') === false && strpos( $_POST['_wp_original_http_referer'], '/wp-admin/page-new.php') === false )
-			$location = add_query_arg( array(
-				'_wp_original_http_referer' => urlencode( stripslashes( $_POST['_wp_original_http_referer'] ) ),
-				'message' => 1
-			), get_edit_post_link( $page_ID, 'url' ) );
+			$location = add_query_arg( '_wp_original_http_referer', urlencode( stripslashes( $_POST['_wp_original_http_referer'] ) ), "page.php?action=edit&post=$page_ID&message=1" );
 		else
-			$location = add_query_arg( 'message', 4, get_edit_post_link( $page_ID, 'url' ) );
+			$location = "page.php?action=edit&post=$page_ID&message=4";
 	} elseif ($_POST['addmeta']) {
 		$location = add_query_arg( 'message', 2, wp_get_referer() );
 		$location = explode('#', $location);
@@ -46,7 +43,7 @@ function redirect_page($page_ID) {
 	} elseif ($action == 'editattachment') {
 		$location = 'attachments.php';
 	} else {
-		$location = add_query_arg( 'message', 4, get_edit_post_link( $page_ID, 'url' ) );
+		$location = "page.php?action=edit&post=$page_ID&message=4";
 	}
 
 	wp_redirect($location);

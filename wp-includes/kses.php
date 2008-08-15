@@ -273,12 +273,12 @@ if (!CUSTOM_TAGS) {
 		'u' => array(),
 		'ul' => array (
 			'class' => array (),
-			'style' => array (),
+			'style' => array (), 
 			'type' => array ()),
 		'ol' => array (
 			'class' => array (),
 			'start' => array (),
-			'style' => array (),
+			'style' => array (), 
 			'type' => array ()),
 		'var' => array ());
 	/**
@@ -410,7 +410,6 @@ function wp_kses_split($string, $allowed_html, $allowed_protocols) {
  * through another filter which will remove illegal attributes and once
  * that is completed, will be returned.
  *
- * @access private
  * @since 1.0.0
  * @uses wp_kses_attr()
  *
@@ -793,11 +792,11 @@ function wp_kses_stripslashes($string) {
 function wp_kses_array_lc($inarray) {
 	$outarray = array ();
 
-	foreach ( (array) $inarray as $inkey => $inval) {
+	foreach ($inarray as $inkey => $inval) {
 		$outkey = strtolower($inkey);
 		$outarray[$outkey] = array ();
 
-		foreach ( (array) $inval as $inkey2 => $inval2) {
+		foreach ($inval as $inkey2 => $inval2) {
 			$outkey2 = strtolower($inkey2);
 			$outarray[$outkey][$outkey2] = $inval2;
 		} # foreach $inval
@@ -851,9 +850,9 @@ function wp_kses_bad_protocol_once($string, $allowed_protocols) {
 
 	$string2 = preg_split('/:|&#58;|&#x3a;/i', $string, 2);
 	if ( isset($string2[1]) && !preg_match('%/\?%', $string2[0]) )
-		$string = wp_kses_bad_protocol_once2($string2[0]) . trim($string2[1]);
+		$string = wp_kses_bad_protocol_once2($string2[0], $allowed_protocols) . trim($string2[1]);
 	else
-		$string = preg_replace_callback('/^((&[^;]*;|[\sA-Za-z0-9])*)'.'(:|&#58;|&#[Xx]3[Aa];)\s*/', 'wp_kses_bad_protocol_once2', $string);
+		$string = preg_replace_callback('/^((&[^;]*;|[\sA-Za-z0-9])*)'.'(:|&#58;|&#[Xx]3[Aa];)\s*/', create_function('$matches', 'global $_kses_allowed_protocols; return wp_kses_bad_protocol_once2($matches[1], $_kses_allowed_protocols);'), $string);
 
 	return $string;
 }
@@ -864,24 +863,13 @@ function wp_kses_bad_protocol_once($string, $allowed_protocols) {
  * This function processes URL protocols, checks to see if they're in the
  * white-list or not, and returns different data depending on the answer.
  *
- * @access private
  * @since 1.0.0
  *
- * @param mixed $matches string or preg_replace_callback() matches array to check for bad protocols
+ * @param string $string Content to check for bad protocols
+ * @param array $allowed_protocols Allowed protocols
  * @return string Sanitized content
  */
-function wp_kses_bad_protocol_once2($matches) {
-	global $_kses_allowed_protocols;
-
-	if ( is_array($matches) ) {
-		if ( ! isset($matches[1]) || empty($matches[1]) )
-			return '';
-
-		$string = $matches[1];
-	} else {
-		$string = $matches;
-	}
-
+function wp_kses_bad_protocol_once2($string, $allowed_protocols) {
 	$string2 = wp_kses_decode_entities($string);
 	$string2 = preg_replace('/\s/', '', $string2);
 	$string2 = wp_kses_no_null($string2);
@@ -890,7 +878,7 @@ function wp_kses_bad_protocol_once2($matches) {
 	$string2 = strtolower($string2);
 
 	$allowed = false;
-	foreach ( (array) $_kses_allowed_protocols as $one_protocol)
+	foreach ($allowed_protocols as $one_protocol)
 		if (strtolower($one_protocol) == $string2) {
 			$allowed = true;
 			break;
@@ -922,8 +910,8 @@ function wp_kses_normalize_entities($string) {
 	# Change back the allowed entities in our entity whitelist
 
 	$string = preg_replace('/&amp;([A-Za-z][A-Za-z0-9]{0,19});/', '&\\1;', $string);
-	$string = preg_replace_callback('/&amp;#0*([0-9]{1,5});/', 'wp_kses_normalize_entities2', $string);
-	$string = preg_replace_callback('/&amp;#([Xx])0*(([0-9A-Fa-f]{2}){1,2});/', 'wp_kses_normalize_entities3', $string);
+	$string = preg_replace_callback('/&amp;#0*([0-9]{1,5});/', create_function('$matches', 'return wp_kses_normalize_entities2($matches[1]);'), $string);
+	$string = preg_replace('/&amp;#([Xx])0*(([0-9A-Fa-f]{2}){1,2});/', '&#\\1\\2;', $string);
 
 	return $string;
 }
@@ -934,50 +922,13 @@ function wp_kses_normalize_entities($string) {
  * This function helps wp_kses_normalize_entities() to only accept 16 bit
  * values and nothing more for &#number; entities.
  *
- * @access private
  * @since 1.0.0
  *
- * @param array $matches preg_replace_callback() matches array
+ * @param int $i Number encoded entity
  * @return string Correctly encoded entity
  */
-function wp_kses_normalize_entities2($matches) {
-	if ( ! isset($matches[1]) || empty($matches[1]) )
-		return '';
-
-	$i = $matches[1];
-	return ( ( ! valid_unicode($i) ) || ($i > 65535) ? "&amp;#$i;" : "&#$i;" );
-}
-
-/**
- * wp_kses_normalize_entities3() - Callback for wp_kses_normalize_entities() for regular expression
- *
- * This function helps wp_kses_normalize_entities() to only accept valid Unicode numeric entities
- * in hex form.
- *
- * @access private
- *
- * @param array $matches preg_replace_callback() matches array
- * @return string Correctly encoded entity
- */
-function wp_kses_normalize_entities3($matches) {
-	if ( ! isset($matches[2]) || empty($matches[2]) )
-		return '';
-
-	$hexchars = $matches[2];
-	return ( ( ! valid_unicode(hexdec($hexchars)) ) ? "&amp;#x$hexchars;" : "&#x$hexchars;" );
-}
-
-/**
- * valid_unicode() - Helper function to determine if a Unicode value is valid.
- *
- * @param int $i Unicode value
- * @return bool true if the value was a valid Unicode number
- */
-function valid_unicode($i) {
-	return ( $i == 0x9 || $i == 0xa || $i == 0xd ||
-			($i >= 0x20 && $i <= 0xd7ff) ||
-			($i >= 0xe000 && $i <= 0xfffd) ||
-			($i >= 0x10000 && $i <= 0x10ffff) );
+function wp_kses_normalize_entities2($i) {
+	return (($i > 65535) ? "&amp;#$i;" : "&#$i;");
 }
 
 /**

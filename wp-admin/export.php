@@ -1,15 +1,5 @@
 <?php
-/**
- * WordPress Export Administration Panel
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** Load WordPress Bootstrap */
 require_once ('admin.php');
-
-/** Load WordPress export API */
 require_once('includes/export.php');
 $title = __('Export');
 $parent_file = 'edit.php';

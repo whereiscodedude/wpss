@@ -1,18 +1,4 @@
 <?php
-/**
- * Displays Administration Menu.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/**
- * The current page.
- *
- * @global string $self
- * @name $self
- * @var string
- */
 $self = preg_replace('|^.*/wp-admin/|i', '', $_SERVER['PHP_SELF']);
 $self = preg_replace('|^.*/plugins/|i', '', $self);
 

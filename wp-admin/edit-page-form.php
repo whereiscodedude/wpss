@@ -1,11 +1,7 @@
 <?php
-
-if ( ! isset( $post_ID ) )
-	$post_ID = 0;
-
 if ( isset($_GET['message']) )
 	$_GET['message'] = absint( $_GET['message'] );
-$messages[1] = sprintf( __( 'Page updated. Continue editing below or <a href="%s">go back</a>.' ), attribute_escape( stripslashes( ( isset( $_GET['_wp_original_http_referer'] ) ? $_GET['_wp_original_http_referer'] : '') ) ) );
+$messages[1] = sprintf( __( 'Page updated. Continue editing below or <a href="%s">go back</a>.' ), attribute_escape( stripslashes( $_GET['_wp_original_http_referer'] ) ) );
 $messages[2] = __('Custom field updated.');
 $messages[3] = __('Custom field deleted.');
 $messages[4] = __('Page updated.');
@@ -16,7 +12,7 @@ if ( isset($_GET['revision']) )
 $notice = false;
 $notices[1] = __( 'There is an autosave of this page that is more recent than the version below.  <a href="%s">View the autosave</a>.' );
 
-if ( 0 == $post_ID) {
+if (!isset($post_ID) || 0 == $post_ID) {
 	$form_action = 'post';
 	$nonce_action = 'add-page';
 	$temp_ID = -1 * time(); // don't change this formula without looking at wp_write_post()
@@ -81,7 +77,7 @@ if (isset($mode) && 'bookmarklet' == $mode)
 <select name='post_status' tabindex='4' id='post_status'>
 <?php // Show publish in dropdown if user can publish or if they can re-publish this page ('edit_published_pages')
 // 'publish' option will be selected for published AND private posts (checkbox overrides dropdown)
-if ( current_user_can('publish_pages') OR ( $post->post_status == 'publish' AND current_user_can('edit_page', $post->ID) ) ) :
+if ( current_user_can('publish_pages') OR ( $post->post_status == 'publish' AND current_user_can('edit_page', $post->ID) ) ) : 
 ?>
 <option<?php selected( $post->post_status, 'publish' ); selected( $post->post_status, 'private' );?> value='publish'><?php _e('Published') ?></option>
 <?php endif; ?>
@@ -92,12 +88,12 @@ if ( current_user_can('publish_pages') OR ( $post->post_status == 'publish' AND 
 <option<?php selected( $post->post_status, 'draft' ); ?> value='draft'><?php _e('Unpublished') ?></option>
 </select>
 </p>
-<?php if ( current_user_can( 'publish_posts' ) ) : ?>
-<p><label for="post_status_private" class="selectit"><input id="post_status_private" name="post_status" type="checkbox" value="private" <?php checked($post->post_status, 'private'); ?> tabindex='4' /> <?php _e('Keep this page private') ?></label></p>
+<?php if ( current_user_can( 'publish_posts' ) ) : ?> 
+<p id="private-checkbox"><label for="post_status_private" class="selectit"><input id="post_status_private" name="post_status" type="checkbox" value="private" <?php checked($post->post_status, 'private'); ?> tabindex='4' /> <?php _e('Keep this page private') ?></label></p>
 <?php endif; ?>
 
 <?php
-if ( 0 != $post_ID ) {
+if ($post_ID) {
 	if ( 'future' == $post->post_status ) { // scheduled for publishing at a future date
 		$stamp = __('Scheduled for:<br />%1$s at %2$s');
 	} else if ( 'publish' == $post->post_status ) { // already published
@@ -123,7 +119,6 @@ if ( 0 != $post_ID ) {
 </div>
 
 <p class="submit">
-<?php do_action('page_submitbox_start'); ?>
 <input type="submit" name="save" class="button button-highlighted" value="<?php _e('Save'); ?>" tabindex="4" />
 <?php
 if ( !in_array( $post->post_status, array('publish', 'future') ) || 0 == $post_ID ) {
@@ -140,7 +135,7 @@ if ( ('edit' == $action) && current_user_can('delete_page', $post_ID) )
 	echo "<a class='submitdelete' href='" . wp_nonce_url("page.php?action=delete&amp;post=$post_ID", 'delete-page_' . $post_ID) . "' onclick=\"if ( confirm('" . js_escape(sprintf( ('draft' == $post->post_status) ? __("You are about to delete this draft '%s'\n  'Cancel' to stop, 'OK' to delete.") : __("You are about to delete this page '%s'\n  'Cancel' to stop, 'OK' to delete."), $post->post_title )) . "') ) { return true;}return false;\">" . __('Delete&nbsp;page') . "</a>";
 ?>
 <br class="clear" />
-<?php if ( 0 != $post_ID ) : ?>
+<?php if ($post_ID): ?>
 <?php if ( $last_id = get_post_meta($post_ID, '_edit_last', true) ) {
 	$last_user = get_userdata($last_id);
 	printf(__('Last edited by %1$s on %2$s at %3$s'), wp_specialchars( $last_user->display_name ), mysql2date(get_option('date_format'), $post->post_modified), mysql2date(get_option('time_format'), $post->post_modified));
@@ -158,7 +153,7 @@ if ( ('edit' == $action) && current_user_can('delete_page', $post_ID) )
 <h5><?php _e('Related') ?></h5>
 
 <ul>
-<?php if ( 0 != $post_ID ) : ?>
+<?php if ($post_ID): ?>
 <li><a href="edit-pages.php?page_id=<?php echo $post_ID ?>"><?php _e('See Comments on this Page') ?></a></li>
 <?php endif; ?>
 <li><a href="edit-comments.php"><?php _e('Manage All Comments') ?></a></li>
@@ -201,7 +196,7 @@ endif; ?>
 <h2><?php _e('Advanced Options'); ?></h2>
 
 
-<?php
+<?php 
 function page_custom_meta_box($post){
 ?>
 <div id="postcustomstuff">
@@ -230,13 +225,13 @@ function page_comments_status_meta_box($post){
 <?php _e('Allow Comments') ?></label></p>
 <p><label for="ping_status" class="selectit"><input name="ping_status" type="checkbox" id="ping_status" value="open" <?php checked($post->ping_status, 'open'); ?> /> <?php _e('Allow Pings') ?></label></p>
 <p><?php _e('These settings apply to this page only. &#8220;Pings&#8221; are <a href="http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments" target="_blank">trackbacks and pingbacks</a>.'); ?></p>
-<?php
+<?php 
 }
 add_meta_box('pagecommentstatusdiv', __('Comments &amp; Pings'), 'page_comments_status_meta_box', 'page', 'advanced', 'core');
 
 function page_password_meta_box($post){
 ?>
-<p><label class="hidden" for="post_password"><?php _e('Password Protect This Page') ?></label><input name="post_password" type="text" size="25" id="post_password" value="<?php echo ( isset( $post->post_password ) ? attribute_escape( $post->post_password ) : '' ); ?>" /></p>
+<p><label class="hidden" for="post_password"><?php _e('Password Protect This Page') ?></label><input name="post_password" type="text" size="25" id="post_password" value="<?php echo attribute_escape( $post->post_password ); ?>" /></p>
 <p><?php _e('Setting a password will require people who visit your blog to enter the above password to view this page and its comments.'); ?></p>
 <?php
 }
@@ -300,7 +295,7 @@ if ( $authors && count( $authors ) > 1 ) {
 }
 
 
-if ( 0 < $post_ID && wp_get_post_revisions( $post_ID ) ) :
+if ( isset($post_ID) && 0 < $post_ID && wp_get_post_revisions( $post_ID ) ) :
 function page_revisions_meta_box($post) {
 	wp_list_post_revisions();
 }

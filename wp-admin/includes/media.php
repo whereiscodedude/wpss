@@ -295,9 +295,6 @@ function media_upload_form_handler() {
 }
 
 function media_upload_image() {
-	$errors = array();
-	$id = 0;
-
 	if ( isset($_POST['html-upload']) && !empty($_FILES) ) {
 		// Upload File button was clicked
 		$id = media_handle_upload('async-upload', $_REQUEST['post_id']);
@@ -362,9 +359,6 @@ function media_sideload_image($file, $post_id, $desc = null) {
 }
 
 function media_upload_audio() {
-	$errors = array();
-	$id = 0;
-
 	if ( isset($_POST['html-upload']) && !empty($_FILES) ) {
 		// Upload File button was clicked
 		$id = media_handle_upload('async-upload', $_REQUEST['post_id']);
@@ -405,9 +399,6 @@ function media_upload_audio() {
 }
 
 function media_upload_video() {
-	$errors = array();
-	$id = 0;
-
 	if ( isset($_POST['html-upload']) && !empty($_FILES) ) {
 		// Upload File button was clicked
 		$id = media_handle_upload('async-upload', $_REQUEST['post_id']);
@@ -448,9 +439,6 @@ function media_upload_video() {
 }
 
 function media_upload_file() {
-	$errors = array();
-	$id = 0;
-
 	if ( isset($_POST['html-upload']) && !empty($_FILES) ) {
 		// Upload File button was clicked
 		$id = media_handle_upload('async-upload', $_REQUEST['post_id']);
@@ -491,8 +479,6 @@ function media_upload_file() {
 }
 
 function media_upload_gallery() {
-	$errors = array();
-
 	if ( !empty($_POST) ) {
 		$return = media_upload_form_handler();
 
@@ -507,7 +493,6 @@ function media_upload_gallery() {
 }
 
 function media_upload_library() {
-	$errors = array();
 	if ( !empty($_POST) ) {
 		$return = media_upload_form_handler();
 
@@ -520,41 +505,6 @@ function media_upload_library() {
 	return wp_iframe( 'media_upload_library_form', $errors );
 }
 
-function image_size_input_fields($post, $checked='') {
-		
-		// get a list of the actual pixel dimensions of each possible intermediate version of this image
-		$sizes = array();
-		$size_names = array('thumbnail' => 'Thumbnail', 'medium' => 'Medium', 'large' => 'Large', 'full' => 'Full size');
-		
-		foreach ( $size_names as $size => $name) {
-			$downsize = image_downsize($post->ID, $size);
-			
-			// is this size selectable?
-			$enabled = ( $downsize[3] || 'full' == $size );
-			$css_id = "image-size-{$size}-{$post->ID}";
-			// if $checked was not specified, default to the first available size that's bigger than a thumbnail
-			if ( !$checked && $enabled && 'thumbnail' != $size )
-				$checked = $size;
-			
-			$html = "<div class='image-size-item'><input type='radio' ".( $enabled ? '' : "disabled='disabled'")."name='attachments[$post->ID][image-size]' id='{$css_id}' value='{$size}'".( $checked == $size ? " checked='checked'" : '') ." />";
-			
-			$html .= "<label for='{$css_id}'>" . __($name). "</label>";
-			// only show the dimensions if that choice is available
-			if ( $enabled )
-				$html .= " <label for='{$css_id}' class='help'>" . sprintf( __("(%d&nbsp;&times;&nbsp;%d)"), $downsize[1], $downsize[2] ). "</label>";
-				
-			$html .= '</div>';
-		
-			$out[] = $html;
-		}
-		
-		return array(
-			'label' => __('Size'),
-			'input' => 'html',
-			'html'  => join("\n", $out),
-		);
-}
-
 function image_attachment_fields_to_edit($form_fields, $post) {
 	if ( substr($post->post_mime_type, 0, 5) == 'image' ) {
 		$form_fields['post_title']['required'] = true;
@@ -563,6 +513,8 @@ function image_attachment_fields_to_edit($form_fields, $post) {
 		$form_fields['post_excerpt']['helps'][] = __('Also used as alternate text for the image');
 
 		$form_fields['post_content']['label'] = __('Description');
+
+		$thumb = wp_get_attachment_thumb_url($post->ID);
 
 		$form_fields['align'] = array(
 			'label' => __('Alignment'),
@@ -577,7 +529,17 @@ function image_attachment_fields_to_edit($form_fields, $post) {
 				<input type='radio' name='attachments[$post->ID][align]' id='image-align-right-$post->ID' value='right' />
 				<label for='image-align-right-$post->ID' class='align image-align-right-label'>" . __('Right') . "</label>\n",
 		);
-		$form_fields['image-size'] = image_size_input_fields($post);
+		$form_fields['image-size'] = array(
+			'label' => __('Size'),
+			'input' => 'html',
+			'html'  => "
+				" . ( $thumb ? "<input type='radio' name='attachments[$post->ID][image-size]' id='image-size-thumb-$post->ID' value='thumbnail' />
+				<label for='image-size-thumb-$post->ID'>" . __('Thumbnail') . "</label>
+				" : '' ) . "<input type='radio' name='attachments[$post->ID][image-size]' id='image-size-medium-$post->ID' value='medium' checked='checked' />
+				<label for='image-size-medium-$post->ID'>" . __('Medium') . "</label>
+				<input type='radio' name='attachments[$post->ID][image-size]' id='image-size-full-$post->ID' value='full' />
+				<label for='image-size-full-$post->ID'>" . __('Full size') . "</label>",
+		);
 	}
 	return $form_fields;
 }
@@ -973,7 +935,6 @@ jQuery(function($){
 	<p>
 	<input type="file" name="async-upload" id="async-upload" /> <input type="submit" class="button" name="html-upload" value="<?php echo attribute_escape(__('Upload')); ?>" /> <a href="#" onclick="return top.tb_remove();"><?php _e('Cancel'); ?></a>
 	</p>
-
 	<br class="clear" />
 	<?php if ( is_lighttpd_before_150() ): ?>
 	<p><?php _e('If you want to use all capabilities of the uploader, like uploading multiple files at once, please upgrade to lighttpd 1.5.'); ?></p>
@@ -1165,7 +1126,7 @@ function media_upload_library_form($errors) {
 
 	$form_action_url = admin_url("media-upload.php?type={$GLOBALS['type']}&tab=library&post_id=$post_id");
 
-	$_GET['paged'] = isset( $_GET['paged'] ) ? intval($_GET['paged']) : 0;
+	$_GET['paged'] = intval($_GET['paged']);
 	if ( $_GET['paged'] < 1 )
 		$_GET['paged'] = 1;
 	$start = ( $_GET['paged'] - 1 ) * 10;

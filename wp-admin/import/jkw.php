@@ -1,18 +1,5 @@
 <?php
-/**
- * Jeromes Keyword Plugin Importer
- *
- * @package WordPress
- * @subpackage Importer
- */
 
-/**
- * Jeromes Keyword Plugin Importer class
- *
- * Will convert Jeromes Keyword Plugin tags to WordPress taxonomy tags.
- *
- * @since 2.3
- */
 class JeromesKeyword_Import {
 
 	function header() {

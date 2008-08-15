@@ -1,14 +1,7 @@
 <?php
-/**
- * Links Import Administration Panel.
- *
- * @copyright 2002 Mike Little <mike@zed1.com>
- * @author Mike Little <mike@zed1.com>
- * @package WordPress
- * @subpackage Administration
- */
+// Links
+// Copyright (C) 2002 Mike Little -- mike@zed1.com
 
-/** Load WordPress Administration Bootstrap */
 require_once('admin.php');
 $parent_file = 'edit.php';
 $title = __('Import Blogroll');
@@ -105,7 +98,6 @@ foreach ($categories as $category) {
 				$opml = file_get_contents($opml_url);
 			}
 
-			/** Load OPML Parser */
 			include_once('link-parse-opml.php');
 
 			$link_count = count($names);

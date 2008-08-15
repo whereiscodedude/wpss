@@ -1,17 +1,16 @@
 <?php
 /**
- * A simple set of functions to check our version 1.0 update service.
+ * A simple set of functions to check our version 1.0 update service
  *
  * @package WordPress
  * @since 2.3
  */
 
 /**
- * Check WordPress version against the newest version.
+ * wp_version_check() - Check WordPress version against the newest version.
  *
- * The WordPress version, PHP version, and Locale is sent. Checks against the
- * WordPress server at api.wordpress.org server. Will only check if WordPress
- * isn't installing.
+ * The WordPress version, PHP version, and Locale is sent. Checks against the WordPress server at
+ * api.wordpress.org. Will only check if PHP has fsockopen enabled and WordPress isn't installing.
  *
  * @package WordPress
  * @since 2.3
@@ -20,7 +19,7 @@
  * @return mixed Returns null if update is unsupported. Returns false if check is too soon.
  */
 function wp_version_check() {
-	if ( defined('WP_INSTALLING') )
+	if ( !function_exists('fsockopen') || defined('WP_INSTALLING') )
 		return;
 
 	global $wp_version;
@@ -40,47 +39,44 @@ function wp_version_check() {
 	$new_option->last_checked = time(); // this gets set whether we get a response or not, so if something is down or misconfigured it won't delay the page load for more than 3 seconds, twice a day
 	$new_option->version_checked = $wp_version;
 
-	$url = "http://api.wordpress.org/core/version-check/1.2/?version=$wp_version&php=$php_version&locale=$locale";
+	$http_request  = "GET /core/version-check/1.1/?version=$wp_version&php=$php_version&locale=$locale HTTP/1.0\r\n";
+	$http_request .= "Host: api.wordpress.org\r\n";
+	$http_request .= 'Content-Type: application/x-www-form-urlencoded; charset=' . get_option('blog_charset') . "\r\n";
+	$http_request .= 'User-Agent: WordPress/' . $wp_version . '; ' . get_bloginfo('url') . "\r\n";
+	$http_request .= "\r\n";
 
-	$options = array('timeout' => 3);
-	$options['headers'] = array(
-		'Content-Type' => 'application/x-www-form-urlencoded; charset=' . get_option('blog_charset'),
-		'User-Agent' => 'WordPress/' . $wp_version . '; ' . get_bloginfo('url')
-	);
+	$response = '';
+	if ( false !== ( $fs = @fsockopen( 'api.wordpress.org', 80, $errno, $errstr, 3 ) ) && is_resource($fs) ) {
+		fwrite( $fs, $http_request );
+		while ( !feof( $fs ) )
+			$response .= fgets( $fs, 1160 ); // One TCP-IP packet
+		fclose( $fs );
 
-	$response = wp_remote_request($url, $options);
+		$response = explode("\r\n\r\n", $response, 2);
+		if ( !preg_match( '|HTTP/.*? 200|', $response[0] ) )
+			return false;
 
-	if ( is_wp_error( $response ) )
-		return false;
+		$body = trim( $response[1] );
+		$body = str_replace(array("\r\n", "\r"), "\n", $body);
 
-	if ( 200 != $response['response']['code'] )
-		return false;
+		$returns = explode("\n", $body);
 
-	$body = trim( $response['body'] );
-	$body = str_replace(array("\r\n", "\r"), "\n", $body);
-	$returns = explode("\n", $body);
-
-	$new_option->response = attribute_escape( $returns[0] );
-	if ( isset( $returns[1] ) )
-		$new_option->url = clean_url( $returns[1] );
-	if ( isset( $returns[2] ) )
-		$new_option->package = clean_url( $returns[2] );
-	if ( isset( $returns[3] ) )
-		$new_option->current = attribute_escape( $returns[3] );
-	if ( isset( $returns[4] ) )
-		$new_option->locale = attribute_escape( $returns[4] );
-
+		$new_option->response = attribute_escape( $returns[0] );
+		if ( isset( $returns[1] ) )
+			$new_option->url = clean_url( $returns[1] );
+		if ( isset( $returns[2] ) )
+			$new_option->current = attribute_escape( $returns[2] );
+	}
 	update_option( 'update_core', $new_option );
 }
 add_action( 'init', 'wp_version_check' );
 
 /**
- * Check plugin versions against the latest versions hosted on WordPress.org.
+ * wp_update_plugins() - Check plugin versions against the latest versions hosted on WordPress.org.
  *
- * The WordPress version, PHP version, and Locale is sent along with a list of
- * all plugins installed. Checks against the WordPress server at
- * api.wordpress.org. Will only check if PHP has fsockopen enabled and WordPress
- * isn't installing.
+ * The WordPress version, PHP version, and Locale is sent along with a list of all plugins installed.
+ * Checks against the WordPress server at api.wordpress.org.
+ * Will only check if PHP has fsockopen enabled and WordPress isn't installing.
  *
  * @package WordPress
  * @since 2.3
@@ -91,7 +87,7 @@ add_action( 'init', 'wp_version_check' );
 function wp_update_plugins() {
 	global $wp_version;
 
-	if ( defined('WP_INSTALLING') )
+	if ( !function_exists('fsockopen') || defined('WP_INSTALLING') )
 		return false;
 
 	// If running blog-side, bail unless we've not checked in the last 12 hours
@@ -119,11 +115,9 @@ function wp_update_plugins() {
 			$plugin_changed = true;
 	}
 
-	if ( isset ( $current->response ) && is_array( $current->response ) ) {
-		foreach ( $current->response as $plugin_file => $update_details ) {
-			if ( ! isset($plugins[ $plugin_file ]) ) {
-				$plugin_changed = true;
-			}
+	foreach ( (array) $current->response as $plugin_file => $update_details ) {
+		if ( ! isset($plugins[ $plugin_file ]) ) {
+			$plugin_changed = true;
 		}
 	}
 
@@ -134,25 +128,27 @@ function wp_update_plugins() {
 	$to_send->plugins = $plugins;
 	$to_send->active = $active;
 	$send = serialize( $to_send );
-	$body = 'plugins=' . urlencode( $send );
 
-	$options = array('method' => 'POST', 'timeout' => 3, 'body' => $body);
-	$options['headers'] = array(
-		'Content-Type' => 'application/x-www-form-urlencoded; charset=' . get_option('blog_charset'),
-		'Content-Length' => strlen($body),
-		'User-Agent' => 'WordPress/' . $wp_version . '; ' . get_bloginfo('url')
-	);
+	$request = 'plugins=' . urlencode( $send );
+	$http_request  = "POST /plugins/update-check/1.0/ HTTP/1.0\r\n";
+	$http_request .= "Host: api.wordpress.org\r\n";
+	$http_request .= "Content-Type: application/x-www-form-urlencoded; charset=" . get_option('blog_charset') . "\r\n";
+	$http_request .= "Content-Length: " . strlen($request) . "\r\n";
+	$http_request .= 'User-Agent: WordPress/' . $wp_version . '; ' . get_bloginfo('url') . "\r\n";
+	$http_request .= "\r\n";
+	$http_request .= $request;
 
-	$raw_response = wp_remote_request('http://api.wordpress.org/plugins/update-check/1.0/', $options);
+	$response = '';
+	if( false != ( $fs = @fsockopen( 'api.wordpress.org', 80, $errno, $errstr, 3) ) && is_resource($fs) ) {
+		fwrite($fs, $http_request);
 
-	if ( is_wp_error( $raw_response ) )
-		return false;
-
-	if( 200 != $raw_response['response']['code'] ) {
-		return false;
+		while ( !feof($fs) )
+			$response .= fgets($fs, 1160); // One TCP-IP packet
+		fclose($fs);
+		$response = explode("\r\n\r\n", $response, 2);
 	}
 
-	$response = unserialize( $raw_response['body'] );
+	$response = unserialize( $response[1] );
 
 	if ( $response )
 		$new_option->response = $response;

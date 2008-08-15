@@ -1,91 +1,20 @@
 <?php
-/**
- * Define Gears manifest for Google Gears storage.
- *
- * @package WordPress
- * @subpackage Administration
- */
 
-/** Set ABSPATH for execution */
 define( 'ABSPATH', dirname(dirname(__FILE__)) );
 define( 'WPINC', '/wp-includes' );
 
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function __() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function add_filter() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function attribute_escape() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function apply_filters() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function get_option() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function is_lighttpd_before_150() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function add_action() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function do_action_ref_array() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function get_bloginfo() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function is_admin() {return true;}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function site_url() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function admin_url() {}
-
-/**
- * @package WordPress
- * @subpackage Dummy
- */
 function wp_guess_url() {}
 
 require(ABSPATH . '/wp-includes/script-loader.php');
@@ -117,7 +46,7 @@ foreach ( $wp_styles->registered as $style ) {
 	if ( isset($style->extra['rtl']) && $style->extra['rtl'] ) {
 		if ( is_bool( $style->extra['rtl'] ) )
 			$rtl_href = str_replace( '.css', '-rtl.css', $src );
-		else
+		else 
 			$rtl_href = str_replace( array( '/wp-admin/', '/wp-includes/' ), array( '', '../wp-includes/' ), $style->extra['rtl'] );
 
 		$defaults .= '{ "url" : "' . $rtl_href . '?ver=' . $ver . '" },' . "\n";
@@ -135,7 +64,7 @@ header( 'Content-Type: application/x-javascript; charset=UTF-8' );
 ?>
 {
 "betaManifestVersion" : 1,
-"version" : "<?php echo $man_version; ?>_20080731",
+"version" : "<?php echo $man_version; ?>_20080810",
 "entries" : [
 <?php echo $defaults; ?>
 
@@ -174,54 +103,54 @@ header( 'Content-Type: application/x-javascript; charset=UTF-8' );
 { "url" : "images/no.png" },
 { "url" : "images/yes.png" },
 
-<?php if ( is_file('../wp-includes/js/tinymce/tiny_mce.js') ) { ?>
-{ "url" : "../wp-includes/js/tinymce/tiny_mce_popup.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/utils/mctabs.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/utils/validate.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/utils/form_utils.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/utils/editable_selects.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/paste/js/pasteword.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/paste/js/pastetext.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/media/js/media.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/color_picker.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/charmap.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/image.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/link.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/source_editor.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/anchor.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/wpeditimage/js/editimage.js?ver=311f" },
-{ "url" : "../wp-includes/js/tinymce/tiny_mce.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/editor_template.js?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/inlinepopups/editor_plugin.js?ver=311b" },
+<?php if ( is_file(ABSPATH.'/wp-includes/js/tinymce/tiny_mce.js') ) { ?>
+{ "url" : "../wp-includes/js/tinymce/tiny_mce_popup.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/utils/mctabs.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/utils/validate.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/utils/form_utils.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/utils/editable_selects.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/paste/js/pasteword.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/paste/js/pastetext.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/media/js/media.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/color_picker.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/charmap.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/image.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/link.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/source_editor.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/js/anchor.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/wpeditimage/js/editimage.js?ver=311g" },
+{ "url" : "../wp-includes/js/tinymce/tiny_mce.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/editor_template.js?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/inlinepopups/editor_plugin.js?ver=311" },
 
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/source_editor.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/anchor.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/image.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/link.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/color_picker.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/charmap.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/media/media.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/paste/pasteword.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/paste/blank.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/paste/pastetext.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/fullscreen/fullscreen.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/inlinepopups/template.htm?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/wpeditimage/editimage.html?ver=311f" },
-{ "url" : "../wp-includes/js/tinymce/wp-mce-help.php?ver=311b" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/source_editor.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/anchor.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/image.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/link.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/color_picker.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/charmap.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/media/media.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/paste/pasteword.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/paste/blank.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/paste/pastetext.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/fullscreen/fullscreen.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/inlinepopups/template.htm?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/wpeditimage/editimage.html?ver=311g" },
+{ "url" : "../wp-includes/js/tinymce/wp-mce-help.php?ver=311" },
 
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/skins/wp_theme/ui.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/skins/wp_theme/content.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/themes/advanced/skins/wp_theme/dialog.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/inlinepopups/skins/clearlooks2/window.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/spellchecker/css/content.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/wordpress/css/content.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/media/css/content.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/media/css/media.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/paste/css/pasteword.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/paste/css/blank.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/plugins/wpeditimage/css/editimage.css?ver=311f" },
-{ "url" : "../wp-includes/js/tinymce/plugins/wpeditimage/css/editimage-rtl.css?ver=311b" },
-{ "url" : "../wp-includes/js/tinymce/wordpress.css?ver=311b" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/skins/wp_theme/ui.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/skins/wp_theme/content.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/themes/advanced/skins/wp_theme/dialog.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/inlinepopups/skins/clearlooks2/window.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/spellchecker/css/content.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/wordpress/css/content.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/media/css/content.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/media/css/media.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/paste/css/pasteword.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/paste/css/blank.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/plugins/wpeditimage/css/editimage.css?ver=311g" },
+{ "url" : "../wp-includes/js/tinymce/plugins/wpeditimage/css/editimage-rtl.css?ver=311" },
+{ "url" : "../wp-includes/js/tinymce/wordpress.css?ver=311" },
 
 { "url" : "../wp-includes/js/tinymce/themes/advanced/img/icons.gif" },
 { "url" : "../wp-includes/js/tinymce/themes/advanced/img/colorpicker.jpg" },

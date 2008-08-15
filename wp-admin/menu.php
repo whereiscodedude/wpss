@@ -1,23 +1,9 @@
 <?php
-/**
- * Build Administration Menu.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/**
- * Constructs the admin menu bar.
- *
- * The elements in the array are :
- *     0: Menu item name
- *     1: Minimum level or capability required.
- *     2: The URL of the item's file
- *
- * @global array $menu
- * @name $menu
- * @var array
- */
+// This array constructs the admin menu bar.
+//
+// Menu item name
+// The minimum level the user needs to access the item: between 0 and 10
+// The URL of the item's file
 $menu[0] = array(__('Dashboard'), 'read', 'index.php');
 
 if (strpos($_SERVER['REQUEST_URI'], 'edit-pages.php') !== false)
@@ -41,10 +27,7 @@ $menu[20] = array( sprintf( __('Comments %s'), "<span id='awaiting-mod' class='c
 $menu[30] = array(__('Settings'), 'manage_options', 'options-general.php');
 
 $update_plugins = get_option( 'update_plugins' );
-$update_count = 0;
-if ( isset( $update_plugins->response ) )
-	$update_count = count( $update_plugins->response );
-
+$update_count = count( $update_plugins->response );
 $menu[35] = array( sprintf( __('Plugins %s'), "<span id='update-plugins' class='count-$update_count'><span class='plugin-count'>" . number_format_i18n($update_count) . "</span></span>" ), 'activate_plugins', 'plugins.php');
 if ( current_user_can('edit_users') )
 	$menu[40] = array(__('Users'), 'edit_users', 'users.php');
@@ -87,7 +70,6 @@ $submenu['options-general.php'][40] = array(__('Miscellaneous'), 'manage_options
 
 $submenu['plugins.php'][5] = array(__('Plugins'), 'activate_plugins', 'plugins.php');
 $submenu['plugins.php'][10] = array(__('Plugin Editor'), 'edit_plugins', 'plugin-editor.php');
-$submenu['plugins.php'][15] = array(__('Install Plugins'), 'install_plugins', 'plugin-install.php');
 
 $submenu['themes.php'][5] = array(__('Themes'), 'switch_themes', 'themes.php');
 $submenu['themes.php'][10] = array(__('Theme Editor'), 'edit_themes', 'theme-editor.php');

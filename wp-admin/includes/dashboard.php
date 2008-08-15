@@ -433,16 +433,10 @@ function wp_dashboard_plugins_output() {
 		list($link, $frag) = explode( '#', $item['link'] );
 
 		$link = clean_url($link);
-		if( preg_match('|/([^/]+?)/?$|', $link, $matches) )
-			$slug = $matches[1];
-		else
-			$slug = '';
-
-		$ilink = wp_nonce_url('plugin-install.php?tab=plugin-information&plugin=' . $slug, 'install-plugin_' . $slug) .
-							'&TB_iframe=true&width=600&height=800';
+		$dlink = rtrim($link, '/') . '/download/';
 
 		echo "<h4>$label</h4>\n";
-		echo "<h5><a href='$link'>$title</a></h5>&nbsp;<span>(<a href='$ilink' class='thickbox' title='$title'>" . __( 'Install' ) . "</a>)</span>\n";
+		echo "<h5><a href='$link'>$title</a></h5>&nbsp;<span>(<a href='$dlink'>" . __( 'Download' ) . "</a>)</span>\n";
 		echo "<p>$description</p>\n";
 	}
 }

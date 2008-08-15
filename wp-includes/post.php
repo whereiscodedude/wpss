@@ -143,11 +143,11 @@ function &get_children($args = '', $output = OBJECT) {
 	if ( $output == OBJECT ) {
 		return $kids;
 	} elseif ( $output == ARRAY_A ) {
-		foreach ( (array) $kids as $kid )
+		foreach ( $kids as $kid )
 			$weeuns[$kid->ID] = get_object_vars($kids[$kid->ID]);
 		return $weeuns;
 	} elseif ( $output == ARRAY_N ) {
-		foreach ( (array) $kids as $kid )
+		foreach ( $kids as $kid )
 			$babes[$kid->ID] = array_values(get_object_vars($kids[$kid->ID]));
 		return $babes;
 	} else {
@@ -482,8 +482,6 @@ function get_posts($args = null) {
 	} elseif ( ! empty($r['exclude']) )
 		$r['post__not_in'] = preg_split('/[\s,]+/',$r['exclude']);
 
-	$r['caller_get_posts'] = true;
-
 	$get_posts = new WP_Query;
 	return $get_posts->query($r);
 
@@ -752,38 +750,6 @@ function get_post_custom_values( $key = '', $post_id = 0 ) {
 }
 
 /**
- * is_sticky() - Check if post is sticky
- *
- * {@internal Missing Long Description}}
- *
- * @package WordPress
- * @subpackage Post
- * @since 2.7
- *
- * @param int $post_id A post ID
- * @return bool
- */
-function is_sticky($post_id = null) {
-	global $id;
-
-	$post_id = absint($post_id);
-
-	if ( !$post_id )
-		$post_id = absint($id);
-
-	$stickies = get_option('sticky_posts');
-
-	if ( !is_array($stickies) )
-		return false;
-
-	if ( in_array($post_id, $stickies) )
-		return true;
-
-	return false;
-}
-
-
-/**
  * sanitize_post() - Sanitize every post field
  *
  * {@internal Missing Long Description}}
@@ -879,58 +845,6 @@ function sanitize_post_field($field, $value, $post_id, $context) {
 		$value = js_escape($value);
 
 	return $value;
-}
-
-/**
- * Make a post sticky
- *
- * Makes a post stick to the top of the front page
- *
- * @package WordPress
- * @subpackage Post
- * @since 2.7
- *
- * @param int $post_id A post ID
- */
-function stick_post($post_id) {
-	$stickies = get_option('sticky_posts');
-
-	if ( !is_array($stickies) )
-		$stickies = array($post_id);
-
-	if ( ! in_array($post_id, $stickies) )
-		$stickies[] = $post_id;
-
-	update_option('sticky_posts', $stickies);
-}
-
-/**
- * Unstick a post
- *
- * Unstick a post from the front page
- *
- * @package WordPress
- * @subpackage Post
- * @since 2.7
- *
- * @param int $post_id A post ID
- */
-function unstick_post($post_id) {
-	$stickies = get_option('sticky_posts');
-
-	if ( !is_array($stickies) )
-		return;
-
-	if ( ! in_array($post_id, $stickies) )
-		return;
-
-	$offset = array_search($post_id, $stickies);
-	if ( false === $offset )
-		return;
-
-	array_splice($stickies, $offset, 1);
-
-	update_option('sticky_posts', $stickies);
 }
 
 /**
@@ -1436,7 +1350,6 @@ function wp_insert_post($postarr = array(), $wp_error = false) {
 
 	// expected_slashed (everything!)
 	$data = compact( array( 'post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_content_filtered', 'post_title', 'post_excerpt', 'post_status', 'post_type', 'comment_status', 'ping_status', 'post_password', 'post_name', 'to_ping', 'pinged', 'post_modified', 'post_modified_gmt', 'post_parent', 'menu_order', 'guid' ) );
-	$data = apply_filters('wp_insert_post', $data, $postarr);
 	$data = stripslashes_deep( $data );
 	$where = array( 'ID' => $post_ID );
 
@@ -1454,7 +1367,7 @@ function wp_insert_post($postarr = array(), $wp_error = false) {
 			if ( $wp_error )
 				return new WP_Error('db_insert_error', __('Could not insert post into the database'), $wpdb->last_error);
 			else
-				return 0;
+				return 0;	
 		}
 		$post_ID = (int) $wpdb->insert_id;
 
@@ -1588,7 +1501,7 @@ function wp_publish_post($post_id) {
 	wp_transition_post_status('publish', $old_status, $post);
 
 	// Update counts for the post's terms.
-	foreach ( (array) get_object_taxonomies('post') as $taxonomy ) {
+	foreach ( get_object_taxonomies('post') as $taxonomy ) {
 		$terms = wp_get_object_terms($post_id, $taxonomy, 'fields=tt_ids');
 		wp_update_term_count($terms, $taxonomy);
 	}
@@ -1854,7 +1767,7 @@ function trackback_url_list($tb_list, $post_id) {
 		}
 
 		$trackback_urls = explode(',', $tb_list);
-		foreach( (array) $trackback_urls as $tb_url) {
+		foreach($trackback_urls as $tb_url) {
 				$tb_url = trim($tb_url);
 				trackback($tb_url, stripslashes($post_title), $excerpt, $post_id);
 		}
@@ -1904,12 +1817,10 @@ function get_all_page_ids() {
  */
 function &get_page(&$page, $output = OBJECT, $filter = 'raw') {
 	if ( empty($page) ) {
-		if ( isset( $GLOBALS['page'] ) && isset( $GLOBALS['page']->ID ) ) {
+		if ( isset( $GLOBALS['page'] ) && isset( $GLOBALS['page']->ID ) )
 			return get_post($GLOBALS['page'], $output, $filter);
-		} else {
-			$page = null;
-			return $page;
-		}
+		else
+			return null;
 	}
 
 	return get_post($page, $output, $filter);
@@ -1937,8 +1848,7 @@ function get_page_by_path($page_path, $output = OBJECT) {
 	$page_paths = '/' . trim($page_path, '/');
 	$leaf_path  = sanitize_title(basename($page_paths));
 	$page_paths = explode('/', $page_paths);
-	$full_path = '';
-	foreach( (array) $page_paths as $pathdir)
+	foreach($page_paths as $pathdir)
 		$full_path .= ($pathdir!=''?'/':'') . sanitize_title($pathdir);
 
 	$pages = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_name, post_parent FROM $wpdb->posts WHERE post_name = %s AND (post_type = 'page' OR post_type = 'attachment')", $leaf_path ));
@@ -1999,7 +1909,7 @@ function get_page_by_title($page_title, $output = OBJECT) {
  */
 function &get_page_children($page_id, $pages) {
 	$page_list = array();
-	foreach ( (array) $pages as $page ) {
+	foreach ( $pages as $page ) {
 		if ( $page->post_parent == $page_id ) {
 			$page_list[] = $page;
 			if ( $children = get_page_children($page->ID, $pages) )
@@ -2025,7 +1935,7 @@ function &get_page_children($page_id, $pages) {
  */
 function get_page_hierarchy($posts, $parent = 0) {
 	$result = array ( );
-	if ($posts) { foreach ( (array) $posts as $post) {
+	if ($posts) { foreach ($posts as $post) {
 		if ($post->post_parent == $parent) {
 			$result[$post->ID] = $post->post_name;
 			$children = get_page_hierarchy($posts, $post->ID);
@@ -2160,8 +2070,8 @@ function &get_pages($args = '') {
 	$where = "$exclusions $inclusions ";
 	if ( ! empty( $meta_key ) || ! empty( $meta_value ) ) {
 		$join = " LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )";
-
-		// meta_key and met_value might be slashed
+		
+		// meta_key and met_value might be slashed 
 		$meta_key = stripslashes($meta_key);
 		$meta_value = stripslashes($meta_value);
 		if ( ! empty( $meta_key ) )
@@ -2354,7 +2264,7 @@ function wp_insert_attachment($object, $file = false, $parent = 0) {
 
 	if ( $file )
 		update_attached_file( $post_ID, $file );
-
+		
 	clean_post_cache($post_ID);
 
 	if ( $update) {
@@ -2546,7 +2456,7 @@ function wp_get_attachment_thumb_url( $post_id = 0 ) {
 		return false;
 	if ( !$url = wp_get_attachment_url( $post->ID ) )
 		return false;
-
+		
 	$sized = image_downsize( $post_id, 'thumbnail' );
 	if ( $sized )
 		return $sized[0];
@@ -3018,7 +2928,7 @@ function update_postmeta_cache($post_ids) {
 	// Get post-meta info
 	$id_list = join(',', $ids);
 	$cache = array();
-	if ( $meta_list = $wpdb->get_results("SELECT post_id, meta_key, meta_value FROM $wpdb->postmeta WHERE post_id IN ($id_list)", ARRAY_A) ) {
+	if ( $meta_list = $wpdb->get_results("SELECT post_id, meta_key, meta_value FROM $wpdb->postmeta WHERE post_id IN ($id_list) ORDER BY post_id, meta_key", ARRAY_A) ) {
 		foreach ( (array) $meta_list as $metarow) {
 			$mpid = (int) $metarow['post_id'];
 			$mkey = $metarow['meta_key'];
@@ -3040,7 +2950,7 @@ function update_postmeta_cache($post_ids) {
 			$cache[$id] = array();
 	}
 
-	foreach ( (array) array_keys($cache) as $post)
+	foreach ( array_keys($cache) as $post)
 		wp_cache_set($post, $cache[$post], 'post_meta');
 
 	return $cache;

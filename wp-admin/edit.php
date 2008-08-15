@@ -56,13 +56,13 @@ if ( is_single() ) {
 	$post_status_label = _c('Manage Posts|manage posts header');
 	if ( isset($_GET['post_status']) && in_array( $_GET['post_status'], array_keys($post_stati) ) )
         $post_status_label = $post_stati[$_GET['post_status']][1];
-	//if ( $post_listing_pageable && !is_archive() && !is_search() ) //Unreachable code: $post_listing_pageable is undefined, Similar code in upload.php
-	//	$h2_noun = is_paged() ? sprintf(__( 'Previous %s' ), $post_status_label) : sprintf(__('Latest %s'), $post_status_label);
-	//else
+	if ( $post_listing_pageable && !is_archive() && !is_search() )
+		$h2_noun = is_paged() ? sprintf(__( 'Previous %s' ), $post_status_label) : sprintf(__('Latest %s'), $post_status_label);
+	else
 		$h2_noun = $post_status_label;
 	// Use $_GET instead of is_ since they can override each other
 	$h2_author = '';
-	$_GET['author'] = isset($_GET['author']) ? (int) $_GET['author'] : 0;
+	$_GET['author'] = (int) $_GET['author'];
 	if ( $_GET['author'] != 0 ) {
 		if ( $_GET['author'] == '-' . $user_ID ) { // author exclusion
 			$h2_author = ' ' . __('by other authors');
@@ -93,7 +93,7 @@ foreach ( $post_stati as $status => $label ) {
 
 	if ( empty( $num_posts->$status ) )
 		continue;
-	if ( isset($_GET['post_status']) && $status == $_GET['post_status'] )
+	if ( $status == $_GET['post_status'] )
 		$class = ' class="current"';
 
 	$status_links[] = "<li><a href='edit.php?post_status=$status' $class>" .
@@ -110,7 +110,7 @@ unset( $status_links );
 endif;
 
 if ( isset($_GET['posted']) && $_GET['posted'] ) : $_GET['posted'] = (int) $_GET['posted']; ?>
-<div id="message" class="updated fade"><p><strong><?php _e('Your post has been saved.'); ?></strong> <a href="<?php echo get_permalink( $_GET['posted'] ); ?>"><?php _e('View post'); ?></a> | <a href="<?php echo get_edit_post_link( $_GET['posted'] ); ?>"><?php _e('Edit post'); ?></a></p></div>
+<div id="message" class="updated fade"><p><strong><?php _e('Your post has been saved.'); ?></strong> <a href="<?php echo get_permalink( $_GET['posted'] ); ?>"><?php _e('View post'); ?></a> | <a href="post.php?action=edit&amp;post=<?php echo $_GET['posted']; ?>"><?php _e('Edit post'); ?></a></p></div>
 <?php $_SERVER['REQUEST_URI'] = remove_query_arg(array('posted'), $_SERVER['REQUEST_URI']);
 endif;
 ?>
@@ -146,18 +146,16 @@ $arc_result = $wpdb->get_results( $arc_query );
 
 $month_count = count($arc_result);
 
-if ( $month_count && !( 1 == $month_count && 0 == $arc_result[0]->mmonth ) ) {
-$m = isset($_GET['m']) ? (int)$_GET['m'] : 0;
-?>
+if ( $month_count && !( 1 == $month_count && 0 == $arc_result[0]->mmonth ) ) { ?>
 <select name='m'>
-<option<?php selected( $m, 0 ); ?> value='0'><?php _e('Show all dates'); ?></option>
+<option<?php selected( @$_GET['m'], 0 ); ?> value='0'><?php _e('Show all dates'); ?></option>
 <?php
 foreach ($arc_result as $arc_row) {
 	if ( $arc_row->yyear == 0 )
 		continue;
 	$arc_row->mmonth = zeroise( $arc_row->mmonth, 2 );
 
-	if ( $arc_row->yyear . $arc_row->mmonth == $m )
+	if ( $arc_row->yyear . $arc_row->mmonth == $_GET['m'] )
 		$default = ' selected="selected"';
 	else
 		$default = '';

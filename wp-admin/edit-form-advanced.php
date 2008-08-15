@@ -1,12 +1,9 @@
 <?php
 
-if ( ! isset( $post_ID ) )
-	$post_ID = 0;
-
 $action = isset($action) ? $action : '';
 if ( isset($_GET['message']) )
 	$_GET['message'] = absint( $_GET['message'] );
-$messages[1] = sprintf( __( 'Post updated. Continue editing below or <a href="%s">go back</a>.' ), attribute_escape( stripslashes( ( isset( $_GET['_wp_original_http_referer'] ) ? $_GET['_wp_original_http_referer'] : '') ) ) );
+$messages[1] = sprintf( __( 'Post updated. Continue editing below or <a href="%s">go back</a>.' ), attribute_escape( stripslashes( $_GET['_wp_original_http_referer'] ) ) );
 $messages[2] = __('Custom field updated.');
 $messages[3] = __('Custom field deleted.');
 $messages[4] = __('Post updated.');
@@ -17,7 +14,7 @@ if ( isset($_GET['revision']) )
 $notice = false;
 $notices[1] = __( 'There is an autosave of this post that is more recent than the version below.  <a href="%s">View the autosave</a>.' );
 
-if ( 0 == $post_ID ) {
+if ( !isset($post_ID) || 0 == $post_ID ) {
 	$form_action = 'post';
 	$temp_ID = -1 * time(); // don't change this formula without looking at wp_write_post()
 	$form_extra = "<input type='hidden' id='post_ID' name='temp_ID' value='$temp_ID' />";
@@ -57,7 +54,7 @@ if ( 0 == $post_ID ) {
 <h2><?php _e('Write Post') ?></h2>
 <?php
 
-if ( 0 == $post_ID)
+if ( !isset($post_ID) || 0 == $post_ID)
 	wp_nonce_field('add-post');
 else
 	wp_nonce_field('update-post_' .  $post_ID);
@@ -98,8 +95,8 @@ $saveasdraft = '<input name="save" type="submit" id="save" class="button" tabind
 <p><strong><label for='post_status'><?php _e('Publish Status') ?></label></strong></p>
 <p>
 <select name='post_status' id='post_status' tabindex='4'>
-<?php
-// only show the publish menu item if they are allowed to publish posts or they are allowed to edit this post (accounts for 'edit_published_posts' capability)
+<?php 
+// only show the publish menu item if they are allowed to publish posts or they are allowed to edit this post (accounts for 'edit_published_posts' capability) 
 if ( current_user_can('publish_posts') OR ( $post->post_status == 'publish' AND current_user_can('edit_post', $post->ID) ) ) :
 ?>
 <option<?php selected( $post->post_status, 'publish' ); selected( $post->post_status, 'private' );?> value='publish'><?php _e('Published') ?></option>
@@ -114,12 +111,9 @@ if ( current_user_can('publish_posts') OR ( $post->post_status == 'publish' AND 
 
 <?php if ( current_user_can( 'publish_posts' ) ) : ?>
 <p id="private-checkbox"><label for="post_status_private" class="selectit"><input id="post_status_private" name="post_status" type="checkbox" value="private" <?php checked($post->post_status, 'private'); ?> tabindex="4" /> <?php _e('Keep this post private') ?></label></p>
-	<?php if ( current_user_can( 'edit_others_posts' ) ) : ?>
-		<p id="sticky-checkbox"><label for="sticky" class="selectit"><input id="sticky" name="sticky" type="checkbox" value="sticky" <?php checked(is_sticky($post->ID), true); ?> tabindex="4" /> <?php _e('Stick this post to the front page') ?></label></p>
-	<?php endif; ?>
 <?php endif; ?>
 <?php
-if ( 0 != $post_ID ) {
+if ($post_ID) {
 	if ( 'future' == $post->post_status ) { // scheduled for publishing at a future date
 		$stamp = __('Scheduled for:<br />%1$s at %2$s');
 	} else if ( 'publish' == $post->post_status ) { // already published
@@ -147,7 +141,6 @@ if ( 0 != $post_ID ) {
 </div>
 
 <p class="submit">
-<?php do_action('post_submitbox_start'); ?>
 <input type="submit" name="save" id="save-post" value="<?php _e('Save'); ?>" tabindex="4" class="button button-highlighted" />
 <?php
 if ( !in_array( $post->post_status, array('publish', 'future') ) || 0 == $post_ID ) {
@@ -164,7 +157,7 @@ if ( ( 'edit' == $action) && current_user_can('delete_post', $post_ID) )
 	echo "<a class='submitdelete' href='" . wp_nonce_url("post.php?action=delete&amp;post=$post_ID", 'delete-post_' . $post_ID) . "' onclick=\"if ( confirm('" . js_escape(sprintf( ('draft' == $post->post_status) ? __("You are about to delete this draft '%s'\n  'Cancel' to stop, 'OK' to delete.") : __("You are about to delete this post '%s'\n  'Cancel' to stop, 'OK' to delete."), $post->post_title )) . "') ) { return true;}return false;\">" . __('Delete&nbsp;post') . "</a>";
 ?>
 <br class="clear" />
-<?php if ( 0 != $post_ID ): ?>
+<?php if ($post_ID): ?>
 <?php if ( $last_id = get_post_meta($post_ID, '_edit_last', true) ) {
 	$last_user = get_userdata($last_id);
 	printf(__('Last edited by %1$s on %2$s at %3$s'), wp_specialchars( $last_user->display_name ), mysql2date(get_option('date_format'), $post->post_modified), mysql2date(get_option('time_format'), $post->post_modified));
@@ -182,7 +175,7 @@ if ( ( 'edit' == $action) && current_user_can('delete_post', $post_ID) )
 <h5><?php _e('Related') ?></h5>
 
 <ul>
-<?php if ( 0 != $post_ID ): ?>
+<?php if ($post_ID): ?>
 <li><a href="edit.php?p=<?php echo $post_ID ?>"><?php _e('See Comments on this Post') ?></a></li>
 <?php endif; ?>
 <li><a href="edit-comments.php"><?php _e('Manage All Comments') ?></a></li>
@@ -342,7 +335,7 @@ add_meta_box('commentstatusdiv', __('Comments &amp; Pings'), 'post_comment_statu
 
 function post_password_meta_box($post) {
 ?>
-<p><label class="hidden" for="post_password"><?php _e('Password Protect This Post') ?></label><input name="post_password" type="text" size="25" id="post_password" value="<?php if ( isset( $post->post_password ) ) : echo attribute_escape( $post->post_password ); endif; ?>" /></p>
+<p><label class="hidden" for="post_password"><?php _e('Password Protect This Post') ?></label><input name="post_password" type="text" size="25" id="post_password" value="<?php echo attribute_escape( $post->post_password ); ?>" /></p>
 <p><?php _e('Setting a password will require people who visit your blog to enter the above password to view this post and its comments.'); ?></p>
 <?php
 }
@@ -371,7 +364,7 @@ function post_author_meta_box($post) {
 add_meta_box('authordiv', __('Post Author'), 'post_author_meta_box', 'post', 'advanced', 'core');
 endif;
 
-if ( 0 < $post_ID && wp_get_post_revisions( $post_ID ) ) :
+if ( isset($post_ID) && 0 < $post_ID && wp_get_post_revisions( $post_ID ) ) :
 function post_revisions_meta_box($post) {
 	wp_list_post_revisions();
 }

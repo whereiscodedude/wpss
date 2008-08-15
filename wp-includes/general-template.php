@@ -4,29 +4,30 @@
 
 function get_header() {
 	do_action( 'get_header' );
-	if ('' == locate_template(array('header.php'), true))
-		load_template( get_theme_root() . '/default/header.php');
+	if ( file_exists( TEMPLATEPATH . '/header.php') )
+		load_template( TEMPLATEPATH . '/header.php');
+	else
+		load_template( WP_CONTENT_DIR . '/themes/default/header.php');
 }
 
 
 function get_footer() {
 	do_action( 'get_footer' );
-	if ('' == locate_template(array('footer.php'), true))
-		load_template( get_theme_root() . '/default/footer.php');
+	if ( file_exists( TEMPLATEPATH . '/footer.php') )
+		load_template( TEMPLATEPATH . '/footer.php');
+	else
+		load_template( WP_CONTENT_DIR . '/themes/default/footer.php');
 }
 
 
 function get_sidebar( $name = null ) {
 	do_action( 'get_sidebar' );
-	
-	$templates = array();
-	if ( isset($name) )
-		$templates[] = "sidebar-{$name}.php";
-	
-	$templates[] = "sidebar.php";
-	
-	if ('' == locate_template($templates, true))
-		load_template( get_theme_root() . '/default/sidebar.php');
+	if ( isset($name) && file_exists( TEMPLATEPATH . "/sidebar-{$name}.php") )
+		load_template( TEMPLATEPATH . "/sidebar-{$name}.php");
+	elseif ( file_exists( TEMPLATEPATH . '/sidebar.php') )
+		load_template( TEMPLATEPATH . '/sidebar.php');
+	else
+		load_template( WP_CONTENT_DIR . '/themes/default/sidebar.php');
 }
 
 
@@ -255,7 +256,7 @@ function wp_title($sep = '&raquo;', $display = true, $seplocation = '') {
 	else
 		$title = $prefix . $title;
 
-	$title = apply_filters('wp_title', $title, $sep, $seplocation);
+	$title = apply_filters('wp_title', $title, $sep);
 
 	// Send it out
 	if ( $display )
@@ -364,7 +365,7 @@ function get_archives_link($url, $text, $format = 'html', $before = '', $after =
 		$link_html = "\t$before<a href='$url' title='$title_text'>$text</a>$after\n";
 
 	$link_html = apply_filters( "get_archives_link", $link_html );
-
+		
 	return $link_html;
 }
 
@@ -425,7 +426,7 @@ function wp_get_archives($args = '') {
 		}
 		if ( $arcresults ) {
 			$afterafter = $after;
-			foreach ( (array) $arcresults as $arcresult ) {
+			foreach ( $arcresults as $arcresult ) {
 				$url	= get_month_link($arcresult->year,	$arcresult->month);
 				$text = sprintf(__('%1$s %2$d'), $wp_locale->get_month($arcresult->month), $arcresult->year);
 				if ( $show_post_count )
@@ -446,7 +447,7 @@ function wp_get_archives($args = '') {
 		}
 		if ($arcresults) {
 			$afterafter = $after;
-			foreach ( (array) $arcresults as $arcresult) {
+			foreach ($arcresults as $arcresult) {
 				$url = get_year_link($arcresult->year);
 				$text = sprintf('%d', $arcresult->year);
 				if ($show_post_count)
@@ -467,7 +468,7 @@ function wp_get_archives($args = '') {
 		}
 		if ( $arcresults ) {
 			$afterafter = $after;
-			foreach ( (array) $arcresults as $arcresult ) {
+			foreach ( $arcresults as $arcresult ) {
 				$url	= get_day_link($arcresult->year, $arcresult->month, $arcresult->dayofmonth);
 				$date = sprintf('%1$d-%2$02d-%3$02d 00:00:00', $arcresult->year, $arcresult->month, $arcresult->dayofmonth);
 				$text = mysql2date($archive_day_date_format, $date);
@@ -491,7 +492,7 @@ function wp_get_archives($args = '') {
 		$arc_w_last = '';
 		$afterafter = $after;
 		if ( $arcresults ) {
-				foreach ( (array) $arcresults as $arcresult ) {
+				foreach ( $arcresults as $arcresult ) {
 					if ( $arcresult->week != $arc_w_last ) {
 						$arc_year = $arcresult->yr;
 						$arc_w_last = $arcresult->week;
@@ -519,7 +520,7 @@ function wp_get_archives($args = '') {
 			$arcresults = $cache[ $key ];
 		}
 		if ( $arcresults ) {
-			foreach ( (array) $arcresults as $arcresult ) {
+			foreach ( $arcresults as $arcresult ) {
 				if ( $arcresult->post_date != '0000-00-00 00:00:00' ) {
 					$url  = get_permalink($arcresult);
 					$arc_title = $arcresult->post_title;
@@ -659,7 +660,7 @@ function get_calendar($initial = true) {
 		AND post_type = 'post' AND post_status = 'publish'
 		AND post_date < '" . current_time('mysql') . '\'', ARRAY_N);
 	if ( $dayswithposts ) {
-		foreach ( (array) $dayswithposts as $daywith ) {
+		foreach ( $dayswithposts as $daywith ) {
 			$daywithpost[] = $daywith[0];
 		}
 	} else {
@@ -680,7 +681,7 @@ function get_calendar($initial = true) {
 		."AND post_type = 'post' AND post_status = 'publish'"
 	);
 	if ( $ak_post_titles ) {
-		foreach ( (array) $ak_post_titles as $ak_post_title ) {
+		foreach ( $ak_post_titles as $ak_post_title ) {
 
 				$post_title = apply_filters( "the_title", $ak_post_title->post_title );
 				$post_title = str_replace('"', '&quot;', wptexturize( $post_title ));
@@ -747,7 +748,7 @@ add_action( 'update_option_start_of_week', 'delete_get_calendar_cache' );
 function allowed_tags() {
 	global $allowedtags;
 	$allowed = '';
-	foreach ( (array) $allowedtags as $tag => $attributes ) {
+	foreach ( $allowedtags as $tag => $attributes ) {
 		$allowed .= '<'.$tag;
 		if ( 0 < count($attributes) ) {
 			foreach ( $attributes as $attribute => $limits ) {
@@ -1057,7 +1058,7 @@ function paginate_links( $args = '' ) {
 	extract($args, EXTR_SKIP);
 
 	// Who knows what else people pass in $args
-	$total	= (int) $total;
+	$total    = (int) $total;
 	if ( $total < 2 )
 		return;
 	$current  = (int) $current;
@@ -1188,10 +1189,10 @@ function wp_admin_css( $file = 'wp-admin', $force_echo = false ) {
 }
 
 /**
- * Enqueues the default ThickBox js and css.
+ * Enqueues the default ThickBox js and css. 
  * If any of the settings need to be changed, this can be done with another js file
  * similar to media-upload.js and theme-preview.js. That file should require array('thickbox')
- * to ensure it is loaded after.
+ * to ensure it is loaded after. 
  */
 function add_thickbox() {
 	wp_enqueue_script( 'thickbox' );

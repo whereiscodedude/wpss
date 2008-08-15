@@ -121,7 +121,7 @@ function is_tag( $slug = '' ) {
 
 function is_tax( $slug = '' ) {
 	global $wp_query;
-
+	
 	if ( !$wp_query->is_tax )
 		return false;
 
@@ -214,7 +214,7 @@ function is_page ($page = '') {
 
 	$page = (array) $page;
 
-	if ( in_array( $page_obj->ID, $page ) )
+    if ( in_array( $page_obj->ID, $page ) )
 		return true;
 	elseif ( in_array( $page_obj->post_title, $page ) )
 		return true;
@@ -472,7 +472,6 @@ class WP_Query {
 			, 'w'
 			, 'category_name'
 			, 'tag'
-			, 'cat'
 			, 'tag_id'
 			, 'author_name'
 			, 'feed'
@@ -686,7 +685,7 @@ class WP_Query {
 			if ( empty($qv['taxonomy']) || empty($qv['term']) ) {
 				$this->is_tax = false;
 				foreach ( $GLOBALS['wp_taxonomies'] as $t ) {
-					if ( isset($t->query_var) && isset($qv[$t->query_var]) && '' != $qv[$t->query_var] ) {
+					if ( isset($t->query_var) && '' != $qv[$t->query_var] ) {
 						$this->is_tax = true;
 						break;
 					}
@@ -831,9 +830,6 @@ class WP_Query {
 		$search = '';
 		$groupby = '';
 		$post_status_join = false;
-
-		if ( !isset($q['caller_get_posts']) )
-			$q['caller_get_posts'] = false;
 
 		if ( !isset($q['post_type']) ) {
 			if ( $this->is_search )
@@ -991,7 +987,7 @@ class WP_Query {
 			}
 			$n = ($q['exact']) ? '' : '%';
 			$searchand = '';
-			foreach( (array) $q['search_terms'] as $term) {
+			foreach((array)$q['search_terms'] as $term) {
 				$term = addslashes_gpc($term);
 				$search .= "{$searchand}(($wpdb->posts.post_title LIKE '{$n}{$term}{$n}') OR ($wpdb->posts.post_content LIKE '{$n}{$term}{$n}'))";
 				$searchand = ' AND ';
@@ -1016,7 +1012,7 @@ class WP_Query {
 			$cat_array = preg_split('/[,\s]+/', $q['cat']);
 			$q['cat'] = '';
 			$req_cats = array();
-			foreach ( (array) $cat_array as $cat ) {
+			foreach ( $cat_array as $cat ) {
 				$cat = intval($cat);
 				$req_cats[] = $cat;
 				$in = ($cat > 0);
@@ -1358,7 +1354,7 @@ class WP_Query {
 		// postmeta queries
 		if ( ! empty($q['meta_key']) || ! empty($q['meta_value']) )
 			$join .= " LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
-		if ( ! empty($q['meta_key']) )
+		if ( ! empty($q['meta_key']) ) 
 			$where .= $wpdb->prepare("AND $wpdb->postmeta.meta_key = %s ", $q['meta_key']);
 		if ( ! empty($q['meta_value']) )
 			$where .= $wpdb->prepare("AND $wpdb->postmeta.meta_value = %s ", $q['meta_value']);
@@ -1497,41 +1493,6 @@ class WP_Query {
 						if (! current_user_can('read_post', $this->posts[0]->ID))
 							$this->posts = array();
 					}
-				}
-			}
-		}
-
-		// Put sticky posts at the top of the posts array
-		$sticky_posts = get_option('sticky_posts');
-		if ( $this->is_home && $page <= 1 && !empty($sticky_posts) && !$q['caller_get_posts'] ) {
-			$num_posts = count($this->posts);
-			$sticky_offset = 0;
-			// Loop over posts and relocate stickies to the front.
-			for ( $i = 0; $i < $num_posts; $i++ ) {
-				if ( in_array($this->posts[$i]->ID, $sticky_posts) ) {
-					$sticky_post = $this->posts[$i];
-					// Remove sticky from current position
-					array_splice($this->posts, $i, 1);
-					// Move to front, after other stickies
-					array_splice($this->posts, $sticky_offset, 0, array($sticky_post));
-					// Increment the sticky offset.  The next sticky will be placed at this offset.
-					$sticky_offset++;
-					// Remove post from sticky posts array
-					$offset = array_search($sticky_post->ID, $sticky_posts);
-					array_splice($sticky_posts, $offset, 1);
-				}
-			}
-
-			// Fetch sticky posts that weren't in the query results
-			if ( !empty($sticky_posts) ) {
-				$stickies__in = implode(',', array_map( 'absint', $sticky_posts ));
-				$stickies = $wpdb->get_results( "SELECT * FROM $wpdb->posts WHERE $wpdb->posts.ID IN ($stickies__in)" );
-				// TODO Make sure post is published or viewable by the current user
-				foreach ( $stickies as $sticky_post ) {
-					if ( 'publish' != $sticky_post->post_status )
-						continue;
-						array_splice($this->posts, $sticky_offset, 0, array($sticky_post));
-						$sticky_offset++;
 				}
 			}
 		}

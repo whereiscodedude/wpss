@@ -1,12 +1,4 @@
 <?php
-/**
- * Import WordPress Administration Panel
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** Load WordPress Bootstrap */
 require_once ('admin.php');
 $title = __('Import');
 $parent_file = 'edit.php';
