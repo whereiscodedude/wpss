@@ -1,56 +1,17 @@
 <?php
-/**
- * Press This Display and Handler.
- *
- * @package WordPress
- * @subpackage Press_This
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 if ( ! current_user_can('publish_posts') ) wp_die( __( 'Cheatin&#8217; uh?' ) );
 
-/**
- * Replace forward slash with backslash and slash.
- *
- * @package WordPress
- * @subpackage Press_This
- * @since unknown
- *
- * @param string $string
- * @return string
- */
 function preg_quote2($string) {
 	return str_replace('/', '\/', preg_quote($string));
 }
-
-/**
- * Convert characters.
- *
- * @package WordPress
- * @subpackage Press_This
- * @since unknown
- *
- * @param string $text
- * @return string
- */
 function aposfix($text) {
 	$translation_table[chr(34)] = '&quot;';
 	$translation_table[chr(38)] = '&';
 	$translation_table[chr(39)] = '&apos;';
 	return preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,3};)/","&amp;" , strtr($text, $translation_table));
 }
-
-/**
- * Press It form handler.
- *
- * @package WordPress
- * @subpackage Press_This
- * @since unknown
- *
- * @return int Post ID
- */
 function press_it() {
 	// define some basic variables
 	$quick['post_status'] = isset($_REQUEST['publish']) ? 'publish' : 'draft';
@@ -73,11 +34,11 @@ function press_it() {
 			$content = $_REQUEST['content'];
 
 			foreach( (array) $_REQUEST['photo_src'] as $key => $image) {
-
+				
 				// see if files exist in content - we don't want to upload non-used selected files.
 				if( strpos($_REQUEST['content'], $image) !== false ) {
 					$upload = media_sideload_image($image, $post_ID, $_REQUEST['photo_description'][$key]);
-
+					 
 					// Replace the POSTED content <img> with correct uploaded ones.
 					// escape quote for matching
 					$quoted = preg_quote2($image);
@@ -88,7 +49,7 @@ function press_it() {
 			break;
 
 		case "video":
-			if($_REQUEST['embed_code'])
+			if($_REQUEST['embed_code']) 
 				$content .= $_REQUEST['embed_code']."\n\n";
 			$content .= $_REQUEST['content'];
 			break;
@@ -112,11 +73,38 @@ function press_it() {
 }
 
 // For submitted posts.
-if ( 'post' == $_REQUEST['action'] ) {
-	check_admin_referer('press-this');
-	$post_ID = press_it(); 
-	wp_redirect('press-this.php?posted=' . $post_ID);
-	die;
+if ( 'post' == $_REQUEST['action'] ) { 
+	check_admin_referer('press-this'); $post_ID = press_it(); ?>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml" <?php do_action('admin_xml_ns'); ?> <?php language_attributes(); ?>>
+	<head>
+		<meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php echo get_option('blog_charset'); ?>" />
+		<title><?php _e('Press This') ?></title>
+	<?php
+		add_thickbox();
+		wp_enqueue_style('press-this');
+		wp_enqueue_style('press-this-ie');
+		wp_enqueue_style( 'colors' );
+		wp_enqueue_script('post');
+
+		do_action('admin_print_styles');
+		do_action('admin_print_scripts');
+		do_action('admin_head');
+	?>
+	</head>
+	<body class="press-this">
+		<div id="message" class="updated fade"><p><strong><?php _e('Your post has been saved.'); ?></strong> <a onclick="window.opener.location.replace(this.href); window.close();" href="<?php echo get_permalink( $post_ID); ?>"><?php _e('View post'); ?></a> | <a href="post.php?action=edit&amp;post=<?php echo $post_ID; ?>" onclick="window.opener.location.replace(this.href); window.close();"><?php _e('Edit post'); ?></a> | <a href="#" onclick="window.close();"><?php _e('Close Window'); ?></a></p></div>
+		<div id="footer">
+		<p><?php
+		do_action('in_admin_footer', '');
+		$upgrade = apply_filters( 'update_footer', '' );
+		echo __('Thank you for creating with <a href="http://wordpress.org/">WordPress</a>');
+		?></p>
+		</div>
+		<?php do_action('admin_footer', ''); ?>
+	</body>
+	</html>
+	<?php die;
 }
 
 // Ajax Requests
@@ -150,7 +138,7 @@ if($_REQUEST['ajax'] == 'thickbox') { ?>
 		<a href="#" class="select"><img src="<?php echo clean_url($image); ?>" alt="<?php echo attribute_escape(__('Click to insert.')); ?>" title="<?php echo attribute_escape(__('Click to insert.')); ?>" /></a></p>
 
 	<p id="options"><a href="#" class="select button"><?php _e('Insert Image'); ?></a> <a href="#" class="cancel button"><?php _e('Cancel'); ?></a></p>
-<?php die;
+<?php die; 
 }
 
 if($_REQUEST['ajax'] == 'thickbox_url') { ?>
@@ -175,7 +163,7 @@ if($_REQUEST['ajax'] == 'thickbox_url') { ?>
 	</div>
 
 	<p id="options"><a href="#" class="select"><?php _e('Insert Image'); ?></a> | <a href="#" class="cancel"><?php _e('Cancel'); ?></a></p>
-<?php die;
+<?php die; 
 }
 
 if($_REQUEST['ajax'] == 'video') { ?>
@@ -188,7 +176,7 @@ if($_REQUEST['ajax'] == 'video') { ?>
 
 if($_REQUEST['ajax'] == 'photo_images') {
 	function get_images_from_uri($uri) {
-		if( preg_match('/\.(jpg|jpe|jpeg|png|gif)/', $uri) && !strpos($uri,'blogger.com') )
+		if( preg_match('/\.(jpg|jpe|jpeg|png|gif)/', $uri) && !strpos($uri,'blogger.com') ) 
 			return "'".$uri."'";
 
 		$content = wp_remote_fopen($uri);
@@ -198,7 +186,7 @@ if($_REQUEST['ajax'] == 'photo_images') {
 
 		$pattern = '/<img ([^>]*)src=(\"|\')([^<>]+?\.(png|jpeg|jpg|jpe|gif))[^<>\'\"]*(\2)([^>\/]*)\/*>/is';
 		preg_match_all($pattern, $content, $matches);
-
+		
 		if ( empty($matches[1]) ) return '';
 
 		$sources = array();
@@ -210,15 +198,15 @@ if($_REQUEST['ajax'] == 'photo_images') {
 					$src = 'http://'.str_replace('//','/', $host['host'].'/'.$src);
 				else
 					$src = 'http://'.str_replace('//','/', $host['host'].'/'.dirname($host['path']).'/'.$src);
-
+			
 			$sources[] = clean_url($src);
 		}
 		return "'" . implode("','", $sources) . "'";
-	}
+	} 
 
 	$url = urldecode($url);
 	$url = str_replace(' ', '%20', $url);
-	echo 'new Array('.get_images_from_uri($url).')';
+	echo 'new Array('.get_images_from_uri($url).')'; 
 die;
 }
 
@@ -238,12 +226,12 @@ if($_REQUEST['ajax'] == 'photo_js') { ?>
 	);
 
 	for (i = 0; i < my_src.length; i++) {
-		img = new Image();
-		img.src = my_src[i];
-		img_attr = 'id="img' + i + '"';
+		img = new Image(); 
+		img.src = my_src[i]; 
+		img_attr = 'id="img' + i + '"'; 
 		skip = false;
 		if (img.width && img.height) {
-			if (img.width * img.height < 2500)
+			if (img.width * img.height < 2500) 
 				skip = true;
 			aspect = img.width / img.height;
 			scale = (aspect > 1) ? (75 / img.width) : (75 / img.height);
@@ -307,17 +295,15 @@ if($_REQUEST['ajax'] == 'photo') { ?>
 	wp_enqueue_style('press-this');
 	wp_enqueue_style('press-this-ie');
 	wp_enqueue_style( 'colors' );
-	wp_enqueue_script( 'post' );
+	wp_enqueue_script('post');
 	wp_enqueue_script('editor_functions');
-
-//	wp_teeny_mce();
 
 	do_action('admin_print_styles');
 	do_action('admin_print_scripts');
 	do_action('admin_head');
 ?>
 	<script type="text/javascript">
-	<?php if ( user_can_richedit() ) {
+	<?php if ( user_can_richedit() ) { 
 		$language = ( '' == get_locale() ) ? 'en' : strtolower( substr(get_locale(), 0, 2) );
 		// Add TinyMCE languages
 		@include_once( dirname(__FILE__).'/../wp-includes/js/tinymce/langs/wp-langs.php' );
@@ -373,7 +359,7 @@ if($_REQUEST['ajax'] == 'photo') { ?>
 			jQuery(this).val( '' ).removeClass( 'form-input-tip' );
 	});
 	jQuery('#newtag').blur(function() {
-		if ( this.value == '' )
+		if ( this.value == '' ) 
 			jQuery(this).val( postL10n.addTag ).addClass( 'form-input-tip' );
 	});
 
@@ -425,7 +411,7 @@ if($_REQUEST['ajax'] == 'photo') { ?>
 				jQuery('#extra_fields').show();
 				jQuery('body').addClass('video_split');
 				jQuery('#extra_fields').load('<?php echo clean_url($_SERVER['PHP_SELF']); ?>', { ajax: 'video', s: '<?php echo attribute_escape($selection); ?>'}, function() {
-					<?php
+					<?php 
 					$content = '';
 					if ( preg_match("/youtube\.com\/watch/i", $url) ) {
 						list($domain, $video_id) = split("v=", $url);
@@ -474,7 +460,7 @@ if($_REQUEST['ajax'] == 'photo') { ?>
 	}
 
 	jQuery(document).ready(function() {
-    	jQuery('#menu li').click(function (){
+    	jQuery('#menu li').click(function (){ 
 			tab_name = this.id.split('_');
 			tab_name = tab_name[0];
 			show(tab_name);
@@ -503,14 +489,6 @@ if($_REQUEST['ajax'] == 'photo') { ?>
 	<li id="video_button"><a href="#"><?php _e('Video') ?></a></li>
 </ul>
 
-<?php
-if ( isset($_GET['posted']) && intval($_GET['posted']) ) {
-	$post_ID = intval($_GET['posted']);
-?>
-<div id="message" class="updated fade"><p><strong><?php _e('Your post has been saved.'); ?></strong> <a onclick="window.opener.location.replace(this.href); window.close();" href="<?php echo get_permalink( $post_ID); ?>"><?php _e('View post'); ?></a> | <a href="<?php echo get_edit_post_link( $post_ID ); ?>" onclick="window.opener.location.replace(this.href); window.close();"><?php _e('Edit post'); ?></a> | <a href="#" onclick="window.close();"><?php _e('Close Window'); ?></a></p></div>
-<?php
-}
-?>
 <form action="press-this.php?action=post" method="post">
 	<?php wp_nonce_field('press-this') ?>
 	<input type="hidden" name="post_type" id="post_type" value="text"/>
@@ -540,13 +518,13 @@ if ( isset($_GET['posted']) && intval($_GET['posted']) ) {
 						<?php wp_category_checklist() ?>
 					</ul>
 				</div>
-
+				
 				<h2><?php _e('Tags') ?></h2>
 				<p id="jaxtag"><label class="hidden" for="newtag"><?php _e('Tags'); ?></label><input type="text" name="tags_input" class="tags-input" id="tags-input" size="40" tabindex="3" value="<?php echo get_tags_to_edit( $post->ID ); ?>" /></p>
 				<div id="tagchecklist"></div>
 			</div>
 
-			<p class="submit">
+			<p class="submit">         
 				<input type="submit" name="draft" value="<?php _e('Save') ?>" onclick="document.getElementById('photo_saving').style.display = '';"/>
 				<input type="submit" name="publish" value="<?php _e('Publish') ?>" onclick="document.getElementById('photo_saving').style.display = '';"/>
 				<img src="images/loading-publish.gif" alt="" id="photo_saving" style="display:none;"/>

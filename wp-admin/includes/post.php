@@ -17,8 +17,7 @@ function _wp_translate_postdata( $update = false ) {
 	$_POST['post_content'] = $_POST['content'];
 	$_POST['post_excerpt'] = $_POST['excerpt'];
 	$_POST['post_parent'] = isset($_POST['parent_id'])? $_POST['parent_id'] : '';
-	if ( isset($_POST['trackback_url']) )
-		$_POST['to_ping'] = $_POST['trackback_url'];
+	$_POST['to_ping'] = $_POST['trackback_url'];
 
 	if (!empty ( $_POST['post_author_override'] ) ) {
 		$_POST['post_author'] = (int) $_POST['post_author_override'];
@@ -30,7 +29,7 @@ function _wp_translate_postdata( $update = false ) {
 		}
 	}
 
-	if ( isset($_POST['user_ID']) && ($_POST['post_author'] != $_POST['user_ID']) ) {
+	if ( $_POST['post_author'] != $_POST['user_ID'] ) {
 		if ( 'page' == $_POST['post_type'] ) {
 			if ( !current_user_can( 'edit_others_pages' ) ) {
 				return new WP_Error( 'edit_others_pages', $update ?
@@ -60,14 +59,14 @@ function _wp_translate_postdata( $update = false ) {
 
 	$previous_status = get_post_field('post_status',  $_POST['ID']);
 
-	// Posts 'submitted for approval' present are submitted to $_POST the same as if they were being published.
+	// Posts 'submitted for approval' present are submitted to $_POST the same as if they were being published. 
 	// Change status from 'publish' to 'pending' if user lacks permissions to publish or to resave published posts.
 	if ( 'page' == $_POST['post_type'] ) {
 		if ( 'publish' == $_POST['post_status'] && !current_user_can( 'publish_pages' ) )
 			if ( $previous_status != 'publish' OR !current_user_can( 'edit_published_pages') )
 				$_POST['post_status'] = 'pending';
 	} else {
-		if ( isset($_POST['post_status']) && ('publish' == $_POST['post_status'] && !current_user_can( 'publish_posts' )) ) :
+		if ( 'publish' == $_POST['post_status'] && !current_user_can( 'publish_posts' ) ) :
 			// Stop attempts to publish new posts, but allow already published posts to be saved if appropriate.
 			if ( $previous_status != 'publish' OR !current_user_can( 'edit_published_posts') )
 				$_POST['post_status'] = 'pending';
@@ -161,13 +160,6 @@ function edit_post() {
 	_fix_attachment_links( $post_ID );
 
 	wp_set_post_lock( $post_ID, $GLOBALS['current_user']->ID );
-
-	if ( current_user_can( 'edit_others_posts' ) ) {
-		if ( !empty($_POST['sticky']) )
-			stick_post($post_ID);
-		else
-			unstick_post($post_ID);
-	}
 
 	return $post_ID;
 }
@@ -357,7 +349,7 @@ function add_meta( $post_ID ) {
 
 		wp_cache_delete($post_ID, 'post_meta');
 
-		$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->postmeta
+		$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->postmeta 
 			(post_id,meta_key,meta_value ) VALUES (%s, %s, %s)",
 			$post_ID, $metakey, $metavalue) );
 		return $wpdb->insert_id;
@@ -421,7 +413,7 @@ function update_meta( $meta_id, $meta_key, $meta_value ) {
 
 	$meta_value = maybe_serialize( stripslashes( $meta_value ));
 	$meta_id = (int) $meta_id;
-
+	
 	$data  = compact( 'meta_key', 'meta_value' );
 	$where = compact( 'meta_id' );
 
@@ -491,8 +483,8 @@ function wp_edit_posts_query( $q = false ) {
 	global $wpdb;
 	if ( false === $q )
 		$q = $_GET;
-	$q['m']   = isset($q['m']) ? (int) $q['m'] : 0;
-	$q['cat'] = isset($q['cat']) ? (int) $q['cat'] : 0;
+	$q['m']   = (int) $q['m'];
+	$q['cat'] = (int) $q['cat'];
 	$post_stati  = array(	//	array( adj, noun )
 				'publish' => array(__('Published'), __('Published posts'), __ngettext_noop('Published (%s)', 'Published (%s)')),
 				'future' => array(__('Scheduled'), __('Scheduled posts'), __ngettext_noop('Scheduled (%s)', 'Scheduled (%s)')),
@@ -511,10 +503,10 @@ function wp_edit_posts_query( $q = false ) {
 		$post_status_q .= '&perm=readable';
 	}
 
-	if ( isset($q['post_status']) && 'pending' === $q['post_status'] ) {
+	if ( 'pending' === $q['post_status'] ) {
 		$order = 'ASC';
 		$orderby = 'modified';
-	} elseif ( isset($q['post_status']) && 'draft' === $q['post_status'] ) {
+	} elseif ( 'draft' === $q['post_status'] ) {
 		$order = 'DESC';
 		$orderby = 'modified';
 	} else {
@@ -538,9 +530,8 @@ function wp_edit_attachments_query( $q = false ) {
 	global $wpdb;
 	if ( false === $q )
 		$q = $_GET;
-
-	$q['m']   = isset( $q['m'] ) ? (int) $q['m'] : 0;
-	$q['cat'] = isset( $q['cat'] ) ? (int) $q['cat'] : 0;
+	$q['m']   = (int) $q['m'];
+	$q['cat'] = (int) $q['cat'];
 	$q['post_type'] = 'attachment';
 	$q['post_status'] = 'any';
 	$q['posts_per_page'] = 15;
@@ -586,7 +577,7 @@ function get_sample_permalink($id, $title=null, $name = null) {
 	if (in_array($post->post_status, array('draft', 'pending'))) {
 		$post->post_status = 'publish';
 		$post->post_date = date('Y-m-d H:i:s');
-		$post->post_name = sanitize_title($post->post_name? $post->post_name : $post->post_title, $post->ID);
+		$post->post_name = sanitize_title($post->post_name? $post->post_name : $post->post_title, $post->ID); 
 	}
 
 	// If the user wants to set a new name -- override the current one
@@ -691,81 +682,4 @@ function wp_create_post_autosave( $post_id ) {
 
 	// Otherwise create the new autosave as a special post revision
 	return _wp_put_post_revision( $_POST, true );
-}
-
-/**
- * wp_teeny_mce() - adds a trimmed down version of the tinyMCE editor used on the Write -> Post screen.
- *
- * @package WordPress
- * @since 2.6
- */
-function wp_teeny_mce( $args = null ) {
-	if ( !user_can_richedit() )
-		return;
-
-	$defaults = array(
-		'buttons1' => 'bold,italic,underline,blockquote,separator,strikethrough,bullist,numlist,undo,redo,link,unlink'
-	);
-	$args = wp_parse_args( $args, $defaults );
-	if ( is_array( $args['buttons1'] ) )
-		$args['buttons1'] = join( ',', $args['buttons1'] );
-
-	$language = ( '' == get_locale() ) ? 'en' : strtolower( substr(get_locale(), 0, 2) );
-
-?>
-
-<script type="text/javascript" src="<?php echo clean_url( site_url( 'wp-includes/js/tinymce/tiny_mce.js' ) ); ?>"></script>
-<script type="text/javascript">
-/* <![CDATA[ */
-<?php
-	// Add TinyMCE languages
-	@include_once( ABSPATH . WPINC . '/js/tinymce/langs/wp-langs.php' );
-
-	if ( isset($strings) )
-		echo $strings;
-
-?>
-	(function() {
-		var base = tinymce.baseURL, sl = tinymce.ScriptLoader, ln = "<?php echo $language; ?>";
-
-		sl.markDone(base + '/langs/' + ln + '.js');
-		sl.markDone(base + '/themes/advanced/langs/' + ln + '.js');
-		sl.markDone(base + '/themes/advanced/langs/' + ln + '_dlg.js');
-	})();
-	
-	var wpTeenyMCEInit = function() {
-	tinyMCE.init({
-		mode: "textareas",
-		editor_selector: "mceEditor",
-		language : "<?php echo $language; ?>",
-		width: "100%",
-		theme : "advanced",
-		theme_advanced_buttons1 : "<?php echo $args['buttons1']; ?>",
-		theme_advanced_buttons2 : "",
-		theme_advanced_buttons3 : "",
-		theme_advanced_toolbar_location : "top",
-		theme_advanced_toolbar_align : "left",
-		theme_advanced_statusbar_location : "bottom",
-		theme_advanced_resizing : true,
-		theme_advanced_resize_horizontal : false,
-		skin : "wp_theme",
-		dialog_type : "modal",
-		relative_urls : false,
-		remove_script_host : false,
-		convert_urls : false,
-		apply_source_formatting : false,
-		remove_linebreaks : true,
-		accessibility_focus : false,
-		tab_focus : ":next",
-		plugins : "safari,inlinepopups",
-		entities : "38,amp,60,lt,62,gt",
-		force_p_newlines : true,
-		save_callback : 'switchEditors.saveCallback'
-	});
-	};
-	wpTeenyMCEInit();
-/* ]]> */
-</script>
-
-<?php
 }

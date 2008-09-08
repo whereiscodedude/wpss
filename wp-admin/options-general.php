@@ -1,12 +1,4 @@
 <?php
-/**
- * General settings administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('./admin.php');
 
 $title = __('General Settings');
@@ -18,8 +10,7 @@ include('./admin-header.php');
 <div class="wrap">
 <h2><?php _e('General Settings') ?></h2>
 <form method="post" action="options.php">
-<?php wp_nonce_field('general-options') ?>
-<input type='hidden' name='option_page' value='general' />
+<?php wp_nonce_field('update-options') ?>
 <table class="form-table">
 <tr valign="top">
 <th scope="row"><label for="blogname"><?php _e('Blog Title') ?></label></th>
@@ -121,6 +112,7 @@ endfor;
 
 <p class="submit"><input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
 <input type="hidden" name="action" value="update" />
+<input type="hidden" name="page_options" value="<?php if ( ! defined( 'WP_SITEURL' ) ) echo 'siteurl,'; if ( ! defined( 'WP_HOME' ) ) echo 'home,'; ?>blogname,blogdescription,admin_email,users_can_register,gmt_offset,date_format,time_format,start_of_week,comment_registration,default_role" />
 </p>
 </form>
 

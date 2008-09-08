@@ -1,13 +1,5 @@
 <?php
-/**
- * WordPress Administration Generic POST Handler.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** We are located in WordPress Administration Panels */
-define('WP_ADMIN', true);
+define('WP_ADMIN', TRUE);
 
 if ( defined('ABSPATH') )
 	require_once(ABSPATH . 'wp-load.php');

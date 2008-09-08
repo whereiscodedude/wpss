@@ -295,9 +295,6 @@ function media_upload_form_handler() {
 }
 
 function media_upload_image() {
-	$errors = array();
-	$id = 0;
-
 	if ( isset($_POST['html-upload']) && !empty($_FILES) ) {
 		// Upload File button was clicked
 		$id = media_handle_upload('async-upload', $_REQUEST['post_id']);
@@ -362,9 +359,6 @@ function media_sideload_image($file, $post_id, $desc = null) {
 }
 
 function media_upload_audio() {
-	$errors = array();
-	$id = 0;
-
 	if ( isset($_POST['html-upload']) && !empty($_FILES) ) {
 		// Upload File button was clicked
 		$id = media_handle_upload('async-upload', $_REQUEST['post_id']);
@@ -405,9 +399,6 @@ function media_upload_audio() {
 }
 
 function media_upload_video() {
-	$errors = array();
-	$id = 0;
-
 	if ( isset($_POST['html-upload']) && !empty($_FILES) ) {
 		// Upload File button was clicked
 		$id = media_handle_upload('async-upload', $_REQUEST['post_id']);
@@ -448,9 +439,6 @@ function media_upload_video() {
 }
 
 function media_upload_file() {
-	$errors = array();
-	$id = 0;
-
 	if ( isset($_POST['html-upload']) && !empty($_FILES) ) {
 		// Upload File button was clicked
 		$id = media_handle_upload('async-upload', $_REQUEST['post_id']);
@@ -491,8 +479,6 @@ function media_upload_file() {
 }
 
 function media_upload_gallery() {
-	$errors = array();
-
 	if ( !empty($_POST) ) {
 		$return = media_upload_form_handler();
 
@@ -507,7 +493,6 @@ function media_upload_gallery() {
 }
 
 function media_upload_library() {
-	$errors = array();
 	if ( !empty($_POST) ) {
 		$return = media_upload_form_handler();
 
@@ -520,82 +505,6 @@ function media_upload_library() {
 	return wp_iframe( 'media_upload_library_form', $errors );
 }
 
-// produce HTML for the image alignment radio buttons with the specified one checked
-function image_align_input_fields($post, $checked='') {
-	
-	$alignments = array('none' => 'None', 'left' => 'Left', 'center' => 'Center', 'right' => 'Right');
-	if ( !array_key_exists($checked, $alignments) )
-		$checked = 'none';
-	
-	$out = array();
-	foreach ($alignments as $name => $label) {
-	
-		$out[] = "<input type='radio' name='attachments[{$post->ID}][align]' id='image-align-{$name}-{$post->ID}' value='$name'".
-		 	( $checked == $name ? " checked='checked'" : "" ) . 
-			" /><label for='image-align-{$name}-{$post->ID}' class='align image-align-{$name}-label'>" . __($label) . "</label>";
-	}
-	return join("\n", $out);
-}
-
-// produce HTML for the size radio buttons with the specified one checked
-function image_size_input_fields($post, $checked='') {
-		
-		// get a list of the actual pixel dimensions of each possible intermediate version of this image
-		$size_names = array('thumbnail' => 'Thumbnail', 'medium' => 'Medium', 'large' => 'Large', 'full' => 'Full size');
-		
-		foreach ( $size_names as $size => $name) {
-			$downsize = image_downsize($post->ID, $size);
-			
-			// is this size selectable?
-			$enabled = ( $downsize[3] || 'full' == $size );
-			$css_id = "image-size-{$size}-{$post->ID}";
-			// if this size is the default but that's not available, don't select it
-			if ( $checked && !$enabled )
-				$checked = '';
-			// if $checked was not specified, default to the first available size that's bigger than a thumbnail
-			if ( !$checked && $enabled && 'thumbnail' != $size )
-				$checked = $size;
-			
-			$html = "<div class='image-size-item'><input type='radio' ".( $enabled ? '' : "disabled='disabled'")."name='attachments[$post->ID][image-size]' id='{$css_id}' value='{$size}'".( $checked == $size ? " checked='checked'" : '') ." />";
-			
-			$html .= "<label for='{$css_id}'>" . __($name). "</label>";
-			// only show the dimensions if that choice is available
-			if ( $enabled )
-				$html .= " <label for='{$css_id}' class='help'>" . sprintf( __("(%d&nbsp;&times;&nbsp;%d)"), $downsize[1], $downsize[2] ). "</label>";
-				
-			$html .= '</div>';
-		
-			$out[] = $html;
-		}
-		
-		return array(
-			'label' => __('Size'),
-			'input' => 'html',
-			'html'  => join("\n", $out),
-		);
-}
-
-// produce HTML for the Link URL buttons with the default link type as specified
-function image_link_input_fields($post, $url_type='') {
-
-	$file = wp_get_attachment_url($post->ID);
-	$link = get_attachment_link($post->ID);
-
-	$url = '';
-	if ( $url_type == 'file' )
-		$url = $file;
-	elseif ( $url_type == 'post' )
-		$url = $link;
-	
-	return "<input type='text' name='attachments[$post->ID][url]' value='" . attribute_escape($url) . "' /><br />
-				<button type='button' class='button url-$post->ID' value=''>" . __('None') . "</button>
-				<button type='button' class='button url-$post->ID' value='" . attribute_escape($file) . "'>" . __('File URL') . "</button>
-				<button type='button' class='button url-$post->ID' value='" . attribute_escape($link) . "'>" . __('Post URL') . "</button>
-				<script type='text/javascript'>
-				jQuery('button.url-$post->ID').bind('click', function(){jQuery(this).siblings('input').val(this.value);});
-				</script>\n";
-}
-
 function image_attachment_fields_to_edit($form_fields, $post) {
 	if ( substr($post->post_mime_type, 0, 5) == 'image' ) {
 		$form_fields['post_title']['required'] = true;
@@ -605,13 +514,32 @@ function image_attachment_fields_to_edit($form_fields, $post) {
 
 		$form_fields['post_content']['label'] = __('Description');
 
+		$thumb = wp_get_attachment_thumb_url($post->ID);
+
 		$form_fields['align'] = array(
 			'label' => __('Alignment'),
 			'input' => 'html',
-			'html'  => image_align_input_fields($post, get_option('image_default_align')),
+			'html'  => "
+				<input type='radio' name='attachments[$post->ID][align]' id='image-align-none-$post->ID' value='none' checked='checked' />
+				<label for='image-align-none-$post->ID' class='align image-align-none-label'>" . __('None') . "</label>
+				<input type='radio' name='attachments[$post->ID][align]' id='image-align-left-$post->ID' value='left' />
+				<label for='image-align-left-$post->ID' class='align image-align-left-label'>" . __('Left') . "</label>
+				<input type='radio' name='attachments[$post->ID][align]' id='image-align-center-$post->ID' value='center' />
+				<label for='image-align-center-$post->ID' class='align image-align-center-label'>" . __('Center') . "</label>
+				<input type='radio' name='attachments[$post->ID][align]' id='image-align-right-$post->ID' value='right' />
+				<label for='image-align-right-$post->ID' class='align image-align-right-label'>" . __('Right') . "</label>\n",
 		);
-		
-		$form_fields['image-size'] = image_size_input_fields($post, get_option('image_default_size'));
+		$form_fields['image-size'] = array(
+			'label' => __('Size'),
+			'input' => 'html',
+			'html'  => "
+				" . ( $thumb ? "<input type='radio' name='attachments[$post->ID][image-size]' id='image-size-thumb-$post->ID' value='thumbnail' />
+				<label for='image-size-thumb-$post->ID'>" . __('Thumbnail') . "</label>
+				" : '' ) . "<input type='radio' name='attachments[$post->ID][image-size]' id='image-size-medium-$post->ID' value='medium' checked='checked' />
+				<label for='image-size-medium-$post->ID'>" . __('Medium') . "</label>
+				<input type='radio' name='attachments[$post->ID][image-size]' id='image-size-full-$post->ID' value='full' />
+				<label for='image-size-full-$post->ID'>" . __('Full size') . "</label>",
+		);
 	}
 	return $form_fields;
 }
@@ -688,7 +616,14 @@ function get_attachment_fields_to_edit($post, $errors = null) {
 		'url'          => array(
 			'label'      => __('Link URL'),
 			'input'      => 'html',
-			'html'       => image_link_input_fields($post, get_option('image_default_link_type')),
+			'html'       => "
+				<input type='text' name='attachments[$post->ID][url]' value='" . attribute_escape($file) . "' /><br />
+				<button type='button' class='button url-$post->ID' value=''>" . __('None') . "</button>
+				<button type='button' class='button url-$post->ID' value='" . attribute_escape($file) . "'>" . __('File URL') . "</button>
+				<button type='button' class='button url-$post->ID' value='" . attribute_escape($link) . "'>" . __('Post URL') . "</button>
+				<script type='text/javascript'>
+				jQuery('button.url-$post->ID').bind('click', function(){jQuery(this).siblings('input').val(this.value);});
+				</script>\n",
 			'helps'      => __('Enter a link URL or click above for presets.'),
 		),
     	'menu_order'   => array(
@@ -1000,7 +935,6 @@ jQuery(function($){
 	<p>
 	<input type="file" name="async-upload" id="async-upload" /> <input type="submit" class="button" name="html-upload" value="<?php echo attribute_escape(__('Upload')); ?>" /> <a href="#" onclick="return top.tb_remove();"><?php _e('Cancel'); ?></a>
 	</p>
-
 	<br class="clear" />
 	<?php if ( is_lighttpd_before_150() ): ?>
 	<p><?php _e('If you want to use all capabilities of the uploader, like uploading multiple files at once, please upgrade to lighttpd 1.5.'); ?></p>
@@ -1192,7 +1126,7 @@ function media_upload_library_form($errors) {
 
 	$form_action_url = admin_url("media-upload.php?type={$GLOBALS['type']}&tab=library&post_id=$post_id");
 
-	$_GET['paged'] = isset( $_GET['paged'] ) ? intval($_GET['paged']) : 0;
+	$_GET['paged'] = intval($_GET['paged']);
 	if ( $_GET['paged'] < 1 )
 		$_GET['paged'] = 1;
 	$start = ( $_GET['paged'] - 1 ) * 10;
@@ -1210,11 +1144,11 @@ function media_upload_library_form($errors) {
 <input type="hidden" name="post_id" value="<?php echo (int) $post_id; ?>" />
 <input type="hidden" name="post_mime_type" value="<?php echo attribute_escape( $_GET['post_mime_type'] ); ?>" />
 
-<p id="media-search" class="search-box">
-	<label class="hidden" for="media-search-input"><?php _e('Search Media');?>:</label>
-	<input type="text" id="media-search-input" class="search-input" name="s" value="<?php the_search_query(); ?>" />
+<div id="search-filter">
+	<label class="hidden" for="post-search-input"><?php _e('Search Media');?>:</label>
+	<input type="text" id="post-search-input" name="s" value="<?php the_search_query(); ?>" />
 	<input type="submit" value="<?php echo attribute_escape( __( 'Search Media' ) ); ?>" class="button" />
-</p>
+</div>
 
 <ul class="subsubsub">
 <?php
@@ -1339,10 +1273,6 @@ function type_form_image() {
 		$alt_help = __('Also used as alternate text for the image');
 	}
 
-	$default_align = get_option('image_default_align');
-	if ( empty($default_align) )
-		$default_align = 'none';
-		
 	return '
 	<table class="describe"><tbody>
 		<tr>
@@ -1372,13 +1302,13 @@ function type_form_image() {
 		<tr class="align">
 			<th valign="top" scope="row" class="label"><p><label for="align">' . __('Alignment') . '</label></p></th>
 			<td class="field">
-				<input name="align" id="align-none" value="alignnone" onclick="addExtImage.align=this.value" type="radio"' . ($default_align == 'none' ? ' checked="checked"' : '').' />
+				<input name="align" id="align-none" value="alignnone" onclick="addExtImage.align=this.value" type="radio" checked="checked" />
 				<label for="align-none" class="align image-align-none-label">' . __('None') . '</label>
-				<input name="align" id="align-left" value="alignleft" onclick="addExtImage.align=this.value" type="radio"' . ($default_align == 'left' ? ' checked="checked"' : '').' />
+				<input name="align" id="align-left" value="alignleft" onclick="addExtImage.align=this.value" type="radio" />
 				<label for="align-left" class="align image-align-left-label">' . __('Left') . '</label>
-				<input name="align" id="align-center" value="aligncenter" onclick="addExtImage.align=this.value" type="radio"' . ($default_align == 'center' ? ' checked="checked"' : '').' />
+				<input name="align" id="align-center" value="aligncenter" onclick="addExtImage.align=this.value" type="radio" />
 				<label for="align-center" class="align image-align-center-label">' . __('Center') . '</label>
-				<input name="align" id="align-right" value="alignright" onclick="addExtImage.align=this.value" type="radio"' . ($default_align == 'right' ? ' checked="checked"' : '').' />
+				<input name="align" id="align-right" value="alignright" onclick="addExtImage.align=this.value" type="radio" />
 				<label for="align-right" class="align image-align-right-label">' . __('Right') . '</label>
 			</td>
 		</tr>

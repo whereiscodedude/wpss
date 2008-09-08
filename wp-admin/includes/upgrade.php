@@ -141,9 +141,6 @@ function wp_upgrade() {
 	if ( $wp_db_version == $wp_current_db_version )
 		return;
 
-	if(!is_blog_installed())
-		return;
-
 	wp_check_mysql_version();
 	wp_cache_flush();
 	make_db_current_silent();
@@ -209,9 +206,6 @@ function upgrade_all() {
 
 	if ( $wp_current_db_version < 8201 )
 		upgrade_260();
-
-	if ( $wp_current_db_version < 8539 )
-		upgrade_270();
 
 	maybe_disable_automattic_widgets();
 
@@ -574,7 +568,7 @@ function upgrade_230() {
 			}
 		}
 
-		$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->terms (term_id, name, slug, term_group) VALUES
+		$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->terms (term_id, name, slug, term_group) VALUES 
 		(%d, %s, %s, %d)", $term_id, $name, $slug, $term_group) );
 
 		$count = 0;
@@ -735,7 +729,7 @@ function upgrade_250() {
 	if ( $wp_current_db_version < 6689 ) {
 		populate_roles_250();
 	}
-
+	
 }
 
 function upgrade_251() {
@@ -760,12 +754,6 @@ function upgrade_260() {
 		update_option('enable_xmlrpc', 1);
 	}
 }
-
-function upgrade_270() {
-	if ( $wp_current_db_version < 8530 )
-		populate_roles_270();
-}
-
 
 // The functions we use to actually do stuff
 

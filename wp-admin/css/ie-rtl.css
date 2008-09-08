@@ -57,7 +57,7 @@ ul.view-switch li {
 form#posts-filter {
 	position:static;
 }
-.search-box {
+#post-search {
 	display:none;
 }
 #submenu {

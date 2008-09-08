@@ -332,19 +332,19 @@ class wpdb {
 
 		$this->ready = true;
 
-		if ( $this->has_cap( 'collation' ) ) {
+		if ( $this->supports_collation() ) {
 			$collation_query = '';
 			if ( !empty($this->charset) ) {
 				$collation_query = "SET NAMES '{$this->charset}'";
 				if (!empty($this->collate) )
 					$collation_query .= " COLLATE '{$this->collate}'";
 			}
-
+			
 			if ( !empty($collation_query) )
 				$this->query($collation_query);
-
+			
 		}
-
+		
 		$this->select($dbname);
 	}
 
@@ -378,7 +378,7 @@ class wpdb {
 		$old_prefix = $this->prefix;
 		$this->prefix = $prefix;
 
-		foreach ( (array) $this->tables as $table )
+		foreach ( $this->tables as $table )
 			$this->$table = $this->prefix . $table;
 
 		if ( defined('CUSTOM_USER_TABLE') )
@@ -677,7 +677,7 @@ class wpdb {
 	function update($table, $data, $where){
 		$data = add_magic_quotes($data);
 		$bits = $wheres = array();
-		foreach ( (array) array_keys($data) as $k )
+		foreach ( array_keys($data) as $k )
 			$bits[] = "`$k` = '$data[$k]'";
 
 		if ( is_array( $where ) )
@@ -685,7 +685,7 @@ class wpdb {
 				$wheres[] = "$c = '" . $this->escape( $v ) . "'";
 		else
 			return false;
-
+			
 		return $this->query( "UPDATE $table SET " . implode( ', ', $bits ) . ' WHERE ' . implode( ' AND ', $wheres ) );
 	}
 
@@ -805,7 +805,7 @@ class wpdb {
 			// Return an integer-keyed array of...
 			if ( $this->last_result ) {
 				$i = 0;
-				foreach( (array) $this->last_result as $row ) {
+				foreach( $this->last_result as $row ) {
 					if ( $output == ARRAY_N ) {
 						// ...integer-keyed row arrays
 						$new_array[$i] = array_values( get_object_vars( $row ) );
@@ -833,7 +833,7 @@ class wpdb {
 		if ( $this->col_info ) {
 			if ( $col_offset == -1 ) {
 				$i = 0;
-				foreach( (array) $this->col_info as $col ) {
+				foreach($this->col_info as $col ) {
 					$new_array[$i] = $col->{$info_type};
 					$i++;
 				}
@@ -904,7 +904,8 @@ class wpdb {
 	{
 		global $wp_version;
 		// Make sure the server has MySQL 4.0
-		if ( version_compare($this->db_version(), '4.0.0', '<') )
+		$mysql_version = preg_replace('|[^0-9\.]|', '', @mysql_get_server_info($this->dbh));
+		if ( version_compare($mysql_version, '4.0.0', '<') )
 			return new WP_Error('database_version',sprintf(__('<strong>ERROR</strong>: WordPress %s requires MySQL 4.0.0 or higher'), $wp_version));
 	}
 
@@ -919,27 +920,7 @@ class wpdb {
 	 */
 	function supports_collation()
 	{
-		return $this->has_cap( 'collation' );
-	}
-
-	/**
-	 * Generic function to determine if a database supports a particular feature
-	 * @param string $db_cap the feature
-	 * @param false|string|resource $dbh_or_table the databaese (the current database, the database housing the specified table, or the database of the mysql resource)
-	 * @return bool
-	 */
-	function has_cap( $db_cap ) {
-		$version = $this->db_version();
-
-		switch ( strtolower( $db_cap ) ) :
-		case 'collation' :    // @since 2.5.0
-		case 'group_concat' : // @since 2.7
-		case 'subqueries' :   // @since 2.7
-			return version_compare($version, '4.1', '>=');
-			break;
-		endswitch;
-
-		return false;
+		return ( version_compare(mysql_get_server_info($this->dbh), '4.1.0', '>=') );
 	}
 
 	/**
@@ -960,7 +941,7 @@ class wpdb {
 		$bt = debug_backtrace();
 		$caller = '';
 
-		foreach ( (array) $bt as $trace ) {
+		foreach ( $bt as $trace ) {
 			if ( @$trace['class'] == __CLASS__ )
 				continue;
 			elseif ( strtolower(@$trace['function']) == 'call_user_func_array' )
@@ -976,13 +957,6 @@ class wpdb {
 		return $caller;
 	}
 
-	/**
-	 * The database version number
-	 * @return false|string false on failure, version number on success
-	 */
-	function db_version() {
-		return preg_replace('/[^0-9.].*/', '', mysql_get_server_info( $this->dbh ));
-	}
 }
 
 if ( ! isset($wpdb) ) {

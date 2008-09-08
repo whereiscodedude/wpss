@@ -1,12 +1,4 @@
 <?php
-/**
- * Miscellaneous settings administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 $title = __('Miscellaneous Settings');
@@ -19,8 +11,7 @@ include('admin-header.php');
 <div class="wrap">
 <h2><?php _e('Miscellaneous Settings') ?></h2>
 <form method="post" action="options.php">
-<input type='hidden' name='option_page' value='misc' />
-<?php wp_nonce_field('misc-options') ?>
+<?php wp_nonce_field('update-options') ?>
 <h3><?php _e('Uploading'); ?></h3>
 <table class="form-table">
 <tr valign="top">
@@ -40,7 +31,7 @@ include('admin-header.php');
 <tr>
 <th scope="row" colspan="2" class="th-full">
 <label for="uploads_use_yearmonth_folders">
-<input name="uploads_use_yearmonth_folders" type="checkbox" id="uploads_use_yearmonth_folders" value="1"<?php checked('1', get_option('uploads_use_yearmonth_folders')); ?> />
+<input name="uploads_use_yearmonth_folders" type="checkbox" id="uploads_use_yearmonth_folders" value="1" <?php checked('1', get_option('uploads_use_yearmonth_folders')); ?> />
 <?php _e('Organize my uploads into month- and year-based folders'); ?>
 </label>
 </th>
@@ -71,66 +62,6 @@ include('admin-header.php');
 <input name="medium_size_h" type="text" id="medium_size_h" value="<?php form_option('medium_size_h'); ?>" size="6" />
 </fieldset></td>
 </tr>
-<tr valign="top">
-<th scope="row"><?php _e('Large size') ?></th>
-<td><fieldset><legend class="hidden"><?php _e('Large size') ?></legend>
-<label for="large_size_w"><?php _e('Max Width'); ?></label>
-<input name="large_size_w" type="text" id="large_size_w" value="<?php form_option('large_size_w'); ?>" size="6" />
-<label for="large_size_h"><?php _e('Max Height'); ?></label>
-<input name="large_size_h" type="text" id="large_size_h" value="<?php form_option('large_size_h'); ?>" size="6" />
-</fieldset></td>
-</tr>
-
-<tr valign="top">
-<th scope="row"><?php _e('Default image size') ?></th>
-<td><fieldset><legend class="hidden"><?php _e('Default image size') ?></legend>
-<?php
-	$size_names = array('' => 'Auto', 'thumbnail' => 'Thumbnail', 'medium' => 'Medium', 'large' => 'Large', 'full' => 'Full size');
-	foreach ($size_names as $size => $name) { ?>
-		<input type="radio" name="image_default_size" id="image_default_size_<?php echo $size; ?>" value="<?php echo $size; ?>"<?php checked(get_option('image_default_size'), $size); ?> />			
-		<label for="image_default_size_<?php echo $size; ?>"><?php _e($name); ?></label>
-	<?php
-	}
-
-?>
-</fieldset></td>
-</tr>
-
-<tr valign="top">
-<th scope="row"><?php _e('Default image alignment') ?></th>
-<td><fieldset><legend class="hidden"><?php _e('Default image alignment') ?></legend>
-<?php
-	$alignments = array('none' => 'None', 'left' => 'Left', 'center' => 'Center', 'right' => 'Right');
-
-	$default_align = get_option('image_default_align');
-	if ( empty($default_align) )
-		$default_align = 'none';
-
-	foreach ($alignments as $align => $name) { ?>
-		<input type="radio" name="image_default_align" id="image_default_align_<?php echo $align; ?>" value="<?php echo $align; ?>"<?php checked($default_align, $align); ?> />
-		<label for="image_default_align_<?php echo $align; ?>"><?php _e($name); ?></label>
-	<?php
-	}
-
-?>
-</fieldset></td>
-</tr>
-
-<tr valign="top">
-<th scope="row"><?php _e('Default image links') ?></th>
-<td><fieldset><legend class="hidden"><?php _e('Default image links') ?></legend>
-<?php
-	$link_types = array('' => 'None', 'post' => 'Post URL', 'file' => 'File');
-	foreach ($link_types as $type => $name) { ?>
-		<input type="radio" name="image_default_link_type" id="image_default_link_type_<?php echo $type; ?>" value="<?php echo $type; ?>"<?php checked(get_option('image_default_link_type'), $type); ?> />			
-		<label for="image_default_link_type_<?php echo $type; ?>"><?php _e($name); ?></label>
-	<?php
-	}
-
-?>
-</fieldset></td>
-</tr>
-
 </table>
 
 
@@ -140,7 +71,7 @@ include('admin-header.php');
 <tr>
 <th scope="row" class="th-full">
 <label for="use_linksupdate">
-<input name="use_linksupdate" type="checkbox" id="use_linksupdate" value="1"<?php checked('1', get_option('use_linksupdate')); ?> />
+<input name="use_linksupdate" type="checkbox" id="use_linksupdate" value="1" <?php checked('1', get_option('use_linksupdate')); ?> />
 <?php _e('Track Links&#8217; Update Times') ?>
 </label>
 </th>
@@ -149,7 +80,7 @@ include('admin-header.php');
 
 <th scope="row" class="th-full">
 <label for="hack_file">
-<input type="checkbox" id="hack_file" name="hack_file" value="1"<?php checked('1', get_option('hack_file')); ?> />
+<input type="checkbox" id="hack_file" name="hack_file" value="1" <?php checked('1', get_option('hack_file')); ?> />
 <?php _e('Use legacy <code>my-hacks.php</code> file support') ?>
 </label>
 </th>
@@ -159,6 +90,7 @@ include('admin-header.php');
 
 <p class="submit">
 <input type="hidden" name="action" value="update" />
+<input type="hidden" name="page_options" value="hack_file,use_linksupdate,uploads_use_yearmonth_folders,upload_path,upload_url_path,thumbnail_size_w,thumbnail_size_h,thumbnail_crop,medium_size_w,medium_size_h" />
 <input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" class="button" />
 </p>
 </form>

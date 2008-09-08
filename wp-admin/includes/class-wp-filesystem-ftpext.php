@@ -1,20 +1,5 @@
 <?php
-/**
- * WordPress FTP Filesystem.
- *
- * @package WordPress
- * @subpackage Filesystem
- */
-
-/**
- * WordPress Filesystem Class for implementing FTP.
- *
- * @since 2.5
- * @package WordPress
- * @subpackage Filesystem
- * @uses WP_Filesystem_Base Extends class
- */
-class WP_Filesystem_FTPext extends WP_Filesystem_Base {
+class WP_Filesystem_FTPext extends WP_Filesystem_Base{
 	var $link;
 	var $timeout = 5;
 	var $errors = array();
@@ -72,11 +57,7 @@ class WP_Filesystem_FTPext extends WP_Filesystem_Base {
 		else
 			$this->options['password'] = $opt['password'];
 
-		$this->options['ssl'] = false;
-		if ( isset($opt['ssl']) )
-			$this->options['ssl'] = ( !empty($opt['ssl']) );
-		elseif ( isset( $opt['connection_type']) )
-			$this->options['ssl'] = ( 'ftps' == $opt['connection_type'] );
+		$this->options['ssl'] = ( !empty($opt['ssl']) );
 	}
 
 	function connect() {
@@ -101,7 +82,7 @@ class WP_Filesystem_FTPext extends WP_Filesystem_Base {
 	function setDefaultPermissions($perm) {
 		$this->permission = $perm;
 	}
-
+	
 	function get_contents($file, $type = '', $resumepos = 0 ){
 		if( empty($type) ){
 			$extension = substr(strrchr($file, "."), 1);
@@ -138,7 +119,7 @@ class WP_Filesystem_FTPext extends WP_Filesystem_Base {
 		return $ret;
 	}
 	function cwd() {
-		$cwd = @ftp_pwd($this->link);
+		$cwd = ftp_pwd($this->link);
 		if( $cwd )
 			$cwd = trailingslashit($cwd);
 		return $cwd;

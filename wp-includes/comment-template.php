@@ -219,70 +219,6 @@ function comment_author_url_link( $linktext = '', $before = '', $after = '' ) {
 }
 
 /**
- * Generates semantic classes for each comment element
- *
- * @since 2.7
- *
- * @param string|array $class One or more classes to add to the class list
- * @param int $comment_id An optional comment ID
- * @param int $post_id An optional post ID
- */
-function comment_class( $class = '', $comment_id = null, $post_id = null ) {
-	// Separates classes with a single space, collates classes for post DIV
-	echo 'class="' . join( ' ', get_comment_class( $class, $comment_id, $post_id ) ) . '"';
-}
-
-/**
- * Returns the classes for the comment div as an array
- *
- * @since 2.7
- *
- * @param string|array $class One or more classes to add to the class list
- * @param int $comment_id An optional comment ID
- * @param int $post_id An optional post ID
- * @return array Array of classes
- */
-function get_comment_class( $class = '', $comment_id = null, $post_id = null ) {
-	static $comment_alt;
-
-	$comment = get_comment($comment_id);
-
-	$classes = array();
-
-	// Get the comment type (comment, trackback),
-	$classes[] = $comment->comment_type;
-
-	// If the comment author has an id (registered), then print the log in name
-	if ( $comment->user_id > 0 && $user = get_userdata($comment->user_id) ) {
-		// For all registered users, 'byuser'
-		$classes[] = 'byuser comment-author-' . $user->user_nicename;
-		// For comment authors who are the author of the post
-		if ( $post = get_post($post_id) ) {
-			if ( $comment->user_id === $post->post_author )
-				$classes[] = 'bypostauthor';
-		}
-	}
-
-	if ( empty($comment_alt) )
-		$comment_alt = 0;
-
-	if ( $comment_alt % 2 )
-		$classes[] = 'odd';
-	else
-		$classes[] = 'even';
-
-	$comment_alt++;
-
-	if ( !empty($class) ) {
-		if ( !is_array( $class ) )
-			$class = preg_split('#\s+#', $class);
-		$classes = array_merge($classes, $class);
-	}
-
-	return apply_filters('comment_class', $classes, $class, $comment_id, $post_id);
-}
-
-/**
  * Retrieve the comment date of the current comment.
  *
  * @since 1.5
@@ -384,11 +320,10 @@ function comment_ID() {
  * @since 1.5
  * @uses $comment
  *
- * @param object|string|int $comment Comment to retrieve.
  * @return string The permalink to the current comment
  */
-function get_comment_link($comment = null) {
-	$comment = get_comment($comment);
+function get_comment_link() {
+	global $comment;
 	return get_permalink( $comment->comment_post_ID ) . '#comment-' . $comment->comment_ID;
 }
 
@@ -729,14 +664,11 @@ function comments_template( $file = '/comments.php' ) {
 	update_comment_cache($comments);
 
 	define('COMMENTS_TEMPLATE', true);
-
-	$include = apply_filters('comments_template', STYLESHEETPATH . $file );
+	$include = apply_filters('comments_template', TEMPLATEPATH . $file );
 	if ( file_exists( $include ) )
 		require( $include );
-	elseif ( file_exists( TEMPLATEPATH . $file ) )
-		require( TEMPLATEPATH .  $file );
 	else
-		require( get_theme_root() . '/default/comments.php');
+		require( WP_CONTENT_DIR . '/themes/default/comments.php');
 }
 
 /**
@@ -802,9 +734,11 @@ function comments_popup_link( $zero = 'No Comments', $one = '1 Comment', $more =
 		return;
 	}
 
-	if ( post_password_required() ) {
-		echo __('Enter your password to view comments');
-		return;
+	if ( !empty($post->post_password) ) { // if there's a password
+		if ( !isset($_COOKIE['wp-postpass_' . COOKIEHASH]) || $_COOKIE['wp-postpass_' . COOKIEHASH] != $post->post_password ) {  // and it doesn't match the cookie
+			echo __('Enter your password to view comments');
+			return;
+		}
 	}
 
 	echo '<a href="';

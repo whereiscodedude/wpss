@@ -1,15 +1,6 @@
 <?php
-/**
- * Widgets administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
 
-/** WordPress Administration Bootstrap */
 require_once( 'admin.php' );
-
-/** WordPress Administration Widgets API */
 require_once(ABSPATH . 'wp-admin/includes/widgets.php');
 
 if ( ! current_user_can('switch_themes') )
@@ -39,7 +30,7 @@ if ( isset($_GET['sidebar']) && isset($wp_registered_sidebars[$_GET['sidebar']])
 	</div>
 
 	<div class="wrap">
-		<p><?php _e( 'You are seeing this message because the theme you are currently using isn&#8217;t widget-aware, meaning that it has no sidebars that you are able to change. For information on making your theme widget-aware, please <a href="http://codex.wordpress.org/Widgetizing_Themes">follow these instructions</a>.' ); ?></p>
+		<p><?php _e( 'You are seeing this message because the theme you are currently using isn&#8217;t widget-aware, meaning that it has no sidebars that you are able to change. For information on making your theme widget-aware, please <a href="http://automattic.com/code/widgets/themes/">follow these instructions</a>.' ); /* TODO: article on codex */; ?></p>
 	</div>
 
 <?php
@@ -141,7 +132,7 @@ if ( isset($_GET['add']) && $_GET['add'] ) {
 		<h2><?php _e( 'Add Widget' ); ?></h2>
 		<br />
 		<form action="<?php echo clean_url( remove_query_arg( $query_args ) ); ?>" method="post">
-
+		
 			<ul class="widget-control-list">
 				<li class="widget-list-control-item">
 					<div class="widget-top">
@@ -243,9 +234,9 @@ if ( isset($_GET['message']) && isset($messages[$_GET['message']]) ) : ?>
 	<form id="widgets-filter" action="" method="get">
 
 	<h2><?php _e( 'Widgets' ); ?></h2>
-	<p id="widget-search" class="search-box">
-		<label class="hidden" for="widget-search-input"><?php _e( 'Search Widgets' ); ?></label>
-		<input type="text" id="widget-search-input" class="search-input" name="s" value="<?php echo attribute_escape( $widget_search ); ?>" />
+	<p id="widget-search">
+		<label class="hidden" for="widget-search-input"><?php _e( 'Search Widgets' ); ?>:</label>
+		<input type="text" id="widget-search-input" name="s" value="<?php echo attribute_escape( $widget_search ); ?>" />
 		<input type="submit" class="button" value="<?php _e( 'Search Widgets' ); ?>" />
 	</p>
 

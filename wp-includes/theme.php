@@ -1,80 +1,30 @@
 <?php
-/**
- * Theme, template, and stylesheet functions.
- *
- * @package WordPress
- * @subpackage Template
+/*
+ * Theme/template/stylesheet functions.
  */
 
-/**
- * Get current theme name.
- *
- * The theme name that the administrator has currently set the frontend theme
- * as.
- *
- * @since 1.5.0
- * @uses apply_filters() Calls 'stylesheet' filter
- *
- * @return string 
- */
 function get_stylesheet() {
 	return apply_filters('stylesheet', get_option('stylesheet'));
 }
 
-/**
- * get_stylesheet_directory() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_stylesheet_directory() {
 	$stylesheet = get_stylesheet();
 	$stylesheet_dir = get_theme_root() . "/$stylesheet";
 	return apply_filters('stylesheet_directory', $stylesheet_dir, $stylesheet);
 }
 
-/**
- * get_stylesheet_directory_uri() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_stylesheet_directory_uri() {
 	$stylesheet = get_stylesheet();
 	$stylesheet_dir_uri = get_theme_root_uri() . "/$stylesheet";
 	return apply_filters('stylesheet_directory_uri', $stylesheet_dir_uri, $stylesheet);
 }
 
-/**
- * get_stylesheet_uri() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_stylesheet_uri() {
 	$stylesheet_dir_uri = get_stylesheet_directory_uri();
 	$stylesheet_uri = $stylesheet_dir_uri . "/style.css";
 	return apply_filters('stylesheet_uri', $stylesheet_uri, $stylesheet_dir_uri);
 }
 
-/**
- * get_locale_stylesheet_uri() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- *
- * @return unknown
- */
 function get_locale_stylesheet_uri() {
 	global $wp_locale;
 	$stylesheet_dir_uri = get_stylesheet_directory_uri();
@@ -89,59 +39,22 @@ function get_locale_stylesheet_uri() {
 	return apply_filters('locale_stylesheet_uri', $stylesheet_uri, $stylesheet_dir_uri);
 }
 
-/**
- * get_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_template() {
 	return apply_filters('template', get_option('template'));
 }
 
-/**
- * get_template_directory() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_template_directory() {
 	$template = get_template();
 	$template_dir = get_theme_root() . "/$template";
 	return apply_filters('template_directory', $template_dir, $template);
 }
 
-/**
- * get_template_directory_uri() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_template_directory_uri() {
 	$template = get_template();
 	$template_dir_uri = get_theme_root_uri() . "/$template";
 	return apply_filters('template_directory_uri', $template_dir_uri, $template);
 }
 
-/**
- * get_theme_data() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @param unknown_type $theme_file
- * @return unknown
- */
 function get_theme_data( $theme_file ) {
 	$themes_allowed_tags = array(
 		'a' => array(
@@ -206,15 +119,6 @@ function get_theme_data( $theme_file ) {
 	return array( 'Name' => $name, 'Title' => $theme, 'URI' => $theme_uri, 'Description' => $description, 'Author' => $author, 'Version' => $version, 'Template' => $template, 'Status' => $status, 'Tags' => $tags );
 }
 
-/**
- * get_themes() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_themes() {
 	global $wp_themes, $wp_broken_themes;
 
@@ -328,20 +232,15 @@ function get_themes() {
 		}
 
 		$stylesheet_files = array();
-		$template_files = array();
-
 		$stylesheet_dir = @ dir("$theme_root/$stylesheet");
 		if ( $stylesheet_dir ) {
 			while ( ($file = $stylesheet_dir->read()) !== false ) {
-				if ( !preg_match('|^\.+$|', $file) ) {
-					if ( preg_match('|\.css$|', $file) )
-						$stylesheet_files[] = "$theme_loc/$stylesheet/$file";
-					elseif ( preg_match('|\.php$|', $file) )
-						$template_files[] = "$theme_loc/$stylesheet/$file";
-				}
+				if ( !preg_match('|^\.+$|', $file) && preg_match('|\.css$|', $file) )
+					$stylesheet_files[] = "$theme_loc/$stylesheet/$file";
 			}
 		}
 
+		$template_files = array();
 		$template_dir = @ dir("$theme_root/$template");
 		if ( $template_dir ) {
 			while(($file = $template_dir->read()) !== false) {
@@ -399,16 +298,6 @@ function get_themes() {
 	return $themes;
 }
 
-/**
- * get_theme() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @param unknown_type $theme
- * @return unknown
- */
 function get_theme($theme) {
 	$themes = get_themes();
 
@@ -418,15 +307,6 @@ function get_theme($theme) {
 	return NULL;
 }
 
-/**
- * get_current_theme() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_current_theme() {
 	if ( $theme = get_option('current_theme') )
 		return $theme;
@@ -452,136 +332,66 @@ function get_current_theme() {
 	return $current_theme;
 }
 
-/**
- * get_theme_root() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_theme_root() {
 	return apply_filters('theme_root', WP_CONTENT_DIR . "/themes");
 }
 
-/**
- * get_theme_root_uri() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_theme_root_uri() {
 	return apply_filters('theme_root_uri', content_url('themes'), get_option('siteurl'));
 }
 
-/**
- * get_query_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @param unknown_type $type
- * @return unknown
- */
 function get_query_template($type) {
+	$template = '';
 	$type = preg_replace( '|[^a-z0-9-]+|', '', $type );
-	return apply_filters("{$type}_template", locate_template(array("{$type}.php")));
+	if ( file_exists(TEMPLATEPATH . "/{$type}.php") )
+		$template = TEMPLATEPATH . "/{$type}.php";
+
+	return apply_filters("{$type}_template", $template);
 }
 
-/**
- * get_404_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_404_template() {
 	return get_query_template('404');
 }
 
-/**
- * get_archive_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_archive_template() {
 	return get_query_template('archive');
 }
 
-/**
- * get_author_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_author_template() {
 	return get_query_template('author');
 }
 
-/**
- * get_category_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_category_template() {
-	$template =locate_template(array("category-" . absint( get_query_var('cat') ) . '.php',"category.php"));
+	$template = '';
+	if ( file_exists(TEMPLATEPATH . "/category-" . absint( get_query_var('cat') ) . '.php') )
+		$template = TEMPLATEPATH . "/category-" . absint( get_query_var('cat') ) . '.php';
+	elseif ( file_exists(TEMPLATEPATH . "/category.php") )
+		$template = TEMPLATEPATH . "/category.php";
+
 	return apply_filters('category_template', $template);
 }
 
-/**
- * get_tag_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.3.0
- *
- * @return unknown
- */
 function get_tag_template() {
-	$template = locate_template(array("tag-" . absint( get_query_var('tag') ) . '.php',"tag.php"));
+	$template = '';
+	if ( file_exists(TEMPLATEPATH . "/tag-" . get_query_var('tag') . '.php') )
+		$template = TEMPLATEPATH . "/tag-" . get_query_var('tag') . '.php';
+	elseif ( file_exists(TEMPLATEPATH . "/tag.php") )
+		$template = TEMPLATEPATH . "/tag.php";
+
 	return apply_filters('tag_template', $template);
 }
 
-/**
- * get_date_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_taxonomy_template() {
+	$template = '';
 	$taxonomy = get_query_var('taxonomy');
 	$term = get_query_var('term');
+	if ( $taxonomy && $term && file_exists(TEMPLATEPATH . "/taxonomy-$taxonomy-$term.php") )
+		$template = TEMPLATEPATH . "/taxonomy-$taxonomy-$term.php";
+	elseif ( $taxonomy && file_exists(TEMPLATEPATH . "/taxonomy-$taxonomy.php") )
+		$template = TEMPLATEPATH . "/taxonomy-$taxonomy.php";
+	elseif ( file_exists(TEMPLATEPATH . "/taxonomy.php") )
+		$template = TEMPLATEPATH . "/taxonomy.php";
 
-	$templates = array();
-	if ( $taxonomy && $term )
-		$templates[] = "taxonomy-$taxonomy-$term.php";
-	if ( $taxonomy )
-		$templates[] = "taxonomy-$taxonomy.php";
-	
-	$templates[] = "taxonomy.php";
-
-	$template = locate_template($templates);
 	return apply_filters('taxonomy_template', $template);
 }
 
@@ -589,29 +399,17 @@ function get_date_template() {
 	return get_query_template('date');
 }
 
-/**
- * get_home_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_home_template() {
-	$template = locate_template(array('home.php','index.php'));
+	$template = '';
+
+	if ( file_exists(TEMPLATEPATH . "/home.php") )
+		$template = TEMPLATEPATH . "/home.php";
+	elseif ( file_exists(TEMPLATEPATH . "/index.php") )
+		$template = TEMPLATEPATH . "/index.php";
+
 	return apply_filters('home_template', $template);
 }
 
-/**
- * get_page_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_page_template() {
 	global $wp_query;
 
@@ -621,63 +419,28 @@ function get_page_template() {
 	if ( 'default' == $template )
 		$template = '';
 
-	$templates = array();
-	if ( !empty($template) && !validate_file($template) )
-		$templates[] = $template;
-	
-	$templates[] = "page.php";
+	if ( !empty($template) && !validate_file($template) && file_exists(TEMPLATEPATH . "/$template") )
+		$template = TEMPLATEPATH . "/$template";
+	elseif ( file_exists(TEMPLATEPATH . "/page.php") )
+		$template = TEMPLATEPATH . "/page.php";
+	else
+		$template = '';
 
-	return apply_filters('page_template', locate_template($templates));
+	return apply_filters('page_template', $template);
 }
 
-/**
- * get_paged_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_paged_template() {
 	return get_query_template('paged');
 }
 
-/**
- * get_search_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_search_template() {
 	return get_query_template('search');
 }
 
-/**
- * get_single_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_single_template() {
 	return get_query_template('single');
 }
 
-/**
- * get_attachment_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.0.0
- *
- * @return unknown
- */
 function get_attachment_template() {
 	global $posts;
 	$type = explode('/', $posts[0]->post_mime_type);
@@ -691,64 +454,15 @@ function get_attachment_template() {
 		return get_query_template('attachment');
 }
 
-/**
- * get_comments_popup_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function get_comments_popup_template() {
-	$template = locate_template(array("comments-popup.php"));
-	if ('' == $template)
+	if ( file_exists( TEMPLATEPATH . '/comments-popup.php') )
+		$template = TEMPLATEPATH . '/comments-popup.php';
+	else
 		$template = get_theme_root() . '/default/comments-popup.php';
 
 	return apply_filters('comments_popup_template', $template);
 }
 
-/**
- * Returns the name of the highest priority template file that exists
- * 
- * Searches in the STYLESHEETPATH before TEMPLATEPATH so that themes which
- * inherit from a parent theme can just overload one file.
- * @since 2.7
- *
- * @param array $template_names Array of template files to search for in priority order
- * @param bool $load If true the template file will be loaded if it is found.
- * @return string The template filename if one is located.
- */
-function locate_template($template_names, $load = false) {
-	if (!is_array($template_names))
-		return '';
-	
-	$located = '';
-	foreach($template_names as $template_name) {
-		if ( file_exists(STYLESHEETPATH . '/' . $template_name)) {
-			$located = STYLESHEETPATH . '/' . $template_name;
-			break;
-		} else if ( file_exists(TEMPLATEPATH . '/' . $template_name) ) {
-			$located = TEMPLATEPATH . '/' . $template_name;
-			break;
-		}
-	}
-	
-	if ($load && '' != $located)
-		load_template($located);
-	
-	return $located;
-}
-
-/**
- * load_template() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @param unknown_type $_template_file
- */
 function load_template($_template_file) {
 	global $posts, $post, $wp_did_header, $wp_did_template_redirect, $wp_query, $wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment, $user_ID;
 
@@ -758,13 +472,6 @@ function load_template($_template_file) {
 	require_once($_template_file);
 }
 
-/**
- * locale_stylesheet() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- */
 function locale_stylesheet() {
 	$stylesheet = get_locale_stylesheet_uri();
 	if ( empty($stylesheet) )
@@ -772,16 +479,6 @@ function locale_stylesheet() {
 	echo '<link rel="stylesheet" href="' . $stylesheet . '" type="text/css" media="screen" />';
 }
 
-/**
- * switch_theme() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.5.0
- *
- * @param unknown_type $template
- * @param unknown_type $stylesheet
- */
 function preview_theme() {
 	if ( ! (isset($_GET['template']) && isset($_GET['preview'])) )
 		return;
@@ -789,18 +486,18 @@ function preview_theme() {
 	if ( !current_user_can( 'switch_themes' ) )
 		return;
 
-	$_GET['template'] = preg_replace('|[^a-z0-9_.-]|i', '', $_GET['template']);
+	$_GET[template] = preg_replace('|[^a-z0-9_.-]|i', '', $_GET[template]);
 
-	if ( validate_file($_GET['template']) )
+	if ( validate_file($_GET[template]) )
 		return;
 
-	add_filter('template', create_function('', "return '{$_GET['template']}';") );
+	add_filter('template', create_function('', "return '$_GET[template]';") );
 
 	if ( isset($_GET['stylesheet']) ) {
-		$_GET['stylesheet'] = preg_replace('|[^a-z0-9_.-]|i', '', $_GET['stylesheet']);
-		if ( validate_file($_GET['stylesheet']) )
+		$_GET[stylesheet] = preg_replace('|[^a-z0-9_.-]|i', '', $_GET[stylesheet]);
+		if ( validate_file($_GET[stylesheet]) )
 			return;
-		add_filter('stylesheet', create_function('', "return '{$_GET['stylesheet']}';") );
+		add_filter('stylesheet', create_function('', "return '$_GET[stylesheet]';") );
 	}
 
 	ob_start( 'preview_theme_ob_filter' );
@@ -837,15 +534,6 @@ function switch_theme($template, $stylesheet) {
 	do_action('switch_theme', $theme);
 }
 
-/**
- * validate_current_theme() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 1.5.0
- *
- * @return unknown
- */
 function validate_current_theme() {
 	// Don't validate during an install/upgrade.
 	if ( defined('WP_INSTALLING') )
@@ -864,17 +552,6 @@ function validate_current_theme() {
 	return true;
 }
 
-/**
- * get_theme_mod() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- *
- * @param unknown_type $name
- * @param unknown_type $default
- * @return unknown
- */
 function get_theme_mod($name, $default = false) {
 	$theme = get_current_theme();
 
@@ -886,16 +563,6 @@ function get_theme_mod($name, $default = false) {
 	return apply_filters( "theme_mod_$name", sprintf($default, get_template_directory_uri(), get_stylesheet_directory_uri()) );
 }
 
-/**
- * set_theme_mod() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- *
- * @param unknown_type $name
- * @param unknown_type $value
- */
 function set_theme_mod($name, $value) {
 	$theme = get_current_theme();
 
@@ -907,16 +574,6 @@ function set_theme_mod($name, $value) {
 	wp_cache_delete("mods_$theme", 'options');
 }
 
-/**
- * remove_theme_mod() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- *
- * @param unknown_type $name
- * @return unknown
- */
 function remove_theme_mod( $name ) {
 	$theme = get_current_theme();
 
@@ -934,78 +591,28 @@ function remove_theme_mod( $name ) {
 	wp_cache_delete("mods_$theme", 'options');
 }
 
-/**
- * remove_theme_mods() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- */
 function remove_theme_mods() {
 	$theme = get_current_theme();
 
 	delete_option("mods_$theme");
 }
 
-/**
- * get_header_textcolor() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- *
- * @return unknown
- */
 function get_header_textcolor() {
 	return get_theme_mod('header_textcolor', HEADER_TEXTCOLOR);
 }
 
-/**
- * header_textcolor() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- *
- */
 function header_textcolor() {
 	echo get_header_textcolor();
 }
 
-/**
- * get_header_image() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- *
- * @return unknown
- */
 function get_header_image() {
 	return get_theme_mod('header_image', HEADER_IMAGE);
 }
 
-/**
- * header_image() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- */
 function header_image() {
 	echo get_header_image();
 }
 
-/**
- * add_custom_image_header() - {@internal Missing Short Description}}
- *
- * {@internal Missing Long Description}}
- *
- * @since 2.1.0
- *
- * @param unknown_type $header_callback
- * @param unknown_type $admin_header_callback
- */
 function add_custom_image_header($header_callback, $admin_header_callback) {
 	if ( ! empty($header_callback) )
 		add_action('wp_head', $header_callback);

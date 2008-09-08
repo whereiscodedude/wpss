@@ -1,4 +1,4 @@
-<?php if ( post_password_required() ) : ?>
+<?php if ( !empty($post->post_password) && $_COOKIE['wp-postpass_' . COOKIEHASH] != $post->post_password) : ?>
 <p><?php _e('Enter your password to view comments.'); ?></p>
 <?php return; endif; ?>
 
@@ -12,7 +12,7 @@
 <ol id="commentlist">
 
 <?php foreach ($comments as $comment) : ?>
-	<li <?php comment_class(); ?> id="comment-<?php comment_ID() ?>">
+	<li id="comment-<?php comment_ID() ?>">
 	<?php echo get_avatar( $comment, 32 ); ?>
 	<?php comment_text() ?>
 	<p><cite><?php comment_type(__('Comment'), __('Trackback'), __('Pingback')); ?> <?php _e('by'); ?> <?php comment_author_link() ?> &#8212; <?php comment_date() ?> @ <a href="#comment-<?php comment_ID() ?>"><?php comment_time() ?></a></cite> <?php edit_comment_link(__("Edit This"), ' |'); ?></p>

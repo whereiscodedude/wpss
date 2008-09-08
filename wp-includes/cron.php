@@ -1,24 +1,5 @@
 <?php
-/**
- * WordPress CRON API
- *
- * @package WordPress
- */
 
-/**
- * Schedules a hook to run only once.
- *
- * Schedules a hook which will be executed once by the Wordpress actions core at
- * a time which you specify. The action will fire off when someone visits your
- * WordPress site, if the schedule time has passed.
- *
- * @since 2.1.0
- * @link http://codex.wordpress.org/Function_Reference/wp_schedule_single_event
- *
- * @param int $timestamp Timestamp for when to run the event.
- * @param callback $hook Function or method to call, when cron is run.
- * @param array $args Optional. Arguments to pass to the hook function.
- */
 function wp_schedule_single_event( $timestamp, $hook, $args = array()) {
 	$crons = _get_cron_array();
 	$key = md5(serialize($args));
@@ -27,21 +8,6 @@ function wp_schedule_single_event( $timestamp, $hook, $args = array()) {
 	_set_cron_array( $crons );
 }
 
-/**
- * Schedule a periodic event.
- *
- * Schedules a hook which will be executed by the WordPress actions core on a
- * specific interval, specified by you. The action will trigger when someone
- * visits your WordPress site, if the scheduled time has passed.
- *
- * @since 2.1.0
- *
- * @param int $timestamp Timestamp for when to run the event.
- * @param string $recurrence How often the event should recur.
- * @param callback $hook Function or method to call, when cron is run.
- * @param array $args Optional. Arguments to pass to the hook function.
- * @return bool|null False on failure, null when complete with scheduling event.
- */
 function wp_schedule_event( $timestamp, $recurrence, $hook, $args = array()) {
 	$crons = _get_cron_array();
 	$schedules = wp_get_schedules();
@@ -53,17 +19,6 @@ function wp_schedule_event( $timestamp, $recurrence, $hook, $args = array()) {
 	_set_cron_array( $crons );
 }
 
-/**
- * Reschedule a recurring event.
- *
- * @since 2.1.0
- *
- * @param int $timestamp Timestamp for when to run the event.
- * @param string $recurrence How often the event should recur.
- * @param callback $hook Function or method to call, when cron is run.
- * @param array $args Optional. Arguments to pass to the hook function.
- * @return bool|null False on failure. Null when event is rescheduled.
- */
 function wp_reschedule_event( $timestamp, $recurrence, $hook, $args = array()) {
 	$crons = _get_cron_array();
 	$schedules = wp_get_schedules();
@@ -86,18 +41,6 @@ function wp_reschedule_event( $timestamp, $recurrence, $hook, $args = array()) {
 	wp_schedule_event( $timestamp, $recurrence, $hook, $args );
 }
 
-/**
- * Unschedule a previously scheduled cron job.
- *
- * The $timestamp and $hook parameters are required, so that the event can be
- * identified.
- *
- * @since 2.1.0
- *
- * @param int $timestamp Timestamp for when to run the event.
- * @param callback $hook Function or method to call, when cron is run.
- * @param array $args Optional. Arguments to pass to the hook function.
- */
 function wp_unschedule_event( $timestamp, $hook, $args = array() ) {
 	$crons = _get_cron_array();
 	$key = md5(serialize($args));
@@ -109,14 +52,6 @@ function wp_unschedule_event( $timestamp, $hook, $args = array() ) {
 	_set_cron_array( $crons );
 }
 
-/**
- * Unschedule all cron jobs attached to a specific hook.
- *
- * @since 2.1.0
- *
- * @param callback $hook Function or method to call, when cron is run.
- * @param mixed $args,... Optional. Event arguments.
- */
 function wp_clear_scheduled_hook( $hook ) {
 	$args = array_slice( func_get_args(), 1 );
 
@@ -124,15 +59,6 @@ function wp_clear_scheduled_hook( $hook ) {
 		wp_unschedule_event( $timestamp, $hook, $args );
 }
 
-/**
- * Retrieve the next timestamp for a cron event.
- *
- * @since 2.1.0
- *
- * @param callback $hook Function or method to call, when cron is run.
- * @param array $args Optional. Arguments to pass to the hook function.
- * @return bool|int The UNIX timestamp of the next time the scheduled event will occur.
- */
 function wp_next_scheduled( $hook, $args = array() ) {
 	$crons = _get_cron_array();
 	$key = md5(serialize($args));
@@ -145,13 +71,6 @@ function wp_next_scheduled( $hook, $args = array() ) {
 	return false;
 }
 
-/**
- * Send request to run cron through HTTP request that doesn't halt page loading.
- *
- * @since 2.1.0
- *
- * @return null Cron could not be spawned, because it is not needed to run.
- */
 function spawn_cron() {
 	$crons = _get_cron_array();
 
@@ -162,18 +81,29 @@ function spawn_cron() {
 	if ( array_shift( $keys ) > time() )
 		return;
 
-	$cron_url = get_option( 'siteurl' ) . '/wp-cron.php?check=' . wp_hash('187425');
+	$cron_url = get_option( 'siteurl' ) . '/wp-cron.php';
+	$parts = parse_url( $cron_url );
 
-	wp_remote_post($cron_url, array('timeout' => 0.01, 'blocking' => false));
+	if ($parts['scheme'] == 'https') {
+		// support for SSL was added in 4.3.0
+		if (version_compare(phpversion(), '4.3.0', '>=') && function_exists('openssl_open')) {
+			$port = isset($parts['port']) ? $parts['port'] : 443;
+			$argyle = @fsockopen('ssl://' . $parts['host'], $port, $errno, $errstr, 0.01);
+		} else {
+			return false;
+		}
+	} else {
+		$port = isset($parts['port']) ? $parts['port'] : 80;
+		$argyle = @ fsockopen( $parts['host'], $port, $errno, $errstr, 0.01 );
+	}
+
+	if ( $argyle )
+		fputs( $argyle,
+			  "GET {$parts['path']}?check=" . wp_hash('187425') . " HTTP/1.0\r\n"
+			. "Host: {$_SERVER['HTTP_HOST']}\r\n\r\n"
+		);
 }
 
-/**
- * Run scheduled callbacks or spawn cron for all scheduled events.
- *
- * @since 2.1.0
- *
- * @return null When doesn't need to run Cron.
- */
 function wp_cron() {
 	// Prevent infinite loops caused by lack of wp-cron.php
 	if ( strpos($_SERVER['REQUEST_URI'], '/wp-cron.php') !== false )
@@ -191,7 +121,7 @@ function wp_cron() {
 	$schedules = wp_get_schedules();
 	foreach ( $crons as $timestamp => $cronhooks ) {
 		if ( $timestamp > time() ) break;
-		foreach ( (array) $cronhooks as $hook => $args ) {
+		foreach ( $cronhooks as $hook => $args ) {
 			if ( isset($schedules[$hook]['callback']) && !call_user_func( $schedules[$hook]['callback'] ) )
 				continue;
 			spawn_cron();
@@ -200,36 +130,6 @@ function wp_cron() {
 	}
 }
 
-/**
- * Retrieve supported and filtered Cron recurrences.
- *
- * The supported recurrences are 'hourly' and 'daily'. A plugin may add more by
- * hooking into the 'cron_schedules' filter. The filter accepts an array of
- * arrays. The outer array has a key that is the name of the schedule or for
- * example 'weekly'. The value is an array with two keys, one is 'interval' and
- * the other is 'display'.
- *
- * The 'interval' is a number in seconds of when the cron job should run. So for
- * 'hourly', the time is 3600 or 60*60. For weekly, the value would be
- * 60*60*24*7 or 604800. The value of 'interval' would then be 604800.
- *
- * The 'display' is the description. For the 'weekly' key, the 'display' would
- * be <code>__('Once Weekly')</code>.
- *
- * For your plugin, you will be passed an array. you can easily add your
- * schedule by doing the following.
- * <code>
- * // filter parameter variable name is 'array'
- *	$array['weekly'] = array(
- *		'interval' => 604800,
- *		'display' => __('Once Weekly')
- *	);
- * </code>
- *
- * @since 2.1.0
- *
- * @return array
- */
 function wp_get_schedules() {
 	$schedules = array(
 		'hourly' => array( 'interval' => 3600, 'display' => __('Once Hourly') ),
@@ -239,15 +139,6 @@ function wp_get_schedules() {
 	return array_merge( apply_filters( 'cron_schedules', array() ), $schedules );
 }
 
-/**
- * Retrieve Cron schedule for hook with arguments.
- *
- * @since 2.1.0
- *
- * @param callback $hook Function or method to call, when cron is run.
- * @param array $args Optional. Arguments to pass to the hook function.
- * @return string|bool False, if no schedule. Schedule on success.
- */
 function wp_get_schedule($hook, $args = array()) {
 	$crons = _get_cron_array();
 	$key = md5(serialize($args));
@@ -264,14 +155,6 @@ function wp_get_schedule($hook, $args = array()) {
 // Private functions
 //
 
-/**
- * Retrieve cron info array option.
- *
- * @since 2.1.0
- * @access private
- *
- * @return array CRON info array.
- */
 function _get_cron_array()  {
 	$cron = get_option('cron');
 	if ( ! is_array($cron) )
@@ -285,38 +168,19 @@ function _get_cron_array()  {
 	return $cron;
 }
 
-/**
- * Updates the CRON option with the new CRON array.
- *
- * @since 2.1.0
- * @access private
- *
- * @param array $cron Cron info array from {@link _get_cron_array()}.
- */
 function _set_cron_array($cron) {
 	$cron['version'] = 2;
 	update_option( 'cron', $cron );
 }
 
-/**
- * Upgrade a Cron info array.
- *
- * This function upgrades the Cron info array to version 2.
- *
- * @since 2.1.0
- * @access private
- *
- * @param array $cron Cron info array from {@link _get_cron_array()}.
- * @return array An upgraded Cron info array.
- */
 function _upgrade_cron_array($cron) {
 	if ( isset($cron['version']) && 2 == $cron['version'])
 		return $cron;
 
 	$new_cron = array();
 
-	foreach ( (array) $cron as $timestamp => $hooks) {
-		foreach ( (array) $hooks as $hook => $args ) {
+	foreach ($cron as $timestamp => $hooks) {
+		foreach ( $hooks as $hook => $args ) {
 			$key = md5(serialize($args['args']));
 			$new_cron[$timestamp][$hook][$key] = $args;
 		}

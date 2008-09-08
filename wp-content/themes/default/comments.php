@@ -2,14 +2,19 @@
 	if (!empty($_SERVER['SCRIPT_FILENAME']) && 'comments.php' == basename($_SERVER['SCRIPT_FILENAME']))
 		die ('Please do not load this page directly. Thanks!');
 
-	if ( post_password_required() ) { ?>
-		<p class="nocomments">This post is password protected. Enter the password to view comments.</p>
-	<?php
-		return;
+	if (!empty($post->post_password)) { // if there's a password
+		if ($_COOKIE['wp-postpass_' . COOKIEHASH] != $post->post_password) {  // and it doesn't match the cookie
+			?>
+
+			<p class="nocomments">This post is password protected. Enter the password to view comments.</p>
+
+			<?php
+			return;
+		}
 	}
 
 	/* This variable is for alternating comment background */
-	$oddcomment = 'alt';
+	$oddcomment = 'class="alt" ';
 ?>
 
 <!-- You can start editing here. -->
@@ -21,7 +26,7 @@
 
 	<?php foreach ($comments as $comment) : ?>
 
-		<li <?php comment_class($oddcomment) ?> id="comment-<?php comment_ID() ?>">
+		<li <?php echo $oddcomment; ?>id="comment-<?php comment_ID() ?>">
 			<?php echo get_avatar( $comment, 32 ); ?>
 			<cite><?php comment_author_link() ?></cite> Says:
 			<?php if ($comment->comment_approved == '0') : ?>
@@ -37,7 +42,7 @@
 
 	<?php
 		/* Changes every other comment to a different class */
-		$oddcomment = ( empty( $oddcomment ) ) ? 'alt' : '';
+		$oddcomment = ( empty( $oddcomment ) ) ? 'class="alt" ' : '';
 	?>
 
 	<?php endforeach; /* end for each comment */ ?>

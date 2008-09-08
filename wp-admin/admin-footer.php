@@ -1,17 +1,6 @@
-<?php
-/**
- * WordPress Administration Template Footer
- *
- * @package WordPress
- * @subpackage Administration
- */
-?>
-
-<br class="clear" /></div><!-- wpbody-content -->
 </div><!-- wpbody -->
-<br class="clear" /></div><!-- wpcontent -->
+</div><!-- wpcontent -->
 </div><!-- wpwrap -->
-
 <div id="footer">
 <p><?php
 do_action('in_admin_footer', '');

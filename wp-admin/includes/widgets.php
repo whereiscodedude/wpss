@@ -84,7 +84,7 @@ function wp_list_widgets( $show = 'all', $_search = false ) {
 					'edit' => $widget['id'],
 					'key' => array_search( $widget['id'], $sidebars_widgets[$sidebar] ),
 				) ) );
-
+				
 				$widget_control_template = '<textarea rows="1" cols="1">' . htmlspecialchars( $widget_control_template ) . '</textarea>';
 			}
 
@@ -262,7 +262,7 @@ function wp_widget_control( $sidebar_args ) {
 
 				<?php if ( $control ) : ?>
 
-				<a class="widget-action widget-control-save hide-if-no-js edit alignleft" href="#save:<?php echo $id_format; ?>"><?php _e('Change'); ?></a>
+				<a class="widget-action widget-control-save wp-no-js-hidden edit alignleft" href="#save:<?php echo $id_format; ?>"><?php _e('Change'); ?></a>
 
 				<?php endif; ?>
 

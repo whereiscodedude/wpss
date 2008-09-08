@@ -1,12 +1,5 @@
 <?php
-/**
- * Edit user administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
 
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 if ( defined('IS_PROFILE_PAGE') && IS_PROFILE_PAGE )
@@ -14,61 +7,62 @@ if ( defined('IS_PROFILE_PAGE') && IS_PROFILE_PAGE )
 else
 	$is_profile_page = false;
 
-/**
- * Display JavaScript for profile page.
- *
- * @package WordPress
- * @subpackage Administration
- */
 function profile_js ( ) {
 ?>
 <script type="text/javascript">
-(function($){
-	
-	function check_pass_strength () {
+	function check_pass_strength ( ) {
 
-		var pass = $('#pass1').val();
-		var user = $('#user_login').val();
+		var pass = jQuery('#pass1').val();
+		var user = jQuery('#user_login').val();
 
-		$('#pass-strength-result').removeClass('short bad good strong');
-		if ( ! pass ) {
-			$('#pass-strength-result').html( pwsL10n.empty );
-			return;
-		}
+		// get the result as an object, i'm tired of typing it
+		var res = jQuery('#pass-strength-result');
 
 		var strength = passwordStrength(pass, user);
 
-		if ( 2 == strength )
-			$('#pass-strength-result').addClass('bad').html( pwsL10n.bad );
-		else if ( 3 == strength )
-			$('#pass-strength-result').addClass('good').html( pwsL10n.good );
-		else if ( 4 == strength )
-			$('#pass-strength-result').addClass('strong').html( pwsL10n.strong );
-		else
-			// this catches 'Too short' and the off chance anything else comes along
-			$('#pass-strength-result').addClass('short').html( pwsL10n.short );
+		jQuery(res).removeClass('short bad good strong');
 
-	}
-
-	function update_nickname () {
-
-		var nickname = $('#nickname').val();
-		var display_nickname = $('#display_nickname').val();
-
-		if ( nickname == '' ) {
-			$('#display_nickname').remove();
+		if ( strength == pwsL10n.bad ) {
+			jQuery(res).addClass('bad');
+			jQuery(res).html( pwsL10n.bad );
 		}
-		$('#display_nickname').val(nickname).html(nickname);
+		else if ( strength == pwsL10n.good ) {
+			jQuery(res).addClass('good');
+			jQuery(res).html( pwsL10n.good );
+		}
+		else if ( strength == pwsL10n.strong ) {
+			jQuery(res).addClass('strong');
+			jQuery(res).html( pwsL10n.strong );
+		}
+		else {
+			// this catches 'Too short' and the off chance anything else comes along
+			jQuery(res).addClass('short');
+			jQuery(res).html( pwsL10n.short );
+		}
 
 	}
+	
+	function update_nickname ( ) {
+		
+		var nickname = jQuery('#nickname').val();
+		var display_nickname = jQuery('#display_nickname').val();
+		
+		if ( nickname == '' ) {
+			jQuery('#display_nickname').remove();
+		}
+		jQuery('#display_nickname').val(nickname).html(nickname);
+		
+	}
 
-	$(document).ready( function() {
-		$('#pass1,#pass2').attr('autocomplete','off');
-		$('#nickname').blur(update_nickname);
-		$('#pass1').keyup( check_pass_strength );
+	jQuery(function($) { 
+		$('#pass1').keyup( check_pass_strength ) 
 		$('.color-palette').click(function(){$(this).siblings('input[name=admin_color]').attr('checked', 'checked')});
+	} );
+	
+	jQuery(document).ready( function() {
+		jQuery('#pass1,#pass2').attr('autocomplete','off');
+		jQuery('#nickname').blur(update_nickname);
     });
-})(jQuery);
 </script>
 <?php
 }
@@ -92,24 +86,13 @@ $wp_http_referer = remove_query_arg(array('update', 'delete_count'), stripslashe
 
 $user_id = (int) $user_id;
 
-if ( !$user_id ) {
+if ( !$user_id )
 	if ( $is_profile_page ) {
 		$current_user = wp_get_current_user();
 		$user_id = $current_user->ID;
 	} else {
 		wp_die(__('Invalid user ID.'));
 	}
-}
-
-// Optional SSL preference that can be turned on by hooking to the 'personal_options' action 
-function use_ssl_preference($user) {
-?>
-	<tr>
-		<th scope="row"><?php _e('Use https')?></th>
-		<td><label for="use_ssl"><input name="use_ssl" type="checkbox" id="use_ssl" value="1" <?php checked('1', $user->use_ssl); ?> /> <?php _e('Always use https when visiting the admin'); ?></label></td>
-	</tr>
-<?php
-}
 
 switch ($action) {
 case 'switchposts':
@@ -133,7 +116,7 @@ if ( $is_profile_page ) {
 
 $errors = edit_user($user_id);
 
-if ( !is_wp_error( $errors ) ) {
+if( !is_wp_error( $errors ) ) {
 	$redirect = ($is_profile_page? "profile.php?" : "user-edit.php?user_id=$user_id&"). "updated=true";
 	$redirect = add_query_arg('wp_http_referer', urlencode($wp_http_referer), $redirect);
 	wp_redirect($redirect);
@@ -144,7 +127,7 @@ default:
 $profileuser = get_user_to_edit($user_id);
 
 if ( !current_user_can('edit_user', $user_id) )
-	wp_die(__('You do not have permission to edit this user.'));
+		wp_die(__('You do not have permission to edit this user.'));
 
 include ('admin-header.php');
 ?>
@@ -171,7 +154,7 @@ include ('admin-header.php');
 <div class="wrap" id="profile-page">
 <h2><?php $is_profile_page? _e('Your Profile and Personal Options') : _e('Edit User'); ?></h2>
 
-<form id="your-profile" action="" method="post">
+<form name="profile" id="your-profile" action="" method="post">
 <?php wp_nonce_field('update-user_' . $user_id) ?>
 <?php if ( $wp_http_referer ) : ?>
 	<input type="hidden" name="wp_http_referer" value="<?php echo clean_url($wp_http_referer); ?>" />
@@ -190,7 +173,6 @@ include ('admin-header.php');
 		<td><label for="rich_editing"><input name="rich_editing" type="checkbox" id="rich_editing" value="true" <?php checked('true', $profileuser->rich_editing); ?> /> <?php _e('Use the visual editor when writing'); ?></label></td>
 	</tr>
 <?php endif; ?>
-<?php if (count($_wp_admin_css_colors) > 1 ) : ?>
 <tr>
 <th scope="row"><?php _e('Admin Color Scheme')?></th>
 <td><fieldset><legend class="hidden"><?php _e('Admin Color Scheme')?></legend>
@@ -202,25 +184,24 @@ foreach ( $_wp_admin_css_colors as $color => $color_info ): ?>
 <div class="color-option"><input name="admin_color" id="admin_color_<?php echo $color; ?>" type="radio" value="<?php echo $color ?>" class="tog" <?php checked($color, $current_color); ?> />
 	<table class="color-palette">
 	<tr>
-	<?php foreach ( $color_info->colors as $html_color ): ?>
+	<?php
+	foreach ( $color_info->colors as $html_color ): ?>
 	<td style="background-color: <?php echo $html_color ?>" title="<?php echo $color ?>">&nbsp;</td>
 	<?php endforeach; ?>
 	</tr>
 	</table>
-
+	
 	<label for="admin_color_<?php echo $color; ?>"><?php echo $color_info->name ?></label>
 </div>
-	<?php endforeach; ?>
+<?php endforeach; ?>
 </fieldset></td>
 </tr>
-<?php
-endif;
-do_action('personal_options', $profileuser);
-?>
 </table>
+
 <?php
-	if ( $is_profile_page )
-		do_action('profile_personal_options', $profileuser);
+	if ( $is_profile_page ) {
+		do_action('profile_personal_options');
+	}
 ?>
 
 <h3><?php _e('Name') ?></h3>
@@ -340,10 +321,10 @@ if ( $show_password_fields ) :
 	<th><label for="pass1"><?php _e('New Password'); ?></label></th>
 	<td><input type="password" name="pass1" id="pass1" size="16" value="" /> <?php _e("If you would like to change the password type a new one. Otherwise leave this blank."); ?><br />
 		<input type="password" name="pass2" id="pass2" size="16" value="" /> <?php _e("Type your new password again."); ?><br />
-	<?php if ( $is_profile_page ): ?>
-		<div id="pass-strength-result"><?php _e('Strength indicator'); ?></div>
-		<p><?php _e('Hint: Your password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).'); ?></p>
-	<?php endif; ?>
+		<?php if ( $is_profile_page ): ?>
+		<p><strong><?php _e('Password Strength'); ?></strong></p>
+		<div id="pass-strength-result"><?php _e('Too short'); ?></div> <?php _e('Hint: Use upper and lower case characters, numbers and symbols like !"?$%^&amp;( in your password.'); ?>
+		<?php endif; ?>
 	</td>
 </tr>
 <?php endif; ?>

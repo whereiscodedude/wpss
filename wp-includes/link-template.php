@@ -85,7 +85,7 @@ function get_permalink($id = 0, $leavename=false) {
 			// having to assign it explicitly
 			if ( empty($category) ) {
 				$default_category = get_category( get_option( 'default_category' ) );
-				$category = is_wp_error( $default_category ) ? '' : $default_category->slug;
+				$category = is_wp_error( $default_category ) ? '' : $default_category->slug; 
 			}
 		}
 
@@ -112,10 +112,10 @@ function get_permalink($id = 0, $leavename=false) {
 		);
 		$permalink = get_option('home') . str_replace($rewritecode, $rewritereplace, $permalink);
 		$permalink = user_trailingslashit($permalink, 'single');
-		return apply_filters('post_link', $permalink, $post, $leavename);
+		return apply_filters('post_link', $permalink, $post);
 	} else { // if they're not using the fancy permalink option
 		$permalink = get_option('home') . '/?p=' . $post->ID;
-		return apply_filters('post_link', $permalink, $post, $leavename);
+		return apply_filters('post_link', $permalink, $post);
 	}
 }
 
@@ -319,19 +319,6 @@ function post_comments_feed_link( $link_text = '', $post_id = '', $feed = '' ) {
 	echo "<a href='$url'>$link_text</a>";
 }
 
-/** Get the feed link for a given author
- *
- * Returns a link to the feed for all posts by a given author.  A specific feed can be requested
- * or left blank to get the default feed.
- *
- * @package WordPress
- * @subpackage Feed
- * @since 2.5
- *
- * @param int $author_id ID of an author
- * @param string $feed Feed type
- * @return string Link to the feed for the author specified by $author_id
-*/
 function get_author_feed_link( $author_id, $feed = '' ) {
 	$author_id = (int) $author_id;
 	$permalink_structure = get_option('permalink_structure');
@@ -340,25 +327,20 @@ function get_author_feed_link( $author_id, $feed = '' ) {
 		$feed = get_default_feed();
 
 	if ( '' == $permalink_structure ) {
-		$link = get_option('home') . "?feed=$feed&amp;author=" . $author_id;
+		$link = get_option('home') . '?feed=rss2&amp;author=' . $author_id;
 	} else {
 		$link = get_author_posts_url($author_id);
-		if ( $feed == get_default_feed() )
-			$feed_link = 'feed';
-		else
-			$feed_link = "feed/$feed";
-
-		$link = trailingslashit($link) . user_trailingslashit($feed_link, 'feed');
+		$link = trailingslashit($link) . user_trailingslashit('feed', 'feed');
 	}
 
-	$link = apply_filters('author_feed_link', $link, $feed);
+	$link = apply_filters('author_feed_link', $link);
 
 	return $link;
 }
 
-/** Get the feed link for a given category
+/** get_category_feed_link() - Get the feed link for a given category
  *
- * Returns a link to the feed for all posts in a given category.  A specific feed can be requested
+ * Returns a link to the feed for all post in a given category.  A specific feed can be requested
  * or left blank to get the default feed.
  *
  * @package WordPress
@@ -496,7 +478,7 @@ function get_edit_post_link( $id = 0, $context = 'display' ) {
 		$var  = 'post';
 		break;
 	endswitch;
-
+	
 	return apply_filters( 'get_edit_post_link', admin_url("$file.php?{$action}$var=$post->ID"), $post->ID, $context );
 }
 
@@ -545,29 +527,6 @@ function edit_comment_link( $link = 'Edit This', $before = '', $after = '' ) {
 
 	$link = '<a href="' . get_edit_comment_link( $comment->comment_ID ) . '" title="' . __( 'Edit comment' ) . '">' . $link . '</a>';
 	echo $before . apply_filters( 'edit_comment_link', $link, $comment->comment_ID ) . $after;
-}
-
-function get_edit_bookmark_link( $link = 0 ) {
-	$link = &get_bookmark( $link );
-
-	if ( !current_user_can('manage_links') )
-		return;
-
-	$location = admin_url('link.php?action=edit&amp;link_id=') . $link->link_id;
-	return apply_filters( 'get_edit_bookmark_link', $location, $link->link_id );
-}
-
-function edit_bookmark_link( $link = '', $before = '', $after = '', $bookmark = null ) {
-	$bookmark = get_bookmark($bookmark);
-
-	if ( !current_user_can('manage_links') )
-		return;
-
-	if ( empty($link) )
-		$link = __('Edit This');
-
-	$link = '<a href="' . get_edit_bookmark_link( $link ) . '" title="' . __( 'Edit link' ) . '">' . $link . '</a>';
-	echo $before . apply_filters( 'edit_bookmark_link', $link, $bookmark->link_id ) . $after;
 }
 
 // Navigation links
@@ -737,8 +696,7 @@ function next_posts_link($label='Next Page &raquo;', $max_page=0) {
 	if ( (! is_single()) && (empty($paged) || $nextpage <= $max_page) ) {
 		echo '<a href="';
 		next_posts($max_page);
-		$attr = apply_filters( 'next_posts_link_attributes', '' );
-		echo "\" $attr>". preg_replace('/&([^#])(?![a-z]{1,8};)/', '&#038;$1', $label) .'</a>';
+		echo '">'. preg_replace('/&([^#])(?![a-z]{1,8};)/', '&#038;$1', $label) .'</a>';
 	}
 }
 
@@ -762,8 +720,7 @@ function previous_posts_link($label='&laquo; Previous Page') {
 	if ( (!is_single())	&& ($paged > 1) ) {
 		echo '<a href="';
 		previous_posts();
-		$attr = apply_filters( 'previous_posts_link_attributes', '' );
-		echo "\" $attr>". preg_replace('/&([^#])(?![a-z]{1,8};)/', '&#038;$1', $label) .'</a>';
+		echo '">'. preg_replace('/&([^#])(?![a-z]{1,8};)/', '&#038;$1', $label) .'</a>';
 	}
 }
 
@@ -821,7 +778,7 @@ function get_shortcut_link() {
  * @package WordPress
  * @since 2.6
  *
- * Returns the 'site_url' option with the appropriate protocol,  'https' if is_ssl() and 'http' otherwise.
+ * Returns the 'site_url' option with the appropriate protocol,  'https' if is_ssl() and 'http' otherwise. 
  * If $scheme is 'http' or 'https', is_ssl() is overridden.
  *
  * @param string $path Optional path relative to the site url
@@ -830,7 +787,6 @@ function get_shortcut_link() {
 */
 function site_url($path = '', $scheme = null) {
 	// should the list of allowed schemes be maintained elsewhere?
-	$orig_scheme = $scheme;
 	if ( !in_array($scheme, array('http', 'https')) ) {
 		if ( ('login_post' == $scheme) && ( force_ssl_login() || force_ssl_admin() ) )
 			$scheme = 'https';
@@ -847,7 +803,7 @@ function site_url($path = '', $scheme = null) {
 	if ( !empty($path) && is_string($path) && strpos($path, '..') === false )
 		$url .= '/' . ltrim($path, '/');
 
-	return apply_filters('site_url', $url, $path, $orig_scheme);
+	return $url;
 }
 
 /** Return the admin url

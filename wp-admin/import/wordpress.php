@@ -1,19 +1,5 @@
 <?php
-/**
- * WordPress Importer
- *
- * @package WordPress
- * @subpackage Importer
- */
 
-/**
- * WordPress Importer
- *
- * Will process the WordPress eXtended RSS files that you upload from the export
- * file.
- *
- * @since unknown
- */
 class WP_Import {
 
 	var $post_ids_processed = array ();
@@ -105,12 +91,7 @@ class WP_Import {
 				// this doesn't check that the file is perfectly valid but will at least confirm that it's not the wrong format altogether
 				if ( !$is_wxr_file && preg_match('|xmlns:wp="http://wordpress[.]org/export/\d+[.]\d+/"|', $importline) )
 					$is_wxr_file = true;
-				
-				if ( false !== strpos($importline, '<wp:base_site_url>') ) {
-					preg_match('|<wp:base_site_url>(.*?)</wp:base_site_url>|is', $importline, $url);
-					$this->base_url = $url[1];
-					continue;
-				}
+
 				if ( false !== strpos($importline, '<wp:category>') ) {
 					preg_match('|<wp:category>(.*?)</wp:category>|is', $importline, $category);
 					$this->categories[] = $category[1];
@@ -358,7 +339,7 @@ class WP_Import {
 		$post_ID = (int) $this->get_tag( $post, 'wp:post_id' );
   		if ( $post_ID && !empty($this->post_ids_processed[$post_ID]) ) // Processed already
 			return 0;
-
+		
 		set_time_limit( 60 );
 
 		// There are only ever one of these
@@ -544,11 +525,6 @@ class WP_Import {
 	function process_attachment($postdata, $remote_url) {
 		if ($this->fetch_attachments and $remote_url) {
 			printf( __('Importing attachment <em>%s</em>... '), htmlspecialchars($remote_url) );
-			
-			// If the URL is absolute, but does not contain http, upload it assuming the base_site_url variable
-			if ( preg_match('/^\/[\w\W]+$/', $remote_url) )
-				$remote_url = rtrim($this->base_url,'/').$remote_url;
-			
 			$upload = $this->fetch_remote_file($postdata, $remote_url);
 			if ( is_wp_error($upload) ) {
 				printf( __('Remote file error: %s'), htmlspecialchars($upload->get_error_message()) );
@@ -770,13 +746,6 @@ class WP_Import {
 	}
 }
 
-/**
- * Register WordPress Importer
- *
- * @since unknown
- * @var WP_Import
- * @name $wp_import
- */
 $wp_import = new WP_Import();
 
 register_importer('wordpress', 'WordPress', __('Import <strong>posts, comments, custom fields, pages, and categories</strong> from a WordPress export file.'), array ($wp_import, 'dispatch'));

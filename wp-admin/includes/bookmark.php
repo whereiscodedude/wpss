@@ -51,8 +51,6 @@ function wp_delete_link($link_id) {
 
 	do_action('deleted_link', $link_id);
 
-	clean_bookmark_cache($link_id);
-
 	return true;
 }
 
@@ -67,7 +65,7 @@ function get_link_to_edit( $link_id ) {
 	return get_bookmark( $link_id, OBJECT, 'edit' );
 }
 
-function wp_insert_link($linkdata, $wp_error = false) {
+function wp_insert_link($linkdata) {
 	global $wpdb, $current_user;
 
 	$defaults = array('link_id' => 0, 'link_name' => '', 'link_url' => '', 'link_rating' => 0 );
@@ -121,24 +119,14 @@ function wp_insert_link($linkdata, $wp_error = false) {
 	}
 
 	if ( $update ) {
-		if ( false === $wpdb->query( $wpdb->prepare("UPDATE $wpdb->links SET link_url = %s,
-			link_name = %s, link_image = %s, link_target = %s,
-			link_visible = %s, link_description = %s, link_rating = %s,
+		$wpdb->query( $wpdb->prepare("UPDATE $wpdb->links SET link_url = %s,
+			link_name = %s, link_image = %s, link_target = %s, 
+			link_visible = %s, link_description = %s, link_rating = %s, 
 			link_rel = %s, link_notes = %s, link_rss = %s
-			WHERE link_id = %s", $link_url, $link_name, $link_image, $link_target, $link_visible, $link_description, $link_rating, $link_rel, $link_notes, $link_rss, $link_id) ) ) {
-			if ( $wp_error )
-				return new WP_Error('db_update_error', __('Could not update link in the database'), $wpdb->last_error);
-			else
-				return 0;
-		}
+			WHERE link_id = %s", $link_url, $link_name, $link_image, $link_target, $link_visible, $link_description, $link_rating, $link_rel, $link_notes, $link_rss, $link_id) );
 	} else {
-		if ( false === $wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->links (link_url, link_name, link_image, link_target, link_description, link_visible, link_owner, link_rating, link_rel, link_notes, link_rss) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-		$link_url,$link_name, $link_image, $link_target, $link_description, $link_visible, $link_owner, $link_rating, $link_rel, $link_notes, $link_rss) ) ) {
-			if ( $wp_error )
-				return new WP_Error('db_insert_error', __('Could not insert link into the database'), $wpdb->last_error);
-			else
-				return 0;
-		}
+		$wpdb->query( $wpdb->prepare("INSERT INTO $wpdb->links (link_url, link_name, link_image, link_target, link_description, link_visible, link_owner, link_rating, link_rel, link_notes, link_rss) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+		$link_url,$link_name, $link_image, $link_target, $link_description, $link_visible, $link_owner, $link_rating, $link_rel, $link_notes, $link_rss) );
 		$link_id = (int) $wpdb->insert_id;
 	}
 
@@ -148,8 +136,6 @@ function wp_insert_link($linkdata, $wp_error = false) {
 		do_action('edit_link', $link_id);
 	else
 		do_action('add_link', $link_id);
-
-	clean_bookmark_cache($link_id);
 
 	return $link_id;
 }
@@ -163,8 +149,6 @@ function wp_set_link_cats($link_id = 0, $link_categories = array()) {
 	$link_categories = array_unique($link_categories);
 
 	wp_set_object_terms($link_id, $link_categories, 'link_category');
-
-	clean_bookmark_cache($link_id);
 }	// wp_set_link_cats()
 
 function wp_update_link($linkdata) {

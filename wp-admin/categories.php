@@ -1,19 +1,12 @@
 <?php
-/**
- * Categories Management Panel
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** Load WordPress Bootstrap */
 require_once('admin.php');
 
 $title = __('Categories');
+$parent_file = 'edit.php';
 
 wp_reset_vars(array('action', 'cat'));
 
-if ( $_GET['action'] == 'delete' && isset($_GET['delete']) )
+if ( isset($_GET['deleteit']) && isset($_GET['delete']) )
 	$action = 'bulk-delete';
 
 switch($action) {
@@ -126,11 +119,15 @@ endif; ?>
 
 <div class="wrap">
 <form id="posts-filter" action="" method="get">
-	<h2><?php printf( current_user_can('manage_categories') ? __('Categories (<a href="%s">Add New</a>)') : __('Manage Tags'), '#addcat' ); ?></h2>
+<?php if ( current_user_can('manage_categories') ) : ?>
+	<h2><?php printf(__('Manage Categories (<a href="%s">add new</a>)'), '#addcat') ?> </h2>
+<?php else : ?>
+	<h2><?php _e('Manage Categories') ?> </h2>
+<?php endif; ?>
 
-<p id="category-search" class="search-box">
-	<label class="hidden" for="category-search-input"><?php _e('Search Categories'); ?></label>
-	<input type="text" id="category-search-input" class="search-input" name="s" value="<?php echo attribute_escape(stripslashes($_GET['s'])); ?>" />
+<p id="post-search">
+	<label class="hidden" for="post-search-input"><?php _e('Search Categories'); ?>:</label>
+	<input type="text" id="post-search-input" name="s" value="<?php echo attribute_escape(stripslashes($_GET['s'])); ?>" />
 	<input type="submit" value="<?php _e( 'Search Categories' ); ?>" class="button" />
 </p>
 
@@ -157,11 +154,7 @@ if ( $page_links )
 ?>
 
 <div class="alignleft">
-<select name="action">
-<option value="" selected><?php _e('Actions'); ?></option>
-<option value="delete"><?php _e('Delete'); ?></option>
-</select>
-<input type="submit" value="<?php _e('Apply'); ?>" name="doaction" class="button-secondary action" />
+<input type="submit" value="<?php _e('Delete'); ?>" name="deleteit" class="button-secondary delete" />
 <?php wp_nonce_field('bulk-categories'); ?>
 </div>
 

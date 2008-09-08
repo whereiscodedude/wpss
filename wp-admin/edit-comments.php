@@ -1,20 +1,12 @@
 <?php
-/**
- * Edit Comments Administration Panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 $title = __('Edit Comments');
+$parent_file = 'edit-comments.php';
 wp_enqueue_script( 'admin-comments' );
-wp_enqueue_script( 'admin-forms' );
-wp_enqueue_script( 'jquery-table-hotkeys' );
+wp_enqueue_script('admin-forms');
 
-if ( !empty( $_REQUEST['delete_comments'] ) && isset($_REQUEST['action']) ) {
+if ( !empty( $_REQUEST['delete_comments'] ) ) {
 	check_admin_referer('bulk-comments');
 
 	$comments_deleted = $comments_approved = $comments_unapproved = $comments_spammed = 0;
@@ -23,16 +15,16 @@ if ( !empty( $_REQUEST['delete_comments'] ) && isset($_REQUEST['action']) ) {
 		$post_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT comment_post_ID FROM $wpdb->comments WHERE comment_ID = %d", $comment) );
 		if ( !current_user_can('edit_post', $post_id) )
 			continue;
-		if ( $_REQUEST['action'] == 'markspam' ) {
+		if ( !empty( $_REQUEST['spamit'] ) ) {
 			wp_set_comment_status($comment, 'spam');
 			$comments_spammed++;
-		} elseif ( $_REQUEST['action'] == 'delete' ) {
+		} elseif ( !empty( $_REQUEST['deleteit'] ) ) {
 			wp_set_comment_status($comment, 'delete');
 			$comments_deleted++;
-		} elseif ( $_REQUEST['action'] == 'approve' ) {
+		} elseif ( !empty( $_REQUEST['approveit'] ) ) {
 			wp_set_comment_status($comment, 'approve');
 			$comments_approved++;
-		} elseif ( $_REQUEST['action'] == 'unapprove' ) {
+		} elseif ( !empty( $_REQUEST['unapproveit'] ) ) {
 			wp_set_comment_status($comment, 'hold');
 			$comments_unapproved++;
 		}
@@ -54,11 +46,20 @@ if ( !empty( $_REQUEST['delete_comments'] ) && isset($_REQUEST['action']) ) {
 
 require_once('admin-header.php');
 
-$mode = ( ! isset($_GET['mode']) || empty($_GET['mode']) ) ? 'detail' : attribute_escape($_GET['mode']);
+if ( empty($_GET['mode']) )
+	$mode = 'detail';
+else
+	$mode = attribute_escape($_GET['mode']);
 
-$comment_status = isset($_GET['comment_status']) ? attribute_escape($_GET['comment_status']) : '';
+if ( isset($_GET['comment_status']) )
+	$comment_status = attribute_escape($_GET['comment_status']);
+else
+	$comment_status = '';
 
-$search_dirty = ( isset($_GET['s']) ) ? $_GET['s'] : '';
+if ( isset($_GET['s']) )
+	$search_dirty = $_GET['s'];
+else
+	$search_dirty = '';
 $search = attribute_escape( $search_dirty );
 ?>
 <?php
@@ -97,11 +98,7 @@ if ( isset( $_GET['approved'] ) || isset( $_GET['deleted'] ) || isset( $_GET['sp
 <?php
 $status_links = array();
 $num_comments = wp_count_comments();
-$stati = array(
-		'moderated' => sprintf(__ngettext('Awaiting Moderation (%s)', 'Awaiting Moderation (%s)', number_format_i18n($num_comments->moderated) ), "<span class='comment-count'>" . number_format_i18n($num_comments->moderated) . "</span>"),
-		'approved' => _c('Approved|plural'),
-		'spam' => sprintf(__ngettext('Spam (%s)', 'Spam (%s)', number_format_i18n($num_comments->spam) ), "<span class='spam-comment-count'>" . number_format_i18n($num_comments->spam) . "</span>")
-	);
+$stati = array('moderated' => sprintf(__ngettext('Awaiting Moderation (%s)', 'Awaiting Moderation (%s)', number_format_i18n($num_comments->moderated) ), "<span class='comment-count'>" . number_format_i18n($num_comments->moderated) . "</span>"), 'approved' => _c('Approved|plural'));
 $class = ( '' === $comment_status ) ? ' class="current"' : '';
 $status_links[] = "<li><a href=\"edit-comments.php\"$class>".__('Show All Comments')."</a>";
 foreach ( $stati as $status => $label ) {
@@ -110,8 +107,7 @@ foreach ( $stati as $status => $label ) {
 	if ( $status == $comment_status )
 		$class = ' class="current"';
 
-
-	$status_links[] = "<li class='$status'><a href=\"edit-comments.php?comment_status=$status\"$class>$label</a>";
+	$status_links[] = "<li><a href=\"edit-comments.php?comment_status=$status\"$class>" . $label . '</a>';
 }
 
 $status_links = apply_filters( 'comment_status_links', $status_links );
@@ -121,9 +117,9 @@ unset($status_links);
 ?>
 </ul>
 
-<p id="comment-search" class="search-box">
-	<label class="hidden" for="comment-search-input"><?php _e( 'Search Comments' ); ?></label>
-	<input type="text" id="comment-search-input" class="search-input" name="s" value="<?php the_search_query(); ?>" />
+<p id="post-search">
+	<label class="hidden" for="post-search-input"><?php _e( 'Search Comments' ); ?>:</label>
+	<input type="text" id="post-search-input" name="s" value="<?php echo $search; ?>" />
 	<input type="submit" value="<?php _e( 'Search Comments' ); ?>" class="button" />
 </p>
 
@@ -131,12 +127,10 @@ unset($status_links);
 <input type="hidden" name="comment_status" value="<?php echo $comment_status; ?>" />
 </form>
 
-<!-- crazyhorse
 <ul class="view-switch">
 	<li <?php if ( 'detail' == $mode ) echo "class='current'" ?>><a href="<?php echo clean_url(add_query_arg('mode', 'detail', $_SERVER['REQUEST_URI'])) ?>"><?php _e('Detail View') ?></a></li>
 	<li <?php if ( 'list' == $mode ) echo "class='current'" ?>><a href="<?php echo clean_url(add_query_arg('mode', 'list', $_SERVER['REQUEST_URI'])) ?>"><?php _e('List View') ?></a></li>
 </ul>
--->
 
 <?php
 
@@ -173,20 +167,14 @@ if ( $page_links )
 ?>
 
 <div class="alignleft">
-<select name="action">
-<option value="" selected="selected"><?php _e('Actions') ?></option>
-<?php if ( empty($comment_status) || 'approved' == $comment_status ): ?>
-<option value="unapprove"><?php _e('Unapprove'); ?></option>
+<?php if ( 'approved' != $comment_status ): ?>
+<input type="submit" value="<?php _e('Approve'); ?>" name="approveit" class="button-secondary" />
 <?php endif; ?>
-<?php if ( empty($comment_status) || 'moderated' == $comment_status ): ?>
-<option value="approve"><?php _e('Approve'); ?></option>
+<input type="submit" value="<?php _e('Mark as Spam'); ?>" name="spamit" class="button-secondary" />
+<?php if ( 'moderated' != $comment_status ): ?>
+<input type="submit" value="<?php _e('Unapprove'); ?>" name="unapproveit" class="button-secondary" />
 <?php endif; ?>
-<?php if ( 'spam' != $comment_status ): ?>
-<option value="markspam"><?php _e('Mark as Spam'); ?></option>
-<?php endif; ?>
-<option value="delete"><?php _e('Delete'); ?></option>
-</select>
-<input type="submit" name="doaction" value="Apply" class="button-secondary apply" />
+<input type="submit" value="<?php _e('Delete'); ?>" name="deleteit" class="button-secondary delete" />
 <?php do_action('manage_comments_nav', $comment_status); ?>
 <?php wp_nonce_field('bulk-comments'); ?>
 <?php if ( isset($_GET['apage']) ) { ?>
@@ -206,10 +194,9 @@ if ($comments) {
 <thead>
   <tr>
     <th scope="col" class="check-column"><input type="checkbox" /></th>
-    <th scope="col" class="comment-column"><?php _e('Comment') ?></th>
-	<th scope="col" class="author-column"><?php _e('Author') ?></th>
-    <th scope="col" class="date-column"><?php _e('Submitted') ?></th>
-    <th scope="col" class="response-column"><?php _e('In Response To This Post') ?></th>
+    <th scope="col"><?php _e('Comment') ?></th>
+    <th scope="col"><?php _e('Date') ?></th>
+    <th scope="col" class="action-links"><?php _e('Actions') ?></th>
   </tr>
 </thead>
 <tbody id="the-comment-list" class="list:comment">
@@ -262,6 +249,4 @@ if ( $page_links )
 
 </div>
 
-<?php
-wp_comment_reply('-1', true, 'detail');
-include('admin-footer.php'); ?>
+<?php include('admin-footer.php'); ?>

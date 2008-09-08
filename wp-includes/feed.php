@@ -306,7 +306,7 @@ function comment_text_rss() {
  * @package WordPress
  * @subpackage Feed
  * @since 2.1.0
- * @uses apply_filters()
+ * @uses apply_filters() 
  *
  * @param string $type Optional, default is 'rss'. Either 'rss', 'atom', or 'rdf'.
  * @return string All of the post categories for displaying in the feed.
@@ -394,12 +394,13 @@ function html_type_rss() {
  * @uses get_post_custom() To get the current post enclosure metadata.
  */
 function rss_enclosure() {
-	if ( post_password_required() )
+	global $post;
+	if ( !empty($post->post_password) && (!isset($_COOKIE['wp-postpass_'.COOKIEHASH]) || $_COOKIE['wp-postpass_'.COOKIEHASH] != $post->post_password) )
 		return;
 
-	foreach ( (array) get_post_custom() as $key => $val) {
+	foreach (get_post_custom() as $key => $val) {
 		if ($key == 'enclosure') {
-			foreach ( (array) $val as $enc ) {
+			foreach ((array)$val as $enc) {
 				$enclosure = split("\n", $enc);
 				echo apply_filters('rss_enclosure', '<enclosure url="' . trim(htmlspecialchars($enclosure[0])) . '" length="' . trim($enclosure[1]) . '" type="' . trim($enclosure[2]) . '" />' . "\n");
 			}
@@ -425,12 +426,13 @@ function rss_enclosure() {
  * @uses get_post_custom() To get the current post enclosure metadata.
  */
 function atom_enclosure() {
-	if ( post_password_required() )
+	global $post;
+	if ( !empty($post->post_password) && ($_COOKIE['wp-postpass_'.COOKIEHASH] != $post->post_password) )
 		return;
 
-	foreach ( (array) get_post_custom() as $key => $val ) {
+	foreach (get_post_custom() as $key => $val) {
 		if ($key == 'enclosure') {
-			foreach ( (array) $val as $enc ) {
+			foreach ((array)$val as $enc) {
 				$enclosure = split("\n", $enc);
 				echo apply_filters('atom_enclosure', '<link href="' . trim(htmlspecialchars($enclosure[0])) . '" rel="enclosure" length="' . trim($enclosure[1]) . '" type="' . trim($enclosure[2]) . '" />' . "\n");
 			}

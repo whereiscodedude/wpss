@@ -3,7 +3,6 @@
  * Manages WordPress comments
  *
  * @package WordPress
- * @subpackage Comment
  */
 
 /**
@@ -45,14 +44,14 @@ function check_comment($author, $email, $url, $comment, $user_ip, $user_agent, $
 	if ( 1 == get_option('comment_moderation') )
 		return false; // If moderation is set to manual
 
-	if ( get_option('comment_max_links') && preg_match_all("|(href\t*?=\t*?['\"]?)?(https?:)?//|i", $comment, $out) >= get_option('comment_max_links') )
+	if ( preg_match_all("|(href\t*?=\t*?['\"]?)?(https?:)?//|i", $comment, $out) >= get_option('comment_max_links') )
 		return false; // Check # of external links
 
 	$mod_keys = trim(get_option('moderation_keys'));
 	if ( !empty($mod_keys) ) {
 		$words = explode("\n", $mod_keys );
 
-		foreach ( (array) $words as $word) {
+		foreach ($words as $word) {
 			$word = trim($word);
 
 			// Skip empty lines
@@ -163,85 +162,48 @@ function &get_comment(&$comment, $output = OBJECT) {
 }
 
 /**
- * Retrieve a list of comments
+ * Retrieve an array of comment data about comment $comment_ID.
  *
- * {@internal Missing Long Description}}
+ * get_comment() technically does the same thing as this function. This function
+ * also appears to reference variables and then not use them or not update them
+ * when needed. It is advised to switch to get_comment(), since this function
+ * might be deprecated in favor of using get_comment().
  *
- * @package WordPress
- * @subpackage Comment
- * @since 2.7
- * @uses $wpdb
+ * @deprecated Use get_comment()
+ * @see get_comment()
+ * @since 0.71
  *
- * @param mixed $args Optional. Array or string of options
- * @return array List of comments matching defaults or $args
+ * @uses $postc Comment cache, might not be used any more
+ * @uses $id
+ * @uses $wpdb Database Object
+ *
+ * @param int $comment_ID The ID of the comment
+ * @param int $no_cache Whether to use the cache or not (casted to bool)
+ * @param bool $include_unapproved Whether to include unapproved comments or not
+ * @return array The comment data
  */
-function get_comments( $args = '' ) {
-	global $wpdb;
-
-	$defaults = array('status' => '', 'orderby' => 'comment_date_gmt', 'order' => 'DESC', 'number' => '', 'offset' => '', 'post_id' => 0);
-
-	$r = wp_parse_args( $args, $defaults );
-	extract( $r, EXTR_SKIP );
-
-	$post_id = absint($post_id);
-
-	if ( 'hold' == $status )
-		$approved = "comment_approved = '0'";
-	elseif ( 'approve' == $status )
-		$approved = "comment_approved = '1'";
-	elseif ( 'spam' == $status )
-		$approved = "comment_approved = 'spam'";
-	else
-		$approved = "( comment_approved = '0' OR comment_approved = '1' )";
-
-	if ( 'ASC' != $order )
-		$order = 'DESC';
-
-	$orderby = 'comment_date_gmt';  // Hard code for now
-
-	$number = absint($number);
-	$offset = absint($offset);
-
-	if ( !empty($number) ) {
-		if ( $offset )
-			$number = 'LIMIT ' . $offset . ',' . $number;
-		else
-			$number = 'LIMIT ' . $number;
-
+function get_commentdata( $comment_ID, $no_cache = 0, $include_unapproved = false ) {
+	global $postc, $wpdb;
+	if ( $no_cache ) {
+		$query = $wpdb->prepare("SELECT * FROM $wpdb->comments WHERE comment_ID = %d", $comment_ID);
+		if ( false == $include_unapproved )
+			$query .= " AND comment_approved = '1'";
+		$myrow = $wpdb->get_row($query, ARRAY_A);
 	} else {
-		$number = '';
+		$myrow['comment_ID']           = $postc->comment_ID;
+		$myrow['comment_post_ID']      = $postc->comment_post_ID;
+		$myrow['comment_author']       = $postc->comment_author;
+		$myrow['comment_author_email'] = $postc->comment_author_email;
+		$myrow['comment_author_url']   = $postc->comment_author_url;
+		$myrow['comment_author_IP']    = $postc->comment_author_IP;
+		$myrow['comment_date']         = $postc->comment_date;
+		$myrow['comment_content']      = $postc->comment_content;
+		$myrow['comment_karma']        = $postc->comment_karma;
+		$myrow['comment_approved']     = $postc->comment_approved;
+		$myrow['comment_type']         = $postc->comment_type;
 	}
-
-	if ( ! empty($post_id) )
-		$post_where = "comment_post_ID = $post_id AND";
-	else
-		$post_where = '';
-
-	return $wpdb->get_results( "SELECT * FROM $wpdb->comments WHERE $post_where $approved ORDER BY $orderby $order $number" );
+	return $myrow;
 }
-
-/**
- * Retrieve all of the WordPress supported comment statuses.
- *
- * Comments have a limited set of valid status values, this provides the
- * comment status values and descriptions.
- *
- * @package WordPress
- * @subpackage Post
- * @since 2.7
- *
- * @return array List of comment statuses.
- */
-function get_comment_statuses( ) {
-	$status = array(
-		'hold'		=> __('Unapproved'),
-		'approve'	=> __('Approved'),
-		'spam'		=> __('Spam'),
-	);
-
-	return $status;
-}
-
 
 /**
  * The date the last comment was modified.
@@ -391,12 +353,8 @@ function wp_allow_comment($commentdata) {
 	if ( $comment_author_email )
 		$dupe .= "OR comment_author_email = '$comment_author_email' ";
 	$dupe .= ") AND comment_content = '$comment_content' LIMIT 1";
-	if ( $wpdb->get_var($dupe) ) {
-		if ( defined('DOING_AJAX') )
-			die( __('Duplicate comment detected; it looks as though you\'ve already said that!') );
-
+	if ( $wpdb->get_var($dupe) )
 		wp_die( __('Duplicate comment detected; it looks as though you\'ve already said that!') );
-	}
 
 	do_action( 'check_comment_flood', $comment_author_IP, $comment_author_email, $comment_date_gmt );
 
@@ -447,10 +405,6 @@ function check_comment_flood_db( $ip, $email, $date ) {
 		$flood_die = apply_filters('comment_flood_filter', false, $time_lastcomment, $time_newcomment);
 		if ( $flood_die ) {
 			do_action('comment_flood_trigger', $time_lastcomment, $time_newcomment);
-
-			if ( defined('DOING_AJAX') )
-				die( __('You are posting comments too quickly.  Slow down.') );
-
 			wp_die( __('You are posting comments too quickly.  Slow down.') );
 		}
 	}
@@ -761,10 +715,6 @@ function wp_new_comment( $commentdata ) {
 	$commentdata['comment_post_ID'] = (int) $commentdata['comment_post_ID'];
 	$commentdata['user_ID']         = (int) $commentdata['user_ID'];
 
-	$commentdata['comment_parent'] = absint($commentdata['comment_parent']);
-	$parent_status = ( 0 < $commentdata['comment_parent'] ) ? wp_get_comment_status($commentdata['comment_parent']) : '';
-	$commentdata['comment_parent'] = ( 'approved' == $parent_status || 'unapproved' == $parent_status ) ? $commentdata['comment_parent'] : 0;
-
 	$commentdata['comment_author_IP'] = preg_replace( '/[^0-9a-fA-F:., ]/', '',$_SERVER['REMOTE_ADDR'] );
 	$commentdata['comment_agent']     = $_SERVER['HTTP_USER_AGENT'];
 
@@ -871,13 +821,6 @@ function wp_update_comment($commentarr) {
 	$comment_content = apply_filters('comment_save_pre', $comment_content);
 
 	$comment_date_gmt = get_gmt_from_date($comment_date);
-
-	if ( !isset($comment_approved) )
-		$comment_approved = 1;
-	else if ( 'hold' == $comment_approved )
-		$comment_approved = 0;
-	else if ( 'approve' == $comment_approved )
-		$comment_approved = 1;
 
 	$wpdb->query( $wpdb->prepare("UPDATE $wpdb->comments SET
 			comment_content      = %s,
@@ -1247,7 +1190,7 @@ function pingback($content, $post_ID) {
 	// http://dummy-weblog.org/post.php
 	// We don't wanna ping first and second types, even if they have a valid <link/>
 
-	foreach ( (array) $post_links_temp[0] as $link_test ) :
+	foreach ( $post_links_temp[0] as $link_test ) :
 		if ( !in_array($link_test, $pung) && (url_to_postid($link_test) != $post_ID) // If we haven't pung it already and it isn't a link to itself
 				&& !is_local_attachment($link_test) ) : // Also, let's never ping local attachments.
 			$test = parse_url($link_test);

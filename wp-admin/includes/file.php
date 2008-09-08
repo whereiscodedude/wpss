@@ -1,30 +1,6 @@
 <?php
 
-$wp_file_descriptions = array (
-	'index.php' => __( 'Main Index Template' ),
-	'style.css' => __( 'Stylesheet' ),
-	'rtl.css' => __( 'RTL Stylesheet' ), 
-	'comments.php' => __( 'Comments' ), 
-	'comments-popup.php' => __( 'Popup Comments' ), 
-	'footer.php' => __( 'Footer' ), 
-	'header.php' => __( 'Header' ), 
-	'sidebar.php' => __( 'Sidebar' ),
-	'archive.php' => __( 'Archives' ),
-	'category.php' => __( 'Category Template' ),
-	'page.php' => __( 'Page Template' ),
-	'search.php' => __( 'Search Results' ),
-	'searchform.php' => __( 'Search Form' ),
-	'single.php' => __( 'Single Post' ),
-	'404.php' => __( '404 Template' ),
-	'link.php' => __( 'Links Template' ),
-	'functions.php' => __( 'Theme Functions' ),
-	'attachment.php' => __( 'Attachment Template' ),
-	'image.php' => __('Image Attachment Template'),
-	'video.php' => __('Video Attachment Template'),
-	'audio.php' => __('Audio Attachment Template'),
-	'application.php' => __('Application Attachment Template'),
-	'my-hacks.php' => __( 'my-hacks.php (legacy hacks support)' ),
-	'.htaccess' => __( '.htaccess (for rewrite rules )' ),
+$wp_file_descriptions = array ('index.php' => __( 'Main Index Template' ), 'style.css' => __( 'Stylesheet' ), 'rtl.css' => __( 'RTL Stylesheet' ), 'comments.php' => __( 'Comments' ), 'comments-popup.php' => __( 'Popup Comments' ), 'footer.php' => __( 'Footer' ), 'header.php' => __( 'Header' ), 'sidebar.php' => __( 'Sidebar' ), 'archive.php' => __( 'Archives' ), 'category.php' => __( 'Category Template' ), 'page.php' => __( 'Page Template' ), 'search.php' => __( 'Search Results' ), 'searchform.php' => __( 'Search Form' ), 'single.php' => __( 'Single Post' ), '404.php' => __( '404 Template' ), 'link.php' => __( 'Links Template' ), 'functions.php' => __( 'Theme Functions' ), 'attachment.php' => __( 'Attachment Template' ), 'my-hacks.php' => __( 'my-hacks.php (legacy hacks support)' ), '.htaccess' => __( '.htaccess (for rewrite rules )' ),
 	// Deprecated files
 	'wp-layout.css' => __( 'Stylesheet' ), 'wp-comments.php' => __( 'Comments Template' ), 'wp-comments-popup.php' => __( 'Popup Comments Template' ));
 function get_file_description( $file ) {
@@ -33,10 +9,10 @@ function get_file_description( $file ) {
 	if ( isset( $wp_file_descriptions[basename( $file )] ) ) {
 		return $wp_file_descriptions[basename( $file )];
 	}
-	elseif ( file_exists( WP_CONTENT_DIR . $file ) && is_file( WP_CONTENT_DIR . $file ) ) {
-		$template_data = implode( '', file( WP_CONTENT_DIR . $file ) );
-		if ( preg_match( '|Template Name:(.*)$|mi', $template_data, $name ))
-			return $name[1] . ' Page Template';
+	elseif ( file_exists( ABSPATH . $file ) && is_file( ABSPATH . $file ) ) {
+		$template_data = implode( '', file( ABSPATH . $file ) );
+		if ( preg_match( "|Template Name:(.*)|i", $template_data, $name ))
+			return $name[1];
 	}
 
 	return basename( $file );
@@ -309,11 +285,11 @@ function wp_handle_sideload( &$file, $overrides = false ) {
 		return $upload_error_handler( $file, $uploads['error'] );
 
 	$filename = wp_unique_filename( $uploads['path'], $file['name'], $unique_filename_callback );
-
+	
 	// Strip the query strings.
 	$filename = str_replace('?','-', $filename);
 	$filename = str_replace('&','-', $filename);
-
+	
 	// Move the file to the uploads dir
 	$new_file = $uploads['path'] . "/$filename";
 	if ( false === @ rename( $file['tmp_name'], $new_file ) ) {
@@ -408,11 +384,10 @@ function unzip_file($file, $to) {
 		}
 
 		// We've made sure the folders are there, so let's extract the file now:
-		if ( ! $file['folder'] ) {
+		if ( ! $file['folder'] )
 			if ( !$fs->put_contents( $to . $file['filename'], $file['content']) )
 				return new WP_Error('copy_failed', __('Could not copy file'), $to . $file['filename']);
 			$fs->chmod($to . $file['filename'], 0644);
-		}
 	}
 
 	return true;
@@ -432,10 +407,8 @@ function copy_dir($from, $to) {
 				return new WP_Error('copy_failed', __('Could not copy file'), $to . $filename);
 			$wp_filesystem->chmod($to . $filename, 0644);
 		} elseif ( 'd' == $fileinfo['type'] ) {
-			if ( !$wp_filesystem->is_dir($to . $filename) ) {
-				if ( !$wp_filesystem->mkdir($to . $filename, 0755) )
-					return new WP_Error('mkdir_failed', __('Could not create directory'), $to . $filename);
-			}
+			if ( !$wp_filesystem->mkdir($to . $filename, 0755) )
+				return new WP_Error('mkdir_failed', __('Could not create directory'), $to . $filename);
 			$result = copy_dir($from . $filename, $to . $filename);
 			if ( is_wp_error($result) )
 				return $result;
@@ -448,7 +421,7 @@ function WP_Filesystem( $args = false ) {
 
 	require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php');
 
-	$method = get_filesystem_method($args);
+	$method = get_filesystem_method();
 
 	if ( ! $method )
 		return false;
@@ -471,7 +444,7 @@ function WP_Filesystem( $args = false ) {
 	return true;
 }
 
-function get_filesystem_method($args = array()) {
+function get_filesystem_method() {
 	$method = false;
 	if( function_exists('getmyuid') && function_exists('fileowner') ){
 		$temp_file = wp_tempnam();
@@ -480,94 +453,9 @@ function get_filesystem_method($args = array()) {
 		unlink($temp_file);
 	}
 
-	if ( isset($args['connection_type']) && 'ssh' == $args['connection_type'] ) {
-		$method = 'SSH2';
-		return apply_filters('filesystem_method', $method);
-	}
-
 	if ( ! $method && extension_loaded('ftp') ) $method = 'ftpext';
 	if ( ! $method && ( extension_loaded('sockets') || function_exists('fsockopen') ) ) $method = 'ftpsockets'; //Sockets: Socket extension; PHP Mode: FSockopen / fwrite / fread
 	return apply_filters('filesystem_method', $method);
-}
-
-function request_filesystem_credentials($form_post, $type = '', $error = false) {
-	$req_cred = apply_filters('request_filesystem_credentials', '', $form_post, $type, $error);
-	if ( '' !== $req_cred )
-		return $req_cred;
-
-	if ( empty($type) )
-		$type = get_filesystem_method();
-
-	if ( 'direct' == $type )
-		return true;
-
-	if( ! $credentials = get_option('ftp_credentials') )
-		$credentials = array();
-	// If defined, set it to that, Else, If POST'd, set it to that, If not, Set it to whatever it previously was(saved details in option)
-	$credentials['hostname'] = defined('FTP_HOST') ? FTP_HOST : (!empty($_POST['hostname']) ? $_POST['hostname'] : $credentials['hostname']);
-	$credentials['username'] = defined('FTP_USER') ? FTP_USER : (!empty($_POST['username']) ? $_POST['username'] : $credentials['username']);
-	$credentials['password'] = defined('FTP_PASS') ? FTP_PASS : (!empty($_POST['password']) ? $_POST['password'] : $credentials['password']);
-	if ( defined('FTP_SSH') || 'ssh' == $_POST['connection_type'] )
-		$credentials['connection_type'] = 'ssh';
-	else if ( defined('FTP_SSL') || 'ftps' == $_POST['connection_type'] )
-		$credentials['connection_type'] = 'ftps';
-	else
-		$credentials['connection_type'] = 'ftp';
-
-	if ( ! $error && !empty($credentials['password']) && !empty($credentials['username']) && !empty($credentials['hostname']) ) {
-		$stored_credentials = $credentials;
-		unset($stored_credentials['password']);
-		update_option('ftp_credentials', $stored_credentials);
-		return $credentials;
-	}
-	$hostname = '';
-	$username = '';
-	$password = '';
-	$ssl = '';
-	if ( !empty($credentials) )
-		extract($credentials, EXTR_OVERWRITE);
-	if ( $error ) {
-		$error_string = __('<strong>Error:</strong> There was an error connecting to the server, Please verify the settings are correct.');
-		if ( is_wp_error($error) )
-			$error_string = $error->get_error_message();
-		echo '<div id="message" class="error"><p>' . $error_string . '</p></div>';
-	}
-?>
-<form action="<?php echo $form_post ?>" method="post">
-<div class="wrap">
-<h2><?php _e('FTP Connection Information') ?></h2>
-<p><?php _e('To perform the requested action, FTP connection information is required.') ?></p>
-<table class="form-table">
-<tr valign="top">
-<th scope="row"><label for="hostname"><?php _e('Hostname') ?></label></th>
-<td><input name="hostname" type="text" id="hostname" value="<?php echo attribute_escape($hostname) ?>"<?php if( defined('FTP_HOST') ) echo ' disabled="disabled"' ?> size="40" /></td>
-</tr>
-<tr valign="top">
-<th scope="row"><label for="username"><?php _e('Username') ?></label></th>
-<td><input name="username" type="text" id="username" value="<?php echo attribute_escape($username) ?>"<?php if( defined('FTP_USER') ) echo ' disabled="disabled"' ?> size="40" /></td>
-</tr>
-<tr valign="top">
-<th scope="row"><label for="password"><?php _e('Password') ?></label></th>
-<td><input name="password" type="password" id="password" value=""<?php if( defined('FTP_PASS') ) echo ' disabled="disabled"' ?> size="40" /><?php if( defined('FTP_PASS') && !empty($password) ) echo '<em>'.__('(Password not shown)').'</em>'; ?></td>
-</tr>
-<tr valign="top">
-<th scope="row"><?php _e('Connection Type') ?></th>
-<td>
-<fieldset><legend class="hidden"><?php _e('Connection Type') ?> </legend>
-<p><label><input name="connection_type"  type="radio" value="ftp" <?php checked('ftp', $connection_type); ?>	/> <?php _e('FTP') ?></label><br />
-<label><input name="connection_type" type="radio" value="ftps" <?php checked('ftps', $connection_type); ?> /> <?php _e('FTPS (SSL)') ?></label><br />
-<label><input name="connection_type" type="radio" value="ssh" <?php checked('ssh', $connection_type); ?> /> <?php _e('SSH') ?></label></p>
-</fieldset>
-</td>
-</tr>
-</table>
-<p class="submit">
-<input type="submit" name="submit" value="<?php _e('Proceed'); ?>" />
-</p>
-</div>
-</form>
-<?php
-	return false;
 }
 
 ?>

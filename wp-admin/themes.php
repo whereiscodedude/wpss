@@ -1,12 +1,4 @@
 <?php
-/**
- * Themes administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 if ( isset($_GET['action']) ) {

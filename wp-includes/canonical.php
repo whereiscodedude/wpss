@@ -8,11 +8,11 @@
  * @author Scott Yang
  * @author Mark Jaquith
  * @package WordPress
- * @since 2.3.0
+ * @since 2.3
  */
 
 /**
- * Redirects incoming links to the proper URL based on the site url.
+ * Redirects incoming links to the proper URL based on the site url
  *
  * Search engines consider www.somedomain.com and somedomain.com to be two
  * different URLs when they both go to the same location. This SEO enhancement
@@ -26,7 +26,7 @@
  * not exist based on exact WordPress query. Will instead try to parse the URL
  * or query in an attempt to figure the correct page to go to.
  *
- * @since 2.3.0
+ * @since 2.3
  * @uses $wp_rewrite
  * @uses $is_IIS
  *
@@ -37,7 +37,7 @@
  *		not needed or the string of the URL
  */
 function redirect_canonical($requested_url=null, $do_redirect=true) {
-	global $wp_rewrite, $is_IIS, $wp_query, $wpdb;
+	global $wp_rewrite, $is_IIS;
 
 	if ( is_feed() || is_trackback() || is_search() || is_comments_popup() || is_admin() || $is_IIS || ( isset($_POST) && count($_POST) ) || is_preview() || is_robots() )
 		return;
@@ -59,28 +59,15 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 	$redirect = $original;
 	$redirect_url = false;
 
-	if ( is_singular() && 1 > $wp_query->post_count && ($id = get_query_var('p')) ) {
-
-		$vars = $wpdb->get_results( $wpdb->prepare("SELECT post_type, post_parent FROM $wpdb->posts WHERE ID = %d", $id) );
-
-		if ( isset($vars[0]) && $vars = $vars[0] ) {
-			if ( 'revision' == $vars->post_type && $vars->post_parent > 0 )
-				$id = $vars->post_parent;
-
-			if ( $redirect_url = get_permalink($id) )
-				$redirect['query'] = remove_query_arg(array('p', 'page_id', 'attachment_id'), $redirect['query']);
-		}
-	}
-
 	// These tests give us a WP-generated permalink
 	if ( is_404() ) {
 		$redirect_url = redirect_guess_404_permalink();
 	} elseif ( is_object($wp_rewrite) && $wp_rewrite->using_permalinks() ) {
 		// rewriting of old ?p=X, ?m=2004, ?m=200401, ?m=20040101
-		if ( is_single() && isset($_GET['p']) && ! $redirect_url ) {
+		if ( is_single() && isset($_GET['p']) ) {
 			if ( $redirect_url = get_permalink(get_query_var('p')) )
 				$redirect['query'] = remove_query_arg('p', $redirect['query']);
-		} elseif ( is_page() && isset($_GET['page_id']) && ! $redirect_url ) {
+		} elseif ( is_page() && isset($_GET['page_id']) ) {
 			if ( $redirect_url = get_permalink(get_query_var('page_id')) )
 				$redirect['query'] = remove_query_arg('page_id', $redirect['query']);
 		} elseif ( isset($_GET['m']) && ( is_year() || is_month() || is_day() ) ) {
@@ -166,17 +153,6 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 	// trailing /index.php/
 	$redirect['path'] = preg_replace('|/index.php/$|', '/', $redirect['path']);
 
-	// Remove trailing spaces from the path
-	$redirect['path'] = preg_replace( '#(%20| )+$#', '', $redirect['path'] );
-
-	if ( isset( $redirect['query'] ) ) {
-		// Remove trailing slashes from certain terminating query string args
-		$redirect['query'] = preg_replace( '#((p|page_id|cat|tag)=[^&]*?)(%20| )+$#', '$1', $redirect['query'] );
-
-		// Clean up empty query strings
-		$redirect['query'] = preg_replace( '#&?(p|page_id|cat|tag)=?$#', '', $redirect['query'] );
-	}
-
 	// strip /index.php/ when we're not using PATHINFO permalinks
 	if ( !$wp_rewrite->using_index_permalinks() )
 		$redirect['path'] = str_replace('/index.php/', '/', $redirect['path']);
@@ -208,23 +184,7 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 	if ( strtolower($original['host']) == strtolower($redirect['host']) )
 		$redirect['host'] = $original['host'];
 
-	$compare_original = array($original['host'], $original['path']);
-
-	if ( isset( $original['port'] ) )
-		$compare_original[] = $original['port'];
-
-	if ( isset( $original['query'] ) )
-		$compare_original[] = $original['query'];
-
-	$compare_redirect = array($redirect['host'], $redirect['path']);
-
-	if ( isset( $redirect['port'] ) )
-		$compare_redirect[] = $redirect['port'];
-
-	if ( isset( $redirect['query'] ) )
-		$compare_redirect[] = $redirect['query'];
-
-	if ( $compare_original !== $compare_redirect ) {
+	if ( array($original['host'], $original['port'], $original['path'], $original['query']) !== array($redirect['host'], $redirect['port'], $redirect['path'], $redirect['query']) ) {
 		$redirect_url = $redirect['scheme'] . '://' . $redirect['host'];
 		if ( isset($redirect['port']) )
 		 	$redirect_url .= ':' . $redirect['port'];
@@ -256,9 +216,9 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 }
 
 /**
- * Attempts to guess correct post based on query vars.
+ * Attempts to guess correct post based on query vars
  *
- * @since 2.3.0
+ * @since 2.3
  * @uses $wpdb
  *
  * @return bool|string Returns False, if it can't find post, returns correct
@@ -266,7 +226,6 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
  */
 function redirect_guess_404_permalink() {
 	global $wpdb;
-
 	if ( !get_query_var('name') )
 		return false;
 

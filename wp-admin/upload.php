@@ -1,45 +1,33 @@
 <?php
-/**
- * Media Library administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
-add_thickbox();
-wp_enqueue_script( 'media-upload' );
 
 if (!current_user_can('upload_files'))
 	wp_die(__('You do not have permission to upload files.'));
 
 // Handle bulk deletes
-if ( isset($_GET['action']) && isset($_GET['media']) ) {
+if ( isset($_GET['deleteit']) && isset($_GET['delete']) ) {
 	check_admin_referer('bulk-media');
-	if ( $_GET['action'] == 'delete' ) {
-		foreach( (array) $_GET['media'] as $post_id_del ) {
-			$post_del = & get_post($post_id_del);
+	foreach( (array) $_GET['delete'] as $post_id_del ) {
+		$post_del = & get_post($post_id_del);
 
-			if ( !current_user_can('delete_post', $post_id_del) )
-				wp_die( __('You are not allowed to delete this post.') );
+		if ( !current_user_can('delete_post', $post_id_del) )
+			wp_die( __('You are not allowed to delete this post.') );
 
-			if ( $post_del->post_type == 'attachment' )
-				if ( ! wp_delete_attachment($post_id_del) )
-					wp_die( __('Error in deleting...') );
-		}
-
-		$location = 'upload.php';
-		if ( $referer = wp_get_referer() ) {
-			if ( false !== strpos($referer, 'upload.php') )
-				$location = $referer;
-		}
-
-		$location = add_query_arg('message', 2, $location);
-		$location = remove_query_arg('posted', $location);
-		wp_redirect($location);
-		exit;
+		if ( $post_del->post_type == 'attachment' )
+			if ( ! wp_delete_attachment($post_id_del) )
+				wp_die( __('Error in deleting...') );
 	}
+
+	$location = 'upload.php';
+	if ( $referer = wp_get_referer() ) {
+		if ( false !== strpos($referer, 'upload.php') )
+			$location = $referer;
+	}
+
+	$location = add_query_arg('message', 2, $location);
+	$location = remove_query_arg('posted', $location);
+	wp_redirect($location);
+	exit;
 } elseif ( !empty($_GET['_wp_http_referer']) ) {
 	wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
 	exit;
@@ -51,10 +39,8 @@ wp_enqueue_script( 'admin-forms' );
 
 list($post_mime_types, $avail_post_mime_types) = wp_edit_attachments_query();
 
-if ( is_singular() ) {
+if ( is_singular() )
 	wp_enqueue_script( 'admin-comments' );
-	wp_enqueue_script( 'jquery-table-hotkeys' );
-}
 
 require_once('admin-header.php');
 
@@ -70,13 +56,12 @@ if ( !isset( $_GET['paged'] ) )
 if ( is_singular() ) {
 	printf(__('Comments on %s'), apply_filters( "the_title", $post->post_title));
 } else {
-	$post_mime_type_label = _c('Media|manage media header');
+	$post_mime_type_label = _c('Manage Media|manage media header');
 	if ( isset($_GET['post_mime_type']) && in_array( $_GET['post_mime_type'], array_keys($post_mime_types) ) )
         $post_mime_type_label = $post_mime_types[$_GET['post_mime_type']][1];
-   	//TODO: Unreachable code: $post_listing_pageable is undefined, Similar code in edit.php
-	//if ( $post_listing_pageable && !is_archive() && !is_search() ) 
-	//	$h2_noun = is_paged() ? sprintf(__( 'Previous %s' ), $post_mime_type_label) : sprintf(__('Latest %s'), $post_mime_type_label);
-	//else
+	if ( $post_listing_pageable && !is_archive() && !is_search() )
+		$h2_noun = is_paged() ? sprintf(__( 'Previous %s' ), $post_mime_type_label) : sprintf(__('Latest %s'), $post_mime_type_label);
+	else
 		$h2_noun = $post_mime_type_label;
 	// Use $_GET instead of is_ since they can override each other
 	$h2_author = '';
@@ -93,7 +78,7 @@ if ( is_singular() ) {
 	$h2_cat    = isset($_GET['cat']) && $_GET['cat'] ? ' ' . sprintf( __('in &#8220;%s&#8221;'), single_cat_title('', false) ) : '';
 	$h2_tag    = isset($_GET['tag']) && $_GET['tag'] ? ' ' . sprintf( __('tagged with &#8220;%s&#8221;'), single_tag_title('', false) ) : '';
 	$h2_month  = isset($_GET['m'])   && $_GET['m']   ? ' ' . sprintf( __('during %s'), single_month_title(' ', false) ) : '';
-	printf( _c( '%1$s%2$s%3$s%4$s%5$s%6$s (<a href="%7$s" class="thickbox">Add New</a>)|You can reorder these: 1: Posts, 2: by {s}, 3: matching {s}, 4: in {s}, 5: tagged with {s}, 6: during {s}' ), $h2_noun, $h2_author, $h2_search, $h2_cat, $h2_tag, $h2_month, 'media-upload.php?library=false&TB_iframe=true' );
+	printf( _c( '%1$s%2$s%3$s%4$s%5$s%6$s|You can reorder these: 1: Posts, 2: by {s}, 3: matching {s}, 4: in {s}, 5: tagged with {s}, 6: during {s}' ), $h2_noun, $h2_author, $h2_search, $h2_cat, $h2_tag, $h2_month );
 }
 ?></h2>
 
@@ -126,7 +111,7 @@ unset($type_links);
 
 <?php
 if ( isset($_GET['posted']) && $_GET['posted'] ) : $_GET['posted'] = (int) $_GET['posted']; ?>
-<div id="message" class="updated fade"><p><strong><?php _e('Your media has been saved.'); ?></strong> <a href="<?php echo get_permalink( $_GET['posted'] ); ?>"><?php _e('View media'); ?></a> | <a href="<?php echo get_edit_post_link( $_GET['posted'] ); ?>"><?php _e('Edit media'); ?></a></p></div>
+<div id="message" class="updated fade"><p><strong><?php _e('Your media has been saved.'); ?></strong> <a href="<?php echo get_permalink( $_GET['posted'] ); ?>"><?php _e('View media'); ?></a> | <a href="media.php?action=edit&amp;attachment_id=<?php echo $_GET['posted']; ?>"><?php _e('Edit media'); ?></a></p></div>
 <?php $_SERVER['REQUEST_URI'] = remove_query_arg(array('posted'), $_SERVER['REQUEST_URI']);
 endif;
 
@@ -139,9 +124,9 @@ if (isset($_GET['message'])) : ?>
 endif;
 ?>
 
-<p id="media-search" class="search-box" >
-	<label class="hidden" for="media-search-input"><?php _e( 'Search Media' ); ?></label>
-	<input type="text" id="media-search-input" class="search-input" name="s" value="<?php the_search_query(); ?>" />
+<p id="post-search">
+	<label class="hidden" for="post-search-input"><?php _e( 'Search Media' ); ?>:</label>
+	<input type="text" id="post-search-input" name="s" value="<?php the_search_query(); ?>" />
 	<input type="submit" value="<?php _e( 'Search Media' ); ?>" class="button" />
 </p>
 
@@ -162,11 +147,7 @@ if ( $page_links )
 ?>
 
 <div class="alignleft">
-<select name="action">
-<option value="" selected><?php _e('Actions'); ?></option>
-<option value="delete"><?php _e('Delete'); ?></option>
-</select>
-<input type="submit" value="<?php _e('Apply'); ?>" name="doaction" class="button-secondary action" />
+<input type="submit" value="<?php _e('Delete'); ?>" name="deleteit" class="button-secondary delete" />
 <?php wp_nonce_field('bulk-media'); ?>
 <?php
 
@@ -228,9 +209,9 @@ if ( $page_links )
 <br class="clear" />
 
 <?php
-
+ 
 if ( 1 == count($posts) && is_singular() ) :
-
+	
 	$comments = $wpdb->get_results( $wpdb->prepare("SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND comment_approved != 'spam' ORDER BY comment_date", $id) );
 	if ( $comments ) :
 		// Make sure comments, post, and post_author are cached
@@ -258,7 +239,7 @@ if ( 1 == count($posts) && is_singular() ) :
 </table>
 
 <?php
-wp_comment_reply();
+
 endif; // comments
 endif; // posts;
 
@@ -266,7 +247,4 @@ endif; // posts;
 
 </div>
 
-<?php 
-
-include('admin-footer.php');
-?>
+<?php include('admin-footer.php'); ?>

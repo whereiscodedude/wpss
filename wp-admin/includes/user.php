@@ -73,10 +73,6 @@ function edit_user( $user_id = 0 ) {
 	else
 		$user->rich_editing = 'false';
 
-	$user->use_ssl = 0;
-	if ( !empty($_POST['use_ssl']) )
-		$user->use_ssl = 1;
-
 	if ( !$update )
 		$user->admin_color = 'fresh';  // Default to fresh for new users.
 	else if ( isset( $_POST['admin_color'] ) )
@@ -305,7 +301,6 @@ class WP_User_Search {
 	var $total_users_for_query = 0;
 	var $too_many_total_users = false;
 	var $search_errors;
-	var $paging_text;
 
 	function WP_User_Search ($search_term = '', $page = '', $role = '') { // constructor
 		$this->search_term = $search_term;

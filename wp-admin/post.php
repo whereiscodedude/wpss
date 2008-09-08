@@ -1,14 +1,4 @@
 <?php
-/**
- * Edit post administration panel.
- *
- * Manage Post actions: post, edit, delete, etc.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 $parent_file = 'edit.php';
@@ -16,11 +6,6 @@ $submenu_file = 'edit.php';
 
 wp_reset_vars(array('action', 'safe_mode', 'withcomments', 'posts', 'content', 'edited_post_title', 'comment_error', 'profile', 'trackback_url', 'excerpt', 'showcomments', 'commentstart', 'commentend', 'commentorder'));
 
-/**
- * Redirect to previous page.
- *
- * @param int $post_ID Optional. Post ID.
- */
 function redirect_post($post_ID = '') {
 	global $action;
 
@@ -34,22 +19,12 @@ function redirect_post($post_ID = '') {
 	if ( !empty($_POST['mode']) && 'bookmarklet' == $_POST['mode'] ) {
 		$location = $_POST['referredby'];
 	} elseif ( !empty($_POST['mode']) && 'sidebar' == $_POST['mode'] ) {
-		if ( isset($_POST['saveasdraft']) )
-			$location = 'sidebar.php?a=c';
-		elseif ( isset($_POST['publish']) )
-			$location = 'sidebar.php?a=b';
-	} elseif ( ( isset($_POST['save']) || isset($_POST['publish']) ) && ( empty($referredby) || $referredby == $referer || 'redo' != $referredby ) ) {
+		$location = 'sidebar.php?a=b';
+	} elseif ( isset($_POST['save']) && ( empty($referredby) || $referredby == $referer || 'redo' != $referredby ) ) {
 		if ( $_POST['_wp_original_http_referer'] && strpos( $_POST['_wp_original_http_referer'], '/wp-admin/post.php') === false && strpos( $_POST['_wp_original_http_referer'], '/wp-admin/post-new.php') === false )
-			$location = add_query_arg( array(
-				'_wp_original_http_referer' => urlencode( stripslashes( $_POST['_wp_original_http_referer'] ) ),
-				'message' => 1
-			), get_edit_post_link( $post_ID, 'url' ) );
-		else {
-			if ( isset( $_POST['publish'] ) )
-				$location = add_query_arg( 'message', 6, get_edit_post_link( $post_ID, 'url' ) );
-			else
-				$location = add_query_arg( 'message', 7, get_edit_post_link( $post_ID, 'url' ) );
-		}
+			$location = add_query_arg( '_wp_original_http_referer', urlencode( stripslashes( $_POST['_wp_original_http_referer'] ) ), "post.php?action=edit&post=$post_ID&message=1" );
+		else
+			$location = "post.php?action=edit&post=$post_ID&message=4";
 	} elseif (isset($_POST['addmeta']) && $_POST['addmeta']) {
 		$location = add_query_arg( 'message', 2, wp_get_referer() );
 		$location = explode('#', $location);
@@ -62,17 +37,15 @@ function redirect_post($post_ID = '') {
 		$location = $_POST['referredby'];
 		$location = remove_query_arg('_wp_original_http_referer', $location);
 		if ( false !== strpos($location, 'edit.php') )
-			$location = add_query_arg('posted', $post_ID, $location);
+			$location = add_query_arg('posted', $post_ID, $location);		
 		elseif ( false !== strpos($location, 'wp-admin') )
 			$location = "post-new.php?posted=$post_ID";
 	} elseif ( isset($_POST['publish']) ) {
 		$location = "post-new.php?posted=$post_ID";
 	} elseif ($action == 'editattachment') {
 		$location = 'attachments.php';
-	} elseif ( 'post-quickpress-save-cont' == $_POST['action'] ) {
-		$location = "post.php?action=edit&post=$post_ID&message=7";
 	} else {
-		$location = add_query_arg( 'message', 4, get_edit_post_link( $post_ID, 'url' ) );
+		$location = "post.php?action=edit&post=$post_ID&message=4";
 	}
 
 	wp_redirect( $location );
@@ -84,35 +57,9 @@ if ( isset( $_POST['deletepost'] ) )
 switch($action) {
 case 'postajaxpost':
 case 'post':
-case 'post-quickpress-publish':
-case 'post-quickpress-save':
-case 'post-quickpress-save-cont':
 	check_admin_referer('add-post');
 
-	if ( 'post-quickpress-publish' == $action )
-		$_POST['publish'] = 'publish'; // tell write_post() to publish
-
-	if ( 'post-quickpress-publish' == $action || 'post-quickpress-save' == $action ) {
-		$_POST['comment_status'] = get_option('default_comment_status');
-		$_POST['ping_status'] = get_option('default_ping_status');
-	}
-
-	if ( !empty( $_POST['quickpress_post_ID'] ) ) {
-		$_POST['post_ID'] = (int) $_POST['quickpress_post_ID'];
-		$post_ID = edit_post();
-	} else {
-		$post_ID = 'postajaxpost' == $action ? edit_post() : write_post();
-	}
-
-	if ( 'post-quickpress-save-cont' != $action && 0 === strpos( $action, 'post-quickpress' ) ) {
-		$_POST['post_ID'] = $post_ID;
-		// output the quickpress dashboard widget
-		require_once(ABSPATH . 'wp-admin/includes/dashboard.php');
-		add_filter( 'wp_dashboard_widgets', create_function( '$a', 'return array( "dashboard_quick_press" );' ) );
-		wp_dashboard_setup();
-		wp_dashboard();
-		exit;
-	}
+	$post_ID = 'post' == $action ? write_post() : edit_post();
 
 	redirect_post($post_ID);
 	exit();
@@ -142,8 +89,6 @@ case 'edit':
 	add_thickbox();
 	wp_enqueue_script('media-upload');
 	wp_enqueue_script('word-count');
-	wp_enqueue_script( 'admin-comments' );
-	wp_enqueue_script( 'jquery-table-hotkeys' );
 
 	if ( current_user_can('edit_post', $post_ID) ) {
 		if ( $last = wp_check_post_lock( $post->ID ) ) {
