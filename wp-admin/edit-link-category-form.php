@@ -1,59 +1,23 @@
 <?php
-/**
- * Edit link category form for inclusion in administration panels.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/**
- * @var object
- */
-if ( ! isset( $category ) )
-	$category = (object) array();
-
 if ( ! empty($cat_ID) ) {
-	/**
-	 * @var string
-	 */
-	$heading = '';
+	$heading = __('Edit Category');
 	$submit_text = __('Edit Category');
 	$form = '<form name="editcat" id="editcat" method="post" action="link-category.php" class="validate">';
 	$action = 'editedcat';
 	$nonce_action = 'update-link-category_' . $cat_ID;
 	do_action('edit_link_category_form_pre', $category);
 } else {
-	$heading = '<h2>' . __('Add Category') . '</h2>';
+	$heading = __('Add Category');
 	$submit_text = __('Add Category');
 	$form = '<form name="addcat" id="addcat" class="add:the-list: validate" method="post" action="link-category.php">';
 	$action = 'addcat';
 	$nonce_action = 'add-link-category';
 	do_action('add_link_category_form_pre', $category);
 }
-
-/**
- * @ignore
- * @since 2.7
- * @internal Used to prevent errors in page when no category is being edited.
- *
- * @param object $category
- */
-function _fill_empty_link_category(&$category) {
-	if ( ! isset( $category->name ) )
-		$category->name = '';
-
-	if ( ! isset( $category->slug ) )
-		$category->slug = '';
-
-	if ( ! isset( $category->description ) )
-		$category->description = '';
-}
-
-_fill_empty_link_category($category);
 ?>
 
 <div class="wrap">
-<?php echo $heading ?>
+<h2><?php echo $heading ?></h2>
 <div id="ajax-response"></div>
 <?php echo $form ?>
 <input type="hidden" name="action" value="<?php echo $action ?>" />

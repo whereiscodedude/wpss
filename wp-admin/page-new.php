@@ -1,15 +1,7 @@
 <?php
-/**
- * New page administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
-$title = __('Add New Page');
-$parent_file = 'edit-pages.php';
+$title = __('New Page');
+$parent_file = 'post-new.php';
 $editing = true;
 wp_enqueue_script('autosave');
 wp_enqueue_script('page');

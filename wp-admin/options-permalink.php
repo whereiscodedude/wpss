@@ -1,23 +1,9 @@
 <?php
-/**
- * Permalink settings administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 $title = __('Permalink Settings');
 $parent_file = 'options-general.php';
 
-/**
- * Display JavaScript on the page.
- *
- * @package WordPress
- * @subpackage Permalink_Settings_Panel
- */
 function add_js() {
 ?>
 <script type="text/javascript">
@@ -123,16 +109,9 @@ else
 <?php endif; ?>
 
 <div class="wrap">
-<h2><?php echo wp_specialchars( $title ); ?></h2> 
-
+  <h2><?php _e('Customize Permalink Structure') ?></h2>
 <form name="form" action="options-permalink.php" method="post">
 <?php wp_nonce_field('update-permalink') ?>
-
-
-<p class="submit">
-	<input type="submit" name="submit" class="button" value="<?php _e('Save Changes') ?>" />
-</p>
-
   <p><?php _e('By default WordPress uses web <abbr title="Universal Resource Locator">URL</abbr>s which have question marks and lots of numbers in them, however WordPress offers you the ability to create a custom URL structure for your permalinks and archives. This can improve the aesthetics, usability, and forward-compatibility of your links. A <a href="http://codex.wordpress.org/Using_Permalinks">number of tags are available</a>, and here are some examples to get you started.'); ?></p>
 
 <?php
@@ -198,14 +177,8 @@ $structures = array(
 		<th><label for="tag_base"><?php _e('Tag base'); ?></label></th>
 		<td><input name="tag_base" id="tag_base" type="text" class="code"  value="<?php echo attribute_escape($tag_base); ?>" size="30" /></td>
 	</tr>
-	<?php do_settings_fields('permalink', 'optional'); ?>
 </table>
-
-<?php do_settings_sections('permalink'); ?>
-
-<p class="submit">
-	<input type="submit" name="submit" class="button" value="<?php _e('Save Changes') ?>" />
-</p>
+<p class="submit"><input type="submit" name="submit" class="button" value="<?php _e('Save Changes') ?>" /></p>
   </form>
 <?php if ( $permalink_structure && !$usingpi && !$writable ) : ?>
   <p><?php _e('If your <code>.htaccess</code> file were <a href="http://codex.wordpress.org/Changing_File_Permissions">writable</a>, we could do this automatically, but it isn&#8217;t so these are the mod_rewrite rules you should have in your <code>.htaccess</code> file. Click in the field and press <kbd>CTRL + a</kbd> to select all.') ?></p>

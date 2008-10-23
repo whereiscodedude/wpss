@@ -60,12 +60,16 @@ function tag_press_key( e ) {
 	}
 }
 
-jQuery(document).ready( function($) {
+jQuery(document).ready( function() {
 	// close postboxes that should be closed
 	jQuery('.if-js-closed').removeClass('if-js-closed').addClass('closed');
 
+	// show things that should be visible, hide what should be hidden
+	jQuery('.hide-if-no-js').show();
+	jQuery('.hide-if-js').hide();
+
 	// postboxes
-	postboxes.add_postbox_toggles('post');
+	add_postbox_toggles('post');
 
 	// Editable slugs
 	make_slugedit_clickable();
@@ -154,42 +158,22 @@ jQuery(document).ready( function($) {
 		return false;
 	} );
 	jQuery('.categorychecklist .popular-category :checkbox').change( syncChecks ).filter( ':checked' ).change();
-	var stamp = $('#timestamp').html();
 
-	$('.edit-timestamp').click(function () {
-		if ($('#timestampdiv').is(":hidden")) {
-			$('#timestampdiv').slideDown("normal");
-			$('.edit-timestamp').hide();
+	jQuery('.edit-timestamp').click(function () {
+		if (jQuery('#timestampdiv').is(":hidden")) {
+			jQuery('#timestampdiv').slideDown("normal");
+			jQuery('.edit-timestamp').text(postL10n.cancel);
+		} else {
+			jQuery('#timestampdiv').hide();
+			jQuery('#mm').val(jQuery('#hidden_mm').val());
+			jQuery('#jj').val(jQuery('#hidden_jj').val());
+			jQuery('#aa').val(jQuery('#hidden_aa').val());
+			jQuery('#hh').val(jQuery('#hidden_hh').val());
+			jQuery('#mn').val(jQuery('#hidden_mn').val());
+			jQuery('.edit-timestamp').text(postL10n.edit);
 		}
-
 		return false;
-	});
 
-	$('.cancel-timestamp').click(function() {
-		$('#timestampdiv').slideUp("normal");
-		$('#mm').val($('#hidden_mm').val());
-		$('#jj').val($('#hidden_jj').val());
-		$('#aa').val($('#hidden_aa').val());
-		$('#hh').val($('#hidden_hh').val());
-		$('#mn').val($('#hidden_mn').val());
-		$('#timestamp').html(stamp);
-		$('.edit-timestamp').show();
-
-		return false;
-	});
-
-	$('.save-timestamp').click(function () { // crazyhorse - multiple ok cancels
-		$('#timestampdiv').slideUp("normal");
-		$('.edit-timestamp').show();
-		$('#timestamp').html(
-			$( '#mm option[value=' + $('#mm').val() + ']' ).text() + ' ' +
-			$('#jj').val() + ', ' +
-			$('#aa').val() + ' @ ' +
-			$('#hh').val() + ':' +
-			$('#mn').val() + ' '
-		);
-
-		return false;
 	});
 
 	// Custom Fields
@@ -202,87 +186,4 @@ jQuery(document).ready( function($) {
 		return s;
 	}
 	});
-
-	$('.edit-post-status').click(function() {
-		if ($('#post-status-select').is(":hidden")) {
-			$('#post-status-select').slideDown("normal");
-			$(this).hide();
-		}
-
-		return false;
-	});
-
-	$('.save-post-status').click(function() {
-		$('#post-status-select').slideUp("normal");
-		$('#post-status-display').html($('#post_status :selected').text());
-		$('.edit-post-status').show();
-
-		return false;
-	});
-
-	$('.cancel-post-status').click(function() {
-		$('#post-status-select').slideUp("normal");
-		$('#post_status').val($('#hidden_post_status').val());
-		$('#post-status-display').html($('#post_status :selected').text());
-		$('.edit-post-status').show();
-
-		return false;
-	});
 });
-
-(function($){
-	commentsBox = {
-		st : 0,
-
-		get : function(total, num) {
-			var st = this.st;
-			if ( ! num )
-				num = 20;
-
-			this.st += num;
-			this.total = total;
-			$('.waiting').show();
-
-			var data = {
-				'action' : 'get-comments',
-				'mode' : 'single',
-				'_ajax_nonce' : $('#add_comment_nonce').val(),
-				'post_ID' : $('#post_ID').val(),
-				'start' : st,
-				'num' : num
-			};
-
-			$.post('admin-ajax.php', data,
-				function(r) {
-					var r = wpAjax.parseAjaxResponse(r);
-					$('#commentstatusdiv .widefat').show();
-					$('.waiting').hide();
-
-					if ( 'object' == typeof r && r.responses[0] ) {
-						$('#the-comment-list').append( r.responses[0].data );
-						$('#the-comment-list .hide-if-no-js').removeClass('hide-if-no-js');
-
-						theList = theExtraList = null;
-						$("a[className*=':']").unbind();
-						setCommentsList();
-
-						if ( commentsBox.st > commentsBox.total )
-							$('#show-comments').hide();
-						else
-							$('#show-comments').html(postL10n.showcomm);
-						return;
-					} else if ( 1 == r ) {
-						$('#show-comments').parent().html(postL10n.endcomm);
-						return;
-					}
-
-					$('#the-comment-list').append('<tr><td colspan="5">'+wpAjax.broken+'</td></tr>');
-				}
-			);
-
-			return false;
-		}
-	}
-
-})(jQuery);
-

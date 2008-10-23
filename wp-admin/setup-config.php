@@ -1,30 +1,9 @@
 <?php
-/**
- * Retrieves and creates the wp-config.php file.
- *
- * The permissions for the base directory must allow for writing files in order
- * for the wp-config.php to be created using this page.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/**
- * We are installing.
- *
- * @package WordPress
- */
 define('WP_INSTALLING', true);
-
-/**#@+
- * These three defines are required to allow us to use require_wp_db() to load
- * the database class while being wp-content/db.php aware.
- * @ignore
- */
+//These three defines are required to allow us to use require_wp_db() to load the database class while being wp-content/wp-db.php aware
 define('ABSPATH', dirname(dirname(__FILE__)).'/');
 define('WPINC', 'wp-includes');
 define('WP_CONTENT_DIR', ABSPATH . 'wp-content');
-/**#@-*/
 
 require_once('../wp-includes/compat.php');
 require_once('../wp-includes/functions.php');
@@ -51,15 +30,7 @@ if (isset($_GET['step']))
 else
 	$step = 0;
 
-/**
- * Display setup wp-config.php file header.
- *
- * @ignore
- * @since 2.3.0
- * @package WordPress
- * @subpackage Installer_WP_Config
- */
-function display_header() {
+function display_header(){
 	header( 'Content-Type: text/html; charset=utf-8' );
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -67,7 +38,7 @@ function display_header() {
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>WordPress &rsaquo; Setup Configuration File</title>
-<link rel="stylesheet" href="css/install.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $admin_dir; ?>css/install.css" type="text/css" />
 
 </head>
 <body>
@@ -89,7 +60,7 @@ switch($step) {
 	<li>Table prefix (if you want to run more than one WordPress in a single database) </li>
 </ol>
 <p><strong>If for any reason this automatic file creation doesn't work, don't worry. All this does is fill in the database information to a configuration file. You may also simply open <code>wp-config-sample.php</code> in a text editor, fill in your information, and save it as <code>wp-config.php</code>. </strong></p>
-<p>In all likelihood, these items were supplied to you by your Web Host. If you do not have this information, then you will need to contact them before you can continue. If you&#8217;re all ready&hellip;</p>
+<p>In all likelihood, these items were supplied to you by your ISP. If you do not have this information, then you will need to contact them before you can continue. If you&#8217;re all ready&hellip;</p>
 
 <p class="step"><a href="setup-config.php?step=1" class="button">Let&#8217;s go!</a></p>
 <?php
@@ -141,14 +112,10 @@ switch($step) {
 	if (empty($prefix)) $prefix = 'wp_';
 
 	// Test the db connection.
-	/**#@+
-	 * @ignore
-	 */
 	define('DB_NAME', $dbname);
 	define('DB_USER', $uname);
 	define('DB_PASSWORD', $passwrd);
 	define('DB_HOST', $dbhost);
-	/**#@-*/
 
 	// We'll fail here if the values are no good.
 	require_wp_db();

@@ -1,11 +1,4 @@
-<?php
-/**
- * @package WordPress
- * @subpackage Default_Theme
- */
-
-get_header();
-?>
+<?php get_header(); ?>
 
 	<div id="content" class="widecolumn">
 
@@ -16,7 +9,7 @@ get_header();
 			<div class="alignright"><?php next_post_link('%link &raquo;') ?></div>
 		</div>
 
-		<div <?php post_class() ?> id="post-<?php the_ID(); ?>">
+		<div class="post" id="post-<?php the_ID(); ?>">
 			<h2><?php the_title(); ?></h2>
 
 			<div class="entry">

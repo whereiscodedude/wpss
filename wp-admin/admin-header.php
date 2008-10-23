@@ -1,22 +1,33 @@
 <?php
-/**
- * WordPress Administration Template Header
- *
- * @package WordPress
- * @subpackage Administration
- */
-
 @header('Content-Type: ' . get_option('html_type') . '; charset=' . get_option('blog_charset'));
 if (!isset($_GET["page"])) require_once('admin.php');
+if ( $editing ) {
+	if ( user_can_richedit() )
+		wp_enqueue_script( 'wp_tiny_mce' );
+}
+wp_enqueue_script( 'wp-gears' );
+
+$min_width_pages = array( 'post.php', 'post-new.php', 'page.php', 'page-new.php', 'widgets.php', 'comment.php', 'link.php' );
+$the_current_page = preg_replace('|^.*/wp-admin/|i', '', $_SERVER['PHP_SELF']);
+$ie6_no_scrollbar = true;
+
+function add_minwidth($c) {
+	return $c . 'minwidth ';
+}
+
+if ( in_array( $the_current_page, $min_width_pages ) ) {
+		$ie6_no_scrollbar = false;
+		add_filter( 'admin_body_class', 'add_minwidth' );
+}
 
 get_admin_page_title();
-$title = wp_specialchars( strip_tags( $title ) );
+
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" <?php do_action('admin_xml_ns'); ?> <?php language_attributes(); ?>>
 <head>
 <meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php echo get_option('blog_charset'); ?>" />
-<title><?php bloginfo('name') ?> &rsaquo; <?php echo $title; ?> &#8212; WordPress</title>
+<title><?php bloginfo('name') ?> &rsaquo; <?php echo wp_specialchars( strip_tags( $title ) ); ?> &#8212; WordPress</title>
 <?php
 
 wp_admin_css( 'css/global' );
@@ -30,22 +41,9 @@ wp_admin_css( 'css/ie' );
 addLoadEvent = function(func) {if (typeof jQuery != "undefined") jQuery(document).ready(func); else if (typeof wpOnload!='function'){wpOnload=func;} else {var oldonload=wpOnload; wpOnload=function(){oldonload();func();}}};
 //]]>
 </script>
-<?php
-
-switch ( $pagenow ) {
-	case 'post.php':
-		add_action( 'admin_head-post.php', 'wp_tiny_mce' );
-		break;
-	case 'post-new.php':
-		add_action( 'admin_head-post-new.php', 'wp_tiny_mce' );
-		break;
-	case 'page.php':
-		add_action( 'admin_head-page.php', 'wp_tiny_mce' );
-		break;
-	case 'page-new.php':
-		add_action( 'admin_head-page-new.php', 'wp_tiny_mce' );
-		break;
-}
+<?php if ( ($parent_file != 'link-manager.php') && ($parent_file != 'options-general.php') && $ie6_no_scrollbar ) : ?>
+<style type="text/css">* html { overflow-x: hidden; }</style>
+<?php endif;
 
 $hook_suffixes = array();
 
@@ -72,44 +70,63 @@ unset($hook_suffixes, $hook_suffix);
 <div id="wpwrap">
 <div id="wpcontent">
 <div id="wphead">
+<h1><?php if ( '' == get_bloginfo('name', 'display') ) echo '&nbsp;'; else echo get_bloginfo('name', 'display'); ?><span id="viewsite"><a href="<?php echo trailingslashit( get_option('home') ); ?>"><?php _e('Visit Site') ?></a></span></h1>
+</div>
+
 <?php
-$settings_pages = array( 'categories.php', 'edit.php', 'edit-comments.php', 'edit-form-advanced.php', 'edit-link-categories.php', 'edit-link-form.php', 'edit-page-form.php', 'edit-tags.php', 'link-manager.php', 'upload.php', 'users.php', 'edit-pages.php', 'post-new.php', 'post.php', 'page-new.php', 'page.php', 'index.php' );
-$blog_name = get_bloginfo('name', 'display');
-if ( '' == $blog_name )
-	$blog_name = '&nbsp;';
+if ( ! $is_opera ) { 
 ?>
+	<div id="gears-info-box" class="info-box" style="display:none;">
+	<img src="images/gear.png" title="Gear" alt="" class="gears-img" />
+	<div id="gears-msg1">
+	<h3 class="info-box-title"><?php _e('Speed up WordPress'); ?></h3>
+	<p><?php _e('WordPress now has support for Gears, which adds new features to your web browser.'); ?><br />
+	<a href="http://gears.google.com/" target="_blank" style="font-weight:normal;"><?php _e('More information...'); ?></a></p>
+	<p><?php _e('After you install and enable Gears most of WordPress&#8217; images, scripts, and CSS files will be stored locally on your computer. This speeds up page load time.'); ?></p>
+	<p><strong><?php _e('Don&#8217;t install on a public or shared computer.'); ?></strong></p>	<div class="submit"><button onclick="window.location = 'http://gears.google.com/?action=install&amp;return=<?php echo urlencode( admin_url() ); ?>';" class="button"><?php _e('Install Now'); ?></button>
+	<button class="button" style="margin-left:10px;" onclick="document.getElementById('gears-info-box').style.display='none';"><?php _e('Cancel'); ?></button></div>
+	</div>
 
-<img id="logo50" src="images/wp-logo.gif" alt="" /> <h1><a href="<?php echo trailingslashit( get_bloginfo('url') ); ?>" title="<?php _e('Visit site') ?>"><?php echo $blog_name ?></a>
-<?php if ( in_array( $pagenow, $settings_pages ) ) { ?>
-<span id="edit-settings">
-<a href="#edit_settings" id="show-settings-link" class="hide-if-no-js show-settings"><?php _e('Page Options') ?></a>
-<a href="#edit_settings" id="hide-settings-link" class="show-settings" style="display:none;"><?php _e('Hide Options') ?></a>
-</span>
-<?php } ?></h1>
+	<div id="gears-msg2" style="display:none;">
+	<h3 class="info-box-title"><?php _e('Gears Status'); ?></h3>
+	<p><?php _e('Gears is installed on this computer but is not enabled for use with WordPress.'); ?></p> 
+	<p><?php 
+	
+	if ( $is_safari )
+		_e('To enable it, make sure this web site is not on the denied list in Gears Settings under the Safari menu, then click the button below.');
+	else
+		_e('To enable it, make sure this web site is not on the denied list in Gears Settings under your browser Tools menu, then click the button below.'); 
+	
+	?></p>
+	<p><strong><?php _e('However if this is a public or shared computer, Gears should not be enabled.'); ?></strong></p>
+	<div class="submit"><button class="button" onclick="wpGears.getPermission();"><?php _e('Enable Gears'); ?></button>
+	<button class="button" style="margin-left:10px;" onclick="document.getElementById('gears-info-box').style.display='none';"><?php _e('Cancel'); ?></button></div>
+	</div>
 
-<div id="wphead-info">
-<div id="user_info">
-<p><?php printf(__('Howdy, <a href="%1$s" title="Edit your profile">%2$s</a>'), 'profile.php', $user_identity) ?> |
-<!--
-<?php _e('<a href="http://codex.wordpress.org/">Documentation</a>'); ?> |
-<?php _e('<a href="http://wordpress.org/support/forum/4">Feedback</a>'); ?> |
--->
-<a href="<?php echo wp_logout_url() ?>" title="<?php _e('Log Out') ?>"><?php _e('Log Out'); ?></a></p>
-</div>
+	<div id="gears-msg3" style="display:none;">
+	<h3 class="info-box-title"><?php _e('Gears Status'); ?></h3>
+	<p><?php
+	
+	if ( $is_safari )
+		_e('Gears is installed and enabled on this computer. You can disable it from the Safari menu.');
+	else
+		_e('Gears is installed and enabled on this computer. You can disable it from your browser Tools menu.'); 
+	
+	?></p>
+	<p><?php _e('If there are any errors, try disabling Gears, then reload the page and enable it again.'); ?></p>
+	<p><?php _e('Local storage status:'); ?> <span id="gears-wait"><span style="color:#f00;"><?php _e('Please wait! Updating files:'); ?></span> <span id="gears-upd-number"></span></span></p>
+	<div class="submit"><button class="button" onclick="document.getElementById('gears-info-box').style.display='none';"><?php _e('Close'); ?></button></div>
+	</div>
+	</div>
+<?php } ?>
 
-<?php favorite_actions(); ?>
-</div>
-
-</div>
+<div id="user_info"><p><?php printf(__('Howdy, <a href="%1$s">%2$s</a>!'), 'profile.php', $user_identity) ?> | <a href="<?php echo site_url('wp-login.php?action=logout', 'login') ?>" title="<?php _e('Log Out') ?>"><?php _e('Log Out'); ?></a> | <?php _e('<a href="http://codex.wordpress.org/">Help</a>') ?> | <?php _e('<a href="http://wordpress.org/support/">Forums</a>'); if ( ! $is_opera ) { ?> | <span id="gears-menu"><a href="#" onclick="wpGears.message(1);return false;"><?php _e('Turbo') ?></a></span><?php } ?></p></div>
 
 <?php
 require(ABSPATH . 'wp-admin/menu-header.php');
-?>
-<div id="wpbody">
-<div id="wpbody-content">
-<?php
-do_action('admin_notices');
 
 if ( $parent_file == 'options-general.php' ) {
 	require(ABSPATH . 'wp-admin/options-head.php');
 }
+?>
+<div id="wpbody">

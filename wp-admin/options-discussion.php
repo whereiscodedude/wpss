@@ -1,12 +1,4 @@
 <?php
-/**
- * Discussion settings administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 $title = __('Discussion Settings');
@@ -16,17 +8,9 @@ include('admin-header.php');
 ?>
 
 <div class="wrap">
-<h2><?php echo wp_specialchars( $title ); ?></h2> 
-
+<h2><?php _e('Discussion Settings') ?></h2>
 <form method="post" action="options.php">
-<input type='hidden' name='option_page' value='discussion' />
-<input type="hidden" name="action" value="update" />
-<?php wp_nonce_field('discussion-options') ?>
-
-<p class="submit">
-<input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
-</p>
-
+<?php wp_nonce_field('update-options') ?>
 <table class="form-table">
 <tr valign="top">
 <th scope="row"><?php _e('Default article settings') ?></th>
@@ -47,59 +31,6 @@ include('admin-header.php');
 </fieldset></td>
 </tr>
 <tr valign="top">
-<th scope="row"><?php _e('Other comment settings') ?></th>
-<td><fieldset><legend class="hidden"><?php _e('Other comment settings') ?></legend>
-<label for="require_name_email"><input type="checkbox" name="require_name_email" id="require_name_email" value="1" <?php checked('1', get_option('require_name_email')); ?> /> <?php _e('Comment author must fill out name and e-mail') ?></label>
-<br />
-<label for="close_comments_for_old_posts">
-<input name="close_comments_for_old_posts" type="checkbox" id="close_comments_for_old_posts" value="1" <?php checked('1', get_option('close_comments_for_old_posts')); ?> />
-<?php printf( __('Automatically close comments on articles older than %s days'), '</label><input name="close_comments_days_old" type="text" id="close_comments_days_old" value="' . attribute_escape(get_option('close_comments_days_old')) . '" size="3" />') ?>
-<br />
-<label for="thread_comments">
-<input name="thread_comments" type="checkbox" id="thread_comments" value="1" <?php checked('1', get_option('thread_comments')); ?> />
-<?php 
-
-$maxdeep = (int) apply_filters( 'thread_comments_depth_max', 10 );
-
-$thread_comments_depth = '</label><select name="thread_comments_depth" id="thread_comments_depth">';
-for ( $i = 1; $i <= $maxdeep; $i++ ) {
-	$thread_comments_depth .= "<option value='$i'";
-	if ( get_option('thread_comments_depth') == $i ) $thread_comments_depth .= " selected='selected'";
-	$thread_comments_depth .= ">$i</option>";
-}
-$thread_comments_depth .= '</select>';
-
-printf( __('Enable threaded (nested) comments %s levels deep'), $thread_comments_depth );
-
-?><br />
-<label for="page_comments">
-<input name="page_comments" type="checkbox" id="page_comments" value="1" <?php checked('1', get_option('page_comments')); ?> />
-<?php
-
-$default_comments_page = '</label><select name="default_comments_page" id="default_comments_page"><option value="newest"';
-if ( 'newest' == get_option('default_comments_page') ) $default_comments_page .= ' selected="selected"';
-$default_comments_page .= '>' . __('last') . '</option><option value="oldest"';
-if ( 'oldest' == get_option('default_comments_page') ) $default_comments_page .= ' selected="selected"';
-$default_comments_page .= '>' . __('first') . '</option></select>';
-
-printf( __('Break comments into pages with %1$s comments per page and the %2$s page displayed by default'), '</label><input name="comments_per_page" type="text" id="comments_per_page" value="' . attribute_escape(get_option('comments_per_page')) . '" size="3" />', $default_comments_page );
-
-?>
-<br />
-<label for="comment_order"><?php
-
-$comment_order = '<select name="comment_order" id="comment_order"><option value="asc"';
-if ( 'asc' == get_option('comment_order') ) $comment_order .= ' selected="selected"';
-$comment_order .= '>' . __('older') . '</option><option value="desc"';
-if ( 'desc' == get_option('comment_order') ) $comment_order .= ' selected="selected"';
-$comment_order .= '>' . __('newer') . '</option></select>';
-
-printf( __('Comments should be displayed with the %s comments at the top of each page'), $comment_order );
-
-?></label>
-</fieldset></td>
-</tr>
-<tr valign="top">
 <th scope="row"><?php _e('E-mail me whenever') ?></th>
 <td><fieldset><legend class="hidden"><?php _e('E-mail me whenever') ?></legend>
 <label for="comments_notify">
@@ -117,6 +48,8 @@ printf( __('Comments should be displayed with the %s comments at the top of each
 <label for="comment_moderation">
 <input name="comment_moderation" type="checkbox" id="comment_moderation" value="1" <?php checked('1', get_option('comment_moderation')); ?> />
 <?php _e('An administrator must always approve the comment') ?> </label>
+<br />
+<label for="require_name_email"><input type="checkbox" name="require_name_email" id="require_name_email" value="1" <?php checked('1', get_option('require_name_email')); ?> /> <?php _e('Comment author must fill out name and e-mail') ?></label>
 <br />
 <label for="comment_whitelist"><input type="checkbox" name="comment_whitelist" id="comment_whitelist" value="1" <?php checked('1', get_option('comment_whitelist')); ?> /> <?php _e('Comment author must have a previously approved comment') ?></label>
 </fieldset></td>
@@ -141,7 +74,6 @@ printf( __('Comments should be displayed with the %s comments at the top of each
 </p>
 </fieldset></td>
 </tr>
-<?php do_settings_fields('discussion', 'default'); ?>
 </table>
 
 <h3><?php _e('Avatars') ?></h3>
@@ -213,12 +145,13 @@ echo apply_filters('default_avatar_select', $avatar_list);
 
 </fieldset></td>
 </tr>
-<?php do_settings_fields('discussion', 'avatars'); ?>
+
 </table>
 
-<?php do_settings_sections('discussion'); ?>
 
 <p class="submit">
+<input type="hidden" name="action" value="update" />
+<input type="hidden" name="page_options" value="default_pingback_flag,default_ping_status,default_comment_status,comments_notify,moderation_notify,comment_moderation,require_name_email,comment_whitelist,comment_max_links,moderation_keys,blacklist_keys,show_avatars,avatar_rating,avatar_default" />
 <input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
 </p>
 </form>

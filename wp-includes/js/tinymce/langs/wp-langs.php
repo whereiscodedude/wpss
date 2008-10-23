@@ -1,18 +1,5 @@
 <?php
 
-function mce_put_file( $path, $content ) {
-	if ( function_exists('file_put_contents') )
-		return @file_put_contents( $path, $content );
-
-	$newfile = false;
-	$fp = @fopen( $path, 'wb' );
-	if ($fp) {
-		$newfile = fwrite( $fp, $content );
-		fclose($fp);
-	}
-	return $newfile;
-}
-
 // escape text only if it needs translating
 function mce_escape($text) {
 	global $language;
@@ -21,7 +8,7 @@ function mce_escape($text) {
 	else return js_escape($text);
 }
 
-$lang = 'tinyMCE.addI18n({' . $language . ':{
+$strings = 'tinyMCE.addI18n({' . $language . ':{
 common:{
 edit_confirm:"' . mce_escape( __('Do you want to use the WYSIWYG mode for this textarea?') ) . '",
 apply:"' . mce_escape( __('Apply') ) . '",
@@ -451,5 +438,4 @@ caption:"' . mce_escape( __('Edit Image Caption') ) . '",
 alt:"' . mce_escape( __('Edit Alternate Text') ) . '"
 });
 ';
-
-// mce_put_file( ABSPATH . WPINC . '/js/tinymce/langs/wp-langs-' . $language . '.js', $lang );
+?>

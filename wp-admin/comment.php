@@ -1,12 +1,4 @@
 <?php
-/**
- * Comment Management Panel
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** Load WordPress Bootstrap */
 require_once('admin.php');
 
 $parent_file = 'edit-comments.php';
@@ -17,12 +9,7 @@ wp_reset_vars( array('action') );
 if ( isset( $_POST['deletecomment'] ) )
 	$action = 'deletecomment';
 
-/**
- * Display error message at bottom of comments.
- *
- * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
- */
-function comment_footer_die( $msg ) {  // 
+function comment_footer_die( $msg ) {  // $msg is assumed to contain HTML and be sanitized
 	echo "<div class='wrap'><p>$msg</p></div>";
 	include('admin-footer.php');
 	die;
@@ -34,6 +21,7 @@ case 'editcomment' :
 	$title = __('Edit Comment');
 
 	wp_enqueue_script('comment');
+
 	require_once('admin-header.php');
 
 	$comment_id = absint( $_GET['c'] );

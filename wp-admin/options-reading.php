@@ -1,12 +1,4 @@
 <?php
-/**
- * Reading settings administration panel.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** WordPress Administration Bootstrap */
 require_once('admin.php');
 
 $title = __('Reading Settings');
@@ -16,17 +8,9 @@ include('admin-header.php');
 ?>
 
 <div class="wrap">
-<h2><?php echo wp_specialchars( $title ); ?></h2> 
-
+<h2><?php _e('Reading Settings') ?></h2>
 <form name="form1" method="post" action="options.php">
-<?php wp_nonce_field('reading-options') ?>
-<input type='hidden' name='option_page' value='reading' />
-<input type="hidden" name="action" value="update" />
-
-<p class="submit">
-	<input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
-</p>
-
+<?php wp_nonce_field('update-options') ?>
 <table class="form-table">
 <?php if ( get_pages() ): ?>
 <tr valign="top">
@@ -79,10 +63,11 @@ include('admin-header.php');
 <td><input name="blog_charset" type="text" id="blog_charset" value="<?php form_option('blog_charset'); ?>" size="20" class="code" /><br />
 <?php _e('The character encoding you write your blog in (UTF-8 is <a href="http://developer.apple.com/documentation/macos8/TextIntlSvcs/TextEncodingConversionManager/TEC1.5/TEC.b0.html">recommended</a>)') ?></td>
 </tr>
-<?php do_settings_fields('reading', 'default'); ?>
 </table>
 <p class="submit">
-	<input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
+<input type="hidden" name="action" value="update" />
+<input type="hidden" name="page_options" value="posts_per_page,posts_per_rss,rss_use_excerpt,blog_charset,gzipcompression,show_on_front,page_on_front,page_for_posts" />
+<input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
 </p>
 </form>
 </div>

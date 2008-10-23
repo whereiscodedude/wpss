@@ -1,19 +1,5 @@
 <?php
-/**
- * WordPress Importer
- *
- * @package WordPress
- * @subpackage Importer
- */
 
-/**
- * WordPress Importer
- *
- * Will process the WordPress eXtended RSS files that you upload from the export
- * file.
- *
- * @since unknown
- */
 class WP_Import {
 
 	var $post_ids_processed = array ();
@@ -105,12 +91,7 @@ class WP_Import {
 				// this doesn't check that the file is perfectly valid but will at least confirm that it's not the wrong format altogether
 				if ( !$is_wxr_file && preg_match('|xmlns:wp="http://wordpress[.]org/export/\d+[.]\d+/"|', $importline) )
 					$is_wxr_file = true;
-				
-				if ( false !== strpos($importline, '<wp:base_site_url>') ) {
-					preg_match('|<wp:base_site_url>(.*?)</wp:base_site_url>|is', $importline, $url);
-					$this->base_url = $url[1];
-					continue;
-				}
+
 				if ( false !== strpos($importline, '<wp:category>') ) {
 					preg_match('|<wp:category>(.*?)</wp:category>|is', $importline, $category);
 					$this->categories[] = $category[1];
@@ -339,6 +320,7 @@ class WP_Import {
 	}
 
 	function process_posts() {
+		$i = -1;
 		echo '<ol>';
 
 		$this->get_entries(array(&$this, 'process_post'));
@@ -357,7 +339,7 @@ class WP_Import {
 		$post_ID = (int) $this->get_tag( $post, 'wp:post_id' );
   		if ( $post_ID && !empty($this->post_ids_processed[$post_ID]) ) // Processed already
 			return 0;
-
+		
 		set_time_limit( 60 );
 
 		// There are only ever one of these
@@ -408,7 +390,6 @@ class WP_Import {
 		if ( $post_exists ) {
 			echo '<li>';
 			printf(__('Post <em>%s</em> already exists.'), stripslashes($post_title));
-			$post_id = $post_exists; 
 		} else {
 
 			// If it has parent, process parent first.
@@ -429,7 +410,6 @@ class WP_Import {
 			$post_author = $this->checkauthor($post_author); //just so that if a post already exists, new users are not created by checkauthor
 
 			$postdata = compact('post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_excerpt', 'post_title', 'post_status', 'post_name', 'comment_status', 'ping_status', 'guid', 'post_parent', 'menu_order', 'post_type', 'post_password');
-			$postdata['import_id'] = $post_ID;
 			if ($post_type == 'attachment') {
 				$remote_url = $this->get_tag( $post, 'wp:attachment_url' );
 				if ( !$remote_url )
@@ -545,11 +525,6 @@ class WP_Import {
 	function process_attachment($postdata, $remote_url) {
 		if ($this->fetch_attachments and $remote_url) {
 			printf( __('Importing attachment <em>%s</em>... '), htmlspecialchars($remote_url) );
-			
-			// If the URL is absolute, but does not contain http, upload it assuming the base_site_url variable
-			if ( preg_match('/^\/[\w\W]+$/', $remote_url) )
-				$remote_url = rtrim($this->base_url,'/').$remote_url;
-			
 			$upload = $this->fetch_remote_file($postdata, $remote_url);
 			if ( is_wp_error($upload) ) {
 				printf( __('Remote file error: %s'), htmlspecialchars($upload->get_error_message()) );
@@ -716,12 +691,10 @@ class WP_Import {
 
 		$this->import_start();
 		$this->get_authors_from_post();
-		wp_suspend_cache_invalidation(true);
 		$this->get_entries();
 		$this->process_categories();
 		$this->process_tags();
 		$result = $this->process_posts();
-		wp_suspend_cache_invalidation(false);
 		$this->backfill_parents();
 		$this->backfill_attachment_urls();
 		$this->import_end();
@@ -773,13 +746,6 @@ class WP_Import {
 	}
 }
 
-/**
- * Register WordPress Importer
- *
- * @since unknown
- * @var WP_Import
- * @name $wp_import
- */
 $wp_import = new WP_Import();
 
 register_importer('wordpress', 'WordPress', __('Import <strong>posts, comments, custom fields, pages, and categories</strong> from a WordPress export file.'), array ($wp_import, 'dispatch'));

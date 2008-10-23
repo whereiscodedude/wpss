@@ -1,21 +1,5 @@
 <?php
-/**
- * BackPress Styles enqueue.
- *
- * These classes were refactored from the WordPress WP_Scripts and WordPress
- * script enqueue API.
- *
- * @package BackPress
- * @since r74
- */
 
-/**
- * BackPress Styles enqueue class.
- *
- * @package BackPress
- * @uses WP_Dependencies
- * @since r74
- */
 class WP_Styles extends WP_Dependencies {
 	var $base_url;
 	var $default_version;
