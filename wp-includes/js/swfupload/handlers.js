@@ -35,7 +35,6 @@ function prepareMediaItem(fileObj, serverData) {
 	jQuery('#media-item-' + fileObj.id + ' .bar').remove();
 	jQuery('#media-item-' + fileObj.id + ' .progress').hide();
 
-	var f = ( typeof shortform == 'undefined' ) ? 1 : 2;
 	// Old style: Append the HTML returned by the server -- thumbnail and form inputs
 	if ( isNaN(serverData) || !serverData ) {
 		jQuery('#media-item-' + fileObj.id).append(serverData);
@@ -43,7 +42,7 @@ function prepareMediaItem(fileObj, serverData) {
 	}
 	// New style: server data is just the attachment ID, fetch the thumbnail and form html from the server
 	else {
-		jQuery('#media-item-' + fileObj.id).load('async-upload.php', {attachment_id:serverData, fetch:f}, function(){prepareMediaItemInit(fileObj);updateMediaForm()});
+		jQuery('#media-item-' + fileObj.id).load('async-upload.php', {attachment_id:serverData, fetch:1}, function(){prepareMediaItemInit(fileObj);updateMediaForm()});
 	}
 }
 		
@@ -205,19 +204,6 @@ function fileDialogComplete(num_files_queued) {
 	}
 }
 
-function swfuploadPreLoad() {
-	var swfupload_element = jQuery('#'+swfu.customSettings.swfupload_element_id).get(0);
-	jQuery('#' + swfu.customSettings.degraded_element_id).hide();
-	// Doing this directly because jQuery().show() seems to have timing problems
-	if ( swfupload_element && ! swfupload_element.style.display )
-			swfupload_element.style.display = 'block';
-}
-
-function swfuploadLoadFailed() {
-	jQuery('#' + swfu.customSettings.swfupload_element_id).hide();
-	jQuery('#' + swfu.customSettings.degraded_element_id).show();
-}
-
 function uploadError(fileObj, error_code, message) {
 	// first the file specific error
 	if ( error_code == SWFUpload.UPLOAD_ERROR.MISSING_UPLOAD_URL ) {
@@ -247,36 +233,3 @@ function uploadError(fileObj, error_code, message) {
 		wpQueueError(swfuploadL10n.security_error);
 	}
 }
-
-// remember the last used image size, alignment and url
-jQuery(document).ready(function($){
-	var align = getUserSetting('align') || '', imgsize = getUserSetting('imgsize') || '';
-
-	$('tr.align input[type="radio"]').click(function(){
-		setUserSetting('align', $(this).val());
-	}).filter(function(){
-		if ( $(this).val() == align )
-			return true;
-		return false;
-	}).attr('checked','checked');
-
-	$('tr.image-size input[type="radio"]').click(function(){
-		setUserSetting('imgsize', $(this).val());
-	}).filter(function(){
-		if ( $(this).attr('disabled') || $(this).val() != imgsize )
-			return false;
-		return true;
-	}).attr('checked','checked');
-
-	$('tr.url button').click(function(){
-		var c = this.className || '';
-		c = c.replace(/.*?(url[^ '"]+).*/, '$1');
-		if (c) setUserSetting('urlbutton', c);
-		$(this).siblings('.urlfield').val( $(this).attr('title') );
-	});
-
-	$('tr.url .urlfield').each(function(){
-		var b = getUserSetting('urlbutton');
-		$(this).val( $(this).siblings('button.'+b).attr('title') );
-	});
-});

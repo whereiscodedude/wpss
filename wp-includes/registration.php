@@ -6,7 +6,7 @@
  */
 
 /**
- * Checks whether the given username exists.
+ * username_exists() - Checks whether the given username exists.
  *
  * @since 2.0.0
  *
@@ -22,7 +22,7 @@ function username_exists( $username ) {
 }
 
 /**
- * Checks whether the given email exists.
+ * email_exists() - Checks whether the given email exists.
  *
  * @since 2.1.0
  * @uses $wpdb
@@ -38,7 +38,7 @@ function email_exists( $email ) {
 }
 
 /**
- * Checks whether an username is valid.
+ * validate_username() - Checks whether an username is valid.
  *
  * @since 2.0.1
  * @uses apply_filters() Calls 'validate_username' hook on $valid check and $username as parameters
@@ -53,19 +53,21 @@ function validate_username( $username ) {
 }
 
 /**
- * Insert an user into the database.
+ * wp_insert_user() - Insert an user into the database.
  *
- * Can update a current user or insert a new user based on whether the user's ID
- * is present.
+ * Can update a current user or insert a new user based on whether
+ * the user's ID is present.
  *
- * Can be used to update the user's info (see below), set the user's role, and
- * set the user's preference on whether they want the rich editor on.
+ * Can be used to update the user's info (see below), set the user's
+ * role, and set the user's preference on whether they want the rich
+ * editor on.
  *
- * Most of the $userdata array fields have filters associated with the values.
- * The exceptions are 'rich_editing', 'role', 'jabber', 'aim', 'yim',
- * 'user_registered', and 'ID'. The filters have the prefix 'pre_user_' followed
- * by the field name. An example using 'description' would have the filter
- * called, 'pre_user_description' that can be hooked into.
+ * Most of the $userdata array fields have filters associated with
+ * the values. The exceptions are 'rich_editing', 'role', 'jabber',
+ * 'aim', 'yim', 'user_registered', and 'ID'. The filters have the
+ * prefix 'pre_user_' followed by the field name. An example using
+ * 'description' would have the filter called, 'pre_user_description'
+ * that can be hooked into.
  *
  * The $userdata array can contain the following fields:
  * 'ID' - An integer that will be used for updating an existing user.
@@ -75,16 +77,15 @@ function validate_username( $username ) {
  *		The default is the user's username.
  * 'user_url' - A string containing the user's URL for the user's web site.
  * 'user_email' - A string containing the user's email address.
- * 'display_name' - A string that will be shown on the site. Defaults to user's
- *		username. It is likely that you will want to change this, for both
- *		appearance and security through obscurity (that is if you don't use and
- *		delete the default 'admin' user).
+ * 'display_name' - A string that will be shown on the site. Defaults to user's username.
+ *		It is likely that you will want to change this, for both appearance and security
+ *		through obscurity (that is if you don't use and delete the default 'admin' user).
  * 'nickname' - The user's nickname, defaults to the user's username.
  * 'first_name' - The user's first name.
  * 'last_name' - The user's last name.
  * 'description' - A string containing content about the user.
- * 'rich_editing' - A string for whether to enable the rich editor or not. False
- *		if not empty.
+ * 'rich_editing' - A string for whether to enable the rich editor or not. False if not
+ *		empty.
  * 'user_registered' - The date the user registered. Format is 'Y-m-d H:i:s'.
  * 'role' - A string used to set the user's role.
  * 'jabber' - User's Jabber account.
@@ -109,7 +110,6 @@ function wp_insert_user($userdata) {
 	if ( !empty($ID) ) {
 		$ID = (int) $ID;
 		$update = true;
-		$old_user_data = get_userdata($ID);
 	} else {
 		$update = false;
 		// Hash the password
@@ -154,24 +154,9 @@ function wp_insert_user($userdata) {
 	if ( empty($rich_editing) )
 		$rich_editing = 'true';
 
-	if ( empty($comment_shortcuts) )
-		$comment_shortcuts = 'false';
-
 	if ( empty($admin_color) )
 		$admin_color = 'fresh';
 	$admin_color = preg_replace('|[^a-z0-9 _.\-@]|i', '', $admin_color);
-
-	if ( empty($use_ssl) )
-		$use_ssl = 0;
-
-	if ( empty($jabber) )
-		$jabber = '';
-
-	if ( empty($aim) )
-		$aim = '';
-
-	if ( empty($yim) )
-		$yim = '';
 
 	if ( empty($user_registered) )
 		$user_registered = gmdate('Y-m-d H:i:s');
@@ -195,9 +180,7 @@ function wp_insert_user($userdata) {
 	update_usermeta( $user_id, 'aim', $aim );
 	update_usermeta( $user_id, 'yim', $yim );
 	update_usermeta( $user_id, 'rich_editing', $rich_editing);
-	update_usermeta( $user_id, 'comment_shortcuts', $comment_shortcuts);
 	update_usermeta( $user_id, 'admin_color', $admin_color);
-	update_usermeta( $user_id, 'use_ssl', $use_ssl);
 
 	if ( $update && isset($role) ) {
 		$user = new WP_User($user_id);
@@ -213,7 +196,7 @@ function wp_insert_user($userdata) {
 	wp_cache_delete($user_login, 'userlogins');
 
 	if ( $update )
-		do_action('profile_update', $user_id, $old_user_data);
+		do_action('profile_update', $user_id);
 	else
 		do_action('user_register', $user_id);
 
@@ -221,16 +204,16 @@ function wp_insert_user($userdata) {
 }
 
 /**
- * Update an user in the database.
+ * wp_update_user() - Update an user in the database
  *
- * It is possible to update a user's password by specifying the 'user_pass'
- * value in the $userdata parameter array.
+ * It is possible to update a user's password by specifying the
+ * 'user_pass' value in the $userdata parameter array.
  *
- * If $userdata does not contain an 'ID' key, then a new user will be created
- * and the new user's ID will be returned.
+ * If $userdata does not contain an 'ID' key, then a new user
+ * will be created and the new user's ID will be returned.
  *
- * If current user's password is being updated, then the cookies will be
- * cleared.
+ * If current user's password is being updated, then the cookies
+ * will be cleared.
  *
  * @since 2.0.0
  * @see wp_insert_user() For what fields can be set in $userdata
@@ -271,7 +254,7 @@ function wp_update_user($userdata) {
 }
 
 /**
- * A simpler way of inserting an user into the database.
+ * wp_create_user() - A simpler way of inserting an user into the database.
  *
  * Creates a new user with just the username, password, and email. For a more
  * detail creation of a user, use wp_insert_user() to specify more infomation.

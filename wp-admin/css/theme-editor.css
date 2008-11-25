@@ -11,6 +11,7 @@
 #templateside {
 	float: right;
 	width: 190px;
+	margin-top:-3.4em;
 }
 
 #templateside h3, #postcustomstuff p.submit {
@@ -22,7 +23,7 @@ h3#bordertitle {
 }
 
 #templateside h4 {
-	margin-bottom: 0;
+	margin-bottom: 0px;
 }
 
 #templateside ol, #templateside ul {
@@ -32,7 +33,7 @@ h3#bordertitle {
 }
 
 #templateside ol li, #templateside ul li {
-	margin: 1px 0;
+	margin: 1px 0px;
 }
 
 #themeselector {
@@ -40,7 +41,6 @@ h3#bordertitle {
 	float: right;
 	position: relative;
 	bottom: 25px;
-	top:20px;
 }
 
 #themeselector select {
@@ -58,7 +58,7 @@ h3#bordertitle {
 
 div.bordertitle h2 {
 	border: none;
-	padding-bottom: 0;
+	padding-bottom: 0px;
 }
 
 div.tablenav {

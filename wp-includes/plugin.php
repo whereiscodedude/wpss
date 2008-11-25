@@ -11,8 +11,8 @@
  * {@link http://us2.php.net/manual/en/language.pseudo-types.php#language.types.callback 'callback'}
  * type are valid.
  *
- * Also see the {@link http://codex.wordpress.org/Plugin_API Plugin API} for
- * more information and examples on how to use a lot of these functions.
+ * Also see the {@link http://codex.wordpress.org/Plugin_API Plugin API} for more information
+ * and examples on how to use a lot of these functions.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -20,34 +20,31 @@
  */
 
 /**
- * Hooks a function or method to a specific filter action.
+ * add_filter() - Hooks a function or method to a specific filter action.
  *
  * Filters are the hooks that WordPress launches to modify text of various types
  * before adding it to the database or sending it to the browser screen. Plugins
  * can specify that one or more of its PHP functions is executed to
  * modify specific types of text at these times, using the Filter API.
  *
- * To use the API, the following code should be used to bind a callback to the
- * filter.
- *
+ * To use the API, the following code should be used to bind a callback to the filter
  * <code>
  * function example_hook($example) { echo $example; }
+ *
  * add_filter('example_filter', 'example_hook');
  * </code>
  *
- * In WordPress 1.5.1+, hooked functions can take extra arguments that are set
- * when the matching do_action() or apply_filters() call is run. The
- * $accepted_args allow for calling functions only when the number of args
- * match. Hooked functions can take extra arguments that are set when the
- * matching do_action() or apply_filters() call is run. For example, the action
- * comment_id_not_found will pass any functions that hook onto it the ID of the
- * requested comment.
+ * In WordPress 1.5.1+, hooked functions can take extra arguments that are set when
+ * the matching do_action() or apply_filters() call is run. The <tt>$accepted_args
+ * allow for calling functions only when the number of args match. Hooked functions
+ * can take extra arguments that are set when the matching <tt>do_action()</tt> or
+ * <tt>apply_filters()</tt> call is run. For example, the action <tt>comment_id_not_found</tt>
+ * will pass any functions that hook onto it the ID of the requested comment.
  *
- * <strong>Note:</strong> the function will return true no matter if the
- * function was hooked fails or not. There are no checks for whether the
- * function exists beforehand and no checks to whether the <tt>$function_to_add
- * is even a string. It is up to you to take care and this is done for
- * optimization purposes, so everything is as quick as possible.
+ * <strong>Note:</strong> the function will return true no matter if the function was hooked
+ * fails or not. There are no checks for whether the function exists beforehand and no checks
+ * to whether the <tt>$function_to_add is even a string. It is up to you to take care and
+ * this is done for optimization purposes, so everything is as quick as possible.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -56,7 +53,7 @@
  *	wp_filter['tag']['array of priorities']['array of functions serialized']['array of ['array (functions, accepted_args)]']
  * @global array $merged_filters Tracks the tags that need to be merged for later. If the hook is added, it doesn't need to run through that process.
  *
- * @param string $tag The name of the filter to hook the $function_to_add to.
+ * @param string $tag The name of the filter to hook the <tt>$function_to_add</tt> to.
  * @param callback $function_to_add The name of the function to be called when the filter is applied.
  * @param int $priority optional. Used to specify the order in which the functions associated with a particular action are executed (default: 10). Lower numbers correspond with earlier execution, and functions with the same priority are executed in the order in which they were added to the action.
  * @param int $accepted_args optional. The number of arguments the function accept (default 1).
@@ -72,7 +69,7 @@ function add_filter($tag, $function_to_add, $priority = 10, $accepted_args = 1) 
 }
 
 /**
- * Check if any filter has been registered for a hook.
+ * has_filter() - Check if any filter has been registered for a hook.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -93,7 +90,7 @@ function has_filter($tag, $function_to_check = false) {
 	if ( !$idx = _wp_filter_build_unique_id($tag, $function_to_check, false) )
 		return false;
 
-	foreach ( (array) array_keys($wp_filter[$tag]) as $priority ) {
+	foreach ( array_keys($wp_filter[$tag]) as $priority ) {
 		if ( isset($wp_filter[$tag][$priority][$idx]) )
 			return $priority;
 	}
@@ -102,12 +99,12 @@ function has_filter($tag, $function_to_check = false) {
 }
 
 /**
- * Call the functions added to a filter hook.
+ * apply_filters() - Call the functions added to a filter hook.
  *
- * The callback functions attached to filter hook $tag are invoked by calling
- * this function. This function can be used to create a new filter hook by
- * simply calling this function with the name of the new hook specified using
- * the $tag parameter.
+ * The callback functions attached to filter hook <tt>$tag</tt> are invoked by
+ * calling this function. This function can be used to create a new filter hook
+ * by simply calling this function with the name of the new hook specified using
+ * the <tt>$tag</a> parameter.
  *
  * The function allows for additional arguments to be added and passed to hooks.
  * <code>
@@ -123,7 +120,7 @@ function has_filter($tag, $function_to_check = false) {
  * @subpackage Plugin
  * @since 0.71
  * @global array $wp_filter Stores all of the filters
- * @global array $merged_filters Merges the filter hooks using this function.
+ * @global array $merge_filters Merges the filter hooks using this function.
  * @global array $wp_current_filter stores the list of current filters with the current one last
  *
  * @param string $tag The name of the filter hook.
@@ -174,14 +171,14 @@ function apply_filters($tag, $value) {
 }
 
 /**
- * Removes a function from a specified filter hook.
+ * remove_filter() - Removes a function from a specified filter hook.
  *
  * This function removes a function attached to a specified filter hook. This
  * method can be used to remove default functions attached to a specific filter
  * hook and possibly replace them with a substitute.
  *
- * To remove a hook, the $function_to_remove and $priority arguments must match
- * when the hook was added. This goes for both filters and actions. No warning
+ * To remove a hook, the <tt>$function_to_remove</tt> and <tt>$priority</tt> arguments
+ * must match when the hook was added. This goes for both filters and actions. No warning
  * will be given on removal failure.
  *
  * @package WordPress
@@ -209,33 +206,9 @@ function remove_filter($tag, $function_to_remove, $priority = 10, $accepted_args
 	return $r;
 }
 
-/**
- * Remove all of the hooks from a filter.
- *
- * @since 2.7
- *
- * @param string $tag The filter to remove hooks from.
- * @param int $priority The priority number to remove.
- * @return bool True when finished.
- */
-function remove_all_filters($tag, $priority = false) {
-	global $wp_filter, $merged_filters;
-
-	if( isset($wp_filter[$tag]) ) {
-		if( false !== $priority && isset($$wp_filter[$tag][$priority]) )
-			unset($wp_filter[$tag][$priority]);
-		else
-			unset($wp_filter[$tag]);
-	}
-
-	if( isset($merged_filters[$tag]) )
-		unset($merged_filters[$tag]);
-
-	return true;
-}
 
 /**
- * Retrieve the name of the current filter or action.
+ * current_filter() - Return the name of the current filter or action.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -250,7 +223,7 @@ function current_filter() {
 
 
 /**
- * Hooks a function on to a specific action.
+ * add_action() - Hooks a function on to a specific action.
  *
  * Actions are the hooks that the WordPress core launches at specific points
  * during execution, or when specific events occur. Plugins can specify that
@@ -263,7 +236,7 @@ function current_filter() {
  * @subpackage Plugin
  * @since 1.2
  *
- * @param string $tag The name of the action to which the $function_to_add is hooked.
+ * @param string $tag The name of the action to which the <tt>$function_to-add</tt> is hooked.
  * @param callback $function_to_add The name of the function you wish to be called.
  * @param int $priority optional. Used to specify the order in which the functions associated with a particular action are executed (default: 10). Lower numbers correspond with earlier execution, and functions with the same priority are executed in the order in which they were added to the action.
  * @param int $accepted_args optional. The number of arguments the function accept (default 1).
@@ -274,17 +247,16 @@ function add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1) 
 
 
 /**
- * Execute functions hooked on a specific action hook.
+ * do_action() - Execute functions hooked on a specific action hook.
  *
- * This function invokes all functions attached to action hook $tag. It is
- * possible to create new action hooks by simply calling this function,
+ * This function invokes all functions attached to action hook <tt>$tag</tt>.
+ * It is possible to create new action hooks by simply calling this function,
  * specifying the name of the new hook using the <tt>$tag</tt> parameter.
  *
- * You can pass extra arguments to the hooks, much like you can with
- * apply_filters().
+ * You can pass extra arguments to the hooks, much like you can with apply_filters().
  *
- * @see apply_filters() This function works similar with the exception that
- * nothing is returned and only the functions or methods are called.
+ * @see apply_filters() This function works similar with the exception that nothing is
+ * returned and only the functions or methods are called.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -344,7 +316,7 @@ function do_action($tag, $arg = '') {
 }
 
 /**
- * Retrieve the number times an action is fired.
+ * did_action() - Return the number times an action is fired.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -364,10 +336,10 @@ function did_action($tag) {
 }
 
 /**
- * Execute functions hooked on a specific action hook, specifying arguments in an array.
+ * do_action_ref_array() - Execute functions hooked on a specific action hook, specifying arguments in an array.
  *
- * @see do_action() This function is identical, but the arguments passed to the
- * functions hooked to <tt>$tag</tt> are supplied using an array.
+ * @see do_action() This function is identical, but the arguments passed to
+ * the functions hooked to <tt>$tag</tt> are supplied using an array.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -419,7 +391,7 @@ function do_action_ref_array($tag, $args) {
 }
 
 /**
- * Check if any action has been registered for a hook.
+ * has_action() - Check if any action has been registered for a hook.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -435,7 +407,7 @@ function has_action($tag, $function_to_check = false) {
 }
 
 /**
- * Removes a function from a specified action hook.
+ * remove_action() - Removes a function from a specified action hook.
  *
  * This function removes a function attached to a specified action hook. This
  * method can be used to remove default functions attached to a specific filter
@@ -455,25 +427,12 @@ function remove_action($tag, $function_to_remove, $priority = 10, $accepted_args
 	return remove_filter($tag, $function_to_remove, $priority, $accepted_args);
 }
 
-/**
- * Remove all of the hooks from an action.
- *
- * @since 2.7
- *
- * @param string $tag The action to remove hooks from.
- * @param int $priority The priority number to remove them from.
- * @return bool True when finished.
- */
-function remove_all_actions($tag, $priority = false) {
-	return remove_all_filters($tag, $priority);
-}
-
 //
 // Functions for handling plugins.
 //
 
 /**
- * Gets the basename of a plugin.
+ * plugin_basename() - Gets the basename of a plugin.
  *
  * This method extracts the name of a plugin from its filename.
  *
@@ -497,15 +456,15 @@ function plugin_basename($file) {
 }
 
 /**
- * Set the activation hook for a plugin.
+ * register_activation_hook() - Hook a function on a plugin activation action hook.
  *
  * When a plugin is activated, the action 'activate_PLUGINNAME' hook is
  * activated. In the name of this hook, PLUGINNAME is replaced with the name of
  * the plugin, including the optional subdirectory. For example, when the plugin
- * is located in wp-content/plugin/sampleplugin/sample.php, then the name of
- * this hook will become 'activate_sampleplugin/sample.php'. When the plugin
- * consists of only one file and is (as by default) located at
- * wp-content/plugin/sample.php the name of this hook will be
+ * is located in <tt>wp-content/plugin/sampleplugin/sample.php</tt>, then the
+ * name of this hook will become 'activate_sampleplugin/sample.php'
+ * When the plugin consists of only one file and is (as by default) located at
+ * <tt>wp-content/plugin/sample.php</tt> the name of this hook will be
  * 'activate_sample.php'.
  *
  * @package WordPress
@@ -515,7 +474,7 @@ function plugin_basename($file) {
  * @access private
  *
  * @param string $file The filename of the plugin including the path.
- * @param callback $function the function hooked to the 'activate_PLUGIN' action.
+ * @param string $function the function hooked to the 'activate_PLUGIN' action.
  */
 function register_activation_hook($file, $function) {
 	$file = plugin_basename($file);
@@ -523,16 +482,15 @@ function register_activation_hook($file, $function) {
 }
 
 /**
- * Set the deactivation hook for a plugin.
+ * register_deactivation_hook() - Hook a function on a plugin deactivation action hook.
  *
  * When a plugin is deactivated, the action 'deactivate_PLUGINNAME' hook is
- * deactivated. In the name of this hook, PLUGINNAME is replaced with the name
- * of the plugin, including the optional subdirectory. For example, when the
- * plugin is located in wp-content/plugin/sampleplugin/sample.php, then
- * the name of this hook will become 'activate_sampleplugin/sample.php'.
- *
+ * deactivated. In the name of this hook, PLUGINNAME is replaced with the name of
+ * the plugin, including the optional subdirectory. For example, when the plugin
+ * is located in <tt>wp-content/plugin/sampleplugin/sample.php</tt>, then the
+ * name of this hook will become 'activate_sampleplugin/sample.php'.
  * When the plugin consists of only one file and is (as by default) located at
- * wp-content/plugin/sample.php the name of this hook will be
+ * <tt>wp-content/plugin/sample.php</tt> the name of this hook will be
  * 'activate_sample.php'.
  *
  * @package WordPress
@@ -542,7 +500,7 @@ function register_activation_hook($file, $function) {
  * @access private
  *
  * @param string $file The filename of the plugin including the path.
- * @param callback $function the function hooked to the 'activate_PLUGIN' action.
+ * @param string $function the function hooked to the 'activate_PLUGIN' action.
  */
 function register_deactivation_hook($file, $function) {
 	$file = plugin_basename($file);
@@ -550,49 +508,14 @@ function register_deactivation_hook($file, $function) {
 }
 
 /**
- * Set the uninstallation hook for a plugin.
+ * _wp_call_all_hook() - Calls the 'all' hook, which will process the functions hooked into it.
  *
- * Registers the uninstall hook that will be called when the user clicks on the
- * uninstall link that calls for the plugin to uninstall itself. The link won't
- * be active unless the plugin hooks into the action.
+ * The 'all' hook passes all of the arguments or parameters that were used for the
+ * hook, which this function was called for.
  *
- * The plugin should not run arbitrary code outside of functions, when
- * registering the uninstall hook. In order to run using the hook, the plugin
- * will have to be included, which means that any code laying outside of a
- * function will be run during the uninstall process. The plugin should not
- * hinder the uninstall process.
- *
- * If the plugin can not be written without running code within the plugin, then
- * the plugin should create a file named 'uninstall.php' in the base plugin
- * folder. This file will be called, if it exists, during the uninstall process
- * bypassing the uninstall hook. The plugin, when using the 'uninstall.php'
- * should always check for the 'WP_UNINSTALL_PLUGIN' constant, before
- * executing.
- *
- * @since 2.7
- *
- * @param string $file
- * @param callback $callback The callback to run when the hook is called.
- */
-function register_uninstall_hook($file, $callback) {
-	// The option should not be autoloaded, because it is not needed in most
-	// cases. Emphasis should be put on using the 'uninstall.php' way of
-	// uninstalling the plugin.
-	$uninstallable_plugins = (array) get_option('uninstall_plugins');
-	$uninstallable_plugins[plugin_basename($file)] = $callback;
-	update_option('uninstall_plugins', $uninstallable_plugins);
-}
-
-/**
- * Calls the 'all' hook, which will process the functions hooked into it.
- *
- * The 'all' hook passes all of the arguments or parameters that were used for
- * the hook, which this function was called for.
- *
- * This function is used internally for apply_filters(), do_action(), and
- * do_action_ref_array() and is not meant to be used from outside those
- * functions. This function does not check for the existence of the all hook, so
- * it will fail unless the all hook exists prior to this function call.
+ * This function is used internally for apply_filters(), do_action(), and do_action_ref_array()
+ * and is not meant to be used from outside those functions. This function does not check for the
+ * existence of the all hook, so it will fail unless the all hook exists prior to this function call.
  *
  * @package WordPress
  * @subpackage Plugin
@@ -617,7 +540,7 @@ function _wp_call_all_hook($args) {
 }
 
 /**
- * Build Unique ID for storage and retrieval.
+ * _wp_filter_build_unique_id() - Build Unique ID for storage and retrieval
  *
  * The old way to serialize the callback caused issues and this function is the
  * solution. It works by checking for objects and creating an a new property in
@@ -626,18 +549,20 @@ function _wp_call_all_hook($args) {
  *
  * It also allows for the removal of actions and filters for objects after they
  * change class properties. It is possible to include the property $wp_filter_id
- * in your class and set it to "null" or a number to bypass the workaround.
- * However this will prevent you from adding new classes and any new classes
- * will overwrite the previous hook by the same class.
+ * in your class and set it to "null" or a number to bypass the workaround. However
+ * this will prevent you from adding new classes and any new classes will overwrite
+ * the previous hook by the same class.
  *
- * Functions and static method callbacks are just returned as strings and
- * shouldn't have any speed penalty.
+ * Functions and static method callbacks are just returned as strings and shouldn't
+ * have any speed penalty.
  *
  * @package WordPress
  * @subpackage Plugin
- * @access private
  * @since 2.2.3
+ *
  * @link http://trac.wordpress.org/ticket/3875
+ *
+ * @access private
  *
  * @global array $wp_filter Storage for all of the filters and actions
  * @param string $tag Used in counting how many hooks were applied
@@ -658,7 +583,7 @@ function _wp_filter_build_unique_id($tag, $function, $priority) {
 		if ( !isset($function[0]->wp_filter_id) ) {
 			if ( false === $priority )
 				return false;
-			$count = isset($wp_filter[$tag][$priority]) ? count((array)$wp_filter[$tag][$priority]) : 0;
+			$count = count((array)$wp_filter[$tag][$priority]);
 			$function[0]->wp_filter_id = $count;
 			$obj_idx .= $count;
 			unset($count);

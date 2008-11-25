@@ -1,9 +1,3 @@
-<?php
-/**
- * @package WordPress
- * @subpackage Default_Theme
- */
-?>
 
 <hr />
 <div id="footer">

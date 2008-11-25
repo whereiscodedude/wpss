@@ -21,14 +21,10 @@ tinyMCEPopup = {
 		tinyMCE = w.tinyMCE;
 		t.editor = tinymce.EditorManager.activeEditor;
 		t.params = t.editor.windowManager.params;
-		t.features = t.editor.windowManager.features;
 
 		// Setup local DOM
 		t.dom = t.editor.windowManager.createInstance('tinymce.dom.DOMUtils', document);
-
-		// Enables you to skip loading the default css
-		if (t.features.popup_css !== false)
-			t.dom.loadCSS(t.features.popup_css || t.editor.settings.popup_css);
+		t.dom.loadCSS(t.editor.settings.popup_css);
 
 		// Setup on init listeners
 		t.listeners = [];
@@ -131,14 +127,6 @@ tinyMCEPopup = {
 		this.editor.execCallback('file_browser_callback', element_id, document.getElementById(element_id).value, type, window);
 	},
 
-	confirm : function(t, cb, s) {
-		this.editor.windowManager.confirm(t, cb, s, window);
-	},
-
-	alert : function(tx, cb, s) {
-		this.editor.windowManager.alert(tx, cb, s, window);
-	},
-
 	close : function() {
 		var t = this;
 
@@ -172,25 +160,18 @@ tinyMCEPopup = {
 	},*/
 
 	_onDOMLoaded : function() {
-		var t = this, ti = document.title, bm, h, nv;
+		var t = this, ti = document.title, bm, h;
 
 		// Translate page
-		if (t.features.translate_i18n !== false) {
-			h = document.body.innerHTML;
+		h = document.body.innerHTML;
 
-			// Replace a=x with a="x" in IE
-			if (tinymce.isIE)
-				h = h.replace(/ (value|title|alt)=([^"][^\s>]+)/gi, ' $1="$2"')
+		// Replace a=x with a="x" in IE
+		if (tinymce.isIE)
+			h = h.replace(/ (value|title|alt)=([^"][^\s>]+)/gi, ' $1="$2"')
 
-			document.dir = t.editor.getParam('directionality','');
-
-			if ((nv = t.editor.translate(h)) && nv != h)
-				document.body.innerHTML = nv;
-
-			if ((nv = t.editor.translate(ti)) && nv != ti)
-				document.title = ti = nv;
-		}
-
+		document.dir = t.editor.getParam('directionality','');
+		document.body.innerHTML = t.editor.translate(h);
+		document.title = ti = t.editor.translate(ti);
 		document.body.style.display = '';
 
 		// Restore selection in IE when focus is placed on a non textarea or input element of the type text

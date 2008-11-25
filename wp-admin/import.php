@@ -1,19 +1,12 @@
 <?php
-/**
- * Import WordPress Administration Panel
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** Load WordPress Bootstrap */
 require_once ('admin.php');
 $title = __('Import');
+$parent_file = 'edit.php';
 require_once ('admin-header.php');
 ?>
 
 <div class="wrap">
-<h2><?php echo wp_specialchars( $title ); ?></h2> 
+<h2><?php _e('Import'); ?></h2>
 <p><?php _e('If you have posts or comments in another system, WordPress can import those into this blog. To get started, choose a system to import from below:'); ?></p>
 
 <?php
@@ -39,7 +32,7 @@ if (empty ($importers)) {
 	echo '<p>'.__('No importers are available.').'</p>'; // TODO: make more helpful
 } else {
 ?>
-<table class="widefat" cellspacing="0">
+<table class="widefat">
 
 <?php
 	$style = '';

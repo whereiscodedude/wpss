@@ -1,46 +1,9 @@
 <?php
-/**
- * Blogger Importer
- *
- * @package WordPress
- * @subpackage Importer
- */
 
-/**
- * How many records per GData query
- *
- * @package WordPress
- * @subpackage Blogger_Import
- * @var int
- * @since unknown
- */
-define( 'MAX_RESULTS',        50 );
+define( 'MAX_RESULTS',        50 ); // How many records per GData query
+define( 'MAX_EXECUTION_TIME', 20 ); // How many seconds to let the script run
+define( 'STATUS_INTERVAL',     3 ); // How many seconds between status bar updates
 
-/**
- * How many seconds to let the script run
- *
- * @package WordPress
- * @subpackage Blogger_Import
- * @var int
- * @since unknown
- */
-define( 'MAX_EXECUTION_TIME', 20 );
-
-/**
- * How many seconds between status bar updates
- *
- * @package WordPress
- * @subpackage Blogger_Import
- * @var int
- * @since unknown
- */
-define( 'STATUS_INTERVAL',     3 );
-
-/**
- * Blogger Importer class
- *
- * @since unknown
- */
 class Blogger_Import {
 
 	// Shows the welcome screen and the magic auth link.
@@ -522,7 +485,7 @@ class Blogger_Import {
 	}
 
 	function import_post( $entry ) {
-		global $importing_blog;
+		global $wpdb, $importing_blog;
 
 		// The old permalink is all Blogger gives us to link comments to their posts.
 		if ( isset( $entry->draft ) )
@@ -659,7 +622,7 @@ class Blogger_Import {
 	}
 
 	function get_user_options($current) {
-		global $importer_users;
+		global $wpdb, $importer_users;
 		if ( ! isset( $importer_users ) )
 			$importer_users = (array) get_users_of_blog();
 
@@ -814,7 +777,7 @@ class Blogger_Import {
 				echo $result->get_error_message();
 		} elseif ( isset($_GET['token']) )
 			$this->auth();
-		elseif ( isset($this->token) && $this->token_is_valid() )
+		elseif ( $this->token && $this->token_is_valid() )
 			$this->show_blogs();
 		else
 			$this->greet();

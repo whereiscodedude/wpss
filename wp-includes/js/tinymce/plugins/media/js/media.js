@@ -183,7 +183,7 @@ function insertMedia() {
 	tinyMCEPopup.restoreSelection();
 
 	if (!AutoValidator.validate(f)) {
-		tinyMCEPopup.alert(ed.getLang('invalid_data'));
+		alert(ed.getLang('invalid_data'));
 		return false;
 	}
 
@@ -359,9 +359,7 @@ function changedType(t) {
 	d.getElementById('shockwave_options').style.display = 'none';
 	d.getElementById('wmp_options').style.display = 'none';
 	d.getElementById('rmp_options').style.display = 'none';
-
-	if (t)
-		d.getElementById(t + '_options').style.display = 'block';
+	d.getElementById(t + '_options').style.display = 'block';
 }
 
 function serializeParameters() {
@@ -602,7 +600,7 @@ function generatePreview(c) {
 
 	// Avoid annoying warning about insecure items
 	if (!tinymce.isIE || document.location.protocol != 'https:') {
-		h += '<object classid="' + cls + '" codebase="' + codebase + '" width="' + pl.width + '" height="' + pl.height + '" id="' + pl.id + '" name="' + pl.name + '" align="' + pl.align + '">';
+		h += '<object classid="clsid:' + cls + '" codebase="' + codebase + '" width="' + pl.width + '" height="' + pl.height + '" id="' + pl.id + '" name="' + pl.name + '" align="' + pl.align + '">';
 
 		for (n in pl) {
 			h += '<param name="' + n + '" value="' + pl[n] + '">';

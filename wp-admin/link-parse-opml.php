@@ -1,12 +1,4 @@
 <?php
-/**
- * Parse OPML XML files and store in globals.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** Load WordPress Bootstrap */
 require_once('../wp-load.php');
 
 // columns we wish to find are:  link_url, link_name, link_target, link_description
@@ -23,24 +15,9 @@ $opml_map = array('URL'         => 'link_url',
 $map = $opml_map;
 
 /**
- * XML callback function for the start of a new XML tag.
- *
- * @since unknown
- * @access private
- *
- * @uses $updated_timestamp Not used inside function.
- * @uses $all_links Not used inside function.
- * @uses $map Stores names of attributes to use.
- * @global array $names
- * @global array $urls
- * @global array $targets
- * @global array $descriptions
- * @global array $feeds
- *
- * @param mixed $parser XML Parser resource.
- * @param string $tagName XML element name.
- * @param array $attrs XML element attributes.
- */
+ ** startElement()
+ ** Callback function. Called at the start of a new xml tag.
+ **/
 function startElement($parser, $tagName, $attrs) {
 	global $updated_timestamp, $all_links, $map;
 	global $names, $urls, $targets, $descriptions, $feeds;
@@ -64,16 +41,9 @@ function startElement($parser, $tagName, $attrs) {
 }
 
 /**
- * XML callback function that is called at the end of a XML tag.
- *
- * @since unknown
- * @access private
- * @package WordPress
- * @subpackage Dummy
- *
- * @param mixed $parser XML Parser resource.
- * @param string $tagName XML tag name.
- */
+ ** endElement()
+ ** Callback function. Called at the end of an xml tag.
+ **/
 function endElement($parser, $tagName) {
 	// nothing to do.
 }

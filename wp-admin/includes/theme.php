@@ -1,18 +1,5 @@
 <?php
-/**
- * WordPress Theme Administration API
- *
- * @package WordPress
- * @subpackage Administration
- */
 
-/**
- * {@internal Missing Short Description}}
- *
- * @since unknown
- *
- * @return unknown
- */
 function current_theme_info() {
 	$themes = get_themes();
 	$current_theme = get_current_theme();
@@ -31,13 +18,6 @@ function current_theme_info() {
 	return $ct;
 }
 
-/**
- * {@internal Missing Short Description}}
- *
- * @since unknown
- *
- * @return unknown
- */
 function get_broken_themes() {
 	global $wp_broken_themes;
 
@@ -45,13 +25,6 @@ function get_broken_themes() {
 	return $wp_broken_themes;
 }
 
-/**
- * {@internal Missing Short Description}}
- *
- * @since unknown
- *
- * @return unknown
- */
 function get_page_templates() {
 	$themes = get_themes();
 	$theme = get_current_theme();
@@ -62,13 +35,11 @@ function get_page_templates() {
 		foreach ( $templates as $template ) {
 			$template_data = implode( '', file( WP_CONTENT_DIR.$template ));
 
-			$name = '';
-			if ( preg_match( '|Template Name:(.*)$|mi', $template_data, $name ) )
-				$name = $name[1];
+			preg_match( '|Template Name:(.*)$|mi', $template_data, $name );
+			preg_match( '|Description:(.*)$|mi', $template_data, $description );
 
-			$description = '';
-			if( preg_match( '|Description:(.*)$|mi', $template_data, $description ) )
-				$description = $description[1];
+			$name = $name[1];
+			$description = $description[1];
 
 			if ( !empty( $name ) ) {
 				$page_templates[trim( $name )] = basename( $template );

@@ -1,9 +1,6 @@
 <?php
 /**
- * Deprecated functions from past WordPress versions. You shouldn't use these
- * globals and functions and look for the alternatives instead. The functions
- * and globals will be removed in a later version.
- *
+ * Deprecated functions from past WordPress versions
  * @package WordPress
  * @subpackage Deprecated
  */
@@ -79,7 +76,7 @@ $tablepostmeta = $wpdb->postmeta;
  */
 
 /**
- * Entire Post data.
+ * get_postdata() - Entire Post data
  *
  * @since 0.71
  * @deprecated Use get_post()
@@ -115,7 +112,7 @@ function get_postdata($postid) {
 }
 
 /**
- * Sets up the WordPress Loop.
+ * start_wp() - Sets up the WordPress Loop
  *
  * @since 1.0.1
  * @deprecated Since 1.5 - {@link http://codex.wordpress.org/The_Loop Use new WordPress Loop}
@@ -132,7 +129,7 @@ function start_wp() {
 }
 
 /**
- * Return or Print Category ID.
+ * the_category_ID() - Return or Print Category ID
  *
  * @since 0.71
  * @deprecated use get_the_category()
@@ -155,7 +152,7 @@ function the_category_ID($echo = true) {
 }
 
 /**
- * Print category with optional text before and after.
+ * the_category_head() - Print category with optional text before and after
  *
  * @since 0.71
  * @deprecated use get_the_category_by_ID()
@@ -181,7 +178,7 @@ function the_category_head($before='', $after='') {
 }
 
 /**
- * Prints link to the previous post.
+ * previous_post() - Prints link to the previous post
  *
  * @since 1.5
  * @deprecated Use previous_post_link()
@@ -217,7 +214,7 @@ function previous_post($format='%', $previous='previous post: ', $title='yes', $
 }
 
 /**
- * Prints link to the next post.
+ * next_post() - Prints link to the next post
  *
  * @since 0.71
  * @deprecated Use next_post_link()
@@ -252,7 +249,7 @@ function next_post($format='%', $next='next post: ', $title='yes', $in_same_cat=
 }
 
 /**
- * Whether user can create a post.
+ * user_can_create_post() - Whether user can create a post
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -271,7 +268,7 @@ function user_can_create_post($user_id, $blog_id = 1, $category_id = 'None') {
 }
 
 /**
- * Whether user can create a post.
+ * user_can_create_draft() - Whether user can create a post
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -290,7 +287,7 @@ function user_can_create_draft($user_id, $blog_id = 1, $category_id = 'None') {
 }
 
 /**
- * Whether user can edit a post.
+ * user_can_edit_post() - Whether user can edit a post
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -318,7 +315,7 @@ function user_can_edit_post($user_id, $post_id, $blog_id = 1) {
 }
 
 /**
- * Whether user can delete a post.
+ * user_can_delete_post() - Whether user can delete a post
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -337,7 +334,7 @@ function user_can_delete_post($user_id, $post_id, $blog_id = 1) {
 }
 
 /**
- * Whether user can set new posts' dates.
+ * user_can_set_post_date() - Whether user can set new posts' dates
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -355,8 +352,9 @@ function user_can_set_post_date($user_id, $blog_id = 1, $category_id = 'None') {
 	return (($author_data->user_level > 4) && user_can_create_post($user_id, $blog_id, $category_id));
 }
 
+/* returns true if $user_id can edit $post_id's date */
 /**
- * Whether user can delete a post.
+ * user_can_edit_post_date() - Whether user can delete a post
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -365,7 +363,7 @@ function user_can_set_post_date($user_id, $blog_id = 1, $category_id = 'None') {
  * @param int $user_id
  * @param int $post_id
  * @param int $blog_id Not Used
- * @return bool returns true if $user_id can edit $post_id's date
+ * @return bool
  */
 function user_can_edit_post_date($user_id, $post_id, $blog_id = 1) {
 	_deprecated_function(__FUNCTION__, '0.0', 'current_user_can()');
@@ -374,8 +372,9 @@ function user_can_edit_post_date($user_id, $post_id, $blog_id = 1) {
 	return (($author_data->user_level > 4) && user_can_edit_post($user_id, $post_id, $blog_id));
 }
 
+/* returns true if $user_id can edit $post_id's comments */
 /**
- * Whether user can delete a post.
+ * user_can_edit_post_comments() - Whether user can delete a post
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -384,7 +383,7 @@ function user_can_edit_post_date($user_id, $post_id, $blog_id = 1) {
  * @param int $user_id
  * @param int $post_id
  * @param int $blog_id Not Used
- * @return bool returns true if $user_id can edit $post_id's comments
+ * @return bool
  */
 function user_can_edit_post_comments($user_id, $post_id, $blog_id = 1) {
 	_deprecated_function(__FUNCTION__, '0.0', 'current_user_can()');
@@ -393,8 +392,9 @@ function user_can_edit_post_comments($user_id, $post_id, $blog_id = 1) {
 	return user_can_edit_post($user_id, $post_id, $blog_id);
 }
 
+/* returns true if $user_id can delete $post_id's comments */
 /**
- * Whether user can delete a post.
+ * user_can_delete_post_comments() - Whether user can delete a post
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -403,7 +403,7 @@ function user_can_edit_post_comments($user_id, $post_id, $blog_id = 1) {
  * @param int $user_id
  * @param int $post_id
  * @param int $blog_id Not Used
- * @return bool returns true if $user_id can delete $post_id's comments
+ * @return bool
  */
 function user_can_delete_post_comments($user_id, $post_id, $blog_id = 1) {
 	_deprecated_function(__FUNCTION__, '0.0', 'current_user_can()');
@@ -413,7 +413,7 @@ function user_can_delete_post_comments($user_id, $post_id, $blog_id = 1) {
 }
 
 /**
- * Can user can edit other user.
+ * user_can_edit_user() - Can user can edit other user
  *
  * @since 1.5
  * @deprecated Use current_user_can()
@@ -435,24 +435,24 @@ function user_can_edit_user($user_id, $other_user) {
 }
 
 /**
- * Gets the links associated with category $cat_name.
+ * get_linksbyname() - Gets the links associated with category $cat_name.
  *
  * @since 0.71
  * @deprecated Use get_links()
  * @see get_links()
  *
- * @param string $cat_name Optional. The category name to use. If no match is found uses all.
- * @param string $before Optional. The html to output before the link.
- * @param string $after Optional. The html to output after the link.
- * @param string $between Optional. The html to output between the link/image and it's description. Not used if no image or $show_images is true.
- * @param bool $show_images Optional. Whether to show images (if defined).
- * @param string $orderby Optional. The order to output the links. E.g. 'id', 'name', 'url', 'description' or 'rating'. Or maybe owner.
+ * @param string 	$cat_name 	Optional. The category name to use. If no match is found uses all.
+ * @param string 	$before 	Optional. The html to output before the link.
+ * @param string 	$after 		Optional. The html to output after the link.
+ * @param string 	$between 	Optional. The html to output between the link/image and it's description. Not used if no image or $show_images is true.
+ * @param bool 		$show_images Optional. Whether to show images (if defined).
+ * @param string 	$orderby	Optional. The order to output the links. E.g. 'id', 'name', 'url', 'description' or 'rating'. Or maybe owner.
  *		If you start the name with an underscore the order will be reversed. You can also specify 'rand' as the order which will return links in a
  *		random order.
- * @param bool $show_description Optional. Whether to show the description if show_images=false/not defined.
- * @param bool $show_rating Optional. Show rating stars/chars.
- * @param int $limit		Optional. Limit to X entries. If not specified, all entries are shown.
- * @param int $show_updated Optional. Whether to show last updated timestamp
+ * @param bool 		$show_description Optional. Whether to show the description if show_images=false/not defined.
+ * @param bool 		$show_rating Optional. Show rating stars/chars.
+ * @param int 		$limit		Optional. Limit to X entries. If not specified, all entries are shown.
+ * @param int 		$show_updated Optional. Whether to show last updated timestamp
  */
 function get_linksbyname($cat_name = "noname", $before = '', $after = '<br />', $between = " ", $show_images = true, $orderby = 'id',
 						 $show_description = true, $show_rating = false,
@@ -468,7 +468,7 @@ function get_linksbyname($cat_name = "noname", $before = '', $after = '<br />', 
 }
 
 /**
- * Gets the links associated with the named category.
+ * wp_get_linksbyname() - Gets the links associated with the named category.
  *
  * @since 1.0.1
  * @deprecated Use wp_get_links()
@@ -491,7 +491,7 @@ function wp_get_linksbyname($category, $args = '') {
 }
 
 /**
- * Gets an array of link objects associated with category $cat_name.
+ * get_linkobjectsbyname() - Gets an array of link objects associated with category $cat_name.
  *
  * <code>
  *	$links = get_linkobjectsbyname('fred');
@@ -523,7 +523,7 @@ function get_linkobjectsbyname($cat_name = "noname" , $orderby = 'name', $limit 
 }
 
 /**
- * Gets an array of link objects associated with category n.
+ * get_linkobjects() - Gets an array of link objects associated with category n.
  *
  * Usage:
  * <code>
@@ -577,7 +577,7 @@ function get_linkobjects($category = 0, $orderby = 'name', $limit = 0) {
 }
 
 /**
- * Gets the links associated with category 'cat_name' and display rating stars/chars.
+ * get_linksbyname_withrating() - Gets the links associated with category 'cat_name' and display rating stars/chars.
  *
  * @since 0.71
  * @deprecated Use get_bookmarks()
@@ -604,7 +604,7 @@ function get_linksbyname_withrating($cat_name = "noname", $before = '', $after =
 }
 
 /**
- * Gets the links associated with category n and display rating stars/chars.
+ * get_links_withrating() - Gets the links associated with category n and display rating stars/chars.
  *
  * @since 0.71
  * @deprecated Use get_bookmarks()
@@ -631,7 +631,7 @@ function get_links_withrating($category = -1, $before = '', $after = '<br />', $
 }
 
 /**
- * Gets the auto_toggle setting.
+ * get_autotoggle() - Gets the auto_toggle setting
  *
  * @since 0.71
  * @deprecated No alternative function available
@@ -793,7 +793,7 @@ function wp_get_post_cats($blogid = '1', $post_ID = 0) {
 }
 
 /**
- * Sets the categories that the post id belongs to.
+ * wp_set_post_cats() - Sets the categories that the post id belongs to.
  *
  * @since 1.0.1
  * @deprecated Use wp_set_post_categories()
@@ -829,7 +829,7 @@ function get_archives($type='', $limit='', $format='html', $before = '', $after 
 }
 
 /**
- * Returns or Prints link to the author's posts.
+ * get_author_link() - Returns or Prints link to the author's posts
  *
  * @since 1.2
  * @deprecated Use get_author_posts_url()
@@ -851,7 +851,7 @@ function get_author_link($echo = false, $author_id, $author_nicename = '') {
 }
 
 /**
- * Print list of pages based on arguments.
+ * link_pages() - Print list of pages based on arguments
  *
  * @since 0.71
  * @deprecated Use wp_link_pages()
@@ -875,7 +875,7 @@ function link_pages($before='<br />', $after='<br />', $next_or_number='number',
 }
 
 /**
- * Get value based on option.
+ * get_settings() - Get value based on option
  *
  * @since 0.71
  * @deprecated Use get_option()
@@ -891,7 +891,7 @@ function get_settings($option) {
 }
 
 /**
- * Print the permalink of the current post in the loop.
+ * permalink_link() - Print the permalink of the current post in the loop
  *
  * @since 0.71
  * @deprecated Use the_permalink()
@@ -903,7 +903,7 @@ function permalink_link() {
 }
 
 /**
- * Print the permalink to the RSS feed.
+ * permalink_single_rss() - Print the permalink to the RSS feed
  *
  * @since 0.71
  * @deprecated Use the_permalink_rss()
@@ -917,7 +917,7 @@ function permalink_single_rss($deprecated = '') {
 }
 
 /**
- * Gets the links associated with category.
+ * wp_get_links() - Gets the links associated with category.
  *
  * @see get_links() for argument information that can be used in $args
  * @since 1.0.1
@@ -951,7 +951,7 @@ function wp_get_links($args = '') {
 }
 
 /**
- * Gets the links associated with category by id.
+ * get_links() - Gets the links associated with category by id.
  *
  * @since 0.71
  * @deprecated Use get_bookmarks()
@@ -1056,10 +1056,11 @@ function get_links($category = -1, $before = '', $after = '<br />', $between = '
 }
 
 /**
- * Output entire list of links by category.
+ * get_links_list() - Output entire list of links by category
  *
- * Output a list of all links, listed by category, using the settings in
- * $wpdb->linkcategories and output it as a nested HTML unordered list.
+ * Output a list of all links, listed by category, using the
+ * settings in $wpdb->linkcategories and output it as a nested
+ * HTML unordered list.
  *
  * @author Dougal
  * @since 1.0.1
@@ -1103,7 +1104,7 @@ function get_links_list($order = 'name', $deprecated = '') {
 }
 
 /**
- * Show the link to the links popup and the number of links.
+ * links_popup_script() - Show the link to the links popup and the number of links
  *
  * @author Fullo
  * @link http://sprite.csr.unibo.it/fullo/
@@ -1147,7 +1148,7 @@ function get_linkrating($link) {
 }
 
 /**
- * Gets the name of category by id.
+ * get_linkcatname() - Gets the name of category by id.
  *
  * @since 0.71
  * @deprecated Use get_category()
@@ -1176,7 +1177,7 @@ function get_linkcatname($id = 0) {
 }
 
 /**
- * Print RSS comment feed link.
+ * comment_rss_link() - Print RSS comment feed link
  *
  * @since 1.0.1
  * @deprecated Use post_comments_feed_link()
@@ -1191,7 +1192,7 @@ function comments_rss_link($link_text = 'Comments RSS', $deprecated = '') {
 }
 
 /**
- * Print/Return link to category RSS2 feed.
+ * get_category_rss_link() - Print/Return link to category RSS2 feed
  *
  * @since 1.2
  * @deprecated Use get_category_feed_link()
@@ -1213,7 +1214,7 @@ function get_category_rss_link($echo = false, $cat_ID = 1, $deprecated = '') {
 }
 
 /**
- * Print/Return link to author RSS feed.
+ * get_author_rss_link() - Print/Return link to author RSS feed
  *
  * @since 1.2
  * @deprecated Use get_author_feed_link()
@@ -1234,7 +1235,7 @@ function get_author_rss_link($echo = false, $author_id = 1, $deprecated = '') {
 }
 
 /**
- * Return link to the post RSS feed.
+ * comments_rss() - Return link to the post RSS feed
  *
  * @since 1.5
  * @deprecated Use get_post_comments_feed_link()
@@ -1249,8 +1250,7 @@ function comments_rss($deprecated = '') {
 }
 
 /**
- * An alias of wp_create_user().
- *
+ * create_user() - An alias of wp_create_user().
  * @param string $username The user's username.
  * @param string $password The user's password.
  * @param string $email The user's email (optional).
@@ -1264,8 +1264,7 @@ function create_user($username, $password, $email) {
 }
 
 /**
- * Unused Admin function.
- *
+ * documentation_link() - Unused Admin function
  * @since 2.0
  * @param string $deprecated Unknown
  * @deprecated 2.5
@@ -1276,32 +1275,12 @@ function documentation_link( $deprecated = '' ) {
 }
 
 /**
- * Unused function.
+ * gzip_compression() - Unused function
  *
  * @deprecated 2.5
 */
+
 function gzip_compression() {
 	return false;
 }
-
-/**
- * Retrieve an array of comment data about comment $comment_ID.
- *
- * @deprecated Use get_comment()
- * @see get_comment()
- * @since 0.71
- *
- * @uses $id
- * @uses $wpdb Database Object
- *
- * @param int $comment_ID The ID of the comment
- * @param int $no_cache Whether to use the cache or not (casted to bool)
- * @param bool $include_unapproved Whether to include unapproved comments or not
- * @return array The comment data
- */
-function get_commentdata( $comment_ID, $no_cache = 0, $include_unapproved = false ) {
-	_deprecated_function( __FUNCTION__, '2.7', 'get_comment()' );
-	return get_comment($comment_ID, ARRAY_A);
-}
-
 ?>

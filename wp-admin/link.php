@@ -1,15 +1,4 @@
 <?php
-/**
- * Manage link administration actions.
- *
- * This page is accessed by the link management pages and handles the forms and
- * AJAX processes for link actions.
- *
- * @package WordPress
- * @subpackage Administration
- */
-
-/** Load WordPress Administration Bootstrap */
 require_once ('admin.php');
 
 wp_reset_vars(array('action', 'cat_id', 'linkurl', 'name', 'image', 'description', 'visible', 'target', 'category', 'link_id', 'submit', 'order_by', 'links_show_cat_id', 'rating', 'rel', 'notes', 'linkcheck[]'));
@@ -17,12 +6,12 @@ wp_reset_vars(array('action', 'cat_id', 'linkurl', 'name', 'image', 'description
 if ( ! current_user_can('manage_links') )
 	wp_die( __('You do not have sufficient permissions to edit the links for this blog.') );
 
-if ( !empty($_POST['deletebookmarks']) )
+if ('' != $_POST['deletebookmarks'])
 	$action = 'deletebookmarks';
-if ( !empty($_POST['move']) )
+if ('' != $_POST['move'])
 	$action = 'move';
-if ( !empty($_POST['linkcheck']) )
-	$linkcheck = $_POST['linkcheck'];
+if ('' != $_POST['linkcheck'])
+	$linkcheck = $_POST[linkcheck];
 
 $this_file = 'link-manager.php';
 
@@ -106,6 +95,7 @@ switch ($action) {
 		if (!$link = get_link_to_edit($link_id))
 			wp_die(__('Link not found.'));
 
+		include_once ('admin-header.php');
 		include ('edit-link-form.php');
 		include ('admin-footer.php');
 		break;

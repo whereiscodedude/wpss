@@ -1,18 +1,5 @@
 <?php
 
-function mce_put_file( $path, $content ) {
-	if ( function_exists('file_put_contents') )
-		return @file_put_contents( $path, $content );
-
-	$newfile = false;
-	$fp = @fopen( $path, 'wb' );
-	if ($fp) {
-		$newfile = fwrite( $fp, $content );
-		fclose($fp);
-	}
-	return $newfile;
-}
-
 // escape text only if it needs translating
 function mce_escape($text) {
 	global $language;
@@ -21,7 +8,7 @@ function mce_escape($text) {
 	else return js_escape($text);
 }
 
-$lang = 'tinyMCE.addI18n({' . $language . ':{
+$strings = 'tinyMCE.addI18n({' . $language . ':{
 common:{
 edit_confirm:"' . mce_escape( __('Do you want to use the WYSIWYG mode for this textarea?') ) . '",
 apply:"' . mce_escape( __('Apply') ) . '",
@@ -450,30 +437,5 @@ img_title:"' . mce_escape( __('Edit Image Title') ) . '",
 caption:"' . mce_escape( __('Edit Image Caption') ) . '",
 alt:"' . mce_escape( __('Edit Alternate Text') ) . '"
 });
-
-tinyMCE.addI18n("' . $language . '.gallery",{
-settings:"' . mce_escape( __('Gallery Settings') )  . '",
-linkto:"' . mce_escape( __('Link thumbnails to:') )  . '",
-linktofile:"' . mce_escape( __('Image File') )  . '",
-linktopost:"' . mce_escape( __('Attachment Page') )  . '",
-orderby:"' . mce_escape( __('Order images by:') ) . '",
-menu_order:"' . mce_escape( __('Menu order') ) . '",
-byname:"' . mce_escape( __('Name') ) . '",
-bydate:"' . mce_escape( __('Date/Time') ) . '",
-random:"' . mce_escape( __('Random') ) . '",
-order:"' . mce_escape( __('Order:') ) . '",
-orderasc:"' . mce_escape( __('Ascending') ) . '",
-orderdesc:"' . mce_escape( __('Descending') ) . '",
-cols:"' . mce_escape( __('Gallery columns:') )  . '",
-two:"' . mce_escape( __('two') ) . '",
-three:"' . mce_escape( __('three') ) . '",
-four:"' . mce_escape( __('four') ) . '",
-five:"' . mce_escape( __('five') ) . '",
-six:"' . mce_escape( __('six') )  . '",
-seven:"' . mce_escape( __('seven') ) . '",
-eight:"' . mce_escape( __('eight') ) . '",
-nine:"' . mce_escape( __('nine') ) . '",
-imgwidth:"' . mce_escape( __('Limit the thumbnails width:') ) . '",
-imgwidthhelp:"' . mce_escape( __('Overrides the thumbnail images width. The default can be changed from the Media Settings page.') ) . '"
-});
 ';
+?>

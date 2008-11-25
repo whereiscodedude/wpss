@@ -13,7 +13,6 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
 	xmlns:dc="http://purl.org/dc/elements/1.1/"
 	xmlns:atom="http://www.w3.org/2005/Atom"
-	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
 	>
 <channel>
 	<title><?php
@@ -29,8 +28,6 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
 	<description><?php bloginfo_rss("description") ?></description>
 	<pubDate><?php echo gmdate('r'); ?></pubDate>
 	<?php the_generator( 'rss2' ); ?>
-	<sy:updatePeriod><?php echo apply_filters( 'rss_update_period', 'hourly' ); ?></sy:updatePeriod>
-	<sy:updateFrequency><?php echo apply_filters( 'rss_update_frequency', '1' ); ?></sy:updateFrequency>
 	<?php do_action('commentsrss2_head'); ?>
 <?php
 if ( have_comments() ) : while ( have_comments() ) : the_comment();
@@ -51,7 +48,7 @@ if ( have_comments() ) : while ( have_comments() ) : the_comment();
 		<dc:creator><?php echo get_comment_author_rss() ?></dc:creator>
 		<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_comment_time('Y-m-d H:i:s', true), false); ?></pubDate>
 		<guid isPermaLink="false"><?php comment_guid() ?></guid>
-<?php if ( post_password_required($comment_post) ) : ?>
+<?php if (!empty($comment_post->post_password) && $_COOKIE['wp-postpass'] != $comment_post->post_password) : ?>
 		<description><?php _e('Protected Comments: Please enter your password to view comments.'); ?></description>
 		<content:encoded><![CDATA[<?php echo get_the_password_form() ?>]]></content:encoded>
 <?php else : // post pass ?>

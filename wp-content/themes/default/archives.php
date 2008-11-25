@@ -1,8 +1,4 @@
 <?php
-/**
- * @package WordPress
- * @subpackage Default_Theme
- */
 /*
 Template Name: Archives
 */
@@ -12,7 +8,7 @@ Template Name: Archives
 
 <div id="content" class="widecolumn">
 
-<?php get_search_form(); ?>
+<?php include (TEMPLATEPATH . '/searchform.php'); ?>
 
 <h2>Archives by Month:</h2>
 	<ul>
