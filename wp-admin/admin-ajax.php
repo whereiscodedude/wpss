@@ -16,7 +16,6 @@ define('WP_ADMIN', true);
 
 require_once('../wp-load.php');
 require_once('includes/admin.php');
-@header('Content-Type: text/html; charset=' . get_option('blog_charset'));
 
 if ( ! is_user_logged_in() ) {
 
@@ -46,11 +45,6 @@ case 'ajax-tag-search' :
 
 	$s = $_GET['q']; // is this slashed already?
 
-	if ( isset($_GET['tax']) )
-		$taxonomy = sanitize_title($_GET['tax']);
-	else
-		die('0');
-
 	if ( false !== strpos( $s, ',' ) ) {
 		$s = explode( ',', $s );
 		$s = $s[count( $s ) - 1];
@@ -58,53 +52,9 @@ case 'ajax-tag-search' :
 	$s = trim( $s );
 	if ( strlen( $s ) < 2 )
 		die; // require 2 chars for matching
-
-	$results = $wpdb->get_col( "SELECT t.name FROM $wpdb->term_taxonomy AS tt INNER JOIN $wpdb->terms AS t ON tt.term_id = t.term_id WHERE tt.taxonomy = '$taxonomy' AND t.name LIKE ('%" . $s . "%')" );
-
+	$results = $wpdb->get_col( "SELECT t.name FROM $wpdb->term_taxonomy AS tt INNER JOIN $wpdb->terms AS t ON tt.term_id = t.term_id WHERE tt.taxonomy = 'post_tag' AND t.name LIKE ('%". $s . "%')" );
 	echo join( $results, "\n" );
 	die;
-	break;
-case 'wp-compression-test' :
-	if ( !current_user_can( 'manage_options' ) )
-		die('-1');
-
-	if ( ini_get('zlib.output_compression') || 'ob_gzhandler' == ini_get('output_handler') ) {
-		update_option('can_compress_scripts', 0);
-		die('0');
-	}
-
-	if ( isset($_GET['test']) ) {
-		header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
-		header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s' ) . ' GMT' );
-		header( 'Cache-Control: no-cache, must-revalidate, max-age=0' );
-		header( 'Pragma: no-cache' );
-		header('Content-Type: application/x-javascript; charset=UTF-8');
-		$force_gzip = ( defined('ENFORCE_GZIP') && ENFORCE_GZIP );
-		$test_str = '"wpCompressionTest Lorem ipsum dolor sit amet consectetuer mollis sapien urna ut a. Eu nonummy condimentum fringilla tempor pretium platea vel nibh netus Maecenas. Hac molestie amet justo quis pellentesque est ultrices interdum nibh Morbi. Cras mattis pretium Phasellus ante ipsum ipsum ut sociis Suspendisse Lorem. Ante et non molestie. Porta urna Vestibulum egestas id congue nibh eu risus gravida sit. Ac augue auctor Ut et non a elit massa id sodales. Elit eu Nulla at nibh adipiscing mattis lacus mauris at tempus. Netus nibh quis suscipit nec feugiat eget sed lorem et urna. Pellentesque lacus at ut massa consectetuer ligula ut auctor semper Pellentesque. Ut metus massa nibh quam Curabitur molestie nec mauris congue. Volutpat molestie elit justo facilisis neque ac risus Ut nascetur tristique. Vitae sit lorem tellus et quis Phasellus lacus tincidunt nunc Fusce. Pharetra wisi Suspendisse mus sagittis libero lacinia Integer consequat ac Phasellus. Et urna ac cursus tortor aliquam Aliquam amet tellus volutpat Vestibulum. Justo interdum condimentum In augue congue tellus sollicitudin Quisque quis nibh."';
-
-		 if ( 1 == $_GET['test'] ) {
-		 	echo $test_str;
-		 	die;
-		 } elseif ( 2 == $_GET['test'] ) {
-			if ( false !== strpos( strtolower($_SERVER['HTTP_ACCEPT_ENCODING']), 'deflate') && function_exists('gzdeflate') && ! $force_gzip ) {
-				header('Content-Encoding: deflate');
-				$out = gzdeflate( $test_str, 1 );
-			} elseif ( false !== strpos( strtolower($_SERVER['HTTP_ACCEPT_ENCODING']), 'gzip') && function_exists('gzencode') ) {
-				header('Content-Encoding: gzip');
-				$out = gzencode( $test_str, 1 );
-			} else {
-				die('-1');
-			}
-			echo $out;
-			die;
-		} elseif ( 'no' == $_GET['test'] ) {
-			update_option('can_compress_scripts', 0);
-		} elseif ( 'yes' == $_GET['test'] ) {
-			update_option('can_compress_scripts', 1);
-		}
-	}
-
-	die('0');
 	break;
 default :
 	do_action( 'wp_ajax_' . $_GET['action'] );
@@ -113,85 +63,24 @@ default :
 endswitch;
 endif;
 
-/**
- * Sends back current comment total and new page links if they need to be updated.
- *
- * Contrary to normal success AJAX response ("1"), die with time() on success.
- *
- * @since 2.7
- *
- * @param int $comment_id
- * @return die
- */
-function _wp_ajax_delete_comment_response( $comment_id ) {
-	$total = (int) @$_POST['_total'];
-	$per_page = (int) @$_POST['_per_page'];
-	$page = (int) @$_POST['_page'];
-	$url = clean_url( @$_POST['_url'], null, 'url' );
-	// JS didn't send us everything we need to know.  Just die with success message
-	if ( !$total || !$per_page || !$page || !$url )
-		die( (string) time() );
-
-	if ( --$total < 0 ) // Take the total from POST and decrement it (since we just deleted one)
-		$total = 0;
-
-	if ( 0 != $total % $per_page && 1 != mt_rand( 1, $per_page ) ) // Only do the expensive stuff on a page-break, and about 1 other time per page
-		die( (string) time() );
-
-	$status = 'total_comments'; // What type of comment count are we looking for?
-	$parsed = parse_url( $url );
-	if ( isset( $parsed['query'] ) ) {
-		parse_str( $parsed['query'], $query_vars );
-		if ( !empty( $query_vars['comment_status'] ) )
-			$status = $query_vars['comment_status'];
-	}
-
-	$comment_count = wp_count_comments();
-	$time = time(); // The time since the last comment count
-
-	if ( isset( $comment_count->$status ) ) // We're looking for a known type of comment count
-		$total = $comment_count->$status;
-	// else use the decremented value from above
-
-	$page_links = paginate_links( array(
-		'base' => add_query_arg( 'apage', '%#%', $url ),
-		'format' => '',
-		'prev_text' => __('&laquo;'),
-		'next_text' => __('&raquo;'),
-		'total' => ceil($total / $per_page),
-		'current' => $page
-	) );
-	$x = new WP_Ajax_Response( array(
-		'what' => 'comment',
-		'id' => $comment_id, // here for completeness - not used
-		'supplemental' => array(
-			'pageLinks' => $page_links,
-			'total' => $total,
-			'time' => $time
-		)
-	) );
-	$x->send();
-}
-
 $id = isset($_POST['id'])? (int) $_POST['id'] : 0;
 switch ( $action = $_POST['action'] ) :
-case 'delete-comment' : // On success, die with time() instead of 1
+case 'delete-comment' :
 	check_ajax_referer( "delete-comment_$id" );
 	if ( !$comment = get_comment( $id ) )
-		die( (string) time() );
+		die('1');
 	if ( !current_user_can( 'edit_post', $comment->comment_post_ID ) )
 		die('-1');
 
 	if ( isset($_POST['spam']) && 1 == $_POST['spam'] ) {
 		if ( 'spam' == wp_get_comment_status( $comment->comment_ID ) )
-			die( (string) time() );
+			die('1');
 		$r = wp_set_comment_status( $comment->comment_ID, 'spam' );
 	} else {
 		$r = wp_delete_comment( $comment->comment_ID );
 	}
-	if ( $r ) // Decide if we need to send back '1' or a more complicated response including page links and comment counts
-		_wp_ajax_delete_comment_response( $comment->comment_ID );
-	die( '0' );
+
+	die( $r ? '1' : '0' );
 	break;
 case 'delete-cat' :
 	check_ajax_referer( "delete-category_$id" );
@@ -306,7 +195,7 @@ case 'delete-page' :
 	else
 		die('0');
 	break;
-case 'dim-comment' : // On success, die with time() instead of 1
+case 'dim-comment' :
 	if ( !$comment = get_comment( $id ) )
 		die('0');
 
@@ -317,21 +206,18 @@ case 'dim-comment' : // On success, die with time() instead of 1
 
 	$current = wp_get_comment_status( $comment->comment_ID );
 	if ( $_POST['new'] == $current )
-		die( (string) time() );
+		die('1');
 
-	$r = 0;
 	if ( in_array( $current, array( 'unapproved', 'spam' ) ) ) {
 		check_ajax_referer( "approve-comment_$id" );
 		if ( wp_set_comment_status( $comment->comment_ID, 'approve' ) )
-			$r = 1;
+			die('1');
 	} else {
 		check_ajax_referer( "unapprove-comment_$id" );
 		if ( wp_set_comment_status( $comment->comment_ID, 'hold' ) )
-			$r = 1;
+			die('1');
 	}
-	if ( $r ) // Decide if we need to send back '1' or a more complicated response including page links and comment counts
-		_wp_ajax_delete_comment_response( $comment->comment_ID );
-	die( '0' );
+	die('0');
 	break;
 case 'add-category' : // On the Fly
 	check_ajax_referer( $action );
@@ -540,12 +426,7 @@ case 'get-tagcloud' :
 	if ( !current_user_can( 'manage_categories' ) )
 		die('-1');
 
-	if ( isset($_POST['tax']) )
-		$taxonomy = sanitize_title($_POST['tax']);
-	else
-		die('0');
-
-	$tags = get_terms( $taxonomy, array( 'number' => 45, 'orderby' => 'count', 'order' => 'DESC' ) );
+	$tags = get_tags( array( 'number' => 45, 'orderby' => 'count', 'order' => 'DESC' ) );
 
 	if ( empty( $tags ) )
 		die( __('No tags found!') );
@@ -715,7 +596,6 @@ case 'edit-comment' :
 	$mode = ( isset($_POST['mode']) && 'single' == $_POST['mode'] ) ? 'single' : 'detail';
 	$position = ( isset($_POST['position']) && (int) $_POST['position']) ? (int) $_POST['position'] : '-1';
 	$checkbox = ( isset($_POST['checkbox']) && true == $_POST['checkbox'] ) ? 1 : 0;
-	$comments_listing = isset($_POST['comments_listing']) ? $_POST['comments_listing'] : '';
 
 	if ( get_option('show_avatars') && 'single' != $mode )
 		add_filter( 'comment_author', 'floated_admin_avatar' );
@@ -723,7 +603,7 @@ case 'edit-comment' :
 	$x = new WP_Ajax_Response();
 
 	ob_start();
-		_wp_comment_row( $comment_id, $mode, $comments_listing, $checkbox );
+		_wp_comment_row( $comment_id, $mode, true, $checkbox );
 		$comment_list_item = ob_get_contents();
 	ob_end_clean();
 
@@ -835,6 +715,7 @@ case 'autosave' : // The name of this action is hardcoded in edit_post()
 	global $current_user;
 
 	$_POST['post_category'] = explode(",", $_POST['catslist']);
+	$_POST['tags_input'] = explode(",", $_POST['tags_input']);
 	if($_POST['post_type'] == 'page' || empty($_POST['post_category']))
 		unset($_POST['post_category']);
 
@@ -956,7 +837,7 @@ case 'hidden-columns' :
 	$hidden = isset( $_POST['hidden'] )? $_POST['hidden'] : '';
 	$hidden = explode( ',', $_POST['hidden'] );
 	$page = isset( $_POST['page'] )? $_POST['page'] : '';
-	if ( !preg_match( '/^[a-z_-]+$/', $page ) ) {
+	if ( !preg_match( '/^[a-z-_]+$/', $page ) ) {
 		die(-1);
 	}
 	$current_user = wp_get_current_user();
@@ -1157,19 +1038,6 @@ case 'find_posts':
 	));
 	$x->send();
 
-	break;
-case 'lj-importer' :
-	check_ajax_referer( 'lj-api-import' );
-	if ( !current_user_can( 'publish_posts' ) )
-		die('-1');
-	if ( empty( $_POST['step'] ) )
-		die( '-1' );
-
-	include( ABSPATH . 'wp-admin/import/livejournal.php' );
-	$result = $lj_api_import->{ 'step' . ( (int) $_POST['step'] ) }();
-	if ( is_wp_error( $result ) )
-		echo $result->get_error_message();
-	die;
 	break;
 default :
 	do_action( 'wp_ajax_' . $_POST['action'] );

@@ -25,11 +25,11 @@ case 'addcat':
 	if ( !current_user_can('manage_categories') )
 		wp_die(__('Cheatin&#8217; uh?'));
 
-	if ( wp_insert_category($_POST ) )
-		wp_safe_redirect( add_query_arg( 'message', 1, wp_get_referer() ) . '#addcat' );
-	else
-		wp_safe_redirect( add_query_arg( 'message', 4, wp_get_referer() ) . '#addcat' );
-
+	if( wp_insert_category($_POST ) ) {
+		wp_redirect('categories.php?message=1#addcat');
+	} else {
+		wp_redirect('categories.php?message=4#addcat');
+	}
 	exit;
 break;
 
@@ -43,12 +43,12 @@ case 'delete':
 	$cat_name = get_catname($cat_ID);
 
 	// Don't delete the default cats.
-	if ( $cat_ID == get_option('default_category') )
+    if ( $cat_ID == get_option('default_category') )
 		wp_die(sprintf(__("Can&#8217;t delete the <strong>%s</strong> category: this is the default one"), $cat_name));
 
 	wp_delete_category($cat_ID);
 
-	wp_safe_redirect( add_query_arg( 'message', 2, wp_get_referer() ) );
+	wp_redirect('categories.php?message=2');
 	exit;
 
 break;
@@ -69,7 +69,9 @@ case 'bulk-delete':
 		wp_delete_category($cat_ID);
 	}
 
-	wp_safe_redirect( wp_get_referer() );
+	$sendback = wp_get_referer();
+
+	wp_redirect($sendback);
 	exit();
 
 break;
@@ -286,6 +288,21 @@ if ( $page_links )
 
 </div><!-- /col-container -->
 </div><!-- /wrap -->
+
+<script type="text/javascript">
+/* <![CDATA[ */
+(function($){
+	$(document).ready(function(){
+		$('#doaction, #doaction2').click(function(){
+			if ( $('select[name^="action"]').val() == 'delete' ) {
+				var m = '<?php echo js_escape(__("You are about to delete the selected categories.\n  'Cancel' to stop, 'OK' to delete.")); ?>';
+				return showNotice.warn(m);
+			}
+		});
+	});
+})(jQuery);
+/* ]]> */
+</script>
 
 <?php
 inline_edit_term_row('categories');

@@ -748,13 +748,14 @@ function dropdown_cats($optionall = 1, $all = 'All', $orderby = 'ID', $order = '
 
 /**
  * @since 2.1
- * @deprecated Use wp_tiny_mce().
- * @see wp_tiny_mce()
+ * @deprecated Use wp_print_scripts() or WP_Scripts.
+ * @see wp_print_scripts()
+ * @see WP_Scripts
  */
 function tinymce_include() {
-	_deprecated_function(__FUNCTION__, '0.0', 'wp_tiny_mce()');
+	_deprecated_function(__FUNCTION__, '0.0', 'wp_print_scripts()/WP_Scripts');
 
-	wp_tiny_mce();
+	wp_print_script('wp_tiny_mce');
 }
 
 /**

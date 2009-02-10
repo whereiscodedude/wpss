@@ -308,7 +308,6 @@ if ( 0 === strpos( $content_func, 'media' ) )
 <script type="text/javascript">
 //<![CDATA[
 function addLoadEvent(func) {if ( typeof wpOnload!='function'){wpOnload=func;}else{ var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}}
-var userSettings = {'url':'<?php echo SITECOOKIEPATH; ?>','uid':'<?php if ( ! isset($current_user) ) $current_user = wp_get_current_user(); echo $current_user->ID; ?>','time':'<?php echo time() ?>'};
 //]]>
 </script>
 <?php
@@ -374,7 +373,7 @@ function media_upload_form_handler() {
 		$keys = array_keys($_POST['send']);
 		$send_id = (int) array_shift($keys);
 	}
-
+	
 	if ( !empty($_POST['attachments']) ) foreach ( $_POST['attachments'] as $attachment_id => $attachment ) {
 		$post = $_post = get_post($attachment_id, ARRAY_A);
 		if ( isset($attachment['post_content']) )
@@ -385,7 +384,6 @@ function media_upload_form_handler() {
 			$post['post_excerpt'] = $attachment['post_excerpt'];
 		if ( isset($attachment['menu_order']) )
 			$post['menu_order'] = $attachment['menu_order'];
-
 		if ( isset($send_id) && $attachment_id == $send_id ) {
 			if ( isset($attachment['post_parent']) )
 				$post['post_parent'] = $attachment['post_parent'];

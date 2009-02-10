@@ -682,12 +682,12 @@ li.widget-list-control-item h4,
 	color: #448abd;
 }
 
-.tagchecklist span a,
+#tagchecklist span a,
 #bulk-titles div a {
 	background: url(../images/xit.gif) no-repeat;
 }
 
-.tagchecklist span a:hover,
+#tagchecklist span a:hover,
 #bulk-titles div a:hover {
 	background: url(../images/xit.gif) no-repeat -10px 0;
 }
@@ -925,7 +925,7 @@ abbr.required,
 }
 
 .wp_themeSkin tr.mceFirst td.mceToolbar {
-	background: #dfdfdf url("../images/ed-bg.gif") repeat-x scroll left top;
+	background-color: #dfdfdf;
 	border-color: #dfdfdf;
 }
 
@@ -1007,7 +1007,7 @@ abbr.required,
 
 #timestampdiv input,
 #namediv input,
-#poststuff .inside .the-tagcloud {
+#tagsdiv #the-tagcloud {
 	border-color: #ddd;
 }
 
@@ -1287,9 +1287,7 @@ table.diff .diff-addedline ins {
 }
 
 /* table vim shortcuts */
-.vim-current,
-.vim-current th,
-.vim-current td {
+.vim-current {
 	background-color: #E4F2FD !important;
 }
 

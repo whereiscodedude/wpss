@@ -24,22 +24,37 @@ wp_admin_css( 'css/global' );
 wp_admin_css();
 wp_admin_css( 'css/colors' );
 wp_admin_css( 'css/ie' );
-wp_enqueue_script('utils');
 
 ?>
 <script type="text/javascript">
 //<![CDATA[
-addLoadEvent = function(func){if(typeof jQuery!="undefined")jQuery(document).ready(func);else if(typeof wpOnload!='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
-var userSettings = {'url':'<?php echo SITECOOKIEPATH; ?>','uid':'<?php if ( ! isset($current_user) ) $current_user = wp_get_current_user(); echo $current_user->ID; ?>','time':'<?php echo time() ?>'};
-var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
-var pagenow = '<?php echo substr($pagenow, 0, -4); ?>';
+addLoadEvent = function(func) {if (typeof jQuery != "undefined") jQuery(document).ready(func); else if (typeof wpOnload!='function'){wpOnload=func;} else {var oldonload=wpOnload; wpOnload=function(){oldonload();func();}}};
+
+function convertEntities(o) {
+	var c = function(s) {
+		if (/&[^;]+;/.test(s)) {
+			var e = document.createElement("div");
+			e.innerHTML = s;
+			return !e.firstChild ? s : e.firstChild.nodeValue;
+		}
+		return s;
+	}
+
+	if ( typeof o === 'string' )
+		return c(o);
+	else if ( typeof o === 'object' )
+		for (var v in o) {
+			if ( typeof o[v] === 'string' )
+				o[v] = c(o[v]);
+		}
+	return o;
+};
 //]]>
 </script>
 <?php
 
 if ( in_array( $pagenow, array('post.php', 'post-new.php', 'page.php', 'page-new.php') ) ) {
-	add_action( 'admin_print_footer_scripts', 'wp_tiny_mce', 25 );
-	wp_enqueue_script('quicktags');
+	add_action( 'admin_head', 'wp_tiny_mce' );
 }
 
 $hook_suffix = '';
@@ -50,29 +65,14 @@ else if ( isset($plugin_page) )
 else if ( isset($pagenow) )
 	$hook_suffix = "$pagenow";
 
-do_action('admin_enqueue_scripts', $hook_suffix);
 do_action("admin_print_styles-$hook_suffix");
 do_action('admin_print_styles');
 do_action("admin_print_scripts-$hook_suffix");
 do_action('admin_print_scripts');
 do_action("admin_head-$hook_suffix");
 do_action('admin_head');
-?>
 
-<noscript>
-<style type="text/css">
-.hide-if-no-js{display:none}
-.hide-if-js,.closed .inside{display:block}
-</style>
-</noscript>
-<script type="text/javascript">
-(function(){
-	var ns = document.getElementsByTagName('noscript');
-	if ( ns && (ns = ns[0]) ) ns.parentNode.removeChild(ns);
-})();
-</script>
-
-<?php if ( $is_iphone ) { ?>
+if ( $is_iphone ) { ?>
 <style type="text/css">.row-actions{visibility:visible;}</style>
 <?php } ?>
 </head>

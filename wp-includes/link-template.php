@@ -92,18 +92,15 @@ function get_permalink($id = 0, $leavename = false) {
 		$leavename? '' : '%pagename%',
 	);
 
-	if ( is_object($id) && isset($id->filter) && 'sample' == $id->filter ) {
+	if ( is_object($id) && isset($id->filter) && 'sample' == $id->filter )
 		$post = $id;
-		$sample = true;
-	} else {
+	else
 		$post = &get_post($id);
-		$sample = false;
-	}
 
 	if ( empty($post->ID) ) return false;
 
 	if ( $post->post_type == 'page' )
-		return get_page_link($post->ID, $leavename, $sample);
+		return get_page_link($post->ID, $leavename);
 	elseif ($post->post_type == 'attachment')
 		return get_attachment_link($post->ID);
 
@@ -180,11 +177,10 @@ function post_permalink($post_id = 0, $deprecated = '') {
  * @since 1.5.0
  *
  * @param int $id Optional. Post ID.
- * @param bool $leavename Optional, defaults to false. Whether to keep page name.
- * @param bool $sample Optional, defaults to false. Is it a sample permalink.
+ * @param bool $leavename Optional, defaults to false. Whether to keep post name or page name.
  * @return string
  */
-function get_page_link( $id = false, $leavename = false, $sample = false ) {
+function get_page_link($id = false, $leavename = false) {
 	global $post;
 
 	$id = (int) $id;
@@ -194,7 +190,7 @@ function get_page_link( $id = false, $leavename = false, $sample = false ) {
 	if ( 'page' == get_option('show_on_front') && $id == get_option('page_on_front') )
 		$link = get_option('home');
 	else
-		$link = _get_page_link( $id , $leavename, $sample );
+		$link = _get_page_link( $id , $leavename );
 
 	return apply_filters('page_link', $link, $id);
 }
@@ -209,10 +205,9 @@ function get_page_link( $id = false, $leavename = false, $sample = false ) {
  *
  * @param int $id Optional. Post ID.
  * @param bool $leavename Optional. Leave name.
- * @param bool $sample Optional. Sample permalink.
  * @return string
  */
-function _get_page_link( $id = false, $leavename = false, $sample = false ) {
+function _get_page_link( $id = false, $leavename = false ) {
 	global $post, $wp_rewrite;
 
 	if ( !$id )
@@ -222,7 +217,7 @@ function _get_page_link( $id = false, $leavename = false, $sample = false ) {
 
 	$pagestruct = $wp_rewrite->get_page_permastruct();
 
-	if ( '' != $pagestruct && ( ( isset($post->post_status) && 'draft' != $post->post_status ) || $sample ) ) {
+	if ( '' != $pagestruct && isset($post->post_status) && 'draft' != $post->post_status ) {
 		$link = get_page_uri($id);
 		$link = ( $leavename ) ? $pagestruct : str_replace('%pagename%', $link, $pagestruct);
 		$link = get_option('home') . "/$link";
@@ -512,7 +507,7 @@ function get_category_feed_link($cat_id, $feed = '') {
 	$permalink_structure = get_option('permalink_structure');
 
 	if ( '' == $permalink_structure ) {
-		$link = trailingslashit( get_option('home') ) . "?feed=$feed&amp;cat=" . $cat_id;
+		$link = get_option('home') . "?feed=$feed&amp;cat=" . $cat_id;
 	} else {
 		$link = get_category_link($cat_id);
 		if( $feed == get_default_feed() )
@@ -574,13 +569,13 @@ function get_tag_feed_link($tag_id, $feed = '') {
  * @param int $tag_id Tag ID
  * @return string
  */
-function get_edit_tag_link( $tag_id = 0, $taxonomy = 'post_tag' ) {
+function get_edit_tag_link( $tag_id = 0 ) {
 	$tag = get_term($tag_id, 'post_tag');
 
 	if ( !current_user_can('manage_categories') )
 		return;
 
-	$location = admin_url('edit-tags.php?action=edit&amp;taxonomy=' . $taxonomy . '&amp;tag_ID=' . $tag->term_id);
+	$location = admin_url('edit-tags.php?action=edit&amp;tag_ID=') . $tag->term_id;
 	return apply_filters( 'get_edit_tag_link', $location );
 }
 
@@ -1261,7 +1256,7 @@ function get_comments_pagenum_link( $pagenum = 1, $max_page = 0 ) {
 function get_next_comments_link( $label = '', $max_page = 0 ) {
 	global $wp_query;
 
-	if ( !is_singular() || !get_option('page_comments') )
+	if ( !is_singular() )
 		return;
 
 	$page = get_query_var('cpage');
@@ -1304,7 +1299,7 @@ function next_comments_link( $label = '', $max_page = 0 ) {
  * @return string|null
  */
 function get_previous_comments_link( $label = '' ) {
-	if ( !is_singular() || !get_option('page_comments') )
+	if ( !is_singular() )
 		return;
 
 	$page = get_query_var('cpage');
@@ -1343,7 +1338,7 @@ function previous_comments_link( $label = '' ) {
 function paginate_comments_links($args = array()) {
 	global $wp_query, $wp_rewrite;
 
-	if ( !is_singular() || !get_option('page_comments') )
+	if ( !is_singular() )
 		return;
 
 	$page = get_query_var('cpage');

@@ -131,8 +131,9 @@ function wpautop($pee, $br = 1) {
 	$pee = '';
 	foreach ( $pees as $tinkle )
 		$pee .= '<p>' . trim($tinkle, "\n") . "</p>\n";
-	$pee = preg_replace('|<p>\s*</p>|', '', $pee); // under certain strange conditions it could create a P of entirely whitespace
-	$pee = preg_replace('!<p>([^<]+)</(div|address|form)>!', "<p>$1</p></$2>", $pee);
+	$pee = preg_replace('|<p>\s*?</p>|', '', $pee); // under certain strange conditions it could create a P of entirely whitespace
+	$pee = preg_replace('!<p>([^<]+)\s*?(</(?:div|address|form)[^>]*>)!', "<p>$1</p>$2", $pee);
+	$pee = preg_replace( '|<p>|', "$1<p>", $pee );
 	$pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)\s*</p>!', "$1", $pee); // don't pee all over a tag
 	$pee = preg_replace("|<p>(<li.+?)</p>|", "$1", $pee); // problem with nested lists
 	$pee = preg_replace('|<p><blockquote([^>]*)>|i', "<blockquote$1><p>", $pee);
@@ -147,7 +148,7 @@ function wpautop($pee, $br = 1) {
 	$pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*<br />!', "$1", $pee);
 	$pee = preg_replace('!<br />(\s*</?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)[^>]*>)!', '$1', $pee);
 	if (strpos($pee, '<pre') !== false)
-		$pee = preg_replace_callback('!(<pre[^>]*>)(.*?)</pre>!is', 'clean_pre', $pee );
+		$pee = preg_replace_callback('!(<pre.*?>)(.*?)</pre>!is', 'clean_pre', $pee );
 	$pee = preg_replace( "|\n</p>$|", '</p>', $pee );
 	$pee = preg_replace('/<p>\s*?(' . get_shortcode_regex() . ')\s*<\/p>/s', '$1', $pee); // don't auto-p wrap shortcodes that stand alone
 
@@ -847,7 +848,7 @@ function force_balance_tags( $text ) {
 		// clear the shifter
 		$tagqueue = '';
 		// Pop or Push
-		if ( isset($regex[1][0]) && '/' == $regex[1][0] ) { // End Tag
+		if ($regex[1][0] == "/") { // End Tag
 			$tag = strtolower(substr($regex[1],1));
 			// if too many closing tags
 			if($stacksize <= 0) {
@@ -1235,59 +1236,29 @@ function wp_rel_nofollow_callback( $matches ) {
 	return "<a $text rel=\"nofollow\">";
 }
 
-
-/**
- * Convert one smiley code to the icon graphic file equivalent.
- *
- * Looks up one smiley code in the $wpsmiliestrans global array and returns an
- * <img> string for that smiley.
- *
- * @global array $wpsmiliestrans
- * @since 2.8.0
- *
- * @param string $smiley Smiley code to convert to image.
- * @return string Image string for smiley.
- */
-function translate_smiley($smiley) {
-	global $wpsmiliestrans;
-
-	if (count($smiley) == 0) {
-		return '';
-	}
-
-	$siteurl = get_option( 'siteurl' );
-
-	$smiley = trim(reset($smiley));
-	$img = $wpsmiliestrans[$smiley];
-	$smiley_masked = attribute_escape($smiley);
-
-	return " <img src='$siteurl/wp-includes/images/smilies/$img' alt='$smiley_masked' class='wp-smiley' /> ";
-}
-
-
 /**
  * Convert text equivalent of smilies to images.
  *
- * Will only convert smilies if the option 'use_smilies' is true and the global
- * used in the function isn't empty.
+ * Will only convert smilies if the option 'use_smilies' is true and the globals
+ * used in the function aren't empty.
  *
  * @since 0.71
- * @uses $wp_smiliessearch
+ * @uses $wp_smiliessearch, $wp_smiliesreplace Smiley replacement arrays.
  *
  * @param string $text Content to convert smilies from text.
  * @return string Converted content with text smilies replaced with images.
  */
 function convert_smilies($text) {
-	global $wp_smiliessearch;
+	global $wp_smiliessearch, $wp_smiliesreplace;
 	$output = '';
-	if ( get_option('use_smilies') && !empty($wp_smiliessearch) ) {
+	if ( get_option('use_smilies') && !empty($wp_smiliessearch) && !empty($wp_smiliesreplace) ) {
 		// HTML loop taken from texturize function, could possible be consolidated
 		$textarr = preg_split("/(<.*>)/U", $text, -1, PREG_SPLIT_DELIM_CAPTURE); // capture the tags as well as in between
 		$stop = count($textarr);// loop stuff
 		for ($i = 0; $i < $stop; $i++) {
 			$content = $textarr[$i];
 			if ((strlen($content) > 0) && ('<' != $content{0})) { // If it's not a tag
-				$content = preg_replace_callback($wp_smiliessearch, 'translate_smiley', $content);
+				$content = preg_replace($wp_smiliessearch, $wp_smiliesreplace, $content);
 			}
 			$output .= $content;
 		}

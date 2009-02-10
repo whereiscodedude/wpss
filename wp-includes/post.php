@@ -1059,7 +1059,7 @@ function wp_post_mime_type_where($post_mime_types) {
 		$slashpos = strpos($mime_type, '/');
 		if ( false !== $slashpos ) {
 			$mime_group = preg_replace('/[^-*.a-zA-Z0-9]/', '', substr($mime_type, 0, $slashpos));
-			$mime_subgroup = preg_replace('/[^-*.+a-zA-Z0-9]/', '', substr($mime_type, $slashpos + 1));
+			$mime_subgroup = preg_replace('/[^-*.a-zA-Z0-9]/', '', substr($mime_type, $slashpos + 1));
 			if ( empty($mime_subgroup) )
 				$mime_subgroup = '*';
 			else
@@ -1131,8 +1131,6 @@ function wp_delete_post($postid = 0) {
 		$children = $wpdb->get_results($children_query);
 
 		$wpdb->update( $wpdb->posts, $parent_data, $parent_where + array( 'post_type' => 'page' ) );
-	} else {
-		unstick_post($postid);
 	}
 
 	// Do raw query.  wp_get_post_revisions() is filtered
@@ -1208,34 +1206,12 @@ function wp_get_post_categories( $post_id = 0, $args = array() ) {
  * @return array List of post tags.
  */
 function wp_get_post_tags( $post_id = 0, $args = array() ) {
-	return wp_get_post_terms( $post_id, 'post_tag', $args);
-}
-
-/**
- * Retrieve the terms for a post.
- *
- * There is only one default for this function, called 'fields' and by default
- * is set to 'all'. There are other defaults that can be override in
- * {@link wp_get_object_terms()}.
- *
- * @package WordPress
- * @subpackage Post
- * @since 2.8.0
- *
- * @uses wp_get_object_terms() Gets the tags for returning. Args can be found here
- *
- * @param int $post_id Optional. The Post ID
- * @param string $taxonomy The taxonomy for which to retrieve terms. Defaults to post_tag.
- * @param array $args Optional. Overwrite the defaults
- * @return array List of post tags.
- */
-function wp_get_post_terms( $post_id = 0, $taxonomy = 'post_tag', $args = array() ) {
 	$post_id = (int) $post_id;
 
 	$defaults = array('fields' => 'all');
 	$args = wp_parse_args( $args, $defaults );
 
-	$tags = wp_get_object_terms($post_id, $taxonomy, $args);
+	$tags = wp_get_object_terms($post_id, 'post_tag', $args);
 
 	return $tags;
 }
@@ -1522,15 +1498,7 @@ function wp_insert_post($postarr = array(), $wp_error = false) {
 	}
 
 	wp_set_post_categories( $post_ID, $post_category );
-	// old-style tags_input
-	if ( !empty($tags_input) )
-		wp_set_post_tags( $post_ID, $tags_input );
-	// new-style support for all tag-like taxonomies
-	if ( !empty($tax_input) ) {
-		foreach ( $tax_input as $taxonomy => $tags ) {
-			wp_set_post_terms( $post_ID, $tags, $taxonomy );			
-		}
-	}
+	wp_set_post_tags( $post_ID, $tags_input );
 
 	$current_guid = get_post_field( 'guid', $post_ID );
 
@@ -1717,21 +1685,7 @@ function wp_add_post_tags($post_id = 0, $tags = '') {
  * @return bool|null Will return false if $post_id is not an integer or is 0. Will return null otherwise
  */
 function wp_set_post_tags( $post_id = 0, $tags = '', $append = false ) {
-	return wp_set_post_terms( $post_id, $tags, 'post_tag', $append);
-}
 
-/**
- * Set the terms for a post.
- *
- * @since 2.8.0
- * @uses wp_set_object_terms() Sets the tags for the post.
- *
- * @param int $post_id Post ID.
- * @param string $tags The tags to set for the post, separated by commas.
- * @param bool $append If true, don't delete existing tags, just add on. If false, replace the tags with the new tags.
- * @return bool|null Will return false if $post_id is not an integer or is 0. Will return null otherwise
- */
-function wp_set_post_terms( $post_id = 0, $tags = '', $taxonomy = 'post_tag', $append = false ) {
 	$post_id = (int) $post_id;
 
 	if ( !$post_id )
@@ -1739,9 +1693,8 @@ function wp_set_post_terms( $post_id = 0, $tags = '', $taxonomy = 'post_tag', $a
 
 	if ( empty($tags) )
 		$tags = array();
-
-	$tags = is_array($tags) ? $tags : explode( ',', trim($tags, " \n\t\r\0\x0B,") );
-	wp_set_object_terms($post_id, $tags, $taxonomy, $append);
+	$tags = (is_array($tags)) ? $tags : explode( ',', trim($tags, " \n\t\r\0\x0B,") );
+	wp_set_object_terms($post_id, $tags, 'post_tag', $append);
 }
 
 /**
@@ -2129,17 +2082,13 @@ function &get_pages($args = '') {
 	$r = wp_parse_args( $args, $defaults );
 	extract( $r, EXTR_SKIP );
 
-	$cache = array();
 	$key = md5( serialize( compact(array_keys($defaults)) ) );
 	if ( $cache = wp_cache_get( 'get_pages', 'posts' ) ) {
-		if ( is_array($cache) && isset( $cache[ $key ] ) ) {
+		if ( isset( $cache[ $key ] ) ) {
 			$pages = apply_filters('get_pages', $cache[ $key ], $r );
 			return $pages;
 		}
 	}
-
-	if ( !is_array($cache) )
-		$cache = array();
 
 	$inclusions = '';
 	if ( !empty($include) ) {
@@ -2493,8 +2442,6 @@ function wp_delete_attachment($postid) {
 	$meta = wp_get_attachment_metadata( $postid );
 	$file = get_attached_file( $postid );
 
-	do_action('delete_attachment', $postid);
-
 	/** @todo Delete for pluggable post taxonomies too */
 	wp_delete_object_term_relationships($postid, array('category', 'post_tag'));
 
@@ -2530,6 +2477,8 @@ function wp_delete_attachment($postid) {
 		@ unlink($file);
 
 	clean_post_cache($postid);
+
+	do_action('delete_attachment', $postid);
 
 	return $post;
 }

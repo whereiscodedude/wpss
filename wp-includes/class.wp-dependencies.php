@@ -22,8 +22,6 @@ class WP_Dependencies {
 	var $to_do = array();
 	var $done = array();
 	var $args = array();
-	var $groups = array();
-	var $group = 0;
 
 	function WP_Dependencies() {
 		$args = func_get_args();
@@ -40,26 +38,21 @@ class WP_Dependencies {
 	 * @param mixed handles (optional) items to be processed.  (void) processes queue, (string) process that item, (array of strings) process those items
 	 * @return array Items that have been processed
 	 */
-	function do_items( $handles = false, $group = false ) {
+	function do_items( $handles = false ) {
 		// Print the queue if nothing is passed.  If a string is passed, print that script.  If an array is passed, print those scripts.
 		$handles = false === $handles ? $this->queue : (array) $handles;
 		$this->all_deps( $handles );
 
-		foreach( $this->to_do as $key => $handle ) {
+		foreach( $this->to_do as $handle ) {
 			if ( !in_array($handle, $this->done) && isset($this->registered[$handle]) ) {
-
-				if ( ! $this->registered[$handle]->src ) { // Defines a group.
-					$this->done[] = $handle;
-					continue;
+				if ( $this->registered[$handle]->src ) { // Else it defines a group.
+					$this->do_item( $handle );
 				}
-
-				if ( $this->do_item( $handle, $group ) )
-					$this->done[] = $handle;
-
-				unset( $this->to_do[$key] );
+				$this->done[] = $handle;
 			}
 		}
 
+		$this->to_do = array();
 		return $this->done;
 	}
 
@@ -76,31 +69,25 @@ class WP_Dependencies {
 	 * @param mixed handles Accepts (string) dep name or (array of strings) dep names
 	 * @param bool recursion Used internally when function calls itself
 	 */
-	function all_deps( $handles, $recursion = false, $group = false ) {
+	function all_deps( $handles, $recursion = false ) {
 		if ( !$handles = (array) $handles )
 			return false;
 
 		foreach ( $handles as $handle ) {
-			$handle_parts = explode('?', $handle);
-			$handle = $handle_parts[0];
+			$handle = explode('?', $handle);
+			if ( isset($handle[1]) )
+				$this->args[$handle[0]] = $handle[1];
+			$handle = $handle[0];
 
-			if ( in_array($handle, $this->done, true) ) // Already done
+			if ( isset($this->to_do[$handle]) ) // Already grobbed it and its deps
 				continue;
-
-			$this->set_group( $handle, $recursion, $group );
-
-			if ( in_array($handle, $this->to_do, true) ) // Already grobbed it and its deps
-				continue;
-
-			if ( isset($handle_parts[1]) )
-				$this->args[$handle] = $handle_parts[1];
 
 			$keep_going = true;
 			if ( !isset($this->registered[$handle]) )
 				$keep_going = false; // Script doesn't exist
 			elseif ( $this->registered[$handle]->deps && array_diff($this->registered[$handle]->deps, array_keys($this->registered)) )
 				$keep_going = false; // Script requires deps which don't exist (not a necessary check.  efficiency?)
-			elseif ( $this->registered[$handle]->deps && !$this->all_deps( $this->registered[$handle]->deps, true, $group ) )
+			elseif ( $this->registered[$handle]->deps && !$this->all_deps( $this->registered[$handle]->deps, true ) )
 				$keep_going = false; // Script requires deps which don't exist
 
 			if ( !$keep_going ) { // Either script or its deps don't exist.
@@ -110,9 +97,11 @@ class WP_Dependencies {
 					continue; // We're at the top level.  Move on to the next one.
 			}
 
-			$this->to_do[] = $handle;
+			$this->to_do[$handle] = true;
 		}
 
+		if ( !$recursion ) // at the end
+			$this->to_do = array_keys( $this->to_do );
 		return true;
 	}
 
@@ -190,21 +179,6 @@ class WP_Dependencies {
 			break;
 		endswitch;
 		return false;
-	}
-
-	function set_group( $handle, $recursion, $group ) {
-		$group = (int) $group;
-
-		if ( $recursion )
-			$group = min($this->group, $group);
-		else
-			$this->group = $group;
-
-		if ( isset($this->groups[$handle]) && $this->groups[$handle] <= $group )
-			return false;
-
-		$this->groups[$handle] = $group;
-		return true;
 	}
 
 }

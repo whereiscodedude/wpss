@@ -34,7 +34,7 @@ if ( !function_exists('wp_set_current_user') ) :
  * the signed in user. Therefore, it opens the ability to edit and perform
  * actions on users who aren't signed in.
  *
- * @since 2.0.3
+ * @since 2.0.4
  * @global object $current_user The current user object which holds the user data.
  * @uses do_action() Calls 'set_current_user' hook after setting the current user.
  *
@@ -62,7 +62,7 @@ if ( !function_exists('wp_get_current_user') ) :
 /**
  * Retrieve the current user object.
  *
- * @since 2.0.3
+ * @since 2.0.4
  *
  * @return WP_User Current user WP_User object
  */
@@ -136,6 +136,21 @@ function get_userdata( $user_id ) {
 	_fill_user($user);
 
 	return $user;
+}
+endif;
+
+if ( !function_exists('update_user_cache') ) :
+/**
+ * Updates a users cache when overridden by a plugin.
+ *
+ * Core function does nothing.
+ *
+ * @since 1.5
+ *
+ * @return bool Only returns true
+ */
+function update_user_cache() {
+	return true;
 }
 endif;
 
@@ -422,21 +437,32 @@ if ( !function_exists('wp_authenticate') ) :
  */
 function wp_authenticate($username, $password) {
 	$username = sanitize_user($username);
-	$password = trim($password);
 
-	$user = apply_filters('authenticate', null, $username, $password);
+	if ( '' == $username )
+		return new WP_Error('empty_username', __('<strong>ERROR</strong>: The username field is empty.'));
 
-	if ( $user == null ) {
-		// TODO what should the error message be? (Or would these even happen?)
-		// Only needed if all authentication handlers fail to return anything.
-		$user = new WP_Error('authentication_failed', __('<strong>ERROR</strong>: Invalid username or incorrect password.'));
+	if ( '' == $password )
+		return new WP_Error('empty_password', __('<strong>ERROR</strong>: The password field is empty.'));
+
+	$user = get_userdatabylogin($username);
+
+	if ( !$user || ($user->user_login != $username) ) {
+		do_action( 'wp_login_failed', $username );
+		return new WP_Error('invalid_username', __('<strong>ERROR</strong>: Invalid username.'));
 	}
 
-	if (is_wp_error($user)) {
-		do_action('wp_login_failed', $username);
+	$user = apply_filters('wp_authenticate_user', $user, $password);
+	if ( is_wp_error($user) ) {
+		do_action( 'wp_login_failed', $username );
+		return $user;
 	}
 
-	return $user;
+	if ( !wp_check_password($password, $user->user_pass, $user->ID) ) {
+		do_action( 'wp_login_failed', $username );
+		return new WP_Error('incorrect_password', __('<strong>ERROR</strong>: Incorrect password.'));
+	}
+
+	return new WP_User($user->ID);
 }
 endif;
 
@@ -488,19 +514,17 @@ function wp_validate_auth_cookie($cookie = '', $scheme = '') {
 		return false;
 	}
 
-	$user = get_userdatabylogin($username);
-	if ( ! $user ) {
-		do_action('auth_cookie_bad_username', $cookie_elements);
-		return false;
-	}
-
-	$pass_frag = substr($user->user_pass, 8, 4);
-
-	$key = wp_hash($username . $pass_frag . '|' . $expiration, $scheme);
+	$key = wp_hash($username . '|' . $expiration, $scheme);
 	$hash = hash_hmac('md5', $username . '|' . $expiration, $key);
 
 	if ( $hmac != $hash ) {
 		do_action('auth_cookie_bad_hash', $cookie_elements);
+		return false;
+	}
+
+	$user = get_userdatabylogin($username);
+	if ( ! $user ) {
+		do_action('auth_cookie_bad_username', $cookie_elements);
 		return false;
 	}
 
@@ -526,9 +550,7 @@ if ( !function_exists('wp_generate_auth_cookie') ) :
 function wp_generate_auth_cookie($user_id, $expiration, $scheme = 'auth') {
 	$user = get_userdata($user_id);
 
-	$pass_frag = substr($user->user_pass, 8, 4);
-
-	$key = wp_hash($user->user_login . $pass_frag . '|' . $expiration, $scheme);
+	$key = wp_hash($user->user_login . '|' . $expiration, $scheme);
 	$hash = hash_hmac('md5', $user->user_login . '|' . $expiration, $key);
 
 	$cookie = $user->user_login . '|' . $expiration . '|' . $hash;
@@ -775,7 +797,7 @@ if ( !function_exists('check_ajax_referer') ) :
 /**
  * Verifies the AJAX request to prevent processing requests external of the blog.
  *
- * @since 2.0.3
+ * @since 2.0.4
  *
  * @param string $action Action nonce
  * @param string $query_arg where to look for nonce in $_REQUEST (since 2.5)
@@ -1124,7 +1146,7 @@ if ( !function_exists('wp_verify_nonce') ) :
  * The user is given an amount of time to use the token, so therefore, since the
  * UID and $action remain the same, the independent variable is the time.
  *
- * @since 2.0.3
+ * @since 2.0.4
  *
  * @param string $nonce Nonce that was used in the form to verify
  * @param string|int $action Should give context to what is taking place and be the same when nonce was created.
@@ -1151,7 +1173,7 @@ if ( !function_exists('wp_create_nonce') ) :
 /**
  * Creates a random, one time use token.
  *
- * @since 2.0.3
+ * @since 2.0.4
  *
  * @param string|int $action Scalar value to add context to the nonce.
  * @return string The one use form token
@@ -1276,7 +1298,7 @@ if ( !function_exists('wp_hash') ) :
 /**
  * Get hash of given string.
  *
- * @since 2.0.3
+ * @since 2.0.4
  * @uses wp_salt() Get WordPress salt
  *
  * @param string $data Plain text to hash
@@ -1587,7 +1609,7 @@ if ( !function_exists('wp_get_cookie_login') ):
  * This function is deprecated and should no longer be extended as it won't be
  * used anywhere in WordPress. Also, plugins shouldn't use it either.
  *
- * @since 2.0.3
+ * @since 2.0.4
  * @deprecated No alternative
  *
  * @return bool Always returns false

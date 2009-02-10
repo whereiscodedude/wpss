@@ -11,10 +11,7 @@ require_once('admin.php');
 
 $title = __('Tags');
 
-wp_reset_vars( array('action', 'tag', 'taxonomy') );
-
-if ( empty($taxonomy) )
-	$taxonomy = 'post_tag';
+wp_reset_vars( array('action', 'tag') );
 
 if ( isset( $_GET['action'] ) && isset($_GET['delete_tags']) && ( 'delete' == $_GET['action'] || 'delete' == $_GET['action2'] ) )
 	$action = 'bulk-delete';
@@ -28,7 +25,7 @@ case 'addtag':
 	if ( !current_user_can('manage_categories') )
 		wp_die(__('Cheatin&#8217; uh?'));
 
-	$ret = wp_insert_term($_POST['name'], $taxonomy, $_POST);
+	$ret = wp_insert_term($_POST['name'], 'post_tag', $_POST);
 	if ( $ret && !is_wp_error( $ret ) ) {
 		wp_redirect('edit-tags.php?message=1#addtag');
 	} else {
@@ -44,7 +41,7 @@ case 'delete':
 	if ( !current_user_can('manage_categories') )
 		wp_die(__('Cheatin&#8217; uh?'));
 
-	wp_delete_term( $tag_ID, $taxonomy);
+	wp_delete_term( $tag_ID, 'post_tag');
 
 	wp_redirect('edit-tags.php?message=2');
 	exit;
@@ -59,7 +56,7 @@ case 'bulk-delete':
 
 	$tags = $_GET['delete_tags'];
 	foreach( (array) $tags as $tag_ID ) {
-		wp_delete_term( $tag_ID, $taxonomy);
+		wp_delete_term( $tag_ID, 'post_tag');
 	}
 
 	$location = 'edit-tags.php';
@@ -80,7 +77,7 @@ case 'edit':
 	require_once ('admin-header.php');
 	$tag_ID = (int) $_GET['tag_ID'];
 
-	$tag = get_term($tag_ID, $taxonomy, OBJECT, 'edit');
+	$tag = get_term($tag_ID, 'post_tag', OBJECT, 'edit');
 	include('edit-tag-form.php');
 
 break;
@@ -92,7 +89,7 @@ case 'editedtag':
 	if ( !current_user_can('manage_categories') )
 		wp_die(__('Cheatin&#8217; uh?'));
 
-	$ret = wp_update_term($tag_ID, $taxonomy, $_POST);
+	$ret = wp_update_term($tag_ID, 'post_tag', $_POST);
 
 	$location = 'edit-tags.php';
 	if ( $referer = wp_get_original_referer() ) {
@@ -170,7 +167,7 @@ $page_links = paginate_links( array(
 	'format' => '',
 	'prev_text' => __('&laquo;'),
 	'next_text' => __('&raquo;'),
-	'total' => ceil(wp_count_terms($taxonomy) / $tagsperpage),
+	'total' => ceil(wp_count_terms('post_tag') / $tagsperpage),
 	'current' => $pagenum
 ));
 
@@ -210,7 +207,7 @@ if ( $page_links )
 
 $searchterms = isset( $_GET['s'] ) ? trim( $_GET['s'] ) : '';
 
-$count = tag_rows( $pagenum, $tagsperpage, $searchterms, $taxonomy );
+$count = tag_rows( $pagenum, $tagsperpage, $searchterms );
 ?>
 	</tbody>
 </table>
@@ -282,6 +279,21 @@ else
 
 </div><!-- /col-container -->
 </div><!-- /wrap -->
+
+<script type="text/javascript">
+/* <![CDATA[ */
+(function($){
+	$(document).ready(function(){
+		$('#doaction, #doaction2').click(function(){
+			if ( $('select[name^="action"]').val() == 'delete' ) {
+				var m = '<?php echo js_escape(__("You are about to delete the selected tags.\n  'Cancel' to stop, 'OK' to delete.")); ?>';
+				return showNotice.warn(m);
+			}
+		});
+	});
+})(jQuery);
+/* ]]> */
+</script>
 
 <?php inline_edit_term_row('edit-tags'); ?>
 

@@ -178,13 +178,12 @@ table {
 
 .hidden,
 .closed .inside,
-.hide-if-js {
+.hide-if-no-js {
 	display: none;
 }
 
 /* include margin and padding in the width calculation of input and textarea */
 input[type="text"],
-input[type="password"],
 textarea {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;

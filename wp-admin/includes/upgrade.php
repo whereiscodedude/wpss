@@ -278,7 +278,9 @@ function upgrade_all() {
 
 	maybe_disable_automattic_widgets();
 
-	update_option('db_version', 'db_upgraded');
+	$wp_rewrite->flush_rules();
+
+	update_option('db_version', $wp_db_version);
 }
 
 /**
@@ -924,13 +926,19 @@ function upgrade_270() {
  */
 function maybe_create_table($table_name, $create_ddl) {
 	global $wpdb;
-	if ( $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name )
-		return true;
+	foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
+		if ($table == $table_name) {
+			return true;
+		}
+	}
 	//didn't find it try to create it.
 	$q = $wpdb->query($create_ddl);
 	// we cannot directly tell that whether this succeeded!
-	if ( $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name )
-		return true;
+	foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
+		if ($table == $table_name) {
+			return true;
+		}
+	}
 	return false;
 }
 
