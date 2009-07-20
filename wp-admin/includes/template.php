@@ -376,7 +376,7 @@ function link_cat_row( $category, $name_override = false ) {
  *
  * Compares the first two arguments and if identical marks as checked
  *
- * @since 1.0
+ * @since 2.8
  *
  * @param any $checked One of the values to compare
  * @param any $current (true) The other value to compare if not just true
@@ -391,7 +391,7 @@ function checked( $checked, $current = true, $echo = true) {
  *
  * Compares the first two arguments and if identical marks as selected
  *
- * @since 1.0
+ * @since 2.8
  *
  * @param any selected One of the values to compare
  * @param any $current (true) The other value to compare if not just true
@@ -415,7 +415,7 @@ function selected( $selected, $current = true, $echo = true) {
  * @param string $type The type of checked|selected we are doing.
  */
 function __checked_selected_helper( $helper, $current, $echo, $type) {
-	if ( (string) $helper === (string) $current)
+	if ( $helper == $current)
 		$result = " $type='$type'";
 	else
 		$result = '';
@@ -663,7 +663,7 @@ function _tag_row( $tag, $class = '', $taxonomy = 'post_tag' ) {
 					$actions = array();
 					$actions['edit'] = '<a href="' . $edit_link . '">' . __('Edit') . '</a>';
 					$actions['inline hide-if-no-js'] = '<a href="#" class="editinline">' . __('Quick&nbsp;Edit') . '</a>';
-					$actions['delete'] = "<a class='delete-tag' href='" . wp_nonce_url("edit-tags.php?action=delete&amp;taxonomy=$taxonomy&amp;tag_ID=$tag->term_id", 'delete-tag_' . $tag->term_id) . "'>" . __('Delete') . "</a>";
+					$actions['delete'] = "<a class='delete:the-list:tag-$tag->term_id submitdelete' href='" . wp_nonce_url("edit-tags.php?action=delete&amp;taxonomy=$taxonomy&amp;tag_ID=$tag->term_id", 'delete-tag_' . $tag->term_id) . "'>" . __('Delete') . "</a>";
 					$actions = apply_filters('tag_row_actions', $actions, $tag);
 					$action_count = count($actions);
 					$i = 0;
@@ -730,7 +730,7 @@ function tag_rows( $page = 1, $pagesize = 20, $searchterms = '', $taxonomy = 'po
 	$out = '';
 	$count = 0;
 	foreach( $tags as $tag )
-		$out .= _tag_row( $tag, ++$count % 2 ? ' class="alternate"' : '', $taxonomy );
+		$out .= _tag_row( $tag, ++$count % 2 ? ' class="iedit alternate"' : ' class="iedit"', $taxonomy );
 
 	// filter and send to screen
 	echo $out;
@@ -1055,18 +1055,21 @@ function inline_edit_row( $type ) {
 
 <?php endif; // $bulk
 
+		ob_start();
 		$authors = get_editable_user_ids( $current_user->id, true, $type ); // TODO: ROLE SYSTEM
 		if ( $authors && count( $authors ) > 1 ) :
-			$users_opt = array('include' => $authors, 'name' => 'post_author', 'class'=> 'authors', 'multi' => 1, 'echo' => 0);
+			$users_opt = array('include' => $authors, 'name' => 'post_author', 'class'=> 'authors', 'multi' => 1);
 			if ( $bulk )
 				$users_opt['show_option_none'] = __('- No Change -');
+?>
+		<label>
+			<span class="title"><?php _e( 'Author' ); ?></span>
+			<?php wp_dropdown_users( $users_opt ); ?>
+		</label>
 
-		$authors_dropdown  = '<label>';
-		$authors_dropdown .= '<span class="title">' . __( 'Author' ) . '</span>';
-		$authors_dropdown .= wp_dropdown_users( $users_opt );
-		$authors_dropdown .= '</label>';
-
+<?php
 		endif; // authors
+		$authors_dropdown = ob_get_clean();
 ?>
 
 <?php if ( !$bulk ) : echo $authors_dropdown; ?>
@@ -2121,17 +2124,15 @@ function _wp_comment_row( $comment_id, $mode, $comment_status, $checkbox = true,
 				echo '<div id="submitted-on">';
 				printf(__('Submitted on <a href="%1$s">%2$s at %3$s</a>'), get_comment_link($comment->comment_ID), get_comment_date(__('Y/m/d')), get_comment_date(__('g:ia')));
 				echo '</div>';
-				comment_text(); 
-				if ( $user_can ) { ?>
+				comment_text(); ?>
 				<div id="inline-<?php echo $comment->comment_ID; ?>" class="hidden">
-				<textarea class="comment" rows="1" cols="1"><?php echo htmlspecialchars($comment->comment_content, ENT_QUOTES); ?></textarea>
-				<div class="author-email"><?php echo esc_attr( $comment->comment_author_email ); ?></div>
-				<div class="author"><?php echo esc_attr( $comment->comment_author ); ?></div>
+				<textarea class="comment" rows="3" cols="10"><?php echo $comment->comment_content; ?></textarea>
+				<div class="author-email"><?php if ( $user_can ) echo esc_attr( $comment->comment_author_email ); ?></div>
+				<div class="author"><?php if ( $user_can ) echo esc_attr( $comment->comment_author ); ?></div>
 				<div class="author-url"><?php echo esc_attr( $comment->comment_author_url ); ?></div>
 				<div class="comment_status"><?php echo $comment->comment_approved; ?></div>
 				</div>
 				<?php
-				}
 				$actions = array();
 
 				if ( $user_can ) {
@@ -3471,11 +3472,6 @@ function screen_meta($screen) {
 				$help = plugins_search_help();
 				$_wp_contextual_help[$screen] = $help;
 			}
-			break;
-		case 'theme-editor':
-		case 'plugin-editor':
-			$settings = '<p><a id="codepress-on" href="' . $screen . '.php?codepress=on">' . __('Enable syntax highlighting') . '</a><a id="codepress-off" href="' . $screen . '.php?codepress=off">' . __('Disable syntax highlighting') . "</a></p>\n";
-			$show_screen = true;
 			break;
 		case 'widgets':
 			if ( !isset($_wp_contextual_help['widgets']) ) {
