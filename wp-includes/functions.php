@@ -3328,6 +3328,8 @@ function wp_timezone_choice( $selected_zone ) {
 	return join( "\n", $structure );
 }
 
+
+
 /**
  * Strip close comment and close php tags from file headers used by WP
  * See http://core.trac.wordpress.org/ticket/8497
@@ -3337,33 +3339,4 @@ function wp_timezone_choice( $selected_zone ) {
 function _cleanup_header_comment($str) {
 	return trim(preg_replace("/\s*(?:\*\/|\?>).*/", '', $str));
 }
-
-/**
- * Permanently deletes posts, pages, attachments, and comments which have been in the trash for EMPTY_TRASH_DAYS.
- * 
- * @since 2.9.0
- *
- * @return void
- */
-function wp_scheduled_delete() {
-	$trash_meta = get_option('wp_trash_meta');
-	if ( !is_array($trash_meta) )
-		return;
-
-	$delete_timestamp = time() - (60*60*24*EMPTY_TRASH_DAYS);
-
-	foreach ( (array) $trash_meta['comments'] as $id => $meta ) {
-		if ( $meta['time'] < $delete_timestamp ) {
-			wp_delete_comment($id);
-			unset($trash_meta['comments'][$id]);
-		}
-	}
-	foreach ( (array) $trash_meta['posts'] as $id => $meta ) {
-		if ( $meta['time'] < $delete_timestamp ) {
-			wp_delete_post($id);
-			unset($trash_meta['posts'][$id]);
-		}
-	}
-
-	update_option('wp_trash_meta', $trash_meta);
-}
+?>
