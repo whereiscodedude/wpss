@@ -105,11 +105,12 @@ function edit_user( $user_id = 0 ) {
 		$user->display_name = esc_html( trim( $_POST['display_name'] ));
 	if ( isset( $_POST['description'] ))
 		$user->description = trim( $_POST['description'] );
-	$user_contactmethods = _wp_get_user_contactmethods();
-	foreach ($user_contactmethods as $method => $name) {
-		if ( isset( $_POST[$method] ))
-			$user->$method = esc_html( trim( $_POST[$method] ) );
-	}
+	if ( isset( $_POST['jabber'] ))
+		$user->jabber = esc_html( trim( $_POST['jabber'] ));
+	if ( isset( $_POST['aim'] ))
+		$user->aim = esc_html( trim( $_POST['aim'] ));
+	if ( isset( $_POST['yim'] ))
+		$user->yim = esc_html( trim( $_POST['yim'] ));
 	if ( !$update )
 		$user->rich_editing = 'true';  // Default to true for new users.
 	else if ( isset( $_POST['rich_editing'] ) )
@@ -377,12 +378,9 @@ function get_user_to_edit( $user_id ) {
 	$user->last_name    = esc_attr($user->last_name);
 	$user->display_name = esc_attr($user->display_name);
 	$user->nickname     = esc_attr($user->nickname);
-
-	$user_contactmethods = _wp_get_user_contactmethods();
-	foreach ($user_contactmethods as $method => $name) {
-		$user->{$method} = isset( $user->{$method} ) && !empty( $user->{$method} ) ? esc_attr($user->{$method}) : '';
-	}
-	
+	$user->aim          = isset( $user->aim ) && !empty( $user->aim ) ? esc_attr($user->aim) : '';
+	$user->yim          = isset( $user->yim ) && !empty( $user->yim ) ? esc_attr($user->yim) : '';
+	$user->jabber       = isset( $user->jabber ) && !empty( $user->jabber ) ? esc_attr($user->jabber) : '';
 	$user->description  = isset( $user->description ) && !empty( $user->description ) ? esc_html($user->description) : '';
 
 	return $user;
@@ -835,23 +833,6 @@ function default_password_nag() {
 	printf(__("Notice: you're using the auto-generated password for your account. Would you like to change it to something you'll remember easier?<br />
 			  <a href='%s'>Yes, Take me to my profile page</a> | <a href='%s' id='default-password-nag-no'>No Thanks, Do not remind me again.</a>"), admin_url('profile.php') . '#password', '?default_password_nag=0');
 	echo '</p></div>';
-}
-
-/**
- * Setup the default contact methods
- *
- * @access private
- * @since 
- *
- * @return array $user_contactmethods Array of contact methods and their labels.
- */
-function _wp_get_user_contactmethods() {
-	$user_contactmethods = array(
-		'aim' => __('AIM'),
-		'yim' => __('Yahoo IM'),
-		'jabber' => __('Jabber / Google Talk')
-	);
-	return apply_filters('user_contactmethods',$user_contactmethods);
 }
 
 ?>

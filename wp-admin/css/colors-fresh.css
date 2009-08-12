@@ -58,8 +58,7 @@ div.dashboard-widget,
 	border-color: #ccc;
 }
 
-#poststuff .inside label.spam,
-#poststuff .inside label.deleted {
+#poststuff .inside label.spam {
 	color: red;
 }
 

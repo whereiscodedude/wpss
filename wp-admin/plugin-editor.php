@@ -9,9 +9,6 @@
 /** WordPress Administration Bootstrap */
 require_once('admin.php');
 
-if ( !current_user_can('edit_plugins') )
-	wp_die('<p>'.__('You do not have sufficient permissions to edit plugins for this blog.').'</p>');
-
 $title = __("Edit Plugins");
 $parent_file = 'plugins.php';
 
@@ -36,13 +33,15 @@ if ( empty($file) )
 
 $file = validate_file_to_edit($file, $plugin_files);
 $real_file = WP_PLUGIN_DIR . '/' . $file;
-$scrollto = isset($_REQUEST['scrollto']) ? (int) $_REQUEST['scrollto'] : 0;
 
 switch ( $action ) {
 
 case 'update':
 
 	check_admin_referer('edit-plugin_' . $file);
+
+	if ( !current_user_can('edit_plugins') )
+		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this blog.').'</p>');
 
 	$newcontent = stripslashes($_POST['newcontent']);
 	if ( is_writeable($real_file) ) {
@@ -54,18 +53,21 @@ case 'update':
 		if ( is_plugin_active($file) || isset($_POST['phperror']) ) {
 			if ( is_plugin_active($file) )
 				deactivate_plugins($file, true);
-			wp_redirect(add_query_arg('_wpnonce', wp_create_nonce('edit-plugin-test_' . $file), "plugin-editor.php?file=$file&liveupdate=1&scrollto=$scrollto"));
+			wp_redirect(add_query_arg('_wpnonce', wp_create_nonce('edit-plugin-test_' . $file), "plugin-editor.php?file=$file&liveupdate=1"));
 			exit;
 		}
-		wp_redirect("plugin-editor.php?file=$file&a=te&scrollto=$scrollto");
+		wp_redirect("plugin-editor.php?file=$file&a=te");
 	} else {
-		wp_redirect("plugin-editor.php?file=$file&scrollto=$scrollto");
+		wp_redirect("plugin-editor.php?file=$file");
 	}
 	exit;
 
 break;
 
 default:
+
+	if ( !current_user_can('edit_plugins') )
+		wp_die('<p>'.__('You do not have sufficient permissions to edit plugins for this blog.').'</p>');
 
 	if ( isset($_GET['liveupdate']) ) {
 		check_admin_referer('edit-plugin-test_' . $file);
@@ -77,12 +79,9 @@ default:
 		if ( ! is_plugin_active($file) )
 			activate_plugin($file, "plugin-editor.php?file=$file&phperror=1"); // we'll override this later if the plugin can be included without fatal error
 
-		wp_redirect("plugin-editor.php?file=$file&a=te&scrollto=$scrollto");
+		wp_redirect("plugin-editor.php?file=$file&a=te");
 		exit;
 	}
-
-	if ( use_codepress() )
-		wp_enqueue_script( 'codepress' );
 
 	// List of allowable extensions
 	$editable_extensions = array('php', 'txt', 'text', 'js', 'css', 'html', 'htm', 'xml', 'inc', 'include');
@@ -203,7 +202,6 @@ foreach ( $plugin_files as $plugin_file ) :
 		<input type="hidden" name="action" value="update" />
 		<input type="hidden" name="file" value="<?php echo esc_attr($file) ?>" />
 		<input type="hidden" name="plugin" value="<?php echo esc_attr($plugin) ?>" />
-		<input type="hidden" name="scrollto" id="scrollto" value="<?php echo $scrollto; ?>" />
 		</div>
 		<?php if ( !empty( $docs_select ) ) : ?>
 		<div id="documentation"><label for="docs-list"><?php _e('Documentation:') ?></label> <?php echo $docs_select ?> <input type="button" class="button" value="<?php esc_attr_e( 'Lookup' ) ?> " onclick="if ( '' != jQuery('#docs-list').val() ) { window.open( 'http://api.wordpress.org/core/handbook/1.0/?function=' + escape( jQuery( '#docs-list' ).val() ) + '&amp;locale=<?php echo urlencode( get_locale() ) ?>&amp;version=<?php echo urlencode( $wp_version ) ?>&amp;redirect=true'); }" /></div>
@@ -226,14 +224,6 @@ foreach ( $plugin_files as $plugin_file ) :
 </form>
 <br class="clear" />
 </div>
-<script type="text/javascript">
-/* <![CDATA[ */
-jQuery(document).ready(function($){
-	$('#template').submit(function(){ $('#scrollto').val( $('#newcontent').scrollTop() ); });
-	$('#newcontent').scrollTop( $('#scrollto').val() );
-});
-/* ]]> */
-</script>
 <?php
 	break;
 }

@@ -8,10 +8,8 @@ inlineEditTax = {
 		t.type = $('#the-list').attr('className').substr(5);
 		t.what = '#'+t.type+'-';
 
-		$('.editinline').live('click', function(){
-			inlineEditTax.edit(this);
-			return false;
-		});
+		// get all editable rows
+		t.rows = $('tr.iedit');
 
 		// prepare the edit row
 		row.keyup(function(e) { if(e.which == 27) return inlineEditTax.revert(); });
@@ -19,6 +17,9 @@ inlineEditTax = {
 		$('a.cancel', row).click(function() { return inlineEditTax.revert(); });
 		$('a.save', row).click(function() { return inlineEditTax.save(this); });
 		$('input, select', row).keydown(function(e) { if(e.which == 13) return inlineEditTax.save(this); });
+
+		// add events
+		t.addEvents(t.rows);
 
 		$('#posts-filter input[type="submit"]').click(function(e){
 			if ( $('form#posts-filter tr.inline-editor').length > 0 )
@@ -29,6 +30,12 @@ inlineEditTax = {
 	toggle : function(el) {
 		var t = this;
 		$(t.what+t.getId(el)).css('display') == 'none' ? t.revert() : t.edit(el);
+	},
+
+	addEvents : function(r) {
+		r.each(function() {
+			$(this).find('a.editinline').click(function() { inlineEditTax.edit(this); return false; });
+		});
 	},
 
 	edit : function(id) {
@@ -70,7 +77,7 @@ inlineEditTax = {
 			taxonomy: tax
 		};
 
-		fields = $('#edit-'+id+' :input').serialize();
+		fields = $('#edit-'+id+' :input').fieldSerialize();
 		params = fields + '&' + $.param(params);
 
 		// make ajax request
@@ -86,7 +93,10 @@ inlineEditTax = {
 
 						$('#edit-'+id).before(r).remove();
 						row = new_id ? $('#'+new_id) : $(inlineEditTax.what+id);
-						row.hide().fadeIn();
+						row.hide();
+
+						inlineEditTax.addEvents(row);
+						row.fadeIn();
 					} else
 						$('#edit-'+id+' .inline-edit-save .error').html(r).show();
 				} else

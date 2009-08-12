@@ -1317,10 +1317,8 @@ function translate_smiley($smiley) {
 	$smiley = trim(reset($smiley));
 	$img = $wpsmiliestrans[$smiley];
 	$smiley_masked = esc_attr($smiley);
-	
-	$srcurl = apply_filters('smilies_src', "$siteurl/wp-includes/images/smilies/$img", $img, $siteurl);
 
-	return " <img src='$srcurl' alt='$smiley_masked' class='wp-smiley' /> ";
+	return " <img src='$siteurl/wp-includes/images/smilies/$img' alt='$smiley_masked' class='wp-smiley' /> ";
 }
 
 
@@ -2351,8 +2349,7 @@ function sanitize_option($option, $value) {
 		case 'close_comments_days_old':
 		case 'comments_per_page':
 		case 'thread_comments_depth':
-		case 'users_can_register':
-			$value = absint( $value );
+			$value = abs((int) $value);
 			break;
 
 		case 'posts_per_page':

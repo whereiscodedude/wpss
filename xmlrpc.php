@@ -201,9 +201,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$this->initialise_blog_option_info( );
 		$this->methods = apply_filters('xmlrpc_methods', $this->methods);
-	}
-
-	function serve_request() {
 		$this->IXR_Server($this->methods);
 	}
 
@@ -422,11 +419,6 @@ class wp_xmlrpc_server extends IXR_Server {
 				'desc'			=> __( 'Time Format' ),
 				'readonly'		=> false,
 				'option'		=> 'time_format'
-			),
-			'users_can_register'	=> array(
-				'desc'			=> __( 'Allow new users to sign up' ),
-				'readonly'		=> false,
-				'option'		=> 'users_can_register'
 			)
 		);
 
@@ -1058,11 +1050,11 @@ class wp_xmlrpc_server extends IXR_Server {
 		$comment_date = mysql2date("Ymd\TH:i:s", $comment->comment_date, false);
 		$comment_date_gmt = mysql2date("Ymd\TH:i:s", $comment->comment_date_gmt, false);
 
-		if ( '0' == $comment->comment_approved )
+		if ( 0 == $comment->comment_approved )
 			$comment_status = 'hold';
 		else if ( 'spam' == $comment->comment_approved )
 			$comment_status = 'spam';
-		else if ( '1' == $comment->comment_approved )
+		else if ( 1 == $comment->comment_approved )
 			$comment_status = 'approve';
 		else
 			$comment_status = $comment->comment_approved;
@@ -1559,6 +1551,9 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		foreach( $options as $o_name => $o_value ) {
 			$option_names[] = $o_name;
+			if( empty( $o_value ) )
+				continue;
+
 			if( !array_key_exists( $o_name, $this->blog_options ) )
 				continue;
 
@@ -3408,5 +3403,5 @@ class wp_xmlrpc_server extends IXR_Server {
 }
 
 $wp_xmlrpc_server = new wp_xmlrpc_server();
-$wp_xmlrpc_server->serve_request();
+
 ?>

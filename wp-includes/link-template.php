@@ -701,7 +701,7 @@ function get_edit_post_link( $id = 0, $context = 'display' ) {
 		break;
 	default :
 		if ( !current_user_can( 'edit_post', $post->ID ) )
-			return apply_filters( 'get_edit_post_link', '', $post->ID, $context );;
+			return;
 		$file = 'post';
 		$var  = 'post';
 		break;
@@ -1804,24 +1804,6 @@ function plugins_url($path = '', $plugin = '') {
 		$url .= '/' . ltrim($path, '/');
 
 	return apply_filters('plugins_url', $url, $path, $plugin);
-}
-
-/**
- * Output rel=canonical for singular queries
- *
- * @package WordPress
- * @since 2.9.0
-*/
-function rel_canonical() {
-	if ( !is_singular() )
-		return;
-
-	global $wp_the_query;
-	if ( !$id = $wp_the_query->get_queried_object_id() )
-		return;
-
-	$link = get_permalink( $id );
-	echo "<link rel='canonical' href='$link' />\n";
 }
 
 ?>
