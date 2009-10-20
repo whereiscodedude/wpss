@@ -409,7 +409,7 @@ function get_body_class( $class = '' ) {
 		if ( is_author() ) {
 			$author = $wp_query->get_queried_object();
 			$classes[] = 'author';
-			$classes[] = 'author-' . sanitize_html_class($author->user_nicename , $author->ID);
+			$classes[] = 'author-' . sanitize_html_class($author->user_nicename , $author->user_id);
 		} elseif ( is_category() ) {
 			$cat = $wp_query->get_queried_object();
 			$classes[] = 'category';
@@ -777,7 +777,7 @@ function wp_list_pages($args = '') {
 			$output .= '</ul></li>';
 	}
 
-	$output = apply_filters('wp_list_pages', $output, $r);
+	$output = apply_filters('wp_list_pages', $output);
 
 	if ( $r['echo'] )
 		echo $output;
@@ -828,7 +828,7 @@ function wp_page_menu( $args = array() ) {
 		$class = '';
 		if ( is_front_page() && !is_paged() )
 			$class = 'class="current_page_item"';
-		$menu .= '<li ' . $class . '><a href="' . get_option('home') . '" title="' . esc_attr($text) . '">' . $args['link_before'] . $text . $args['link_after'] . '</a></li>';
+		$menu .= '<li ' . $class . '><a href="' . get_option('home') . '">' . $args['link_before'] . $text . $args['link_after'] . '</a></li>';
 		// If the front page is a page, add it to the exclude list
 		if (get_option('show_on_front') == 'page') {
 			if ( !empty( $list_args['exclude'] ) ) {
@@ -891,41 +891,6 @@ function walk_page_dropdown_tree() {
 		$walker = $args[2]['walker'];
 
 	return call_user_func_array(array(&$walker, 'walk'), $args);
-}
-
-//
-// Post images
-//
-
-function has_post_image( $post_id = NULL ) {
-	global $id;
-	$post_id = ( NULL === $post_id ) ? $id : $post_id;
-	return !! get_post_image_id( $post_id );
-}
-
-function get_post_image_id( $post_id = NULL ) {
-	global $id;
-	$post_id = ( NULL === $post_id ) ? $id : $post_id;
-	return get_post_meta( $post_id, '_thumbnail_id', true );
-}
-
-function the_post_image( $size = 'thumbnail', $attr = '' ) {
-	echo get_the_post_image( NULL, $size, $attr );
-}
-
-function get_the_post_image( $post_id = NULL, $size = 'thumbnail', $attr = '' ) {
-	global $id;
-	$post_id = ( NULL === $post_id ) ? $id : $post_id;
-	$post_image_id = get_post_image_id( $post_id );
-	$size = apply_filters( 'post_image_size', $size );
-	if ( $post_image_id ) {
-		do_action( 'begin_fetch_post_image_html', $post_id, $post_image_id, $size ); // for "Just In Time" filtering of all of wp_get_attachment_image()'s filters
-		$html = wp_get_attachment_image( $post_image_id, $size, false, $attr );
-		do_action( 'end_fetch_post_image_html', $post_id, $post_image_id, $size );
-	} else {
-		$html = '';
-	}
-	return apply_filters( 'post_image_html', $html, $post_id, $post_image_id );
 }
 
 //

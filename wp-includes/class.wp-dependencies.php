@@ -171,14 +171,8 @@ class WP_Dependencies {
 	}
 
 	function dequeue( $handles ) {
-		foreach ( (array) $handles as $handle ) {
-			$handle = explode('?', $handle);
-			$key = array_search($handle[0], $this->queue);
-			if ( false !== $key ) {
-				unset($this->queue[$key]);
-				unset($this->args[$handle[0]]);
-			}
-		}
+		foreach ( (array) $handles as $handle )
+			unset( $this->queue[$handle] );
 	}
 
 	function query( $handle, $list = 'registered' ) { // registered, queue, done, to_do

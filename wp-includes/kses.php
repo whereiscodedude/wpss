@@ -1027,30 +1027,10 @@ function valid_unicode($i) {
  * @return string Content after decoded entities
  */
 function wp_kses_decode_entities($string) {
-	$string = preg_replace_callback('/&#([0-9]+);/', '_wp_kses_decode_entities_chr', $string);
-	$string = preg_replace_callback('/&#[Xx]([0-9A-Fa-f]+);/', '_wp_kses_decode_entities_chr_hexdec', $string);
+	$string = preg_replace_callback('/&#([0-9]+);/', create_function('$match', 'return chr($match[1]);'), $string);
+	$string = preg_replace_callback('/&#[Xx]([0-9A-Fa-f]+);/', create_function('$match', 'return chr(hexdec($match[1]));'), $string);
 
 	return $string;
-}
-
-/**
- * Regex callback for wp_kses_decode_entities()
- *
- * @param array $match preg match
- * @return string
- */
-function _wp_kses_decode_entities_chr( $match ) {
-	return chr( $match[1] );
-}
-
-/**
- * Regex callback for wp_kses_decode_entities()
- *
- * @param array $match preg match
- * @return string
- */
-function _wp_kses_decode_entities_chr_hexdec( $match ) {
-	return chr( hexdec( $match[1] ) );
 }
 
 /**
@@ -1176,16 +1156,16 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
 		return '';
 
 	$css_array = split( ';', trim( $css ) );
-	$allowed_attr = apply_filters( 'safe_style_css', array( 'text-align', 'margin', 'color', 'float',
-	'border', 'background', 'background-color', 'border-bottom', 'border-bottom-color',
+	$allowed_attr = apply_filters( 'safe_style_css', array( 'text-align', 'margin', 'color', 'float', 
+	'border', 'background', 'background-color', 'border-bottom', 'border-bottom-color', 
 	'border-bottom-style', 'border-bottom-width', 'border-collapse', 'border-color', 'border-left',
-	'border-left-color', 'border-left-style', 'border-left-width', 'border-right', 'border-right-color',
-	'border-right-style', 'border-right-width', 'border-spacing', 'border-style', 'border-top',
-	'border-top-color', 'border-top-style', 'border-top-width', 'border-width', 'caption-side',
-	'clear', 'cursor', 'direction', 'font', 'font-family', 'font-size', 'font-style',
-	'font-variant', 'font-weight', 'height', 'letter-spacing', 'line-height', 'margin-bottom',
-	'margin-left', 'margin-right', 'margin-top', 'overflow', 'padding', 'padding-bottom',
-	'padding-left', 'padding-right', 'padding-top', 'text-decoration', 'text-indent', 'vertical-align',
+	'border-left-color', 'border-left-style', 'border-left-width', 'border-right', 'border-right-color', 
+	'border-right-style', 'border-right-width', 'border-spacing', 'border-style', 'border-top', 
+	'border-top-color', 'border-top-style', 'border-top-width', 'border-width', 'caption-side', 
+	'clear', 'cursor', 'direction', 'font', 'font-family', 'font-size', 'font-style', 
+	'font-variant', 'font-weight', 'height', 'letter-spacing', 'line-height', 'margin-bottom', 
+	'margin-left', 'margin-right', 'margin-top', 'overflow', 'padding', 'padding-bottom', 
+	'padding-left', 'padding-right', 'padding-top', 'text-decoration', 'text-indent', 'vertical-align', 
 	'width' ) );
 
 	if ( empty($allowed_attr) )

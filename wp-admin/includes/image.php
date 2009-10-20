@@ -49,7 +49,7 @@ function wp_crop_image( $src_file, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_
 	if ( !is_resource( $src ))
 		return $src;
 
-	$dst = wp_imagecreatetruecolor( $dst_w, $dst_h );
+	$dst = imagecreatetruecolor( $dst_w, $dst_h );
 
 	if ( $src_abs ) {
 		$src_w -= $src_x;
@@ -121,7 +121,7 @@ function wp_generate_attachment_metadata( $attachment_id, $file ) {
 
 	}
 
-	return apply_filters( 'wp_generate_attachment_metadata', $metadata, $attachment_id );
+	return apply_filters( 'wp_generate_attachment_metadata', $metadata );
 }
 
 /**
@@ -326,3 +326,5 @@ function file_is_displayable_image($path) {
 
 	return apply_filters('file_is_displayable_image', $result, $path);
 }
+
+?>

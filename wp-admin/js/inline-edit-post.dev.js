@@ -8,6 +8,9 @@ inlineEditPost = {
 		t.type = $('table.widefat').hasClass('page') ? 'page' : 'post';
 		t.what = '#'+t.type+'-';
 
+		// get all editable rows
+		t.rows = $('tr.iedit');
+
 		// prepare the edit rows
 		qeRow.keyup(function(e) { if(e.which == 27) return inlineEditPost.revert(); });
 		bulkRow.keyup(function(e) { if (e.which == 27) return inlineEditPost.revert(); });
@@ -28,7 +31,7 @@ inlineEditPost = {
 		});
 
 		// add events
-		$('a.editinline').live('click', function() { inlineEditPost.edit(this); return false; });
+		t.addEvents(t.rows);
 
 		$('#bulk-title-div').parents('fieldset').after(
 			$('#inline-edit fieldset.inline-edit-categories').clone()
@@ -71,6 +74,13 @@ inlineEditPost = {
 	toggle : function(el) {
 		var t = this;
 		$(t.what+t.getId(el)).css('display') == 'none' ? t.revert() : t.edit(el);
+	},
+
+	addEvents : function(r) {
+		r.each(function() {
+			var row = $(this);
+			$('a.editinline', row).click(function() { inlineEditPost.edit(this); return false; });
+		});
 	},
 
 	setBulk : function() {
@@ -126,11 +136,6 @@ inlineEditPost = {
 
 		// populate the data
 		rowData = $('#inline_'+id);
-		if ( !$(':input[name="post_author"] option[value=' + $('.post_author', rowData).text() + ']', editRow).val() ) {
-			// author no longer has edit caps, so we need to add them to the list of authors
-			$(':input[name="post_author"]', editRow).prepend('<option value="' + $('.post_author', rowData).text() + '">' + $('#' + t.type + '-' + id + ' .author').text() + '</option>');
-		}
-
 		for ( f = 0; f < fields.length; f++ ) {
 			$(':input[name="'+fields[f]+'"]', editRow).val( $('.'+fields[f], rowData).text() );
 		}
@@ -186,7 +191,7 @@ inlineEditPost = {
 	},
 
 	save : function(id) {
-		var params, fields, page = $('.post_status_page').val() || '';
+		var params, fields;
 
 		if( typeof(id) == 'object' )
 			id = this.getId(id);
@@ -197,11 +202,10 @@ inlineEditPost = {
 			action: 'inline-save',
 			post_type: this.type,
 			post_ID: id,
-			edit_date: 'true',
-			post_status: page
+			edit_date: 'true'
 		};
 
-		fields = $('#edit-'+id+' :input').serialize();
+		fields = $('#edit-'+id+' :input').fieldSerialize();
 		params = fields + '&' + $.param(params);
 
 		// make ajax request
@@ -213,7 +217,15 @@ inlineEditPost = {
 					if ( -1 != r.indexOf('<tr') ) {
 						$(inlineEditPost.what+id).remove();
 						$('#edit-'+id).before(r).remove();
-						$(inlineEditPost.what+id).hide().fadeIn();
+
+						var row = $(inlineEditPost.what+id);
+						row.hide();
+
+						if ( 'draft' == $('input[name="post_status"]').val() )
+							row.find('td.column-comments').hide();
+
+						inlineEditPost.addEvents(row);
+						row.fadeIn();
 					} else {
 						r = r.replace( /<.[^<>]*?>/g, '' );
 						$('#edit-'+id+' .inline-edit-save').append('<span class="error">'+r+'</span>');

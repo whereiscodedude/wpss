@@ -3,11 +3,10 @@ jQuery(document).ready(function($) {
 
 	gallerySortableInit = function() {
 		gallerySortable = $('#media-items').sortable( {
-			items: 'div.media-item',
+			items: '.media-item',
 			placeholder: 'sorthelper',
 			axis: 'y',
 			distance: 2,
-			handle: 'div.filename',
 			stop: function(e, ui) {
 				// When an update has occurred, adjust the order for each item
 				var all = $('#media-items').sortable('toArray'), len = all.length;

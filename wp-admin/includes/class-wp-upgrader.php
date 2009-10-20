@@ -81,28 +81,20 @@ class WP_Upgrader {
 			return new WP_Error('fs_error', $this->strings['fs_error'], $wp_filesystem->errors);
 
 		foreach ( (array)$directories as $dir ) {
-			switch ( $dir ) {
-				case ABSPATH:
-					if ( ! $wp_filesystem->abspath() )
-						return new WP_Error('fs_no_root_dir', $this->strings['fs_no_root_dir']);
-					break;
-				case WP_CONTENT_DIR:
-					if ( ! $wp_filesystem->wp_content_dir() )
-						return new WP_Error('fs_no_content_dir', $this->strings['fs_no_content_dir']);
-					break;
-				case WP_PLUGIN_DIR:
-					if ( ! $wp_filesystem->wp_plugins_dir() )
-						return new WP_Error('fs_no_plugins_dir', $this->strings['fs_no_plugins_dir']);
-					break;
-				case WP_CONTENT_DIR . '/themes':
-					if ( ! $wp_filesystem->find_folder(WP_CONTENT_DIR . '/themes') )
-						return new WP_Error('fs_no_themes_dir', $this->strings['fs_no_themes_dir']);
-					break;
-				default:
-					if ( ! $wp_filesystem->find_folder($dir) )
-						return new WP_Error('fs_no_folder', sprintf($this->strings['fs_no_folder'], $dir));
-					break;
-			}
+			if ( ABSPATH == $dir && ! $wp_filesystem->abspath() )
+				return new WP_Error('fs_no_root_dir', $this->strings['fs_no_root_dir']);
+
+			elseif ( WP_CONTENT_DIR == $dir && ! $wp_filesystem->wp_content_dir() )
+				return new WP_Error('fs_no_content_dir', $this->strings['fs_no_content_dir']);
+
+			elseif ( WP_PLUGIN_DIR == $dir && ! $wp_filesystem->wp_plugins_dir() )
+				return new WP_Error('fs_no_plugins_dir', $this->strings['fs_no_plugins_dir']);
+
+			elseif ( WP_CONTENT_DIR . '/themes' == $dir && ! $wp_filesystem->find_folder(WP_CONTENT_DIR . '/themes') )
+				return new WP_Error('fs_no_themes_dir', $this->strings['fs_no_themes_dir']);
+
+			elseif ( ! $wp_filesystem->find_folder($dir) )
+				return new WP_Error('fs_no_folder', sprintf($strings['fs_no_folder'], $dir));
 		}
 		return true;
 	} //end fs_connect();
@@ -210,26 +202,24 @@ class WP_Upgrader {
 			$destination = trailingslashit($destination) . trailingslashit(basename($source));
 		}
 
-		if ( $wp_filesystem->exists($remote_destination) ) {
-			if ( $clear_destination ) {
-				//We're going to clear the destination if theres something there
-				$this->skin->feedback('remove_old');
-				$removed = $wp_filesystem->delete($remote_destination, true);
-				$removed = apply_filters('upgrader_clear_destination', $removed, $local_destination, $remote_destination, $hook_extra);
+		//If we're not clearing the destination folder, and something exists there allready, Bail.
+		if ( ! $clear_destination && $wp_filesystem->exists($remote_destination) ) {
+			$wp_filesystem->delete($remote_source, true); //Clear out the source files.
+			return new WP_Error('folder_exists', $this->strings['folder_exists'], $remote_destination );
+		} else if ( $clear_destination ) {
+			//We're going to clear the destination if theres something there
+			$this->skin->feedback('remove_old');
 
-				if ( is_wp_error($removed) )
-					return $removed;
-				else if ( ! $removed )
-					return new WP_Error('remove_old_failed', $this->strings['remove_old_failed']);
-			} else {
-				//If we're not clearing the destination folder and something exists there allready, Bail.
-				//But first check to see if there are actually any files in the folder.
-				$_files = $wp_filesystem->dirlist($remote_destination);
-				if ( ! empty($_files) ) {
-					$wp_filesystem->delete($remote_source, true); //Clear out the source files.
-					return new WP_Error('folder_exists', $this->strings['folder_exists'], $remote_destination );
-				}
-			}
+			$removed = true;
+			if ( $wp_filesystem->exists($remote_destination) )
+				$removed = $wp_filesystem->delete($remote_destination, true);
+
+			$removed = apply_filters('upgrader_clear_destination', $removed, $local_destination, $remote_destination, $hook_extra);
+
+			if ( is_wp_error($removed) )
+				return $removed;
+			else if ( ! $removed )
+				return new WP_Error('remove_old_failed', $this->strings['remove_old_failed']);
 		}
 
 		//Create destination if needed
@@ -570,7 +560,7 @@ class Theme_Upgrader extends WP_Upgrader {
 			$this->skin->after();
 			return false;
 		}
-
+		
 		$r = $current->response[ $theme ];
 
 		add_filter('upgrader_pre_install', array(&$this, 'current_before'), 10, 2);
@@ -1006,10 +996,10 @@ class Theme_Upgrader_Skin extends WP_Upgrader_Skin {
 			$name = $theme_info['Name'];
 			$stylesheet = $this->upgrader->result['destination_name'];
 			$template = !empty($theme_info['Template']) ? $theme_info['Template'] : $stylesheet;
-
+	
 			$preview_link = htmlspecialchars( add_query_arg( array('preview' => 1, 'template' => $template, 'stylesheet' => $stylesheet, 'TB_iframe' => 'true' ), trailingslashit(esc_url(get_option('home'))) ) );
 			$activate_link = wp_nonce_url("themes.php?action=activate&amp;template=" . urlencode($template) . "&amp;stylesheet=" . urlencode($stylesheet), 'switch-theme_' . $template);
-
+	
 			$update_actions =  array(
 				'preview' => '<a href="' . $preview_link . '" class="thickbox thickbox-preview" title="' . esc_attr(sprintf(__('Preview &#8220;%s&#8221;'), $name)) . '">' . __('Preview') . '</a>',
 				'activate' => '<a href="' . $activate_link .  '" class="activatelink" title="' . esc_attr( sprintf( __('Activate &#8220;%s&#8221;'), $name ) ) . '">' . __('Activate') . '</a>',

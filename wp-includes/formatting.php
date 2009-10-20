@@ -32,12 +32,12 @@ function wptexturize($text) {
 	$curl = '';
 	$textarr = preg_split('/(<.*>|\[.*\])/Us', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 	$stop = count($textarr);
-
+	
 	/* translators: opening curly quote */
 	$opening_quote = _x('&#8220;', 'opening curly quote');
 	/* translators: closing curly quote */
 	$closing_quote = _x('&#8221;', 'closing curly quote');
-
+	
 	$no_texturize_tags = apply_filters('no_texturize_tags', array('pre', 'code', 'kbd', 'style', 'script', 'tt'));
 	$no_texturize_shortcodes = apply_filters('no_texturize_shortcodes', array('code'));
 	$no_texturize_tags_stack = array();
@@ -55,7 +55,7 @@ function wptexturize($text) {
 	$static_characters = array_merge(array('---', ' -- ', '--', ' - ', 'xn&#8211;', '...', '``', '\'s', '\'\'', ' (tm)'), $cockney);
 	$static_replacements = array_merge(array('&#8212;', ' &#8212; ', '&#8211;', ' &#8211; ', 'xn--', '&#8230;', $opening_quote, '&#8217;s', $closing_quote, ' &#8482;'), $cockneyreplace);
 
-	$dynamic_characters = array('/\'(\d\d(?:&#8217;|\')?s)/', '/(\s|\A|[([{<]|")\'/', '/(\d+)"/', '/(\d+)\'/', '/(\S)\'([^\'\s])/', '/(\s|\A|[([{<])"(?!\s)/', '/"(\s|\S|\Z)/', '/\'([\s.]|\Z)/', '/(\d+)x(\d+)/');
+	$dynamic_characters = array('/\'(\d\d(?:&#8217;|\')?s)/', '/(\s|\A|")\'/', '/(\d+)"/', '/(\d+)\'/', '/(\S)\'([^\'\s])/', '/(\s|\A)"(?!\s)/', '/"(\s|\S|\Z)/', '/\'([\s.]|\Z)/', '/(\d+)x(\d+)/');
 	$dynamic_replacements = array('&#8217;$1','$1&#8216;', '$1&#8243;', '$1&#8242;', '$1&#8217;$2', '$1' . $opening_quote . '$2', $closing_quote . '$1', '&#8217;$1', '$1&#215;$2');
 
 	for ( $i = 0; $i < $stop; $i++ ) {
@@ -628,7 +628,7 @@ function sanitize_file_name( $filename ) {
  */
 function sanitize_user( $username, $strict = false ) {
 	$raw_username = $username;
-	$username = wp_strip_all_tags($username);
+	$username = strip_tags($username);
 	// Kill octets
 	$username = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '', $username);
 	$username = preg_replace('/&.+?;/', '', $username); // Kill entities
@@ -1110,7 +1110,7 @@ function addslashes_gpc($gpc) {
 		$gpc = stripslashes($gpc);
 	}
 
-	return esc_sql($gpc);
+	return $wpdb->escape($gpc);
 }
 
 /**
@@ -1185,18 +1185,10 @@ function antispambot($emailaddy, $mailto=0) {
  */
 function _make_url_clickable_cb($matches) {
 	$url = $matches[2];
-
-	$after = '';
-	if ( preg_match( '|(.+?)([).,;:]*)$|', $url, $split ) ) {
-		$url = $split[1];
-		$after = $split[2];
-	}
-
 	$url = esc_url($url);
 	if ( empty($url) )
 		return $matches[0];
-
-	return $matches[1] . "<a href=\"$url\" rel=\"nofollow\">$url</a>$after";
+	return $matches[1] . "<a href=\"$url\" rel=\"nofollow\">$url</a>";
 }
 
 /**
@@ -1218,13 +1210,12 @@ function _make_web_ftp_clickable_cb($matches) {
 	$dest = esc_url($dest);
 	if ( empty($dest) )
 		return $matches[0];
-
-	// removed trailing [.,;:)] from URL
-	if ( in_array( substr($dest, -1), array('.', ',', ';', ':', ')') ) === true ) {
+	// removed trailing [,;:] from URL
+	if ( in_array(substr($dest, -1), array('.', ',', ';', ':')) === true ) {
 		$ret = substr($dest, -1);
 		$dest = substr($dest, 0, strlen($dest)-1);
 	}
-	return $matches[1] . "<a href=\"$dest\" rel=\"nofollow\">$dest</a>$ret";
+	return $matches[1] . "<a href=\"$dest\" rel=\"nofollow\">$dest</a>" . $ret;
 }
 
 /**
@@ -1280,7 +1271,7 @@ function wp_rel_nofollow( $text ) {
 	// This is a pre save filter, so text is already escaped.
 	$text = stripslashes($text);
 	$text = preg_replace_callback('|<a (.+?)>|i', 'wp_rel_nofollow_callback', $text);
-	$text = esc_sql($text);
+	$text = $wpdb->escape($text);
 	return $text;
 }
 
@@ -1327,9 +1318,7 @@ function translate_smiley($smiley) {
 	$img = $wpsmiliestrans[$smiley];
 	$smiley_masked = esc_attr($smiley);
 
-	$srcurl = apply_filters('smilies_src', "$siteurl/wp-includes/images/smilies/$img", $img, $siteurl);
-
-	return " <img src='$srcurl' alt='$smiley_masked' class='wp-smiley' /> ";
+	return " <img src='$siteurl/wp-includes/images/smilies/$img' alt='$smiley_masked' class='wp-smiley' /> ";
 }
 
 
@@ -1696,12 +1685,9 @@ function human_time_diff( $from, $to = '' ) {
  * that, then the string '[...]' will be appended to the excerpt. If the string
  * is less than 55 words, then the content will be returned as is.
  *
- * The 55 word limit can be modified by plugins/themes using the excerpt_length filter
- * The '[..]' string can be modified by plugins/themes using the excerpt_more filter
- *
  * @since 1.5.0
  *
- * @param string $text The excerpt. If set to empty an excerpt is generated.
+ * @param string $text The exerpt. If set to empty an excerpt is generated.
  * @return string The excerpt.
  */
 function wp_trim_excerpt($text) {
@@ -1715,11 +1701,10 @@ function wp_trim_excerpt($text) {
 		$text = str_replace(']]>', ']]&gt;', $text);
 		$text = strip_tags($text);
 		$excerpt_length = apply_filters('excerpt_length', 55);
-		$excerpt_more = apply_filters('excerpt_more', '[...]');
 		$words = explode(' ', $text, $excerpt_length + 1);
 		if (count($words) > $excerpt_length) {
 			array_pop($words);
-			array_push($words, $excerpt_more);
+			array_push($words, '[...]');
 			$text = implode(' ', $words);
 		}
 	}
@@ -2087,14 +2072,14 @@ function clean_url( $url, $protocols = null, $context = 'display' ) {
 
 /**
  * Perform a deep string replace operation to ensure the values in $search are no longer present
- *
+ * 
  * Repeats the replacement operation until it no longer replaces anything so as to remove "nested" values
  * e.g. $subject = '%0%0%0DDD', $search ='%0D', $result ='' rather than the '%0%0DD' that
  * str_replace would return
- *
+ * 
  * @since 2.8.1
  * @access private
- *
+ * 
  * @param string|array $search
  * @param string $subject
  * @return string The processed string
@@ -2110,7 +2095,7 @@ function _deep_replace($search, $subject){
 			}
 		}
 	}
-
+	
 	return $subject;
 }
 
@@ -2199,10 +2184,8 @@ function htmlentities2($myHTML) {
 }
 
 /**
- * Escape single quotes, htmlspecialchar " < > &, and fix line endings.
+ * Escape single quotes, specialchar double quotes, and fix line endings.
  *
- * Escapes text strings for echoing in JS, both inline (for example in onclick="...")
- * and inside <script> tag. Note that the strings have to be in single quotes.
  * The filter 'js_escape' is also applied here.
  *
  * @since 2.8.0
@@ -2214,8 +2197,7 @@ function esc_js( $text ) {
 	$safe_text = wp_check_invalid_utf8( $text );
 	$safe_text = _wp_specialchars( $safe_text, ENT_COMPAT );
 	$safe_text = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", stripslashes( $safe_text ) );
-	$safe_text = str_replace( "\r", '', $safe_text );
-	$safe_text = str_replace( "\n", '\\n', addslashes( $safe_text ) );
+	$safe_text = preg_replace( "/\r?\n/", "\\n", addslashes( $safe_text ) );
 	return apply_filters( 'js_escape', $safe_text, $text );
 }
 
@@ -2248,6 +2230,7 @@ function esc_html( $text ) {
 	$safe_text = wp_check_invalid_utf8( $text );
 	$safe_text = _wp_specialchars( $safe_text, ENT_QUOTES );
 	return apply_filters( 'esc_html', $safe_text, $text );
+	return $text;
 }
 
 /**
@@ -2358,7 +2341,6 @@ function sanitize_option($option, $value) {
 		case 'medium_size_h':
 		case 'large_size_w':
 		case 'large_size_h':
-		case 'embed_size_h':
 		case 'default_post_edit_rows':
 		case 'mailserver_port':
 		case 'comment_max_links':
@@ -2370,13 +2352,7 @@ function sanitize_option($option, $value) {
 		case 'close_comments_days_old':
 		case 'comments_per_page':
 		case 'thread_comments_depth':
-		case 'users_can_register':
-			$value = absint( $value );
-			break;
-
-		case 'embed_size_w':
-			if ( '' !== $value )
-				$value = absint( $value );
+			$value = abs((int) $value);
 			break;
 
 		case 'posts_per_page':
@@ -2609,7 +2585,7 @@ function wp_sprintf_l($pattern, $args) {
  * @return string The excerpt.
  */
 function wp_html_excerpt( $str, $count ) {
-	$str = wp_strip_all_tags( $str, true );
+	$str = strip_tags( $str );
 	$str = mb_substr( $str, 0, $count );
 	// remove part of an entity at the end
 	$str = preg_replace( '/&[^;\s]{0,6}$/', '', $str );
@@ -2676,7 +2652,6 @@ function links_add_target( $content, $target = '_blank', $tags = array('a') ) {
 			create_function('$m', 'return _links_add_target($m, "' . $target . '");'),
 			$content);
 }
-
 /**
  * Callback to add a target attribute to all links in passed content.
  *
@@ -2699,56 +2674,6 @@ function normalize_whitespace( $str ) {
 	$str  = str_replace("\r", "\n", $str);
 	$str  = preg_replace( array( '/\n+/', '/[ \t]+/' ), array( "\n", ' ' ), $str );
 	return $str;
-}
-
-/**
- * Properly strip all HTML tags including script and style
- *
- * @since 2.9.0
- *
- * @param string $string String containing HTML tags
- * @param bool $remove_breaks optional Whether to remove left over line breaks and white space chars
- * @return string The processed string.
- */
-function wp_strip_all_tags($string, $remove_breaks = false) {
-	$string = preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', $string );
-	$string = strip_tags($string);
-
-	if ( $remove_breaks )
-		$string = preg_replace('/\s+/', ' ', $string);
-
-	return trim($string);
-}
-
-/**
- * Sanitize a string from user input or from the db
- *
- * check for invalid UTF-8,
- * Convert single < characters to entity,
- * strip all tags,
- * remove line breaks, tabs and extra whitre space,
- * strip octets.
- *
- * @since 2.9
- *
- * @param string $str
- * @return string
- */
-function sanitize_text_field($str) {
-	$filtered = wp_check_invalid_utf8( $str );
-
-	if ( strpos($filtered, '<') !== false ) {
-		$filtered = wp_pre_kses_less_than( $filtered );
-		$filtered = wp_strip_all_tags( $filtered, true );
-	} else {
-		 $filtered = trim( preg_replace('/\s+/', ' ', $filtered) );
-	}
-
-	$match = array();
-	while ( preg_match('/%[a-f0-9]{2}/i', $filtered, $match) )
-		$filtered = str_replace($match[0], '', $filtered);
-
-	return apply_filters('sanitize_text_field', $filtered, $str);
 }
 
 ?>

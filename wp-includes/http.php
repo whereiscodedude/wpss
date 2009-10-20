@@ -118,7 +118,8 @@ class WP_Http {
 			}
 		}
 
-		do_action( 'http_transport_get_debug', $working_transport, $blocking_transport, $nonblocking_transport );
+		if ( has_filter('http_transport_get_debug') )
+			do_action('http_transport_get_debug', $working_transport, $blocking_transport, $nonblocking_transport);
 
 		if ( isset($args['blocking']) && !$args['blocking'] )
 			return $nonblocking_transport;
@@ -165,7 +166,8 @@ class WP_Http {
 			}
 		}
 
-		do_action( 'http_transport_post_debug', $working_transport, $blocking_transport, $nonblocking_transport );
+		if ( has_filter('http_transport_post_debug') )
+			do_action('http_transport_post_debug', $working_transport, $blocking_transport, $nonblocking_transport);
 
 		if ( isset($args['blocking']) && !$args['blocking'] )
 			return $nonblocking_transport;
@@ -208,11 +210,6 @@ class WP_Http {
 	 *
 	 * @access public
 	 * @since 2.7.0
-	 * @todo Refactor this code. The code in this method extends the scope of its original purpose
-	 *		and should be refactored to allow for cleaner abstraction and reduce duplication of the
-	 *		code. One suggestion is to create a class specifically for the arguments, however
-	 *		preliminary refactoring to this affect has affect more than just the scope of the
-	 *		arguments. Something to ponder at least.
 	 *
 	 * @param string $url URI resource.
 	 * @param str|array $args Optional. Override the defaults.
@@ -238,11 +235,6 @@ class WP_Http {
 
 		$r = wp_parse_args( $args, $defaults );
 		$r = apply_filters( 'http_request_args', $r, $url );
-
-		// Allow plugins to short-circuit the request
-		$pre = apply_filters( 'pre_http_request', false, $r, $url );
-		if ( false !== $pre )
-			return $pre;
 
 		$arrURL = parse_url($url);
 
@@ -282,16 +274,10 @@ class WP_Http {
 		if ( WP_Http_Encoding::is_available() )
 			$r['headers']['Accept-Encoding'] = WP_Http_Encoding::accept_encoding();
 
-		if ( empty($r['body']) ) {
-			// Some servers fail when sending content without the content-length header being set.
-			// Also, to fix another bug, we only send when doing POST and PUT and the content-length
-			// header isn't already set.
-			if( ($r['method'] == 'POST' || $r['method'] == 'PUT') && ! isset($r['headers']['Content-Length']) )
-				$r['headers']['Content-Length'] = 0;
-
-			// The method is ambiguous, because we aren't talking about HTTP methods, the "get" in
-			// this case is simply that we aren't sending any bodies and to get the transports that
-			// don't support sending bodies along with those which do.
+		if ( is_null($r['body']) ) {
+			// Some servers fail when sending content without the content-length
+			// header being set.
+			$r['headers']['Content-Length'] = 0;
 			$transports = WP_Http::_getTransport($r);
 		} else {
 			if ( is_array( $r['body'] ) || is_object( $r['body'] ) ) {
@@ -306,23 +292,21 @@ class WP_Http {
 			if ( ! isset( $r['headers']['Content-Length'] ) && ! isset( $r['headers']['content-length'] ) )
 				$r['headers']['Content-Length'] = strlen($r['body']);
 
-			// The method is ambiguous, because we aren't talking about HTTP methods, the "post" in
-			// this case is simply that we are sending HTTP body and to get the transports that do
-			// support sending the body. Not all do, depending on the limitations of the PHP core
-			// limitations.
 			$transports = WP_Http::_postTransport($r);
 		}
 
-		do_action( 'http_api_debug', $transports, 'transports_list' );
+		if ( has_action('http_api_debug') )
+			do_action('http_api_debug', $transports, 'transports_list');
 
 		$response = array( 'headers' => array(), 'body' => '', 'response' => array('code' => false, 'message' => false), 'cookies' => array() );
 		foreach ( (array) $transports as $transport ) {
 			$response = $transport->request($url, $r);
 
-			do_action( 'http_api_debug', $response, 'response', get_class($transport) );
+			if ( has_action('http_api_debug') )
+				do_action( 'http_api_debug', $response, 'response', get_class($transport) );
 
 			if ( ! is_wp_error($response) )
-				return apply_filters( 'http_response', $response, $r, $url );
+				return $response;
 		}
 
 		return $response;
@@ -640,11 +624,6 @@ class WP_Http_Fsockopen {
 				$arrURL['port'] = 80;
 			}
 		}
-
-		//fsockopen has issues with 'localhost' with IPv6 with certain versions of PHP, It attempts to connect to ::1,
-		// which fails when the server is not setup for it. For compatibility, always connect to the IPv4 address.
-		if ( 'localhost' == strtolower($fsockopen_host) )
-			$fsockopen_host = '127.0.0.1';
 
 		// There are issues with the HTTPS and SSL protocols that cause errors that can be safely
 		// ignored and should be ignored.
@@ -1121,9 +1100,6 @@ class WP_Http_ExtHTTP {
 			case 'HEAD':
 				$r['method'] = HTTP_METH_HEAD;
 				break;
-			case 'PUT':
-				$r['method'] =  HTTP_METH_PUT;
-				break;
 			case 'GET':
 			default:
 				$r['method'] = HTTP_METH_GET;
@@ -1307,10 +1283,6 @@ class WP_Http_Curl {
 				break;
 			case 'POST':
 				curl_setopt( $handle, CURLOPT_POST, true );
-				curl_setopt( $handle, CURLOPT_POSTFIELDS, $r['body'] );
-				break;
-			case 'PUT':
-				curl_setopt( $handle, CURLOPT_CUSTOMREQUEST, 'PUT' );
 				curl_setopt( $handle, CURLOPT_POSTFIELDS, $r['body'] );
 				break;
 		}
@@ -1812,7 +1784,7 @@ class WP_Http_Encoding {
 	 * @return string|bool False on failure.
 	 */
 	function decompress( $compressed, $length = null ) {
-		$decompressed = WP_Http_Encoding::compatible_gzinflate( $compressed );
+		$decompressed = gzinflate( $compressed );
 
 		if ( false !== $decompressed )
 			return $decompressed;
@@ -1830,42 +1802,6 @@ class WP_Http_Encoding {
 		}
 
 		return $compressed;
-	}
-
-	/**
-	 * Decompression of deflated string while staying compatible with the majority of servers.
-	 *
-	 * Certain Servers will return deflated data with headers which PHP's gziniflate()
-	 * function cannot handle out of the box. The following function lifted from
-	 * http://au2.php.net/manual/en/function.gzinflate.php#77336 will attempt to deflate
-	 * the various return forms used.
-	 *
-	 * @since 2.8.1
-	 * @link http://au2.php.net/manual/en/function.gzinflate.php#77336
-	 *
-	 * @param string $gzData String to decompress.
-	 * @return string|bool False on failure.
-	 */
-	function compatible_gzinflate($gzData) {
-		if ( substr($gzData, 0, 3) == "\x1f\x8b\x08" ) {
-			$i = 10;
-			$flg = ord( substr($gzData, 3, 1) );
-			if ( $flg > 0 ) {
-				if ( $flg & 4 ) {
-					list($xlen) = unpack('v', substr($gzData, $i, 2) );
-					$i = $i + 2 + $xlen;
-				}
-				if ( $flg & 8 )
-					$i = strpos($gzData, "\0", $i) + 1;
-				if ( $flg & 16 )
-					$i = strpos($gzData, "\0", $i) + 1;
-				if ( $flg & 2 )
-					$i = $i + 2;
-			}
-			return gzinflate( substr($gzData, $i, -8) );
-		} else {
-			return false;
-		}
 	}
 
 	/**

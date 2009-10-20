@@ -4,9 +4,9 @@ var theList, theExtraList, toggleWithKeyboard = false;
 setCommentsList = function() {
 	var totalInput, perPageInput, pageInput, lastConfidentTime = 0, dimAfter, delBefore, updateTotalCount, delAfter;
 
-	totalInput = $('.tablenav input[name="_total"]', '#comments-form');
-	perPageInput = $('.tablenav input[name="_per_page"]', '#comments-form');
-	pageInput = $('.tablenav input[name="_page"]', '#comments-form');
+	totalInput = $('#comments-form .tablenav :input[name="_total"]');
+	perPageInput = $('#comments-form .tablenav :input[name="_per_page"]');
+	pageInput = $('#comments-form .tablenav :input[name="_page"]');
 
 	dimAfter = function( r, settings ) {
 		var c = $('#' + settings.element);
@@ -17,183 +17,109 @@ setCommentsList = function() {
 			c.find('div.comment_status').html('1')
 
 		$('span.pending-count').each( function() {
-			var a = $(this), n, dif;
-			n = a.html().replace(/[^0-9]+/g, '');
+			var a = $(this), n;
+			n = a.html().replace(/[ ,.]+/g, '');
 			n = parseInt(n,10);
 			if ( isNaN(n) ) return;
-			dif = $('#' + settings.element).is('.' + settings.dimClass) ? 1 : -1;
-			n = n + dif;
+			n = n + ( $('#' + settings.element).is('.' + settings.dimClass) ? 1 : -1 );
 			if ( n < 0 ) { n = 0; }
-			a.closest('#awaiting-mod')[ 0 == n ? 'addClass' : 'removeClass' ]('count-0');
-			updateCount(a, n);
-			dashboardTotals();
+			a.parents('#awaiting-mod')[ 0 == n ? 'addClass' : 'removeClass' ]('count-0');
+			n = n.toString();
+			if ( n.length > 3 )
+				n = n.substr(0, n.length-3)+' '+n.substr(-3);
+			a.html(n);
 		});
 	};
 
 	// Send current total, page, per_page and url
-	delBefore = function( settings, list ) {
-		var cl = $(settings.target).attr('className'), id, el, n, h, a, to, author;
-
-		settings.data._total = totalInput.val() || 0;
-		settings.data._per_page = perPageInput.val() || 0;
-		settings.data._page = pageInput.val() || 0;
+	delBefore = function( settings ) {
+		settings.data._total = totalInput.val();
+		settings.data._per_page = perPageInput.val();
+		settings.data._page = pageInput.val();
 		settings.data._url = document.location.href;
 
-		if ( cl.indexOf(':trash=1') != -1 ) {
-			id = cl.replace(/.*?comment-([0-9]+).*/, '$1');
-			el = $('#comment-' + id);
-			note = $('#undo-holder').html();
-
-			if ( el.is('tr') ) {
-				n = el.children(':visible').length;
-				author = $('.author strong', el).html();
-				h = $('<tr id="trashundo-' + id + '" style="display:none;"><td class="trash-undo" colspan="' + n + '">' + note + '</td></tr>');
-			} else {
-				author = $('.comment-author', el).html();
-				h = $('<div id="trashundo-' + id + '" style="display:none;" class="trash-undo">' + note + '</div>');
-			}
-
-			el.before(h);
-
-			$('strong', '#trashundo-' + id).html(author);
-			a = $('a.undo-trash', '#trashundo-' + id);
-			a.attr('href', 'comment.php?action=untrashcomment&c=' + id + '&_ajax_nonce=' + settings.data._ajax_nonce);
-			a.attr('className', 'delete:the-comment-list:comment-' + id + '::untrash=1 vim-z vim-destructive');
-
-			a.click(function(){
-				list.wpList.del(this);
-				$('#trashundo-' + id).fadeOut(250, function(){
-					$(this).remove();
-					$('#comment-' + id).css('backgroundColor', '').fadeIn(300);
-				});
-				return false;
-			});
-
-			to = window.setTimeout( function(){
-				$('#trashundo-' + id).fadeOut('slow', function(){ $(this).remove(); });
-			}, 200000 );
-		}
+		if ( 'undefined' != showNotice && settings.data.action && settings.data.action == 'delete-comment' && !settings.data.spam )
+			return showNotice.warn() ? settings : false;
 
 		return settings;
 	};
 
-	// Updates the current total (as displayed visibly)
+	/* Updates the current total (as displayed visibly)
+	*/
 	updateTotalCount = function( total, time, setConfidentTime ) {
-		if ( time < lastConfidentTime )
+		if ( time < lastConfidentTime ) {
 			return;
-
-		if ( setConfidentTime )
-			lastConfidentTime = time;
-
-		totalInput.val( total.toString() );
-		$('span.total-type-count').each( function() {
-			updateCount( $(this), total );
-		});
-	};
-
-	function dashboardTotals(n) {
-		var dash = $('#dashboard_right_now'), total, appr, totalN, apprN;
-
-		n = n || 0;
-		if ( isNaN(n) || !dash.length )
-			return;
-
-		total = $('span.total-count', dash);
-		appr = $('span.approved-count', dash);
-		totalN = getCount(total);
-		apprN = getCount(appr);
-
-		if ( totalN ) {
-			totalN = totalN + n;
-			apprN = totalN - getCount( $('span.pending-count', dash) );
-			updateCount(total, totalN);
-			updateCount(appr, apprN);
 		}
-	}
+		totalInput.val( total.toString() );
+		if ( setConfidentTime ) {
+			lastConfidentTime = time;
+		}
+		$('span.total-type-count').each( function() {
+			var a = $(this), n;
+			n = totalInput.val().toString();
+			if ( n.length > 3 )
+				n = n.substr(0, n.length-3)+' '+n.substr(-3);
+			a.html(n);
+		});
 
-	function getCount(el) {
-		var n = parseInt( el.html().replace(/[^0-9]+/g, ''), 10 );
-		if ( isNaN(n) )
-			return 0;
-		return n;
-	}
-
-	function updateCount(el, n) {
-		if ( isNaN(n) )
-			return;
-		n = n < 1 ? '0' : n.toString();
-		if ( n.length > 3 )
-			n = n.substr(0, n.length-3) + thousandsSeparator + n.substr(-3);
-		el.html(n);
-	}
+	};
 
 	// In admin-ajax.php, we send back the unix time stamp instead of 1 on success
 	delAfter = function( r, settings ) {
-		var total, pageLinks, N, untrash = $(settings.target).parent().is('span.untrash'), spam, trash;
-
-		function getUpdate(s) {
-			if ( $(settings.target).parent().is('span.' + s) )
-				return 1;
-			else if ( $('#' + settings.element).is('.' + s) )
-				return -1;
-
-			return 0;
-		}
-		spam = getUpdate('spam');
-		trash = getUpdate('trash');
-
-		if ( untrash )
-			trash = -1;
-
 		$('span.pending-count').each( function() {
-			var a = $(this), n = getCount(a), unapproved = $('#' + settings.element).is('.unapproved');
-
-			if ( $(settings.target).parent().is('span.unapprove') || ( untrash && unapproved ) ) { // we "deleted" an approved comment from the approved list by clicking "Unapprove"
-				n = n + 1;
-			} else if ( unapproved ) { // we deleted a formerly unapproved comment
+			var a = $(this), n;
+			n = a.html().replace(/[ ,.]+/g, '');
+			n = parseInt(n,10);
+			if ( isNaN(n) ) return;
+			if ( $('#' + settings.element).is('.unapproved') ) { // we deleted a formerly unapproved comment
 				n = n - 1;
+			} else if ( $(settings.target).parents( 'span.unapprove' ).size() ) { // we "deleted" an approved comment from the approved list by clicking "Unapprove"
+				n = n + 1;
 			}
 			if ( n < 0 ) { n = 0; }
-			a.closest('#awaiting-mod')[ 0 == n ? 'addClass' : 'removeClass' ]('count-0');
-			updateCount(a, n);
-			dashboardTotals();
+			a.parents('#awaiting-mod')[ 0 == n ? 'addClass' : 'removeClass' ]('count-0');
+			n = n.toString();
+			if ( n.length > 3 )
+				n = n.substr(0, n.length-3)+' '+n.substr(-3);
+			a.html(n);
 		});
 
 		$('span.spam-count').each( function() {
-			var a = $(this), n = getCount(a) + spam;
-			updateCount(a, n);
-		});
-
-		$('span.trash-count').each( function() {
-			var a = $(this), n = getCount(a) + trash;
-			updateCount(a, n);
-		});
-
-		if ( $('#dashboard_right_now').length ) {
-			N = spam || trash || 0;
-			if ( N > 0 )
-				dashboardTotals(-1);
-			else if ( N < 0 )
-				dashboardTotals(1);
-		} else {
-			// XML response
-			if ( ( 'object' == typeof r ) && lastConfidentTime < settings.parsed.responses[0].supplemental.time ) {
-				pageLinks = settings.parsed.responses[0].supplemental.pageLinks || '';
-				if ( $.trim( pageLinks ) )
-					$('.tablenav-pages').find( '.page-numbers' ).remove().end().append( $( pageLinks ) );
-				else
-					$('.tablenav-pages').find( '.page-numbers' ).remove();
+			var a = $(this), n;
+			n = a.html().replace(/[ ,.]+/g, '');
+			n = parseInt(n,10);
+			if ( isNaN(n) ) return;
+			if ( $(settings.target).parents( 'span.spam' ).size() ) { // we marked a comment as spam
+				n = n + 1;
+			} else if ( $('#' + settings.element).is('.spam') ) { // we approved or deleted a comment marked as spam
+				n = n - 1;
 			}
+			if ( n < 0 ) { n = 0; }
+			n = n.toString();
+			if ( n.length > 3 )
+				n = n.substr(0, n.length-3)+' '+n.substr(-3);
+			a.html(n);
+		});
 
-			total = totalInput.val() ? parseInt( totalInput.val(), 10 ) : 0;
-			total = total - spam - trash;
-			if ( total < 0 )
+
+		// XML response
+		if ( ( 'object' == typeof r ) && lastConfidentTime < settings.parsed.responses[0].supplemental.time ) {
+			// Set the total to the known good value (even if this value is a little old, newer values should only be a few less, and so shouldn't mess up the page links)
+			updateTotalCount( settings.parsed.responses[0].supplemental.total, settings.parsed.responses[0].supplemental.time, true );
+			if ( $.trim( settings.parsed.responses[0].supplemental.pageLinks ) ) {
+				$('.tablenav-pages').find( '.page-numbers' ).remove().end().append( $( settings.parsed.responses[0].supplemental.pageLinks ) );
+			} else if ( 'undefined' != typeof settings.parsed.responses[0].supplemental.pageLinks ) {
+				$('.tablenav-pages').find( '.page-numbers' ).remove();
+			}
+		} else {
+			// Decrement the total
+			var total = parseInt( totalInput.val(), 10 );
+			if ( total-- < 0 )
 				total = 0;
-
 			updateTotalCount( total, r, false );
 		}
 
-		if ( theExtraList.size() == 0 || theExtraList.children().size() == 0 || untrash ) {
+		if ( theExtraList.size() == 0 || theExtraList.children().size() == 0 ) {
 			return;
 		}
 
@@ -202,13 +128,8 @@ setCommentsList = function() {
 	};
 
 	theExtraList = $('#the-extra-comment-list').wpList( { alt: '', delColor: 'none', addColor: 'none' } );
-	theList = $('#the-comment-list').wpList( { alt: '', delBefore: delBefore, dimAfter: dimAfter, delAfter: delAfter, addColor: 'none' } )
-		.bind('wpListDelEnd', function(e, s){
-			var id = s.element.replace(/[^0-9]+/g, '');
+	theList = $('#the-comment-list').wpList( { alt: '', delBefore: delBefore, dimAfter: dimAfter, delAfter: delAfter, addColor: 'none' } );
 
-			if ( s.target.className.indexOf(':trash=1') != -1 )
-				$('#trashundo-' + id).fadeIn(300);
-		});
 };
 
 commentReply = {
@@ -364,7 +285,7 @@ commentReply = {
 
 		$.ajax({
 			type : 'POST',
-			url : ajaxurl,
+			url : wpListL10n.url,
 			data : post,
 			success : function(x) { commentReply.show(x); },
 			error : function(r) { commentReply.error(r); }
@@ -443,33 +364,26 @@ $(document).ready(function(){
 					window.location = l[0].href.replace(/\&hotkeys_highlight_(first|last)=1/g, '')+'&hotkeys_highlight_'+first_last+'=1';
 			}
 		};
-
 		edit_comment = function(event, current_row) {
 			window.location = $('span.edit a', current_row).attr('href');
 		};
-
 		toggle_all = function() {
 			toggleWithKeyboard = true;
-			$('input:checkbox', '#cb').click().attr('checked', '');
+			$('#comments-form thead #cb input:checkbox').click().attr('checked', '');
 			toggleWithKeyboard = false;
-		};
-
+		}
 		make_bulk = function(value) {
-			return function() {
-				var scope = $('select[name="action"]');
-				$('option[value='+value+']', scope).attr('selected', 'selected');
-				$('#comments-form').submit();
+			return function(event, _) {
+				$('option[value='+value+']').attr('selected', 'selected');
+				$('form#comments-form')[0].submit();
 			}
 		};
-
-		$.table_hotkeys(
-			$('table.widefat'),
-			['a', 'u', 's', 'd', 'r', 'q', 'z', ['e', edit_comment], ['shift+x', toggle_all],
-			['shift+a', make_bulk('approve')], ['shift+s', make_bulk('markspam')],
-			['shift+d', make_bulk('delete')], ['shift+t', make_bulk('trash')],
-			['shift+z', make_bulk('untrash')], ['shift+u', make_bulk('unapprove')]],
-			{ highlight_first: adminCommentsL10n.hotkeys_highlight_first, highlight_last: adminCommentsL10n.hotkeys_highlight_last,
-			prev_page_link_cb: make_hotkeys_redirect('prev'), next_page_link_cb: make_hotkeys_redirect('next') }
+		$.table_hotkeys($('table.widefat'),['a', 'u', 's', 'd', 'r', 'q', ['e', edit_comment],
+				['shift+a', make_bulk('approve')], ['shift+s', make_bulk('markspam')],
+				['shift+d', make_bulk('delete')], ['shift+x', toggle_all],
+				['shift+u', make_bulk('unapprove')]],
+				{highlight_first: adminCommentsL10n.hotkeys_highlight_first, highlight_last: adminCommentsL10n.hotkeys_highlight_last,
+				prev_page_link_cb: make_hotkeys_redirect('prev'), next_page_link_cb: make_hotkeys_redirect('next')}
 		);
 	}
 });

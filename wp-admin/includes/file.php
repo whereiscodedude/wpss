@@ -171,7 +171,6 @@ function wp_tempnam($filename = '', $dir = ''){
 	if ( empty($filename) )
 		$filename = time();
 
-	$filename = preg_replace('|\..*$|', '.tmp', $filename);
 	$filename = $dir . wp_unique_filename($dir, $filename);
 	touch($filename);
 	return $filename;
@@ -265,7 +264,7 @@ function wp_handle_upload( &$file, $overrides = false, $time = null ) {
 
 	// A non-empty file will pass this test.
 	if ( $test_size && !($file['size'] > 0 ) )
-		return $upload_error_handler( $file, __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.' ));
+		return $upload_error_handler( $file, __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini.' ));
 
 	// A properly uploaded file will pass this test. There should be no reason to override this one.
 	if (! @ is_uploaded_file( $file['tmp_name'] ) )
@@ -598,18 +597,12 @@ function WP_Filesystem( $args = false, $context = false ) {
 		$abstraction_file = apply_filters('filesystem_method_file', ABSPATH . 'wp-admin/includes/class-wp-filesystem-' . $method . '.php', $method);
 		if( ! file_exists($abstraction_file) )
 			return;
-
+	
 		require_once($abstraction_file);
 	}
 	$method = "WP_Filesystem_$method";
 
 	$wp_filesystem = new $method($args);
-
-	//Define the timeouts for the connections. Only available after the construct is called to allow for per-transport overriding of the default.
-	if ( ! defined('FS_CONNECT_TIMEOUT') )
-		define('FS_CONNECT_TIMEOUT', 30);
-	if ( ! defined('FS_TIMEOUT') )
-		define('FS_TIMEOUT', 30);
 
 	if ( is_wp_error($wp_filesystem->errors) && $wp_filesystem->errors->get_error_code() )
 		return false;
@@ -642,13 +635,13 @@ function get_filesystem_method($args = array(), $context = false) {
 		if ( !$context )
 			$context = WP_CONTENT_DIR;
 		$context = trailingslashit($context);
-		$temp_file_name = $context . 'temp-write-test-' . time();
+		$temp_file_name = $context . '.write-test-' . time();
 		$temp_handle = @fopen($temp_file_name, 'w');
 		if ( $temp_handle ) {
-			if ( getmyuid() == @fileowner($temp_file_name) )
+			if ( getmyuid() == fileowner($temp_file_name) )
 				$method = 'direct';
 			@fclose($temp_handle);
-			@unlink($temp_file_name);
+			unlink($temp_file_name);
 		}
  	}
 
@@ -682,13 +675,13 @@ function request_filesystem_credentials($form_post, $type = '', $error = false, 
 	$credentials = get_option('ftp_credentials', array( 'hostname' => '', 'username' => ''));
 
 	// If defined, set it to that, Else, If POST'd, set it to that, If not, Set it to whatever it previously was(saved details in option)
-	$credentials['hostname'] = defined('FTP_HOST') ? FTP_HOST : (!empty($_POST['hostname']) ? stripslashes($_POST['hostname']) : $credentials['hostname']);
-	$credentials['username'] = defined('FTP_USER') ? FTP_USER : (!empty($_POST['username']) ? stripslashes($_POST['username']) : $credentials['username']);
-	$credentials['password'] = defined('FTP_PASS') ? FTP_PASS : (!empty($_POST['password']) ? stripslashes($_POST['password']) : '');
+	$credentials['hostname'] = defined('FTP_HOST') ? FTP_HOST : (!empty($_POST['hostname']) ? $_POST['hostname'] : $credentials['hostname']);
+	$credentials['username'] = defined('FTP_USER') ? FTP_USER : (!empty($_POST['username']) ? $_POST['username'] : $credentials['username']);
+	$credentials['password'] = defined('FTP_PASS') ? FTP_PASS : (!empty($_POST['password']) ? $_POST['password'] : '');
 
 	// Check to see if we are setting the public/private keys for ssh
-	$credentials['public_key'] = defined('FTP_PUBKEY') ? FTP_PUBKEY : (!empty($_POST['public_key']) ? stripslashes($_POST['public_key']) : '');
-	$credentials['private_key'] = defined('FTP_PRIKEY') ? FTP_PRIKEY : (!empty($_POST['private_key']) ? stripslashes($_POST['private_key']) : '');
+	$credentials['public_key'] = defined('FTP_PUBKEY') ? FTP_PUBKEY : (!empty($_POST['public_key']) ? $_POST['public_key'] : '');
+	$credentials['private_key'] = defined('FTP_PRIKEY') ? FTP_PRIKEY : (!empty($_POST['private_key']) ? $_POST['private_key'] : '');
 
 	//sanitize the hostname, Some people might pass in odd-data:
 	$credentials['hostname'] = preg_replace('|\w+://|', '', $credentials['hostname']); //Strip any schemes off
@@ -703,7 +696,7 @@ function request_filesystem_credentials($form_post, $type = '', $error = false, 
 	else if ( defined('FTP_SSL') && 'ftpext' == $type ) //Only the FTP Extension understands SSL
 		$credentials['connection_type'] = 'ftps';
 	else if ( !empty($_POST['connection_type']) )
-		$credentials['connection_type'] = stripslashes($_POST['connection_type']);
+		$credentials['connection_type'] = $_POST['connection_type'];
 	else if ( !isset($credentials['connection_type']) ) //All else fails (And its not defaulted to something else saved), Default to FTP
 		$credentials['connection_type'] = 'ftp';
 
@@ -797,10 +790,10 @@ jQuery(function($){
 </table>
 
 <?php if ( isset( $_POST['version'] ) ) : ?>
-<input type="hidden" name="version" value="<?php echo esc_attr(stripslashes($_POST['version'])) ?>" />
+<input type="hidden" name="version" value="<?php echo esc_attr($_POST['version']) ?>" />
 <?php endif; ?>
 <?php if ( isset( $_POST['locale'] ) ) : ?>
-<input type="hidden" name="locale" value="<?php echo esc_attr(stripslashes($_POST['locale'])) ?>" />
+<input type="hidden" name="locale" value="<?php echo esc_attr($_POST['locale']) ?>" />
 <?php endif; ?>
 <p class="submit">
 <input id="upgrade" name="upgrade" type="submit" class="button" value="<?php esc_attr_e('Proceed'); ?>" />
