@@ -4,8 +4,6 @@
  * @subpackage Default_Theme
  */
 
-$content_width = 450;
-
 automatic_feed_links();
 
 if ( function_exists('register_sidebar') ) {
@@ -16,9 +14,6 @@ if ( function_exists('register_sidebar') ) {
 		'after_title' => '</h2>',
 	));
 }
-
-if ( function_exists( 'add_theme_support' ) )
-	add_theme_support( 'post-thumbnails' );
 
 /** @ignore */
 function kubrick_head() {
@@ -316,12 +311,6 @@ function kubrick_theme_page_head() {
 		width: 100%;
 		display: <?php echo kubrick_header_display_string(); ?>;
 	}
-	
-	.description {
-		margin-top: 16px;
-		color: #fff;
-	}
-
 	#jsForm {
 		display: none;
 		text-align: center;

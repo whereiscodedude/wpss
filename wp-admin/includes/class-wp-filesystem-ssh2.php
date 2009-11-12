@@ -45,8 +45,18 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	var $link = false;
 	var $sftp_link = false;
 	var $keys = false;
+	/*
+	 * This is the timeout value for ssh results.
+	 * Slower servers might need this incressed, but this number otherwise should not change.
+	 *
+	 * @parm $timeout int
+	 *
+	 */
+	var $timeout = 15;
 	var $errors = array();
 	var $options = array();
+
+	var $permission = 0644;
 
 	function WP_Filesystem_SSH2($opt='') {
 		$this->method = 'ssh2';
@@ -138,7 +148,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 			$this->errors->add('command', sprintf(__('Unable to perform command: %s'), $command));
 		} else {
 			stream_set_blocking( $stream, true );
-			stream_set_timeout( $stream, FS_TIMEOUT );
+			stream_set_timeout( $stream, $this->timeout );
 			$data = stream_get_contents( $stream );
 			fclose( $stream );
 
@@ -148,6 +158,12 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 				return $data;
 		}
 		return false;
+	}
+
+	function setDefaultPermissions($perm) {
+		$this->debug("setDefaultPermissions();");
+		if ( $perm )
+			$this->permission = $perm;
 	}
 
 	function get_contents($file, $type = '', $resumepos = 0 ) {
@@ -162,7 +178,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 
 	function put_contents($file, $contents, $type = '' ) {
 		$file = ltrim($file, '/');
-		return false !== file_put_contents('ssh2.sftp://' . $this->sftp_link . '/' . $file, $contents);
+		return file_put_contents('ssh2.sftp://' . $this->sftp_link . '/' . $file, $contents);
 	}
 
 	function cwd() {
@@ -185,18 +201,12 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	}
 
 	function chmod($file, $mode = false, $recursive = false) {
+		if( ! $mode )
+			$mode = $this->permission;
+		if( ! $mode )
+			return false;
 		if ( ! $this->exists($file) )
 			return false;
-
-		if ( ! $mode ) {
-			if ( $this->is_file($file) )
-				$mode = FS_CHMOD_FILE;
-			elseif ( $this->is_dir($file) )
-				$mode = FS_CHMOD_DIR;
-			else
-				return false;
-		}
-
 		if ( ! $recursive || ! $this->is_dir($file) )
 			return $this->run_command(sprintf('chmod %o %s', $mode, escapeshellarg($file)), true);
 		return $this->run_command(sprintf('chmod -R %o %s', $mode, escapeshellarg($file)), true);
@@ -305,10 +315,9 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		//Not implmented.
 	}
 
-	function mkdir($path, $chmod = false, $chown = false, $chgrp = false) {
+	function mkdir($path, $chmod = null, $chown = false, $chgrp = false) {
 		$path = untrailingslashit($path);
-		if ( ! $chmod )
-			$chmod = FS_CHMOD_DIR;
+		$chmod = !empty($chmod) ? $chmod : $this->permission;
 		if ( ! ssh2_sftp_mkdir($this->sftp_link, $path, $chmod, true) )
 			return false;
 		if ( $chown )
@@ -322,34 +331,29 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return $this->delete($path, $recursive);
 	}
 
-	function dirlist($path, $include_hidden = true, $recursive = false) {
+	function dirlist($path, $incdot = false, $recursive = false) {
 		if ( $this->is_file($path) ) {
-			$limit_file = basename($path);
+			$limitFile = basename($path);
 			$path = dirname($path);
 		} else {
-			$limit_file = false;
+			$limitFile = false;
 		}
-
 		if ( ! $this->is_dir($path) )
 			return false;
 
 		$ret = array();
 		$dir = @dir('ssh2.sftp://' . $this->sftp_link .'/' . ltrim($path, '/') );
-
 		if ( ! $dir )
 			return false;
-
 		while (false !== ($entry = $dir->read()) ) {
 			$struc = array();
 			$struc['name'] = $entry;
 
 			if ( '.' == $struc['name'] || '..' == $struc['name'] )
 				continue; //Do not care about these folders.
-
-			if ( ! $include_hidden && '.' == $struc['name'][0] )
+			if ( '.' == $struc['name'][0] && !$incdot)
 				continue;
-
-			if ( $limit_file && $struc['name'] != $limit_file )
+			if ( $limitFile && $struc['name'] != $limitFile)
 				continue;
 
 			$struc['perms'] 	= $this->gethchmod($path.'/'.$entry);
@@ -365,7 +369,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 
 			if ( 'd' == $struc['type'] ) {
 				if ( $recursive )
-					$struc['files'] = $this->dirlist($path . '/' . $struc['name'], $include_hidden, $recursive);
+					$struc['files'] = $this->dirlist($path . '/' . $struc['name'], $incdot, $recursive);
 				else
 					$struc['files'] = array();
 			}

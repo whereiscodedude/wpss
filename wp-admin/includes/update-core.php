@@ -55,12 +55,6 @@ $_old_files = array(
 'wp-admin/js/link-cat.js',
 'wp-admin/js/forms.js',
 'wp-admin/js/upload.js',
-'wp-admin/js/set-post-thumbnail-handler.js',
-'wp-admin/js/set-post-thumbnail-handler.dev.js',
-'wp-admin/js/page.js',
-'wp-admin/js/page.dev.js',
-'wp-admin/js/slug.js',
-'wp-admin/js/slug.dev.js',
 'wp-admin/profile-update.php',
 'wp-admin/templates.php',
 'wp-includes/images/audio.png',
@@ -169,9 +163,7 @@ $_old_files = array(
 'wp-images/smilies',
 'wp-images/wp-small.png',
 'wp-images/wpminilogo.png',
-'wp.php',
-'wp-includes/gettext.php',
-'wp-includes/streams.php'
+'wp.php'
 );
 
 /**

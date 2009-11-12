@@ -30,10 +30,10 @@ $tabs['dashboard'] = __('Search');
 if ( 'search' == $tab )
 	$tabs['search']	= __('Search Results');
 $tabs['upload'] = __('Upload');
-$tabs['featured'] = _x('Featured','Theme Installer');
-//$tabs['popular']  = _x('Popular','Theme Installer');
-$tabs['new']      = _x('Newest','Theme Installer');
-$tabs['updated']  = _x('Recently Updated','Theme Installer');
+$tabs['featured'] = __('Featured');
+//$tabs['popular']  = __('Popular');
+$tabs['new']      = __('Newest');
+$tabs['updated']  = __('Recently Updated');
 
 $nonmenu_tabs = array('theme-information'); //Valid actions to perform which do not have a Menu item.
 

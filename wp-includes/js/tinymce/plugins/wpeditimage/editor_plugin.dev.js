@@ -37,54 +37,60 @@
 			});
 
 			ed.onInit.add(function(ed) {
-				tinymce.dom.Event.add(ed.getBody(), 'dragstart', function(e) {
-					if ( !tinymce.isGecko && e.target.nodeName == 'IMG' && ed.dom.getParent(e.target, 'dl.wp-caption') )
-						return tinymce.dom.Event.cancel(e);
+				tinymce.dom.Event.add(ed.getWin(), 'scroll', function(e) {
+					ed.plugins.wpeditimage.hideButtons();
 				});
 			});
 
+			ed.onBeforeExecCommand.add(function(ed, cmd, ui, val) {
+				ed.plugins.wpeditimage.hideButtons();
+			});
+
+			ed.onSaveContent.add(function(ed, o) {
+				ed.plugins.wpeditimage.hideButtons();
+			});
+
 			ed.onMouseUp.add(function(ed, e) {
-				if ( tinymce.isWebKit || tinymce.isOpera )
-					return;
-
-				if ( ed.dom.getParent(e.target, 'div.mceTemp') || ed.dom.is(e.target, 'div.mceTemp') ) {					
-					window.setTimeout(function(){
-						var ed = tinyMCE.activeEditor, n = ed.selection.getNode(), DL = ed.dom.getParent(n, 'dl.wp-caption');
-
-						if ( DL && n.width != ( parseInt(ed.dom.getStyle(DL, 'width'), 10) - 10 ) ) {
-							ed.dom.setStyle(DL, 'width', parseInt(n.width, 10) + 10);
-							ed.execCommand('mceRepaint');
-						}
-					}, 100);
+				var n, DL;
+				
+				if ( tinymce.isOpera ) {
+					if ( e.target.nodeName == 'IMG' )
+						ed.plugins.wpeditimage.showButtons(e.target);
+				} else if ( ! tinymce.isWebKit ) {
+					n = ed.selection.getNode();
+					
+					if ( n.nodeName == 'IMG' && (DL = ed.dom.getParent(n, 'DL')) ) {					
+						window.setTimeout(function(){
+							var ed = tinyMCE.activeEditor, n = ed.selection.getNode(), DL = ed.dom.getParent(n, 'DL');
+						
+							if ( n.width != (parseInt(ed.dom.getStyle(DL, 'width')) - 10) ) {
+								ed.dom.setStyle(DL, 'width', parseInt(n.width)+10);
+								ed.execCommand('mceRepaint');
+							}
+						}, 100);
+					}
 				}
 			});
 
 			ed.onMouseDown.add(function(ed, e) {
-				var p;
-
-				if ( e.target.nodeName == 'IMG' && ed.dom.getAttrib(e.target, 'class').indexOf('mceItem') == -1 ) {
-					ed.plugins.wordpress._showButtons(e.target, 'wp_editbtns');
-					if ( tinymce.isGecko && (p = ed.dom.getParent(e.target, 'dl.wp-caption')) && ed.dom.hasClass(p.parentNode, 'mceTemp') )
-						ed.selection.select(p.parentNode);
+				if ( tinymce.isOpera || e.target.nodeName != 'IMG' ) {
+					t.hideButtons();
+					return;
 				}
+				ed.plugins.wpeditimage.showButtons(e.target);
 			});
 
 			ed.onKeyPress.add(function(ed, e) {
 				var DL, DIV, P;
 
-				if ( e.keyCode == 13 && (DL = ed.dom.getParent(ed.selection.getNode(), 'DL')) && ed.dom.hasClass(DL, 'wp-caption') ) {
+				if ( e.keyCode == 13 && (DL = ed.dom.getParent(ed.selection.getNode(), 'DL')) ) {
 					P = ed.dom.create('p', {}, '&nbsp;');
 					if ( (DIV = DL.parentNode) && DIV.nodeName == 'DIV' ) 
 						ed.dom.insertAfter( P, DIV );
-					else
-						ed.dom.insertAfter( P, DL );
-
-					if ( P.firstChild )
-						ed.selection.select(P.firstChild);
-					else
-						ed.selection.select(P);
+					else ed.dom.insertAfter( P, DL );
 
 					tinymce.dom.Event.cancel(e);
+					ed.selection.select(P);
 					return false;
 				}
 			});
@@ -118,7 +124,7 @@
 				
 				div_cls = (cls == 'aligncenter') ? 'mceTemp mceIEcenter' : 'mceTemp';
 
-				return '<div class="'+div_cls+'" draggable><dl id="'+id+'" class="wp-caption '+cls+'" style="width: '+(10+parseInt(w))+
+				return '<div class="'+div_cls+'"><dl id="'+id+'" class="wp-caption '+cls+'" style="width: '+(10+parseInt(w))+
 				'px"><dt class="wp-caption-dt">'+c+'</dt><dd class="wp-caption-dd">'+cap+'</dd></dl></div>';
 			});
 		},
@@ -143,17 +149,46 @@
 			});
 		},
 
+		showButtons : function(n) {
+			var t = this, ed = tinyMCE.activeEditor, p1, p2, vp, DOM = tinymce.DOM, X, Y, cls = ed.dom.getAttrib(n, 'class');
+
+			if ( cls.indexOf('mceItem') != -1 || cls.indexOf('wpGallery') != -1 )
+				return;
+
+			vp = ed.dom.getViewPort(ed.getWin());
+			p1 = DOM.getPos(ed.getContentAreaContainer());
+			p2 = ed.dom.getPos(n);
+
+			X = Math.max(p2.x - vp.x, 0) + p1.x;
+			Y = Math.max(p2.y - vp.y, 0) + p1.y;
+
+			DOM.setStyles('wp_editbtns', {
+				'top' : Y+5+'px',
+				'left' : X+5+'px',
+				'display' : 'block'
+			});
+
+			t.btnsTout = window.setTimeout( function(){ed.plugins.wpeditimage.hideButtons();}, 5000 );
+		},
+
+		hideButtons : function() {
+			if ( tinymce.DOM.isHidden('wp_editbtns') ) return;
+
+			tinymce.DOM.hide('wp_editbtns');
+			window.clearTimeout(this.btnsTout);
+		},
+
 		_createButtons : function() {
-			var t = this, ed = tinyMCE.activeEditor, DOM = tinymce.DOM, editButton, dellButton;
+			var t = this, ed = tinyMCE.activeEditor, DOM = tinymce.DOM, wp_editbtns, wp_editimgbtn, wp_delimgbtn;
 
 			DOM.remove('wp_editbtns');
 
-			DOM.add(document.body, 'div', {
+			wp_editbtns = DOM.add(document.body, 'div', {
 				id : 'wp_editbtns',
 				style : 'display:none;'
 			});
 
-			editButton = DOM.add('wp_editbtns', 'img', {
+			wp_editimgbtn = DOM.add('wp_editbtns', 'img', {
 				src : t.url+'/img/image.png',
 				id : 'wp_editimgbtn',
 				width : '24',
@@ -161,13 +196,14 @@
 				title : ed.getLang('wpeditimage.edit_img')
 			});
 
-			tinymce.dom.Event.add(editButton, 'mousedown', function(e) {
+			wp_editimgbtn.onmousedown = function(e) {
 				var ed = tinyMCE.activeEditor;
 				ed.windowManager.bookmark = ed.selection.getBookmark('simple');
 				ed.execCommand("WP_EditImage");
-			});
+				this.parentNode.style.display = 'none';
+			};
 
-			dellButton = DOM.add('wp_editbtns', 'img', {
+			wp_delimgbtn = DOM.add('wp_editbtns', 'img', {
 				src : t.url+'/img/delete.png',
 				id : 'wp_delimgbtn',
 				width : '24',
@@ -175,7 +211,7 @@
 				title : ed.getLang('wpeditimage.del_img')
 			});
 
-			tinymce.dom.Event.add(dellButton, 'mousedown', function(e) {
+			wp_delimgbtn.onmousedown = function(e) {
 				var ed = tinyMCE.activeEditor, el = ed.selection.getNode(), p;
 
 				if ( el.nodeName == 'IMG' && ed.dom.getAttrib(el, 'class').indexOf('mceItem') == -1 ) {
@@ -183,13 +219,13 @@
 						ed.dom.remove(p);
 					else if ( (p = ed.dom.getParent(el, 'A')) && p.childNodes.length == 1 )
 						ed.dom.remove(p);
-					else
-						ed.dom.remove(el);
+					else ed.dom.remove(el);
 
+					this.parentNode.style.display = 'none';
 					ed.execCommand('mceRepaint');
 					return false;
 				}
-			});
+			};
 		},
 
 		getInfo : function() {

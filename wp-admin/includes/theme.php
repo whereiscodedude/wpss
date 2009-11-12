@@ -28,8 +28,6 @@ function current_theme_info() {
 	$ct->description = $themes[$current_theme]['Description'];
 	$ct->author = $themes[$current_theme]['Author'];
 	$ct->tags = $themes[$current_theme]['Tags'];
-	$ct->theme_root = $themes[$current_theme]['Theme Root'];
-	$ct->theme_root_uri = $themes[$current_theme]['Theme Root URI'];
 	return $ct;
 }
 
@@ -131,7 +129,7 @@ function get_page_templates() {
 
 	if ( is_array( $templates ) ) {
 		foreach ( $templates as $template ) {
-			$template_data = implode( '', file( $template ));
+			$template_data = implode( '', file( WP_CONTENT_DIR.$template ));
 
 			$name = '';
 			if ( preg_match( '|Template Name:(.*)$|mi', $template_data, $name ) )
@@ -144,20 +142,6 @@ function get_page_templates() {
 	}
 
 	return $page_templates;
-}
-
-/**
- * Tidies a filename for url display by the theme editor.
- * 
- * @since 2.9.0
- * @private
- * 
- * @param string $fullpath Full path to the theme file
- * @param string $containingfolder Path of the theme parent folder
- * @return string
- */
-function _get_template_edit_filename($fullpath, $containingfolder) {
-	return str_replace(dirname(dirname( $containingfolder )) , '', $fullpath);
 }
 
 ?>

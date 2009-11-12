@@ -253,7 +253,7 @@ function _nc( $single, $plural, $number, $domain = 'default' ) {
 function _nx($single, $plural, $number, $context, $domain = 'default') {
 	$translations = &get_translations_for_domain( $domain );
 	$translation = $translations->translate_plural( $single, $plural, $number, $context );
-	return apply_filters( 'ngettext_with_context', $translation, $single, $plural, $number, $context, $domain );
+	return apply_filters( 'ngettext_with_context ', $translation, $single, $plural, $number, $context, $domain );
 }
 
 /**
@@ -404,10 +404,11 @@ function load_theme_textdomain($domain, $path = false) {
  */
 function &get_translations_for_domain( $domain ) {
 	global $l10n;
-	if ( !isset($l10n[$domain]) ) {
-		$l10n[$domain] = &new NOOP_Translations;
-	}
-	return $l10n[$domain];
+	$empty = &new Translations;
+	if ( isset($l10n[$domain]) )
+		return $l10n[$domain];
+	else
+		return $empty;
 }
 
 /**

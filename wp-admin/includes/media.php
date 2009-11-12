@@ -98,16 +98,18 @@ function the_media_upload_tabs() {
  * @param unknown_type $size
  * @return unknown
  */
-function get_image_send_to_editor($id, $caption, $title, $align, $url='', $rel = false, $size='medium', $alt = '') {
+function get_image_send_to_editor($id, $alt, $title, $align, $url='', $rel = false, $size='medium') {
 
-	$html = get_image_tag($id, $alt, $title, $align, $size);
+	$htmlalt = ( empty($alt) ) ? $title : $alt;
+
+	$html = get_image_tag($id, $htmlalt, $title, $align, $size);
 
 	$rel = $rel ? ' rel="attachment wp-att-' . esc_attr($id).'"' : '';
 
 	if ( $url )
-		$html = '<a href="' . esc_attr($url) . "\"$rel>$html</a>";
+		$html = '<a href="' . esc_url($url) . "\"$rel>$html</a>";
 
-	$html = apply_filters( 'image_send_to_editor', $html, $id, $caption, $title, $align, $url, $size, $alt );
+	$html = apply_filters( 'image_send_to_editor', $html, $id, $alt, $title, $align, $url, $size );
 
 	return $html;
 }
@@ -126,14 +128,15 @@ function get_image_send_to_editor($id, $caption, $title, $align, $url='', $rel =
  * @param unknown_type $size
  * @return unknown
  */
-function image_add_caption( $html, $id, $caption, $title, $align, $url, $size, $alt = '' ) {
+function image_add_caption( $html, $id, $alt, $title, $align, $url, $size ) {
 
-	if ( empty($caption) || apply_filters( 'disable_captions', '' ) )
+	if ( empty($alt) || apply_filters( 'disable_captions', '' ) )
 		return $html;
 
 	$id = ( 0 < (int) $id ) ? 'attachment_' . $id : '';
 
-	if ( ! preg_match( '/width="([0-9]+)/', $html, $matches ) )
+	preg_match( '/width="([0-9]+)/', $html, $matches );
+	if ( ! isset($matches[1]) )
 		return $html;
 
 	$width = $matches[1];
@@ -142,12 +145,14 @@ function image_add_caption( $html, $id, $caption, $title, $align, $url, $size, $
 	if ( empty($align) )
 		$align = 'none';
 
+	$alt = ! empty($alt) ? addslashes($alt) : '';
+
 	$shcode = '[caption id="' . $id . '" align="align' . $align
-	. '" width="' . $width . '" caption="' . addslashes($caption) . '"]' . $html . '[/caption]';
+	. '" width="' . $width . '" caption="' . $alt . '"]' . $html . '[/caption]';
 
 	return apply_filters( 'image_add_caption_shortcode', $shcode, $html );
 }
-add_filter( 'image_send_to_editor', 'image_add_caption', 20, 8 );
+add_filter( 'image_send_to_editor', 'image_add_caption', 20, 7 );
 
 /**
  * {@internal Missing Short Description}}
@@ -164,7 +169,7 @@ var win = window.dialogArguments || opener || parent || top;
 win.send_to_editor('<?php echo addslashes($html); ?>');
 /* ]]> */
 </script>
-<?php
+	<?php
 	exit;
 }
 
@@ -244,8 +249,8 @@ function media_handle_upload($file_id, $post_id, $post_data = array()) {
  */
 function media_handle_sideload($file_array, $post_id, $desc = null, $post_data = array()) {
 	$overrides = array('test_form'=>false);
-
 	$file = wp_handle_sideload($file_array, $overrides);
+
 	if ( isset($file['error']) )
 		return new WP_Error( 'upload_error', $file['error'] );
 
@@ -274,7 +279,7 @@ function media_handle_sideload($file_array, $post_id, $desc = null, $post_data =
 		'post_content' => $content,
 	), $post_data );
 
-	// Save the attachment metadata
+	// Save the data
 	$id = wp_insert_attachment($attachment, $file, $post_id);
 	if ( !is_wp_error($id) ) {
 		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
@@ -311,19 +316,13 @@ wp_enqueue_style( 'ie' );
 <script type="text/javascript">
 //<![CDATA[
 addLoadEvent = function(func){if(typeof jQuery!="undefined")jQuery(document).ready(func);else if(typeof wpOnload!='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
-var userSettings = {'url':'<?php echo SITECOOKIEPATH; ?>','uid':'<?php if ( ! isset($current_user) ) $current_user = wp_get_current_user(); echo $current_user->ID; ?>','time':'<?php echo time(); ?>'};
-var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>', pagenow = 'media-upload-popup', adminpage = 'media-upload-popup';
+var userSettings = {'url':'<?php echo SITECOOKIEPATH; ?>','uid':'<?php if ( ! isset($current_user) ) $current_user = wp_get_current_user(); echo $current_user->ID; ?>','time':'<?php echo time() ?>'};
 //]]>
 </script>
 <?php
-do_action('admin_enqueue_scripts', 'media-upload-popup');
-do_action('admin_print_styles-media-upload-popup');
 do_action('admin_print_styles');
-do_action('admin_print_scripts-media-upload-popup');
 do_action('admin_print_scripts');
-do_action('admin_head-media-upload-popup');
 do_action('admin_head');
-
 if ( is_string($content_func) )
 	do_action( "admin_head_{$content_func}" );
 ?>
@@ -406,15 +405,6 @@ function media_upload_form_handler() {
 
 		$post = apply_filters('attachment_fields_to_save', $post, $attachment);
 
-		if ( isset($attachment['image_alt']) && !empty($attachment['image_alt']) ) {
-			$image_alt = get_post_meta($attachment_id, '_wp_attachment_image_alt', true);
-			if ( $image_alt != stripslashes($attachment['image_alt']) ) {
-				$image_alt = wp_strip_all_tags( stripslashes($attachment['image_alt']), true );
-				// update_meta expects slashed
-				update_post_meta( $attachment_id, '_wp_attachment_image_alt', addslashes($image_alt) );
-			}
-		}
-
 		if ( isset($post['errors']) ) {
 			$errors[$attachment_id] = $post['errors'];
 			unset($post['errors']);
@@ -423,10 +413,9 @@ function media_upload_form_handler() {
 		if ( $post != $_post )
 			wp_update_post($post);
 
-		foreach ( get_attachment_taxonomies($post) as $t ) {
+		foreach ( get_attachment_taxonomies($post) as $t )
 			if ( isset($attachment[$t]) )
 				wp_set_object_terms($attachment_id, array_map('trim', preg_split('/,+/', $attachment[$t])), $t, false);
-		}
 	}
 
 	if ( isset($_POST['insert-gallery']) || isset($_POST['update-gallery']) ) { ?>
@@ -479,25 +468,16 @@ function media_upload_image() {
 	}
 
 	if ( !empty($_POST['insertonlybutton']) ) {
-		$alt = $align = '';
-		if ( !empty($_POST['insertonly']['embed-src']) ) {
-			$src = $_POST['insertonly']['embed-src'];
-			if ( !strpos($src, '://') )
-				$src = "http://$src";
-			$html = '[embed]' . $src . '[/embed]';
-		} else {
-			$src = $_POST['insertonly']['src'];
-			if ( !empty($src) && !strpos($src, '://') )
-				$src = "http://$src";
-			$alt = esc_attr($_POST['insertonly']['alt']);
-			if ( isset($_POST['insertonly']['align']) ) {
-				$align = esc_attr($_POST['insertonly']['align']);
-				$class = " class='align$align'";
-			}
-			if ( !empty($src) )
-				$html = "<img src='$src' alt='$alt'$class />";
+		$src = $_POST['insertonly']['src'];
+		if ( !empty($src) && !strpos($src, '://') )
+			$src = "http://$src";
+		$alt = esc_attr($_POST['insertonly']['alt']);
+		if ( isset($_POST['insertonly']['align']) ) {
+			$align = esc_attr($_POST['insertonly']['align']);
+			$class = " class='align$align'";
 		}
-
+		if ( !empty($src) )
+			$html = "<img src='$src' alt='$alt'$class />";
 		$html = apply_filters('image_send_to_editor_url', $html, $src, $alt, $align);
 		return media_send_to_editor($html);
 	}
@@ -534,33 +514,25 @@ function media_upload_image() {
  */
 function media_sideload_image($file, $post_id, $desc = null) {
 	if (!empty($file) ) {
-		// Download file to temp location
+		$file_array['name'] = basename($file);
 		$tmp = download_url($file);
-
-		// Set variables for storage
-		// fix file filename for query strings
-		preg_match('/[^\?]+\.(jpg|JPG|jpe|JPE|jpeg|JPEG|gif|GIF|png|PNG)/', $file, $matches);
-		$file_array['name'] = basename($matches[0]);
 		$file_array['tmp_name'] = $tmp;
+		$desc = @$desc;
 
-		// If error storing temporarily, unlink
 		if ( is_wp_error($tmp) ) {
 			@unlink($file_array['tmp_name']);
 			$file_array['tmp_name'] = '';
 		}
 
-		// do the validation and storage stuff
-		$id = media_handle_sideload($file_array, $post_id, @$desc);
+		$id = media_handle_sideload($file_array, $post_id, $desc);
 		$src = $id;
 
-		// If error storing permanently, unlink
 		if ( is_wp_error($id) ) {
 			@unlink($file_array['tmp_name']);
 			return $id;
 		}
 	}
 
-	// Finally check to make sure the file has been saved, then return the html
 	if ( !empty($src) ) {
 		$alt = @$desc;
 		$html = "<img src='$src' alt='$alt' />";
@@ -593,9 +565,12 @@ function media_upload_audio() {
 		$href = $_POST['insertonly']['href'];
 		if ( !empty($href) && !strpos($href, '://') )
 			$href = "http://$href";
-
-		$html = '[embed]' . $href . '[/embed]';
-		$html = apply_filters('audio_send_to_editor_url', $html, $href);
+		$title = esc_attr($_POST['insertonly']['title']);
+		if ( empty($title) )
+			$title = basename($href);
+		if ( !empty($title) && !empty($href) )
+			$html = "<a href='$href' >$title</a>";
+		$html = apply_filters('audio_send_to_editor_url', $html, $href, $title);
 		return media_send_to_editor($html);
 	}
 
@@ -644,9 +619,12 @@ function media_upload_video() {
 		$href = $_POST['insertonly']['href'];
 		if ( !empty($href) && !strpos($href, '://') )
 			$href = "http://$href";
-
-		$html = '[embed]' . $href . '[/embed]';
-		$html = apply_filters('video_send_to_editor_url', $html, $href);
+		$title = esc_attr($_POST['insertonly']['title']);
+		if ( empty($title) )
+			$title = basename($href);
+		if ( !empty($title) && !empty($href) )
+			$html = "<a href='$href' >$title</a>";
+		$html = apply_filters('video_send_to_editor_url', $html, $href, $title);
 		return media_send_to_editor($html);
 	}
 
@@ -695,7 +673,6 @@ function media_upload_file() {
 		$href = $_POST['insertonly']['href'];
 		if ( !empty($href) && !strpos($href, '://') )
 			$href = "http://$href";
-
 		$title = esc_attr($_POST['insertonly']['title']);
 		if ( empty($title) )
 			$title = basename($href);
@@ -878,17 +855,15 @@ function image_link_input_fields($post, $url_type='') {
  */
 function image_attachment_fields_to_edit($form_fields, $post) {
 	if ( substr($post->post_mime_type, 0, 5) == 'image' ) {
-		$alt = get_post_meta($post->ID, '_wp_attachment_image_alt', true);
-		if ( empty($alt) )
-			$alt = '';
-
 		$form_fields['post_title']['required'] = true;
+		$file = wp_get_attachment_url($post->ID);
 
-		$form_fields['image_alt'] = array(
-			'value' => $alt,
-			'label' => __('Alternate text'),
-			'helps' => __('Alt text for the image, e.g. &#8220;The Mona Lisa&#8221;')
-		);
+		$form_fields['image_url']['value'] = $file;
+
+		$form_fields['post_excerpt']['label'] = __('Caption');
+		$form_fields['post_excerpt']['helps'][] = __('Also used as alternate text for the image');
+
+		$form_fields['post_content']['label'] = __('Description');
 
 		$form_fields['align'] = array(
 			'label' => __('Alignment'),
@@ -896,10 +871,7 @@ function image_attachment_fields_to_edit($form_fields, $post) {
 			'html'  => image_align_input_fields($post, get_option('image_default_align')),
 		);
 
-		$form_fields['image-size'] = image_size_input_fields( $post, get_option('image_default_size') );
-
-	} else {
-		unset( $form_fields['image_alt'] );
+		$form_fields['image-size'] = image_size_input_fields($post, get_option('image_default_size'));
 	}
 	return $form_fields;
 }
@@ -961,12 +933,20 @@ function image_media_send_to_editor($html, $attachment_id, $attachment) {
 	$post =& get_post($attachment_id);
 	if ( substr($post->post_mime_type, 0, 5) == 'image' ) {
 		$url = $attachment['url'];
-		$align = !empty($attachment['align']) ? $attachment['align'] : 'none';
-		$size = !empty($attachment['image-size']) ? $attachment['image-size'] : 'medium';
-		$alt = !empty($attachment['image_alt']) ? $attachment['image_alt'] : '';
+
+		if ( isset($attachment['align']) )
+			$align = $attachment['align'];
+		else
+			$align = 'none';
+
+		if ( !empty($attachment['image-size']) )
+			$size = $attachment['image-size'];
+		else
+			$size = 'medium';
+
 		$rel = ( $url == get_attachment_link($attachment_id) );
 
-		return get_image_send_to_editor($attachment_id, $attachment['post_excerpt'], $attachment['post_title'], $align, $url, $rel, $size, $alt);
+		return get_image_send_to_editor($attachment_id, $attachment['post_excerpt'], $attachment['post_title'], $align, $url, $rel, $size);
 	}
 
 	return $html;
@@ -996,23 +976,22 @@ function get_attachment_fields_to_edit($post, $errors = null) {
 	$form_fields = array(
 		'post_title'   => array(
 			'label'      => __('Title'),
-			'value'      => $edit_post->post_title
+			'value'      => $edit_post->post_title,
 		),
-		'image_alt'   => array(),
 		'post_excerpt' => array(
 			'label'      => __('Caption'),
-			'value'      => $edit_post->post_excerpt
+			'value'      => $edit_post->post_excerpt,
 		),
 		'post_content' => array(
 			'label'      => __('Description'),
 			'value'      => $edit_post->post_content,
-			'input'      => 'textarea'
+			'input'      => 'textarea',
 		),
 		'url'          => array(
 			'label'      => __('Link URL'),
 			'input'      => 'html',
 			'html'       => image_link_input_fields($post, get_option('image_default_link_type')),
-			'helps'      => __('Enter a link URL or click above for presets.')
+			'helps'      => __('Enter a link URL or click above for presets.'),
 		),
 		'menu_order'   => array(
 			'label'      => __('Order'),
@@ -1022,8 +1001,8 @@ function get_attachment_fields_to_edit($post, $errors = null) {
 			'label'      => __('File URL'),
 			'input'      => 'html',
 			'html'       => "<input type='text' class='urlfield' readonly='readonly' name='attachments[$post->ID][url]' value='" . esc_attr($image_url) . "' /><br />",
-			'value'      => isset($edit_post->post_url) ? $edit_post->post_url : wp_get_attachment_url($post->ID),
-			'helps'      => __('Location of the uploaded file.')
+			'value'      => isset($edit_post->post_url) ? $edit_post->post_url : '',
+			'helps'      => __('Location of the uploaded file.'),
 		)
 	);
 
@@ -1083,12 +1062,9 @@ function get_media_items( $post_id, $errors ) {
 	}
 
 	$output = '';
-	foreach ( (array) $attachments as $id => $attachment ) {
-		if ( $attachment->post_status == 'trash' )
-			continue;
+	foreach ( (array) $attachments as $id => $attachment )
 		if ( $item = get_media_item( $id, array( 'errors' => isset($errors[$id]) ? $errors[$id] : null) ) )
 			$output .= "\n<div id='media-item-$id' class='media-item child-of-$attachment->post_parent preloaded'><div class='progress'><div class='bar'></div></div><div id='media-upload-error-$id'></div><div class='filename'></div>$item\n</div>";
-	}
 
 	return $output;
 }
@@ -1105,14 +1081,15 @@ function get_media_items( $post_id, $errors ) {
 function get_media_item( $attachment_id, $args = null ) {
 	global $redir_tab;
 
+	$default_args = array( 'errors' => null, 'send' => true, 'delete' => true, 'toggle' => true, 'show_title' => true );
+	$args = wp_parse_args( $args, $default_args );
+	extract( $args, EXTR_SKIP );
+
+	global $post_mime_types;
 	if ( ( $attachment_id = intval($attachment_id) ) && $thumb_url = get_attachment_icon_src( $attachment_id ) )
 		$thumb_url = $thumb_url[0];
 	else
 		return false;
-
-	$default_args = array( 'errors' => null, 'send' => true, 'delete' => true, 'toggle' => true, 'show_title' => true );
-	$args = wp_parse_args( $args, $default_args );
-	extract( $args, EXTR_SKIP );
 
 	$toggle_on = __('Show');
 	$toggle_off = __('Hide');
@@ -1128,10 +1105,12 @@ function get_media_item( $attachment_id, $args = null ) {
 		$tags = esc_attr(join(', ', $tags));
 	}
 
-	$post_mime_types = get_post_mime_types();
-	$keys = array_keys(wp_match_mime_types(array_keys($post_mime_types), $post->post_mime_type));
-	$type = array_shift($keys);
-	$type_html = "<input type='hidden' id='type-of-$attachment_id' value='" . esc_attr( $type ) . "' />";
+	$type = '';
+	if ( isset($post_mime_types) ) {
+		$keys = array_keys(wp_match_mime_types(array_keys($post_mime_types), $post->post_mime_type));
+		$type = array_shift($keys);
+		$type = "<input type='hidden' id='type-of-$attachment_id' value='" . esc_attr( $type ) . "' />";
+	}
 
 	$form_fields = get_attachment_fields_to_edit($post, $errors);
 
@@ -1163,36 +1142,22 @@ function get_media_item( $attachment_id, $args = null ) {
 		}
 	}
 
-	$media_dims = '';
-	$meta = wp_get_attachment_metadata($post->ID);
-	if ( is_array($meta) && array_key_exists('width', $meta) && array_key_exists('height', $meta) )
-		$media_dims .= "<span id='media-dims-{$post->ID}'>{$meta['width']}&nbsp;&times;&nbsp;{$meta['height']}</span> ";
-
-	$image_edit_button = '';
-	if ( gd_edit_image_support($post->post_mime_type) ) {
-		$nonce = wp_create_nonce("image_editor-$post->ID");
-		$image_edit_button = "<input type='button' id='imgedit-open-btn-{$post->ID}' onclick='imageEdit.open($post->ID, \"$nonce\")' class='button' value='" . esc_attr__( 'Edit image' ) . "' /> <img src='images/wpspin_light.gif' class='imgedit-wait-spin' alt='' />";
-	}
-
 	$item = "
-	$type_html
+	$type
 	$toggle_links
 	$order
 	$display_title
 	<table class='slidetoggle describe $class'>
-		<thead class='media-item-info' id='media-head-$post->ID'>
+		<thead class='media-item-info'>
 		<tr>
-			<td class='A1B1' id='thumbnail-head-$post->ID' rowspan='5'><img class='thumbnail' src='$thumb_url' alt='' /></td>
+			<td class='A1B1' rowspan='4'><img class='thumbnail' src='$thumb_url' alt='' /></td>
 			<td>$filename</td>
 		</tr>
 		<tr><td>$post->post_mime_type</td></tr>
-		<tr><td>" . mysql2date(get_option('time_format'), $post->post_date) . "</td></tr>
-		<tr><td>" . apply_filters('media_meta', $media_dims, $post) . "</td></tr>
-		<tr><td class='A1B1'>$image_edit_button</td></tr>
+		<tr><td>" . mysql2date($post->post_date, get_option('time_format')) . "</td></tr>
+		<tr><td>" . apply_filters('media_meta', '', $post) . "</td></tr>
 		</thead>
-		<tbody>
-		<tr><td colspan='2' class='imgedit-response' id='imgedit-response-$post->ID'></td></tr>
-		<tr><td style='display:none' colspan='2' class='image-editor' id='image-editor-$post->ID'></td></tr>\n";
+		<tbody>\n";
 
 	$defaults = array(
 		'input'      => 'text',
@@ -1201,22 +1166,15 @@ function get_media_item( $attachment_id, $args = null ) {
 		'extra_rows' => array(),
 	);
 
+	$delete_href = wp_nonce_url("post.php?action=delete-post&amp;post=$attachment_id", 'delete-post_' . $attachment_id);
 	if ( $send )
 		$send = "<input type='submit' class='button' name='send[$attachment_id]' value='" . esc_attr__( 'Insert into Post' ) . "' />";
-	if ( $delete && current_user_can('delete_post', $attachment_id) ) {
-		if ( !EMPTY_TRASH_DAYS )
-			$delete = "<a href=\"" . wp_nonce_url("post.php?action=delete&amp;post=$attachment_id", 'delete-post_' . $attachment_id) . "\" id=\"del[$attachment_id]\" class=\"delete\">" . __('Delete Permanently') . "</a>";
-		else
-			$delete = "<a href=\"" . wp_nonce_url("post.php?action=trash&amp;post=$attachment_id", 'trash-post_' . $attachment_id) . "\" id=\"del[$attachment_id]\" class=\"delete\">" . __('Move to Trash') . "</a> <a href=\"" . wp_nonce_url("post.php?action=untrash&amp;post=$attachment_id", 'untrash-post_' . $attachment_id) . "\" id=\"undo[$attachment_id]\" class=\"undo hidden\">" . __('Undo?') . "</a>";
-	} else {
-		$delete = '';
-	}
-
-	if ( 'image' == $type && current_theme_supports( 'post-thumbnails' ) && get_post_image_id($_GET['post_id']) != $attachment_id )
-		$thumbnail = "<a class='wp-post-thumbnail' href='#' onclick='WPSetAsThumbnail(\"$attachment_id\");return false;'>" . esc_html__( "Use as thumbnail" ) . "</a>";
-
-	if ( ( $send || $thumbnail || $delete ) && !isset($form_fields['buttons']) )
-		$form_fields['buttons'] = array('tr' => "\t\t<tr class='submit'><td></td><td class='savesend'>$send $thumbnail $delete</td></tr>\n");
+	if ( $delete )
+		$delete = "<a href=\"#\" class=\"del-link\" onclick=\"document.getElementById('del_attachment_$attachment_id').style.display='block';return false;\">" . __('Delete') . "</a>";
+	if ( ( $send || $delete ) && !isset($form_fields['buttons']) )
+		$form_fields['buttons'] = array('tr' => "\t\t<tr class='submit'><td></td><td class='savesend'>$send $delete
+		<div id=\"del_attachment_$attachment_id\" class=\"del-attachment\" style=\"display:none;\">" . sprintf(__("You are about to delete <strong>%s</strong>."), $filename) . " <a href=\"$delete_href\" id=\"del[$attachment_id]\" class=\"delete\">" . __('Continue') . "</a>
+		<a href=\"#\" class=\"del-link\" onclick=\"this.parentNode.style.display='none';return false;\">" . __('Cancel') . "</a></div></td></tr>\n");
 
 	$hidden_fields = array();
 
@@ -1366,7 +1324,6 @@ SWFUpload.onload = function() {
 			post_params : {
 				"post_id" : "<?php echo $post_id; ?>",
 				"auth_cookie" : "<?php if ( is_ssl() ) echo $_COOKIE[SECURE_AUTH_COOKIE]; else echo $_COOKIE[AUTH_COOKIE]; ?>",
-				"logged_in_cookie": "<?php echo $_COOKIE[LOGGED_IN_COOKIE]; ?>",
 				"_wpnonce" : "<?php echo wp_create_nonce('media-form'); ?>",
 				"type" : "<?php echo $type; ?>",
 				"tab" : "<?php echo $tab; ?>",
@@ -1517,26 +1474,21 @@ var addExtImage = {
 	align : 'alignnone',
 
 	insert : function() {
-		var t = this, html, f = document.forms[0], cls, title = '', alt = '', caption = '';
+		var t = this, html, f = document.forms[0], cls, title = '', alt = '', caption = null;
 
-		if ( '' != document.getElementById('embed-src').value )
-			return true;
-
-		if ( '' == f.src.value || '' == t.width )
-			return false;
+		if ( '' == f.src.value || '' == t.width ) return false;
 
 		if ( f.title.value ) {
-			title = f.title.value.replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			title = f.title.value.replace(/['"<>]+/g, '');
 			title = ' title="'+title+'"';
 		}
 
-		if ( f.alt.value )
-			alt = f.alt.value.replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
+		if ( f.alt.value ) {
+			alt = f.alt.value.replace(/['"<>]+/g, '');
 <?php if ( ! apply_filters( 'disable_captions', '' ) ) { ?>
-		if ( f.caption.value )
-			caption = f.caption.value.replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			caption = f.alt.value.replace(/'/g, '&#39;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 <?php } ?>
+		}
 
 		cls = caption ? '' : ' class="'+t.align+'"';
 
@@ -1550,7 +1502,6 @@ var addExtImage = {
 
 		var win = window.dialogArguments || opener || parent || top;
 		win.send_to_editor(html);
-		return false;
 	},
 
 	resetImageData : function() {
@@ -1559,8 +1510,8 @@ var addExtImage = {
 		t.width = t.height = '';
 		document.getElementById('go_button').style.color = '#bbb';
 		if ( ! document.forms[0].src.value )
-			document.getElementById('status_img').innerHTML = '*';
-		else document.getElementById('status_img').innerHTML = '<img src="images/no.png" alt="" />';
+			document.getElementById('status_img').src = 'images/required.gif';
+		else document.getElementById('status_img').src = 'images/no.png';
 	},
 
 	updateImageData : function() {
@@ -1569,7 +1520,7 @@ var addExtImage = {
 		t.width = t.preloadImg.width;
 		t.height = t.preloadImg.height;
 		document.getElementById('go_button').style.color = '#333';
-		document.getElementById('status_img').innerHTML = '<img src="images/yes.png" alt="" />';
+		document.getElementById('status_img').src = 'images/yes.png';
 	},
 
 	getImageData : function() {
@@ -1579,7 +1530,7 @@ var addExtImage = {
 			t.resetImageData();
 			return false;
 		}
-		document.getElementById('status_img').innerHTML = '<img src="images/wpspin_light.gif" alt="" />';
+		document.getElementById('status_img').src = 'images/wpspin_light.gif';
 		t.preloadImg = new Image();
 		t.preloadImg.onload = t.updateImageData;
 		t.preloadImg.onerror = t.resetImageData;
@@ -1609,14 +1560,13 @@ var addExtImage = {
  * @param unknown_type $errors
  */
 function media_upload_gallery_form($errors) {
-	global $redir_tab, $type;
+	global $redir_tab;
 
 	$redir_tab = 'gallery';
 	media_upload_header();
 
 	$post_id = intval($_REQUEST['post_id']);
-	$form_action_url = admin_url("media-upload.php?type=$type&tab=gallery&post_id=$post_id");
-	$form_action_url = apply_filters('media_upload_form_url', $form_action_url, $type);
+	$form_action_url = admin_url("media-upload.php?type={$GLOBALS['type']}&tab=gallery&post_id=$post_id");
 ?>
 
 <script type="text/javascript">
@@ -1648,7 +1598,6 @@ jQuery(function($){
 <thead><tr>
 <th><?php _e('Media'); ?></th>
 <th class="order-head"><?php _e('Order'); ?></th>
-<th class="actions-head"><?php _e('Actions'); ?></th>
 </tr></thead>
 </table>
 <div id="media-items">
@@ -1756,8 +1705,7 @@ function media_upload_library_form($errors) {
 
 	$post_id = intval($_REQUEST['post_id']);
 
-	$form_action_url = admin_url("media-upload.php?type=$type&tab=library&post_id=$post_id");
-	$form_action_url = apply_filters('media_upload_form_url', $form_action_url, $type);
+	$form_action_url = admin_url("media-upload.php?type={$GLOBALS['type']}&tab=library&post_id=$post_id");
 
 	$_GET['paged'] = isset( $_GET['paged'] ) ? intval($_GET['paged']) : 0;
 	if ( $_GET['paged'] < 1 )
@@ -1913,17 +1861,12 @@ jQuery(function($){
  */
 function type_url_form_image() {
 
-	if ( !apply_filters( 'disable_captions', '' ) ) {
-		$caption = '
-		<tr>
-			<th valign="top" scope="row" class="label">
-				<span class="alignleft"><label for="caption">' . __('Image Caption') . '</label></span>
-			</th>
-			<td class="field"><input id="caption" name="caption" value="" type="text" /></td>
-		</tr>
-';
+	if ( apply_filters( 'disable_captions', '' ) ) {
+		$alt = __('Alternate Text');
+		$alt_help = __('Alt text for the image, e.g. &#8220;The Mona Lisa&#8221;');
 	} else {
-		$caption = '';
+		$alt = __('Image Caption');
+		$alt_help = __('Also used as alternate text for the image');
 	}
 
 	$default_align = get_option('image_default_align');
@@ -1931,30 +1874,11 @@ function type_url_form_image() {
 		$default_align = 'none';
 
 	return '
-	<h4 class="media-sub-title">' . __('Embed a picture from a web site that supports oEmbed') . '</h4>
 	<table class="describe"><tbody>
 		<tr>
-			<th valign="top" scope="row" class="label" style="width:130px;">
-				<span class="alignleft"><label for="embed-src">' . __('Embed image') . '</label></span>
-				<span class="alignright"><abbr title="required" class="required">*</abbr></span>
-			</th>
-			<td class="field"><input id="embed-src" name="insertonly[embed-src]" value="" type="text" /></td>
-		</tr>
-
-		<tr>
-			<td></td>
-			<td>
-				<input type="submit" class="button" name="insertonlybutton" value="' . esc_attr__('Embed') . '" />
-			</td>
-		</tr>
-	</tbody></table>
-
-	<h4 class="media-sub-title">' . __('Insert an image from another web site') . '</h4>
-	<table class="describe"><tbody>
-		<tr>
-			<th valign="top" scope="row" class="label" style="width:130px;">
+			<th valign="top" scope="row" class="label" style="width:120px;">
 				<span class="alignleft"><label for="src">' . __('Image URL') . '</label></span>
-				<span class="alignright"><abbr id="status_img" title="required" class="required">*</abbr></span>
+				<span class="alignright"><img id="status_img" src="images/required.gif" title="required" alt="required" /></span>
 			</th>
 			<td class="field"><input id="src" name="src" value="" type="text" aria-required="true" onblur="addExtImage.getImageData()" /></td>
 		</tr>
@@ -1964,17 +1888,17 @@ function type_url_form_image() {
 				<span class="alignleft"><label for="title">' . __('Image Title') . '</label></span>
 				<span class="alignright"><abbr title="required" class="required">*</abbr></span>
 			</th>
-			<td class="field"><input id="title" name="title" value="" type="text" aria-required="true" /></td>
+			<td class="field"><p><input id="title" name="title" value="" type="text" aria-required="true" /></p></td>
 		</tr>
 
 		<tr>
 			<th valign="top" scope="row" class="label">
-				<span class="alignleft"><label for="alt">' . __('Alternate Text') . '</label></span>
+				<span class="alignleft"><label for="alt">' . $alt . '</label></span>
 			</th>
 			<td class="field"><input id="alt" name="alt" value="" type="text" aria-required="true" />
-			<p class="help">' . __('Alt text for the image, e.g. &#8220;The Mona Lisa&#8221;') . '</p></td>
+			<p class="help">' . $alt_help . '</p></td>
 		</tr>
-		' . $caption . '
+
 		<tr class="align">
 			<th valign="top" scope="row" class="label"><p><label for="align">' . __('Alignment') . '</label></p></th>
 			<td class="field">
@@ -2028,7 +1952,14 @@ function type_url_form_audio() {
 			</th>
 			<td class="field"><input id="insertonly[href]" name="insertonly[href]" value="" type="text" aria-required="true"></td>
 		</tr>
-
+		<tr>
+			<th valign="top" scope="row" class="label">
+				<span class="alignleft"><label for="insertonly[title]">' . __('Title') . '</label></span>
+				<span class="alignright"><abbr title="required" class="required">*</abbr></span>
+			</th>
+			<td class="field"><input id="insertonly[title]" name="insertonly[title]" value="" type="text" aria-required="true"></td>
+		</tr>
+		<tr><td></td><td class="help">' . __('Link text, e.g. &#8220;Still Alive by Jonathan Coulton&#8221;') . '</td></tr>
 		<tr>
 			<td></td>
 			<td>
@@ -2056,7 +1987,14 @@ function type_url_form_video() {
 			</th>
 			<td class="field"><input id="insertonly[href]" name="insertonly[href]" value="" type="text" aria-required="true"></td>
 		</tr>
-
+		<tr>
+			<th valign="top" scope="row" class="label">
+				<span class="alignleft"><label for="insertonly[title]">' . __('Title') . '</label></span>
+				<span class="alignright"><abbr title="required" class="required">*</abbr></span>
+			</th>
+			<td class="field"><input id="insertonly[title]" name="insertonly[title]" value="" type="text" aria-required="true"></td>
+		</tr>
+		<tr><td></td><td class="help">' . __('Link text, e.g. &#8220;Lucy on YouTube&#8220;') . '</td></tr>
 		<tr>
 			<td></td>
 			<td>
@@ -2182,3 +2120,4 @@ add_filter('media_upload_gallery', 'media_upload_gallery');
 
 add_filter('media_upload_library', 'media_upload_library');
 
+?>

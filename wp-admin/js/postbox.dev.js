@@ -116,7 +116,7 @@ var postboxes;
 		save_state : function(page) {
 			var closed = $('.postbox').filter('.closed').map(function() { return this.id; }).get().join(','),
 			hidden = $('.postbox').filter(':hidden').map(function() { return this.id; }).get().join(',');
-			$.post(ajaxurl, {
+			$.post(postboxL10n.requestFile, {
 				action: 'closed-postboxes',
 				closed: closed,
 				hidden: hidden,
@@ -136,7 +136,7 @@ var postboxes;
 			$('.meta-box-sortables').each( function() {
 				postVars["order[" + this.id.split('-')[0] + "]"] = $(this).sortable( 'toArray' ).join(',');
 			} );
-			$.post( ajaxurl, postVars );
+			$.post( postboxL10n.requestFile, postVars );
 		},
 
 		/* Callbacks */
