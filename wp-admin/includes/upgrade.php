@@ -33,11 +33,8 @@ if ( !function_exists('wp_install') ) :
  * @param null $deprecated Optional. Not used.
  * @return array Array keys 'url', 'user_id', 'password', 'password_message'.
  */
-function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated = '' ) {
+function wp_install($blog_title, $user_name, $user_email, $public, $deprecated='') {
 	global $wp_rewrite;
-
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '2.6' );
 
 	wp_check_mysql_version();
 	wp_cache_flush();
@@ -1522,7 +1519,7 @@ function make_site_theme_from_default($theme_name, $template) {
 	// Copy files from the default theme to the site theme.
 	//$files = array('index.php', 'comments.php', 'comments-popup.php', 'footer.php', 'header.php', 'sidebar.php', 'style.css');
 
-	$theme_dir = @ opendir($default_dir);
+	$theme_dir = @ opendir("$default_dir");
 	if ($theme_dir) {
 		while(($theme_file = readdir( $theme_dir )) !== false) {
 			if (is_dir("$default_dir/$theme_file"))

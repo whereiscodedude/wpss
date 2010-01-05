@@ -150,11 +150,11 @@ function get_permalink($id = 0, $leavename = false) {
 			$author,
 			$post->post_name,
 		);
-		$permalink = home_url( str_replace($rewritecode, $rewritereplace, $permalink) );
+		$permalink = get_option('home') . str_replace($rewritecode, $rewritereplace, $permalink);
 		$permalink = user_trailingslashit($permalink, 'single');
 		return apply_filters('post_link', $permalink, $post, $leavename);
 	} else { // if they're not using the fancy permalink option
-		$permalink = home_url('?p=' . $post->ID);
+		$permalink = trailingslashit(get_option('home')) . '?p=' . $post->ID;
 		return apply_filters('post_link', $permalink, $post, $leavename);
 	}
 }
@@ -168,10 +168,7 @@ function get_permalink($id = 0, $leavename = false) {
  * @param mixed $deprecated Not used.
  * @return string
  */
-function post_permalink( $post_id = 0, $deprecated = '' ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
+function post_permalink($post_id = 0, $deprecated = '') {
 	return get_permalink($post_id);
 }
 
@@ -195,7 +192,7 @@ function get_page_link( $id = false, $leavename = false, $sample = false ) {
 		$id = (int) $post->ID;
 
 	if ( 'page' == get_option('show_on_front') && $id == get_option('page_on_front') )
-		$link = home_url();
+		$link = get_option('home');
 	else
 		$link = _get_page_link( $id , $leavename, $sample );
 
@@ -228,10 +225,10 @@ function _get_page_link( $id = false, $leavename = false, $sample = false ) {
 	if ( '' != $pagestruct && ( ( isset($post->post_status) && 'draft' != $post->post_status && 'pending' != $post->post_status ) || $sample ) ) {
 		$link = get_page_uri($id);
 		$link = ( $leavename ) ? $pagestruct : str_replace('%pagename%', $link, $pagestruct);
-		$link = home_url($link);
+		$link = trailingslashit(get_option('home')) . "$link";
 		$link = user_trailingslashit($link, 'page');
 	} else {
-		$link = home_url("?page_id=$id");
+		$link = trailingslashit(get_option('home')) . "?page_id=$id";
 	}
 
 	return apply_filters( '_get_page_link', $link, $id );
@@ -289,13 +286,13 @@ function get_attachment_link($id = false) {
 function get_year_link($year) {
 	global $wp_rewrite;
 	if ( !$year )
-		$year = gmdate('Y', current_time('timestamp'));
+		$year = gmdate('Y', time()+(get_option('gmt_offset') * 3600));
 	$yearlink = $wp_rewrite->get_year_permastruct();
 	if ( !empty($yearlink) ) {
 		$yearlink = str_replace('%year%', $year, $yearlink);
-		return apply_filters('year_link', home_url( user_trailingslashit($yearlink, 'year') ), $year);
+		return apply_filters('year_link', get_option('home') . user_trailingslashit($yearlink, 'year'), $year);
 	} else {
-		return apply_filters('year_link', home_url('?m=' . $year), $year);
+		return apply_filters('year_link', trailingslashit(get_option('home')) . '?m=' . $year, $year);
 	}
 }
 
@@ -311,16 +308,16 @@ function get_year_link($year) {
 function get_month_link($year, $month) {
 	global $wp_rewrite;
 	if ( !$year )
-		$year = gmdate('Y', current_time('timestamp'));
+		$year = gmdate('Y', time()+(get_option('gmt_offset') * 3600));
 	if ( !$month )
-		$month = gmdate('m', current_time('timestamp'));
+		$month = gmdate('m', time()+(get_option('gmt_offset') * 3600));
 	$monthlink = $wp_rewrite->get_month_permastruct();
 	if ( !empty($monthlink) ) {
 		$monthlink = str_replace('%year%', $year, $monthlink);
 		$monthlink = str_replace('%monthnum%', zeroise(intval($month), 2), $monthlink);
-		return apply_filters('month_link', home_url( user_trailingslashit($monthlink, 'month') ), $year, $month);
+		return apply_filters('month_link', get_option('home') . user_trailingslashit($monthlink, 'month'), $year, $month);
 	} else {
-		return apply_filters('month_link', home_url( '?m=' . $year . zeroise($month, 2) ), $year, $month);
+		return apply_filters('month_link', trailingslashit(get_option('home')) . '?m=' . $year . zeroise($month, 2), $year, $month);
 	}
 }
 
@@ -337,20 +334,20 @@ function get_month_link($year, $month) {
 function get_day_link($year, $month, $day) {
 	global $wp_rewrite;
 	if ( !$year )
-		$year = gmdate('Y', current_time('timestamp'));
+		$year = gmdate('Y', time()+(get_option('gmt_offset') * 3600));
 	if ( !$month )
-		$month = gmdate('m', current_time('timestamp'));
+		$month = gmdate('m', time()+(get_option('gmt_offset') * 3600));
 	if ( !$day )
-		$day = gmdate('j', current_time('timestamp'));
+		$day = gmdate('j', time()+(get_option('gmt_offset') * 3600));
 
 	$daylink = $wp_rewrite->get_day_permastruct();
 	if ( !empty($daylink) ) {
 		$daylink = str_replace('%year%', $year, $daylink);
 		$daylink = str_replace('%monthnum%', zeroise(intval($month), 2), $daylink);
 		$daylink = str_replace('%day%', zeroise(intval($day), 2), $daylink);
-		return apply_filters('day_link', home_url( user_trailingslashit($daylink, 'day') ), $year, $month, $day);
+		return apply_filters('day_link', get_option('home') . user_trailingslashit($daylink, 'day'), $year, $month, $day);
 	} else {
-		return apply_filters('day_link', home_url( '?m=' . $year . zeroise($month, 2) . zeroise($day, 2) ), $year, $month, $day);
+		return apply_filters('day_link', trailingslashit(get_option('home')) . '?m=' . $year . zeroise($month, 2) . zeroise($day, 2), $year, $month, $day);
 	}
 }
 
@@ -377,7 +374,7 @@ function get_feed_link($feed = '') {
 
 		$permalink = str_replace('%feed%', $feed, $permalink);
 		$permalink = preg_replace('#/+#', '/', "/$permalink");
-		$output =  home_url( user_trailingslashit($permalink, 'feed') );
+		$output =  get_option('home') . user_trailingslashit($permalink, 'feed');
 	} else {
 		if ( empty($feed) )
 			$feed = get_default_feed();
@@ -385,7 +382,7 @@ function get_feed_link($feed = '') {
 		if ( false !== strpos($feed, 'comments_') )
 			$feed = str_replace('comments_', 'comments-', $feed);
 
-		$output = home_url("?feed={$feed}");
+		$output = trailingslashit(get_option('home')) . "?feed={$feed}";
 	}
 
 	return apply_filters('feed_link', $output, $feed);
@@ -417,9 +414,9 @@ function get_post_comments_feed_link($post_id = '', $feed = '') {
 	} else {
 		$type = get_post_field('post_type', $post_id);
 		if ( 'page' == $type )
-			$url = home_url("?feed=$feed&amp;page_id=$post_id");
+			$url = trailingslashit(get_option('home')) . "?feed=$feed&amp;page_id=$post_id";
 		else
-			$url = home_url("?feed=$feed&amp;p=$post_id");
+			$url = trailingslashit(get_option('home')) . "?feed=$feed&amp;p=$post_id";
 	}
 
 	return apply_filters('post_comments_feed_link', $url);
@@ -471,7 +468,7 @@ function get_author_feed_link( $author_id, $feed = '' ) {
 		$feed = get_default_feed();
 
 	if ( '' == $permalink_structure ) {
-		$link = home_url("?feed=$feed&amp;author=" . $author_id);
+		$link = trailingslashit(get_option('home')) . "?feed=$feed&amp;author=" . $author_id;
 	} else {
 		$link = get_author_posts_url($author_id);
 		if ( $feed == get_default_feed() )
@@ -515,7 +512,7 @@ function get_category_feed_link($cat_id, $feed = '') {
 	$permalink_structure = get_option('permalink_structure');
 
 	if ( '' == $permalink_structure ) {
-		$link = home_url("?feed=$feed&amp;cat=" . $cat_id);
+		$link = trailingslashit(get_option('home')) . "?feed=$feed&amp;cat=" . $cat_id;
 	} else {
 		$link = get_category_link($cat_id);
 		if( $feed == get_default_feed() )
@@ -554,7 +551,7 @@ function get_tag_feed_link($tag_id, $feed = '') {
 		$feed = get_default_feed();
 
 	if ( '' == $permalink_structure ) {
-		$link = home_url("?feed=$feed&amp;tag=" . $tag->slug);
+		$link = trailingslashit(get_option('home')) . "?feed=$feed&amp;tag=" . $tag->slug;
 	} else {
 		$link = get_tag_link($tag->term_id);
 		if ( $feed == get_default_feed() )
@@ -629,7 +626,7 @@ function get_search_feed_link($search_query = '', $feed = '') {
 	if ( empty($feed) )
 		$feed = get_default_feed();
 
-	$link = home_url("?s=$search&amp;feed=$feed");
+	$link = trailingslashit(get_option('home')) . "?s=$search&amp;feed=$feed";
 
 	$link = apply_filters('search_feed_link', $link);
 
@@ -654,7 +651,7 @@ function get_search_comments_feed_link($search_query = '', $feed = '') {
 	if ( empty($feed) )
 		$feed = get_default_feed();
 
-	$link = home_url("?s=$search&amp;feed=comments-$feed");
+	$link = trailingslashit(get_option('home')) . "?s=$search&amp;feed=comments-$feed";
 
 	$link = apply_filters('search_feed_link', $link);
 
@@ -678,18 +675,39 @@ function get_edit_post_link( $id = 0, $context = 'display' ) {
 		return;
 
 	if ( 'display' == $context )
-		$action = '&amp;action=edit';
+		$action = 'action=edit&amp;';
 	else
-		$action = '&action=edit';
+		$action = 'action=edit&';
 
-	$post_type_object = get_post_type_object( $post->post_type ); 
-	if ( !$post_type_object )
-		return;
+	switch ( $post->post_type ) :
+	case 'page' :
+		if ( !current_user_can( 'edit_page', $post->ID ) )
+			return;
+		$file = 'page';
+		$var  = 'post';
+		break;
+	case 'attachment' :
+		if ( !current_user_can( 'edit_post', $post->ID ) )
+			return;
+		$file = 'media';
+		$var  = 'attachment_id';
+		break;
+	case 'revision' :
+		if ( !current_user_can( 'edit_post', $post->ID ) )
+			return;
+		$file = 'revision';
+		$var  = 'revision';
+		$action = '';
+		break;
+	default :
+		if ( !current_user_can( 'edit_post', $post->ID ) )
+			return apply_filters( 'get_edit_post_link', '', $post->ID, $context );;
+		$file = 'post';
+		$var  = 'post';
+		break;
+	endswitch;
 
-	if ( !current_user_can( $post_type_object->edit_cap, $post->ID ) )
-		return;
-
-	return apply_filters( 'get_edit_post_link', admin_url( sprintf($post_type_object->_edit_link . $action, $post->ID) ), $post->ID, $context );
+	return apply_filters( 'get_edit_post_link', admin_url("$file.php?{$action}$var=$post->ID"), $post->ID, $context );
 }
 
 /**
@@ -759,7 +777,7 @@ function get_delete_post_link($id = 0, $context = 'display') {
 		break;
 	default :
 		if ( !current_user_can( 'edit_post', $post->ID ) )
-			return apply_filters( 'get_delete_post_link', '', $post->ID, $context );
+			return apply_filters( 'get_delete_post_link', '', $post->ID, $context );;
 		$file = 'post';
 		$var  = 'post';
 		break;
@@ -915,7 +933,7 @@ function get_adjacent_post($in_same_cat = false, $excluded_categories = '', $pre
 		$join = " INNER JOIN $wpdb->term_relationships AS tr ON p.ID = tr.object_id INNER JOIN $wpdb->term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id";
 
 		if ( $in_same_cat ) {
-			$cat_array = wp_get_object_terms($post->ID, 'category', array('fields' => 'ids'));
+			$cat_array = wp_get_object_terms($post->ID, 'category', 'fields=ids');
 			$join .= " AND tt.taxonomy = 'category' AND tt.term_id IN (" . implode(',', $cat_array) . ")";
 		}
 
@@ -969,7 +987,7 @@ function get_adjacent_post($in_same_cat = false, $excluded_categories = '', $pre
  * @return string
  */
 function get_adjacent_post_rel_link($title = '%title', $in_same_cat = false, $excluded_categories = '', $previous = true) {
-	if ( $previous && is_attachment() && is_object( $GLOBALS['post'] ) )
+	if ( $previous && is_attachment() )
 		$post = & get_post($GLOBALS['post']->post_parent);
 	else
 		$post = get_adjacent_post($in_same_cat,$excluded_categories,$previous);
@@ -1057,7 +1075,7 @@ function get_boundary_post($in_same_cat = false, $excluded_categories = '', $sta
 	$excluded_categories = array();
 	if ( !empty($in_same_cat) || !empty($excluded_categories) ) {
 		if ( !empty($in_same_cat) ) {
-			$cat_array = wp_get_object_terms($post->ID, 'category', array('fields' => 'ids'));
+			$cat_array = wp_get_object_terms($post->ID, 'category', 'fields=ids');
 		}
 
 		if ( !empty($excluded_categories) ) {
@@ -1095,15 +1113,14 @@ function get_boundary_post($in_same_cat = false, $excluded_categories = '', $sta
  */
 function get_boundary_post_rel_link($title = '%title', $in_same_cat = false, $excluded_categories = '', $start = true) {
 	$posts = get_boundary_post($in_same_cat,$excluded_categories,$start);
-	// If there is no post stop.
-	if ( empty($posts) )
-		return;
-	
 	// Even though we limited get_posts to return only 1 item it still returns an array of objects.
 	$post = $posts[0];
 
-	if ( empty($post->post_title) )
-		$post->post_title = $start ? __('First Post') : __('Last Post');
+	if ( empty($post) )
+			 return;
+
+		if ( empty($post->post_title) )
+				$post->post_title = $start ? __('First Post') : __('Last Post');
 
 	$date = mysql2date(get_option('date_format'), $post->post_date);
 
@@ -1140,7 +1157,7 @@ function start_post_rel_link($title = '%title', $in_same_cat = false, $excluded_
  * @return string
  */
 function get_index_rel_link() {
-	$link = "<link rel='index' title='" . esc_attr( get_bloginfo( 'name', 'display' ) ) . "' href='" . esc_url( user_trailingslashit( get_bloginfo( 'url', 'display' ) ) ) . "' />\n";
+	$link = "<link rel='index' title='" . esc_attr(get_bloginfo('name')) . "' href='" . get_bloginfo('siteurl') . "' />\n";
 	return apply_filters( "index_rel_link", $link );
 }
 
@@ -1275,7 +1292,7 @@ function get_pagenum_link($pagenum = 1) {
 
 	$request = remove_query_arg( 'paged' );
 
-	$home_root = parse_url(home_url());
+	$home_root = parse_url(get_option('home'));
 	$home_root = ( isset($home_root['path']) ) ? $home_root['path'] : '';
 	$home_root = preg_quote( trailingslashit( $home_root ), '|' );
 
@@ -1283,7 +1300,7 @@ function get_pagenum_link($pagenum = 1) {
 	$request = preg_replace('|^/+|', '', $request);
 
 	if ( !$wp_rewrite->using_permalinks() || is_admin() ) {
-		$base = trailingslashit( get_bloginfo( 'url' ) );
+		$base = trailingslashit( get_bloginfo( 'home' ) );
 
 		if ( $pagenum > 1 ) {
 			$result = add_query_arg( 'paged', $pagenum, $base . $request );
@@ -1706,31 +1723,6 @@ function get_shortcut_link() {
 	$link = str_replace(array("\r", "\n", "\t"),  '', $link);
 
 	return apply_filters('shortcut_link', $link);
-}
-
-/**
- * Retrieve the home url.
- *
- * Returns the 'home' option with the appropriate protocol,  'https' if
- * is_ssl() and 'http' otherwise. If $scheme is 'http' or 'https', is_ssl() is
- * overridden.
- *
- * @package WordPress
- * @since 3.0
- *
- * @param  string $path   (optional) Path relative to the home url.
- * @param  string $scheme (optional) Scheme to give the home url context. Currently 'http','https'
- * @return string Home url link with optional path appended.
-*/
-function home_url( $path = '', $scheme = null ) {
-	$orig_scheme = $scheme;
-	$scheme      = is_ssl() && !is_admin() ? 'https' : 'http';
-	$url = str_replace( 'http://', "$scheme://", get_option('home') );
-
-	if ( !empty( $path ) && is_string( $path ) && strpos( $path, '..' ) === false )
-		$url .= '/' . ltrim( $path, '/' );
-
-	return apply_filters( 'home_url', $url, $path, $orig_scheme );
 }
 
 /**

@@ -14,7 +14,10 @@
 if ( !defined('WP_ADMIN') )
 	define('WP_ADMIN', TRUE);
 
-require_once(dirname(dirname(__FILE__)) . '/wp-load.php');
+if ( defined('ABSPATH') )
+	require_once(ABSPATH . 'wp-load.php');
+else
+	require_once('../wp-load.php');
 
 if ( get_option('db_upgraded') ) {
 	$wp_rewrite->flush_rules();
@@ -45,6 +48,7 @@ if ( !wp_next_scheduled('wp_scheduled_delete') && !defined('WP_INSTALLING') )
 
 set_screen_options();
 
+$posts_per_page = get_option('posts_per_page');
 $date_format = get_option('date_format');
 $time_format = get_option('time_format');
 

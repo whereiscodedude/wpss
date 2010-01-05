@@ -11,7 +11,7 @@ require_once('admin.php');
 
 $title = __('Categories');
 
-wp_reset_vars( array('action') );
+wp_reset_vars( array('action', 'cat') );
 
 if ( isset( $_GET['action'] ) && isset($_GET['delete']) && ( 'delete' == $_GET['action'] || 'delete' == $_GET['action2'] ) )
 	$action = 'bulk-delete';
@@ -141,7 +141,7 @@ if ( isset($_GET['s']) && $_GET['s'] )
 
 <?php
 if ( isset($_GET['message']) && ( $msg = (int) $_GET['message'] ) ) : ?>
-<div id="message" class="updated"><p><?php echo $messages[$msg]; ?></p></div>
+<div id="message" class="updated fade"><p><?php echo $messages[$msg]; ?></p></div>
 <?php $_SERVER['REQUEST_URI'] = remove_query_arg(array('message'), $_SERVER['REQUEST_URI']);
 endif; ?>
 

@@ -980,13 +980,10 @@ function is_active_sidebar( $index ) {
  * @since 2.2.0
  * @access private
  *
- * @param bool $deprecated. Not used.
+ * @param bool $update Optional, deprecated.
  * @return array Upgraded list of widgets to version 3 array format when called from the admin.
  */
 function wp_get_sidebars_widgets($deprecated = true) {
-	if ( $deprecated !== true )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
 	global $wp_registered_widgets, $wp_registered_sidebars, $_wp_sidebars_widgets;
 
 	// If loading from front page, consult $_wp_sidebars_widgets rather than options

@@ -22,10 +22,6 @@
  */
 function get_the_author($deprecated = '') {
 	global $authordata;
-
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
 	return apply_filters('the_author', is_object($authordata) ? $authordata->display_name : null);
 }
 
@@ -45,12 +41,10 @@ function get_the_author($deprecated = '') {
  * @link http://codex.wordpress.org/Template_Tags/the_author
  *
  * @param string $deprecated Deprecated.
- * @param string $deprecated_echo Deprecated. Use get_the_author(). Echo the string or return it.
+ * @param string $deprecated_echo Echo the string or return it.
  * @return string The author's display name, from get_the_author().
  */
-function the_author( $deprecated = '', $deprecated_echo = true ) {
-	if ( !empty( $deprecated ) || $deprecated_echo !== true )
-		_deprecated_argument( __FUNCTION__, '1.5', $deprecated_echo !== true ? __('Use get_the_author() instead if you do not want the value echoed.') : null );
+function the_author($deprecated = '', $deprecated_echo = true) {
 	if ( $deprecated_echo )
 		echo get_the_author();
 	return get_the_author();
@@ -183,9 +177,6 @@ function the_author_posts() {
  * @param string $deprecated Deprecated.
  */
 function the_author_posts_link($deprecated = '') {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
 	global $authordata;
 	$link = sprintf(
 		'<a href="%1$s" title="%2$s">%3$s</a>',
@@ -209,7 +200,7 @@ function get_author_posts_url($author_id, $author_nicename = '') {
 	$link = $wp_rewrite->get_author_permastruct();
 
 	if ( empty($link) ) {
-		$file = home_url() . '/';
+		$file = get_option('home') . '/';
 		$link = $file . '?author=' . $auth_ID;
 	} else {
 		if ( '' == $author_nicename ) {
@@ -218,7 +209,7 @@ function get_author_posts_url($author_id, $author_nicename = '') {
 				$author_nicename = $user->user_nicename;
 		}
 		$link = str_replace('%author%', $author_nicename, $link);
-		$link = home_url() . trailingslashit($link);
+		$link = get_option('home') . trailingslashit($link);
 	}
 
 	$link = apply_filters('author_link', $link, $author_id, $author_nicename);

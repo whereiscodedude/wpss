@@ -508,11 +508,11 @@ function wp_category_checklist( $post_id = 0, $descendants_and_self = 0, $select
 		$args['popular_cats'] = get_terms( 'category', array( 'fields' => 'ids', 'orderby' => 'count', 'order' => 'DESC', 'number' => 10, 'hierarchical' => false ) );
 
 	if ( $descendants_and_self ) {
-		$categories = get_categories(array('child_of' => $descendants_and_self, 'hierarchical' => 0, 'hide_empty' => 0));
+		$categories = get_categories( "child_of=$descendants_and_self&hierarchical=0&hide_empty=0" );
 		$self = get_category( $descendants_and_self );
 		array_unshift( $categories, $self );
 	} else {
-		$categories = get_categories(array('get' => 'all'));
+		$categories = get_categories('get=all');
 	}
 
 	if ( $checked_ontop ) {
@@ -612,7 +612,7 @@ function wp_link_category_checklist( $link_id = 0 ) {
 		$checked_categories[] = $default;
 	}
 
-	$categories = get_terms('link_category', array('orderby' => 'count', 'hide_empty' => 0));
+	$categories = get_terms('link_category', 'orderby=count&hide_empty=0');
 
 	if ( empty($categories) )
 		return;
@@ -2146,15 +2146,7 @@ function _wp_comment_row( $comment_id, $mode, $comment_status, $checkbox = true,
 			case 'comment':
 				echo "<td $attributes>";
 				echo '<div id="submitted-on">';
-				printf( __( '<a href="%1$s">%2$s at %3$s</a>' ), $comment_url, get_comment_date( __('Y/m/d') ), get_comment_date( __( 'g:ia' ) ) );
-
-				if ( $comment->comment_parent ) {
-					$parent = get_comment( $comment->comment_parent );
-					$parent_link = esc_url( get_comment_link( $comment->comment_parent ) );
-					$name = apply_filters( 'get_comment_author', $parent->comment_author ); // there's no API function for this
-					printf( __( ' | In reply to <a href="%1$s">%2$s</a>.' ), $parent_link, $name );
-				}
-
+				printf(__('Submitted on <a href="%1$s">%2$s at %3$s</a>'), $comment_url, get_comment_date(__('Y/m/d')), get_comment_date(__('g:ia')));
 				echo '</div>';
 				comment_text();
 				if ( $user_can ) { ?>
@@ -2263,8 +2255,8 @@ function _wp_comment_row( $comment_id, $mode, $comment_status, $checkbox = true,
 					if ( isset( $_comment_pending_count[$post->ID] ) ) {
 						$pending_comments = absint( $_comment_pending_count[$post->ID] );
 					} else {
-						$_comment_pending_count_temp = get_pending_comments_num( array( $post->ID ) );
-						$pending_comments = $_comment_pending_count[$post->ID] = $_comment_pending_count_temp;
+						$_comment_pending_count_temp = (array) get_pending_comments_num( array( $post->ID ) );
+						$pending_comments = $_comment_pending_count[$post->ID] = $_comment_pending_count_temp[$post->ID];
 					}
 					if ( $user_can ) {
 						$post_link = "<a href='" . get_edit_post_link($post->ID) . "'>";
@@ -2568,7 +2560,7 @@ function meta_form() {
 ?>
 </select>
 <input class="hide-if-js" type="text" id="metakeyinput" name="metakeyinput" tabindex="7" value="" />
-<a href="#postcustomstuff" class="hide-if-no-js" onClick="jQuery('#metakeyinput, #metakeyselect, #enternew, #cancelnew').toggle();return false;">
+<a href="#postcustomstuff" class="hide-if-no-js" onclick="jQuery('#metakeyinput, #metakeyselect, #enternew, #cancelnew').toggle();return false;">
 <span id="enternew"><?php _e('Enter new'); ?></span>
 <span id="cancelnew" class="hidden"><?php _e('Cancel'); ?></span></a>
 <?php } else { ?>
@@ -2610,7 +2602,7 @@ function touch_time( $edit = 1, $for_post = 1, $tab_index = 0, $multi = 0 ) {
 
 	// echo '<label for="timestamp" style="display: block;"><input type="checkbox" class="checkbox" name="edit_date" value="1" id="timestamp"'.$tab_index_attribute.' /> '.__( 'Edit timestamp' ).'</label><br />';
 
-	$time_adj = current_time('timestamp');
+	$time_adj = time() + (get_option( 'gmt_offset' ) * 3600 );
 	$post_date = ($for_post) ? $post->post_date : $comment->comment_date;
 	$jj = ($edit) ? mysql2date( 'd', $post_date, false ) : gmdate( 'd', $time_adj );
 	$mm = ($edit) ? mysql2date( 'm', $post_date, false ) : gmdate( 'm', $time_adj );
@@ -3239,7 +3231,7 @@ function find_posts_div($found_action = '') {
 				<?php wp_nonce_field( 'find-posts', '_ajax_nonce', false ); ?>
 				<label class="screen-reader-text" for="find-posts-input"><?php _e( 'Search' ); ?></label>
 				<input type="text" id="find-posts-input" name="ps" value="" />
-				<input type="button" onClick="findPosts.send();" value="<?php esc_attr_e( 'Search' ); ?>" class="button" /><br />
+				<input type="button" onclick="findPosts.send();" value="<?php esc_attr_e( 'Search' ); ?>" class="button" /><br />
 
 				<input type="radio" name="find-posts-what" id="find-posts-posts" checked="checked" value="posts" />
 				<label for="find-posts-posts"><?php _e( 'Posts' ); ?></label>
@@ -3249,7 +3241,7 @@ function find_posts_div($found_action = '') {
 			<div id="find-posts-response"></div>
 		</div>
 		<div class="find-box-buttons">
-			<input type="button" class="button alignleft" onClick="findPosts.close();" value="<?php esc_attr_e('Close'); ?>" />
+			<input type="button" class="button alignleft" onclick="findPosts.close();" value="<?php esc_attr_e('Close'); ?>" />
 			<input id="find-posts-submit" type="submit" class="button-primary alignright" value="<?php esc_attr_e('Select'); ?>" />
 		</div>
 	</div>
@@ -3482,7 +3474,7 @@ function _post_states($post) {
 }
 
 function screen_meta($screen) {
-	global $wp_meta_boxes, $_wp_contextual_help, $typenow;
+	global $wp_meta_boxes, $_wp_contextual_help;
 
 	$screen = str_replace('.php', '', $screen);
 	$screen = str_replace('-new', '', $screen);
@@ -3491,12 +3483,6 @@ function screen_meta($screen) {
 
 	$column_screens = get_column_headers($screen);
 	$meta_screens = array('index' => 'dashboard');
-
-	// Give post_type pages their own screen
-	if ( 'post' == $screen ) {
-		if ( !empty($typenow) )
-			$screen = $typenow;
-	}
 
 	if ( isset($meta_screens[$screen]) )
 		$screen = $meta_screens[$screen];
@@ -3681,11 +3667,6 @@ function screen_layout($screen) {
 	global $screen_layout_columns;
 
 	$columns = array('dashboard' => 4, 'post' => 2, 'page' => 2, 'link' => 2);
-
-	// Add custom post types
-	foreach ( get_post_types( array('_show' => true) ) as $post_type )
-		$columns[$post_type] = 2;
-
 	$columns = apply_filters('screen_layout_columns', $columns, $screen);
 
 	if ( !isset($columns[$screen]) ) {
@@ -3765,12 +3746,8 @@ function screen_icon($name = '') {
 	global $parent_file, $hook_suffix;
 
 	if ( empty($name) ) {
-		if ( isset($parent_file) && !empty($parent_file) ) {
-			$name = $parent_file;
-			if ( false !== $pos = strpos($name, '?post_type=') )
-				$name = substr($name, 0, $pos);
-			$name = substr($name, 0, -4);
-		}
+		if ( isset($parent_file) && !empty($parent_file) )
+			$name = substr($parent_file, 0, -4);
 		else
 			$name = str_replace(array('.php', '-new', '-add'), '', $hook_suffix);
 	}

@@ -60,12 +60,8 @@ class WP_Import {
 	function get_tag( $string, $tag ) {
 		global $wpdb;
 		preg_match("|<$tag.*?>(.*?)</$tag>|is", $string, $return);
-		if ( isset($return[1]) ) {
-			$return = preg_replace('|^<!\[CDATA\[(.*)\]\]>$|s', '$1', $return[1]);
-			$return = $wpdb->escape( trim( $return ) );
-		} else {
-			$return = '';
-		}
+		$return = preg_replace('|^<!\[CDATA\[(.*)\]\]>$|s', '$1', $return[1]);
+		$return = $wpdb->escape( trim( $return ) );
 		return $return;
 	}
 
@@ -163,7 +159,7 @@ class WP_Import {
 		for ($x = 1; $x < $y; $x ++) {
 			$next = array_shift($temp);
 			if (!(in_array($next, $authors)))
-				array_push($authors, $next);
+				array_push($authors, "$next");
 		}
 
 		return $authors;
@@ -194,10 +190,8 @@ class WP_Import {
 				if ( !$user_id ) {
 					$user_id = wp_create_user($new_author_name, wp_generate_password());
 				}
-				
-				if ( !is_wp_error( $user_id ) ) {
-					$this->author_ids[$in_author_name] = $user_id;
-				}
+
+				$this->author_ids[$in_author_name] = $user_id;
 			}
 
 			// failsafe: if the user_id was invalid, default to the current user
@@ -302,7 +296,7 @@ class WP_Import {
 	function process_categories() {
 		global $wpdb;
 
-		$cat_names = (array) get_terms('category', array('fields' => 'names'));
+		$cat_names = (array) get_terms('category', 'fields=names');
 
 		while ( $c = array_shift($this->categories) ) {
 			$cat_name = trim($this->get_tag( $c, 'wp:cat_name' ));
@@ -332,7 +326,7 @@ class WP_Import {
 	function process_tags() {
 		global $wpdb;
 
-		$tag_names = (array) get_terms('post_tag', array('fields' => 'names'));
+		$tag_names = (array) get_terms('post_tag', 'fields=names');
 
 		while ( $c = array_shift($this->tags) ) {
 			$tag_name = trim($this->get_tag( $c, 'wp:tag_name' ));
@@ -605,9 +599,7 @@ class WP_Import {
 			$key   = $this->get_tag( $p, 'wp:meta_key' );
 			$value = $this->get_tag( $p, 'wp:meta_value' );
 			$value = stripslashes($value); // add_post_meta() will escape.
-			// get_post_meta would have done this but we read straight from the db on export so we could have a serialized string
-			$value = maybe_unserialize($value);
-			
+
 			$this->process_post_meta($post_id, $key, $value);
 
 		} }
@@ -850,8 +842,7 @@ class WP_Import {
 				break;
 			case 2:
 				check_admin_referer('import-wordpress');
-				$fetch_attachments = (!empty($_POST['attachments'])) ? true : false;
-				$result = $this->import( $_GET['id'], $fetch_attachments);
+				$result = $this->import( $_GET['id'], $_POST['attachments'] );
 				if ( is_wp_error( $result ) )
 					echo $result->get_error_message();
 				break;

@@ -371,10 +371,10 @@ EOD;
 		if( !current_user_can( 'edit_posts' ) )
 			$this->auth_required( __( 'Sorry, you do not have the right to access this blog.' ) );
 
-		$home = esc_attr(get_bloginfo_rss('url'));
+		$home = esc_attr(get_bloginfo_rss('home'));
 
 		$categories = "";
-		$cats = get_categories(array('hierarchical' => 0, 'hide_empty' => 0));
+		$cats = get_categories("hierarchical=0&hide_empty=0");
 		foreach ((array) $cats as $cat) {
 			$categories .= "    <category term=\"" . esc_attr($cat->name) .  "\" />\n";
 }
@@ -884,12 +884,10 @@ EOD;
 	 *
 	 * @since 2.2.0
 	 *
-	 * @param mixed $deprecated Not used.
+	 * @param mixed $deprecated Optional, not used.
 	 * @return string
 	 */
 	function get_categories_url($deprecated = '') {
-		if ( !empty( $deprecated ) )
-			_deprecated_argument( __FUNCTION__, '2.5' );
 		return $this->app_base . $this->CATEGORIES_PATH;
 	}
 
@@ -1094,7 +1092,7 @@ EOD;
 		$prev_page = ($page - 1) < 1 ? NULL : $page - 1;
 		$last_page = ((int)$last_page == 1 || (int)$last_page == 0) ? NULL : (int) $last_page;
 		$self_page = $page > 1 ? $page : NULL;
-?><feed xmlns="<?php echo $this->ATOM_NS ?>" xmlns:app="<?php echo $this->ATOMPUB_NS ?>" xml:lang="<?php echo get_option('rss_language'); ?>" <?php do_action('app_ns'); ?> >
+?><feed xmlns="<?php echo $this->ATOM_NS ?>" xmlns:app="<?php echo $this->ATOMPUB_NS ?>" xml:lang="<?php echo get_option('rss_language'); ?>">
 <id><?php $this->the_entries_url() ?></id>
 <updated><?php echo mysql2date('Y-m-d\TH:i:s\Z', get_lastpostmodified('GMT'), false); ?></updated>
 <title type="text"><?php bloginfo_rss('name') ?></title>
@@ -1110,7 +1108,6 @@ EOD;
 <link rel="self" type="<?php echo $this->ATOM_CONTENT_TYPE ?>" href="<?php $this->the_entries_url($self_page) ?>" />
 <rights type="text">Copyright <?php echo date('Y'); ?></rights>
 <?php the_generator( 'atom' ); ?>
-<?php do_action('app_head'); ?>
 <?php if ( have_posts() ) {
 			while ( have_posts() ) {
 				the_post();
@@ -1198,7 +1195,6 @@ list($content_type, $content) = prep_atom_text_construct(get_the_content()); ?>
 	<?php the_category_rss( 'atom' ); ?>
 <?php list($content_type, $content) = prep_atom_text_construct(get_the_excerpt()); ?>
 	<summary type="<?php echo $content_type ?>"><?php echo $content ?></summary>
-	<?php do_action('app_entry'); ?>
 </entry>
 <?php }
 

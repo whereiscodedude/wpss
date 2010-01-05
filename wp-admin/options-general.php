@@ -146,7 +146,7 @@ $check_zone_info = true;
 if ( false !== strpos($tzstring,'Etc/GMT') )
 	$tzstring = '';
 
-if (empty($tzstring)) { // Create a UTC+- zone if no timezone string exists
+if (empty($tzstring)) { // set the Etc zone if no timezone string exists
 	$check_zone_info = false;
 	if ( 0 == $current_offset )
 		$tzstring = 'UTC+0';

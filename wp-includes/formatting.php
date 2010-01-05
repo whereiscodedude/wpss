@@ -866,9 +866,6 @@ function sanitize_html_class($class, $fallback){
  * @return string Converted string.
  */
 function convert_chars($content, $deprecated = '') {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
 	// Translation of invalid Unicode references range to valid range
 	$wp_htmltranswinuni = array(
 	'&#128;' => '&#8364;', // the Euro sign
@@ -2413,7 +2410,7 @@ function tag_escape($tag_name) {
  * @return string text, safe for inclusion in LIKE query.
  */
 function like_escape($text) {
-	return addcslashes($text, '\\%_'); 
+	return str_replace(array("%", "_"), array("\\%", "\\_"), $text);
 }
 
 /**
@@ -2837,23 +2834,14 @@ function sanitize_text_field($str) {
 
 	if ( strpos($filtered, '<') !== false ) {
 		$filtered = wp_pre_kses_less_than( $filtered );
-		// This will strip extra whitespace for us.
 		$filtered = wp_strip_all_tags( $filtered, true );
 	} else {
-		$filtered = trim( preg_replace('/[\r\n\t ]+/', ' ', $filtered) );
+		 $filtered = trim( preg_replace('/[\r\n\t ]+/', ' ', $filtered) );
 	}
 
 	$match = array();
-	$found = false;
-	while ( preg_match('/%[a-f0-9]{2}/i', $filtered, $match) ) {
+	while ( preg_match('/%[a-f0-9]{2}/i', $filtered, $match) )
 		$filtered = str_replace($match[0], '', $filtered);
-		$found = true;
-	}
-
-	if ( $found ) {
-		// Strip out the whitespace that may now exist after removing the octets.
-		$filtered = trim( preg_replace('/ +/', ' ', $filtered) );
-	}
 
 	return apply_filters('sanitize_text_field', $filtered, $str);
 }

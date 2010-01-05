@@ -106,8 +106,7 @@ function the_title_attribute( $args = '' ) {
 function get_the_title( $id = 0 ) {
 	$post = &get_post($id);
 
-	$title = isset($post->post_title) ? $post->post_title : '';
-	$id = isset($post->ID) ? $post->ID : (int) $id;
+	$title = $post->post_title;
 
 	if ( !is_admin() ) {
 		if ( !empty($post->post_password) ) {
@@ -118,7 +117,7 @@ function get_the_title( $id = 0 ) {
 			$title = sprintf($private_title_format, $title);
 		}
 	}
-	return apply_filters( 'the_title', $title, $id );
+	return apply_filters( 'the_title', $title, $post->ID );
 }
 
 /**
@@ -246,10 +245,7 @@ function the_excerpt() {
  * @param mixed $deprecated Not used.
  * @return string
  */
-function get_the_excerpt( $deprecated = '' ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '2.3' );
-
+function get_the_excerpt($deprecated = '') {
 	global $post;
 	$output = $post->post_excerpt;
 	if ( post_password_required($post) ) {
@@ -578,7 +574,7 @@ function wp_link_pages($args = '') {
 		if ( 'number' == $next_or_number ) {
 			$output .= $before;
 			for ( $i = 1; $i < ($numpages+1); $i = $i + 1 ) {
-				$j = str_replace('%',$i,$pagelink);
+				$j = str_replace('%',"$i",$pagelink);
 				$output .= ' ';
 				if ( ($i != $page) || ((!$more) && ($page==1)) ) {
 					if ( 1 == $i ) {
@@ -822,7 +818,7 @@ function wp_page_menu( $args = array() ) {
 		$class = '';
 		if ( is_front_page() && !is_paged() )
 			$class = 'class="current_page_item"';
-		$menu .= '<li ' . $class . '><a href="' . home_url() . '" title="' . esc_attr($text) . '">' . $args['link_before'] . $text . $args['link_after'] . '</a></li>';
+		$menu .= '<li ' . $class . '><a href="' . get_option('home') . '" title="' . esc_attr($text) . '">' . $args['link_before'] . $text . $args['link_after'] . '</a></li>';
 		// If the front page is a page, add it to the exclude list
 		if (get_option('show_on_front') == 'page') {
 			if ( !empty( $list_args['exclude'] ) ) {
@@ -901,10 +897,7 @@ function walk_page_dropdown_tree() {
  * @param bool $deprecated Deprecated. Not used.
  * @param bool $permalink Optional, default is false. Whether to include permalink.
  */
-function the_attachment_link( $id = 0, $fullsize = false, $deprecated = false, $permalink = false ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
+function the_attachment_link($id = 0, $fullsize = false, $deprecated = false, $permalink = false) {
 	if ( $fullsize )
 		echo wp_get_attachment_link($id, 'full', $permalink);
 	else
@@ -1306,8 +1299,7 @@ function wp_list_post_revisions( $post_id = 0, $args = null ) {
 				$actions = '';
 
 			$rows .= "<tr$class>\n";
-			$rows .= "\t<th style='white-space: nowrap' scope='row'><input type='radio' name='left' value='$revision->ID'$left_checked />\n";
-			$rows .= "\t<th style='white-space: nowrap' scope='row'><input type='radio' name='right' value='$revision->ID'$right_checked /></th>\n";
+			$rows .= "\t<th style='white-space: nowrap' scope='row'><input type='radio' name='left' value='$revision->ID'$left_checked /><input type='radio' name='right' value='$revision->ID'$right_checked /></th>\n";
 			$rows .= "\t<td>$date</td>\n";
 			$rows .= "\t<td>$name</td>\n";
 			$rows .= "\t<td class='action-links'>$actions</td>\n";
@@ -1331,16 +1323,14 @@ function wp_list_post_revisions( $post_id = 0, $args = null ) {
 
 <br class="clear" />
 
-<table class="widefat post-revisions" cellspacing="0" id="post-revisions">
-	<col />
+<table class="widefat post-revisions" cellspacing="0">
 	<col />
 	<col style="width: 33%" />
 	<col style="width: 33%" />
 	<col style="width: 33%" />
 <thead>
 <tr>
-	<th scope="col"><?php _e( 'Old' ); ?></th>
-	<th scope="col"><?php _e( 'New' ); ?></th>
+	<th scope="col"></th>
 	<th scope="col"><?php _e( 'Date Created' ); ?></th>
 	<th scope="col"><?php _e( 'Author' ); ?></th>
 	<th scope="col" class="action-links"><?php _e( 'Actions' ); ?></th>

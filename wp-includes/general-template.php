@@ -121,7 +121,7 @@ function get_search_form() {
 		return;
 	}
 
-	$form = '<form role="search" method="get" id="searchform" action="' . home_url() . '/" >
+	$form = '<form role="search" method="get" id="searchform" action="' . get_option('home') . '/" >
 	<div><label class="screen-reader-text" for="s">' . __('Search for:') . '</label>
 	<input type="text" value="' . esc_attr(apply_filters('the_search_query', get_search_query())) . '" name="s" id="s" />
 	<input type="submit" id="searchsubmit" value="'. esc_attr__('Search') .'" />
@@ -273,8 +273,9 @@ function bloginfo($show='') {
  * Retrieve information about the blog.
  *
  * Some show parameter values are deprecated and will be removed in future
- * versions. These options will trigger the _deprecated_argument() function.
- * The deprecated blog info options are listed in the function contents.
+ * versions. Care should be taken to check the function contents and know what
+ * the deprecated blog info options are. Options without "// DEPRECATED" are
+ * the preferred and recommended ways to get the information.
  *
  * The possible values for the 'show' parameter are listed below.
  * <ol>
@@ -288,20 +289,22 @@ function bloginfo($show='') {
  * comment feeds can be retrieved from the 'comments_atom_url' (Atom comment
  * feed) or 'comments_rss2_url' (RSS 2.0 comment feed).
  *
+ * There are many other options and you should check the function contents:
+ * {@source 32 37}
+ *
  * @since 0.71
  *
  * @param string $show Blog info to retrieve.
  * @param string $filter How to filter what is retrieved.
  * @return string Mostly string values, might be empty.
  */
-function get_bloginfo( $show = '', $filter = 'raw' ) {
+function get_bloginfo($show = '', $filter = 'raw') {
 
-	switch( $show ) {
+	switch($show) {
+		case 'url' :
 		case 'home' : // DEPRECATED
 		case 'siteurl' : // DEPRECATED
-			_deprecated_argument( __FUNCTION__, '2.2', sprintf( __('The \'%1$s\' option is deprecated for the family of bloginfo() functions. Use the \'%2$s\' option instead.'), $show, 'url' ) );
-		case 'url' :
-			$output = home_url();
+			$output = get_option('home');
 			break;
 		case 'wpurl' :
 			$output = get_option('siteurl');
@@ -464,15 +467,15 @@ function wp_title($sep = '&raquo;', $display = true, $seplocation = '') {
 		$my_year = substr($m, 0, 4);
 		$my_month = $wp_locale->get_month(substr($m, 4, 2));
 		$my_day = intval(substr($m, 6, 2));
-		$title = $my_year . ($my_month ? $t_sep . $my_month : "") . ($my_day ? $t_sep . $my_day : "");
+		$title = "$my_year" . ($my_month ? "$t_sep$my_month" : "") . ($my_day ? "$t_sep$my_day" : "");
 	}
 
 	if ( !empty($year) ) {
 		$title = $year;
 		if ( !empty($monthnum) )
-			$title .= $t_sep . $wp_locale->get_month($monthnum);
+			$title .= "$t_sep" . $wp_locale->get_month($monthnum);
 		if ( !empty($day) )
-			$title .= $t_sep . zeroise($day, 2);
+			$title .= "$t_sep" . zeroise($day, 2);
 	}
 
 	// If there is a post
@@ -488,7 +491,7 @@ function wp_title($sep = '&raquo;', $display = true, $seplocation = '') {
 		$tax = $tax->label;
 		$term = $wp_query->get_queried_object();
 		$term = $term->name;
-		$title = $tax . $t_sep . $term;
+		$title = "$tax$t_sep$term";
 	}
 
 	//If it's a search
@@ -886,7 +889,7 @@ function wp_get_archives($args = '') {
 						$arc_week = get_weekstartend($arcresult->yyyymmdd, get_option('start_of_week'));
 						$arc_week_start = date_i18n($archive_week_start_date_format, $arc_week['start']);
 						$arc_week_end = date_i18n($archive_week_end_date_format, $arc_week['end']);
-						$url  = sprintf('%1$s/%2$s%3$sm%4$s%5$s%6$sw%7$s%8$d', home_url(), '', '?', '=', $arc_year, '&amp;', '=', $arcresult->week);
+						$url  = sprintf('%1$s/%2$s%3$sm%4$s%5$s%6$sw%7$s%8$d', get_option('home'), '', '?', '=', $arc_year, '&amp;', '=', $arcresult->week);
 						$text = $arc_week_start . $archive_week_separator . $arc_week_end;
 						if ($show_post_count)
 							$after = '&nbsp;('.$arcresult->posts.')'.$afterafter;
@@ -1123,7 +1126,7 @@ function get_calendar($initial = true) {
 			echo "\n\t</tr>\n\t<tr>\n\t\t";
 		$newrow = false;
 
-		if ( $day == gmdate('j', current_time('timestamp')) && $thismonth == gmdate('m', current_time('timestamp')) && $thisyear == gmdate('Y', current_time('timestamp')) )
+		if ( $day == gmdate('j', (time() + (get_option('gmt_offset') * 3600))) && $thismonth == gmdate('m', time()+(get_option('gmt_offset') * 3600)) && $thisyear == gmdate('Y', time()+(get_option('gmt_offset') * 3600)) )
 			echo '<td id="today">';
 		else
 			echo '<td>';
@@ -1242,22 +1245,11 @@ function the_date($d='', $before='', $after='', $echo = true) {
  *
  * @since 2.1.0
  *
- * @param string $d Optional. PHP date format defaults to the date_format option if not specified.
- * @param string $before Optional. Output before the date.
- * @param string $after Optional. Output after the date.
- * @param bool $echo Optional, default is display. Whether to echo the date or return it.
- * @return string|null Null if displaying, string if retrieving.
+ * @param string $d Optional. PHP date format.
+ * @return string
  */
-function the_modified_date($d = '', $before='', $after='', $echo = true) {
-	
-	$the_modified_date = $before . get_the_modified_date($d) . $after;
-	$the_modified_date = apply_filters('the_modified_date', $the_modified_date, $d, $before, $after);
-	
-	if ( $echo )
-		echo $the_modified_date;
-	else
-		return $the_modified_date;
-	
+function the_modified_date($d = '') {
+	echo apply_filters('the_modified_date', get_the_modified_date($d), $d);
 }
 
 /**

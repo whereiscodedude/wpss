@@ -298,20 +298,6 @@ function is_feed () {
 }
 
 /**
- * Whether current page query is comment feed URL.
- *
- * @since 3.0.0
- * @uses $wp_query
- *
- * @return bool
- */
-function is_comment_feed () {
-	global $wp_query;
-
-	return $wp_query->is_comment_feed;
-}
-
-/**
  * Whether current page query is the front of the site.
  *
  * @since 2.5.0
@@ -332,10 +318,6 @@ function is_front_page () {
 
 /**
  * Whether current page view is the blog homepage.
- * 
- * This is the page which is showing the time based blog content of your site
- * so if you set a static page for the front page of your site then this will
- * only be true on the page which you set as the "Posts page" in Reading Settings. 
  *
  * @since 1.5.0
  * @uses $wp_query
@@ -2062,13 +2044,8 @@ class WP_Query {
 
 		if ( is_array($post_type) )
 			$post_type_cap = 'multiple_post_type';
-		else {
-			$post_type_object = get_post_type_object ( $post_type );
-			if ( !empty($post_type_object) )
-				$post_type_cap = $post_type_object->capability_type; 
-			else
-				$post_type_cap = $post_type;
-		}
+		else
+			$post_type_cap = $post_type;
 
 		$exclude_post_types = '';
 		foreach ( get_post_types( array('exclude_from_search' => true) ) as $_wp_post_type )

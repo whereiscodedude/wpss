@@ -231,14 +231,10 @@ jQuery(document).ready( function($) {
 	var catAddAfter, stamp, visibility, sticky = '', post = 'post' == pagenow || 'post-new' == pagenow, page = 'page' == pagenow || 'page-new' == pagenow;
 
 	// postboxes
-	if ( post ) {
-		type = 'post';
-		if ( typenow )
-			type = typenow;
-		postboxes.add_postbox_toggles(type);
-	} else if ( page ) {
+	if ( post )
+		postboxes.add_postbox_toggles('post');
+	else if ( page )
 		postboxes.add_postbox_toggles('page');
-	}
 
 	// multi-taxonomies
 	if ( $('#tagsdiv-post_tag').length ) {

@@ -17,12 +17,9 @@
  *
  * @param mixed $file Filename of the original image, Or attachment id.
  * @param int $max_side Maximum length of a single side for the thumbnail.
- * @param mixed $deprecated Not used.
  * @return string Thumbnail path on success, Error string on failure.
  */
 function wp_create_thumbnail( $file, $max_side, $deprecated = '' ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
 	$thumbpath = image_resize( $file, $max_side, $max_side );
 	return apply_filters( 'wp_create_thumbnail', $thumbpath );
 }
@@ -41,7 +38,7 @@ function wp_create_thumbnail( $file, $max_side, $deprecated = '' ) {
  * @param int $dst_h The destination height.
  * @param int $src_abs Optional. If the source crop points are absolute.
  * @param string $dst_file Optional. The destination file to write to.
- * @return string|WP_Error|false New filepath on success, WP_Error or false on failure.
+ * @return string New filepath on success, String error message on failure.
  */
 function wp_crop_image( $src_file, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $src_abs = false, $dst_file = false ) {
 	if ( is_numeric( $src_file ) ) // Handle int as attachment ID
@@ -49,8 +46,8 @@ function wp_crop_image( $src_file, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_
 
 	$src = wp_load_image( $src_file );
 
-	if ( !is_resource( $src ) )
-		return new WP_Error( 'error_loading_image', $src, $src_file );
+	if ( !is_resource( $src ))
+		return $src;
 
 	$dst = wp_imagecreatetruecolor( $dst_w, $dst_h );
 

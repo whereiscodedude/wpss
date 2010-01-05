@@ -570,9 +570,6 @@ function update_option( $option_name, $newvalue ) {
  * @return null returns when finished.
  */
 function add_option( $name, $value = '', $deprecated = '', $autoload = 'yes' ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '2.3' );
-
 	global $wpdb;
 
 	wp_protect_special_option( $name );
@@ -1163,25 +1160,10 @@ function do_enclose( $content, $post_ID ) {
 
 	foreach ( (array) $post_links as $url ) {
 		if ( $url != '' && !$wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = 'enclosure' AND meta_value LIKE (%s)", $post_ID, $url . '%' ) ) ) {
-
 			if ( $headers = wp_get_http_headers( $url) ) {
 				$len = (int) $headers['content-length'];
 				$type = $headers['content-type'];
 				$allowed_types = array( 'video', 'audio' );
-
-				// Check to see if we can figure out the mime type from
-				// the extension
-				$url_parts = parse_url( $url );
-				$extension = pathinfo( $url_parts['path'], PATHINFO_EXTENSION );
-				if ( !empty( $extension ) ) {
-					foreach ( get_allowed_mime_types( ) as $exts => $mime ) {
-						if ( preg_match( '!^(' . $exts . ')$!i', $extension ) ) {
-							$type = $mime;
-							break;
-						}
-					}
-				}
-
 				if ( in_array( substr( $type, 0, strpos( $type, "/" ) ), $allowed_types ) ) {
 					$meta_value = "$url\n$len\n$type\n";
 					$wpdb->insert($wpdb->postmeta, array('post_id' => $post_ID, 'meta_key' => 'enclosure', 'meta_value' => $meta_value) );
@@ -1206,9 +1188,6 @@ function do_enclose( $content, $post_ID ) {
  * @return bool|string False on failure and string of headers if HEAD request.
  */
 function wp_get_http( $url, $file_path = false, $deprecated = false ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
 	@set_time_limit( 60 );
 
 	$options = array();
@@ -1251,9 +1230,6 @@ function wp_get_http( $url, $file_path = false, $deprecated = false ) {
  * @return bool|string False on failure, headers on success.
  */
 function wp_get_http_headers( $url, $deprecated = false ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
 	$response = wp_remote_head( $url );
 
 	if ( is_wp_error( $response ) )
@@ -2196,9 +2172,6 @@ function wp_unique_filename( $dir, $filename, $unique_filename_callback = null )
  * @return array
  */
 function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
-
 	if ( empty( $name ) )
 		return array( 'error' => __( 'Empty filename' ) );
 
@@ -2248,18 +2221,18 @@ function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
  * @return string|null The file type, example: audio, video, document, spreadsheet, etc. Null if not found.
  */
 function wp_ext2type( $ext ) {
-	$ext2type = apply_filters( 'ext2type', array(
-		'audio'       => array( 'aac', 'ac3',  'aif',  'aiff', 'm3a',  'm4a',   'm4b', 'mka', 'mp1',  'mp2', 'mp3', 'ogg', 'ram', 'wav', 'wma' ),
-		'video'       => array( 'asf', 'avi',  'divx', 'dv',   'flv',  'mkv',   'mov', 'mpg', 'mpeg', 'mp4', 'mpv', 'ogm', 'qt',  'rm', 'vob', 'wmv', 'm4v' ),
-		'document'    => array( 'doc', 'docx', 'docm', 'dotm', 'odt',  'pages', 'pdf', 'rtf' ),
-		'spreadsheet' => array( 'numbers',     'ods',  'xls',  'xlsx', 'xlsb',  'xlsm' ),
-		'interactive' => array( 'key', 'ppt',  'pptx', 'pptm', 'odp',  'swf' ),
-		'text'        => array( 'asc', 'txt' ),
-		'archive'     => array( 'bz2', 'cab',  'dmg',  'gz',   'rar',  'sea',   'sit', 'sqx', 'tar', 'tgz', 'zip' ),
-		'code'        => array( 'css', 'html', 'php',  'js' ),
+	$ext2type = apply_filters('ext2type', array(
+		'audio' => array('aac','ac3','aif','aiff','mp1','mp2','mp3','m3a','m4a','m4b','ogg','ram','wav','wma'),
+		'video' => array('asf','avi','divx','dv','mov','mpg','mpeg','mp4','mpv','ogm','qt','rm','vob','wmv', 'm4v'),
+		'document' => array('doc','docx','pages','odt','rtf','pdf'),
+		'spreadsheet' => array('xls','xlsx','numbers','ods'),
+		'interactive' => array('ppt','pptx','key','odp','swf'),
+		'text' => array('txt'),
+		'archive' => array('tar','bz2','gz','cab','dmg','rar','sea','sit','sqx','zip'),
+		'code' => array('css','html','php','js'),
 	));
 	foreach ( $ext2type as $type => $exts )
-		if ( in_array( $ext, $exts ) )
+		if ( in_array($ext, $exts) )
 			return $type;
 }
 
@@ -2317,7 +2290,7 @@ function get_allowed_mime_types() {
 		'flv' => 'video/x-flv',
 		'mov|qt' => 'video/quicktime',
 		'mpeg|mpg|mpe' => 'video/mpeg',
-		'txt|asc|c|cc|h' => 'text/plain',
+		'txt|c|cc|h' => 'text/plain',
 		'rtx' => 'text/richtext',
 		'css' => 'text/css',
 		'htm|html' => 'text/html',
@@ -2328,22 +2301,15 @@ function get_allowed_mime_types() {
 		'ogg' => 'audio/ogg',
 		'mid|midi' => 'audio/midi',
 		'wma' => 'audio/wma',
-		'mka' => 'audio/x-matroska', 
-		'mkv' => 'video/x-matroska', 
 		'rtf' => 'application/rtf',
 		'js' => 'application/javascript',
 		'pdf' => 'application/pdf',
 		'doc|docx' => 'application/msword',
-		'pot|pps|ppt|pptx|ppam|pptm|sldm|ppsm|potm' => 'application/vnd.ms-powerpoint',
+		'pot|pps|ppt|pptx' => 'application/vnd.ms-powerpoint',
 		'wri' => 'application/vnd.ms-write',
-		'xla|xls|xlsx|xlt|xlw|xlam|xlsb|xlsm|xltm' => 'application/vnd.ms-excel',
+		'xla|xls|xlsx|xlt|xlw' => 'application/vnd.ms-excel',
 		'mdb' => 'application/vnd.ms-access',
 		'mpp' => 'application/vnd.ms-project',
-		'docm|dotm' => 'application/vnd.ms-word',
-		'pptx|sldx|ppsx|potx' => 'application/vnd.openxmlformats-officedocument.presentationml',
-		'xlsx|xltx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml',
-		'docx|dotx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml',
-		'onetoc|onetoc2|onetmp|onepkg' => 'application/onenote',
 		'swf' => 'application/x-shockwave-flash',
 		'class' => 'application/java',
 		'tar' => 'application/x-tar',
@@ -3027,8 +2993,8 @@ function _deprecated_function($function, $version, $replacement=null) {
  * @uses apply_filters() Calls 'deprecated_file_trigger_error' and expects boolean value of true to do trigger or false to not trigger error.
  *
  * @param string $file The file that was included
- * @param string $version The version of WordPress that deprecated the file
- * @param string $replacement Optional. The file that should have been included based on ABSPATH
+ * @param string $version The version of WordPress that deprecated the function
+ * @param string $replacement Optional. The function that should have been called
  */
 function _deprecated_file($file, $version, $replacement=null) {
 
@@ -3040,48 +3006,6 @@ function _deprecated_file($file, $version, $replacement=null) {
 			trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.'), $file, $version, $replacement ) );
 		else
 			trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.'), $file, $version ) );
-	}
-}
-/**
- * Marks a function argument as deprecated and informs when it has been used.
- *
- * This function is to be used whenever a deprecated function argument is used.
- * Before this function is called, the argument must be checked for whether it was
- * used by comparing it to its default value or evaluating whether it is empty.
- * For example:
- * <code>
- * if ( !empty($deprecated) )
- * 	_deprecated_argument( __FUNCTION__, '0.0' );
- * </code>
- *
- * There is a hook deprecated_argument_run that will be called that can be used
- * to get the backtrace up to what file and function used the deprecated
- * argument.
- *
- * The current behavior is to trigger an user error if WP_DEBUG is true.
- *
- * @package WordPress
- * @package Debug
- * @since 3.0.0
- * @access private
- *
- * @uses do_action() Calls 'deprecated_argument_run' and passes the function name and what to use instead.
- * @uses apply_filters() Calls 'deprecated_argument_trigger_error' and expects boolean value of true to do trigger or false to not trigger error.
- *
- * @param string $function The function that was called
- * @param string $version The version of WordPress that deprecated the argument used
- * @param string $message Optional. A message regarding the change.
- */
-function _deprecated_argument($function, $version, $message = null) {
-
-	do_action('deprecated_argument_run', $function, $message);
-
-	// Allow plugin to filter the output error trigger
-	if( WP_DEBUG && apply_filters( 'deprecated_argument_trigger_error', true ) ) {
-		if( !is_null($message) )
-			trigger_error( sprintf( __('%1$s was called with an argument that is <strong>deprecated</strong> since version %2$s! %3$s'), $function, $version, $message ) );
-		else
-			trigger_error( sprintf( __('%1$s was called with an argument that is <strong>deprecated</strong> since version %2$s with no alternative available.'), $function, $version ) );
 	}
 }
 

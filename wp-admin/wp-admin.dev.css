@@ -528,7 +528,7 @@ textarea.all-options, input.all-options {
 	padding: 0;
 	margin-bottom: -3px;
 	border-bottom-width: 3px;
-	background-image: url("../images/ed-bg.gif");
+	background-image: url("images/ed-bg.gif");
 	background-position: left top;
 	background-repeat: repeat-x;
 }
@@ -806,18 +806,11 @@ td.media-icon img {
 	line-height: 29px;
 	font-size: 12px;
 	text-align: center;
-	margin: 0 6px;
-	border-width: 1px;
-	border-style: solid;
-	border-top-width: 0;
-	border-top-style: none;
-	-moz-border-radius: 0 0 6px 6px;
-	-webkit-border-bottom-right-radius: 6px;
-	-webkit-border-bottom-left-radius: 6px;
-	-khtml-border-bottom-right-radius: 6px;
-	-khtml-border-bottom-left-radius: 6px;
-	border-bottom-right-radius: 6px;
-	border-bottom-left-radius: 6px;
+}
+
+#update-nag {
+	border-width: 1px 0;
+	border-style: solid none;
 }
 
 .plugins .plugin-update {
@@ -904,21 +897,21 @@ div.comment-item:hover .row-actions {
 }
 
 #wphead #site-visit-button {
-	background-repeat: repeat-x;
-	background-position: 0 0;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	-khtml-border-radius: 3px;
-	border-radius: 3px;
-	cursor: pointer; /* to keep IE happy */
-	display: -moz-inline-stack; /* to keep FF2 happy */
-	display: inline-block;
+	background-repeat:repeat-x;
+	background-position:0 0;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	-khtml-border-radius:3px;
+	border-radius:3px;
+	cursor:pointer; /* to keep IE happy */
+	display:-moz-inline-stack; /* to keep FF2 happy */
+	display:inline-block;
 	font-size: 50%;
-	font-style: normal;
-	line-height: 17px;
-	margin-left: 5px;
-	padding: 0 6px;
-	vertical-align: middle;
+	font-style:normal;
+	line-height:17px;
+	margin-left:5px;
+	padding:0 6px;
+	vertical-align:middle;
 }
 
 #wphead h1 a:hover {
@@ -1553,7 +1546,7 @@ span.description,
 
 #post-body .wp_themeSkin .mceStatusbar a.mceResize {
 	display: block;
-	background: transparent url(../images/resize.gif) no-repeat scroll right bottom;
+	background: transparent url(images/resize.gif) no-repeat scroll right bottom;
 	width: 12px;
 	cursor: se-resize;
 	margin: 0 2px;
@@ -1726,11 +1719,11 @@ div.inside {
 }
 
 .postbox.closed h3 {
-	-moz-border-radius-bottomleft: 4px;
+	-moz-border-radius-bottomleft:4px;
 	-webkit-border-bottom-left-radius: 4px;
 	-khtml-border-bottom-left-radius: 4px;
 	border-bottom-left-radius: 4px;
-	-moz-border-radius-bottomright: 4px;
+	-moz-border-radius-bottomright:4px;
 	-webkit-border-bottom-right-radius: 4px;
 	-khtml-border-bottom-right-radius: 4px;
 	border-bottom-right-radius: 4px;
@@ -2488,7 +2481,7 @@ fieldset {
 #screen-options-link-wrap,
 #contextual-help-link-wrap {
 	float: right;
-	background: transparent url( ../images/screen-options-left.gif ) no-repeat 0 0;
+	background: transparent url( images/screen-options-left.gif ) no-repeat 0 0;
 	font-family: "Lucida Grande", Verdana, Arial, "Bitstream Vera Sans", sans-serif;
 	height: 22px;
 	padding: 0;
@@ -2508,7 +2501,7 @@ fieldset {
 }
 
 #screen-meta a.show-settings {
-	background-image: url( ../images/screen-options-right.gif );
+	background-image: url( images/screen-options-right.gif );
 }
 
 #screen-meta a.show-settings:hover {
@@ -3381,7 +3374,7 @@ td.imgedit-settings input {
 .imgedit-wait {
 	position: absolute;
 	top: 0;
-	background: #FFFFFF url(../images/wpspin_light.gif) no-repeat scroll 22px 10px;
+	background: #FFFFFF url(images/wpspin_light.gif) no-repeat scroll 22px 10px;
 	opacity: 0.7;
 	filter: alpha(opacity=70);
 	width: 100%;
@@ -3422,7 +3415,7 @@ td.imgedit-settings input {
 }
 
 .imgedit-crop {
-	background: transparent url(../images/imgedit-icons.png) no-repeat scroll -9px -31px;
+	background: transparent url(images/imgedit-icons.png) no-repeat scroll -9px -31px;
 	margin: 0 8px 0 0;
 }
 
@@ -3435,7 +3428,7 @@ td.imgedit-settings input {
 }
 
 .imgedit-rleft {
-	background: transparent url(../images/imgedit-icons.png) no-repeat scroll -46px -31px;
+	background: transparent url(images/imgedit-icons.png) no-repeat scroll -46px -31px;
 	margin: 0 3px;
 }
 
@@ -3448,7 +3441,7 @@ td.imgedit-settings input {
 }
 
 .imgedit-rright {
-	background: transparent url(../images/imgedit-icons.png) no-repeat scroll -77px -31px;
+	background: transparent url(images/imgedit-icons.png) no-repeat scroll -77px -31px;
 	margin: 0 8px 0 3px;
 }
 
@@ -3461,7 +3454,7 @@ td.imgedit-settings input {
 }
 
 .imgedit-flipv {
-	background: transparent url(../images/imgedit-icons.png) no-repeat scroll -115px -31px;
+	background: transparent url(images/imgedit-icons.png) no-repeat scroll -115px -31px;
 	margin: 0 3px;
 }
 
@@ -3474,7 +3467,7 @@ td.imgedit-settings input {
 }
 
 .imgedit-fliph {
-	background: transparent url(../images/imgedit-icons.png) no-repeat scroll -147px -31px;
+	background: transparent url(images/imgedit-icons.png) no-repeat scroll -147px -31px;
 	margin: 0 8px 0 3px;
 }
 
@@ -3487,7 +3480,7 @@ td.imgedit-settings input {
 }
 
 .imgedit-undo {
-	background: transparent url(../images/imgedit-icons.png) no-repeat scroll -184px -31px;
+	background: transparent url(images/imgedit-icons.png) no-repeat scroll -184px -31px;
 	margin: 0 3px;
 }
 
@@ -3500,7 +3493,7 @@ td.imgedit-settings input {
 }
 
 .imgedit-redo {
-	background: transparent url(../images/imgedit-icons.png) no-repeat scroll -215px -31px;
+	background: transparent url(images/imgedit-icons.png) no-repeat scroll -215px -31px;
 	margin: 0 8px 0 3px;
 }
 

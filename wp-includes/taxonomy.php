@@ -180,44 +180,18 @@ function register_taxonomy( $taxonomy, $object_type, $args = array() ) {
 		$wp->add_query_var($args['query_var']);
 	}
 
-	if ( false !== $args['rewrite'] && '' != get_option('permalink_structure') ) {
+	if ( false !== $args['rewrite'] && !empty($wp_rewrite) ) {
 		if ( !is_array($args['rewrite']) )
 			$args['rewrite'] = array();
 		if ( !isset($args['rewrite']['slug']) )
 			$args['rewrite']['slug'] = sanitize_title_with_dashes($taxonomy);
 		$wp_rewrite->add_rewrite_tag("%$taxonomy%", '([^/]+)', $args['query_var'] ? "{$args['query_var']}=" : "taxonomy=$taxonomy&term=$term");
-		$wp_rewrite->add_permastruct($taxonomy, "/{$args['rewrite']['slug']}/%$taxonomy%");
+		$wp_rewrite->add_permastruct($taxonomy, "{$args['rewrite']['slug']}/%$taxonomy%");
 	}
 
 	$args['name'] = $taxonomy;
-	$args['object_type'] = (array) $object_type;
+	$args['object_type'] = $object_type;
 	$wp_taxonomies[$taxonomy] = (object) $args;
-}
-
-/**
- * Add an already registered taxonomy to an object type.
- *
- * @package WordPress
- * @subpackage Taxonomy
- * @since 3.0
- * @uses $wp_taxonomies Modifies taxonomy object
- *
- * @param string $taxonomy Name of taxonomy object
- * @param array|string $object_type Name of the object type
- * @return bool True if successful, false if not
- */
-function register_taxonomy_for_object_type( $taxonomy, $object_type) {
-	global $wp_taxonomies;
-
-	if ( !isset($wp_taxonomies[$taxonomy]) )
-		return false;
-
-	if ( ! get_post_type_object($object_type) )
-		return false;
-
-	$wp_taxonomies[$taxonomy]->object_type[] = $object_type;
-
-	return true;
 }
 
 //
@@ -1105,7 +1079,7 @@ function wp_delete_object_term_relationships( $object_id, $taxonomies ) {
 		$taxonomies = array($taxonomies);
 
 	foreach ( (array) $taxonomies as $taxonomy ) {
-		$tt_ids = wp_get_object_terms($object_id, $taxonomy, array('fields' => 'tt_ids'));
+		$tt_ids = wp_get_object_terms($object_id, $taxonomy, 'fields=tt_ids');
 		$in_tt_ids = "'" . implode("', '", $tt_ids) . "'";
 		do_action( 'delete_term_relationships', $object_id, $tt_ids );
 		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->term_relationships WHERE object_id = %d AND term_taxonomy_id IN ($in_tt_ids)", $object_id) );
@@ -1536,7 +1510,7 @@ function wp_set_object_terms($object_id, $terms, $taxonomy, $append = false) {
 	if ( ! $append && isset($t->sort) && $t->sort ) {
 		$values = array();
 		$term_order = 0;
-		$final_tt_ids = wp_get_object_terms($object_id, $taxonomy, array('fields' => 'tt_ids'));
+		$final_tt_ids = wp_get_object_terms($object_id, $taxonomy, 'fields=tt_ids');
 		foreach ( $tt_ids as $tt_id )
 			if ( in_array($tt_id, $final_tt_ids) )
 				$values[] = $wpdb->prepare( "(%d, %d, %d)", $object_id, $tt_id, ++$term_order);
@@ -1886,23 +1860,18 @@ function clean_term_cache($ids, $taxonomy = '') {
 	$taxonomies = array();
 	// If no taxonomy, assume tt_ids.
 	if ( empty($taxonomy) ) {
-		$tt_ids = array_map('intval', $ids);
-		$tt_ids = implode(', ', $tt_ids);
+		$tt_ids = implode(', ', $ids);
 		$terms = $wpdb->get_results("SELECT term_id, taxonomy FROM $wpdb->term_taxonomy WHERE term_taxonomy_id IN ($tt_ids)");
-		$ids = array();
 		foreach ( (array) $terms as $term ) {
 			$taxonomies[] = $term->taxonomy;
-			$ids[] = $term->term_id;
 			wp_cache_delete($term->term_id, $term->taxonomy);
 		}
 		$taxonomies = array_unique($taxonomies);
 	} else {
-		$taxonomies = array($taxonomy);
-		foreach ( $taxonomies as $taxonomy ) {
-			foreach ( $ids as $id ) {
-				wp_cache_delete($id, $taxonomy);
-			}
+		foreach ( $ids as $id ) {
+			wp_cache_delete($id, $taxonomy);
 		}
+		$taxonomies = array($taxonomy);
 	}
 
 	foreach ( $taxonomies as $taxonomy ) {
@@ -1912,10 +1881,11 @@ function clean_term_cache($ids, $taxonomy = '') {
 		wp_cache_delete('all_ids', $taxonomy);
 		wp_cache_delete('get', $taxonomy);
 		delete_option("{$taxonomy}_children");
-		do_action('clean_term_cache', $ids, $taxonomy);
 	}
 
 	wp_cache_set('last_changed', time(), 'terms');
+
+	do_action('clean_term_cache', $ids, $taxonomy);
 }
 
 
@@ -1984,7 +1954,7 @@ function update_object_term_cache($object_ids, $object_type) {
 	if ( empty( $ids ) )
 		return false;
 
-	$terms = wp_get_object_terms($ids, $taxonomies, array('fields' => 'all_with_object_id'));
+	$terms = wp_get_object_terms($ids, $taxonomies, 'fields=all_with_object_id');
 
 	$object_terms = array();
 	foreach ( (array) $terms as $term )
@@ -2055,7 +2025,7 @@ function _get_term_hierarchy($taxonomy) {
 		return $children;
 
 	$children = array();
-	$terms = get_terms($taxonomy, array('get' => 'all'));
+	$terms = get_terms($taxonomy, 'get=all');
 	foreach ( $terms as $term ) {
 		if ( $term->parent > 0 )
 			$children[$term->parent][] = $term->term_id;
@@ -2246,15 +2216,15 @@ function get_term_link( $term, $taxonomy ) {
 	$slug = $term->slug;
 
 	if ( empty($termlink) ) {
+		$file = trailingslashit( get_option('home') );
 		$t = get_taxonomy($taxonomy);
 		if ( $t->query_var )
-			$termlink = "?$t->query_var=$slug";
+			$termlink = "$file?$t->query_var=$slug";
 		else
-			$termlink = "?taxonomy=$taxonomy&term=$slug";
-		$termlink = home_url($termlink);
+			$termlink = "$file?taxonomy=$taxonomy&term=$slug";
 	} else {
 		$termlink = str_replace("%$taxonomy%", $slug, $termlink);
-		$termlink = home_url( user_trailingslashit($termlink, 'category') );
+		$termlink = get_option('home') . user_trailingslashit($termlink, 'category');
 	}
 	return apply_filters('term_link', $termlink, $term, $taxonomy);
 }
@@ -2400,28 +2370,6 @@ function is_object_in_term( $object_id, $taxonomy, $terms = null ) {
 			if ( in_array( $object_term->slug, $strs ) )    return true;
 		}
 	}
-
-	return false;
-}
-
-/**
- * Determine if the given object type is associated with the given taxonomy.
- *
- * @since 3.0
- * @uses get_object_taxonomies()
- *
- * @param string $object_type Object type string
- * @param string $taxonomy.  Single taxonomy name
- * @return bool True if object is associated with the taxonomy, otherwise false.
- */
-function is_object_in_taxonomy($object_type, $taxonomy) {
-	$taxonomies = get_object_taxonomies($object_type);
-
-	if ( empty($taxonomies) )
-		return false;
-
-	if ( in_array($taxonomy, $taxonomies) )
-		return true;
 
 	return false;
 }

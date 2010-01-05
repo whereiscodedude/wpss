@@ -13,9 +13,7 @@ function post_submit_meta_box($post) {
 	global $action;
 
 	$post_type = $post->post_type;
-    $post_type_object = get_post_type_object($post_type);
-	$type_cap = $post_type_object->capability_type;
-	$can_publish = current_user_can("publish_${type_cap}s");
+	$can_publish = current_user_can("publish_${post_type}s");
 ?>
 <div class="submitbox" id="submitpost">
 
@@ -186,7 +184,7 @@ if ( $can_publish ) : // Contributors don't get to choose the date of publish ?>
 <?php do_action('post_submitbox_start'); ?>
 <div id="delete-action">
 <?php
-if ( current_user_can( "delete_${type_cap}", $post->ID ) ) {
+if ( current_user_can( "delete_${post_type}", $post->ID ) ) {
 	if ( !EMPTY_TRASH_DAYS ) {
 		$delete_url = wp_nonce_url( add_query_arg( array('action' => 'delete', 'post' => $post->ID) ), "delete-${post_type}_{$post->ID}" );
 		$delete_text = __('Delete Permanently');
@@ -640,9 +638,6 @@ function link_target_meta_box($link) { ?>
  */
 function xfn_check($class, $value = '', $deprecated = '') {
 	global $link;
-
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' );
 
 	$link_rel = isset( $link->link_rel ) ? $link->link_rel : ''; // In PHP 5.3: $link_rel = $link->link_rel ?: '';
 	$rels = preg_split('/\s+/', $link_rel);

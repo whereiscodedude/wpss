@@ -13,7 +13,7 @@ if ( ! current_user_can('update_plugins') )
 	wp_die(__('You do not have sufficient permissions to update plugins for this blog.'));
 
 function list_core_update( $update ) {
-	global $wp_local_package, $wpdb;
+	global $wp_local_package;
 	$version_string = ('en_US' == $update->locale && 'en_US' == get_locale() ) ?
 			$update->current : sprintf("%s&ndash;<strong>%s</strong>", $update->current, $update->locale);
 	$current = false;
@@ -21,9 +21,6 @@ function list_core_update( $update ) {
 		$current = true;
 	$submit = __('Upgrade Automatically');
 	$form_action = 'update-core.php?action=do-core-upgrade';
-	$php_version    = phpversion();
-	$mysql_version  = $wpdb->db_version();
-	$show_buttons = true;
 	if ( 'development' == $update->response ) {
 		$message = __('You are using a development version of WordPress.  You can upgrade to the latest nightly build automatically or download the nightly build and install it manually:');
 		$download = __('Download nightly build');
@@ -33,18 +30,7 @@ function list_core_update( $update ) {
 			$submit = __('Re-install Automatically');
 			$form_action = 'update-core.php?action=do-core-reinstall';
 		} else {
-			$php_compat     = version_compare( $php_version, $update->php_version, '>=' );
-			$mysql_compat   = version_compare( $mysql_version, $update->mysql_version, '>=' ) || file_exists( WP_CONTENT_DIR . '/db.php' );
-			if ( !$mysql_compat && !$php_compat )
-				$message = sprintf( __('You cannot upgrade because WordPress %1$s requires PHP version %2$s or higher and MySQL version %3$s or higher. You are running PHP version %4$s and MySQL version %5$s.'), $update->current, $update->php_version, $update->mysql_version, $php_version, $mysql_version );
-			elseif ( !$php_compat )
-				$message = sprintf( __('You cannot upgrade because WordPress %1$s requires PHP version %2$s or higher. You are running version %3$s.'), $update->current, $update->php_version, $php_version );
-			elseif ( !$mysql_compat )
-				$message = sprintf( __('You cannot upgrade because WordPress %1$s requires MySQL version %2$s or higher. You are running version %3$s.'), $update->current, $update->mysql_version, $mysql_version );
-			else
-				$message = 	sprintf(__('You can upgrade to version %s automatically or download the package and install it manually:'), $version_string);
-			if ( !$mysql_compat || !$php_compat )
-				$show_buttons = false;
+			$message = 	sprintf(__('You can upgrade to version %s automatically or download the package and install it manually:'), $version_string);
 		}
 		$download = sprintf(__('Download %s'), $version_string);
 	}
@@ -55,12 +41,10 @@ function list_core_update( $update ) {
 	echo '<form method="post" action="' . $form_action . '" name="upgrade" class="upgrade">';
 	wp_nonce_field('upgrade-core');
 	echo '<p>';
+	echo '<input id="upgrade" class="button" type="submit" value="' . esc_attr($submit) . '" name="upgrade" />&nbsp;';
 	echo '<input name="version" value="'. esc_attr($update->current) .'" type="hidden"/>';
 	echo '<input name="locale" value="'. esc_attr($update->locale) .'" type="hidden"/>';
-	if ( $show_buttons ) {
-		echo '<input id="upgrade" class="button" type="submit" value="' . esc_attr($submit) . '" name="upgrade" />&nbsp;';
-		echo '<a href="' . esc_url($update->package) . '" class="button">' . $download . '</a>&nbsp;';
-	}
+	echo '<a href="' . esc_url($update->package) . '" class="button">' . $download . '</a>&nbsp;';
 	if ( 'en_US' != $update->locale )
 		if ( !isset( $update->dismissed ) || !$update->dismissed )
 			echo '<input id="dismiss" class="button" type="submit" value="' . esc_attr__('Hide this update') . '" name="dismiss" />';
@@ -130,7 +114,7 @@ function core_upgrade_preamble() {
 		_e('You have the latest version of WordPress. You do not need to upgrade');
 		echo '</h3>';
 	} else {
-		echo '<div class="updated"><p>';
+		echo '<div class="updated fade"><p>';
 		_e('<strong>Important:</strong> before upgrading, please <a href="http://codex.wordpress.org/WordPress_Backups">backup your database and files</a>.');
 		echo '</p></div>';
 
@@ -175,7 +159,7 @@ function list_plugin_updates() {
 		$core_update_version = $core_updates[0]->current;
 	?>
 <h3><?php _e('Plugins'); ?></h3>
-<p><?php _e('The following plugins have new versions available. Check the ones you want to upgrade and then click "Upgrade Plugins".'); ?></p>
+<p><?php _e('The following plugins have new versions available.  Check the ones you want to upgrade and then click "Upgrade Plugins".'); ?></p>
 <form method="post" action="<?php echo $form_action; ?>" name="upgrade-plugins" class="upgrade">
 <?php wp_nonce_field('upgrade-core'); ?>
 <p><input id="upgrade-plugins" class="button" type="submit" value="<?php esc_attr_e('Upgrade Plugins'); ?>" name="upgrade" /></p>

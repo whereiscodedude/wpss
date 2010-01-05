@@ -97,7 +97,8 @@ class WP_Roles {
 	 * @global array $wp_user_roles Used to set the 'roles' property value.
 	 */
 	function _init () {
-		global $wpdb, $wp_user_roles;
+		global $wpdb;
+		global $wp_user_roles;
 		$this->role_key = $wpdb->prefix . 'user_roles';
 		if ( ! empty( $wp_user_roles ) ) {
 			$this->roles = $wp_user_roles;
@@ -544,8 +545,8 @@ class WP_User {
 		//Build $allcaps from role caps, overlay user's $caps
 		$this->allcaps = array();
 		foreach ( (array) $this->roles as $role ) {
-			$the_role =& $wp_roles->get_role( $role );
-			$this->allcaps = array_merge( (array) $this->allcaps, (array) $the_role->capabilities );
+			$role =& $wp_roles->get_role( $role );
+			$this->allcaps = array_merge( (array) $this->allcaps, (array) $role->capabilities );
 		}
 		$this->allcaps = array_merge( (array) $this->allcaps, (array) $this->caps );
 	}
@@ -651,7 +652,7 @@ class WP_User {
 	function update_user_level_from_caps() {
 		global $wpdb;
 		$this->user_level = array_reduce( array_keys( $this->allcaps ), array( &$this, 'level_reduction' ), 0 );
-		update_usermeta( $this->ID, $wpdb->prefix . 'user_level', $this->user_level );
+		update_usermeta( $this->ID, $wpdb->prefix.'user_level', $this->user_level );
 	}
 
 	/**
@@ -677,8 +678,7 @@ class WP_User {
 	 * @param string $cap Capability name.
 	 */
 	function remove_cap( $cap ) {
-		if ( empty( $this->caps[$cap] ) )
-			return;
+		if ( empty( $this->caps[$cap] ) ) return;
 		unset( $this->caps[$cap] );
 		update_usermeta( $this->ID, $this->cap_key, $this->caps );
 	}
@@ -693,7 +693,7 @@ class WP_User {
 		global $wpdb;
 		$this->caps = array();
 		update_usermeta( $this->ID, $this->cap_key, '' );
-		update_usermeta( $this->ID, $wpdb->prefix . 'user_level', '' );
+		update_usermeta( $this->ID, $wpdb->prefix.'user_level', '' );
 		$this->get_role_caps();
 	}
 
@@ -712,11 +712,9 @@ class WP_User {
 	 * @return bool True, if user has capability; false, if user does not have capability.
 	 */
 	function has_cap( $cap ) {
-		if ( is_numeric( $cap ) ) {
-			_deprecated_argument( __FUNCTION__, '2.0', __('Usage of user levels by plugins and themes is deprecated. Use roles and capabilities instead.') );
+		if ( is_numeric( $cap ) )
 			$cap = $this->translate_level_to_cap( $cap );
-		}
-		
+
 		$args = array_slice( func_get_args(), 1 );
 		$args = array_merge( array( $cap, $this->ID ), $args );
 		$caps = call_user_func_array( 'map_meta_cap', $args );
@@ -779,13 +777,12 @@ function map_meta_cap( $cap, $user_id ) {
 		$author_data = get_userdata( $user_id );
 		//echo "post ID: {$args[0]}<br />";
 		$post = get_post( $args[0] );
-		$post_type = get_post_type_object( $post->post_type );
-		if ( $post_type && 'post' != $post_type->capability_type ) {
-			$args = array_merge( array( 'delete_' . $post_type->capability_type, $user_id ), $args );
+		if ( 'page' == $post->post_type ) {
+			$args = array_merge( array( 'delete_page', $user_id ), $args );
 			return call_user_func_array( 'map_meta_cap', $args );
 		}
 
-		if ( '' != $post->post_author ) {
+		if ('' != $post->post_author) {
 			$post_author_data = get_userdata( $post->post_author );
 		} else {
 			//No author set yet so default to current user for cap checks
@@ -856,9 +853,8 @@ function map_meta_cap( $cap, $user_id ) {
 		$author_data = get_userdata( $user_id );
 		//echo "post ID: {$args[0]}<br />";
 		$post = get_post( $args[0] );
-		$post_type = get_post_type_object( $post->post_type );
-		if ( $post_type && 'post' != $post_type->capability_type ) {
-			$args = array_merge( array( 'edit_' . $post_type->capability_type, $user_id ), $args );
+		if ( 'page' == $post->post_type ) {
+			$args = array_merge( array( 'edit_page', $user_id ), $args );
 			return call_user_func_array( 'map_meta_cap', $args );
 		}
 		$post_author_data = get_userdata( $post->post_author );
@@ -915,9 +911,8 @@ function map_meta_cap( $cap, $user_id ) {
 		break;
 	case 'read_post':
 		$post = get_post( $args[0] );
-		$post_type = get_post_type_object( $post->post_type );
-		if ( $post_type && 'post' != $post_type->capability_type ) {
-			$args = array_merge( array( 'read_' . $post_type->capability_type, $user_id ), $args );
+		if ( 'page' == $post->post_type ) {
+			$args = array_merge( array( 'read_page', $user_id ), $args );
 			return call_user_func_array( 'map_meta_cap', $args );
 		}
 

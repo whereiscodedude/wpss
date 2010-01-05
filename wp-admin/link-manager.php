@@ -79,7 +79,7 @@ if ( isset($_GET['s']) && $_GET['s'] )
 
 <?php
 if ( isset($_GET['deleted']) ) {
-	echo '<div id="message" class="updated"><p>';
+	echo '<div id="message" class="updated fade"><p>';
 	$deleted = (int) $_GET['deleted'];
 	printf(_n('%s link deleted.', '%s links deleted', $deleted), $deleted);
 	echo '</p></div>';
@@ -107,7 +107,7 @@ if ( isset($_GET['deleted']) ) {
 <input type="submit" value="<?php esc_attr_e('Apply'); ?>" name="doaction" id="doaction" class="button-secondary action" />
 
 <?php
-$categories = get_terms('link_category', array("hide_empty" => 1));
+$categories = get_terms('link_category', "hide_empty=1");
 $select_cat = "<select name=\"cat_id\">\n";
 $select_cat .= '<option value="all"'  . (($cat_id == 'all') ? " selected='selected'" : '') . '>' . __('View all Categories') . "</option>\n";
 foreach ((array) $categories as $cat)

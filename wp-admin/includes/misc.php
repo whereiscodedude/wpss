@@ -227,15 +227,11 @@ function url_shorten( $url ) {
 }
 
 /**
- * Resets global variables based on $_GET and $_POST
- * 
- * This function resets global variables based on the names passed
- * in the $vars array to the value of $_POST[$var] or $_GET[$var] or ''
- * if neither is defined.
+ * {@internal Missing Short Description}}
  *
  * @since unknown
  *
- * @param array $vars An array of globals to reset.
+ * @param unknown_type $vars
  */
 function wp_reset_vars( $vars ) {
 	for ( $i=0; $i<count( $vars ); $i += 1 ) {
@@ -243,13 +239,13 @@ function wp_reset_vars( $vars ) {
 		global $$var;
 
 		if (!isset( $$var ) ) {
-			if ( empty( $_POST[$var] ) ) {
-				if ( empty( $_GET[$var] ) )
+			if ( empty( $_POST["$var"] ) ) {
+				if ( empty( $_GET["$var"] ) )
 					$$var = '';
 				else
-					$$var = $_GET[$var];
+					$$var = $_GET["$var"];
 			} else {
-				$$var = $_POST[$var];
+				$$var = $_POST["$var"];
 			}
 		}
 	}
