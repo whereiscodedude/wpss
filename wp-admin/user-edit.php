@@ -60,26 +60,6 @@ function use_ssl_preference($user) {
 <?php
 }
 
-
-// Only allow site admins to edit every user.
-if ( is_multisite() && !defined( "EDIT_ANY_USER" ) && !is_super_admin() && $user_id != $current_user->ID )
-	wp_die( __( 'You do not have permission to edit this user.' ) );
-
-// Execute confirmed email change. See send_confirmation_on_profile_email().
-if ( is_multisite() && IS_PROFILE_PAGE && isset( $_GET[ 'newuseremail' ] ) && $current_user->ID ) {
-	$new_email = get_option( $current_user->ID . '_new_email' );
-	if ( $new_email[ 'hash' ] == $_GET[ 'newuseremail' ] ) {
-		$user->ID = $current_user->ID;
-		$user->user_email = esc_html( trim( $new_email[ 'newemail' ] ) );
-		if ( $wpdb->get_var( $wpdb->prepare( "SELECT user_login FROM {$wpdb->signups} WHERE user_login = %s", $current_user->user_login ) ) )
-			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->signups} SET user_email = %s WHERE user_login = %s", $user->user_email, $current_user->user_login ) );
-		wp_update_user( get_object_vars( $user ) );
-		delete_option( $current_user->ID . '_new_email' );
-		wp_redirect( add_query_arg( array('updated' => 'true'), admin_url( 'profile.php' ) ) );
-		die();
-	}
-}
-
 switch ($action) {
 case 'switchposts':
 
@@ -101,30 +81,7 @@ if ( IS_PROFILE_PAGE )
 else
 	do_action('edit_user_profile_update', $user_id);
 
-if ( !is_multisite() ) {
-	$errors = edit_user($user_id);
-} else {
-	$user = get_userdata( $user_id );
-
-	// Update the email address in signups, if present.
-	if ( $user->user_login && isset( $_POST[ 'email' ] ) && is_email( $_POST[ 'email' ] ) && $wpdb->get_var( $wpdb->prepare( "SELECT user_login FROM {$wpdb->signups} WHERE user_login = %s", $user->user_login ) ) )
-		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->signups} SET user_email = %s WHERE user_login = %s", $_POST[ 'email' ], $user_login ) );
-
-	// WPMU must delete the user from the current blog if WP added him after editing.
-	$delete_role = false;
-	$blog_prefix = $wpdb->get_blog_prefix();
-	if ( $user_id != $current_user->ID ) {
-		$cap = $wpdb->get_var( "SELECT meta_value FROM {$wpdb->usermeta} WHERE user_id = '{$user_id}' AND meta_key = '{$blog_prefix}capabilities' AND meta_value = 'a:0:{}'" );
-		if ( null == $cap && $_POST[ 'role' ] == '' ) {
-			$_POST[ 'role' ] = 'contributor';
-			$delete_role = true;
-		}
-	}
-	if ( !isset( $errors ) || ( isset( $errors ) && is_object( $errors ) && false == $errors->get_error_codes() ) )
-		$errors = edit_user($user_id);
-	if ( $delete_role ) // stops users being added to current blog when they are edited
-		update_usermeta( $user_id, $blog_prefix . 'capabilities' , '' );
-}
+$errors = edit_user($user_id);
 
 if ( !is_wp_error( $errors ) ) {
 	$redirect = (IS_PROFILE_PAGE ? "profile.php?" : "user-edit.php?user_id=$user_id&"). "updated=true";
@@ -143,7 +100,7 @@ include ('admin-header.php');
 ?>
 
 <?php if ( isset($_GET['updated']) ) : ?>
-<div id="message" class="updated">
+<div id="message" class="updated fade">
 	<p><strong><?php _e('User updated.') ?></strong></p>
 	<?php if ( $wp_http_referer && !IS_PROFILE_PAGE ) : ?>
 	<p><a href="users.php"><?php _e('&larr; Back to Authors and Users'); ?></a></p>
@@ -253,12 +210,12 @@ else
 <?php endif; //!IS_PROFILE_PAGE ?>
 
 <tr>
-	<th><label for="first_name"><?php _e('First Name') ?></label></th>
+	<th><label for="first_name"><?php _e('First name') ?></label></th>
 	<td><input type="text" name="first_name" id="first_name" value="<?php echo esc_attr($profileuser->first_name) ?>" class="regular-text" /></td>
 </tr>
 
 <tr>
-	<th><label for="last_name"><?php _e('Last Name') ?></label></th>
+	<th><label for="last_name"><?php _e('Last name') ?></label></th>
 	<td><input type="text" name="last_name" id="last_name" value="<?php echo esc_attr($profileuser->last_name) ?>" class="regular-text" /></td>
 </tr>
 

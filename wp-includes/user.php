@@ -83,30 +83,20 @@ function wp_authenticate_username_password($user, $username, $password) {
 		return $error;
 	}
 
-	$userdata = get_user_by('login', $username);
+	$userdata = get_userdatabylogin($username);
 
-	if ( !$userdata )
+	if ( !$userdata ) {
 		return new WP_Error('invalid_username', sprintf(__('<strong>ERROR</strong>: Invalid username. <a href="%s" title="Password Lost and Found">Lost your password</a>?'), site_url('wp-login.php?action=lostpassword', 'login')));
-
-	if ( is_multisite() ) {
-		// Is user marked as spam?
-		if ( 1 == $userdata->spam)
-			return new WP_Error('invalid_username', __('<strong>ERROR</strong>: Your account has been marked as a spammer.'));
-
-		// Is a user's blog marked as spam?
-		if ( !is_super_admin( $userdata->ID ) && isset($userdata->primary_blog) ) {
-			$details = get_blog_details( $userdata->primary_blog );
-			if ( is_object( $details ) && $details->spam == 1 )
-				return new WP_Error('blog_suspended', __('Blog Suspended.'));
-		}
 	}
 
 	$userdata = apply_filters('wp_authenticate_user', $userdata, $password);
-	if ( is_wp_error($userdata) )
+	if ( is_wp_error($userdata) ) {
 		return $userdata;
+	}
 
-	if ( !wp_check_password($password, $userdata->user_pass, $userdata->ID) )
+	if ( !wp_check_password($password, $userdata->user_pass, $userdata->ID) ) {
 		return new WP_Error('incorrect_password', sprintf(__('<strong>ERROR</strong>: Incorrect password. <a href="%s" title="Password Lost and Found">Lost your password</a>?'), site_url('wp-login.php?action=lostpassword', 'login')));
+	}
 
 	$user =  new WP_User($userdata->ID);
 	return $user;
@@ -224,14 +214,11 @@ function user_pass_ok($user_login, $user_pass) {
  *
  * @param string $option User option name.
  * @param int $user Optional. User ID.
- * @param bool $deprecated Use get_option() to check for an option in the options table.
+ * @param bool $check_blog_options Whether to check for an option in the options table if a per-user option does not exist. Default is true.
  * @return mixed
  */
-function get_user_option( $option, $user = 0, $deprecated = '' ) {
+function get_user_option( $option, $user = 0, $check_blog_options = true ) {
 	global $wpdb;
-
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '3.0' );
 
 	$option = preg_replace('|[^a-z0-9_]|i', '', $option);
 	if ( empty($user) )
@@ -243,6 +230,8 @@ function get_user_option( $option, $user = 0, $deprecated = '' ) {
 		$result = $user->{$wpdb->prefix . $option};
 	elseif ( isset( $user->{$option} ) ) // User specific and cross-blog
 		$result = $user->{$option};
+	elseif ( $check_blog_options ) // Blog global
+		$result = get_option( $option );
 	else
 		$result = false;
 
@@ -289,8 +278,7 @@ function get_users_of_blog( $id = '' ) {
 	global $wpdb, $blog_id;
 	if ( empty($id) )
 		$id = (int) $blog_id;
-	$blog_prefix = $wpdb->get_blog_prefix($id);
-	$users = $wpdb->get_results( "SELECT user_id, user_id AS ID, user_login, display_name, user_email, meta_value FROM $wpdb->users, $wpdb->usermeta WHERE {$wpdb->users}.ID = {$wpdb->usermeta}.user_id AND meta_key = '{$blog_prefix}capabilities' ORDER BY {$wpdb->usermeta}.user_id" );
+	$users = $wpdb->get_results( "SELECT user_id, user_id AS ID, user_login, display_name, user_email, meta_value FROM $wpdb->users, $wpdb->usermeta WHERE {$wpdb->users}.ID = {$wpdb->usermeta}.user_id AND meta_key = '{$wpdb->prefix}capabilities' ORDER BY {$wpdb->usermeta}.user_id" );
 	return $users;
 }
 
@@ -507,7 +495,6 @@ function setup_userdata($for_user_id = '') {
  * <li>selected - Which User ID is selected.</li>
  * <li>name - Default is 'user'. Name attribute of select element.</li>
  * <li>class - Class attribute of select element.</li>
- * <li>blog_id - ID of blog (Multisite only). Defaults to ID of current blog.</li>
  * </ol>
  *
  * @since 2.3.0
@@ -523,7 +510,7 @@ function wp_dropdown_users( $args = '' ) {
 		'orderby' => 'display_name', 'order' => 'ASC',
 		'include' => '', 'exclude' => '', 'multi' => 0,
 		'show' => 'display_name', 'echo' => 1,
-		'selected' => 0, 'name' => 'user', 'class' => '', 'blog_id' => $GLOBALS['blog_id'],
+		'selected' => 0, 'name' => 'user', 'class' => ''
 	);
 
 	$defaults['selected'] = is_author() ? get_query_var( 'author' ) : 0;
@@ -531,8 +518,7 @@ function wp_dropdown_users( $args = '' ) {
 	$r = wp_parse_args( $args, $defaults );
 	extract( $r, EXTR_SKIP );
 
-	$blog_prefix = $wpdb->get_blog_prefix( $blog_id );
-	$query = "SELECT {$wpdb->users}.* FROM $wpdb->users, $wpdb->usermeta WHERE {$wpdb->users}.ID = {$wpdb->usermeta}.user_id AND meta_key = '{$blog_prefix}capabilities'";
+	$query = "SELECT * FROM $wpdb->users";
 
 	$query_where = array();
 
@@ -549,7 +535,7 @@ function wp_dropdown_users( $args = '' ) {
 		$query_where[] = "ID NOT IN ($exclude)";
 
 	if ( $query_where )
-		$query .= " AND " . join(' AND', $query_where);
+		$query .= " WHERE " . join(' AND', $query_where);
 
 	$query .= " ORDER BY $orderby $order";
 
@@ -652,7 +638,7 @@ function sanitize_user_object($user, $context = 'display') {
 		else
 			$vars = get_object_vars($user);
 		foreach ( array_keys($vars) as $field ) {
-			if ( is_string($user->$field) || is_numeric($user->$field) )
+			if ( is_string($user->$field) || is_numeric($user->$field) ) 
 				$user->$field = sanitize_user_field($field, $user->$field, $user->ID, $context);
 		}
 		$user->filter = $context;
@@ -745,23 +731,6 @@ function sanitize_user_field($field, $value, $user_id, $context) {
 		$value = esc_js($value);
 
 	return $value;
-}
-
-/**
- * Clean all user caches
- *
- * @since 3.0
- *
- * @param int $id User ID
- * @return void
- */
-function clean_user_cache($id) {
-	$user = new WP_User($id);
-
-	wp_cache_delete($id, 'users');
-	wp_cache_delete($user->user_login, 'userlogins');
-	wp_cache_delete($user->user_email, 'useremail');
-	wp_cache_delete($user->user_nicename, 'userslugs');
 }
 
 ?>

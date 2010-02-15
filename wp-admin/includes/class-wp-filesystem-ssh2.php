@@ -160,18 +160,14 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return file('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	function put_contents($file, $contents, $mode = false ) {
+	function put_contents($file, $contents, $type = '' ) {
 		$file = ltrim($file, '/');
-		$ret = file_put_contents('ssh2.sftp://' . $this->sftp_link . '/' . $file, $contents);
-
-		$this->chmod($file, $mode);
-
-		return false !== $ret;
+		return false !== file_put_contents('ssh2.sftp://' . $this->sftp_link . '/' . $file, $contents);
 	}
 
 	function cwd() {
 		$cwd = $this->run_command('pwd');
-		if ( $cwd )
+		if( $cwd )
 			$cwd = trailingslashit($cwd);
 		return $cwd;
 	}
@@ -239,10 +235,10 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	}
 
 	function copy($source, $destination, $overwrite = false ) {
-		if ( ! $overwrite && $this->exists($destination) )
+		if( ! $overwrite && $this->exists($destination) )
 			return false;
 		$content = $this->get_contents($source);
-		if ( false === $content)
+		if( false === $content)
 			return false;
 		return $this->put_contents($destination, $content);
 	}

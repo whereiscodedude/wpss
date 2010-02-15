@@ -1,9 +1,9 @@
 /* Fixes for IE bugs */
 
-#wpbody-content input.button,
-#wpbody-content input.button-secondary,
-#wpbody-content input.button-highlighted {
-	padding: 2px 3px;
+input.button,
+input.button-secondary,
+input.button-highlighted {
+	padding: 0;
 }
 
 #minor-publishing-actions input,
@@ -207,7 +207,7 @@ input {
 a.button {
 	line-height: 1.4em;
 	margin: 1px;
-	padding: 2px 6px;
+	padding: 4px 6px;
 }
 
 * html div.widget-liquid-left,
@@ -371,11 +371,11 @@ table.ie-fixed {
 }
 
 * html .widget-top .widget-title-action a {
-	background: url("../images/menu-bits.gif") no-repeat scroll 0 -110px;
+    background: url("../images/menu-bits.gif") no-repeat scroll 0 -110px;
 }
 
 * html div.widget-liquid-left {
-	width: 99%;
+    width: 99%;
 }
 
 #wp_inactive_widgets {

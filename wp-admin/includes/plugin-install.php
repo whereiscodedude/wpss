@@ -24,29 +24,26 @@
  *
  * @param string $action
  * @param array|object $args Optional. Arguments to serialize for the Plugin Info API.
- * @return object plugins_api response object on success, WP_Error on failure.
+ * @return mixed
  */
 function plugins_api($action, $args = null) {
 
-	if ( is_array($args) )
+	if( is_array($args) )
 		$args = (object)$args;
 
 	if ( !isset($args->per_page) )
 		$args->per_page = 24;
 
-	// Allows a plugin to override the WordPress.org API entirely.
-	// Use the filter 'plugins_api_result' to mearly add results.
-	// Please ensure that a object is returned from the following filters.
-	$args = apply_filters('plugins_api_args', $args, $action);
-	$res = apply_filters('plugins_api', false, $action, $args);
+	$args = apply_filters('plugins_api_args', $args, $action); //NOTE: Ensure that an object is returned via this filter.
+	$res = apply_filters('plugins_api', false, $action, $args); //NOTE: Allows a plugin to completely override the builtin WordPress.org API.
 
-	if ( false === $res ) {
-		$request = wp_remote_post('http://api.wordpress.org/plugins/info/1.0/', array( 'timeout' => 15, 'body' => array('action' => $action, 'request' => serialize($args))) );
+	if ( ! $res ) {
+		$request = wp_remote_post('http://api.wordpress.org/plugins/info/1.0/', array( 'body' => array('action' => $action, 'request' => serialize($args))) );
 		if ( is_wp_error($request) ) {
 			$res = new WP_Error('plugins_api_failed', __('An Unexpected HTTP Error occurred during the API request.</p> <p><a href="?" onclick="document.location.reload(); return false;">Try again</a>'), $request->get_error_message() );
 		} else {
 			$res = unserialize($request['body']);
-			if ( false === $res )
+			if ( ! $res )
 				$res = new WP_Error('plugins_api_failed', __('An unknown error occurred'), $request['body']);
 		}
 	} elseif ( !is_wp_error($res) ) {
@@ -200,8 +197,6 @@ add_action('install_plugins_popular', 'install_popular', 10, 1);
 function install_popular($page = 1) {
 	$args = array('browse' => 'popular', 'page' => $page);
 	$api = plugins_api('query_plugins', $args);
-	if ( is_wp_error($api) )
-		wp_die($api);
 	display_plugins_table($api->plugins, $api->info['page'], $api->info['pages']);
 }
 
@@ -215,7 +210,7 @@ add_action('install_plugins_upload', 'install_plugins_upload', 10, 1);
 function install_plugins_upload( $page = 1 ) {
 ?>
 	<h4><?php _e('Install a plugin in .zip format') ?></h4>
-	<p class="install-help"><?php _e('If you have a plugin in a .zip format, you may install it by uploading it here.') ?></p>
+	<p class="install-help"><?php _e('If you have a plugin in a .zip format, You may install it by uploading it here.') ?></p>
 	<form method="post" enctype="multipart/form-data" action="<?php echo admin_url('update.php?action=upload-plugin') ?>">
 		<?php wp_nonce_field( 'plugin-upload') ?>
 		<label class="screen-reader-text" for="pluginzip"><?php _e('Plugin zip file'); ?></label>
@@ -253,8 +248,6 @@ add_action('install_plugins_updated', 'install_updated', 10, 1);
 function install_updated($page = 1) {
 	$args = array('browse' => 'updated', 'page' => $page);
 	$api = plugins_api('query_plugins', $args);
-	if ( is_wp_error($api) )
-		wp_die($api);
 	display_plugins_table($api->plugins, $api->info['page'], $api->info['pages']);
 }
 
@@ -325,10 +318,10 @@ function display_plugins_table($plugins, $page = 1, $totalpages = 1){
 
 		<tbody class="plugins">
 		<?php
-			if ( empty($plugins) )
+			if( empty($plugins) )
 				echo '<tr><td colspan="5">', __('No plugins match your request.'), '</td></tr>';
 
-			foreach ( (array) $plugins as $plugin ){
+			foreach( (array) $plugins as $plugin ){
 				if ( is_object($plugin) )
 					$plugin = (array) $plugin;
 
@@ -349,12 +342,12 @@ function display_plugins_table($plugins, $page = 1, $totalpages = 1){
 				$name = strip_tags($title . ' ' . $version);
 
 				$author = $plugin['author'];
-				if ( ! empty($plugin['author']) )
+				if( ! empty($plugin['author']) )
 					$author = ' <cite>' . sprintf( __('By %s'), $author ) . '.</cite>';
 
 				$author = wp_kses($author, $plugins_allowedtags);
 
-				if ( isset($plugin['homepage']) )
+				if( isset($plugin['homepage']) )
 					$title = '<a target="_blank" href="' . esc_attr($plugin['homepage']) . '">' . $title . '</a>';
 
 				$action_links = array();
@@ -423,7 +416,7 @@ function install_plugin_information() {
 		$api->$key = wp_kses($api->$key, $plugins_allowedtags);
 
 	$section = isset($_REQUEST['section']) ? stripslashes( $_REQUEST['section'] ) : 'description'; //Default to the Description tab, Do not translate, API returns English.
-	if ( empty($section) || ! isset($api->sections[ $section ]) )
+	if( empty($section) || ! isset($api->sections[ $section ]) )
 		$section = array_shift( $section_titles = array_keys((array)$api->sections) );
 
 	iframe_header( __('Plugin Install') );
@@ -450,7 +443,7 @@ function install_plugin_information() {
 			//Default to a "new" plugin
 			$type = 'install';
 			//Check to see if this plugin is known to be installed, and has an update awaiting it.
-			$update_plugins = get_site_transient('update_plugins');
+			$update_plugins = get_transient('update_plugins');
 			if ( is_object( $update_plugins ) ) {
 				foreach ( (array)$update_plugins->response as $file => $plugin ) {
 					if ( $plugin->slug === $api->slug ) {
@@ -471,7 +464,7 @@ function install_plugin_information() {
 						$newer_version = $installed_plugin[ $key ]['Version'];
 					} else {
 						//If the above update check failed, Then that probably means that the update checker has out-of-date information, force a refresh
-						delete_site_transient('update_plugins');
+						delete_transient('update_plugins');
 						$update_file = $api->slug . '/' . $key; //This code branch only deals with a plugin which is in a folder the same name as its slug, Doesnt support plugins which have 'non-standard' names
 						$type = 'update_available';
 					}
@@ -503,7 +496,7 @@ function install_plugin_information() {
 			endswitch; ?>
 		</p>
 		<?php endif; ?>
-		<h2 class="mainheader"><?php /* translators: For Your Information */ _e('FYI') ?></h2>
+		<h2 class="mainheader"><?php _e('FYI') ?></h2>
 		<ul>
 <?php if ( ! empty($api->version) ) : ?>
 			<li><strong><?php _e('Version:') ?></strong> <?php echo $api->version ?></li>

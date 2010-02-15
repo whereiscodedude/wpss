@@ -26,19 +26,19 @@ if ((empty ($link_cat)) || ($link_cat == 'all') || ($link_cat == '0')) {
 	$link_cat = intval($link_cat);
 }
 ?><?php echo '<?xml version="1.0"?'.">\n"; ?>
+<?php the_generator( 'comment' ); ?>
 <opml version="1.0">
 	<head>
 		<title>Links for <?php echo esc_attr(get_bloginfo('name', 'display').$cat_name); ?></title>
 		<dateCreated><?php echo gmdate("D, d M Y H:i:s"); ?> GMT</dateCreated>
-		<?php do_action('opml_head'); ?>
 	</head>
 	<body>
 <?php
 
 if (empty ($link_cat))
-	$cats = get_categories(array('type' => 'link', 'hierarchical' => 0));
+	$cats = get_categories("type=link&hierarchical=0");
 else
-	$cats = get_categories(array('type' => 'link', 'hierarchical' => 0, 'include' => $link_cat));
+	$cats = get_categories('type=link&hierarchical=0&include='.$link_cat);
 
 foreach ((array) $cats as $cat) {
 	$catname = apply_filters('link_category', $cat->name);
@@ -47,7 +47,7 @@ foreach ((array) $cats as $cat) {
 <outline type="category" title="<?php echo esc_attr($catname); ?>">
 <?php
 
-	$bookmarks = get_bookmarks(array("category" => $cat->term_id));
+	$bookmarks = get_bookmarks("category={$cat->term_id}");
 	foreach ((array) $bookmarks as $bookmark) {
 		$title = esc_attr(apply_filters('link_title', $bookmark->link_name));
 ?>

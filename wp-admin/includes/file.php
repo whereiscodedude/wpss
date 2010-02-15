@@ -109,10 +109,10 @@ function get_real_file_to_edit( $file ) {
  * @return bool|array False on failure, Else array of files
  */
 function list_files( $folder = '', $levels = 100 ) {
-	if ( empty($folder) )
+	if( empty($folder) )
 		return false;
 
-	if ( ! $levels )
+	if( ! $levels )
 		return false;
 
 	$files = array();
@@ -122,7 +122,7 @@ function list_files( $folder = '', $levels = 100 ) {
 				continue;
 			if ( is_dir( $folder . '/' . $file ) ) {
 				$files2 = list_files( $folder . '/' . $file, $levels - 1);
-				if ( $files2 )
+				if( $files2 )
 					$files = array_merge($files, $files2 );
 				else
 					$files[] = $folder . '/' . $file . '/';
@@ -155,10 +155,6 @@ function get_temp_dir() {
 
 	if  ( function_exists('sys_get_temp_dir') )
 		return trailingslashit(sys_get_temp_dir());
-
-	$temp = ini_get('upload_tmp_dir');
-	if ( is_dir($temp) ) // always writable
-		return trailingslashit($temp);
 
 	return '/tmp/';
 }
@@ -325,9 +321,6 @@ function wp_handle_upload( &$file, $overrides = false, $time = null ) {
 	// Compute the URL
 	$url = $uploads['url'] . "/$filename";
 
-	if ( is_multisite() )
-		delete_transient( 'dirsize_cache' );
-
 	return apply_filters( 'wp_handle_upload', array( 'file' => $new_file, 'url' => $url, 'type' => $type ) );
 }
 
@@ -455,15 +448,15 @@ function wp_handle_sideload( &$file, $overrides = false ) {
 function download_url( $url ) {
 	//WARNING: The file is not automatically deleted, The script must unlink() the file.
 	if ( ! $url )
-		return new WP_Error('http_no_url', __('Invalid URL Provided.'));
+		return new WP_Error('http_no_url', __('Invalid URL Provided'));
 
 	$tmpfname = wp_tempnam($url);
 	if ( ! $tmpfname )
-		return new WP_Error('http_no_file', __('Could not create Temporary file.'));
+		return new WP_Error('http_no_file', __('Could not create Temporary file'));
 
 	$handle = @fopen($tmpfname, 'wb');
 	if ( ! $handle )
-		return new WP_Error('http_no_file', __('Could not create Temporary file.'));
+		return new WP_Error('http_no_file', __('Could not create Temporary file'));
 
 	$response = wp_remote_get($url, array('timeout' => 300));
 
@@ -504,111 +497,10 @@ function unzip_file($file, $to) {
 	if ( ! $wp_filesystem || !is_object($wp_filesystem) )
 		return new WP_Error('fs_unavailable', __('Could not access filesystem.'));
 
-	// Unzip can use a lot of memory, but not this much hopefully
+	// Unzip uses a lot of memory, but not this much hopefully
 	@ini_set('memory_limit', '256M');
 
-	$needed_dirs = array();
-	$to = trailingslashit($to);
-
-	// Determine any parent dir's needed (of the upgrade directory)
-	if ( ! $wp_filesystem->is_dir($to) ) { //Only do parents if no children exist
-		$path = preg_split('![/\\\]!', untrailingslashit($to));
-		for ( $i = count($path); $i >= 0; $i-- ) {
-			if ( empty($path[$i]) )
-				continue;
-
-			$dir = implode('/', array_slice($path, 0, $i+1) );
-			if ( preg_match('!^[a-z]:$!i', $dir) ) // Skip it if it looks like a Windows Drive letter.
-				continue;
-
-			if ( ! $wp_filesystem->is_dir($dir) )
-				$needed_dirs[] = $dir;
-			else
-				break; // A folder exists, therefor, we dont need the check the levels below this
-		}
-	}
-
-	if ( class_exists('ZipArchive') && apply_filters('unzip_file_use_ziparchive', true ) )
-		return _unzip_file_ziparchive($file, $to, $needed_dirs);
-	else
-		return _unzip_file_pclzip($file, $to, $needed_dirs);
-}
-
-/**
- * This function should not be called directly, use unzip_file instead. Attempts to unzip an archive using the ZipArchive class.
- * Assumes that WP_Filesystem() has already been called and set up.
- *
- * @since 3.0
- * @see unzip_file
- * @access private
- *
- * @param string $file Full path and filename of zip archive
- * @param string $to Full path on the filesystem to extract archive to
- * @param array $needed_dirs A partial list of required folders needed to be created.
- * @return mixed WP_Error on failure, True on success
- */
-function _unzip_file_ziparchive($file, $to, $needed_dirs = array() ) {
-	global $wp_filesystem;
-
-	$z = new ZipArchive();
-
-	// PHP4-compat - php4 classes can't contain constants
-	if ( true !== $z->open($file, /* ZIPARCHIVE::CHECKCONS */ 4) )
-		return new WP_Error('incompatible_archive', __('Incompatible Archive.'));
-
-	for ( $i = 0; $i < $z->numFiles; $i++ ) {
-		if ( ! $info = $z->statIndex($i) )
-			return new WP_Error('stat_failed', __('Could not retrieve file from archive.'));
-
-		if ( '/' == substr($info['name'], -1) ) // directory
-			$needed_dirs[] = $to . untrailingslashit($info['name']);
-		else
-			$needed_dirs[] = $to . untrailingslashit(dirname($info['name']));
-	}
-
-	$needed_dirs = array_unique($needed_dirs);
-	asort($needed_dirs);
-
-	// Create those directories if need be:
-	foreach ( $needed_dirs as $_dir ) {
-		if ( ! $wp_filesystem->mkdir($_dir, FS_CHMOD_DIR) && ! $wp_filesystem->is_dir($_dir) ) // Only check to see if the Dir exists upon creation failure. Less I/O this way.
-			return new WP_Error('mkdir_failed', __('Could not create directory.'), $_dir);
-	}
-	unset($needed_dirs);
-
-	for ( $i = 0; $i < $z->numFiles; $i++ ) {
-		if ( ! $info = $z->statIndex($i) )
-			return new WP_Error('stat_failed', __('Could not retrieve file from archive.'));
-
-		if ( '/' == substr($info['name'], -1) ) // directory
-			continue;
-
-		$contents = $z->getFromIndex($i);
-		if ( false === $contents )
-			return new WP_Error('extract_failed', __('Could not extract file from archive.'), $info['name']);
-
-		if ( ! $wp_filesystem->put_contents( $to . $info['name'], $contents, FS_CHMOD_FILE) )
-			return new WP_Error('copy_failed', __('Could not copy file.'), $to . $file['filename']);
-	}
-
-	return true;
-}
-
-/**
- * This function should not be called directly, use unzip_file instead. Attempts to unzip an archive using the PclZip library.
- * Assumes that WP_Filesystem() has already been called and set up.
- *
- * @since 3.0
- * @see unzip_file
- * @access private
- *
- * @param string $file Full path and filename of zip archive
- * @param string $to Full path on the filesystem to extract archive to
- * @param array $needed_dirs A partial list of required folders needed to be created.
- * @return mixed WP_Error on failure, True on success
- */
-function _unzip_file_pclzip($file, $to, $needed_dirs = array()) {
-	global $wp_filesystem;
+	$fs =& $wp_filesystem;
 
 	require_once(ABSPATH . 'wp-admin/includes/class-pclzip.php');
 
@@ -616,32 +508,48 @@ function _unzip_file_pclzip($file, $to, $needed_dirs = array()) {
 
 	// Is the archive valid?
 	if ( false == ($archive_files = $archive->extract(PCLZIP_OPT_EXTRACT_AS_STRING)) )
-		return new WP_Error('incompatible_archive', __('Incompatible Archive.'), $archive->errorInfo(true));
+		return new WP_Error('incompatible_archive', __('Incompatible archive'), $archive->errorInfo(true));
 
 	if ( 0 == count($archive_files) )
-		return new WP_Error('empty_archive', __('Empty archive.'));
+		return new WP_Error('empty_archive', __('Empty archive'));
 
-	// Determine any children directories needed (From within the archive)
-	foreach ( $archive_files as $file )
-		$needed_dirs[] = $to . untrailingslashit( $file['folder'] ? $file['filename'] : dirname($file['filename']) );
-
-	$needed_dirs = array_unique($needed_dirs);
-	asort($needed_dirs);
-
-	// Create those directories if need be:
-	foreach ( $needed_dirs as $_dir ) {
-		if ( ! $wp_filesystem->mkdir($_dir, FS_CHMOD_DIR) && ! $wp_filesystem->is_dir($_dir) ) // Only check to see if the Dir exists upon creation failure. Less I/O this way.
-			return new WP_Error('mkdir_failed', __('Could not create directory.'), $_dir);
+	$path = explode('/', untrailingslashit($to));
+	for ( $i = count($path); $i > 0; $i-- ) { //>0 = first element is empty allways for paths starting with '/'
+		$tmppath = implode('/', array_slice($path, 0, $i) );
+		if ( $fs->is_dir($tmppath) ) { //Found the highest folder that exists, Create from here(ie +1)
+			for ( $i = $i + 1; $i <= count($path); $i++ ) {
+				$tmppath = implode('/', array_slice($path, 0, $i) );
+				if ( ! $fs->mkdir($tmppath, FS_CHMOD_DIR) )
+					return new WP_Error('mkdir_failed', __('Could not create directory'), $tmppath);
+			}
+			break; //Exit main for loop
+		}
 	}
-	unset($needed_dirs);
 
-	// Extract the files from the zip
-	foreach ( $archive_files as $file ) {
-		if ( $file['folder'] )
-			continue;
+	$to = trailingslashit($to);
+	foreach ($archive_files as $file) {
+		$path = $file['folder'] ? $file['filename'] : dirname($file['filename']);
+		$path = explode('/', $path);
+		for ( $i = count($path); $i >= 0; $i-- ) { //>=0 as the first element contains data
+			if ( empty($path[$i]) )
+				continue;
+			$tmppath = $to . implode('/', array_slice($path, 0, $i) );
+			if ( $fs->is_dir($tmppath) ) {//Found the highest folder that exists, Create from here
+				for ( $i = $i + 1; $i <= count($path); $i++ ) { //< count() no file component please.
+					$tmppath = $to . implode('/', array_slice($path, 0, $i) );
+					if ( ! $fs->is_dir($tmppath) && ! $fs->mkdir($tmppath, FS_CHMOD_DIR) )
+						return new WP_Error('mkdir_failed', __('Could not create directory'), $tmppath);
+				}
+				break; //Exit main for loop
+			}
+		}
 
-		if ( ! $wp_filesystem->put_contents( $to . $file['filename'], $file['content'], FS_CHMOD_FILE) )
-			return new WP_Error('copy_failed', __('Could not copy file.'), $to . $file['filename']);
+		// We've made sure the folders are there, so let's extract the file now:
+		if ( ! $file['folder'] ) {
+			if ( !$fs->put_contents( $to . $file['filename'], $file['content']) )
+				return new WP_Error('copy_failed', __('Could not copy file'), $to . $file['filename']);
+			$fs->chmod($to . $file['filename'], FS_CHMOD_FILE);
+		}
 	}
 	return true;
 }
@@ -670,13 +578,13 @@ function copy_dir($from, $to) {
 				// If copy failed, chmod file to 0644 and try again.
 				$wp_filesystem->chmod($to . $filename, 0644);
 				if ( ! $wp_filesystem->copy($from . $filename, $to . $filename, true) )
-					return new WP_Error('copy_failed', __('Could not copy file.'), $to . $filename);
+					return new WP_Error('copy_failed', __('Could not copy file'), $to . $filename);
 			}
 			$wp_filesystem->chmod($to . $filename, FS_CHMOD_FILE);
 		} elseif ( 'd' == $fileinfo['type'] ) {
 			if ( !$wp_filesystem->is_dir($to . $filename) ) {
 				if ( !$wp_filesystem->mkdir($to . $filename, FS_CHMOD_DIR) )
-					return new WP_Error('mkdir_failed', __('Could not create directory.'), $to . $filename);
+					return new WP_Error('mkdir_failed', __('Could not create directory'), $to . $filename);
 			}
 			$result = copy_dir($from . $filename, $to . $filename);
 			if ( is_wp_error($result) )
@@ -710,7 +618,7 @@ function WP_Filesystem( $args = false, $context = false ) {
 
 	if ( ! class_exists("WP_Filesystem_$method") ) {
 		$abstraction_file = apply_filters('filesystem_method_file', ABSPATH . 'wp-admin/includes/class-wp-filesystem-' . $method . '.php', $method);
-		if ( ! file_exists($abstraction_file) )
+		if( ! file_exists($abstraction_file) )
 			return;
 
 		require_once($abstraction_file);
@@ -759,7 +667,7 @@ function WP_Filesystem( $args = false, $context = false ) {
 function get_filesystem_method($args = array(), $context = false) {
 	$method = defined('FS_METHOD') ? FS_METHOD : false; //Please ensure that this is either 'direct', 'ssh', 'ftpext' or 'ftpsockets'
 
-	if ( ! $method && function_exists('getmyuid') && function_exists('fileowner') ){
+	if( ! $method && function_exists('getmyuid') && function_exists('fileowner') ){
 		if ( !$context )
 			$context = WP_CONTENT_DIR;
 		$context = trailingslashit($context);
@@ -896,12 +804,12 @@ jQuery(function($){
 <table class="form-table">
 <tr valign="top">
 <th scope="row"><label for="hostname"><?php _e('Hostname') ?></label></th>
-<td><input name="hostname" type="text" id="hostname" value="<?php echo esc_attr($hostname); if ( !empty($port) ) echo ":$port"; ?>"<?php if ( defined('FTP_HOST') ) echo ' disabled="disabled"' ?> size="40" /></td>
+<td><input name="hostname" type="text" id="hostname" value="<?php echo esc_attr($hostname); if ( !empty($port) ) echo ":$port"; ?>"<?php if( defined('FTP_HOST') ) echo ' disabled="disabled"' ?> size="40" /></td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><label for="username"><?php _e('Username') ?></label></th>
-<td><input name="username" type="text" id="username" value="<?php echo esc_attr($username) ?>"<?php if ( defined('FTP_USER') ) echo ' disabled="disabled"' ?> size="40" /></td>
+<td><input name="username" type="text" id="username" value="<?php echo esc_attr($username) ?>"<?php if( defined('FTP_USER') ) echo ' disabled="disabled"' ?> size="40" /></td>
 </tr>
 
 <tr valign="top">
@@ -916,7 +824,7 @@ jQuery(function($){
 <label for="public_key"><?php _e('Public Key:') ?></label ><br />
 <label for="private_key"><?php _e('Private Key:') ?></label>
 </div></th>
-<td><br /><input name="public_key" type="text" id="public_key" value="<?php echo esc_attr($public_key) ?>"<?php if ( defined('FTP_PUBKEY') ) echo ' disabled="disabled"' ?> size="40" /><br /><input name="private_key" type="text" id="private_key" value="<?php echo esc_attr($private_key) ?>"<?php if ( defined('FTP_PRIKEY') ) echo ' disabled="disabled"' ?> size="40" />
+<td><br /><input name="public_key" type="text" id="public_key" value="<?php echo esc_attr($public_key) ?>"<?php if( defined('FTP_PUBKEY') ) echo ' disabled="disabled"' ?> size="40" /><br /><input name="private_key" type="text" id="private_key" value="<?php echo esc_attr($private_key) ?>"<?php if( defined('FTP_PRIKEY') ) echo ' disabled="disabled"' ?> size="40" />
 <div><?php _e('Enter the location on the server where the keys are located. If a passphrase is needed, enter that in the password field above.') ?></div></td>
 </tr>
 <?php endif; ?>

@@ -19,6 +19,11 @@ function __() {}
 /**
  * @ignore
  */
+function _c() {}
+
+/**
+ * @ignore
+ */
 function _x() {}
 
 

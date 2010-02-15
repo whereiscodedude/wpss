@@ -92,7 +92,7 @@ function edit_user( $user_id = 0 ) {
 		if ( empty ( $_POST['url'] ) || $_POST['url'] == 'http://' ) {
 			$user->user_url = '';
 		} else {
-			$user->user_url = esc_url_raw( $_POST['url'] );
+			$user->user_url = sanitize_url( $_POST['url'] );
 			$user->user_url = preg_match('/^(https?|ftps?|mailto|news|irc|gopher|nntp|feed|telnet):/is', $user->user_url) ? $user->user_url : 'http://'.$user->user_url;
 		}
 	}
@@ -197,11 +197,7 @@ function edit_user( $user_id = 0 ) {
  */
 function get_author_user_ids() {
 	global $wpdb;
-	if ( !is_multisite() )
-		$level_key = $wpdb->get_blog_prefix() . 'user_level';
-	else
-		$level_key = $wpdb->get_blog_prefix() . 'capabilities'; // wpmu site admins don't have user_levels
-
+	$level_key = $wpdb->prefix . 'user_level';
 	return $wpdb->get_col( $wpdb->prepare("SELECT user_id FROM $wpdb->usermeta WHERE meta_key = %s AND meta_value != '0'", $level_key) );
 }
 
@@ -220,7 +216,7 @@ function get_editable_authors( $user_id ) {
 
 	$editable = get_editable_user_ids( $user_id );
 
-	if ( !$editable ) {
+	if( !$editable ) {
 		return false;
 	} else {
 		$editable = join(',', $editable);
@@ -253,10 +249,7 @@ function get_editable_user_ids( $user_id, $exclude_zeros = true, $post_type = 'p
 			return array();
 	}
 
-	if ( !is_multisite() )
-		$level_key = $wpdb->get_blog_prefix() . 'user_level';
-	else
-		$level_key = $wpdb->get_blog_prefix() . 'capabilities'; // wpmu site admins don't have user_levels
+	$level_key = $wpdb->prefix . 'user_level';
 
 	$query = $wpdb->prepare("SELECT user_id FROM $wpdb->usermeta WHERE meta_key = %s", $level_key);
 	if ( $exclude_zeros )
@@ -301,11 +294,7 @@ function get_editable_roles() {
  */
 function get_nonauthor_user_ids() {
 	global $wpdb;
-
-	if ( !is_multisite() )
-		$level_key = $wpdb->get_blog_prefix() . 'user_level';
-	else
-		$level_key = $wpdb->get_blog_prefix() . 'capabilities'; // wpmu site admins don't have user_levels
+	$level_key = $wpdb->prefix . 'user_level';
 
 	return $wpdb->get_col( $wpdb->prepare("SELECT user_id FROM $wpdb->usermeta WHERE meta_key = %s AND meta_value = '0'", $level_key) );
 }
@@ -331,7 +320,7 @@ function get_others_unpublished_posts($user_id, $type='any') {
 
 	$dir = ( 'pending' == $type ) ? 'ASC' : 'DESC';
 
-	if ( !$editable ) {
+	if( !$editable ) {
 		$other_unpubs = '';
 	} else {
 		$editable = join(',', $editable);
@@ -419,7 +408,7 @@ function get_users_drafts( $user_id ) {
  * @param int $reassign Optional. Reassign posts and links to new User ID.
  * @return bool True when finished.
  */
-function wp_delete_user( $id, $reassign = 'novalue' ) {
+function wp_delete_user($id, $reassign = 'novalue') {
 	global $wpdb;
 
 	$id = (int) $id;
@@ -428,11 +417,11 @@ function wp_delete_user( $id, $reassign = 'novalue' ) {
 	// allow for transaction statement
 	do_action('delete_user', $id);
 
-	if ( 'novalue' === $reassign || null === $reassign ) {
+	if ($reassign == 'novalue') {
 		$post_ids = $wpdb->get_col( $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_author = %d", $id) );
 
-		if ( $post_ids ) {
-			foreach ( $post_ids as $post_id )
+		if ($post_ids) {
+			foreach ($post_ids as $post_id)
 				wp_delete_post($post_id);
 		}
 
@@ -443,22 +432,22 @@ function wp_delete_user( $id, $reassign = 'novalue' ) {
 			foreach ( $link_ids as $link_id )
 				wp_delete_link($link_id);
 		}
+
 	} else {
 		$reassign = (int) $reassign;
-		$wpdb->update( $wpdb->posts, array('post_author' => $reassign), array('post_author' => $id) );
-		$wpdb->update( $wpdb->links, array('link_owner' => $reassign), array('link_owner' => $id) );
+		$wpdb->query( $wpdb->prepare("UPDATE $wpdb->posts SET post_author = %d WHERE post_author = %d", $reassign, $id) );
+		$wpdb->query( $wpdb->prepare("UPDATE $wpdb->links SET link_owner = %d WHERE link_owner = %d", $reassign, $id) );
 	}
 
 	// FINALLY, delete user
-	if ( !is_multisite() ) {
-		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->usermeta WHERE user_id = %d", $id) );
-		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->users WHERE ID = %d", $id) );
-	} else {
-		$level_key = $wpdb->get_blog_prefix() . 'capabilities'; // wpmu site admins don't have user_levels
-		$wpdb->query("DELETE FROM $wpdb->usermeta WHERE user_id = $id AND meta_key = '{$level_key}'");
-	}
 
-	clean_user_cache($id);
+	$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->usermeta WHERE user_id = %d", $id) );
+	$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->users WHERE ID = %d", $id) );
+
+	wp_cache_delete($id, 'users');
+	wp_cache_delete($user->user_login, 'userlogins');
+	wp_cache_delete($user->user_email, 'useremail');
+	wp_cache_delete($user->user_nicename, 'userslugs');
 
 	// allow for commit transaction
 	do_action('deleted_user', $id);
@@ -566,36 +555,27 @@ class WP_User_Search {
 	 *
 	 * @since unknown
 	 * @access private
-	 * @var string
+	 * @var unknown_type
 	 */
 	var $query_limit;
 
 	/**
 	 * {@internal Missing Description}}
 	 *
-	 * @since 3.0
+	 * @since unknown
 	 * @access private
-	 * @var string
+	 * @var unknown_type
 	 */
-	var $query_orderby;
+	var $query_sort;
 
 	/**
 	 * {@internal Missing Description}}
 	 *
-	 * @since 3.0
+	 * @since unknown
 	 * @access private
-	 * @var string
+	 * @var unknown_type
 	 */
-	var $query_from;
-
-	/**
-	 * {@internal Missing Description}}
-	 *
-	 * @since 3.0
-	 * @access private
-	 * @var string
-	 */
-	var $query_where;
+	var $query_from_where;
 
 	/**
 	 * {@internal Missing Description}}
@@ -666,10 +646,8 @@ class WP_User_Search {
 	function prepare_query() {
 		global $wpdb;
 		$this->first_user = ($this->page - 1) * $this->users_per_page;
-
 		$this->query_limit = $wpdb->prepare(" LIMIT %d, %d", $this->first_user, $this->users_per_page);
-		$this->query_orderby = ' ORDER BY user_login';
-
+		$this->query_sort = ' ORDER BY user_login';
 		$search_sql = '';
 		if ( $this->search_term ) {
 			$searches = array();
@@ -680,19 +658,13 @@ class WP_User_Search {
 			$search_sql .= ')';
 		}
 
-		$this->query_from = " FROM $wpdb->users";
-		$this->query_where = " WHERE 1=1 $search_sql";
+		$this->query_from_where = "FROM $wpdb->users";
+		if ( $this->role )
+			$this->query_from_where .= $wpdb->prepare(" INNER JOIN $wpdb->usermeta ON $wpdb->users.ID = $wpdb->usermeta.user_id WHERE $wpdb->usermeta.meta_key = '{$wpdb->prefix}capabilities' AND $wpdb->usermeta.meta_value LIKE %s", '%' . $this->role . '%');
+		else
+			$this->query_from_where .= " WHERE 1=1";
+		$this->query_from_where .= " $search_sql";
 
-		if ( $this->role ) {
-			$this->query_from .= " INNER JOIN $wpdb->usermeta ON $wpdb->users.ID = $wpdb->usermeta.user_id";
-			$this->query_where .= $wpdb->prepare(" AND $wpdb->usermeta.meta_key = '{$wpdb->prefix}capabilities' AND $wpdb->usermeta.meta_value LIKE %s", '%' . $this->role . '%');
-		} elseif ( is_multisite() ) {
-			$level_key = $wpdb->get_blog_prefix() . 'capabilities'; // wpmu site admins don't have user_levels
-			$this->query_from .= ", $wpdb->usermeta";
-			$this->query_where .= " AND $wpdb->users.ID = $wpdb->usermeta.user_id AND meta_key = '{$level_key}'";
-		}
-
-		do_action_ref_array( 'pre_user_search', array( &$this ) );
 	}
 
 	/**
@@ -705,11 +677,10 @@ class WP_User_Search {
 	 */
 	function query() {
 		global $wpdb;
-
-		$this->results = $wpdb->get_col("SELECT DISTINCT($wpdb->users.ID)" . $this->query_from . $this->query_where . $this->query_orderby . $this->query_limit);
+		$this->results = $wpdb->get_col('SELECT ID ' . $this->query_from_where . $this->query_sort . $this->query_limit);
 
 		if ( $this->results )
-			$this->total_users_for_query = $wpdb->get_var("SELECT COUNT(DISTINCT($wpdb->users.ID))" . $this->query_from . $this->query_where); // no limit
+			$this->total_users_for_query = $wpdb->get_var('SELECT COUNT(ID) ' . $this->query_from_where); // no limit
 		else
 			$this->search_errors = new WP_Error('no_matching_users_found', __('No matching users were found!'));
 	}
@@ -821,33 +792,34 @@ endif;
 add_action('admin_init', 'default_password_nag_handler');
 function default_password_nag_handler($errors = false) {
 	global $user_ID;
-	if ( ! get_user_option('default_password_nag') ) //Short circuit it.
+	if ( ! get_usermeta($user_ID, 'default_password_nag') ) //Short circuit it.
 		return;
 
 	//get_user_setting = JS saved UI setting. else no-js-falback code.
 	if ( 'hide' == get_user_setting('default_password_nag') || isset($_GET['default_password_nag']) && '0' == $_GET['default_password_nag'] ) {
 		delete_user_setting('default_password_nag');
-		update_user_option($user_ID, 'default_password_nag', false, true);
+		update_usermeta($user_ID, 'default_password_nag', false);
 	}
 }
 
 add_action('profile_update', 'default_password_nag_edit_user', 10, 2);
 function default_password_nag_edit_user($user_ID, $old_data) {
 	global $user_ID;
-	if ( ! get_user_option('default_password_nag') ) //Short circuit it.
+	if ( ! get_usermeta($user_ID, 'default_password_nag') ) //Short circuit it.
 		return;
 
 	$new_data = get_userdata($user_ID);
 
 	if ( $new_data->user_pass != $old_data->user_pass ) { //Remove the nag if the password has been changed.
 		delete_user_setting('default_password_nag');
-		update_user_option($user_ID, 'default_password_nag', false, true);
+		update_usermeta($user_ID, 'default_password_nag', false);
 	}
 }
 
 add_action('admin_notices', 'default_password_nag');
 function default_password_nag() {
-	if ( ! get_user_option('default_password_nag') ) //Short circuit it.
+	global $user_ID;
+	if ( ! get_usermeta($user_ID, 'default_password_nag') )
 		return;
 
 	echo '<div class="error default-password-nag"><p>';

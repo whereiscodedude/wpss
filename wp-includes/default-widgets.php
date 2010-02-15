@@ -406,7 +406,7 @@ class WP_Widget_Text extends WP_Widget {
 
 		<textarea class="widefat" rows="16" cols="20" id="<?php echo $this->get_field_id('text'); ?>" name="<?php echo $this->get_field_name('text'); ?>"><?php echo $text; ?></textarea>
 
-		<p><input id="<?php echo $this->get_field_id('filter'); ?>" name="<?php echo $this->get_field_name('filter'); ?>" type="checkbox" <?php checked(isset($instance['filter']) ? $instance['filter'] : 0); ?> />&nbsp;<label for="<?php echo $this->get_field_id('filter'); ?>"><?php _e('Automatically add paragraphs'); ?></label></p>
+		<p><input id="<?php echo $this->get_field_id('filter'); ?>" name="<?php echo $this->get_field_name('filter'); ?>" type="checkbox" <?php checked(isset($instance['filter']) ? $instance['filter'] : 0); ?> />&nbsp;<label for="<?php echo $this->get_field_id('filter'); ?>"><?php _e('Automatically add paragraphs.'); ?></label></p>
 <?php
 	}
 }
@@ -447,7 +447,7 @@ class WP_Widget_Categories extends WP_Widget {
 	var dropdown = document.getElementById("cat");
 	function onCatChange() {
 		if ( dropdown.options[dropdown.selectedIndex].value > 0 ) {
-			location.href = "<?php echo home_url(); ?>/?cat="+dropdown.options[dropdown.selectedIndex].value;
+			location.href = "<?php echo get_option('home'); ?>/?cat="+dropdown.options[dropdown.selectedIndex].value;
 		}
 	}
 	dropdown.onchange = onCatChange;
@@ -472,9 +472,9 @@ class WP_Widget_Categories extends WP_Widget {
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['count'] = !empty($new_instance['count']) ? 1 : 0;
-		$instance['hierarchical'] = !empty($new_instance['hierarchical']) ? 1 : 0;
-		$instance['dropdown'] = !empty($new_instance['dropdown']) ? 1 : 0;
+		$instance['count'] = $new_instance['count'] ? 1 : 0;
+		$instance['hierarchical'] = $new_instance['hierarchical'] ? 1 : 0;
+		$instance['dropdown'] = $new_instance['dropdown'] ? 1 : 0;
 
 		return $instance;
 	}
@@ -739,7 +739,7 @@ class WP_Widget_RSS extends WP_Widget {
 	}
 
 	function update($new_instance, $old_instance) {
-		$testurl = ( isset($new_instance['url']) && ($new_instance['url'] != $old_instance['url']) );
+		$testurl = $new_instance['url'] != $old_instance['url'];
 		return wp_widget_rss_process( $new_instance, $testurl );
 	}
 
@@ -790,7 +790,7 @@ function wp_widget_rss_output( $rss, $args = array() ) {
 
 	if ( !$rss->get_item_quantity() ) {
 		echo '<ul><li>' . __( 'An error has occurred; the feed is probably down. Try again later.' ) . '</li></ul>';
-		$rss->__destruct();
+		$rss->__destruct(); 
 		unset($rss);
 		return;
 	}
@@ -843,7 +843,7 @@ function wp_widget_rss_output( $rss, $args = array() ) {
 		}
 	}
 	echo '</ul>';
-	$rss->__destruct();
+	$rss->__destruct(); 
 	unset($rss);
 }
 
@@ -939,9 +939,9 @@ function wp_widget_rss_process( $widget_rss, $check_feed = true ) {
 		$items = 10;
 	$url           = esc_url_raw(strip_tags( $widget_rss['url'] ));
 	$title         = trim(strip_tags( $widget_rss['title'] ));
-	$show_summary  = isset($widget_rss['show_summary']) ? (int) $widget_rss['show_summary'] : 0;
-	$show_author   = isset($widget_rss['show_author']) ? (int) $widget_rss['show_author'] :0;
-	$show_date     = isset($widget_rss['show_date']) ? (int) $widget_rss['show_date'] : 0;
+	$show_summary  = (int) $widget_rss['show_summary'];
+	$show_author   = (int) $widget_rss['show_author'];
+	$show_date     = (int) $widget_rss['show_date'];
 
 	if ( $check_feed ) {
 		$rss = fetch_feed($url);

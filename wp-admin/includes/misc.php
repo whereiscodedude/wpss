@@ -120,9 +120,6 @@ function insert_with_markers( $filename, $marker, $insertion ) {
  * @since unknown
  */
 function save_mod_rewrite_rules() {
-	if ( is_multisite() )
-		return;
-
 	global $wp_rewrite;
 
 	$home_path = get_home_path();
@@ -230,28 +227,26 @@ function url_shorten( $url ) {
 }
 
 /**
- * Resets global variables based on $_GET and $_POST
- *
- * This function resets global variables based on the names passed
- * in the $vars array to the value of $_POST[$var] or $_GET[$var] or ''
- * if neither is defined.
+ * {@internal Missing Short Description}}
  *
  * @since unknown
  *
- * @param array $vars An array of globals to reset.
+ * @param unknown_type $vars
  */
 function wp_reset_vars( $vars ) {
 	for ( $i=0; $i<count( $vars ); $i += 1 ) {
 		$var = $vars[$i];
 		global $$var;
 
-		if ( empty( $_POST[$var] ) ) {
-			if ( empty( $_GET[$var] ) )
-				$$var = '';
-			else
-				$$var = $_GET[$var];
-		} else {
-			$$var = $_POST[$var];
+		if (!isset( $$var ) ) {
+			if ( empty( $_POST["$var"] ) ) {
+				if ( empty( $_GET["$var"] ) )
+					$$var = '';
+				else
+					$$var = $_GET["$var"];
+			} else {
+				$$var = $_POST["$var"];
+			}
 		}
 	}
 }
@@ -264,8 +259,8 @@ function wp_reset_vars( $vars ) {
  * @param unknown_type $message
  */
 function show_message($message) {
-	if ( is_wp_error($message) ){
-		if ( $message->get_error_data() )
+	if( is_wp_error($message) ){
+		if( $message->get_error_data() )
 			$message = $message->get_error_message() . ': ' . $message->get_error_data();
 		else
 			$message = $message->get_error_message();
@@ -400,14 +395,9 @@ function set_screen_options() {
 
 		$option = str_replace('-', '_', $option);
 
-		$map_option = $option;
-		$type = str_replace('edit_', '', $map_option);
-		$type = str_replace('_per_page', '', $type);
-		if ( in_array($type, get_post_types()) )
-			$map_option = 'edit_per_page';
-
-		switch ( $map_option ) {
+		switch ( $option ) {
 			case 'edit_per_page':
+			case 'edit_pages_per_page':
 			case 'edit_comments_per_page':
 			case 'upload_per_page':
 			case 'categories_per_page':

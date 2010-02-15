@@ -50,8 +50,6 @@ function add_js() {
 }
 add_filter('admin_head', 'add_js');
 
-add_contextual_help($current_screen, __('<a href="http://codex.wordpress.org/Settings_General_SubPanel" target="_blank">General Settings</a>'));
-
 include('./admin-header.php');
 ?>
 
@@ -72,7 +70,6 @@ include('./admin-header.php');
 <td><input name="blogdescription" type="text" id="blogdescription"  value="<?php form_option('blogdescription'); ?>" class="regular-text" />
 <span class="description"><?php _e('In a few words, explain what this blog is about.') ?></span></td>
 </tr>
-<?php if ( !is_multisite() ) { ?>
 <tr valign="top">
 <th scope="row"><label for="siteurl"><?php _e('WordPress address (URL)') ?></label></th>
 <td><input name="siteurl" type="text" id="siteurl" value="<?php form_option('siteurl'); ?>" class="regular-text code<?php if ( defined( 'WP_SITEURL' ) ) : ?> disabled" disabled="disabled"<?php else: ?>"<?php endif; ?> /></td>
@@ -100,13 +97,6 @@ include('./admin-header.php');
 <select name="default_role" id="default_role"><?php wp_dropdown_roles( get_option('default_role') ); ?></select>
 </td>
 </tr>
-<?php } else { ?>
-<tr valign="top">
-<th scope="row"><label for="new_admin_email"><?php _e('E-mail address') ?> </label></th>
-<td><input name="new_admin_email" type="text" id="new_admin_email" value="<?php form_option('admin_email'); ?>" class="regular-text code" />
-<span class="setting-description"><?php _e('This address is used for admin purposes.') ?> <?php _e('If you change this we will send you an email at your new address to confirm it. <strong>The new address will not become active until confirmed.</strong>') ?></span></td>
-</tr>
-<?php } ?>
 <tr>
 <?php
 if ( !wp_timezone_supported() ) : // no magic timezone support here
@@ -156,7 +146,7 @@ $check_zone_info = true;
 if ( false !== strpos($tzstring,'Etc/GMT') )
 	$tzstring = '';
 
-if (empty($tzstring)) { // Create a UTC+- zone if no timezone string exists
+if (empty($tzstring)) { // set the Etc zone if no timezone string exists
 	$check_zone_info = false;
 	if ( 0 == $current_offset )
 		$tzstring = 'UTC+0';
@@ -291,29 +281,6 @@ endfor;
 </select></td>
 </tr>
 <?php do_settings_fields('general', 'default'); ?>
-<?php
-
-$lang_files = array();
-if ( is_multisite() && is_dir( ABSPATH . LANGDIR ) && $dh = opendir( ABSPATH . LANGDIR ) ) {
-	while ( ( $lang_file = readdir( $dh ) ) !== false ) {
-		if ( substr( $lang_file, -3 ) == '.mo' )
-			$lang_files[] = $lang_file;
-	}
-}
-
-if ( !empty($lang_files) ) {
-?>
-	<tr valign="top">
-		<th width="33%" scope="row"><?php _e('Blog language:') ?></th>
-		<td>
-			<select name="WPLANG" id="WPLANG">
-				<?php mu_dropdown_languages( $lang_files, get_option('WPLANG') ); ?>
-			</select>
-		</td>
-	</tr>
-<?php
-} // languages
-?>
 </table>
 
 <?php do_settings_sections('general'); ?>

@@ -15,10 +15,8 @@
  */
 $self = preg_replace('|^.*/wp-admin/|i', '', $_SERVER['PHP_SELF']);
 $self = preg_replace('|^.*/plugins/|i', '', $self);
-$self = preg_replace('|^.*/mu-plugins/|i', '', $self);
 
 global $menu, $submenu, $parent_file; //For when admin-header is included from within a function.
-$parent_file = apply_filters("parent_file", $parent_file); // For plugins to move submenu tabs around.
 
 get_admin_page_parent();
 
@@ -47,7 +45,7 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 		if ( !empty($submenu[$item[2]]) )
 			$class[] = 'wp-has-submenu';
 
-		if ( ( $parent_file && $item[2] == $parent_file ) || ( false === strpos($parent_file, '?') && strcmp($self, $item[2]) == 0 ) ) {
+		if ( ( $parent_file && $item[2] == $parent_file ) || strcmp($self, $item[2]) == 0 ) {
 			if ( !empty($submenu[$item[2]]) )
 				$class[] = 'wp-has-current-submenu wp-menu-open';
 			else

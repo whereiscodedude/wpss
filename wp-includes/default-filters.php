@@ -185,11 +185,6 @@ add_action( 'wp_head',             'wp_generator'                         );
 add_action( 'wp_head',             'rel_canonical'                        );
 add_action( 'wp_footer',           'wp_print_footer_scripts'              );
 
-// Feed Generator Tags
-foreach ( array( 'rss2_head', 'commentsrss2_head', 'rss_head', 'rdf_header', 'atom_head', 'comments_atom_head', 'opml_head', 'app_head' ) as $action ) {
-	add_action( $action, 'the_generator' );
-}
-
 // WP Cron
 if ( !defined( 'DOING_CRON' ) )
 	add_action( 'sanitize_comment_cookies', 'wp_cron' );
@@ -230,6 +225,3 @@ add_action( 'init',               '_show_post_preview'         );
 
 // Timezone
 add_filter( 'pre_option_gmt_offset','wp_timezone_override_offset' );
-
-// Admin Themes
-add_action('admin_init', 'register_admin_color_themes', 1);

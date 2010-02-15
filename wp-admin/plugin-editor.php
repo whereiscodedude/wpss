@@ -18,7 +18,6 @@ $parent_file = 'plugins.php';
 wp_reset_vars(array('action', 'redirect', 'profile', 'error', 'warning', 'a', 'file', 'plugin'));
 
 wp_admin_css( 'theme-editor' );
-wp_enqueue_script( 'tabby' );
 
 $plugins = get_plugins();
 
@@ -124,9 +123,9 @@ default:
 
 	?>
 <?php if (isset($_GET['a'])) : ?>
- <div id="message" class="updated"><p><?php _e('File edited successfully.') ?></p></div>
+ <div id="message" class="updated fade"><p><?php _e('File edited successfully.') ?></p></div>
 <?php elseif (isset($_GET['phperror'])) : ?>
- <div id="message" class="updated"><p><?php _e('This plugin has been deactivated because your changes resulted in a <strong>fatal error</strong>.') ?></p>
+ <div id="message" class="updated fade"><p><?php _e('This plugin has been deactivated because your changes resulted in a <strong>fatal error</strong>.') ?></p>
 	<?php
 		if ( wp_verify_nonce($_GET['_error_nonce'], 'plugin-activation-error_' . $file) ) { ?>
 	<iframe style="border:0" width="100%" height="70px" src="<?php bloginfo('wpurl'); ?>/wp-admin/plugins.php?action=error_scrape&amp;plugin=<?php echo esc_attr($file); ?>&amp;_wpnonce=<?php echo esc_attr($_GET['_error_nonce']); ?>"></iframe>
@@ -209,7 +208,7 @@ foreach ( $plugin_files as $plugin_file ) :
 		<div id="documentation"><label for="docs-list"><?php _e('Documentation:') ?></label> <?php echo $docs_select ?> <input type="button" class="button" value="<?php esc_attr_e( 'Lookup' ) ?> " onclick="if ( '' != jQuery('#docs-list').val() ) { window.open( 'http://api.wordpress.org/core/handbook/1.0/?function=' + escape( jQuery( '#docs-list' ).val() ) + '&amp;locale=<?php echo urlencode( get_locale() ) ?>&amp;version=<?php echo urlencode( $wp_version ) ?>&amp;redirect=true'); }" /></div>
 		<?php endif; ?>
 <?php if ( is_writeable($real_file) ) : ?>
-	<?php if ( in_array( $file, (array) get_option( 'active_plugins', array() ) ) ) { ?>
+	<?php if ( in_array($file, (array) get_option('active_plugins')) ) { ?>
 		<p><?php _e('<strong>Warning:</strong> Making changes to active plugins is not recommended.  If your changes cause a fatal error, the plugin will be automatically deactivated.'); ?></p>
 	<?php } ?>
 	<p class="submit">
@@ -230,7 +229,7 @@ foreach ( $plugin_files as $plugin_file ) :
 /* <![CDATA[ */
 jQuery(document).ready(function($){
 	$('#template').submit(function(){ $('#scrollto').val( $('#newcontent').scrollTop() ); });
-	$('#newcontent').scrollTop( $('#scrollto').val() ).tabby();
+	$('#newcontent').scrollTop( $('#scrollto').val() );
 });
 /* ]]> */
 </script>

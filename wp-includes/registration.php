@@ -98,7 +98,7 @@ function validate_username( $username ) {
  * @uses do_action() Calls 'user_register' hook when creating a new user giving the user's ID
  *
  * @param array $userdata An array of user data.
- * @return int|WP_Error The newly created user's ID or a WP_Error object if the user could not be created.
+ * @return int The newly created user's ID.
  */
 function wp_insert_user($userdata) {
 	global $wpdb;
@@ -119,15 +119,6 @@ function wp_insert_user($userdata) {
 	$user_login = sanitize_user($user_login, true);
 	$user_login = apply_filters('pre_user_login', $user_login);
 
-	//Remove any non-printable chars from the login string to see if we have ended up with an empty username
-	$user_login = trim($user_login);
-
-	if ( empty($user_login) )
-		return new WP_Error('empty_user_login', __('Cannot create a user with an empty login name.') );
-
-	if ( !$update && username_exists( $user_login ) )
-		return new WP_Error('existing_user_login', __('This username is already registered.') );
-
 	if ( empty($user_nicename) )
 		$user_nicename = sanitize_title( $user_login );
 	$user_nicename = apply_filters('pre_user_nicename', $user_nicename);
@@ -139,9 +130,6 @@ function wp_insert_user($userdata) {
 	if ( empty($user_email) )
 		$user_email = '';
 	$user_email = apply_filters('pre_user_email', $user_email);
-
-	if ( !$update && email_exists($user_email) )
-		return new WP_Error('existing_user_email', __('This email address is already registered.') );
 
 	if ( empty($display_name) )
 		$display_name = $user_login;
@@ -270,8 +258,6 @@ function wp_update_user($userdata) {
 		$plaintext_pass = $userdata['user_pass'];
 		$userdata['user_pass'] = wp_hash_password($userdata['user_pass']);
 	}
-
-	wp_cache_delete($user[ 'user_email' ], 'useremail');
 
 	// Merge old and new fields with new fields overwriting old ones.
 	$userdata = array_merge($user, $userdata);

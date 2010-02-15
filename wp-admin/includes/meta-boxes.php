@@ -13,9 +13,7 @@ function post_submit_meta_box($post) {
 	global $action;
 
 	$post_type = $post->post_type;
-    $post_type_object = get_post_type_object($post_type);
-	$type_cap = $post_type_object->capability_type;
-	$can_publish = current_user_can("publish_${type_cap}s");
+	$can_publish = current_user_can("publish_${post_type}s");
 ?>
 <div class="submitbox" id="submitpost">
 
@@ -71,11 +69,7 @@ switch ( $post->post_status ) {
 		_e('Pending Review');
 		break;
 	case 'draft':
-	case 'auto-draft':
 		_e('Draft');
-		break;
-	case 'auto-draft':
-		_e('Unsaved');
 		break;
 }
 ?>
@@ -84,7 +78,7 @@ switch ( $post->post_status ) {
 <a href="#post_status" <?php if ( 'private' == $post->post_status ) { ?>style="display:none;" <?php } ?>class="edit-post-status hide-if-no-js" tabindex='4'><?php _e('Edit') ?></a>
 
 <div id="post-status-select" class="hide-if-js">
-<input type="hidden" name="hidden_post_status" id="hidden_post_status" value="<?php echo esc_attr( ('auto-draft' == $post->post_status ) ? 'draft' : $post->post_status); ?>" />
+<input type="hidden" name="hidden_post_status" id="hidden_post_status" value="<?php echo esc_attr($post->post_status); ?>" />
 <select name='post_status' id='post_status' tabindex='4'>
 <?php if ( 'publish' == $post->post_status ) : ?>
 <option<?php selected( $post->post_status, 'publish' ); ?> value='publish'><?php _e('Published') ?></option>
@@ -94,11 +88,7 @@ switch ( $post->post_status ) {
 <option<?php selected( $post->post_status, 'future' ); ?> value='future'><?php _e('Scheduled') ?></option>
 <?php endif; ?>
 <option<?php selected( $post->post_status, 'pending' ); ?> value='pending'><?php _e('Pending Review') ?></option>
-<?php if ( 'auto-draft' == $post->post_status ) : ?>
-<option<?php selected( $post->post_status, 'auto-draft' ); ?> value='draft'><?php _e('Draft') ?></option>
-<?php else : ?>
 <option<?php selected( $post->post_status, 'draft' ); ?> value='draft'><?php _e('Draft') ?></option>
-<?php endif; ?>
 </select>
  <a href="#post_status" class="save-post-status hide-if-no-js button"><?php _e('OK'); ?></a>
  <a href="#post_status" class="cancel-post-status hide-if-no-js"><?php _e('Cancel'); ?></a>
@@ -194,7 +184,7 @@ if ( $can_publish ) : // Contributors don't get to choose the date of publish ?>
 <?php do_action('post_submitbox_start'); ?>
 <div id="delete-action">
 <?php
-if ( current_user_can( "delete_${type_cap}", $post->ID ) ) {
+if ( current_user_can( "delete_${post_type}", $post->ID ) ) {
 	if ( !EMPTY_TRASH_DAYS ) {
 		$delete_url = wp_nonce_url( add_query_arg( array('action' => 'delete', 'post' => $post->ID) ), "delete-${post_type}_{$post->ID}" );
 		$delete_text = __('Delete Permanently');
@@ -247,8 +237,6 @@ if ( !in_array( $post->post_status, array('publish', 'future', 'private') ) || 0
 function post_tags_meta_box($post, $box) {
 	$tax_name = esc_attr(substr($box['id'], 8));
 	$taxonomy = get_taxonomy($tax_name);
-	if ( !current_user_can($taxonomy->manage_cap) ) // @todo: Display the terms, do not edit.
-		return;
 	$helps = isset($taxonomy->helps) ? esc_attr($taxonomy->helps) : __('Separate tags with commas.');
 ?>
 <div class="tagsdiv" id="<?php echo $tax_name; ?>">
@@ -278,48 +266,38 @@ function post_tags_meta_box($post, $box) {
  *
  * @param object $post
  */
-function post_categories_meta_box( $post, $box ) {
-	$defaults = array('taxonomy' => 'category');
- 	if ( !isset($box['args']) || !is_array($box['args']) )
- 		$args = array();
-	else
-		$args = $box['args'];
- 	extract( wp_parse_args($args, $defaults), EXTR_SKIP );
-	$tax = get_taxonomy($taxonomy);
+function post_categories_meta_box($post) {
+?>
+<ul id="category-tabs">
+	<li class="tabs"><a href="#categories-all" tabindex="3"><?php _e( 'All Categories' ); ?></a></li>
+	<li class="hide-if-no-js"><a href="#categories-pop" tabindex="3"><?php _e( 'Most Used' ); ?></a></li>
+</ul>
 
- 	?>
- 	<div id="taxonomy-<?php echo $taxonomy; ?>" class="categorydiv">
- 		<ul id="<?php echo $taxonomy; ?>-tabs" class="category-tabs">
- 			<li class="tabs"><a href="#<?php echo $taxonomy; ?>-all" tabindex="3"><?php _e( 'All Categories' ); ?></a></li>
- 			<li class="hide-if-no-js"><a href="#<?php echo $taxonomy; ?>-pop" tabindex="3"><?php _e( 'Most Used' ); ?></a></li>
- 		</ul>
+<div id="categories-pop" class="tabs-panel" style="display: none;">
+	<ul id="categorychecklist-pop" class="categorychecklist form-no-clear" >
+<?php $popular_ids = wp_popular_terms_checklist('category'); ?>
+	</ul>
+</div>
 
-		<div id="<?php echo $taxonomy; ?>-pop" class="tabs-panel" style="display: none;">
-			<ul id="<?php echo $taxonomy; ?>checklist-pop" class="categorychecklist form-no-clear" >
-				<?php $popular_ids = wp_popular_terms_checklist($taxonomy); ?>
-			</ul>
-		</div>
+<div id="categories-all" class="tabs-panel">
+	<ul id="categorychecklist" class="list:category categorychecklist form-no-clear">
+<?php wp_category_checklist($post->ID, false, false, $popular_ids) ?>
+	</ul>
+</div>
 
-		<div id="<?php echo $taxonomy; ?>-all" class="tabs-panel">
-			<ul id="<?php echo $taxonomy; ?>checklist" class="list:<?php echo $taxonomy?> categorychecklist form-no-clear">
-				<?php wp_terms_checklist($post->ID, array( 'taxonomy' => $taxonomy, 'popular_cats' => $popular_ids ) ) ?>
-			</ul>
-		</div>
+<?php if ( current_user_can('manage_categories') ) : ?>
+<div id="category-adder" class="wp-hidden-children">
+	<h4><a id="category-add-toggle" href="#category-add" class="hide-if-no-js" tabindex="3"><?php _e( '+ Add New Category' ); ?></a></h4>
+	<p id="category-add" class="wp-hidden-child">
+	<label class="screen-reader-text" for="newcat"><?php _e( 'Add New Category' ); ?></label><input type="text" name="newcat" id="newcat" class="form-required form-input-tip" value="<?php esc_attr_e( 'New category name' ); ?>" tabindex="3" aria-required="true"/>
+	<label class="screen-reader-text" for="newcat_parent"><?php _e('Parent category'); ?>:</label><?php wp_dropdown_categories( array( 'hide_empty' => 0, 'name' => 'newcat_parent', 'orderby' => 'name', 'hierarchical' => 1, 'show_option_none' => __('Parent category') ) ); ?>
+	<input type="button" id="category-add-sumbit" class="add:categorychecklist:category-add button" value="<?php esc_attr_e( 'Add' ); ?>" tabindex="3" />
+<?php	wp_nonce_field( 'add-category', '_ajax_nonce', false ); ?>
+	<span id="category-ajax-response"></span></p>
+</div>
+<?php
+endif;
 
-    <?php if ( current_user_can($tax->edit_cap) ) : ?>
- 			<div id="<?php echo $taxonomy; ?>-adder" class="wp-hidden-children">
- 				<h4><a id="<?php echo $taxonomy; ?>-add-toggle" href="#<?php echo $taxonomy; ?>-add" class="hide-if-no-js" tabindex="3"><?php _e( '+ Add New Category' ); ?></a></h4>
- 				<p id="<?php echo $taxonomy; ?>-add" class="category-add wp-hidden-child">
- 					<label class="screen-reader-text" for="new<?php echo $taxonomy; ?>"><?php _e( 'Add New Category' ); ?></label><input type="text" name="new<?php echo $taxonomy; ?>" id="new<?php echo $taxonomy; ?>" class="form-required form-input-tip" value="<?php esc_attr_e( 'New category name' ); ?>" tabindex="3" aria-required="true"/>
- 					<label class="screen-reader-text" for="new<?php echo $taxonomy; ?>_parent"><?php _e('Parent category'); ?>:</label><?php wp_dropdown_categories( array( 'taxonomy' => $taxonomy, 'hide_empty' => 0, 'name' => 'new'.$taxonomy.'_parent', 'orderby' => 'name', 'hierarchical' => 1, 'show_option_none' => __('Parent category'), 'tab_index' => 3 ) ); ?>
- 					<input type="button" id="<?php echo $taxonomy; ?>-add-submit" class="add:<?php echo $taxonomy ?>checklist:<?php echo $taxonomy ?>-add button category-add-sumbit" value="<?php esc_attr_e( 'Add' ); ?>" tabindex="3" />
- 					<?php wp_nonce_field( 'add-'.$taxonomy, '_ajax_nonce', false ); ?>
- 					<span id="<?php echo $taxonomy; ?>-ajax-response"></span>
- 				</p>
- 			</div>
- 		<?php endif; ?>
- 	</div>
- 	<?php
 }
 
 
@@ -398,7 +376,7 @@ function post_comment_status_meta_box($post) {
 <input name="advanced_view" type="hidden" value="1" />
 <p class="meta-options">
 	<label for="comment_status" class="selectit"><input name="comment_status" type="checkbox" id="comment_status" value="open" <?php checked($post->comment_status, 'open'); ?> /><?php _e('Allow Comments.') ?></label><br />
-	<label for="ping_status" class="selectit"><input name="ping_status" type="checkbox" id="ping_status" value="open" <?php checked($post->ping_status, 'open'); ?> /><?php printf( __('Allow <a href="%s" target="_blank">trackbacks and pingbacks</a> on this page.'),__('http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments')); ?></label>
+	<label for="ping_status" class="selectit"><input name="ping_status" type="checkbox" id="ping_status" value="open" <?php checked($post->ping_status, 'open'); ?> /><?php printf( __('Allow <a href="%s" target="_blank">trackbacks and pingbacks</a> on this page.'),_x('http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments','Url to codex article on Managing Comments')); ?></label>
 </p>
 <?php
 }
@@ -636,13 +614,13 @@ function link_target_meta_box($link) { ?>
 <fieldset><legend class="screen-reader-text"><span><?php _e('Target') ?></span></legend>
 <p><label for="link_target_blank" class="selectit">
 <input id="link_target_blank" type="radio" name="link_target" value="_blank" <?php echo ( isset( $link->link_target ) && ($link->link_target == '_blank') ? 'checked="checked"' : ''); ?> />
-<?php _e('<code>_blank</code> &mdash; new window or tab.'); ?></label></p>
+<?php _e('<code>_blank</code> - new window or tab.'); ?></label></p>
 <p><label for="link_target_top" class="selectit">
 <input id="link_target_top" type="radio" name="link_target" value="_top" <?php echo ( isset( $link->link_target ) && ($link->link_target == '_top') ? 'checked="checked"' : ''); ?> />
-<?php _e('<code>_top</code> &mdash; current window or tab, with no frames.'); ?></label></p>
+<?php _e('<code>_top</code> - current window or tab, with no frames.'); ?></label></p>
 <p><label for="link_target_none" class="selectit">
 <input id="link_target_none" type="radio" name="link_target" value="" <?php echo ( isset( $link->link_target ) && ($link->link_target == '') ? 'checked="checked"' : ''); ?> />
-<?php _e('<code>_none</code> &mdash; same window or tab.'); ?></label></p>
+<?php _e('<code>_none</code> - same window or tab.'); ?></label></p>
 </fieldset>
 <p><?php _e('Choose the target frame for your link.'); ?></p>
 <?php
@@ -656,13 +634,10 @@ function link_target_meta_box($link) { ?>
  *
  * @param string $class
  * @param string $value
- * @param mixed $deprecated Never used.
+ * @param mixed $deprecated Not used.
  */
-function xfn_check( $class, $value = '', $deprecated = '' ) {
+function xfn_check($class, $value = '', $deprecated = '') {
 	global $link;
-
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0' ); // Never implemented
 
 	$link_rel = isset( $link->link_rel ) ? $link->link_rel : ''; // In PHP 5.3: $link_rel = $link->link_rel ?: '';
 	$rels = preg_split('/\s+/', $link_rel);
@@ -709,13 +684,13 @@ function link_xfn_meta_box($link) {
 					<th scope="row"> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('friendship') ?> </th>
 					<td><fieldset><legend class="screen-reader-text"><span> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('friendship') ?> </span></legend>
 						<label for="contact">
-						<input class="valinp" type="radio" name="friendship" value="contact" id="contact" <?php xfn_check('friendship', 'contact'); ?> /> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('contact') ?></label>
+						<input class="valinp" type="radio" name="friendship" value="contact" id="contact" <?php xfn_check('friendship', 'contact', 'radio'); ?> /> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('contact') ?></label>
 						<label for="acquaintance">
-						<input class="valinp" type="radio" name="friendship" value="acquaintance" id="acquaintance" <?php xfn_check('friendship', 'acquaintance'); ?> />  <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('acquaintance') ?></label>
+						<input class="valinp" type="radio" name="friendship" value="acquaintance" id="acquaintance" <?php xfn_check('friendship', 'acquaintance', 'radio'); ?> />  <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('acquaintance') ?></label>
 						<label for="friend">
-						<input class="valinp" type="radio" name="friendship" value="friend" id="friend" <?php xfn_check('friendship', 'friend'); ?> /> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('friend') ?></label>
+						<input class="valinp" type="radio" name="friendship" value="friend" id="friend" <?php xfn_check('friendship', 'friend', 'radio'); ?> /> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('friend') ?></label>
 						<label for="friendship">
-						<input name="friendship" type="radio" class="valinp" value="" id="friendship" <?php xfn_check('friendship'); ?> /> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('none') ?></label>
+						<input name="friendship" type="radio" class="valinp" value="" id="friendship" <?php xfn_check('friendship', '', 'radio'); ?> /> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('none') ?></label>
 					</fieldset></td>
 				</tr>
 				<tr>
@@ -741,13 +716,13 @@ function link_xfn_meta_box($link) {
 					<th scope="row"> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('geographical') ?> </th>
 					<td><fieldset><legend class="screen-reader-text"><span> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('geographical') ?> </span></legend>
 						<label for="co-resident">
-						<input class="valinp" type="radio" name="geographical" value="co-resident" id="co-resident" <?php xfn_check('geographical', 'co-resident'); ?> />
+						<input class="valinp" type="radio" name="geographical" value="co-resident" id="co-resident" <?php xfn_check('geographical', 'co-resident', 'radio'); ?> />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('co-resident') ?></label>
 						<label for="neighbor">
-						<input class="valinp" type="radio" name="geographical" value="neighbor" id="neighbor" <?php xfn_check('geographical', 'neighbor'); ?> />
+						<input class="valinp" type="radio" name="geographical" value="neighbor" id="neighbor" <?php xfn_check('geographical', 'neighbor', 'radio'); ?> />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('neighbor') ?></label>
 						<label for="geographical">
-						<input class="valinp" type="radio" name="geographical" value="" id="geographical" <?php xfn_check('geographical'); ?> />
+						<input class="valinp" type="radio" name="geographical" value="" id="geographical" <?php xfn_check('geographical', '', 'radio'); ?> />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('none') ?></label>
 					</fieldset></td>
 				</tr>
@@ -755,22 +730,22 @@ function link_xfn_meta_box($link) {
 					<th scope="row"> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('family') ?> </th>
 					<td><fieldset><legend class="screen-reader-text"><span> <?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('family') ?> </span></legend>
 						<label for="child">
-						<input class="valinp" type="radio" name="family" value="child" id="child" <?php xfn_check('family', 'child'); ?>  />
+						<input class="valinp" type="radio" name="family" value="child" id="child" <?php xfn_check('family', 'child', 'radio'); ?>  />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('child') ?></label>
 						<label for="kin">
-						<input class="valinp" type="radio" name="family" value="kin" id="kin" <?php xfn_check('family', 'kin'); ?>  />
+						<input class="valinp" type="radio" name="family" value="kin" id="kin" <?php xfn_check('family', 'kin', 'radio'); ?>  />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('kin') ?></label>
 						<label for="parent">
-						<input class="valinp" type="radio" name="family" value="parent" id="parent" <?php xfn_check('family', 'parent'); ?> />
+						<input class="valinp" type="radio" name="family" value="parent" id="parent" <?php xfn_check('family', 'parent', 'radio'); ?> />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('parent') ?></label>
 						<label for="sibling">
-						<input class="valinp" type="radio" name="family" value="sibling" id="sibling" <?php xfn_check('family', 'sibling'); ?> />
+						<input class="valinp" type="radio" name="family" value="sibling" id="sibling" <?php xfn_check('family', 'sibling', 'radio'); ?> />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('sibling') ?></label>
 						<label for="spouse">
-						<input class="valinp" type="radio" name="family" value="spouse" id="spouse" <?php xfn_check('family', 'spouse'); ?> />
+						<input class="valinp" type="radio" name="family" value="spouse" id="spouse" <?php xfn_check('family', 'spouse', 'radio'); ?> />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('spouse') ?></label>
 						<label for="family">
-						<input class="valinp" type="radio" name="family" value="" id="family" <?php xfn_check('family'); ?> />
+						<input class="valinp" type="radio" name="family" value="" id="family" <?php xfn_check('family', '', 'radio'); ?> />
 						<?php /* translators: xfn: http://gmpg.org/xfn/ */ _e('none') ?></label>
 					</fieldset></td>
 				</tr>

@@ -100,11 +100,6 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 		} elseif ( is_page() && !empty($_GET['page_id']) && ! $redirect_url ) {
 			if ( $redirect_url = get_permalink(get_query_var('page_id')) )
 				$redirect['query'] = remove_query_arg('page_id', $redirect['query']);
-		} elseif ( is_page() && isset($wp_query->queried_object) && 'page' == get_option('show_on_front') && $wp_query->queried_object->ID == get_option('page_on_front')  && ! $redirect_url ) {
-			$redirect_url = home_url('/');
-		} elseif ( is_home() && !empty($_GET['page_id']) && 'page' == get_option('show_on_front') && get_query_var('page_id') == get_option('page_for_posts')  && ! $redirect_url ) {
-			if ( $redirect_url = get_permalink(get_option('page_for_posts')) )
-				$redirect['query'] = remove_query_arg('page_id', $redirect['query']);
 		} elseif ( !empty($_GET['m']) && ( is_year() || is_month() || is_day() ) ) {
 			$m = get_query_var('m');
 			switch ( strlen($m) ) {
@@ -136,25 +131,10 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 		} elseif ( is_author() && !empty($_GET['author']) && preg_match( '|^[0-9]+$|', $_GET['author'] ) ) {
 			$author = get_userdata(get_query_var('author'));
 			if ( false !== $author && $redirect_url = get_author_posts_url($author->ID, $author->user_nicename) )
-				$redirect['query'] = remove_query_arg('author', $redirect['query']);
+				$redirect['query'] = remove_query_arg('author', $redirect['author']);
 		}
 
-		// redirect sub-terms of taxonomies to their correct urls
-		if ( is_category() || is_tax() ) {
-			if ( is_category() ) {
-				$taxonomy = 'category';
-				$slug = get_query_var('category_name');
-			} else {
-				$taxonomy = get_query_var('taxonomy');
-				$slug = get_query_var('term');
-			}
-			if ( $tax_url = get_term_link($slug, $taxonomy) ) {
-				$tax_url = parse_url($tax_url);
-				$redirect['path'] = $tax_url['path'];
-			}
-		}
-
-		// paging and feeds
+	// paging and feeds
 		if ( get_query_var('paged') || is_feed() || get_query_var('cpage') ) {
 			if ( !$redirect_url )
 				$redirect_url = $requested_url;
@@ -182,7 +162,7 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 					if ( $paged > 1 && !is_single() ) {
 						$addl_path = ( !empty( $addl_path ) ? trailingslashit($addl_path) : '' ) . user_trailingslashit("page/$paged", 'paged');
 					} elseif ( !is_single() ) {
-						$addl_path = !empty( $addl_path ) ? trailingslashit($addl_path) : '';
+						$addl_path = ( !empty( $addl_path ) ? trailingslashit($addl_path) : '' ) . user_trailingslashit($paged_redirect['path'], 'paged');
 					}
 				} elseif ( $paged > 1 ) {
 					$redirect['query'] = add_query_arg( 'paged', $paged, $redirect['query'] );
@@ -218,7 +198,7 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 		$redirect = @parse_url($redirect_url);
 
 	// www.example.com vs example.com
-	$user_home = @parse_url(home_url());
+	$user_home = @parse_url(get_option('home'));
 	if ( !empty($user_home['host']) )
 		$redirect['host'] = $user_home['host'];
 	if ( empty($user_home['path']) )
@@ -270,10 +250,6 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 		$redirect['path'] = trailingslashit($redirect['path']);
 	}
 
-	// Strip multiple slashes out of the URL
-	if ( strpos($redirect['path'], '//') > -1 )
-		$redirect['path'] = preg_replace('|/+|', '/', $redirect['path']);
-
 	// Always trailing slash the Front Page URL
 	if ( trailingslashit( $redirect['path'] ) == trailingslashit( $user_home['path'] ) )
 		$redirect['path'] = trailingslashit($redirect['path']);
@@ -309,7 +285,7 @@ function redirect_canonical($requested_url=null, $do_redirect=true) {
 			$redirect_url .= '?' . $redirect['query'];
 	}
 
-	if ( !$redirect_url || $redirect_url == $requested_url )
+	if ( $redirect_url == $requested_url )
 		return false;
 
 	// Note that you can use the "redirect_canonical" filter to cancel a canonical redirect for whatever reason by returning FALSE

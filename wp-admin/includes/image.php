@@ -17,12 +17,9 @@
  *
  * @param mixed $file Filename of the original image, Or attachment id.
  * @param int $max_side Maximum length of a single side for the thumbnail.
- * @param mixed $deprecated Never used.
  * @return string Thumbnail path on success, Error string on failure.
  */
 function wp_create_thumbnail( $file, $max_side, $deprecated = '' ) {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '1.2' );
 	$thumbpath = image_resize( $file, $max_side, $max_side );
 	return apply_filters( 'wp_create_thumbnail', $thumbpath );
 }
@@ -41,7 +38,7 @@ function wp_create_thumbnail( $file, $max_side, $deprecated = '' ) {
  * @param int $dst_h The destination height.
  * @param int $src_abs Optional. If the source crop points are absolute.
  * @param string $dst_file Optional. The destination file to write to.
- * @return string|WP_Error|false New filepath on success, WP_Error or false on failure.
+ * @return string New filepath on success, String error message on failure.
  */
 function wp_crop_image( $src_file, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $src_abs = false, $dst_file = false ) {
 	if ( is_numeric( $src_file ) ) // Handle int as attachment ID
@@ -49,8 +46,8 @@ function wp_crop_image( $src_file, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_
 
 	$src = wp_load_image( $src_file );
 
-	if ( !is_resource( $src ) )
-		return new WP_Error( 'error_loading_image', $src, $src_file );
+	if ( !is_resource( $src ))
+		return $src;
 
 	$dst = wp_imagecreatetruecolor( $dst_w, $dst_h );
 
@@ -94,7 +91,7 @@ function wp_generate_attachment_metadata( $attachment_id, $file ) {
 		$imagesize = getimagesize( $file );
 		$metadata['width'] = $imagesize[0];
 		$metadata['height'] = $imagesize[1];
-		list($uwidth, $uheight) = wp_constrain_dimensions($metadata['width'], $metadata['height'], 128, 96);
+		list($uwidth, $uheight) = wp_shrink_dimensions($metadata['width'], $metadata['height']);
 		$metadata['hwstring_small'] = "height='$uheight' width='$uwidth'";
 
 		// Make the file path relative to the upload dir
@@ -102,8 +99,13 @@ function wp_generate_attachment_metadata( $attachment_id, $file ) {
 
 		// make thumbnails and other intermediate sizes
 		global $_wp_additional_image_sizes;
+		$temp_sizes = array('thumbnail', 'medium', 'large'); // Standard sizes
+		if ( isset( $_wp_additional_image_sizes ) && count( $_wp_additional_image_sizes ) )
+			$temp_sizes = array_merge( $temp_sizes, array_keys( $_wp_additional_image_sizes ) );
 
-		foreach ( get_intermediate_image_sizes() as $s ) {
+		$temp_sizes = apply_filters( 'intermediate_image_sizes', $temp_sizes );
+
+		foreach ( $temp_sizes as $s ) {
 			$sizes[$s] = array( 'width' => '', 'height' => '', 'crop' => FALSE );
 			if ( isset( $_wp_additional_image_sizes[$s]['width'] ) )
 				$sizes[$s]['width'] = intval( $_wp_additional_image_sizes[$s]['width'] ); // For theme-added sizes
@@ -169,14 +171,30 @@ function wp_load_image( $file ) {
  * Calculated the new dimentions for a downsampled image.
  *
  * @since 2.0.0
- * @see wp_constrain_dimensions()
+ * @see wp_shrink_dimensions()
  *
  * @param int $width Current width of the image
  * @param int $height Current height of the image
  * @return mixed Array(height,width) of shrunk dimensions.
  */
 function get_udims( $width, $height) {
-	return wp_constrain_dimensions( $width, $height, 128, 96 );
+	return wp_shrink_dimensions( $width, $height );
+}
+
+/**
+ * Calculates the new dimentions for a downsampled image.
+ *
+ * @since 2.0.0
+ * @see wp_constrain_dimensions()
+ *
+ * @param int $width Current width of the image
+ * @param int $height Current height of the image
+ * @param int $wmax Maximum wanted width
+ * @param int $hmax Maximum wanted height
+ * @return mixed Array(height,width) of shrunk dimensions.
+ */
+function wp_shrink_dimensions( $width, $height, $wmax = 128, $hmax = 96 ) {
+	return wp_constrain_dimensions( $width, $height, $wmax, $hmax );
 }
 
 /**

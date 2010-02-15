@@ -64,7 +64,7 @@ function image_constrain_size_for_editor($width, $height, $size = 'medium') {
 	} elseif ( isset( $_wp_additional_image_sizes ) && count( $_wp_additional_image_sizes ) && in_array( $size, array_keys( $_wp_additional_image_sizes ) ) ) {
 		$max_width = intval( $_wp_additional_image_sizes[$size]['width'] );
 		$max_height = intval( $_wp_additional_image_sizes[$size]['height'] );
-		if ( intval($content_width) > 0 && is_admin() ) // Only in admin. Assume that theme authors know what they're doing.
+		if ( intval($content_width) > 0 )
 			$max_width = min( intval($content_width), $max_width );
 	}
 	// $size == 'full' has no constraint
@@ -233,7 +233,8 @@ function get_image_tag($id, $alt, $title, $align, $size='medium') {
 /**
  * Calculates the new dimentions for a downsampled image.
  *
- * If either width or height are empty, no constraint is applied on
+ * Same as {@link wp_shrink_dimensions()}, except the max parameters are
+ * optional. If either width or height are empty, no constraint is applied on
  * that dimension.
  *
  * @since 2.5.0
@@ -354,7 +355,7 @@ function image_resize( $file, $max_w, $max_h, $crop = false, $suffix = null, $de
 
 	$image = wp_load_image( $file );
 	if ( !is_resource( $image ) )
-		return new WP_Error( 'error_loading_image', $image, $file );
+		return new WP_Error('error_loading_image', $image);
 
 	$size = @getimagesize( $file );
 	if ( !$size )
@@ -484,13 +485,6 @@ function image_get_intermediate_size($post_id, $size='thumbnail') {
 			foreach ( $areas as $_size ) {
 				$data = $imagedata['sizes'][$_size];
 				if ( $data['width'] >= $size[0] || $data['height'] >= $size[1] ) {
-					// Skip images with unexpectedly divergent aspect ratios (crops)
-					// First, we calculate what size the original image would be if constrained to a box the size of the current image in the loop
-					$maybe_cropped = image_resize_dimensions($imagedata['width'], $imagedata['height'], $data['width'], $data['height'], false );
-					// If the size doesn't match exactly, then it is of a different aspect ratio, so we skip it, unless it's the thumbnail size
-					if ( 'thumbnail' != $_size && ( !$maybe_cropped || $maybe_cropped[0] != $data['width'] || $maybe_cropped[1] != $data['height'] ) )
-						continue;
-					// If we're still here, then we're going to use this size
 					$file = $data['file'];
 					list($width, $height) = image_constrain_size_for_editor( $data['width'], $data['height'], $size );
 					return compact( 'file', 'width', 'height' );
@@ -510,20 +504,6 @@ function image_get_intermediate_size($post_id, $size='thumbnail') {
 		$data['url'] = path_join( dirname($file_url), $data['file'] );
 	}
 	return $data;
-}
-
-/**
- * Get the available image sizes
- * @since 3.0
- * @return array Returns a filtered array of image size strings
- */
-function get_intermediate_image_sizes() {
-	global $_wp_additional_image_sizes;
-	$image_sizes = array('thumbnail', 'medium', 'large'); // Standard sizes
-	if ( isset( $_wp_additional_image_sizes ) && count( $_wp_additional_image_sizes ) )
-		$image_sizes = array_merge( $image_sizes, array_keys( $_wp_additional_image_sizes ) );
-
-	return apply_filters( 'intermediate_image_sizes', $image_sizes );
 }
 
 /**
@@ -751,8 +731,8 @@ function gallery_shortcode($attr) {
 	$captiontag = tag_escape($captiontag);
 	$columns = intval($columns);
 	$itemwidth = $columns > 0 ? floor(100/$columns) : 100;
-	$float = $wp_locale->text_direction == 'rtl' ? 'right' : 'left';
-
+	$float = $wp_locale->text_direction == 'rtl' ? 'right' : 'left'; 
+	
 	$selector = "gallery-{$instance}";
 
 	$output = apply_filters('gallery_style', "
@@ -1252,20 +1232,15 @@ function wp_embed_defaults() {
 
 	$width = get_option('embed_size_w');
 
-	if ( empty($width) && !empty($theme_width) )
+	if ( !$width && !empty($theme_width) )
 		$width = $theme_width;
 
-	if ( empty($width) )
+	if ( !$width )
 		$width = 500;
 
-	$height = get_option('embed_size_h');
-
-	if ( empty($height) )
-		$height = 700;
-
 	return apply_filters( 'embed_defaults', array(
-		'width'  => $width,
-		'height' => $height,
+		'width' => $width,
+		'height' => 700,
 	) );
 }
 

@@ -54,13 +54,14 @@ class WP_Filesystem_Direct extends WP_Filesystem_Base {
 	/**
 	 * Write a string to a file
 	 *
-	 * @param $file string Remote path to the file where to write the data.
+	 * @param $file string Path to the file where to write the data.
 	 * @param $contents string The data to write.
 	 * @param $mode int (optional) The file permissions as octal number, usually 0644.
+	 * @param $type string (optional) Specifies additional type of access you require to the file.
 	 * @return bool False upon failure.
 	 */
-	function put_contents($file, $contents, $mode = false ) {
-		if ( ! ($fp = @fopen($file, 'w')) )
+	function put_contents($file, $contents, $mode = false, $type = '') {
+		if ( ! ($fp = @fopen($file, 'w' . $type)) )
 			return false;
 		@fwrite($fp, $contents);
 		@fclose($fp);
@@ -116,6 +117,9 @@ class WP_Filesystem_Direct extends WP_Filesystem_Base {
 	 * @return bool Returns true on success or false on failure.
 	 */
 	function chmod($file, $mode = false, $recursive = false) {
+		if ( ! $this->exists($file) )
+			return false;
+
 		if ( ! $mode ) {
 			if ( $this->is_file($file) )
 				$mode = FS_CHMOD_FILE;
@@ -125,12 +129,14 @@ class WP_Filesystem_Direct extends WP_Filesystem_Base {
 				return false;
 		}
 
-		if ( ! $recursive || ! $this->is_dir($file) )
+		if ( ! $recursive )
+			return @chmod($file, $mode);
+		if ( ! $this->is_dir($file) )
 			return @chmod($file, $mode);
 		//Is a directory, and we want recursive
 		$file = trailingslashit($file);
 		$filelist = $this->dirlist($file);
-		foreach ( (array)$filelist as $filename => $filemeta)
+		foreach ($filelist as $filename)
 			$this->chmod($file . $filename, $mode, $recursive);
 
 		return true;
@@ -196,18 +202,11 @@ class WP_Filesystem_Direct extends WP_Filesystem_Base {
 	function copy($source, $destination, $overwrite = false) {
 		if ( ! $overwrite && $this->exists($destination) )
 			return false;
-
 		return copy($source, $destination);
 	}
 
 	function move($source, $destination, $overwrite = false) {
-		if ( ! $overwrite && $this->exists($destination) )
-			return false;
-
-		// try using rename first.  if that fails (for example, source is read only) try copy
-		if ( @rename($source, $destination) )
-			return true;
-
+		//Possible to use rename()?
 		if ( $this->copy($source, $destination, $overwrite) && $this->exists($destination) ) {
 			$this->delete($source);
 			return true;
@@ -281,11 +280,6 @@ class WP_Filesystem_Direct extends WP_Filesystem_Base {
 	}
 
 	function mkdir($path, $chmod = false, $chown = false, $chgrp = false) {
-		// safe mode fails with a trailing slash under certain PHP versions.
-		$path = untrailingslashit($path);
-		if ( empty($path) )
-			$path = '/';
-
 		if ( ! $chmod )
 			$chmod = FS_CHMOD_DIR;
 
@@ -300,7 +294,17 @@ class WP_Filesystem_Direct extends WP_Filesystem_Base {
 	}
 
 	function rmdir($path, $recursive = false) {
-		return $this->delete($path, $recursive);
+		//Currently unused and untested, Use delete() instead.
+		if ( ! $recursive )
+			return @rmdir($path);
+		//recursive:
+		$filelist = $this->dirlist($path);
+		foreach ($filelist as $filename => $det) {
+			if ( '/' == substr($filename, -1, 1) )
+				$this->rmdir($path . '/' . $filename, $recursive);
+			@rmdir($filename);
+		}
+		return @rmdir($path);
 	}
 
 	function dirlist($path, $include_hidden = true, $recursive = false) {

@@ -135,14 +135,6 @@ class wpdb {
 	 * @var bool
 	 */
 	var $ready = false;
-	var $blogid = 0;
-	var $siteid = 0;
-	var $blogs;
-	var $signups;
-	var $site;
-	var $sitemeta;
-	var $sitecategories;
-	var $global_tables = array('blogs', 'signups', 'site', 'sitemeta', 'users', 'usermeta', 'sitecategories', 'registration_log', 'blog_versions');
 
 	/**
 	 * WordPress Posts table
@@ -268,7 +260,7 @@ class wpdb {
 	 * @access private
 	 * @var array
 	 */
-	var $tables = array('posts', 'categories', 'post2cat', 'comments', 'links', 'link2cat', 'options',
+	var $tables = array('users', 'usermeta', 'posts', 'categories', 'post2cat', 'comments', 'links', 'link2cat', 'options',
 			'postmeta', 'terms', 'term_taxonomy', 'term_relationships', 'commentmeta');
 
 	/**
@@ -291,7 +283,7 @@ class wpdb {
 	 * @see wpdb:insert()
 	 * @see wpdb:update()
 	 * @access public
-	 * @var array
+	 * @war array
 	 */
 	var $field_types = array();
 
@@ -345,8 +337,6 @@ class wpdb {
 	 * @param string $dbhost MySQL database host
 	 */
 	function wpdb($dbuser, $dbpassword, $dbname, $dbhost) {
-		if( defined( "WP_USE_MULTIPLE_DB" ) && CONSTANT( "WP_USE_MULTIPLE_DB" ) == true )
-			$this->db_connect();
 		return $this->__construct($dbuser, $dbpassword, $dbname, $dbhost);
 	}
 
@@ -367,16 +357,8 @@ class wpdb {
 	function __construct($dbuser, $dbpassword, $dbname, $dbhost) {
 		register_shutdown_function(array(&$this, "__destruct"));
 
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG )
+		if ( WP_DEBUG )
 			$this->show_errors();
-
-		if ( is_multisite() ) {
-			$this->charset = 'utf8';
-			if ( defined( 'DB_COLLATE' ) && constant( 'DB_COLLATE' ) != '' )
-				$this->collate = constant( 'DB_COLLATE' );
-			else
-				$this->collate = 'utf8_general_ci';
-		}
 
 		if ( defined('DB_CHARSET') )
 			$this->charset = DB_CHARSET;
@@ -415,7 +397,7 @@ class wpdb {
 			}
 		}
 
-		$this->select($dbname, $this->dbh);
+		$this->select($dbname);
 	}
 
 	/**
@@ -445,21 +427,8 @@ class wpdb {
 		if ( preg_match('|[^a-z0-9_]|i', $prefix) )
 			return new WP_Error('invalid_db_prefix', /*WP_I18N_DB_BAD_PREFIX*/'Invalid database prefix'/*/WP_I18N_DB_BAD_PREFIX*/);
 
-		if ( is_multisite() )
-			$old_prefix = '';
-		else
-			$old_prefix = $prefix;
-
-		if ( isset( $this->base_prefix ) )
-			$old_prefix = $this->base_prefix;
-		$this->base_prefix = $prefix;
-		foreach ( $this->global_tables as $table )
-			$this->$table = $prefix . $table;
-
-		if ( defined('VHOST') && empty($this->blogid) )
-			return $old_prefix;
-
-		$this->prefix = $this->get_blog_prefix( $this->blogid );
+		$old_prefix = $this->prefix;
+		$this->prefix = $prefix;
 
 		foreach ( (array) $this->tables as $table )
 			$this->$table = $this->prefix . $table;
@@ -473,32 +442,6 @@ class wpdb {
 		return $old_prefix;
 	}
 
-	function set_blog_id($blog_id, $site_id = '') {
-		if ( !empty($site_id) )
-			$this->siteid = $site_id;
-
-		$old_blog_id = $this->blogid;
-		$this->blogid = $blog_id;
-
-		$this->prefix = $this->get_blog_prefix( $this->blogid );
-
-		foreach ( $this->tables as $table )
-			$this->$table = $this->prefix . $table;
-
-		return $old_blog_id;
-	}
-
-	function get_blog_prefix( $blog_id = '' ) {
-		if ( is_multisite() && $blog_id ) {
-			if ( defined('MULTISITE') && ( $blog_id == 0 || $blog_id == 1 ) )
-				return $this->base_prefix;
-			else
-				return $this->base_prefix . $blog_id . '_';
-		} else {
-			return $this->base_prefix;
-		}
-	}
-
 	/**
 	 * Selects a database using the current database connection.
 	 *
@@ -510,8 +453,8 @@ class wpdb {
 	 * @param string $db MySQL database name
 	 * @return null Always null.
 	 */
-	function select($db, &$dbh) {
-		if (!@mysql_select_db($db, $dbh)) {
+	function select($db) {
+		if (!@mysql_select_db($db, $this->dbh)) {
 			$this->ready = false;
 			$this->bail(sprintf(/*WP_I18N_DB_SELECT_DB*/'
 <h1>Can&#8217;t select database</h1>
@@ -662,22 +605,14 @@ class wpdb {
 		if ( !$this->show_errors )
 			return false;
 
-		// If there is an error then take note of it
-		if ( is_multisite() ) {
-			$msg = "WordPress database error: [$str]\n{$this->last_query}\n";
-			if ( defined( 'ERRORLOGFILE' ) )
-				error_log( $msg, 3, CONSTANT( 'ERRORLOGFILE' ) );
-			if ( defined( 'DIEONDBERROR' ) )
-				die( $msg );
-		} else {
-			$str = htmlspecialchars($str, ENT_QUOTES);
-			$query = htmlspecialchars($this->last_query, ENT_QUOTES);
+		$str = htmlspecialchars($str, ENT_QUOTES);
+		$query = htmlspecialchars($this->last_query, ENT_QUOTES);
 
-			print "<div id='error'>
-			<p class='wpdberror'><strong>WordPress database error:</strong> [$str]<br />
-			<code>$query</code></p>
-			</div>";
-		}
+		// If there is an error then take note of it
+		print "<div id='error'>
+		<p class='wpdberror'><strong>WordPress database error:</strong> [$str]<br />
+		<code>$query</code></p>
+		</div>";
 	}
 
 	/**
@@ -735,42 +670,6 @@ class wpdb {
 		$this->last_query = null;
 	}
 
-	function db_connect( $query = "SELECT" ) {
-		global $db_list, $global_db_list;
-		if ( is_array( $db_list ) == false )
-			return true;
-
-		if ( $this->blogs != '' && preg_match("/(" . $this->blogs . "|" . $this->users . "|" . $this->usermeta . "|" . $this->site . "|" . $this->sitemeta . "|" . $this->sitecategories . ")/i",$query) ) {
-			$action = 'global';
-			$details = $global_db_list[ mt_rand( 0, count( $global_db_list ) -1 ) ];
-			$this->db_global = $details;
-		} elseif ( preg_match("/^\\s*(alter table|create|insert|delete|update|replace) /i",$query) ) {
-			$action = 'write';
-			$details = $db_list[ 'write' ][ mt_rand( 0, count( $db_list[ 'write' ] ) -1 ) ];
-			$this->db_write = $details;
-		} else {
-			$action = '';
-			$details = $db_list[ 'read' ][ mt_rand( 0, count( $db_list[ 'read' ] ) -1 ) ];
-			$this->db_read = $details;
-		}
-
-		$dbhname = "dbh" . $action;
-		$this->$dbhname = @mysql_connect( $details[ 'db_host' ], $details[ 'db_user' ], $details[ 'db_password' ] );
-		if (!$this->$dbhname ) {
-			$this->bail("
-<h1>Error establishing a database connection</h1>
-<p>This either means that the username and password information in your <code>wp-config.php</code> file is incorrect or we can't contact the database server at <code>$dbhost</code>. This could mean your host's database server is down.</p>
-<ul>
-	<li>Are you sure you have the correct username and password?</li>
-	<li>Are you sure that you have typed the correct hostname?</li>
-	<li>Are you sure that the database server is running?</li>
-</ul>
-<p>If you're unsure what these terms mean you should probably contact your host. If you still need help you can always visit the <a href='http://wordpress.org/support/'>WordPress Support Forums</a>.</p>
-");
-		}
-		$this->select( $details[ 'db_name' ], $this->$dbhname );
-	}
-
 	/**
 	 * Perform a MySQL database query, using current database connection.
 	 *
@@ -804,48 +703,23 @@ class wpdb {
 		if ( defined('SAVEQUERIES') && SAVEQUERIES )
 			$this->timer_start();
 
-		// use $this->dbh for read ops, and $this->dbhwrite for write ops
-		// use $this->dbhglobal for gloal table ops
-		unset( $dbh );
-		if( defined( "WP_USE_MULTIPLE_DB" ) && CONSTANT( "WP_USE_MULTIPLE_DB" ) == true ) {
-			if( $this->blogs != '' && preg_match("/(" . $this->blogs . "|" . $this->users . "|" . $this->usermeta . "|" . $this->site . "|" . $this->sitemeta . "|" . $this->sitecategories . ")/i",$query) ) {
-				if( false == isset( $this->dbhglobal ) ) {
-					$this->db_connect( $query );
-				}
-				$dbh =& $this->dbhglobal;
-				$this->last_db_used = "global";
-			} elseif ( preg_match("/^\\s*(alter table|create|insert|delete|update|replace) /i",$query) ) {
-				if( false == isset( $this->dbhwrite ) ) {
-					$this->db_connect( $query );
-				}
-				$dbh =& $this->dbhwrite;
-				$this->last_db_used = "write";
-			} else {
-				$dbh =& $this->dbh;
-				$this->last_db_used = "read";
-			}
-		} else {
-			$dbh =& $this->dbh;
-			$this->last_db_used = "other/read";
-		}
-
-		$this->result = @mysql_query($query, $dbh);
+		$this->result = @mysql_query($query, $this->dbh);
 		++$this->num_queries;
 
 		if ( defined('SAVEQUERIES') && SAVEQUERIES )
 			$this->queries[] = array( $query, $this->timer_stop(), $this->get_caller() );
 
 		// If there is an error then take note of it..
-		if ( $this->last_error = mysql_error($dbh) ) {
+		if ( $this->last_error = mysql_error($this->dbh) ) {
 			$this->print_error();
 			return false;
 		}
 
 		if ( preg_match("/^\\s*(insert|delete|update|replace|alter) /i",$query) ) {
-			$this->rows_affected = mysql_affected_rows($dbh);
+			$this->rows_affected = mysql_affected_rows($this->dbh);
 			// Take note of the insert_id
 			if ( preg_match("/^\\s*(insert|replace) /i",$query) ) {
-				$this->insert_id = mysql_insert_id($dbh);
+				$this->insert_id = mysql_insert_id($this->dbh);
 			}
 			// Return number of rows affected
 			$return_val = $this->rows_affected;
@@ -1059,7 +933,6 @@ class wpdb {
 		else
 			return null;
 
-		$new_array = array();
 		if ( $output == OBJECT ) {
 			// Return an integer-keyed array of row objects
 			return $this->last_result;
@@ -1104,7 +977,6 @@ class wpdb {
 		if ( $this->col_info ) {
 			if ( $col_offset == -1 ) {
 				$i = 0;
-				$new_array = array();
 				foreach( (array) $this->col_info as $col ) {
 					$new_array[$i] = $col->{$info_type};
 					$i++;
@@ -1175,11 +1047,12 @@ class wpdb {
 	 *
 	 * @return WP_Error
 	 */
-	function check_database_version() {
-		global $wp_version, $required_mysql_version;
-		// Make sure the server has the required MySQL version
-		if ( version_compare($this->db_version(), $required_mysql_version, '<') )
-			return new WP_Error('database_version',sprintf(__('<strong>ERROR</strong>: WordPress %1$s requires MySQL %2$s or higher'), $wp_version, $required_mysql_version));
+	function check_database_version()
+	{
+		global $wp_version;
+		// Make sure the server has MySQL 4.1.2
+		if ( version_compare($this->db_version(), '4.1.2', '<') )
+			return new WP_Error('database_version',sprintf(__('<strong>ERROR</strong>: WordPress %s requires MySQL 4.1.2 or higher'), $wp_version));
 	}
 
 	/**
@@ -1218,7 +1091,7 @@ class wpdb {
 	/**
 	 * Retrieve the name of the function that called wpdb.
 	 *
-	 * Searches up the list of functions until it reaches
+	 * Requires PHP 4.3 and searches up the list of functions until it reaches
 	 * the one that would most logically had called this method.
 	 *
 	 * @since 2.5.0
@@ -1226,6 +1099,10 @@ class wpdb {
 	 * @return string The name of the calling function
 	 */
 	function get_caller() {
+		// requires PHP 4.3+
+		if ( !is_callable('debug_backtrace') )
+			return '';
+
 		$bt = debug_backtrace();
 		$caller = array();
 

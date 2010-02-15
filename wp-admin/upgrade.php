@@ -20,7 +20,7 @@ require( '../wp-load.php' );
 timer_start();
 require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
-delete_site_transient('update_core');
+delete_transient('update_core');
 
 if ( isset( $_GET['step'] ) )
 	$step = $_GET['step'];
@@ -82,8 +82,9 @@ switch ( $step ) :
 	case 1:
 		wp_upgrade();
 
-			$backto = !empty($_GET['backto']) ? stripslashes( urldecode( $_GET['backto'] ) ) :  __get_option( 'home' ) . '/';
-			$backto = esc_url_raw( $backto );
+			$backto = empty($_GET['backto']) ? '' : $_GET['backto'] ;
+			$backto = stripslashes( urldecode( $backto ) );
+			$backto = esc_url_raw( $backto  );
 			$backto = wp_validate_redirect($backto, __get_option( 'home' ) . '/');
 ?>
 <h2><?php _e( 'Upgrade Complete' ); ?></h2>

@@ -25,9 +25,15 @@ wp_admin_css( 'css/global' );
 wp_admin_css();
 wp_admin_css( 'css/colors' );
 wp_admin_css( 'css/ie' );
-if ( is_multisite() )
-	wp_admin_css( 'css/ms' );
 wp_enqueue_script('utils');
+
+$hook_suffix = '';
+if ( isset($page_hook) )
+	$hook_suffix = "$page_hook";
+else if ( isset($plugin_page) )
+	$hook_suffix = "$plugin_page";
+else if ( isset($pagenow) )
+	$hook_suffix = "$pagenow";
 
 $admin_body_class = preg_replace('/[^a-z0-9_-]+/i', '-', $hook_suffix);
 ?>
@@ -35,12 +41,12 @@ $admin_body_class = preg_replace('/[^a-z0-9_-]+/i', '-', $hook_suffix);
 //<![CDATA[
 addLoadEvent = function(func){if(typeof jQuery!="undefined")jQuery(document).ready(func);else if(typeof wpOnload!='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
 var userSettings = {'url':'<?php echo SITECOOKIEPATH; ?>','uid':'<?php if ( ! isset($current_user) ) $current_user = wp_get_current_user(); echo $current_user->ID; ?>','time':'<?php echo time() ?>'};
-var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>', pagenow = '<?php echo substr($pagenow, 0, -4); ?>', typenow = '<?php echo $typenow; ?>', adminpage = '<?php echo $admin_body_class; ?>',  thousandsSeparator = '<?php echo addslashes( $wp_locale->number_format['thousands_sep'] ); ?>', decimalPoint = '<?php echo addslashes( $wp_locale->number_format['decimal_point'] ); ?>';
+var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>', pagenow = '<?php echo substr($pagenow, 0, -4); ?>', adminpage = '<?php echo $admin_body_class; ?>',  thousandsSeparator = '<?php echo $wp_locale->number_format['thousands_sep']; ?>', decimalPoint = '<?php echo $wp_locale->number_format['decimal_point']; ?>';
 //]]>
 </script>
 <?php
 
-if ( in_array( $pagenow, array('post.php', 'post-new.php') ) ) {
+if ( in_array( $pagenow, array('post.php', 'post-new.php', 'page.php', 'page-new.php') ) ) {
 	add_action( 'admin_print_footer_scripts', 'wp_tiny_mce', 25 );
 	wp_enqueue_script('quicktags');
 }
@@ -53,8 +59,9 @@ do_action('admin_print_scripts');
 do_action("admin_head-$hook_suffix");
 do_action('admin_head');
 
-if ( get_user_setting('mfold') == 'f' )
+if ( get_user_setting('mfold') == 'f' ) {
 	$admin_body_class .= ' folded';
+}
 
 if ( $is_iphone ) { ?>
 <style type="text/css">.row-actions{visibility:visible;}</style>
@@ -83,7 +90,6 @@ if ( '' == $blog_name ) {
 	if ( $blog_name != $blog_name_excerpt )
 		$blog_name_excerpt = trim($blog_name_excerpt) . '&hellip;';
 	$blog_name = $blog_name_excerpt;
-	unset($blog_name_excerpt);
 }
 $title_class = '';
 if ( function_exists('mb_strlen') ) {
@@ -104,26 +110,19 @@ if ( function_exists('mb_strlen') ) {
 <a href="<?php echo wp_logout_url() ?>" title="<?php _e('Log Out') ?>"><?php _e('Log Out'); ?></a></p>
 </div>
 
-<?php favorite_actions($current_screen); ?>
+<?php favorite_actions($hook_suffix); ?>
 </div>
 </div>
 
 <div id="wpbody">
-<?php
-unset($title_class, $blog_name);
-
-require(ABSPATH . 'wp-admin/menu-header.php');
-
-$current_screen->parent_file = $parent_file;
-$current_screen->parent_base = preg_replace('/\?.*$/', '', $parent_file);
-$current_screen->parent_base = str_replace('.php', '', $current_screen->parent_base);
-?>
+<?php require(ABSPATH . 'wp-admin/menu-header.php'); ?>
 
 <div id="wpbody-content">
 <?php
-screen_meta($current_screen);
+screen_meta($hook_suffix);
 
 do_action('admin_notices');
 
-if ( $parent_file == 'options-general.php' )
+if ( $parent_file == 'options-general.php' ) {
 	require(ABSPATH . 'wp-admin/options-head.php');
+}

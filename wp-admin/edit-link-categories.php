@@ -68,7 +68,7 @@ if ( isset($_GET['s']) && $_GET['s'] )
 </h2>
 
 <?php if ( isset($_GET['message']) && ( $msg = (int) $_GET['message'] ) ) : ?>
-<div id="message" class="updated"><p><?php echo $messages[$msg]; ?></p></div>
+<div id="message" class="updated fade"><p><?php echo $messages[$msg]; ?></p></div>
 <?php $_SERVER['REQUEST_URI'] = remove_query_arg(array('message'), $_SERVER['REQUEST_URI']);
 endif; ?>
 
@@ -92,7 +92,7 @@ endif; ?>
 $pagenum = isset( $_GET['pagenum'] ) ? absint( $_GET['pagenum'] ) : 0;
 if ( empty($pagenum) )
 	$pagenum = 1;
-if ( ! isset( $catsperpage ) || $catsperpage < 0 )
+if( ! isset( $catsperpage ) || $catsperpage < 0 )
 	$catsperpage = 20;
 
 $page_links = paginate_links( array(
@@ -200,13 +200,13 @@ if ( $page_links )
 	<label for="name"><?php _e('Link Category name') ?></label>
 	<input name="name" id="name" type="text" value="" size="40" aria-required="true" />
 </div>
-<?php if ( !is_multisite() ) { ?>
+
 <div class="form-field">
 	<label for="slug"><?php _e('Link Category slug') ?></label>
 	<input name="slug" id="slug" type="text" value="" size="40" />
 	<p><?php _e('The &#8220;slug&#8221; is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.'); ?></p>
 </div>
-<?php } ?>
+
 <div class="form-field">
 	<label for="description"><?php _e('Description (optional)') ?></label>
 	<textarea name="description" id="description" rows="5" cols="40"></textarea>
@@ -226,5 +226,5 @@ if ( $page_links )
 </div><!-- /col-container -->
 </div><!-- /wrap -->
 
-<?php inline_edit_term_row('edit-link-categories', 'link_category'); ?>
+<?php inline_edit_term_row('edit-link-categories'); ?>
 <?php include('admin-footer.php'); ?>

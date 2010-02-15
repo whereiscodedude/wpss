@@ -73,7 +73,7 @@ class WP_Http {
 	 * Tests all of the objects and returns the object that passes. Also caches
 	 * that object to be used later.
 	 *
-	 * The order for the GET/HEAD requests are HTTP Extension, cURL, Streams, Fopen,
+	 * The order for the GET/HEAD requests are Streams, HTTP Extension, Fopen,
 	 * and finally Fsockopen. fsockopen() is used last, because it has the most
 	 * overhead in its implementation. There isn't any real way around it, since
 	 * redirects have to be supported, much the same way the other transports
@@ -424,15 +424,6 @@ class WP_Http {
 
 		$response = array('code' => 0, 'message' => '');
 
-		// If a redirection has taken place, The headers for each page request may have been passed.
-		// In this case, determine the final HTTP header and parse from there.
-		for ( $i = count($headers)-1; $i >= 0; $i-- ) {
-			if ( false === strpos($headers[$i], ':') ) {
-				$headers = array_splice($headers, $i);
-				break;
-			}
-		}
-
 		$cookies = array();
 		$newheaders = array();
 		foreach ( $headers as $tempheader ) {
@@ -748,7 +739,7 @@ class WP_Http_Fsockopen {
 			return new WP_Error('http_request_failed', $arrHeaders['response']['code'] . ': ' . $arrHeaders['response']['message']);
 
 		// If location is found, then assume redirect and redirect to location.
-		if ( 'HEAD' != $r['method'] && isset($arrHeaders['headers']['location']) ) {
+		if ( isset($arrHeaders['headers']['location']) ) {
 			if ( $r['redirection']-- > 0 ) {
 				return $this->request($arrHeaders['headers']['location'], $r);
 			} else {
@@ -837,25 +828,6 @@ class WP_Http_Fopen {
 		if ( 'http' != $arrURL['scheme'] && 'https' != $arrURL['scheme'] )
 			$url = str_replace($arrURL['scheme'], 'http', $url);
 
-		if ( is_null( $r['headers'] ) )
-			$r['headers'] = array();
-
-		if ( is_string($r['headers']) ) {
-			$processedHeaders = WP_Http::processHeaders($r['headers']);
-			$r['headers'] = $processedHeaders['headers'];
-		}
-
-		$initial_user_agent = ini_get('user_agent');
-
-		if ( !empty($r['headers']) && is_array($r['headers']) ) {
-			$user_agent_extra_headers = '';
-			foreach ( $r['headers'] as $header => $value )
-				$user_agent_extra_headers .= "\r\n$header: $value";
-			@ini_set('user_agent', $r['user-agent'] . $user_agent_extra_headers);
-		} else {
-			@ini_set('user_agent', $r['user-agent']);
-		}
-
 		if ( !WP_DEBUG )
 			$handle = @fopen($url, 'r');
 		else
@@ -870,7 +842,6 @@ class WP_Http_Fopen {
 
 		if ( ! $r['blocking'] ) {
 			fclose($handle);
-			@ini_set('user_agent', $initial_user_agent); //Clean up any extra headers added
 			return array( 'headers' => array(), 'body' => '', 'response' => array('code' => false, 'message' => false), 'cookies' => array() );
 		}
 
@@ -890,8 +861,6 @@ class WP_Http_Fopen {
 		}
 
 		fclose($handle);
-
-		@ini_set('user_agent', $initial_user_agent); //Clean up any extra headers added
 
 		$processedHeaders = WP_Http::processHeaders($theHeaders);
 
@@ -915,10 +884,8 @@ class WP_Http_Fopen {
 		if ( ! function_exists('fopen') || (function_exists('ini_get') && true != ini_get('allow_url_fopen')) )
 			return false;
 
-		if ( isset($args['method']) && 'HEAD' == $args['method'] ) //This transport cannot make a HEAD request
-			return false;
-
 		$use = true;
+
 		//PHP does not verify SSL certs, We can only make a request via this transports if SSL Verification is turned off.
 		$is_ssl = isset($args['ssl']) && $args['ssl'];
 		if ( $is_ssl ) {
@@ -1009,10 +976,9 @@ class WP_Http_Streams {
 			array(
 				'method' => strtoupper($r['method']),
 				'user_agent' => $r['user-agent'],
-				'max_redirects' => $r['redirection'] + 1, // See #11557
+				'max_redirects' => $r['redirection'],
 				'protocol_version' => (float) $r['httpversion'],
 				'header' => $strHeaders,
-				'ignore_errors' => true, // Return non-200 requests. 
 				'timeout' => $r['timeout'],
 				'ssl' => array(
 						'verify_peer' => $ssl_verify,
@@ -1032,10 +998,7 @@ class WP_Http_Streams {
 				$arrContext['http']['header'] .= $proxy->authentication_header() . "\r\n";
 		}
 
-		if ( 'HEAD' == $r['method'] ) // Disable redirects for HEAD requests
-			$arrContext['http']['max_redirects'] = 1;
-
-		if ( ! empty($r['body'] ) )
+		if ( ! is_null($r['body']) && ! empty($r['body'] ) )
 			$arrContext['http']['content'] = $r['body'];
 
 		$context = stream_context_create($arrContext);
@@ -1045,7 +1008,7 @@ class WP_Http_Streams {
 		else
 			$handle = fopen($url, 'r', false, $context);
 
-		if ( ! $handle )
+		if ( ! $handle)
 			return new WP_Error('http_request_failed', sprintf(__('Could not open handle for fopen() to %s'), $url));
 
 		$timeout = (int) floor( $r['timeout'] );
@@ -1195,9 +1158,6 @@ class WP_Http_ExtHTTP {
 				'verifyhost' => $ssl_verify
 			)
 		);
-
-		if ( HTTP_METH_HEAD == $r['method'] )
-			$options['redirect'] = 0; // Assumption: Docs seem to suggest that this means do not follow. Untested.
 
 		// The HTTP extensions offers really easy proxy support.
 		$proxy = new WP_HTTP_Proxy();
@@ -1367,8 +1327,7 @@ class WP_Http_Curl {
 			curl_setopt( $handle, CURLOPT_HEADER, false );
 
 		// The option doesn't work with safe mode or when open_basedir is set.
-		// Disable HEAD when making HEAD requests.
-		if ( !ini_get('safe_mode') && !ini_get('open_basedir') && 'HEAD' != $r['method'] )
+		if ( !ini_get('safe_mode') && !ini_get('open_basedir') )
 			curl_setopt( $handle, CURLOPT_FOLLOWLOCATION, true );
 
 		if ( !empty( $r['headers'] ) ) {
@@ -1401,10 +1360,7 @@ class WP_Http_Curl {
 		if ( !empty($theResponse) ) {
 			$headerLength = curl_getinfo($handle, CURLINFO_HEADER_SIZE);
 			$theHeaders = trim( substr($theResponse, 0, $headerLength) );
-			if ( strlen($theResponse) > $headerLength )
-				$theBody = substr( $theResponse, $headerLength );
-			else
-				$theBody = '';
+			$theBody = substr( $theResponse, $headerLength );
 			if ( false !== strrpos($theHeaders, "\r\n\r\n") ) {
 				$headerParts = explode("\r\n\r\n", $theHeaders);
 				$theHeaders = $headerParts[ count($headerParts) -1 ];
@@ -1425,15 +1381,6 @@ class WP_Http_Curl {
 		$response['message'] = get_status_header_desc($response['code']);
 
 		curl_close( $handle );
-
-		// See #11305 - When running under safe mode, redirection is disabled above. Handle it manually.
-		if ( !empty($theHeaders['headers']['location']) && (ini_get('safe_mode') || ini_get('open_basedir')) ) {
-			if ( $r['redirection']-- > 0 ) {
-				return $this->request($theHeaders['headers']['location'], $r);
-			} else {
-				return new WP_Error('http_request_failed', __('Too many redirects.'));
-			}
-		}
 
 		if ( true === $r['decompress'] && true === WP_Http_Encoding::should_decode($theHeaders['headers']) )
 			$theBody = WP_Http_Encoding::decompress( $theBody );
@@ -1869,9 +1816,6 @@ class WP_Http_Encoding {
 	 * @return string|bool False on failure.
 	 */
 	function decompress( $compressed, $length = null ) {
-
-		if ( empty($compressed) )
-			return $compressed;
 
 		if ( false !== ( $decompressed = @gzinflate( $compressed ) ) )
 			return $decompressed;

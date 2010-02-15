@@ -39,7 +39,7 @@ class WP_Categories_to_Tags {
 
 	function populate_cats() {
 
-		$categories = get_categories(array('get' => 'all'));
+		$categories = get_categories('get=all');
 		foreach ( $categories as $category ) {
 			$this->all_categories[] = $category;
 			if ( is_term( $category->slug, 'post_tag' ) )
@@ -49,7 +49,7 @@ class WP_Categories_to_Tags {
 
 	function populate_tags() {
 
-		$tags = get_terms( array('post_tag'), array('get' => 'all') );
+		$tags = get_terms( array('post_tag'), 'get=all' );
 		foreach ( $tags as $tag ) {
 			$this->all_tags[] = $tag;
 			if ( is_term( $tag->slug, 'category' ) )
@@ -272,7 +272,7 @@ function check_all_tagrows() {
 					if ( $values ) {
 						$wpdb->query("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES " . join(',', $values) . " ON DUPLICATE KEY UPDATE term_order = VALUES(term_order)");
 
-						$wpdb->update($wpdb->term_taxonomy, array('count' => $category->count), array('term_id' => $category->term_id, 'taxonomy' => 'post_tag') );
+						$wpdb->query( $wpdb->prepare("UPDATE $wpdb->term_taxonomy SET count = %d WHERE term_id = %d AND taxonomy = 'post_tag'", $category->count, $category->term_id) );
 					}
 
 					echo __('Converted successfully.') . "</li>\n";
@@ -292,7 +292,7 @@ function check_all_tagrows() {
 						$wpdb->query("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES " . join(',', $values) . " ON DUPLICATE KEY UPDATE term_order = VALUES(term_order)");
 
 						$count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id = %d", $tag_ttid) );
-						$wpdb->update($wpdb->term_taxonomy, array('count' => $count), array('term_id' => $category->term_id, 'taxonomy' => 'post_tag') );
+						$wpdb->query( $wpdb->prepare("UPDATE $wpdb->term_taxonomy SET count = %d WHERE term_id = %d AND taxonomy = 'post_tag'", $count, $category->term_id) );
 					}
 					echo __('Tag added to all posts in this category.') . " *</li>\n";
 
@@ -311,10 +311,10 @@ function check_all_tagrows() {
 				}
 
 				// Change the category to a tag.
-				$wpdb->update($wpdb->term_taxonomy, array('taxonomy' => 'post_tag'), array('term_id' => $category->term_id, 'taxonomy' => 'category') );
+				$wpdb->query( $wpdb->prepare("UPDATE $wpdb->term_taxonomy SET taxonomy = 'post_tag' WHERE term_id = %d AND taxonomy = 'category'", $category->term_id) );
 
 				// Set all parents to 0 (root-level) if their parent was the converted tag
-				$wpdb->update($wpdb->term_taxonomy, array('parent' => 0), array('parent' => $category->term_id, 'taxonomy' => 'category') );
+				$parents = $wpdb->query( $wpdb->prepare("UPDATE $wpdb->term_taxonomy SET parent = 0 WHERE parent = %d AND taxonomy = 'category'", $category->term_id) );
 
 				if ( $parents ) $clear_parents = true;
 				$clean_cat_cache[] = $category->term_id;
@@ -379,7 +379,7 @@ function check_all_tagrows() {
 
 						if ( $default_cat != $tag->term_id ) {
 							$count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id = %d", $tag->term_id) );
-							$wpdb->update($wpdb->term_taxonomy, array('count' => $count), array('term_id' => $tag->term_id, 'taxonomy' => 'category') );
+							$wpdb->query( $wpdb->prepare("UPDATE $wpdb->term_taxonomy SET count = %d WHERE term_id = %d AND taxonomy = 'category'", $count, $tag->term_id) );
 						}
 					}
 
@@ -394,13 +394,12 @@ function check_all_tagrows() {
 				// Change the tag to a category.
 				$parent = $wpdb->get_var( $wpdb->prepare("SELECT parent FROM $wpdb->term_taxonomy WHERE term_id = %d AND taxonomy = 'post_tag'", $tag->term_id) );
 				if ( 0 == $parent || (0 < (int) $parent && $this->_category_exists($parent)) ) {
-					$new_fields = array('taxonomy' => 'category');
+					$reset_parent = '';
 					$clear_parents = true;
-				} else {
-					$new_fields = array('taxonomy' => 'category', 'parent' => 0);
-				}
+				} else
+					$reset_parent = ", parent = '0'";
 
-				$wpdb->update($wpdb->term_taxonomy, $new_fields, array('term_id' => $tag->term_id, 'taxonomy' => 'post_tag') );
+				$wpdb->query( $wpdb->prepare("UPDATE $wpdb->term_taxonomy SET taxonomy = 'category' $reset_parent WHERE term_id = %d AND taxonomy = 'post_tag'", $tag->term_id) );
 
 				$clean_term_cache[] = $tag->term_id;
 				$clean_cat_cache[] = $cat['term_id'];

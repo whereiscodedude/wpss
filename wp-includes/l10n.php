@@ -35,16 +35,6 @@ function get_locale() {
 	if ( defined( 'WPLANG' ) )
 		$locale = WPLANG;
 
-	// If multisite, check options.
-	if ( is_multisite() && !defined('WP_INSTALLING') ) {
-		$ms_locale = get_option('WPLANG');
-		if ( $ms_locale === false )
-			$ms_locale = get_site_option('WPLANG');
-
-		if ( $ms_locale !== false )
-			$locale = $ms_locale;
-	}
-
 	if ( empty( $locale ) )
 		$locale = 'en_US';
 
@@ -75,6 +65,21 @@ function before_last_bar( $string ) {
 		return $string;
 	else
 		return substr( $string, 0, $last_bar );
+}
+
+/**
+ * Translates $text like translate(), but assumes that the text
+ * contains a context after its last vertical bar.
+ *
+ * @since 2.5
+ * @uses translate()
+ *
+ * @param string $text Text to translate
+ * @param string $domain Domain to retrieve the translated text
+ * @return string Translated text
+ */
+function translate_with_context( $text, $domain = 'default' ) {
+	return before_last_bar( translate( $text, $domain ) );
 }
 
 function translate_with_gettext_context( $text, $context, $domain = 'default' ) {
@@ -177,15 +182,16 @@ function esc_html_e( $text, $domain = 'default' ) {
  * found in more than two places but with different translated context.
  *
  * By including the context in the pot file translators can translate the two
- * string differently.
+ * string differently
  *
- * @since 2.8.0
+ * @since 2.8
  *
  * @param string $text Text to translate
  * @param string $context Context information for the translators
  * @param string $domain Optional. Domain to retrieve the translated text
  * @return string Translated context string without pipe
  */
+
 function _x( $single, $context, $domain = 'default' ) {
 	return translate_with_gettext_context( $single, $context, $domain );
 }
@@ -196,6 +202,12 @@ function esc_attr_x( $single, $context, $domain = 'default' ) {
 
 function esc_html_x( $single, $context, $domain = 'default' ) {
 	return esc_html( translate_with_gettext_context( $single, $context, $domain ) );
+}
+
+function __ngettext() {
+	_deprecated_function( __FUNCTION__, '2.8', '_n()' );
+	$args = func_get_args();
+	return call_user_func_array('_n', $args);
 }
 
 /**
@@ -209,7 +221,7 @@ function esc_html_x( $single, $context, $domain = 'default' ) {
  * to the 'ngettext' filter hook along with the same parameters. The expected
  * type will be a string.
  *
- * @since 2.8.0
+ * @since 1.2.0
  * @uses $l10n Gets list of domain translated string (gettext_reader) objects
  * @uses apply_filters() Calls 'ngettext' hook on domains text returned,
  *		along with $single, $plural, and $number parameters. Expected to return string.
@@ -227,16 +239,28 @@ function _n( $single, $plural, $number, $domain = 'default' ) {
 }
 
 /**
- * A hybrid of _n() and _x(). It supports contexts and plurals.
- *
- * @see _n()
- * @see _x()
+ * @see _n() A version of _n(), which supports contexts --
+ * strips everything from the translation after the last bar
  *
  */
+function _nc( $single, $plural, $number, $domain = 'default' ) {
+	return before_last_bar( _n( $single, $plural, $number, $domain ) );
+}
+
 function _nx($single, $plural, $number, $context, $domain = 'default') {
 	$translations = &get_translations_for_domain( $domain );
 	$translation = $translations->translate_plural( $single, $plural, $number, $context );
 	return apply_filters( 'ngettext_with_context', $translation, $single, $plural, $number, $context, $domain );
+}
+
+/**
+ * @deprecated Use _n_noop()
+ */
+function __ngettext_noop() {
+	_deprecated_function( __FUNCTION__, '2.8', '_n_noop()' );
+	$args = func_get_args();
+	return call_user_func_array('_n_noop', $args);
+
 }
 
 /**
@@ -272,6 +296,7 @@ function _nx_noop( $single, $plural, $context ) {
 	return array( $single, $plural, $context );
 }
 
+
 /**
  * Loads a MO file into the domain $domain.
  *
@@ -290,15 +315,15 @@ function _nx_noop( $single, $plural, $context ) {
  */
 function load_textdomain( $domain, $mofile ) {
 	global $l10n;
-
+	
 	$plugin_override = apply_filters( 'override_load_textdomain', false, $domain, $mofile );
-
+	
 	if ( true == $plugin_override ) {
 		return true;
 	}
-
+	
 	do_action( 'load_textdomain', $domain, $mofile );
-
+		
 	$mofile = apply_filters( 'load_textdomain_mofile', $mofile, $domain );
 
 	if ( !is_readable( $mofile ) ) return false;
@@ -310,7 +335,7 @@ function load_textdomain( $domain, $mofile ) {
 		$mo->merge_with( $l10n[$domain] );
 
 	$l10n[$domain] = &$mo;
-
+	
 	return true;
 }
 
@@ -346,39 +371,15 @@ function load_default_textdomain() {
 function load_plugin_textdomain( $domain, $abs_rel_path = false, $plugin_rel_path = false ) {
 	$locale = get_locale();
 
-	if ( false !== $plugin_rel_path	) {
+	if ( false !== $plugin_rel_path	)
 		$path = WP_PLUGIN_DIR . '/' . trim( $plugin_rel_path, '/' );
-	} else if ( false !== $abs_rel_path ) {
-		_deprecated_argument( __FUNCTION__, '2.7' );
+	else if ( false !== $abs_rel_path )
 		$path = ABSPATH . trim( $abs_rel_path, '/' );
-	} else {
+	else
 		$path = WP_PLUGIN_DIR;
-	}
 
 	$mofile = $path . '/'. $domain . '-' . $locale . '.mo';
 	return load_textdomain( $domain, $mofile );
-}
-
-/**
- * Load the translated strings for a plugin residing in the mu-plugins dir.
- *
- * @since 3.0
- *
- * @param string $domain Unique identifier for retrieving translated strings
- */
-function load_muplugin_textdomain($domain, $path = false) {
-	$locale = get_locale();
-	if ( empty($locale) )
-		$locale = 'en_US';
-
-	/* @todo $path is not used.  Was it ever used and was it expected to be an arbitrary absolute dir?
-	 * Ideally, it should be relative to WPMU_PLUGIN_DUR.
-	if ( false === $path )
-		$path = WPMU_PLUGIN_DIR;
-	*/
-
-	$mofile = WPMU_PLUGIN_DIR . "/$domain-$locale.mo";
-	load_textdomain($domain, $mofile);
 }
 
 /**
@@ -451,30 +452,4 @@ function &get_translations_for_domain( $domain ) {
 function translate_user_role( $name ) {
 	return translate_with_gettext_context( before_last_bar($name), 'User role' );
 }
-
-/**
- * Get all available languages based on the presence of *.mo files in a given directory. The default directory is WP_LANG_DIR.
- *
- * @since 3.0.0
- *
- * @param string $dir A directory in which to search for language files. The default directory is WP_LANG_DIR.
- * @return array Array of language codes or an empty array if no languages are present.  Language codes are formed by stripping the .mo extension from the language file names.
- */
-function get_available_languages( $dir = null ) {
-	$languages = array();
-
-	if ( empty($dir) )
-		$dir = WP_LANG_DIR;
-
-	if ( is_dir( $dir ) && $dh = opendir( $dir ) ) {
-		while ( ( $lang_file = readdir( $dh ) ) !== false ) {
-			if ( substr( $lang_file, -3 ) == '.mo' && ( false === strpos( $lang_file, 'continents-cities' ) ) )
-				$languages[] = basename($lang_file, '.mo');
-		}
-		closedir($dh);
-	}
-
-	return $languages;
-}
-
 ?>

@@ -27,7 +27,7 @@ $default_status = get_user_option('plugins_last_view');
 if ( empty($default_status) )
 	$default_status = 'all';
 $status = isset($_REQUEST['plugin_status']) ? $_REQUEST['plugin_status'] : $default_status;
-if ( !in_array($status, array('all', 'active', 'inactive', 'recent', 'upgrade', 'network', 'search')) )
+if ( !in_array($status, array('all', 'active', 'inactive', 'recent', 'upgrade', 'search')) )
 	$status = 'all';
 if ( $status != $default_status && 'search' != $status )
 	update_usermeta($current_user->ID, 'plugins_last_view', $status);
@@ -38,10 +38,6 @@ $page = isset($_REQUEST['paged']) ? $_REQUEST['paged'] : 1;
 $_SERVER['REQUEST_URI'] = remove_query_arg(array('error', 'deleted', 'activate', 'activate-multi', 'deactivate', 'deactivate-multi', '_error_nonce'), $_SERVER['REQUEST_URI']);
 
 if ( !empty($action) ) {
-	$network_wide = false;
-	if ( ( isset( $_GET['networkwide'] ) || 'network-activate-selected' == $action ) && is_multisite() && is_super_admin() )
-		$network_wide = true;
-
 	switch ( $action ) {
 		case 'activate':
 			if ( ! current_user_can('activate_plugins') )
@@ -49,7 +45,7 @@ if ( !empty($action) ) {
 
 			check_admin_referer('activate-plugin_' . $plugin);
 
-			$result = activate_plugin($plugin, 'plugins.php?error=true&plugin=' . $plugin, $network_wide);
+			$result = activate_plugin($plugin, 'plugins.php?error=true&plugin=' . $plugin);
 			if ( is_wp_error( $result ) )
 				wp_die($result);
 
@@ -63,20 +59,19 @@ if ( !empty($action) ) {
 			exit;
 			break;
 		case 'activate-selected':
-		case 'network-activate-selected':
 			if ( ! current_user_can('activate_plugins') )
 				wp_die(__('You do not have sufficient permissions to activate plugins for this blog.'));
 
 			check_admin_referer('bulk-manage-plugins');
 
 			$plugins = isset( $_POST['checked'] ) ? (array) $_POST['checked'] : array();
-			$plugins = array_filter($plugins, create_function('$plugin', 'return !is_plugin_active($plugin);') ); // Only activate plugins which are not already active.
+			$plugins = array_filter($plugins, create_function('$plugin', 'return !is_plugin_active($plugin);') ); //Only activate plugins which are not already active.
 			if ( empty($plugins) ) {
 				wp_redirect("plugins.php?plugin_status=$status&paged=$page");
 				exit;
 			}
 
-			activate_plugins($plugins, 'plugins.php?error=true', $network_wide);
+			activate_plugins($plugins, 'plugins.php?error=true');
 
 			$recent = (array)get_option('recently_activated');
 			foreach ( $plugins as $plugin => $time)
@@ -86,48 +81,6 @@ if ( !empty($action) ) {
 			update_option('recently_activated', $recent);
 
 			wp_redirect("plugins.php?activate-multi=true&plugin_status=$status&paged=$page");
-			exit;
-			break;
-		case 'update-selected' :
-			if ( ! current_user_can( 'update_plugins' ) )
-				wp_die( __( 'You do not have sufficient permissions to update plugins for this blog.' ) );
-
-			check_admin_referer( 'bulk-manage-plugins' );
-
-			if ( isset( $_GET['plugins'] ) )
-				$plugins = explode( ',', $_GET['plugins'] );
-			elseif ( isset( $_POST['checked'] ) )
-				$plugins = (array) $_POST['checked'];
-			else
-				break;
-
-			if ( empty( $plugins ) )
-				break;
-
-			// We'll be passing all checked plugins as long as at least one is out of date.
-			$_plugins = $plugins;
-			$current = get_site_transient( 'update_plugins' );
-			foreach ( $_plugins as $k => $v ) {
-				if ( ! isset( $current->response[ $v ] ) )
-					unset( $_plugins[ $k ] );
-			}
-			unset( $current );
-			// If all checked plugins are up to date
-			if ( empty( $_plugins ) )
-				break;
-
-			require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
-			require_once( 'admin-header.php' );
-
-			$url = 'plugins.php?action=upgrade-selected&amp;plugins=' . urlencode( join( ',', $plugins ) );
-			$title = __( 'Upgrade Plugins' );
-			$nonce = 'bulk-manage-plugins';
-			$parent_file = 'plugins.php';
-
-			$upgrader = new Plugin_Upgrader( new Plugin_Upgrader_Skin( compact( 'title', 'nonce', 'url' ) ) );
-			$upgrader->bulk_upgrade( $plugins );
-
-			require_once( 'admin-footer.php' );
 			exit;
 			break;
 		case 'error_scrape':
@@ -212,12 +165,12 @@ if ( !empty($action) ) {
 					foreach ( (array) $plugins as $plugin ) {
 						if ( '.' == dirname($plugin) ) {
 							$files_to_delete[] = WP_PLUGIN_DIR . '/' . $plugin;
-							if ( $data = get_plugin_data(WP_PLUGIN_DIR . '/' . $plugin) )
+							if( $data = get_plugin_data(WP_PLUGIN_DIR . '/' . $plugin) )
 								$plugin_info[ $plugin ] = $data;
 						} else {
 							//Locate all the files in that folder:
 							$files = list_files( WP_PLUGIN_DIR . '/' . dirname($plugin) );
-							if ( $files ) {
+							if( $files ) {
 								$files_to_delete = array_merge($files_to_delete, $files);
 							}
 							//Get plugins list from that folder
@@ -230,8 +183,7 @@ if ( !empty($action) ) {
 					<ul class="ul-disc">
 						<?php
 						foreach ( $plugin_info as $plugin )
-							/* translators: 1: plugin name, 2: plugin author */
-							echo '<li>', sprintf(__('<strong>%1$s</strong> by <em>%2$s</em>'), $plugin['Name'], $plugin['Author']), '</li>';
+							echo '<li>', sprintf(__('<strong>%s</strong> by <em>%s</em>'), $plugin['Name'], $plugin['Author']), '</li>';
 						?>
 					</ul>
 				<p><?php _e('Are you sure you wish to delete these files?') ?></p>
@@ -279,19 +231,10 @@ wp_enqueue_script('plugin-install');
 add_thickbox();
 
 $help = '<p>' . __('Plugins extend and expand the functionality of WordPress. Once a plugin is installed, you may activate it or deactivate it here.') . '</p>';
-if ( current_user_can('edit_plugins') ) {
 $help .= '<p>' . sprintf(__('If something goes wrong with a plugin and you can&#8217;t use WordPress, delete or rename that file in the <code>%s</code> directory and it will be automatically deactivated.'), WP_PLUGIN_DIR) . '</p>';
 $help .= '<p>' . sprintf(__('You can find additional plugins for your site by using the new <a href="%1$s">Plugin Browser/Installer</a> functionality or by browsing the <a href="http://wordpress.org/extend/plugins/">WordPress Plugin Directory</a> directly and installing manually.  To <em>manually</em> install a plugin you generally just need to upload the plugin file into your <code>%2$s</code> directory.  Once a plugin has been installed, you may activate it here.'), 'plugin-install.php', WP_PLUGIN_DIR) . '</p>';
-}
 
-add_contextual_help($current_screen, $help);
-
-if ( is_multisite() && is_super_admin() ) {
-	$menu_perms = get_site_option('menu_items', array());
-	if ( empty($menu_perms['plugins']) )
-		add_action( 'admin_notices', '_admin_notice_multisite_activate_plugins_page' );
-	unset($menu_perms);
-}
+add_contextual_help('plugins', $help);
 
 $title = __('Manage Plugins');
 require_once('admin-header.php');
@@ -303,7 +246,7 @@ if ( !empty($invalid) )
 ?>
 
 <?php if ( isset($_GET['error']) ) : ?>
-	<div id="message" class="updated"><p><?php _e('Plugin could not be activated because it triggered a <strong>fatal error</strong>.') ?></p>
+	<div id="message" class="updated fade"><p><?php _e('Plugin could not be activated because it triggered a <strong>fatal error</strong>.') ?></p>
 	<?php
 		if ( wp_verify_nonce($_GET['_error_nonce'], 'plugin-activation-error_' . $plugin) ) { ?>
 	<iframe style="border:0" width="100%" height="70px" src="<?php echo admin_url('plugins.php?action=error_scrape&amp;plugin=' . esc_attr($plugin) . '&amp;_wpnonce=' . esc_attr($_GET['_error_nonce'])); ?>"></iframe>
@@ -316,36 +259,33 @@ if ( !empty($invalid) )
 		delete_transient('plugins_delete_result'); //Delete it once we're done.
 
 		if ( is_wp_error($delete_result) ) : ?>
-		<div id="message" class="updated"><p><?php printf( __('Plugin could not be deleted due to an error: %s'), $delete_result->get_error_message() ); ?></p></div>
+		<div id="message" class="updated fade"><p><?php printf( __('Plugin could not be deleted due to an error: %s'), $delete_result->get_error_message() ); ?></p></div>
 		<?php else : ?>
-		<div id="message" class="updated"><p><?php _e('The selected plugins have been <strong>deleted</strong>.'); ?></p></div>
+		<div id="message" class="updated fade"><p><?php _e('The selected plugins have been <strong>deleted</strong>.'); ?></p></div>
 		<?php endif; ?>
 <?php elseif ( isset($_GET['activate']) ) : ?>
-	<div id="message" class="updated"><p><?php _e('Plugin <strong>activated</strong>.') ?></p></div>
+	<div id="message" class="updated fade"><p><?php _e('Plugin <strong>activated</strong>.') ?></p></div>
 <?php elseif (isset($_GET['activate-multi'])) : ?>
-	<div id="message" class="updated"><p><?php _e('Selected plugins <strong>activated</strong>.'); ?></p></div>
+	<div id="message" class="updated fade"><p><?php _e('Selected plugins <strong>activated</strong>.'); ?></p></div>
 <?php elseif ( isset($_GET['deactivate']) ) : ?>
-	<div id="message" class="updated"><p><?php _e('Plugin <strong>deactivated</strong>.') ?></p></div>
+	<div id="message" class="updated fade"><p><?php _e('Plugin <strong>deactivated</strong>.') ?></p></div>
 <?php elseif (isset($_GET['deactivate-multi'])) : ?>
-	<div id="message" class="updated"><p><?php _e('Selected plugins <strong>deactivated</strong>.'); ?></p></div>
-<?php elseif ( 'update-selected' == $action ) : ?>
-	<div id="message" class="updated"><p><?php _e('No out of date plugins were selected.'); ?></p></div>
+	<div id="message" class="updated fade"><p><?php _e('Selected plugins <strong>deactivated</strong>.'); ?></p></div>
 <?php endif; ?>
 
 <div class="wrap">
 <?php screen_icon(); ?>
-<h2><?php echo esc_html( $title ); if ( current_user_can('install_plugins') ) { ?> <a href="plugin-install.php" class="button add-new-h2"><?php echo esc_html_x('Add New', 'plugin'); ?></a><?php } ?></h2>
+<h2><?php echo esc_html( $title ); ?> <a href="plugin-install.php" class="button add-new-h2"><?php echo esc_html_x('Add New', 'plugin'); ?></a></h2>
 
 <?php
 
-$all_plugins = apply_filters( 'all_plugins', get_plugins() );
+$all_plugins = get_plugins();
 $search_plugins = array();
 $active_plugins = array();
 $inactive_plugins = array();
 $recent_plugins = array();
 $recently_activated = get_option('recently_activated', array());
 $upgrade_plugins = array();
-$network_plugins = array();
 
 set_transient( 'plugin_slugs', array_keys($all_plugins), 86400 );
 
@@ -355,18 +295,16 @@ foreach ( $recently_activated as $key => $time )
 		unset($recently_activated[ $key ]);
 if ( $recently_activated != get_option('recently_activated') ) //If array changed, update it.
 	update_option('recently_activated', $recently_activated);
-$current = get_site_transient( 'update_plugins' );
+$current = get_transient( 'update_plugins' );
 
 foreach ( (array)$all_plugins as $plugin_file => $plugin_data) {
 
-	// Translate, Apply Markup, Sanitize HTML
+	//Translate, Apply Markup, Sanitize HTML
 	$plugin_data = _get_plugin_data_markup_translate($plugin_file, $plugin_data, false, true);
 	$all_plugins[ $plugin_file ] = $plugin_data;
 
-	// Filter into individual sections
-	if ( is_plugin_active_for_network($plugin_file) && is_super_admin() ) {
-		$network_plugins[ $plugin_file ] = $plugin_data;
-	} elseif ( is_plugin_active($plugin_file) ) {
+	//Filter into individual sections
+	if ( is_plugin_active($plugin_file) ) {
 		$active_plugins[ $plugin_file ] = $plugin_data;
 	} else {
 		if ( isset( $recently_activated[ $plugin_file ] ) ) // Was the plugin recently activated?
@@ -378,15 +316,11 @@ foreach ( (array)$all_plugins as $plugin_file => $plugin_data) {
         $upgrade_plugins[ $plugin_file ] = $plugin_data;
 }
 
-if ( !current_user_can('update_plugins') )
-	$upgrade_plugins = array();
-
 $total_all_plugins = count($all_plugins);
 $total_inactive_plugins = count($inactive_plugins);
 $total_active_plugins = count($active_plugins);
 $total_recent_plugins = count($recent_plugins);
 $total_upgrade_plugins = count($upgrade_plugins);
-$total_network_plugins = count($network_plugins);
 
 //Searching.
 if ( isset($_GET['s']) ) {
@@ -417,10 +351,10 @@ if ( empty($$plugin_array_name) && $status != 'all' ) {
 
 $plugins = &$$plugin_array_name;
 
-// Paging.
+//Paging.
 $total_this_page = "total_{$status}_plugins";
 $total_this_page = $$total_this_page;
-$plugins_per_page = (int) get_user_option( 'plugins_per_page' );
+$plugins_per_page = (int) get_user_option( 'plugins_per_page', 0, false );
 if ( empty( $plugins_per_page ) || $plugins_per_page < 1 )
 	$plugins_per_page = 999;
 $plugins_per_page = apply_filters( 'plugins_per_page', $plugins_per_page );
@@ -478,29 +412,14 @@ function print_plugins_table($plugins, $context = '') {
 	}
 	foreach ( (array)$plugins as $plugin_file => $plugin_data) {
 		$actions = array();
-		$is_active_for_network = is_plugin_active_for_network($plugin_file);
-		$is_active = $is_active_for_network || is_plugin_active( $plugin_file );
+		$is_active = is_plugin_active($plugin_file);
 
-		if ( $is_active_for_network && !is_super_admin() )
-			continue;
+		if ( $is_active )
+			$actions[] = '<a href="' . wp_nonce_url('plugins.php?action=deactivate&amp;plugin=' . $plugin_file . '&amp;plugin_status=' . $context . '&amp;paged=' . $page, 'deactivate-plugin_' . $plugin_file) . '" title="' . __('Deactivate this plugin') . '">' . __('Deactivate') . '</a>';
+		else
+			$actions[] = '<a href="' . wp_nonce_url('plugins.php?action=activate&amp;plugin=' . $plugin_file . '&amp;plugin_status=' . $context . '&amp;paged=' . $page, 'activate-plugin_' . $plugin_file) . '" title="' . __('Activate this plugin') . '" class="edit">' . __('Activate') . '</a>';
 
-		if ( $is_active ) {
-			if ( $is_active_for_network ) {
-				if ( is_super_admin() )
-					$actions[] = '<a href="' . wp_nonce_url('plugins.php?action=deactivate&amp;networkwide=1&amp;plugin=' . $plugin_file . '&amp;plugin_status=' . $context . '&amp;paged=' . $page, 'deactivate-plugin_' . $plugin_file) . '" title="' . __('Deactivate this plugin') . '">' . __('Network Deactivate') . '</a>';
-			} else {
-				$actions[] = '<a href="' . wp_nonce_url('plugins.php?action=deactivate&amp;plugin=' . $plugin_file . '&amp;plugin_status=' . $context . '&amp;paged=' . $page, 'deactivate-plugin_' . $plugin_file) . '" title="' . __('Deactivate this plugin') . '">' . __('Deactivate') . '</a>';
-			}
-		} else {
-			if ( is_multisite() && is_network_only_plugin( $plugin_file ) )
-				$actions[] = '<span title="' . __('This plugin can only be activated for all sites in a network') . '">' . __('Network Only') . '</span>';
-			else
-				$actions[] = '<a href="' . wp_nonce_url('plugins.php?action=activate&amp;plugin=' . $plugin_file . '&amp;plugin_status=' . $context . '&amp;paged=' . $page, 'activate-plugin_' . $plugin_file) . '" title="' . __('Activate this plugin') . '" class="edit">' . __('Activate') . '</a>';
-			if ( is_multisite() && is_super_admin() )
-				$actions[] = '<a href="' . wp_nonce_url('plugins.php?action=activate&amp;networkwide=1&amp;plugin=' . $plugin_file . '&amp;plugin_status=' . $context . '&amp;paged=' . $page, 'activate-plugin_' . $plugin_file) . '" title="' . __('Activate this plugin for all sites in this network') . '" class="edit">' . __('Network Activate') . '</a>';
-		}
-
-		if ( !is_multisite() && current_user_can('edit_plugins') && is_writable(WP_PLUGIN_DIR . '/' . $plugin_file) )
+		if ( current_user_can('edit_plugins') && is_writable(WP_PLUGIN_DIR . '/' . $plugin_file) )
 			$actions[] = '<a href="plugin-editor.php?file=' . $plugin_file . '" title="' . __('Open this file in the Plugin Editor') . '" class="edit">' . __('Edit') . '</a>';
 
 		if ( ! $is_active && current_user_can('delete_plugins') )
@@ -565,21 +484,15 @@ function print_plugin_actions($context, $field_name = 'action' ) {
 	<?php if ( 'active' != $context ) : ?>
 			<option value="activate-selected"><?php _e('Activate'); ?></option>
 	<?php endif; ?>
-	<?php if ( is_multisite() && 'network' != $context ) : ?>
-			<option value="network-activate-selected"><?php _e('Network Activate'); ?></option>
-	<?php endif; ?>
 	<?php if ( 'inactive' != $context && 'recent' != $context ) : ?>
 			<option value="deactivate-selected"><?php _e('Deactivate'); ?></option>
-	<?php endif; ?>
-	<?php if ( current_user_can( 'update_plugins' ) ) : ?>
-			<option value="update-selected"><?php _e( 'Upgrade' ); ?></option>
 	<?php endif; ?>
 	<?php if ( current_user_can('delete_plugins') && ( 'active' != $context ) ) : ?>
 			<option value="delete-selected"><?php _e('Delete'); ?></option>
 	<?php endif; ?>
 		</select>
 		<input type="submit" name="doaction_active" value="<?php esc_attr_e('Apply'); ?>" class="button-secondary action" />
-	<?php if ( 'recent' == $context ) : ?>
+	<?php if( 'recent' == $context ) : ?>
 		<input type="submit" name="clear-recent-list" value="<?php esc_attr_e('Clear List') ?>" class="button-secondary" />
 	<?php endif; ?>
 	</div>
@@ -594,8 +507,6 @@ function print_plugin_actions($context, $field_name = 'action' ) {
 	<input type="submit" value="<?php esc_attr_e( 'Search Plugins' ); ?>" class="button" />
 </p>
 </form>
-
-<?php do_action( 'pre_current_active_plugins', $all_plugins ) ?>
 
 <form method="post" action="<?php echo admin_url('plugins.php') ?>">
 <?php wp_nonce_field('bulk-manage-plugins') ?>
@@ -619,10 +530,6 @@ if ( ! empty($inactive_plugins) ) {
 	$class = ( 'inactive' == $status ) ? ' class="current"' : '';
 	$status_links[] = "<li><a href='plugins.php?plugin_status=inactive' $class>" . sprintf( _n( 'Inactive <span class="count">(%s)</span>', 'Inactive <span class="count">(%s)</span>', $total_inactive_plugins ), number_format_i18n( $total_inactive_plugins ) ) . '</a>';
 }
-if ( ! empty($network_plugins) ) {
-	$class = ( 'network' == $status ) ? ' class="current"' : '';
-	$status_links[] = "<li><a href='plugins.php?plugin_status=network' $class>" . sprintf( _n( 'Network <span class="count">(%s)</span>', 'Network <span class="count">(%s)</span>', $total_network_plugins ), number_format_i18n( $total_network_plugins ) ) . '</a>';
-}
 if ( ! empty($upgrade_plugins) ) {
 	$class = ( 'upgrade' == $status ) ? ' class="current"' : '';
 	$status_links[] = "<li><a href='plugins.php?plugin_status=upgrade' $class>" . sprintf( _n( 'Upgrade Available <span class="count">(%s)</span>', 'Upgrade Available <span class="count">(%s)</span>', $total_upgrade_plugins ), number_format_i18n( $total_upgrade_plugins ) ) . '</a>';
@@ -636,8 +543,6 @@ echo implode( " |</li>\n", $status_links ) . '</li>';
 unset( $status_links );
 ?>
 </ul>
-
-<?php if ( ! empty( $plugins ) ) { ?>
 
 <div class="tablenav">
 <?php
@@ -662,13 +567,9 @@ if ( $page_links )
 print_plugin_actions($status, "action2");
 ?>
 </div>
-<?php } elseif ( ! empty( $all_plugins ) ) { ?>
-<p><?php __( 'No plugins found.' ); ?></p>
-<?php } ?>
 </form>
 
 <?php if ( empty($all_plugins) ) : ?>
-<br class="clear" />
 <p><?php _e('You do not appear to have any plugins available at this time.') ?></p>
 <?php endif; ?>
 

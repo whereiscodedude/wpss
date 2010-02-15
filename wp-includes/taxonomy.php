@@ -15,28 +15,9 @@
  * Creates the initial taxonomies when 'init' action is fired.
  */
 function create_initial_taxonomies() {
-	register_taxonomy( 'category', 'post', array(	'hierarchical' => true,
-												 	'update_count_callback' => '_update_post_term_count',
-													'label' => __('Categories'),
-													'singular_label' => __('Category'),
-													'query_var' => false,
-													'rewrite' => false
-												) ) ;
-
-	register_taxonomy( 'post_tag', 'post', array(
-												 	'hierarchical' => false,
-													'update_count_callback' => '_update_post_term_count',
-													'label' => __('Post Tags'),
-													'singular_label' => __('Post Tag'),
-													'query_var' => false,
-													'rewrite' => false
-												) ) ;
-
-	register_taxonomy( 'link_category', 'link', array(	'hierarchical' => false,
-													  	'label' => __('Categories'),
-														'query_var' => false,
-														'rewrite' => false
-													) ) ;
+	register_taxonomy( 'category', 'post', array('hierarchical' => true, 'update_count_callback' => '_update_post_term_count', 'label' => __('Categories'), 'query_var' => false, 'rewrite' => false) ) ;
+	register_taxonomy( 'post_tag', 'post', array('hierarchical' => false, 'update_count_callback' => '_update_post_term_count', 'label' => __('Post Tags'), 'query_var' => false, 'rewrite' => false) ) ;
+	register_taxonomy( 'link_category', 'link', array('hierarchical' => false, 'label' => __('Categories'), 'query_var' => false, 'rewrite' => false) ) ;
 }
 add_action( 'init', 'create_initial_taxonomies', 0 ); // highest priority
 
@@ -186,7 +167,7 @@ function is_taxonomy_hierarchical($taxonomy) {
 function register_taxonomy( $taxonomy, $object_type, $args = array() ) {
 	global $wp_taxonomies, $wp_rewrite, $wp;
 
-	if ( ! is_array($wp_taxonomies) )
+	if (!is_array($wp_taxonomies))
 		$wp_taxonomies = array();
 
 	$defaults = array('hierarchical' => false, 'update_count_callback' => '', 'rewrite' => true, 'query_var' => true);
@@ -199,57 +180,18 @@ function register_taxonomy( $taxonomy, $object_type, $args = array() ) {
 		$wp->add_query_var($args['query_var']);
 	}
 
-	if ( false !== $args['rewrite'] && '' != get_option('permalink_structure') ) {
+	if ( false !== $args['rewrite'] && !empty($wp_rewrite) ) {
 		if ( !is_array($args['rewrite']) )
 			$args['rewrite'] = array();
 		if ( !isset($args['rewrite']['slug']) )
 			$args['rewrite']['slug'] = sanitize_title_with_dashes($taxonomy);
-		if ( !isset($args['rewrite']['with_front']) )
-			$args['rewrite']['with_front'] = true;
 		$wp_rewrite->add_rewrite_tag("%$taxonomy%", '([^/]+)', $args['query_var'] ? "{$args['query_var']}=" : "taxonomy=$taxonomy&term=$term");
-		$wp_rewrite->add_permastruct($taxonomy, "/{$args['rewrite']['slug']}/%$taxonomy%", $args['rewrite']['with_front']);
+		$wp_rewrite->add_permastruct($taxonomy, "{$args['rewrite']['slug']}/%$taxonomy%");
 	}
-
-	foreach ( array('manage_cap', 'edit_cap', 'delete_cap') as $cap ) {
-		if ( empty($args[$cap]) )
-			$args[$cap] = 'manage_categories';
-	}
-	
-	if ( empty($args['singular_label']) )
-		$args['singular_label'] = $args['label'];
 
 	$args['name'] = $taxonomy;
-	$args['object_type'] = (array) $object_type;
+	$args['object_type'] = $object_type;
 	$wp_taxonomies[$taxonomy] = (object) $args;
-
-	// register callback handling for metabox
- 	add_filter('wp_ajax_add-'.$taxonomy, '_wp_ajax_add_hierarchical_term');
-}
-
-/**
- * Add an already registered taxonomy to an object type.
- *
- * @package WordPress
- * @subpackage Taxonomy
- * @since 3.0
- * @uses $wp_taxonomies Modifies taxonomy object
- *
- * @param string $taxonomy Name of taxonomy object
- * @param array|string $object_type Name of the object type
- * @return bool True if successful, false if not
- */
-function register_taxonomy_for_object_type( $taxonomy, $object_type) {
-	global $wp_taxonomies;
-
-	if ( !isset($wp_taxonomies[$taxonomy]) )
-		return false;
-
-	if ( ! get_post_type_object($object_type) )
-		return false;
-
-	$wp_taxonomies[$taxonomy]->object_type[] = $object_type;
-
-	return true;
 }
 
 //
@@ -603,19 +545,18 @@ function get_term_to_edit( $id, $taxonomy ) {
  * hide_empty - Default is true. Will not return empty terms, which means
  * terms whose count is 0 according to the given taxonomy.
  *
- * exclude - Default is an empty array.  An array, comma- or space-delimited string
+ * exclude - Default is an empty string.  A comma- or space-delimited string
  * of term ids to exclude from the return array.  If 'include' is non-empty,
  * 'exclude' is ignored.
  *
- * exclude_tree - Default is an empty array.  An array, comma- or space-delimited
- * string of term ids to exclude from the return array, along with all of their
- * descendant terms according to the primary taxonomy.  If 'include' is non-empty,
- * 'exclude_tree' is ignored.
+ * exclude_tree - A comma- or space-delimited string of term ids to exclude
+ * from the return array, along with all of their descendant terms according to
+ * the primary taxonomy.  If 'include' is non-empty, 'exclude_tree' is ignored.
  *
- * include - Default is an empty array.  An array, comma- or space-delimited string
+ * include - Default is an empty string.  A comma- or space-delimited string
  * of term ids to include in the return array.
  *
- * number - The maximum number of terms to return.  Default is to return them all.
+ * number - The maximum number of terms to return.  Default is empty.
  *
  * offset - The number by which to offset the terms query.
  *
@@ -684,7 +625,7 @@ function &get_terms($taxonomies, $args = '') {
 	$in_taxonomies = "'" . implode("', '", $taxonomies) . "'";
 
 	$defaults = array('orderby' => 'name', 'order' => 'ASC',
-		'hide_empty' => true, 'exclude' => array(), 'exclude_tree' => array(), 'include' => array(),
+		'hide_empty' => true, 'exclude' => '', 'exclude_tree' => '', 'include' => '',
 		'number' => '', 'fields' => 'all', 'slug' => '', 'parent' => '',
 		'hierarchical' => true, 'child_of' => 0, 'get' => '', 'name__like' => '',
 		'pad_counts' => false, 'offset' => '', 'search' => '');
@@ -752,12 +693,14 @@ function &get_terms($taxonomies, $args = '') {
 	if ( !empty($include) ) {
 		$exclude = '';
 		$exclude_tree = '';
-		$interms = wp_parse_id_list($include);
-		foreach ( $interms as $interm ) {
-			if ( empty($inclusions) )
-				$inclusions = ' AND ( t.term_id = ' . intval($interm) . ' ';
-			else
-				$inclusions .= ' OR t.term_id = ' . intval($interm) . ' ';
+		$interms = preg_split('/[\s,]+/',$include);
+		if ( count($interms) ) {
+			foreach ( (array) $interms as $interm ) {
+				if (empty($inclusions))
+					$inclusions = ' AND ( t.term_id = ' . intval($interm) . ' ';
+				else
+					$inclusions .= ' OR t.term_id = ' . intval($interm) . ' ';
+			}
 		}
 	}
 
@@ -766,27 +709,29 @@ function &get_terms($taxonomies, $args = '') {
 	$where .= $inclusions;
 
 	$exclusions = '';
-	if ( !empty( $exclude_tree ) ) {
-		$excluded_trunks = wp_parse_id_list($exclude_tree);
-		foreach ( $excluded_trunks as $extrunk ) {
+	if ( ! empty( $exclude_tree ) ) {
+		$excluded_trunks = preg_split('/[\s,]+/',$exclude_tree);
+		foreach( (array) $excluded_trunks as $extrunk ) {
 			$excluded_children = (array) get_terms($taxonomies[0], array('child_of' => intval($extrunk), 'fields' => 'ids'));
 			$excluded_children[] = $extrunk;
-			foreach( $excluded_children as $exterm ) {
+			foreach( (array) $excluded_children as $exterm ) {
+				if ( empty($exclusions) )
+					$exclusions = ' AND ( t.term_id <> ' . intval($exterm) . ' ';
+				else
+					$exclusions .= ' AND t.term_id <> ' . intval($exterm) . ' ';
+
+			}
+		}
+	}
+	if ( !empty($exclude) ) {
+		$exterms = preg_split('/[\s,]+/',$exclude);
+		if ( count($exterms) ) {
+			foreach ( (array) $exterms as $exterm ) {
 				if ( empty($exclusions) )
 					$exclusions = ' AND ( t.term_id <> ' . intval($exterm) . ' ';
 				else
 					$exclusions .= ' AND t.term_id <> ' . intval($exterm) . ' ';
 			}
-		}
-	}
-
-	if ( !empty($exclude) ) {
-		$exterms = wp_parse_id_list($exclude);
-		foreach ( $exterms as $exterm ) {
-			if ( empty($exclusions) )
-				$exclusions = ' AND ( t.term_id <> ' . intval($exterm) . ' ';
-			else
-				$exclusions .= ' AND t.term_id <> ' . intval($exterm) . ' ';
 		}
 	}
 
@@ -813,13 +758,13 @@ function &get_terms($taxonomies, $args = '') {
 
 	// don't limit the query results when we have to descend the family tree
 	if ( ! empty($number) && ! $hierarchical && empty( $child_of ) && '' === $parent ) {
-		if ( $offset )
+		if( $offset )
 			$limit = 'LIMIT ' . $offset . ',' . $number;
 		else
 			$limit = 'LIMIT ' . $number;
-	} else {
+
+	} else
 		$limit = '';
-	}
 
 	if ( !empty($search) ) {
 		$search = like_escape($search);
@@ -829,11 +774,11 @@ function &get_terms($taxonomies, $args = '') {
 	$selects = array();
 	if ( 'all' == $fields )
 		$selects = array('t.*', 'tt.*');
-	else if ( 'ids' == $fields || 'id=>parent' == $fields )
+	else if ( 'ids' == $fields )
 		$selects = array('t.term_id', 'tt.parent', 'tt.count');
 	else if ( 'names' == $fields )
 		$selects = array('t.term_id', 'tt.parent', 'tt.count', 't.name');
-    $select_this = implode(', ', apply_filters( 'get_terms_fields', $selects, $args ));
+        $select_this = implode(', ', apply_filters( 'get_terms_fields', $selects, $args ));
 
 	$query = "SELECT $select_this FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id WHERE tt.taxonomy IN ($in_taxonomies) $where ORDER BY $orderby $order $limit";
 
@@ -863,7 +808,7 @@ function &get_terms($taxonomies, $args = '') {
 		foreach ( $terms as $k => $term ) {
 			if ( ! $term->count ) {
 				$children = _get_term_children($term->term_id, $terms, $taxonomies[0]);
-				if ( is_array($children) )
+				if( is_array($children) )
 					foreach ( $children as $child )
 						if ( $child->count )
 							continue 2;
@@ -876,11 +821,7 @@ function &get_terms($taxonomies, $args = '') {
 	reset ( $terms );
 
 	$_terms = array();
-	if ( 'id=>parent' == $fields ) {
-		while ( $term = array_shift($terms) )
-			$_terms[$term->term_id] = $term->parent;
-		$terms = $_terms;
-	} elseif ( 'ids' == $fields ) {
+	if ( 'ids' == $fields ) {
 		while ( $term = array_shift($terms) )
 			$_terms[] = $term->term_id;
 		$terms = $_terms;
@@ -1138,7 +1079,7 @@ function wp_delete_object_term_relationships( $object_id, $taxonomies ) {
 		$taxonomies = array($taxonomies);
 
 	foreach ( (array) $taxonomies as $taxonomy ) {
-		$tt_ids = wp_get_object_terms($object_id, $taxonomy, array('fields' => 'tt_ids'));
+		$tt_ids = wp_get_object_terms($object_id, $taxonomy, 'fields=tt_ids');
 		$in_tt_ids = "'" . implode("', '", $tt_ids) . "'";
 		do_action( 'delete_term_relationships', $object_id, $tt_ids );
 		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->term_relationships WHERE object_id = %d AND term_taxonomy_id IN ($in_tt_ids)", $object_id) );
@@ -1436,8 +1377,6 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 
 	if ( empty($slug) )
 		$slug = sanitize_title($name);
-	elseif ( is_term($slug) ) // Provided slug issue.
-		return new WP_Error('term_slug_exists', __('A Term with the slug provided already exists.'));
 
 	$term_group = 0;
 	if ( $alias_of ) {
@@ -1454,33 +1393,17 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 		}
 	}
 
-	if ( ! $term_id = is_term($slug, $taxonomy) ) {
-		// Make sure the slug is unique accross all taxonomies.
-		$slug = wp_unique_term_slug($slug, (object) $args);
-		if ( !is_multisite() ) {
-			if ( false === $wpdb->insert( $wpdb->terms, compact( 'name', 'slug', 'term_group' ) ) )
-				return new WP_Error('db_insert_error', __('Could not insert term into the database'), $wpdb->last_error);
-			$term_id = (int) $wpdb->insert_id;
-		} else {
-			$maxterm = $wpdb->get_var( "SELECT max(term_id) FROM {$wpdb->terms}" );
-			$term_id = mt_rand( $maxterm+100, $maxterm+4000 );
-			if ( false === $wpdb->insert( $wpdb->terms, compact( 'term_id', 'name', 'slug', 'term_group' ) ) )
-				return new WP_Error('db_insert_error', __('Could not insert term into the database'), $wpdb->last_error);
-		}
+	if ( ! $term_id = is_term($slug) ) {
+		if ( false === $wpdb->insert( $wpdb->terms, compact( 'name', 'slug', 'term_group' ) ) )
+			return new WP_Error('db_insert_error', __('Could not insert term into the database'), $wpdb->last_error);
+		$term_id = (int) $wpdb->insert_id;
 	} else if ( is_taxonomy_hierarchical($taxonomy) && !empty($parent) ) {
 		// If the taxonomy supports hierarchy and the term has a parent, make the slug unique
 		// by incorporating parent slugs.
 		$slug = wp_unique_term_slug($slug, (object) $args);
-		if ( !is_multisite() ) {
-			if ( false === $wpdb->insert( $wpdb->terms, compact( 'name', 'slug', 'term_group' ) ) )
-				return new WP_Error('db_insert_error', __('Could not insert term into the database'), $wpdb->last_error);
-			$term_id = (int) $wpdb->insert_id;
-		} else {
-			$maxterm = $wpdb->get_var( "SELECT max(term_id) FROM {$wpdb->terms}" );
-			$term_id = mt_rand( $maxterm+100, $maxterm+4000 );
-			if ( false === $wpdb->insert( $wpdb->terms, compact( 'term_id','name', 'slug', 'term_group' ) ) )
-				return new WP_Error('db_insert_error', __('Could not insert term into the database'), $wpdb->last_error);
-		}
+		if ( false === $wpdb->insert( $wpdb->terms, compact( 'name', 'slug', 'term_group' ) ) )
+			return new WP_Error('db_insert_error', __('Could not insert term into the database'), $wpdb->last_error);
+		$term_id = (int) $wpdb->insert_id;
 	}
 
 	if ( empty($slug) ) {
@@ -1587,7 +1510,7 @@ function wp_set_object_terms($object_id, $terms, $taxonomy, $append = false) {
 	if ( ! $append && isset($t->sort) && $t->sort ) {
 		$values = array();
 		$term_order = 0;
-		$final_tt_ids = wp_get_object_terms($object_id, $taxonomy, array('fields' => 'tt_ids'));
+		$final_tt_ids = wp_get_object_terms($object_id, $taxonomy, 'fields=tt_ids');
 		foreach ( $tt_ids as $tt_id )
 			if ( in_array($tt_id, $final_tt_ids) )
 				$values[] = $wpdb->prepare( "(%d, %d, %d)", $object_id, $tt_id, ++$term_order);
@@ -1607,7 +1530,7 @@ function wp_set_object_terms($object_id, $terms, $taxonomy, $append = false) {
  * slug has to be globally unique for every taxonomy.
  *
  * The way this works is that if the taxonomy that the term belongs to is
- * hierarchical and has a parent, it will append that parent to the $slug.
+ * heirarchical and has a parent, it will append that parent to the $slug.
  *
  * If that still doesn't return an unique slug, then it try to append a number
  * until it finds a number that is truely unique.
@@ -1752,7 +1675,7 @@ function wp_update_term( $term_id, $taxonomy, $args = array() ) {
 	if ( $id && ($id != $term_id) ) {
 		// If an empty slug was passed or the parent changed, reset the slug to something unique.
 		// Otherwise, bail.
-		if ( $empty_slug || ( $parent != $term['parent']) )
+		if ( $empty_slug || ( $parent != $term->parent) )
 			$slug = wp_unique_term_slug($slug, (object) $args);
 		else
 			return new WP_Error('duplicate_term_slug', sprintf(__('The slug &#8220;%s&#8221; is already in use by another term'), $slug));
@@ -1876,7 +1799,7 @@ function wp_update_term_count_now( $terms, $taxonomy ) {
 
 	}
 
-	clean_term_cache($terms, '', false);
+	clean_term_cache($terms);
 
 	return true;
 }
@@ -1926,9 +1849,8 @@ function clean_object_term_cache($object_ids, $object_type) {
  *
  * @param int|array $ids Single or list of Term IDs
  * @param string $taxonomy Can be empty and will assume tt_ids, else will use for context.
- * @param bool $clean_taxonomy Whether to clean taxonomy wide caches (true), or just individual term object caches (false). Default is true.
  */
-function clean_term_cache($ids, $taxonomy = '', $clean_taxonomy = true) {
+function clean_term_cache($ids, $taxonomy = '') {
 	global $wpdb;
 	static $cleaned = array();
 
@@ -1938,42 +1860,32 @@ function clean_term_cache($ids, $taxonomy = '', $clean_taxonomy = true) {
 	$taxonomies = array();
 	// If no taxonomy, assume tt_ids.
 	if ( empty($taxonomy) ) {
-		$tt_ids = array_map('intval', $ids);
-		$tt_ids = implode(', ', $tt_ids);
+		$tt_ids = implode(', ', $ids);
 		$terms = $wpdb->get_results("SELECT term_id, taxonomy FROM $wpdb->term_taxonomy WHERE term_taxonomy_id IN ($tt_ids)");
-		$ids = array();
 		foreach ( (array) $terms as $term ) {
 			$taxonomies[] = $term->taxonomy;
-			$ids[] = $term->term_id;
 			wp_cache_delete($term->term_id, $term->taxonomy);
 		}
 		$taxonomies = array_unique($taxonomies);
 	} else {
-		$taxonomies = array($taxonomy);
-		foreach ( $taxonomies as $taxonomy ) {
-			foreach ( $ids as $id ) {
-				wp_cache_delete($id, $taxonomy);
-			}
+		foreach ( $ids as $id ) {
+			wp_cache_delete($id, $taxonomy);
 		}
+		$taxonomies = array($taxonomy);
 	}
 
 	foreach ( $taxonomies as $taxonomy ) {
 		if ( isset($cleaned[$taxonomy]) )
 			continue;
 		$cleaned[$taxonomy] = true;
-
-		if ( $clean_taxonomy ) {
-			wp_cache_delete('all_ids', $taxonomy);
-			wp_cache_delete('get', $taxonomy);
-			delete_option("{$taxonomy}_children");
-			// Regenerate {$taxonomy}_children
-			_get_term_hierarchy($taxonomy);
-		}
-
-		do_action('clean_term_cache', $ids, $taxonomy);
+		wp_cache_delete('all_ids', $taxonomy);
+		wp_cache_delete('get', $taxonomy);
+		delete_option("{$taxonomy}_children");
 	}
 
 	wp_cache_set('last_changed', time(), 'terms');
+
+	do_action('clean_term_cache', $ids, $taxonomy);
 }
 
 
@@ -2042,7 +1954,7 @@ function update_object_term_cache($object_ids, $object_type) {
 	if ( empty( $ids ) )
 		return false;
 
-	$terms = wp_get_object_terms($ids, $taxonomies, array('fields' => 'all_with_object_id'));
+	$terms = wp_get_object_terms($ids, $taxonomies, 'fields=all_with_object_id');
 
 	$object_terms = array();
 	foreach ( (array) $terms as $term )
@@ -2109,14 +2021,14 @@ function _get_term_hierarchy($taxonomy) {
 	if ( !is_taxonomy_hierarchical($taxonomy) )
 		return array();
 	$children = get_option("{$taxonomy}_children");
-
 	if ( is_array($children) )
 		return $children;
+
 	$children = array();
-	$terms = get_terms($taxonomy, array('get' => 'all', 'orderby' => 'id', 'fields' => 'id=>parent'));
-	foreach ( $terms as $term_id => $parent ) {
-		if ( $parent > 0 )
-			$children[$parent][] = $term_id;
+	$terms = get_terms($taxonomy, 'get=all');
+	foreach ( $terms as $term ) {
+		if ( $term->parent > 0 )
+			$children[$term->parent][] = $term->term_id;
 	}
 	update_option("{$taxonomy}_children", $children);
 
@@ -2304,15 +2216,15 @@ function get_term_link( $term, $taxonomy ) {
 	$slug = $term->slug;
 
 	if ( empty($termlink) ) {
+		$file = trailingslashit( get_option('home') );
 		$t = get_taxonomy($taxonomy);
 		if ( $t->query_var )
-			$termlink = "?$t->query_var=$slug";
+			$termlink = "$file?$t->query_var=$slug";
 		else
-			$termlink = "?taxonomy=$taxonomy&term=$slug";
-		$termlink = home_url($termlink);
+			$termlink = "$file?taxonomy=$taxonomy&term=$slug";
 	} else {
 		$termlink = str_replace("%$taxonomy%", $slug, $termlink);
-		$termlink = home_url( user_trailingslashit($termlink, 'category') );
+		$termlink = get_option('home') . user_trailingslashit($termlink, 'category');
 	}
 	return apply_filters('term_link', $termlink, $term, $taxonomy);
 }
@@ -2461,28 +2373,5 @@ function is_object_in_term( $object_id, $taxonomy, $terms = null ) {
 
 	return false;
 }
-
-/**
- * Determine if the given object type is associated with the given taxonomy.
- *
- * @since 3.0
- * @uses get_object_taxonomies()
- *
- * @param string $object_type Object type string
- * @param string $taxonomy.  Single taxonomy name
- * @return bool True if object is associated with the taxonomy, otherwise false.
- */
-function is_object_in_taxonomy($object_type, $taxonomy) {
-	$taxonomies = get_object_taxonomies($object_type);
-
-	if ( empty($taxonomies) )
-		return false;
-
-	if ( in_array($taxonomy, $taxonomies) )
-		return true;
-
-	return false;
-}
-
 
 ?>

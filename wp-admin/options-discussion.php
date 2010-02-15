@@ -52,7 +52,6 @@ include('admin-header.php');
 <label for="comment_registration">
 <input name="comment_registration" type="checkbox" id="comment_registration" value="1" <?php checked('1', get_option('comment_registration')); ?> />
 <?php _e('Users must be registered and logged in to comment') ?>
-<?php if ( !get_option( 'users_can_register' ) && is_multisite() ) _e( ' (Signup has been disabled. Only members of this site can comment)' ); ?>
 </label>
 <br />
 
@@ -158,7 +157,7 @@ printf( __('Comments should be displayed with the %s comments at the top of each
 <table class="form-table">
 <tr valign="top">
 <th scope="row"><?php _e('Avatar Display') ?></th>
-<td><fieldset><legend class="screen-reader-text"><span><?php _e('Avatar Display') ?></span></legend>
+<td><fieldset><legend class="screen-reader-text"><span><?php _e('Avatar display') ?></span></legend>
 <?php
 	$yesorno = array(0 => __("Don&#8217;t show Avatars"), 1 => __('Show Avatars'));
 	foreach ( $yesorno as $key => $value) {
@@ -173,16 +172,7 @@ printf( __('Comments should be displayed with the %s comments at the top of each
 <td><fieldset><legend class="screen-reader-text"><span><?php _e('Maximum Rating') ?></span></legend>
 
 <?php
-$ratings = array(
-	/* translators: Content suitability rating: http://bit.ly/89QxZA */
-	'G' => __('G &#8212; Suitable for all audiences'),
-	/* translators: Content suitability rating: http://bit.ly/89QxZA */
-	'PG' => __('PG &#8212; Possibly offensive, usually for audiences 13 and above'),
-	/* translators: Content suitability rating: http://bit.ly/89QxZA */
-	'R' => __('R &#8212; Intended for adult audiences above 17'),
-	/* translators: Content suitability rating: http://bit.ly/89QxZA */
-	'X' => __('X &#8212; Even more mature than above')
-);
+$ratings = array( 'G' => __('G &#8212; Suitable for all audiences'), 'PG' => __('PG &#8212; Possibly offensive, usually for audiences 13 and above'), 'R' => __('R &#8212; Intended for adult audiences above 17'), 'X' => __('X &#8212; Even more mature than above'));
 foreach ($ratings as $key => $rating) :
 	$selected = (get_option('avatar_rating') == $key) ? 'checked="checked"' : '';
 	echo "\n\t<label><input type='radio' name='avatar_rating' value='" . esc_attr($key) . "' $selected/> $rating</label><br />";

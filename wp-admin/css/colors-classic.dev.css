@@ -4,7 +4,7 @@ html {
 
 * html input,
 * html .widget {
-	border-color: #8cbdd5;
+    border-color: #8cbdd5;
 }
 
 textarea,
@@ -110,11 +110,11 @@ div.dashboard-widget-submit {
 }
 
 div.tabs-panel,
-ul.category-tabs li.tabs {
+ul#category-tabs li.tabs {
 	border-color: #dfdfdf;
 }
 
-ul.category-tabs li.tabs {
+ul#category-tabs li.tabs {
 	background-color: #f1f1f1;
 }
 
@@ -381,10 +381,10 @@ div.dashboard-widget-submit input:hover,
 }
 
 #dashboard_right_now .table {
-	background: #faf9f7 !important;
+	background:#faf9f7 !important;
 }
 
-#side-sortables .category-tabs .tabs a {
+#side-sortables #category-tabs .tabs a {
 	color: #333;
 }
 
@@ -442,7 +442,7 @@ div.dashboard-widget-submit input:hover,
 }
 
 .update-message {
-	color: #000;
+	color: #000000;
 }
 
 a.page-numbers {
@@ -698,8 +698,8 @@ table.widefat span.spam a,
 }
 
 #update-nag {
-	background-color: #FFFBCC;
-	border-color: #E6DB55;
+	background-color: #fffeeb;
+	border-color: #ccc;
 	color: #555;
 }
 
@@ -1463,7 +1463,7 @@ fieldset.inline-edit-col-right .inline-edit-col {
 	background-color: #f5f5f5;
 }
 
-#post-body ul.category-tabs li.tabs a {
+#post-body ul#category-tabs li.tabs a {
 	color: #333;
 }
 
@@ -1629,18 +1629,18 @@ fieldset.inline-edit-col-right .inline-edit-col {
 div.widgets-sortables,
 #widgets-left .inactive {
 	background-color: #f1f1f1;
-	border-color: #ddd;
+    border-color: #ddd;
 }
 
 #available-widgets .widget-holder {
-	background-color: #fff;
-	border-color: #ddd;
+    background-color: #fff;
+    border-color: #ddd;
 }
 
 #widgets-left .sidebar-name {
 	background-color: #aaa;
 	background-image: url(../images/ed-bg-vs.gif);
-	text-shadow: #fff 0 1px 0;
+	text-shadow: #FFFFFF 0 1px 0;
 	border-color: #dfdfdf;
 }
 

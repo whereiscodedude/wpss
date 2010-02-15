@@ -944,7 +944,7 @@ function wp_validate_redirect($location, $default = '') {
 	$test = ( $cut = strpos($location, '?') ) ? substr( $location, 0, $cut ) : $location;
 
 	$lp  = parse_url($test);
-	$wpp = parse_url(home_url());
+	$wpp = parse_url(get_option('home'));
 
 	$allowed_hosts = (array) apply_filters('allowed_redirect_hosts', array($wpp['host']), isset($lp['host']) ? $lp['host'] : '');
 
@@ -976,7 +976,7 @@ function wp_notify_postauthor($comment_id, $comment_type='') {
 	if ('' == $user->user_email) return false; // If there's no email to send the comment to
 
 	$comment_author_domain = @gethostbyaddr($comment->comment_author_IP);
-
+	
 	// The blogname option is escaped with esc_html on the way into the database in sanitize_option
 	// we want to reverse this for the plain text arena of emails.
 	$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
@@ -1072,11 +1072,11 @@ function wp_notify_moderator($comment_id) {
 
 	$comment_author_domain = @gethostbyaddr($comment->comment_author_IP);
 	$comments_waiting = $wpdb->get_var("SELECT count(comment_ID) FROM $wpdb->comments WHERE comment_approved = '0'");
-
+	
 	// The blogname option is escaped with esc_html on the way into the database in sanitize_option
 	// we want to reverse this for the plain text arena of emails.
 	$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
-
+	
 	switch ($comment->comment_type)
 	{
 		case 'trackback':
@@ -1164,7 +1164,7 @@ function wp_new_user_notification($user_id, $plaintext_pass = '') {
 
 	$user_login = stripslashes($user->user_login);
 	$user_email = stripslashes($user->user_email);
-
+	
 	// The blogname option is escaped with esc_html on the way into the database in sanitize_option
 	// we want to reverse this for the plain text arena of emails.
 	$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
@@ -1301,14 +1301,14 @@ function wp_salt($scheme = 'auth') {
 		if ( defined('AUTH_KEY') && ('' != AUTH_KEY) && ( $wp_default_secret_key != AUTH_KEY) )
 			$secret_key = AUTH_KEY;
 
-		if ( defined('AUTH_SALT') && ('' != AUTH_SALT) && ( $wp_default_secret_key != AUTH_SALT) ) {
+		if ( defined('AUTH_SALT') ) {
 			$salt = AUTH_SALT;
-		} elseif ( defined('SECRET_SALT') && ('' != SECRET_SALT) && ( $wp_default_secret_key != SECRET_SALT) ) {
+		} elseif ( defined('SECRET_SALT') ) {
 			$salt = SECRET_SALT;
 		} else {
 			$salt = get_option('auth_salt');
 			if ( empty($salt) ) {
-				$salt = wp_generate_password( 64, true, true );
+				$salt = wp_generate_password(64);
 				update_option('auth_salt', $salt);
 			}
 		}
@@ -1316,12 +1316,12 @@ function wp_salt($scheme = 'auth') {
 		if ( defined('SECURE_AUTH_KEY') && ('' != SECURE_AUTH_KEY) && ( $wp_default_secret_key != SECURE_AUTH_KEY) )
 			$secret_key = SECURE_AUTH_KEY;
 
-		if ( defined('SECURE_AUTH_SALT') && ('' != SECURE_AUTH_SALT) && ( $wp_default_secret_key != SECURE_AUTH_SALT) ) {
+		if ( defined('SECURE_AUTH_SALT') ) {
 			$salt = SECURE_AUTH_SALT;
 		} else {
 			$salt = get_option('secure_auth_salt');
 			if ( empty($salt) ) {
-				$salt = wp_generate_password( 64, true, true );
+				$salt = wp_generate_password(64);
 				update_option('secure_auth_salt', $salt);
 			}
 		}
@@ -1329,12 +1329,12 @@ function wp_salt($scheme = 'auth') {
 		if ( defined('LOGGED_IN_KEY') && ('' != LOGGED_IN_KEY) && ( $wp_default_secret_key != LOGGED_IN_KEY) )
 			$secret_key = LOGGED_IN_KEY;
 
-		if ( defined('LOGGED_IN_SALT') && ('' != LOGGED_IN_SALT) && ( $wp_default_secret_key != LOGGED_IN_SALT) ) {
+		if ( defined('LOGGED_IN_SALT') ) {
 			$salt = LOGGED_IN_SALT;
 		} else {
 			$salt = get_option('logged_in_salt');
 			if ( empty($salt) ) {
-				$salt = wp_generate_password( 64, true, true );
+				$salt = wp_generate_password(64);
 				update_option('logged_in_salt', $salt);
 			}
 		}
@@ -1342,12 +1342,12 @@ function wp_salt($scheme = 'auth') {
 		if ( defined('NONCE_KEY') && ('' != NONCE_KEY) && ( $wp_default_secret_key != NONCE_KEY) )
 			$secret_key = NONCE_KEY;
 
-		if ( defined('NONCE_SALT') && ('' != NONCE_SALT) && ( $wp_default_secret_key != NONCE_SALT) ) {
+		if ( defined('NONCE_SALT') ) {
 			$salt = NONCE_SALT;
 		} else {
 			$salt = get_option('nonce_salt');
 			if ( empty($salt) ) {
-				$salt = wp_generate_password( 64, true, true );
+				$salt = wp_generate_password(64);
 				update_option('nonce_salt', $salt);
 			}
 		}
@@ -1461,26 +1461,18 @@ if ( !function_exists('wp_generate_password') ) :
  * @since 2.5
  *
  * @param int $length The length of password to generate
- * @param bool $special_chars Whether to include standard special characters. Default true.
- * @param bool $extra_special_chars Whether to include more special characters. Used
- *   when generating secret keys and salts. Default false.
+ * @param bool $special_chars Whether to include standard special characters
  * @return string The random password
  **/
-function wp_generate_password( $length = 12, $special_chars = true, $extra_special_chars = false ) {
+function wp_generate_password($length = 12, $special_chars = true) {
 	$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	if ( $special_chars ) {
+	if ( $special_chars )
 		$chars .= '!@#$%^&*()';
-		if ( $extra_special_chars )
-			$chars .= '-_ []{}<>~`+=,.;:/?|';
-	}
 
 	$password = '';
-	for ( $i = 0; $i < $length; $i++ ) {
+	for ( $i = 0; $i < $length; $i++ )
 		$password .= substr($chars, wp_rand(0, strlen($chars) - 1), 1);
-	}
-
-	// random_password filter was previously in random_password function which was deprecated
-	return apply_filters('random_password', $password);
+	return $password;
 }
 endif;
 
@@ -1497,19 +1489,16 @@ if ( !function_exists('wp_rand') ) :
 function wp_rand( $min = 0, $max = 0 ) {
 	global $rnd_value;
 
+	$seed = get_transient('random_seed');
+
 	// Reset $rnd_value after 14 uses
 	// 32(md5) + 40(sha1) + 40(sha1) / 8 = 14 random numbers from $rnd_value
 	if ( strlen($rnd_value) < 8 ) {
-		if ( defined( 'WP_SETUP_CONFIG' ) )
-			static $seed = '';
-		else
-			$seed = get_transient('random_seed');
 		$rnd_value = md5( uniqid(microtime() . mt_rand(), true ) . $seed );
 		$rnd_value .= sha1($rnd_value);
 		$rnd_value .= sha1($rnd_value . $seed);
 		$seed = md5($seed . $rnd_value);
-		if ( ! defined( 'WP_SETUP_CONFIG' ) )
-			set_transient('random_seed', $seed);
+		set_transient('random_seed', $seed);
 	}
 
 	// Take the first 8 digits for our value
@@ -1645,10 +1634,9 @@ endif;
 
 if ( !function_exists('wp_setcookie') ) :
 /**
- * Sets a cookie for a user who just logged in. This function is deprecated.
+ * Sets a cookie for a user who just logged in.
  *
  * @since 1.5
- * @deprecated 2.5
  * @deprecated Use wp_set_auth_cookie()
  * @see wp_set_auth_cookie()
  *
@@ -1668,10 +1656,9 @@ endif;
 
 if ( !function_exists('wp_clearcookie') ) :
 /**
- * Clears the authentication cookie, logging the user out. This function is deprecated.
+ * Clears the authentication cookie, logging the user out.
  *
  * @since 1.5
- * @deprecated 2.5
  * @deprecated Use wp_clear_auth_cookie()
  * @see wp_clear_auth_cookie()
  */
@@ -1683,26 +1670,25 @@ endif;
 
 if ( !function_exists('wp_get_cookie_login') ):
 /**
- * Gets the user cookie login. This function is deprecated.
+ * Gets the user cookie login.
  *
  * This function is deprecated and should no longer be extended as it won't be
  * used anywhere in WordPress. Also, plugins shouldn't use it either.
  *
  * @since 2.0.3
- * @deprecated 2.5
  * @deprecated No alternative
  *
  * @return bool Always returns false
  */
 function wp_get_cookie_login() {
-	_deprecated_function( __FUNCTION__, '2.5' );
+	_deprecated_function( __FUNCTION__, '2.5', '' );
 	return false;
 }
 endif;
 
 if ( !function_exists('wp_login') ) :
 /**
- * Checks a users login information and logs them in if it checks out. This function is deprecated.
+ * Checks a users login information and logs them in if it checks out.
  *
  * Use the global $error to get the reason why the login failed. If the username
  * is blank, no error will be set, so assume blank username on that case.
@@ -1721,7 +1707,6 @@ if ( !function_exists('wp_login') ) :
  * @return bool False on login failure, true on successful check
  */
 function wp_login($username, $password, $deprecated = '') {
-	_deprecated_function( __FUNCTION__, '2.5', 'wp_signon()' ); 
 	global $error;
 
 	$user = wp_authenticate($username, $password);
@@ -1803,3 +1788,4 @@ function wp_text_diff( $left_string, $right_string, $args = null ) {
 	return $r;
 }
 endif;
+

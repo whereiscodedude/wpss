@@ -132,7 +132,7 @@ switch ( $action ) {
 </tr>
 </table>
 
-<p><?php _e('Are you sure you want to do this?'); ?></p>
+<p><?php _e('Are you sure you want to do that?'); ?></p>
 
 <form action='comment.php' method='get'>
 

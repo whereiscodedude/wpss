@@ -256,23 +256,23 @@ function url_to_postid($url) {
 	$url = $url_split[0];
 
 	// Add 'www.' if it is absent and should be there
-	if ( false !== strpos(home_url(), '://www.') && false === strpos($url, '://www.') )
+	if ( false !== strpos(get_option('home'), '://www.') && false === strpos($url, '://www.') )
 		$url = str_replace('://', '://www.', $url);
 
 	// Strip 'www.' if it is present and shouldn't be
-	if ( false === strpos(home_url(), '://www.') )
+	if ( false === strpos(get_option('home'), '://www.') )
 		$url = str_replace('://www.', '://', $url);
 
 	// Strip 'index.php/' if we're not using path info permalinks
 	if ( !$wp_rewrite->using_index_permalinks() )
 		$url = str_replace('index.php/', '', $url);
 
-	if ( false !== strpos($url, home_url()) ) {
+	if ( false !== strpos($url, get_option('home')) ) {
 		// Chop off http://domain.com
-		$url = str_replace(home_url(), '', $url);
+		$url = str_replace(get_option('home'), '', $url);
 	} else {
 		// Chop off /path/to/blog
-		$home_path = parse_url(home_url());
+		$home_path = parse_url(get_option('home'));
 		$home_path = $home_path['path'];
 		$url = str_replace($home_path, '', $url);
 	}
@@ -786,16 +786,14 @@ class WP_Rewrite {
 
 		//get pages in order of hierarchy, i.e. children after parents
 		$posts = get_page_hierarchy($wpdb->get_results("SELECT ID, post_name, post_parent FROM $wpdb->posts WHERE post_type = 'page'"));
-
-		// If we have no pages get out quick
-		if ( !$posts )
-			return array( array(), array() );
-
 		//now reverse it, because we need parents after children for rewrite rules to work properly
 		$posts = array_reverse($posts, true);
 
 		$page_uris = array();
 		$page_attachment_uris = array();
+
+		if ( !$posts )
+			return array( array(), array() );
 
 		foreach ($posts as $id => $post) {
 			// URL => page name
@@ -1645,7 +1643,7 @@ class WP_Rewrite {
 			$site_root = trailingslashit($site_root['path']);
 		}
 
-		$home_root = parse_url(home_url());
+		$home_root = parse_url(get_option('home'));
 		if ( isset( $home_root['path'] ) ) {
 			$home_root = trailingslashit($home_root['path']);
 		} else {
@@ -1724,76 +1722,31 @@ class WP_Rewrite {
 		if ( ! $this->using_permalinks()) {
 			return '';
 		}
-
-		if ( !is_multisite() ) {
-			$rules = '';
-			$extra_indent = '';
-			if ( $add_parent_tags ) {
-				$rules .= "<configuration>".$end_of_line;
-				$rules .= $indent."<system.webServer>".$end_of_line;
-				$rules .= $indent.$indent."<rewrite>".$end_of_line;
-				$rules .= $indent.$indent.$indent."<rules>".$end_of_line;
-				$extra_indent = $indent.$indent.$indent.$indent;
-			}
-
-			$rules .= $extra_indent."<rule name=\"wordpress\" patternSyntax=\"Wildcard\">".$end_of_line;
-			$rules .= $extra_indent.$indent."<match url=\"*\" />".$end_of_line;
-			$rules .= $extra_indent.$indent.$indent."<conditions>".$end_of_line;
-			$rules .= $extra_indent.$indent.$indent.$indent."<add input=\"{REQUEST_FILENAME}\" matchType=\"IsFile\" negate=\"true\" />".$end_of_line;
-			$rules .= $extra_indent.$indent.$indent.$indent."<add input=\"{REQUEST_FILENAME}\" matchType=\"IsDirectory\" negate=\"true\" />".$end_of_line;
-			$rules .= $extra_indent.$indent.$indent."</conditions>".$end_of_line;
-			$rules .= $extra_indent.$indent."<action type=\"Rewrite\" url=\"index.php\" />".$end_of_line;
-			$rules .= $extra_indent."</rule>";
-
-			if ( $add_parent_tags ) {
-				$rules .= $end_of_line.$indent.$indent.$indent."</rules>".$end_of_line;
-				$rules .= $indent.$indent."</rewrite>".$end_of_line;
-				$rules .= $indent."</system.webServer>".$end_of_line;
-				$rules .= "</configuration>";
-			}
-		} else {
-			$rules = '<rule name="wordpress - strip index.php" stopProcessing="false">
-					<match url="^index.php/(.*)$" />
-						<action type="Rewrite" url="{R:1}" />
-					</rule>
-					<rule name="wordpress - 1" stopProcessing="true">
-						<match url="^(.*/)?files/$" />
-						<action type="Rewrite" url="index.php" />
-					</rule>
-					<rule name="wordpress - 2" stopProcessing="true">
-						<match url="^(.*/)?files/(.*)" />
-						<conditions>
-							<add input="{REQUEST_URI}" negate="true" pattern=".*wp-content/plugins.*"/>
-						</conditions>
-						<action type="Rewrite" url="wp-content/blogs.php?file={R:2}" appendQueryString="false" />
-					</rule>
-					<rule name="wordpress - 3" stopProcessing="true">
-						<match url="^(.+)$" />
-						<conditions>
-							<add input="{REQUEST_URI}" pattern="^.*/wp-admin$" />
-						</conditions>
-						<action type="Redirect" url="{R:1}/" redirectType="Permanent" />
-					</rule>
-					<rule name="wordpress - 4" stopProcessing="true">
-						<match url="."/>
-						<conditions logicalGrouping="MatchAny">
-							<add input="{REQUEST_FILENAME}" matchType="IsFile" pattern="" />
-							<add input="{REQUEST_FILENAME}" matchType="IsDirectory" pattern="" />
-						</conditions>
-						<action type="None" />
-					</rule>
-					<rule name="wordpress - 5" stopProcessing="true">
-						<match url="^([_0-9a-zA-Z-]+/)?(wp-.*)" />
-						<action type="Rewrite" url="{R:2}" />
-					</rule>
-					<rule name="wordpress - 6" stopProcessing="true">
-						<match url="^([_0-9a-zA-Z-]+/)?(.*\.php)$" />
-						<action type="Rewrite" url="{R:2}" />
-					</rule>
-					<rule name="wordpress - 7" stopProcessing="true">
-						<match url="." />
-						<action type="Rewrite" url="index.php" />
-					</rule>';
+		
+		$rules = '';
+		$extra_indent = '';
+		if ( $add_parent_tags ) {
+			$rules .= "<configuration>".$end_of_line;
+			$rules .= $indent."<system.webServer>".$end_of_line;
+			$rules .= $indent.$indent."<rewrite>".$end_of_line;
+			$rules .= $indent.$indent.$indent."<rules>".$end_of_line;
+			$extra_indent = $indent.$indent.$indent.$indent;
+		}
+		
+		$rules .= $extra_indent."<rule name=\"wordpress\" patternSyntax=\"Wildcard\">".$end_of_line;
+		$rules .= $extra_indent.$indent."<match url=\"*\" />".$end_of_line;
+		$rules .= $extra_indent.$indent.$indent."<conditions>".$end_of_line;
+		$rules .= $extra_indent.$indent.$indent.$indent."<add input=\"{REQUEST_FILENAME}\" matchType=\"IsFile\" negate=\"true\" />".$end_of_line;
+		$rules .= $extra_indent.$indent.$indent.$indent."<add input=\"{REQUEST_FILENAME}\" matchType=\"IsDirectory\" negate=\"true\" />".$end_of_line;
+		$rules .= $extra_indent.$indent.$indent."</conditions>".$end_of_line;
+		$rules .= $extra_indent.$indent."<action type=\"Rewrite\" url=\"index.php\" />".$end_of_line;
+		$rules .= $extra_indent."</rule>";
+		
+		if ( $add_parent_tags ) {
+			$rules .= $end_of_line.$indent.$indent.$indent."</rules>".$end_of_line;
+			$rules .= $indent.$indent."</rewrite>".$end_of_line;
+			$rules .= $indent."</system.webServer>".$end_of_line;
+			$rules .= "</configuration>";
 		}
 
 		$rules = apply_filters('iis7_url_rewrite_rules', $rules);

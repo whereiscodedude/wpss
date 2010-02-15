@@ -302,12 +302,6 @@ div.postbox div.inside {
 	float: right;
 }
 
-#dashboard-widgets #dashboard_quick_press form p.submit img.waiting {
-	vertical-align: middle;
-	visibility: hidden;
-	margin: 4px 6px 0 0;
-}
-
 /* Recent Drafts */
 #dashboard_recent_drafts ul {
 	margin: 0;

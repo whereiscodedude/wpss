@@ -65,7 +65,7 @@ function delete_theme($template) {
 		request_filesystem_credentials($url, '', true); // Failed to connect, Error and request again
 		$data = ob_get_contents();
 		ob_end_clean();
-		if ( ! empty($data) ) {
+		if( ! empty($data) ){
 			include_once( ABSPATH . 'wp-admin/admin-header.php');
 			echo $data;
 			include( ABSPATH . 'wp-admin/admin-footer.php');
@@ -79,7 +79,7 @@ function delete_theme($template) {
 		return new WP_Error('fs_unavailable', __('Could not access filesystem.'));
 
 	if ( is_wp_error($wp_filesystem->errors) && $wp_filesystem->errors->get_error_code() )
-		return new WP_Error('fs_error', __('Filesystem error.'), $wp_filesystem->errors);
+		return new WP_Error('fs_error', __('Filesystem error'), $wp_filesystem->errors);
 
 	//Get the base plugin folder
 	$themes_dir = $wp_filesystem->wp_themes_dir();
@@ -94,10 +94,10 @@ function delete_theme($template) {
 	$deleted = $wp_filesystem->delete($theme_dir, true);
 
 	if ( ! $deleted )
-		return new WP_Error('could_not_remove_theme', sprintf(__('Could not fully remove the theme %s.'), $template) );
+		return new WP_Error('could_not_remove_theme', sprintf(__('Could not fully remove the theme %s'), $template) );
 
 	// Force refresh of theme update information
-	delete_site_transient('update_themes');
+	delete_transient('update_themes');
 
 	return true;
 }
@@ -114,45 +114,6 @@ function get_broken_themes() {
 
 	get_themes();
 	return $wp_broken_themes;
-}
-
-/**
- * Get the allowed themes for the current blog.
- *
- * @since 3.0
- *
- * @uses get_themes()
- * @uses current_theme_info()
- * @uses get_site_allowed_themes()
- * @uses wpmu_get_blog_allowedthemes
- *
- * @return array $themes Array of allowed themes.
- */
-function get_allowed_themes() {
-	if ( !is_multisite() )
-		return get_themes();
-
-	$themes = get_themes();
-	$ct = current_theme_info();
-	$allowed_themes = apply_filters("allowed_themes", get_site_allowed_themes() );
-	if ( $allowed_themes == false )
-		$allowed_themes = array();
-
-	$blog_allowed_themes = wpmu_get_blog_allowedthemes();
-	if ( is_array( $blog_allowed_themes ) )
-		$allowed_themes = array_merge( $allowed_themes, $blog_allowed_themes );
-
-	if ( isset( $allowed_themes[ esc_html( $ct->stylesheet ) ] ) == false )
-		$allowed_themes[ esc_html( $ct->stylesheet ) ] = true;
-
-	reset( $themes );
-	foreach ( $themes as $key => $theme ) {
-		if ( isset( $allowed_themes[ esc_html( $theme[ 'Stylesheet' ] ) ] ) == false )
-			unset( $themes[ $key ] );
-	}
-	reset( $themes );
-
-	return $themes;
 }
 
 /**
@@ -195,10 +156,10 @@ function get_page_templates() {
 
 /**
  * Tidies a filename for url display by the theme editor.
- *
+ * 
  * @since 2.9.0
  * @private
- *
+ * 
  * @param string $fullpath Full path to the theme file
  * @param string $containingfolder Path of the theme parent folder
  * @return string

@@ -298,20 +298,6 @@ function is_feed () {
 }
 
 /**
- * Whether current page query is comment feed URL.
- *
- * @since 3.0.0
- * @uses $wp_query
- *
- * @return bool
- */
-function is_comment_feed () {
-	global $wp_query;
-
-	return $wp_query->is_comment_feed;
-}
-
-/**
  * Whether current page query is the front of the site.
  *
  * @since 2.5.0
@@ -332,10 +318,6 @@ function is_front_page () {
 
 /**
  * Whether current page view is the blog homepage.
- *
- * This is the page which is showing the time based blog content of your site
- * so if you set a static page for the front page of your site then this will
- * only be true on the page which you set as the "Posts page" in Reading Settings.
  *
  * @since 1.5.0
  * @uses $wp_query
@@ -1765,7 +1747,6 @@ class WP_Query {
 					$search .= " AND ($wpdb->posts.post_password = '') ";
 			}
 		}
-		$search = apply_filters('posts_search', $search, $this);
 
 		// Category stuff
 
@@ -2063,13 +2044,8 @@ class WP_Query {
 
 		if ( is_array($post_type) )
 			$post_type_cap = 'multiple_post_type';
-		else {
-			$post_type_object = get_post_type_object ( $post_type );
-			if ( !empty($post_type_object) )
-				$post_type_cap = $post_type_object->capability_type;
-			else
-				$post_type_cap = $post_type;
-		}
+		else
+			$post_type_cap = $post_type;
 
 		$exclude_post_types = '';
 		foreach ( get_post_types( array('exclude_from_search' => true) ) as $_wp_post_type )
@@ -2078,7 +2054,7 @@ class WP_Query {
 		if ( 'any' == $post_type ) {
 			$where .= $exclude_post_types;
 		} elseif ( !empty( $post_type ) && is_array( $post_type ) ) {
-			$where .= " AND $wpdb->posts.post_type IN ('" . join("', '", $post_type) . "')";
+			$where .= " AND $wpdb->posts.post_type IN ('" . join("', '", $post_type) . "')"; 
 		} elseif ( ! empty( $post_type ) ) {
 			$where .= " AND $wpdb->posts.post_type = '$post_type'";
 		} elseif ( $this->is_attachment ) {
@@ -2097,19 +2073,24 @@ class WP_Query {
 			$q_status = explode(',', $q['post_status']);
 			$r_status = array();
 			$p_status = array();
-			$e_status = array();
 			if ( $q['post_status'] == 'any' ) {
-				foreach ( get_post_stati( array('exclude_from_search' => true) ) as $status )
-					$e_status[] = "$wpdb->posts.post_status <> '$status'";
+				// @todo Use register_post_status() data to determine which states should be excluded.
+				$r_status[] = "$wpdb->posts.post_status <> 'trash'";
 			} else {
-				foreach ( get_post_stati() as $status ) {
-					if ( in_array( $status, $q_status ) ) {
-						if ( 'private' == $status )
-							$p_status[] = "$wpdb->posts.post_status = '$status'";
-						else
-							$r_status[] = "$wpdb->posts.post_status = '$status'";
-					}
-				}
+				if ( in_array( 'draft'  , $q_status ) )
+					$r_status[] = "$wpdb->posts.post_status = 'draft'";
+				if ( in_array( 'pending', $q_status ) )
+					$r_status[] = "$wpdb->posts.post_status = 'pending'";
+				if ( in_array( 'future' , $q_status ) )
+					$r_status[] = "$wpdb->posts.post_status = 'future'";
+				if ( in_array( 'inherit' , $q_status ) )
+					$r_status[] = "$wpdb->posts.post_status = 'inherit'";
+				if ( in_array( 'private', $q_status ) )
+					$p_status[] = "$wpdb->posts.post_status = 'private'";
+				if ( in_array( 'publish', $q_status ) )
+					$r_status[] = "$wpdb->posts.post_status = 'publish'";
+				if ( in_array( 'trash', $q_status ) )
+					$r_status[] = "$wpdb->posts.post_status = 'trash'";
 			}
 
 			if ( empty($q['perm'] ) || 'readable' != $q['perm'] ) {
@@ -2117,9 +2098,6 @@ class WP_Query {
 				unset($p_status);
 			}
 
-			if ( !empty($e_status) ) {
-				$statuswheres[] = "(" . join( ' AND ', $e_status ) . ")";
-			}
 			if ( !empty($r_status) ) {
 				if ( !empty($q['perm'] ) && 'editable' == $q['perm'] && !current_user_can("edit_others_{$post_type_cap}s") )
 					$statuswheres[] = "($wpdb->posts.post_author = $user_ID " .  "AND (" . join( ' OR ', $r_status ) . "))";
@@ -2365,8 +2343,8 @@ class WP_Query {
 				foreach ( $stickies as $sticky_post ) {
 					if ( 'publish' != $sticky_post->post_status )
 						continue;
-					array_splice($this->posts, $sticky_offset, 0, array($sticky_post));
-					$sticky_offset++;
+						array_splice($this->posts, $sticky_offset, 0, array($sticky_post));
+						$sticky_offset++;
 				}
 			}
 		}
@@ -2558,27 +2536,28 @@ class WP_Query {
 	 * @return object
 	 */
 	function get_queried_object() {
-		if ( isset($this->queried_object) )
+		if (isset($this->queried_object)) {
 			return $this->queried_object;
+		}
 
 		$this->queried_object = NULL;
 		$this->queried_object_id = 0;
 
-		if ( $this->is_category ) {
+		if ($this->is_category) {
 			$cat = $this->get('cat');
 			$category = &get_category($cat);
 			if ( is_wp_error( $category ) )
 				return NULL;
 			$this->queried_object = &$category;
 			$this->queried_object_id = (int) $cat;
-		} elseif ( $this->is_tag ) {
+		} else if ($this->is_tag) {
 			$tag_id = $this->get('tag_id');
 			$tag = &get_term($tag_id, 'post_tag');
 			if ( is_wp_error( $tag ) )
 				return NULL;
 			$this->queried_object = &$tag;
 			$this->queried_object_id = (int) $tag_id;
-		} elseif ( $this->is_tax ) {
+		} else if ($this->is_tax) {
 			$tax = $this->get('taxonomy');
 			$slug = $this->get('term');
 			$term = &get_terms($tax, array('slug'=>$slug));
@@ -2587,16 +2566,16 @@ class WP_Query {
 			$term = $term[0];
 			$this->queried_object = $term;
 			$this->queried_object_id = $term->term_id;
-		} elseif ( $this->is_posts_page ) {
+		} else if ($this->is_posts_page) {
 			$this->queried_object = & get_page(get_option('page_for_posts'));
 			$this->queried_object_id = (int) $this->queried_object->ID;
-		} elseif ( $this->is_single ) {
+		} else if ($this->is_single) {
 			$this->queried_object = $this->post;
 			$this->queried_object_id = (int) $this->post->ID;
-		} elseif ( $this->is_page ) {
+		} else if ($this->is_page) {
 			$this->queried_object = $this->post;
 			$this->queried_object_id = (int) $this->post->ID;
-		} elseif ( $this->is_author ) {
+		} else if ($this->is_author) {
 			$author_id = (int) $this->get('author');
 			$author = get_userdata($author_id);
 			$this->queried_object = $author;

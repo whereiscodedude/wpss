@@ -1,4 +1,3 @@
-var topWin = window.dialogArguments || opener || parent || top;
 
 function fileDialogStart() {
 	jQuery("#media-upload-error").empty();
@@ -25,11 +24,6 @@ function fileQueued(fileObj) {
 }
 
 function uploadStart(fileObj) {
-	try {
-		if ( typeof topWin.tb_remove != 'undefined' )
-			topWin.jQuery('#TB_overlay').unbind('click', topWin.tb_remove); 
-	} catch(e){}
-
 	return true;
 }
 
@@ -48,11 +42,6 @@ function prepareMediaItem(fileObj, serverData) {
 	// Move the progress bar to 100%
 	jQuery('.bar', item).remove();
 	jQuery('.progress', item).hide();
-
-	try {
-		if ( typeof topWin.tb_remove != 'undefined' )
-			topWin.jQuery('#TB_overlay').click(topWin.tb_remove);
-	} catch(e){}
 
 	// Old style: Append the HTML returned by the server -- thumbnail and form inputs
 	if ( isNaN(serverData) || !serverData ) {

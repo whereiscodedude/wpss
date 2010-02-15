@@ -17,14 +17,10 @@
 define('WP_INSTALLING', true);
 
 /**
- * We are blissfully unaware of anything.
- */
-define('WP_SETUP_CONFIG', true);
-
-/**
  * Disable error reporting
  *
- * Set this to error_reporting( E_ALL ) or error_reporting( E_ALL | E_STRICT ) for debugging
+ * Set this to error_reporting( E_ALL ) or error_reporting( E_ALL | E_STRICT ) f
+or debugging
  */
 error_reporting(0);
 
@@ -36,14 +32,11 @@ error_reporting(0);
 define('ABSPATH', dirname(dirname(__FILE__)).'/');
 define('WPINC', 'wp-includes');
 define('WP_CONTENT_DIR', ABSPATH . 'wp-content');
-define('WP_DEBUG', false);
 /**#@-*/
 
-require_once(ABSPATH . WPINC . '/load.php');
 require_once(ABSPATH . WPINC . '/compat.php');
 require_once(ABSPATH . WPINC . '/functions.php');
 require_once(ABSPATH . WPINC . '/classes.php');
-require_once(ABSPATH . WPINC . '/version.php');
 
 if (!file_exists(ABSPATH . 'wp-config-sample.php'))
 	wp_die('Sorry, I need a wp-config-sample.php file to work from. Please re-upload this file from your WordPress installation.');
@@ -58,8 +51,8 @@ if (file_exists(ABSPATH . 'wp-config.php'))
 if (file_exists(ABSPATH . '../wp-config.php') && ! file_exists(ABSPATH . '../wp-settings.php'))
 	wp_die("<p>The file 'wp-config.php' already exists one level above your WordPress installation. If you need to reset any of the configuration items in this file, please delete it first. You may try <a href='install.php'>installing now</a>.</p>");
 
-if ( version_compare( $required_php_version, phpversion(), '>' ) )
-	wp_die( sprintf( /*WP_I18N_OLD_PHP*/'Your server is running PHP version %1$s but WordPress requires at least %2$s.'/*/WP_I18N_OLD_PHP*/, phpversion(), $required_php_version ) );
+if ( version_compare( '4.3', phpversion(), '>' ) )
+	wp_die( sprintf( /*WP_I18N_OLD_PHP*/'Your server is running PHP version %s but WordPress requires at least 4.3.'/*/WP_I18N_OLD_PHP*/, phpversion() ) );
 
 if ( !extension_loaded('mysql') && !file_exists(ABSPATH . 'wp-content/db.php') )
 	wp_die( /*WP_I18N_OLD_MYSQL*/'Your PHP installation appears to be missing the MySQL extension which is required by WordPress.'/*/WP_I18N_OLD_MYSQL*/ );
@@ -137,7 +130,7 @@ switch($step) {
 		<tr>
 			<th scope="row"><label for="dbhost">Database Host</label></th>
 			<td><input name="dbhost" id="dbhost" type="text" size="25" value="localhost" /></td>
-			<td>You should be able to get this info from your web host, if <code>localhost</code> does not work.</td>
+			<td>99% chance you won't need to change this value.</td>
 		</tr>
 		<tr>
 			<th scope="row"><label for="prefix">Table Prefix</label></th>
@@ -173,30 +166,6 @@ switch($step) {
 	if ( !empty($wpdb->error) )
 		wp_die($wpdb->error->get_error_message());
 
-	require_once( ABSPATH . WPINC . '/plugin.php' );
-	require_once( ABSPATH . WPINC . '/http.php' );
-	wp_fix_server_vars();
-	/**#@+
-	 * @ignore
-	 */
-	function get_bloginfo() {
-		return 'http://' . $_SERVER['HTTP_HOST'] . str_replace( $_SERVER['PHP_SELF'], '/wp-admin/setup-config.php', '' );
-	}
-	/**#@-*/
-
-	$secret_keys = wp_remote_get( 'https://api.wordpress.org/secret-key/1.1/salt/' );
-	if ( is_wp_error( $secret_keys ) ) {
-		$secret_keys = array();
-		require_once( ABSPATH . WPINC . '/pluggable.php' );
-		for ( $i = 0; $i < 8; $i++ )
-			$secret_keys[] = wp_generate_password( 64, true, true );
-	} else {
-		$secret_keys = explode( "\n", wp_remote_retrieve_body( $secret_keys ) );
-		foreach ( $secret_keys as $k => $v )
-			$secret_keys[$k] = substr( $v, 28, 64 );
-	}
-	$key = 0;
-
 	foreach ($configFile as $line_num => $line) {
 		switch (substr($line,0,16)) {
 			case "define('DB_NAME'":
@@ -214,16 +183,6 @@ switch($step) {
 			case '$table_prefix  =':
 				$configFile[$line_num] = str_replace('wp_', $prefix, $line);
 				break;
-			case "define('AUTH_KEY":
-			case "define('SECURE_A":
-			case "define('LOGGED_I":
-			case "define('NONCE_KE":
-			case "define('AUTH_SAL":
-			case "define('SECURE_A":
-			case "define('LOGGED_I":
-			case "define('NONCE_SA":
-				$configFile[$line_num] = str_replace('put your unique phrase here', $secret_keys[$key++], $line );
-				break;
 		}
 	}
 	if ( ! is_writable(ABSPATH) ) :
@@ -233,7 +192,7 @@ switch($step) {
 <p>You can create the <code>wp-config.php</code> manually and paste the following text into it.</p>
 <textarea cols="90" rows="15"><?php
 		foreach( $configFile as $line ) {
-			echo htmlentities($line, ENT_COMPAT, 'UTF-8');
+			echo htmlentities($line);
 		}
 ?></textarea>
 <p>After you've done that, click "Run the install."</p>

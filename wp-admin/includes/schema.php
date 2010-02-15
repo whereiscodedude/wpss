@@ -180,7 +180,7 @@ CREATE TABLE $wpdb->usermeta (
  * @uses $wp_db_version
  */
 function populate_options() {
-	global $wpdb, $wp_db_version, $current_site;
+	global $wpdb, $wp_db_version;
 
 	$guessurl = wp_guess_url();
 
@@ -196,8 +196,7 @@ function populate_options() {
 	$options = array(
 	'siteurl' => $guessurl,
 	'blogname' => __('My Blog'),
-	/* translators: blog tagline */
-	'blogdescription' => __('Just another WordPress site'),
+	'blogdescription' => __('Just another WordPress weblog'),
 	'users_can_register' => 0,
 	'admin_email' => 'you@example.com',
 	'start_of_week' => 1,
@@ -245,8 +244,8 @@ function populate_options() {
 	'default_email_category' => 1,
 	'recently_edited' => '',
 	'use_linksupdate' => 0,
-	'template' => 'twentyten',
-	'stylesheet' => 'twentyten',
+	'template' => 'default',
+	'stylesheet' => 'default',
 	'comment_whitelist' => 1,
 	'blacklist_keys' => '',
 	'comment_registration' => 0,
@@ -265,7 +264,7 @@ function populate_options() {
 	'upload_path' => '',
 
 	// 2.0.3
-	'secret' => wp_generate_password( 64, true, true ),
+	'secret' => wp_generate_password(64),
 
 	// 2.1
 	'blog_public' => '1',
@@ -318,13 +317,6 @@ function populate_options() {
 	'embed_size_h' => 600,
 	);
 
-	// 3.0 multisite
-	if ( is_multisite() ) {
-		/* translators: blog tagline */
-		$options[ 'blogdescription' ] = sprintf(__('Just another %s site'), $current_site->site_name );
-		$options[ 'permalink_structure' ] = '/%year%/%monthnum%/%day%/%postname%/';
-	}
-
 	// Set autoload to no for these options
 	$fat_options = array( 'moderation_keys', 'recently_edited', 'blacklist_keys' );
 
@@ -359,7 +351,7 @@ function populate_options() {
 		'page_uris', 'update_core', 'update_plugins', 'update_themes', 'doing_cron', 'random_seed', 'rss_excerpt_length');
 	foreach ($unusedoptions as $option)
 		delete_option($option);
-
+	
 	// delete obsolete magpie stuff
 	$wpdb->query("DELETE FROM $wpdb->options WHERE option_name REGEXP '^rss_[0-9a-f]{32}(_ts)?$'");
 }
@@ -377,7 +369,6 @@ function populate_roles() {
 	populate_roles_260();
 	populate_roles_270();
 	populate_roles_280();
-	populate_roles_300();
 }
 
 /**
@@ -597,165 +588,6 @@ function populate_roles_280() {
 	if ( !empty( $role ) ) {
 		$role->add_cap( 'install_themes' );
 	}
-}
-
-/**
- * Create and modify WordPress roles for WordPress 3.0.
- *
- * @since 3.0
- */
-function populate_roles_300() {
-	$role =& get_role( 'administrator' );
-
-	if ( !empty( $role ) ) {
-		$role->add_cap( 'update_core' );
-		$role->add_cap( 'remove_user' );
-		$role->add_cap( 'remove_users' );
-	}
-}
-
-/**
- * populate network settings
- *
- * @since 3.0
- *
- * @param int $network_id id of network to populate
- */
-function populate_network( $network_id = 1, $domain = '', $email = '', $site_name = '', $path = '/', $vhost = 'no' ) {
-	global $wpdb, $current_site, $wp_version, $wp_db_version, $wp_rewrite;
-
-	$msg = '';
-	//@todo: turn these checks into returned messages
-	if ( $domain == '' )
-		die( 'You must provide a domain name!' );
-	if ( $site_name == '' )
-		die( 'You must provide a site name!' );
-
-	// check for network collision
-	$existing_network = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->site WHERE id = %d", $network_id ) );
-	if ( $existing_network == $network_id )
-		die( 'That network already exists!' );
-
-	$site_user = get_user_by_email( $email );
-	if ( !$site_user )
-		die( 'You must provide an email address!' );
-	// set up site tables
-	$template = get_option( 'template' );
-	$stylesheet = get_option( 'stylesheet' );
-	$allowed_themes = array( $stylesheet => true );
-	if ( $template != $stylesheet )
-		$allowed_themes[ $template ] = true;
-	if ( WP_FALLBACK_THEME != $stylesheet && WP_FALLBACK_THEME != $template )
-		$allowed_themes[ WP_FALLBACK_THEME ] = true;
-
-	if ( 1 == $network_id ) {
-		$wpdb->insert( $wpdb->site, array( 'domain' => $domain, 'path' => $path ) );
-		$network_id = $wpdb->insert_id;
-	} else {
-		$wpdb->insert( $wpdb->site, array( 'domain' => $domain, 'path' => $path, 'network_id' => $network_id ) );
-	}
-
-	if ( !is_multisite() ) {
-
-		$wpdb->query( "INSERT INTO $wpdb->sitecategories (cat_id, cat_name, category_nicename, last_updated) SELECT term_id, `name`, slug, NOW() FROM $wpdb->terms" );
-
-		$site_admins = array( $site_user->user_login );
-		$users = get_users_of_blog();
-		if ( $users ) {
-			foreach ( $users as $user ) {
-				if ( is_super_admin( $user->ID ) && !in_array( $user->user_login, $site_admins ) )
-					$site_admins[] = $user->user_login;
-			}
-		}
-	} else {
-		$site_admins = get_site_option( 'site_admins' );
-	}
-
-	$welcome_email = __( 'Dear User,
-
-Your new SITE_NAME blog has been successfully set up at:
-BLOG_URL
-
-You can log in to the administrator account with the following information:
-Username: USERNAME
-Password: PASSWORD
-Login Here: BLOG_URLwp-login.php
-
-We hope you enjoy your new blog.
-Thanks!
-
---The Team @ SITE_NAME' );
-
-	$sitemeta = array(
-		'site_name' => $site_name,
-		'admin_email' => $site_user->user_email,
-		'admin_user_id' => $site_user->ID,
-		'registration' => 'none',
-		'upload_filetypes' => 'jpg jpeg png gif mp3 mov avi wmv midi mid pdf',
-		'blog_upload_space' => 10,
-		'fileupload_maxk' => 1500,
-		'site_admins' => $site_admins,
-		'allowedthemes' => $allowed_themes,
-		'illegal_names' => array( 'www', 'web', 'root', 'admin', 'main', 'invite', 'administrator' ),
-		'wpmu_upgrade_site' => $wp_db_version,
-		'welcome_email' => $welcome_email,
-		'first_post' => __( 'Welcome to <a href="SITE_URL">SITE_NAME</a>. This is your first post. Edit or delete it, then start blogging!' ),
-		// @todo - network admins should have a method of editing the network siteurl (used for cookie hash)
-		'siteurl' => get_option( 'siteurl' )
-	);
-
-	$insert = '';
-	foreach ( $sitemeta as $meta_key => $meta_value ) {
-		$meta_key = $wpdb->escape( $meta_key );
-		if ( is_array( $meta_value ) )
-			$meta_value = serialize( $meta_value );
-		$meta_value = $wpdb->escape( $meta_value );
-		if ( !empty( $insert ) )
-			$insert .= ', ';
-		$insert .= "( $network_id, '$meta_key', '$meta_value')";
-	}
-	$wpdb->query( "INSERT INTO $wpdb->sitemeta ( site_id, meta_key, meta_value ) VALUES " . $insert );
-
-	$current_site->domain = $domain;
-	$current_site->path = $base;
-	$current_site->site_name = ucfirst( $domain );
-
-	if ( !is_multisite() ) {
-		$wpdb->insert( $wpdb->blogs, array( 'site_id' => $network_id, 'domain' => $domain, 'path' => $path ) );
-		$blog_id = $wpdb->insert_id;
-		update_usermeta( $site_user->ID, 'source_domain', $domain );
-		update_usermeta( $site_user->ID, 'primary_blog', $blog_id );
-	}
-
-	if ( $vhost == 'yes' )
-		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/');
-	else
-		update_option( 'permalink_structure', '/blog/%year%/%monthnum%/%day%/%postname%/');
-
-	$wp_rewrite->flush_rules();
-
-	if ( $vhost == 'yes' ) {
-		$vhost_ok = false;
-		$hostname = substr( md5( time() ), 0, 6 ) . '.' . $domain; // Very random hostname!
-		$page = wp_remote_get( 'http://' . $hostname, array( 'timeout' => 5, 'httpversion' => '1.1' ) );
-		if ( is_object( $page ) && is_wp_error( $page ) ) {
-			foreach ( $page->get_error_messages() as $err ) {
-				$errstr = $err;
-			}
-		} elseif( $page[ 'response' ][ 'code' ] == 200 ) {
-				$vhost_ok = true;
-		}
-		if ( !$vhost_ok ) {
-			// @todo Update this to reflect the merge. Also: Multisite readme file, or remove the <blockquote> tags.
-			$msg = '<h2>' . esc_html__( 'Warning! Wildcard DNS may not be configured correctly!' ) . '</h2>';
-			$msg .= '<p>' . __( 'To use the subdomain feature of WordPress MU you must have a wildcard entry in your dns. The installer attempted to contact a random hostname ($hostname) on your domain but failed. It returned this error message:' ) . '<br />';
-			$msg .= '<br/><strong>' . $errstr . '</strong></p>';
-			$msg .= '<p>' . __( 'From the README.txt:' ) . '</p>';
-			$msg .= '<blockquote><p>' . __( "If you want to host blogs of the form http://blog.domain.tld/ where domain.tld is the domain name of your machine then you must add a wildcard record to your DNS records. This usually means adding a '*' hostname record pointing at your webserver in your DNS configuration tool.  Matt has a more detailed <a href='http://ma.tt/2003/10/10/wildcard-dns-and-sub-domains/'>explanation</a> on his blog. If you still have problems, these <a href='http://mu.wordpress.org/forums/tags/wildcard'>forum messages</a> may help." ) . '</p></blockquote>';
-			$msg .= '<p>' . __( 'You can still use your site but any subdomain you create may not be accessible. This check is not foolproof so ignore if you know your dns is correct.' ) . '</p>';
-		}
-	}
-	return $msg;
 }
 
 ?>

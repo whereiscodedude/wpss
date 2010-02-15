@@ -33,7 +33,7 @@ function wptexturize($text) {
 	$curl = '';
 	$textarr = preg_split('/(<.*>|\[.*\])/Us', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 	$stop = count($textarr);
-
+	
 	// No need to setup these variables more than once
 	if (!$static_setup) {
 		/* translators: opening curly quote */
@@ -74,7 +74,7 @@ function wptexturize($text) {
 		$curl = $textarr[$i];
 
 		if ( !empty($curl) && '<' != $curl{0} && '[' != $curl{0}
-				&& empty($no_texturize_shortcodes_stack) && empty($no_texturize_tags_stack)) {
+				&& empty($no_texturize_shortcodes_stack) && empty($no_texturize_tags_stack)) { 
 			// This is not a tag, nor is the texturization disabled
 			// static strings
 			$curl = str_replace($static_characters, $static_replacements, $curl);
@@ -120,7 +120,7 @@ function _wptexturize_pushpop_element($text, &$stack, $disabled_elements, $openi
 			/*
 			 * This disables texturize until we find a closing tag of our type
 			 * (e.g. <pre>) even if there was invalid nesting before that
-			 *
+			 * 
 			 * Example: in the case <pre>sadsadasd</code>"baba"</pre>
 			 *          "baba" won't be texturize
 			 */
@@ -690,7 +690,7 @@ function sanitize_file_name( $filename ) {
 	// long alpha string not in the extension whitelist.
 	foreach ( (array) $parts as $part) {
 		$filename .= '.' . $part;
-
+		
 		if ( preg_match("/^[a-zA-Z]{2,5}\d?$/", $part) ) {
 			$allowed = false;
 			foreach ( $mimes as $ext_preg => $mime_match ) {
@@ -866,9 +866,6 @@ function sanitize_html_class($class, $fallback){
  * @return string Converted string.
  */
 function convert_chars($content, $deprecated = '') {
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.71' );
-
 	// Translation of invalid Unicode references range to valid range
 	$wp_htmltranswinuni = array(
 	'&#128;' => '&#8364;', // the Euro sign
@@ -1374,6 +1371,7 @@ function make_clickable($ret) {
  * @return string Converted content.
  */
 function wp_rel_nofollow( $text ) {
+	global $wpdb;
 	// This is a pre save filter, so text is already escaped.
 	$text = stripslashes($text);
 	$text = preg_replace_callback('|<a (.+?)>|i', 'wp_rel_nofollow_callback', $text);
@@ -1397,6 +1395,7 @@ function wp_rel_nofollow_callback( $matches ) {
 	$text = str_replace(array(' rel="nofollow"', " rel='nofollow'"), '', $text);
 	return "<a $text rel=\"nofollow\">";
 }
+
 
 /**
  * Convert one smiley code to the icon graphic file equivalent.
@@ -1427,6 +1426,7 @@ function translate_smiley($smiley) {
 
 	return " <img src='$srcurl' alt='$smiley_masked' class='wp-smiley' /> ";
 }
+
 
 /**
  * Convert text equivalent of smilies to images.
@@ -1767,7 +1767,6 @@ function human_time_diff( $from, $to = '' ) {
 		if ($mins <= 1) {
 			$mins = 1;
 		}
-		/* translators: min=minute */
 		$since = sprintf(_n('%s min', '%s mins', $mins), $mins);
 	} else if (($diff <= 86400) && ($diff > 3600)) {
 		$hours = round($diff / 3600);
@@ -2138,7 +2137,7 @@ function wp_htmledit_pre($output) {
  * Checks and cleans a URL.
  *
  * A number of characters are removed from the URL. If the URL is for displaying
- * (the default behaviour) amperstands are also replaced. The 'clean_url' filter
+ * (the default behaviour) amperstands are also replaced. The 'esc_url' filter
  * is applied to the returned cleaned URL.
  *
  * @since 1.2.0
@@ -2149,7 +2148,7 @@ function wp_htmledit_pre($output) {
  * @param array $protocols Optional. An array of acceptable protocols.
  *		Defaults to 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet' if not set.
  * @param string $context Optional. How the URL will be used. Default is 'display'.
- * @return string The cleaned $url after the 'clean_url' filter is applied.
+ * @return string The cleaned $url after the 'cleaned_url' filter is applied.
  */
 function clean_url( $url, $protocols = null, $context = 'display' ) {
 	$original_url = $url;
@@ -2224,22 +2223,23 @@ function esc_sql( $sql ) {
 	return $wpdb->escape( $sql );
 }
 
+
 /**
  * Checks and cleans a URL.
  *
  * A number of characters are removed from the URL. If the URL is for displaying
- * (the default behaviour) amperstands are also replaced. The 'clean_url' filter
+ * (the default behaviour) amperstands are also replaced. The 'esc_url' filter
  * is applied to the returned cleaned URL.
  *
  * @since 2.8.0
- * @uses clean_url()
+ * @uses esc_url()
  * @uses wp_kses_bad_protocol() To only permit protocols in the URL set
  *		via $protocols or the common ones set in the function.
  *
  * @param string $url The URL to be cleaned.
  * @param array $protocols Optional. An array of acceptable protocols.
  *		Defaults to 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet' if not set.
- * @return string The cleaned $url after the 'clean_url' filter is applied.
+ * @return string The cleaned $url after the 'cleaned_url' filter is applied.
  */
 function esc_url( $url, $protocols = null ) {
 	return clean_url( $url, $protocols, 'display' );
@@ -2248,14 +2248,32 @@ function esc_url( $url, $protocols = null ) {
 /**
  * Performs esc_url() for database usage.
  *
+ * @see esc_url()
+ * @see esc_url()
+ *
  * @since 2.8.0
- * @uses clean_url()
  *
  * @param string $url The URL to be cleaned.
  * @param array $protocols An array of acceptable protocols.
  * @return string The cleaned URL.
  */
 function esc_url_raw( $url, $protocols = null ) {
+	return clean_url( $url, $protocols, 'db' );
+}
+
+/**
+ * Performs esc_url() for database or redirect usage.
+ *
+ * @see esc_url()
+ * @deprecated 2.8.0
+ *
+ * @since 2.3.1
+ *
+ * @param string $url The URL to be cleaned.
+ * @param array $protocols An array of acceptable protocols.
+ * @return string The cleaned URL.
+ */
+function sanitize_url( $url, $protocols = null ) {
 	return clean_url( $url, $protocols, 'db' );
 }
 
@@ -2278,9 +2296,9 @@ function htmlentities2($myHTML) {
 /**
  * Escape single quotes, htmlspecialchar " < > &, and fix line endings.
  *
- * Escapes text strings for echoing in JS. It is intended to be used for inline JS
- * (in a tag attribute, for example onclick="..."). Note that the strings have to
- * be in single quotes. The filter 'js_escape' is also applied here.
+ * Escapes text strings for echoing in JS, both inline (for example in onclick="...")
+ * and inside <script> tag. Note that the strings have to be in single quotes.
+ * The filter 'js_escape' is also applied here.
  *
  * @since 2.8.0
  *
@@ -2294,6 +2312,23 @@ function esc_js( $text ) {
 	$safe_text = str_replace( "\r", '', $safe_text );
 	$safe_text = str_replace( "\n", '\\n', addslashes( $safe_text ) );
 	return apply_filters( 'js_escape', $safe_text, $text );
+}
+
+/**
+ * Escape single quotes, specialchar double quotes, and fix line endings.
+ *
+ * The filter 'js_escape' is also applied by esc_js()
+ *
+ * @since 2.0.4
+ *
+ * @deprecated 2.8.0
+ * @see esc_js()
+ *
+ * @param string $text The text to be escaped.
+ * @return string Escaped text.
+ */
+function js_escape( $text ) {
+	return esc_js( $text );
 }
 
 /**
@@ -2311,6 +2346,20 @@ function esc_html( $text ) {
 }
 
 /**
+ * Escaping for HTML blocks
+ * @deprecated 2.8.0
+ * @see esc_html()
+ */
+function wp_specialchars( $string, $quote_style = ENT_NOQUOTES, $charset = false, $double_encode = false ) {
+	if ( func_num_args() > 1 ) { // Maintain backwards compat for people passing additional args
+		$args = func_get_args();
+		return call_user_func_array( '_wp_specialchars', $args );
+	} else {
+		return esc_html( $string );
+	}
+}
+
+/**
  * Escaping for HTML attributes.
  *
  * @since 2.8.0
@@ -2322,6 +2371,21 @@ function esc_attr( $text ) {
 	$safe_text = wp_check_invalid_utf8( $text );
 	$safe_text = _wp_specialchars( $safe_text, ENT_QUOTES );
 	return apply_filters( 'attribute_escape', $safe_text, $text );
+}
+
+/**
+ * Escaping for HTML attributes.
+ *
+ * @since 2.0.6
+ *
+ * @deprecated 2.8.0
+ * @see esc_attr()
+ *
+ * @param string $text
+ * @return string
+ */
+function attribute_escape( $text ) {
+	return esc_attr( $text );
 }
 
 /**
@@ -2402,7 +2466,6 @@ function sanitize_option($option, $value) {
 		case 'comments_per_page':
 		case 'thread_comments_depth':
 		case 'users_can_register':
-		case 'start_of_week':
 			$value = absint( $value );
 			break;
 
@@ -2758,7 +2821,7 @@ function wp_strip_all_tags($string, $remove_breaks = false) {
  * check for invalid UTF-8,
  * Convert single < characters to entity,
  * strip all tags,
- * remove line breaks, tabs and extra white space,
+ * remove line breaks, tabs and extra whitre space,
  * strip octets.
  *
  * @since 2.9
@@ -2771,23 +2834,14 @@ function sanitize_text_field($str) {
 
 	if ( strpos($filtered, '<') !== false ) {
 		$filtered = wp_pre_kses_less_than( $filtered );
-		// This will strip extra whitespace for us.
 		$filtered = wp_strip_all_tags( $filtered, true );
 	} else {
-		$filtered = trim( preg_replace('/[\r\n\t ]+/', ' ', $filtered) );
+		 $filtered = trim( preg_replace('/[\r\n\t ]+/', ' ', $filtered) );
 	}
 
 	$match = array();
-	$found = false;
-	while ( preg_match('/%[a-f0-9]{2}/i', $filtered, $match) ) {
+	while ( preg_match('/%[a-f0-9]{2}/i', $filtered, $match) )
 		$filtered = str_replace($match[0], '', $filtered);
-		$found = true;
-	}
-
-	if ( $found ) {
-		// Strip out the whitespace that may now exist after removing the octets.
-		$filtered = trim( preg_replace('/ +/', ' ', $filtered) );
-	}
 
 	return apply_filters('sanitize_text_field', $filtered, $str);
 }

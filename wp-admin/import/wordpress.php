@@ -43,6 +43,12 @@ class WP_Import {
 		echo '</div>';
 	}
 
+	function unhtmlentities($string) { // From php.net for < 4.3 compat
+		$trans_tbl = get_html_translation_table(HTML_ENTITIES);
+		$trans_tbl = array_flip($trans_tbl);
+		return strtr($string, $trans_tbl);
+	}
+
 	function greet() {
 		echo '<div class="narrow">';
 		echo '<p>'.__('Howdy! Upload your WordPress eXtended RSS (WXR) file and we&#8217;ll import the posts, pages, comments, custom fields, categories, and tags into this blog.').'</p>';
@@ -54,12 +60,8 @@ class WP_Import {
 	function get_tag( $string, $tag ) {
 		global $wpdb;
 		preg_match("|<$tag.*?>(.*?)</$tag>|is", $string, $return);
-		if ( isset($return[1]) ) {
-			$return = preg_replace('|^<!\[CDATA\[(.*)\]\]>$|s', '$1', $return[1]);
-			$return = $wpdb->escape( trim( $return ) );
-		} else {
-			$return = '';
-		}
+		$return = preg_replace('|^<!\[CDATA\[(.*)\]\]>$|s', '$1', $return[1]);
+		$return = $wpdb->escape( trim( $return ) );
 		return $return;
 	}
 
@@ -157,7 +159,7 @@ class WP_Import {
 		for ($x = 1; $x < $y; $x ++) {
 			$next = array_shift($temp);
 			if (!(in_array($next, $authors)))
-				array_push($authors, $next);
+				array_push($authors, "$next");
 		}
 
 		return $authors;
@@ -188,10 +190,8 @@ class WP_Import {
 				if ( !$user_id ) {
 					$user_id = wp_create_user($new_author_name, wp_generate_password());
 				}
-				
-				if ( !is_wp_error( $user_id ) ) {
-					$this->author_ids[$in_author_name] = $user_id;
-				}
+
+				$this->author_ids[$in_author_name] = $user_id;
 			}
 
 			// failsafe: if the user_id was invalid, default to the current user
@@ -296,7 +296,7 @@ class WP_Import {
 	function process_categories() {
 		global $wpdb;
 
-		$cat_names = (array) get_terms('category', array('fields' => 'names'));
+		$cat_names = (array) get_terms('category', 'fields=names');
 
 		while ( $c = array_shift($this->categories) ) {
 			$cat_name = trim($this->get_tag( $c, 'wp:cat_name' ));
@@ -326,7 +326,7 @@ class WP_Import {
 	function process_tags() {
 		global $wpdb;
 
-		$tag_names = (array) get_terms('post_tag', array('fields' => 'names'));
+		$tag_names = (array) get_terms('post_tag', 'fields=names');
 
 		while ( $c = array_shift($this->tags) ) {
 			$tag_name = trim($this->get_tag( $c, 'wp:tag_name' ));
@@ -354,7 +354,7 @@ class WP_Import {
 		unset( $custom_taxonomies['link_category'] );
 		
 		$custom_taxonomies = array_keys( $custom_taxonomies );
-		$current_terms = (array) get_terms( $custom_taxonomies, array('get' => 'all') );
+		$current_terms = (array) get_terms( $custom_taxonomies, 'get=all' );
 		$taxonomies = array();
 		foreach ( $current_terms as $term ) {
 			if ( isset( $_terms[$term->taxonomy] ) ) {
@@ -444,7 +444,7 @@ class WP_Import {
 
 		$tag_index = 0;
 		foreach ($tags as $tag) {
-			$tags[$tag_index] = $wpdb->escape( html_entity_decode( str_replace(array( '<![CDATA[', ']]>' ), '', $tag ) ) );
+			$tags[$tag_index] = $wpdb->escape($this->unhtmlentities(str_replace(array ('<![CDATA[', ']]>'), '', $tag)));
 			$tag_index++;
 		}
 
@@ -453,7 +453,7 @@ class WP_Import {
 
 		$cat_index = 0;
 		foreach ($categories as $category) {
-			$categories[$cat_index] = $wpdb->escape( html_entity_decode( str_replace( array( '<![CDATA[', ']]>' ), '', $category ) ) );
+			$categories[$cat_index] = $wpdb->escape($this->unhtmlentities(str_replace(array ('<![CDATA[', ']]>'), '', $category)));
 			$cat_index++;
 		}
 
@@ -599,9 +599,7 @@ class WP_Import {
 			$key   = $this->get_tag( $p, 'wp:meta_key' );
 			$value = $this->get_tag( $p, 'wp:meta_value' );
 			$value = stripslashes($value); // add_post_meta() will escape.
-			// get_post_meta would have done this but we read straight from the db on export so we could have a serialized string
-			$value = maybe_unserialize($value);
-			
+
 			$this->process_post_meta($post_id, $key, $value);
 
 		} }
@@ -741,7 +739,7 @@ class WP_Import {
 			$local_child_id = $this->post_ids_processed[$child_id];
 			$local_parent_id = $this->post_ids_processed[$parent_id];
 			if ($local_child_id and $local_parent_id) {
-				$wpdb->update($wpdb->posts, array('post_parent' => $local_parent_id), array('ID' => $local_child_id) );
+				$wpdb->query( $wpdb->prepare("UPDATE {$wpdb->posts} SET post_parent = %d WHERE ID = %d", $local_parent_id, $local_child_id));
 			}
 		}
 	}
@@ -844,8 +842,7 @@ class WP_Import {
 				break;
 			case 2:
 				check_admin_referer('import-wordpress');
-				$fetch_attachments = (!empty($_POST['attachments'])) ? true : false;
-				$result = $this->import( $_GET['id'], $fetch_attachments);
+				$result = $this->import( $_GET['id'], $_POST['attachments'] );
 				if ( is_wp_error( $result ) )
 					echo $result->get_error_message();
 				break;

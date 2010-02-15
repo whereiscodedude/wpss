@@ -82,9 +82,6 @@ if ( isset($_POST['permalink_structure']) || isset($_POST['category_base']) ) {
 		$permalink_structure = $_POST['permalink_structure'];
 		if (! empty($permalink_structure) )
 			$permalink_structure = preg_replace('#/+#', '/', '/' . $_POST['permalink_structure']);
-		if ( is_multisite() && !is_subdomain_install()  && $permalink_structure != '' && is_main_site() ) {
-			$permalink_structure = '/blog' . $permalink_structure;
-		}
 		$wp_rewrite->set_permalink_structure($permalink_structure);
 	}
 
@@ -92,9 +89,6 @@ if ( isset($_POST['permalink_structure']) || isset($_POST['category_base']) ) {
 		$category_base = $_POST['category_base'];
 		if (! empty($category_base) )
 			$category_base = preg_replace('#/+#', '/', '/' . $_POST['category_base']);
-		if ( is_multisite() && !is_subdomain_install() && $category_base != '' && is_main_site() ) {
-			$category_base = '/blog' . $category_base;
-		}
 		$wp_rewrite->set_category_base($category_base);
 	}
 
@@ -102,9 +96,6 @@ if ( isset($_POST['permalink_structure']) || isset($_POST['category_base']) ) {
 		$tag_base = $_POST['tag_base'];
 		if (! empty($tag_base) )
 			$tag_base = preg_replace('#/+#', '/', '/' . $_POST['tag_base']);
-		if ( is_multisite() && !is_subdomain_install() && $tag_base != '' && is_main_site() ) {
-			$tag_base = '/blog' . $tag_base;
-		}
 		$wp_rewrite->set_tag_base($tag_base);
 	}
 }
@@ -134,7 +125,7 @@ $wp_rewrite->flush_rules();
 ?>
 
 <?php if (isset($_POST['submit'])) : ?>
-<div id="message" class="updated"><p><?php
+<div id="message" class="updated fade"><p><?php
 if ( $iis7_permalinks ) {
 	if ( $permalink_structure && ! $usingpi && ! $writable )
 		_e('You should update your web.config now');
@@ -164,7 +155,7 @@ if ( $iis7_permalinks ) {
 <?php
 $prefix = '';
 
-if ( ! is_multisite() && ! got_mod_rewrite() && ! $iis7_permalinks )
+if ( ! got_mod_rewrite() && ! $iis7_permalinks )
 	$prefix = '/index.php';
 
 $structures = array(
@@ -203,7 +194,6 @@ $structures = array(
 			</label>
 		</th>
 		<td>
-			<?php if ( is_multisite() && !is_subdomain_install() && is_main_site() ) { echo "/blog"; $permalink_structure = preg_replace( "|^/?blog|", "", $permalink_structure ); }?>
 			<input name="permalink_structure" id="permalink_structure" type="text" value="<?php echo esc_attr($permalink_structure); ?>" class="regular-text code" />
 		</td>
 	</tr>
@@ -218,12 +208,12 @@ $structures = array(
 
 <table class="form-table">
 	<tr>
-		<th><label for="category_base"><?php /* translators: prefix for category permalinks */ _e('Category base'); ?></label></th>
-		<td><?php if ( is_multisite() && !is_subdomain_install() && is_main_site() ) { echo "/blog"; $category_base = preg_replace( "|^/?blog|", "", $category_base ); }?> <input name="category_base" id="category_base" type="text" value="<?php echo esc_attr( $category_base ); ?>" class="regular-text code" /></td>
+		<th><label for="category_base"><?php _e('Category base'); ?></label></th>
+		<td><input name="category_base" id="category_base" type="text" value="<?php echo esc_attr($category_base); ?>" class="regular-text code" /></td>
 	</tr>
 	<tr>
 		<th><label for="tag_base"><?php _e('Tag base'); ?></label></th>
-		<td><?php if ( is_multisite() && !is_subdomain_install() && is_main_site() ) { echo "/blog"; $tag_base = preg_replace( "|^/?blog|", "", $tag_base ); }?> <input name="tag_base" id="tag_base" type="text" value="<?php echo esc_attr($tag_base); ?>" class="regular-text code" /></td>
+		<td><input name="tag_base" id="tag_base" type="text" value="<?php echo esc_attr($tag_base); ?>" class="regular-text code" /></td>
 	</tr>
 	<?php do_settings_fields('permalink', 'optional'); ?>
 </table>
@@ -234,9 +224,8 @@ $structures = array(
 	<input type="submit" name="submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
 </p>
   </form>
-<?php if ( !is_multisite() || is_super_admin() ) { ?>
 <?php if ($iis7_permalinks) :
-	if ( isset($_POST['submit']) && $permalink_structure && ! $usingpi && ! $writable ) :
+	if ( isset($_POST['submit']) && $permalink_structure && ! $usingpi && ! $writable ) : 
 		if ( file_exists($home_path . 'web.config') ) : ?>
 <p><?php _e('If your <code>web.config</code> file were <a href="http://codex.wordpress.org/Changing_File_Permissions">writable</a>, we could do this automatically, but it isn&#8217;t so this is the url rewrite rule you should have in your <code>web.config</code> file. Click in the field and press <kbd>CTRL + a</kbd> to select all. Then insert this rule inside of the <code>/&lt;configuration&gt;/&lt;system.webServer&gt;/&lt;rewrite&gt;/&lt;rules&gt;</code> element in <code>web.config</code> file.') ?></p>
 <form action="options-permalink.php" method="post">
@@ -250,7 +239,7 @@ $structures = array(
 <?php wp_nonce_field('update-permalink') ?>
 	<p><textarea rows="18" class="large-text readonly" name="rules" id="rules" readonly="readonly"><?php echo esc_html($wp_rewrite->iis7_url_rewrite_rules(true)); ?></textarea></p>
 </form>
-<p><?php _e('If you temporarily make your site&#8217;s root directory writable for us to generate the <code>web.config</code> file automatically, do not forget to revert the permissions after the file has been created.')  ?></p>
+<p><?php _e('If you temporarily make your site&#8217;s root directory writable for us to generate the <code>web.config</code> file automatically, do not forget to revert the permissions after the file has been created.')  ?></p>			
 		<?php endif; ?>
 	<?php endif; ?>
 <?php else :
@@ -262,7 +251,6 @@ $structures = array(
 </form>
 	<?php endif; ?>
 <?php endif; ?>
-<?php } // multisite ?>
 
 </div>
 

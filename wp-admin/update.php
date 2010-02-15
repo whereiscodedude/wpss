@@ -40,17 +40,17 @@ if ( isset($_GET['action']) ) {
 			wp_die(__('You do not have sufficient permissions to update plugins for this blog.'));
 
 		check_admin_referer('activate-plugin_' . $plugin);
-		if ( ! isset($_GET['failure']) && ! isset($_GET['success']) ) {
+		if( ! isset($_GET['failure']) && ! isset($_GET['success']) ) {
 			wp_redirect( 'update.php?action=activate-plugin&failure=true&plugin=' . $plugin . '&_wpnonce=' . $_GET['_wpnonce'] );
 			activate_plugin($plugin);
 			wp_redirect( 'update.php?action=activate-plugin&success=true&plugin=' . $plugin . '&_wpnonce=' . $_GET['_wpnonce'] );
 			die();
 		}
 		iframe_header( __('Plugin Reactivation'), true );
-		if ( isset($_GET['success']) )
+		if( isset($_GET['success']) )
 			echo '<p>' . __('Plugin reactivated successfully.') . '</p>';
 
-		if ( isset($_GET['failure']) ){
+		if( isset($_GET['failure']) ){
 			echo '<p>' . __('Plugin failed to reactivate due to a fatal error.') . '</p>';
 
 			if ( defined('E_RECOVERABLE_ERROR') )
@@ -156,7 +156,7 @@ if ( isset($_GET['action']) ) {
 		$submenu_file = 'theme-install.php';
 		require_once('admin-header.php');
 
-		$title = sprintf( __('Installing Theme: %s'), $api->name . ' ' . $api->version );
+		$title = sprintf( __('Installing theme: %s'), $api->name . ' ' . $api->version );
 		$nonce = 'install-theme_' . $theme;
 		$url = 'update.php?action=install-theme&theme=' . $theme;
 		$type = 'web'; //Install theme type, From Web or an Upload.

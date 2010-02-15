@@ -32,11 +32,10 @@ if ( isset($_REQUEST['doaction']) ||  isset($_REQUEST['doaction2']) || isset($_R
 		$comment_ids = array_map( 'absint', explode(',', $_REQUEST['ids']) );
 		$doaction = $_REQUEST['action'];
 	} else {
-		wp_redirect( wp_get_referer() );
+		wp_redirect($_SERVER['HTTP_REFERER']);
 	}
 
 	$approved = $unapproved = $spammed = $unspammed = $trashed = $untrashed = $deleted = 0;
-	$redirect_to = remove_query_arg( array('trashed', 'untrashed', 'deleted', 'spammed', 'unspammed', 'approved', 'unapproved', 'ids'), wp_get_referer() );
 
 	foreach ($comment_ids as $comment_id) { // Check the permissions on each
 		$_post_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT comment_post_ID FROM $wpdb->comments WHERE comment_ID = %d", $comment_id) );
@@ -76,6 +75,8 @@ if ( isset($_REQUEST['doaction']) ||  isset($_REQUEST['doaction2']) || isset($_R
 		}
 	}
 
+	$redirect_to = 'edit-comments.php';
+
 	if ( $approved )
 		$redirect_to = add_query_arg( 'approved', $approved, $redirect_to );
 	if ( $unapproved )
@@ -93,8 +94,17 @@ if ( isset($_REQUEST['doaction']) ||  isset($_REQUEST['doaction2']) || isset($_R
 	if ( $trashed || $spammed )
 		$redirect_to = add_query_arg( 'ids', join(',', $comment_ids), $redirect_to );
 
+	if ( $post_id )
+		$redirect_to = add_query_arg( 'p', absint( $post_id ), $redirect_to );
+	if ( isset($_REQUEST['apage']) )
+		$redirect_to = add_query_arg( 'apage', absint($_REQUEST['apage']), $redirect_to );
+	if ( !empty($_REQUEST['mode']) )
+		$redirect_to = add_query_arg('mode', $_REQUEST['mode'], $redirect_to);
+	if ( !empty($_REQUEST['comment_status']) )
+		$redirect_to = add_query_arg('comment_status', $_REQUEST['comment_status'], $redirect_to);
+	if ( !empty($_REQUEST['s']) )
+		$redirect_to = add_query_arg('s', $_REQUEST['s'], $redirect_to);
 	wp_redirect( $redirect_to );
-	exit;
 } elseif ( isset($_GET['_wp_http_referer']) && ! empty($_GET['_wp_http_referer']) ) {
 	 wp_redirect( remove_query_arg( array('_wp_http_referer', '_wpnonce'), stripslashes($_SERVER['REQUEST_URI']) ) );
 	 exit;
@@ -135,7 +145,7 @@ if ( isset($_GET['approved']) || isset($_GET['deleted']) || isset($_GET['trashed
 	$unspammed = isset($_GET['unspammed']) ? (int) $_GET['unspammed'] : 0;
 
 	if ( $approved > 0 || $deleted > 0 || $trashed > 0 || $untrashed > 0 || $spammed > 0 || $unspammed > 0 ) {
-		echo '<div id="moderated" class="updated"><p>';
+		echo '<div id="moderated" class="updated fade"><p>';
 
 		if ( $approved > 0 ) {
 			printf( _n( '%s comment approved', '%s comments approved', $approved ), $approved );
@@ -177,7 +187,7 @@ $num_comments = ( $post_id ) ? wp_count_comments( $post_id ) : wp_count_comments
 //, number_format_i18n($num_comments->moderated) ), "<span class='comment-count'>" . number_format_i18n($num_comments->moderated) . "</span>"),
 //, number_format_i18n($num_comments->spam) ), "<span class='spam-comment-count'>" . number_format_i18n($num_comments->spam) . "</span>")
 $stati = array(
-		'all' => _nx_noop('All', 'All', 'comments'), // singular not used
+		'all' => _n_noop('All', 'All'), // singular not used
 		'moderated' => _n_noop('Pending <span class="count">(<span class="pending-count">%s</span>)</span>', 'Pending <span class="count">(<span class="pending-count">%s</span>)</span>'),
 		'approved' => _n_noop('Approved', 'Approved'), // singular not used
 		'spam' => _n_noop('Spam <span class="count">(<span class="spam-count">%s</span>)</span>', 'Spam <span class="count">(<span class="spam-count">%s</span>)</span>'),
@@ -192,12 +202,12 @@ if ( !empty($comment_type) && 'all' != $comment_type )
 	$link = add_query_arg( 'comment_type', $comment_type, $link );
 
 foreach ( $stati as $status => $label ) {
-	$class = ( $status == $comment_status ) ? ' class="current"' : '';
+	$class = '';
 
+	if ( $status == $comment_status )
+		$class = ' class="current"';
 	if ( !isset( $num_comments->$status ) )
 		$num_comments->$status = 10;
-	if ( empty( $num_comments->$status ) )
-		continue;
 	$link = add_query_arg( 'comment_status', $status, $link );
 	if ( $post_id )
 		$link = add_query_arg( 'p', absint( $post_id ), $link );
@@ -226,7 +236,7 @@ unset($status_links);
 </p>
 
 <?php
-$comments_per_page = (int) get_user_option( 'edit_comments_per_page' );
+$comments_per_page = (int) get_user_option( 'edit_comments_per_page', 0, false );
 if ( empty( $comments_per_page ) || $comments_per_page < 1 )
 	$comments_per_page = 20;
 $comments_per_page = apply_filters( 'comments_per_page', $comments_per_page, $comment_status );
@@ -244,8 +254,11 @@ $_comment_post_ids = array();
 foreach ( $_comments as $_c ) {
 	$_comment_post_ids[] = $_c->comment_post_ID;
 }
-
-$_comment_pending_count = get_pending_comments_num($_comment_post_ids);
+$_comment_pending_count_temp = (array) get_pending_comments_num($_comment_post_ids);
+foreach ( (array) $_comment_post_ids as $_cpid )
+	$_comment_pending_count[$_cpid] = isset( $_comment_pending_count_temp[$_cpid] ) ? $_comment_pending_count_temp[$_cpid] : 0;
+if ( empty($_comment_pending_count) )
+	$_comment_pending_count = array();
 
 $comments = array_slice($_comments, 0, $comments_per_page);
 $extra_comments = array_slice($_comments, $comments_per_page);
@@ -270,7 +283,6 @@ $page_links = paginate_links( array(
 
 <div class="tablenav">
 
-<?php if ( $comments ) { ?>
 <?php if ( $page_links ) : ?>
 <div class="tablenav-pages"><?php $page_links_text = sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s' ) . '</span>%s',
 	number_format_i18n( $start + 1 ),
@@ -347,6 +359,7 @@ if ( ( 'spam' == $comment_status || 'trash' == $comment_status) && current_user_
 
 <div class="clear"></div>
 
+<?php if ( $comments ) { ?>
 <table class="widefat comments fixed" cellspacing="0">
 <thead>
 	<tr>
@@ -436,7 +449,7 @@ if ( $page_links )
 </form>
 
 <?php } else { ?>
-<p><?php _e('No comments found.') ?></p>
+<p><?php _e('No results found.') ?></p>
 </form>
 
 <?php } ?>

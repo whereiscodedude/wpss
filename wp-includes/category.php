@@ -15,7 +15,7 @@
  */
 function get_all_category_ids() {
 	if ( ! $cat_ids = wp_cache_get( 'all_category_ids', 'category' ) ) {
-		$cat_ids = get_terms( 'category', array('fields' => 'ids', 'get' => 'all') );
+		$cat_ids = get_terms( 'category', 'fields=ids&get=all' );
 		wp_cache_add( 'all_category_ids', $cat_ids, 'category' );
 	}
 
@@ -37,14 +37,12 @@ function get_all_category_ids() {
  * @return array List of categories.
  */
 function &get_categories( $args = '' ) {
-	$defaults = array( 'taxonomy' => 'category' );
+	$defaults = array( 'type' => 'category' );
 	$args = wp_parse_args( $args, $defaults );
 
-	$taxonomy = apply_filters( 'get_categories_taxonomy', $args['taxonomy'], $args );
-
-	if ( isset($args['type']) && 'link' == $args['type'] ) //Back compat
-		$taxonomy = $args['taxonomy'] = 'link_category';
-
+	$taxonomy = apply_filters( 'get_categories_taxonomy', 'category', $args );
+	if ( 'link' == $args['type'] )
+		$taxonomy = 'link_category';
 	$categories = (array) get_terms( $taxonomy, $args );
 
 	foreach ( array_keys( $categories ) as $k )
@@ -115,7 +113,7 @@ function get_category_by_path( $category_path, $full_match = true, $output = OBJ
 	foreach ( (array) $category_paths as $pathdir )
 		$full_path .= ( $pathdir != '' ? '/' : '' ) . sanitize_title( $pathdir );
 
-	$categories = get_terms( 'category', array('get' => 'all', 'slug' => $leaf_path) );
+	$categories = get_terms( 'category', "get=all&slug=$leaf_path" );
 
 	if ( empty( $categories ) )
 		return null;
@@ -180,13 +178,11 @@ function get_cat_ID( $cat_name='General' ) {
  * @since 1.0.0
  *
  * @param int $cat_id Category ID
- * @return string Category name, or an empty string if category doesn't exist.
+ * @return string Category name
  */
 function get_cat_name( $cat_id ) {
 	$cat_id = (int) $cat_id;
 	$category = &get_category( $cat_id );
-	if ( ! $category || is_wp_error( $category ) )
-		return '';
 	return $category->name;
 }
 

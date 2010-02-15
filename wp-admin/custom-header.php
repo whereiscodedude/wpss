@@ -25,25 +25,14 @@ class Custom_Image_Header {
 	var $admin_header_callback;
 
 	/**
-	 * Callback for header div.
-	 *
-	 * @var callback
-	 * @since unknown
-	 * @access private
-	 */
-	var $admin_image_div_callback;
-
-	/**
 	 * PHP4 Constructor - Register administration header callback.
 	 *
 	 * @since unknown
 	 * @param callback $admin_header_callback
-	 * @param callback $admin_image_div_callback Optional custom image div output callback.
 	 * @return Custom_Image_Header
 	 */
-	function Custom_Image_Header($admin_header_callback, $admin_image_div_callback = '') {
+	function Custom_Image_Header($admin_header_callback) {
 		$this->admin_header_callback = $admin_header_callback;
-		$this->admin_image_div_callback = $admin_image_div_callback;
 	}
 
 	/**
@@ -52,10 +41,7 @@ class Custom_Image_Header {
 	 * @since unknown
 	 */
 	function init() {
-		if ( ! current_user_can('switch_themes') )
-			return;
-
-		$page = add_theme_page(__('Custom Header'), __('Custom Header'), 'switch_themes', 'custom-header', array(&$this, 'admin_page'));
+		$page = add_theme_page(__('Custom Header'), __('Custom Header'), 'edit_themes', 'custom-header', array(&$this, 'admin_page'));
 
 		add_action("admin_print_scripts-$page", array(&$this, 'js_includes'));
 		add_action("admin_print_styles-$page", array(&$this, 'css_includes'));
@@ -116,9 +102,6 @@ class Custom_Image_Header {
 	 * @since unknown
 	 */
 	function take_action() {
-		if ( ! current_user_can('switch_themes') )
-			return;
-
 		if ( isset( $_POST['textcolor'] ) ) {
 			check_admin_referer('custom-header');
 			if ( 'blank' == $_POST['textcolor'] ) {
@@ -206,7 +189,7 @@ class Custom_Image_Header {
 	}
 
 	function toggle_text(force) {
-		if (jQuery('#textcolor').val() == 'blank') {
+		if(jQuery('#textcolor').val() == 'blank') {
 			//Show text
 			jQuery( buttons.toString() ).show();
 			jQuery('#textcolor').val('<?php echo HEADER_TEXTCOLOR; ?>');
@@ -284,9 +267,9 @@ class Custom_Image_Header {
 	 * @since unknown
 	 */
 	function step_1() {
-		if ( isset($_GET['updated']) && $_GET['updated'] ) { ?>
-<div id="message" class="updated">
-<p><?php printf(__('Header updated. <a href="%s">Visit your site</a> to see how it looks.'), home_url()); ?></p>
+		if ( $_GET['updated'] ) { ?>
+<div id="message" class="updated fade">
+<p><?php _e('Header updated.') ?></p>
 </div>
 		<?php } ?>
 
@@ -294,18 +277,11 @@ class Custom_Image_Header {
 <?php screen_icon(); ?>
 <h2><?php _e('Your Header Image'); ?></h2>
 <p><?php _e('This is your header image. You can change the text color or upload and crop a new image.'); ?></p>
-<?php
 
-if ( $this->admin_image_div_callback ) {
-  call_user_func($this->admin_image_div_callback);
-} else {
-?>
 <div id="headimg" style="background-image: url(<?php esc_url(header_image()) ?>);">
 <h1><a onclick="return false;" href="<?php bloginfo('url'); ?>" title="<?php bloginfo('name'); ?>" id="name"><?php bloginfo('name'); ?></a></h1>
 <div id="desc"><?php bloginfo('description');?></div>
 </div>
-<?php } ?>
-
 <?php if ( !defined( 'NO_HEADER_TEXT' ) ) { ?>
 <form method="post" action="<?php echo admin_url('themes.php?page=custom-header&amp;updated=true') ?>">
 <input type="button" class="button" value="<?php esc_attr_e('Hide Text'); ?>" onclick="hide_text()" id="hidetext" />
@@ -384,9 +360,6 @@ if ( $this->admin_image_div_callback ) {
 		} elseif ( $width > HEADER_IMAGE_WIDTH ) {
 			$oitar = $width / HEADER_IMAGE_WIDTH;
 			$image = wp_crop_image($file, 0, 0, $width, $height, HEADER_IMAGE_WIDTH, $height / $oitar, false, str_replace(basename($file), 'midsize-'.basename($file), $file));
-			if ( is_wp_error( $image ) )
-				wp_die( __( 'Image could not be processed.  Please go back and try again.' ), __( 'Image Processing Error' ) );
-
 			$image = apply_filters('wp_create_file_in_uploads', $image, $id); // For replication
 
 			$url = str_replace(basename($url), basename($image), $url);
@@ -441,9 +414,6 @@ if ( $this->admin_image_div_callback ) {
 		$original = get_attached_file( $_POST['attachment_id'] );
 
 		$cropped = wp_crop_image($_POST['attachment_id'], $_POST['x1'], $_POST['y1'], $_POST['width'], $_POST['height'], HEADER_IMAGE_WIDTH, HEADER_IMAGE_HEIGHT);
-		if ( is_wp_error( $cropped ) )
-			wp_die( __( 'Image could not be processed.  Please go back and try again.' ), __( 'Image Processing Error' ) );
-
 		$cropped = apply_filters('wp_create_file_in_uploads', $cropped, $_POST['attachment_id']); // For replication
 
 		$parent = get_post($_POST['attachment_id']);
@@ -479,8 +449,14 @@ if ( $this->admin_image_div_callback ) {
 	 * @since unknown
 	 */
 	function finished() {
-		$_GET['updated'] = 1;
-	  $this->step_1();
+		?>
+<div class="wrap">
+<h2><?php _e('Header complete!'); ?></h2>
+
+<p><?php _e('Visit your site and you should see the new header now.'); ?></p>
+
+</div>
+		<?php
 	}
 
 	/**
@@ -489,8 +465,6 @@ if ( $this->admin_image_div_callback ) {
 	 * @since unknown
 	 */
 	function admin_page() {
-		if ( ! current_user_can('switch_themes') )
-			wp_die(__('You do not have permission to customize headers.'));
 		$step = $this->step();
 		if ( 1 == $step )
 			$this->step_1();
