@@ -10,7 +10,7 @@
  */
 
 /** Load WordPress Administration Bootstrap */
-require_once( './admin.php' );
+require_once( 'admin.php' );
 
 // Load all the nav menu interface functions
 require_once( ABSPATH . 'wp-admin/includes/nav-menu.php' );
@@ -70,7 +70,7 @@ switch ( $action ) {
 				$ordered_menu_items = wp_get_nav_menu_items( $menu_id );
 				$menu_item_data = (array) wp_setup_nav_menu_item( get_post( $menu_item_id ) );
 
-				// set up the data we need in one pass through the array of menu items
+				// setup the data we need in one pass through the array of menu items
 				$dbids_to_orders = array();
 				$orders_to_dbids = array();
 				foreach( (array) $ordered_menu_items as $ordered_menu_item_object ) {
@@ -144,7 +144,7 @@ switch ( $action ) {
 				$ordered_menu_items = wp_get_nav_menu_items( $menu_id );
 				$menu_item_data = (array) wp_setup_nav_menu_item( get_post( $menu_item_id ) );
 
-				// set up the data we need in one pass through the array of menu items
+				// setup the data we need in one pass through the array of menu items
 				$dbids_to_orders = array();
 				$orders_to_dbids = array();
 				foreach( (array) $ordered_menu_items as $ordered_menu_item_object ) {
@@ -459,7 +459,7 @@ $help .= '<p>' . __('<a href="http://wordpress.org/support/" target="_blank">Sup
 add_contextual_help($current_screen, $help);
 
 // Get the admin header
-require_once( './admin-header.php' );
+require_once( 'admin-header.php' );
 ?>
 <div class="wrap">
 	<?php screen_icon(); ?>
@@ -598,4 +598,4 @@ require_once( './admin-header.php' );
 </div><!-- /.wrap-->
 
 
-<?php include( './admin-footer.php' ); ?>
+<?php include( 'admin-footer.php' ); ?>

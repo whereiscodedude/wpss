@@ -468,12 +468,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 
 		$this->skin->bulk_header();
 
-		// Only start maintenance mode if running in Multisite OR the plugin is in use
-		$maintenance = is_multisite(); // @TODO: This should only kick in for individual sites if at all possible.
-		foreach ( $plugins as $plugin )
-			$maintenance = $maintenance || (is_plugin_active($plugin) && isset($current->response[ $plugin ]) ); // Only activate Maintenance mode if a plugin is active AND has an update available
-		if ( $maintenance )
-			$this->maintenance_mode(true);
+		$this->maintenance_mode(true);
 
 		$results = array();
 
@@ -717,12 +712,7 @@ class Theme_Upgrader extends WP_Upgrader {
 
 		$this->skin->bulk_header();
 
-		// Only start maintenance mode if running in Multisite OR the theme is in use
-		$maintenance = is_multisite(); // @TODO: This should only kick in for individual sites if at all possible.
-		foreach ( $themes as $theme )
-			$maintenance = $maintenance || $theme == get_stylesheet() || $theme == get_template();
-		if ( $maintenance )
-			$this->maintenance_mode(true);
+		$this->maintenance_mode(true);
 
 		$results = array();
 
@@ -790,7 +780,7 @@ class Theme_Upgrader extends WP_Upgrader {
 
 		if ( $theme != get_stylesheet() ) //If not current
 			return $return;
-		//Change to maintenance mode now.
+		//Change to maintainence mode now.
 		if ( ! $this->bulk )
 			$this->maintenance_mode(true);
 
@@ -806,7 +796,6 @@ class Theme_Upgrader extends WP_Upgrader {
 			return $return;
 
 		//Ensure stylesheet name hasnt changed after the upgrade:
-		// @TODO: Note, This doesnt handle the Template changing, or the Template name changing.
 		if ( $theme == get_stylesheet() && $theme != $this->result['destination_name'] ) {
 			$theme_info = $this->theme_info();
 			$stylesheet = $this->result['destination_name'];
@@ -814,7 +803,7 @@ class Theme_Upgrader extends WP_Upgrader {
 			switch_theme($template, $stylesheet, true);
 		}
 
-		//Time to remove maintenance mode
+		//Time to remove maintainence mode
 		if ( ! $this->bulk )
 			$this->maintenance_mode(false);
 		return $return;
@@ -1037,7 +1026,7 @@ class Plugin_Upgrader_Skin extends WP_Upgrader_Skin {
 
 		$update_actions =  array(
 			'activate_plugin' => '<a href="' . wp_nonce_url('plugins.php?action=activate&amp;plugin=' . $this->plugin, 'activate-plugin_' . $this->plugin) . '" title="' . esc_attr__('Activate this plugin') . '" target="_parent">' . __('Activate Plugin') . '</a>',
-			'plugins_page' => '<a href="' . admin_url('plugins.php') . '" title="' . esc_attr__('Go to plugins page') . '" target="_parent">' . __('Return to Plugins page') . '</a>'
+			'plugins_page' => '<a href="' . admin_url('plugins.php') . '" title="' . esc_attr__('Goto plugins page') . '" target="_parent">' . __('Return to Plugins page') . '</a>'
 		);
 		if ( $this->plugin_active )
 			unset( $update_actions['activate_plugin'] );
@@ -1195,8 +1184,8 @@ class Bulk_Plugin_Upgrader_Skin extends Bulk_Upgrader_Skin {
 	function bulk_footer() {
 		parent::bulk_footer();
 		$update_actions =  array(
-			'plugins_page' => '<a href="' . admin_url('plugins.php') . '" title="' . esc_attr__('Go to plugins page') . '" target="_parent">' . __('Return to Plugins page') . '</a>',
-			'updates_page' => '<a href="' . admin_url('update-core.php') . '" title="' . esc_attr__('Go to WordPress Updates page') . '" target="_parent">' . __('Return to WordPress Updates') . '</a>'
+			'plugins_page' => '<a href="' . admin_url('plugins.php') . '" title="' . esc_attr__('Goto plugins page') . '" target="_parent">' . __('Return to Plugins page') . '</a>',
+			'updates_page' => '<a href="' . admin_url('update-core.php') . '" title="' . esc_attr__('Goto WordPress Updates page') . '" target="_parent">' . __('Return to WordPress Updates') . '</a>'
 		);
 
 		$update_actions = apply_filters('update_bulk_plugins_complete_actions', $update_actions, $this->plugin_info);
@@ -1226,8 +1215,8 @@ class Bulk_Theme_Upgrader_Skin extends Bulk_Upgrader_Skin {
 	function bulk_footer() {
 		parent::bulk_footer();
 		$update_actions =  array(
-			'themes_page' => '<a href="' . admin_url('themes.php') . '" title="' . esc_attr__('Go to themes page') . '" target="_parent">' . __('Return to Themes page') . '</a>',
-			'updates_page' => '<a href="' . admin_url('update-core.php') . '" title="' . esc_attr__('Go to WordPress Updates page') . '" target="_parent">' . __('Return to WordPress Updates') . '</a>'
+			'themes_page' => '<a href="' . admin_url('themes.php') . '" title="' . esc_attr__('Goto themes page') . '" target="_parent">' . __('Return to Themes page') . '</a>',
+			'updates_page' => '<a href="' . admin_url('update-core.php') . '" title="' . esc_attr__('Goto WordPress Updates page') . '" target="_parent">' . __('Return to WordPress Updates') . '</a>'
 		);
 
 		$update_actions = apply_filters('update_bulk_theme_complete_actions', $update_actions, $this->theme_info);

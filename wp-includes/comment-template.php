@@ -678,9 +678,9 @@ function get_comment_type( $comment_ID = 0 ) {
  * @param string $pingbacktxt The string to display for pingback type
  */
 function comment_type($commenttxt = false, $trackbacktxt = false, $pingbacktxt = false) {
-	if ( false === $commenttxt ) $commenttxt = _x( 'Comment', 'noun' );
-	if ( false === $trackbacktxt ) $trackbacktxt = __( 'Trackback' );
-	if ( false === $pingbacktxt ) $pingbacktxt = __( 'Pingback' );
+    if ( false === $commenttxt ) $commenttxt = _x( 'Comment', 'noun' );
+    if ( false === $trackbacktxt ) $trackbacktxt = __( 'Trackback' );
+    if ( false === $pingbacktxt ) $pingbacktxt = __( 'Pingback' );
 	$type = get_comment_type();
 	switch( $type ) {
 		case 'trackback' :
@@ -747,9 +747,6 @@ function trackback_url( $deprecated_echo = true ) {
 function trackback_rdf( $deprecated = '' ) {
 	if ( !empty( $deprecated ) )
 		_deprecated_argument( __FUNCTION__, '2.5' );
-
-	if ( false !== stripos($_SERVER['HTTP_USER_AGENT'], 'W3C_Validator') )
-		return;
 
 	echo '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 			xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -976,10 +973,10 @@ function comments_popup_script($width=400, $height=400, $file='') {
 function comments_popup_link( $zero = false, $one = false, $more = false, $css_class = '', $none = false ) {
 	global $id, $wpcommentspopupfile, $wpcommentsjavascript;
 
-	if ( false === $zero ) $zero = __( 'No Comments' );
-	if ( false === $one ) $one = __( '1 Comment' );
-	if ( false === $more ) $more = __( '% Comments' );
-	if ( false === $none ) $none = __( 'Comments Off' );
+    if ( false === $zero ) $zero = __( 'No Comments' );
+    if ( false === $one ) $one = __( '1 Comment' );
+    if ( false === $more ) $more = __( '% Comments' );
+    if ( false === $none ) $none = __( 'Comments Off' );
 
 	$number = get_comments_number( $id );
 

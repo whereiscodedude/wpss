@@ -1063,7 +1063,7 @@ class WP_Embed {
 	function run_shortcode( $content ) {
 		global $shortcode_tags;
 
-		// Back up current registered shortcodes and clear them all out
+		// Backup current registered shortcodes and clear them all out
 		$orig_shortcode_tags = $shortcode_tags;
 		remove_all_shortcodes();
 

@@ -2613,7 +2613,7 @@ function wp_add_post_tags($post_id = 0, $tags = '') {
  * @param int $post_id Post ID.
  * @param string $tags The tags to set for the post, separated by commas.
  * @param bool $append If true, don't delete existing tags, just add on. If false, replace the tags with the new tags.
- * @return mixed Array of affected term IDs. WP_Error or false on failure.
+ * @return bool|null Will return false if $post_id is not an integer or is 0. Will return null otherwise
  */
 function wp_set_post_tags( $post_id = 0, $tags = '', $append = false ) {
 	return wp_set_post_terms( $post_id, $tags, 'post_tag', $append);
@@ -2628,7 +2628,7 @@ function wp_set_post_tags( $post_id = 0, $tags = '', $append = false ) {
  * @param int $post_id Post ID.
  * @param string $tags The tags to set for the post, separated by commas.
  * @param bool $append If true, don't delete existing tags, just add on. If false, replace the tags with the new tags.
- * @return mixed Array of affected term IDs. WP_Error or false on failure.
+ * @return bool|null Will return false if $post_id is not an integer or is 0. Will return null otherwise
  */
 function wp_set_post_terms( $post_id = 0, $tags = '', $taxonomy = 'post_tag', $append = false ) {
 	$post_id = (int) $post_id;
@@ -2648,7 +2648,7 @@ function wp_set_post_terms( $post_id = 0, $tags = '', $taxonomy = 'post_tag', $a
 		$tags = array_unique( $tags );
 	}
 
-	return wp_set_object_terms($post_id, $tags, $taxonomy, $append);
+	wp_set_object_terms($post_id, $tags, $taxonomy, $append);
 }
 
 /**
@@ -3511,7 +3511,7 @@ function wp_delete_attachment( $post_id, $force_delete = false ) {
 		foreach ( $backup_sizes as $size ) {
 			$del_file = path_join( dirname($meta['file']), $size['file'] );
 			$del_file = apply_filters('wp_delete_file', $del_file);
-			@ unlink( path_join($uploadpath['basedir'], $del_file) );
+            @ unlink( path_join($uploadpath['basedir'], $del_file) );
 		}
 	}
 
@@ -3584,10 +3584,10 @@ function wp_get_attachment_url( $post_id = 0 ) {
 		if ( ($uploads = wp_upload_dir()) && false === $uploads['error'] ) { //Get upload directory
 			if ( 0 === strpos($file, $uploads['basedir']) ) //Check that the upload base exists in the file location
 				$url = str_replace($uploads['basedir'], $uploads['baseurl'], $file); //replace file location with url location
-			elseif ( false !== strpos($file, 'wp-content/uploads') )
-				$url = $uploads['baseurl'] . substr( $file, strpos($file, 'wp-content/uploads') + 18 );
-			else
-				$url = $uploads['baseurl'] . "/$file"; //Its a newly uploaded file, therefor $file is relative to the basedir.
+            elseif ( false !== strpos($file, 'wp-content/uploads') )
+                $url = $uploads['baseurl'] . substr( $file, strpos($file, 'wp-content/uploads') + 18 );
+            else
+                $url = $uploads['baseurl'] . "/$file"; //Its a newly uploaded file, therefor $file is relative to the basedir.
 		}
 	}
 
