@@ -51,7 +51,12 @@ if ( $post_id ) {
  * @param int $post_id Optional. Post ID.
  */
 function redirect_post($post_id = '') {
-	if ( isset($_POST['save']) || isset($_POST['publish']) ) {
+	if ( !empty($_POST['mode']) && 'sidebar' == $_POST['mode'] ) {
+		if ( isset($_POST['saveasdraft']) )
+			$location = 'sidebar.php?a=c';
+		elseif ( isset($_POST['publish']) )
+			$location = 'sidebar.php?a=b';
+	} elseif ( isset($_POST['save']) || isset($_POST['publish']) ) {
 		$status = get_post_status( $post_id );
 
 		if ( isset( $_POST['publish'] ) ) {
@@ -138,7 +143,7 @@ case 'edit':
 	$editing = true;
 
 	if ( empty( $post_id ) ) {
-		wp_redirect( admin_url('post.php') );
+		wp_redirect("post.php");
 		exit();
 	}
 
@@ -265,7 +270,7 @@ case 'preview':
 	break;
 
 default:
-		wp_redirect( admin_url('edit.php') );
+		wp_redirect('edit.php');
 	exit();
 	break;
 } // end switch

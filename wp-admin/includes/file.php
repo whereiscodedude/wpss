@@ -39,15 +39,12 @@ $wp_file_descriptions = array (
 	'wp-layout.css' => __( 'Stylesheet' ), 'wp-comments.php' => __( 'Comments Template' ), 'wp-comments-popup.php' => __( 'Popup Comments Template' ));
 
 /**
- * Get the description for standard WordPress theme files and other various standard
- * WordPress files
+ * {@internal Missing Short Description}}
  *
- * @since 1.5.0
+ * @since unknown
  *
- * @uses _cleanup_header_comment
- * @uses $wp_file_descriptions
- * @param string $file Filesystem path or filename
- * @return string Description of file from $wp_file_descriptions or basename of $file if description doesn't exist
+ * @param unknown_type $file
+ * @return unknown
  */
 function get_file_description( $file ) {
 	global $wp_file_descriptions;
@@ -65,12 +62,11 @@ function get_file_description( $file ) {
 }
 
 /**
- * Get the absolute filesystem path to the root of the WordPress installation
+ * {@internal Missing Short Description}}
  *
- * @since 1.5.0
+ * @since unknown
  *
- * @uses get_option
- * @return string Full filesystem path to the root of the WordPress installation
+ * @return unknown
  */
 function get_home_path() {
 	$home = get_option( 'home' );
@@ -88,18 +84,12 @@ function get_home_path() {
 }
 
 /**
- * Get the real file system path to a file to edit within the admin
+ * {@internal Missing Short Description}}
  *
- * If the $file is index.php or .htaccess this function will assume it is relative
- * to the install root, otherwise it is assumed the file is relative to the wp-content
- * directory
+ * @since unknown
  *
- * @since 1.5.0
- *
- * @uses get_home_path
- * @uses WP_CONTENT_DIR full filesystem path to the wp-content directory
- * @param string $file filesystem path relative to the WordPress install directory or to the wp-content directory
- * @return string full file system path to edit
+ * @param unknown_type $file
+ * @return unknown
  */
 function get_real_file_to_edit( $file ) {
 	if ('index.php' == $file || '.htaccess' == $file ) {
@@ -211,17 +201,13 @@ function wp_tempnam($filename = '', $dir = '') {
 }
 
 /**
- * Make sure that the file that was requested to edit, is allowed to be edited
+ * {@internal Missing Short Description}}
  *
- * Function will die if if you are not allowed to edit the file
+ * @since unknown
  *
- * @since 1.5.0
- *
- * @uses wp_die
- * @uses validate_file
- * @param string $file file the users is attempting to edit
- * @param array $allowed_files Array of allowed files to edit, $file must match an entry exactly
- * @return null
+ * @param unknown_type $file
+ * @param unknown_type $allowed_files
+ * @return unknown
  */
 function validate_file_to_edit( $file, $allowed_files = '' ) {
 	$code = validate_file( $file, $allowed_files );
@@ -242,19 +228,10 @@ function validate_file_to_edit( $file, $allowed_files = '' ) {
 }
 
 /**
- * Handle PHP uploads in WordPress, sanitizing file names, checking extensions for mime type,
- * and moving the file to the appropriate directory within the uploads directory.
+ * {@internal Missing Short Description}}
  *
- * @since 2.0
+ * @since unknown
  *
- * @uses wp_handle_upload_error
- * @uses apply_filters
- * @uses is_multisite
- * @uses wp_check_filetype_and_ext
- * @uses current_user_can
- * @uses wp_upload_dir
- * @uses wp_unique_filename
- * @uses delete_transient
  * @param array $file Reference to a single element of $_FILES. Call the function once for each uploaded file.
  * @param array $overrides Optional. An associative array of names=>values to override default variables with extract( $overrides, EXTR_OVERWRITE ).
  * @return array On success, returns an associative array of file attributes. On failure, returns $overrides['upload_error_handler'](&$file, $message ) or array( 'error'=>$message ).
@@ -338,7 +315,7 @@ function wp_handle_upload( &$file, $overrides = false, $time = null ) {
 			$file['name'] = $proper_filename;
 
 		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) )
-			return call_user_func($upload_error_handler, $file, __( 'Sorry, this file type is not permitted for security reasons.' ));
+			return call_user_func($upload_error_handler, $file, __( 'File type does not meet security guidelines. Try another.' ));
 
 		if ( !$ext )
 			$ext = ltrim(strrchr($file['name'], '.'), '.');
@@ -375,21 +352,15 @@ function wp_handle_upload( &$file, $overrides = false, $time = null ) {
 }
 
 /**
- * Handle sideloads, which is the process of retriving a media item from another server instead of
- * a traditional media upload.  This process involves sanitizing the filename, checking extensions
- * for mime type, and moving the file to the appropriate directory within the uploads directory.
+ * {@internal Missing Short Description}}
  *
- * @since 2.6.0
+ * Pass this function an array similar to that of a $_FILES POST array.
  *
- * @uses wp_handle_upload_error
- * @uses apply_filters
- * @uses wp_check_filetype_and_ext
- * @uses current_user_can
- * @uses wp_upload_dir
- * @uses wp_unique_filename
- * @param array $file an array similar to that of a PHP $_FILES POST array
- * @param array $overrides Optional. An associative array of names=>values to override default variables with extract( $overrides, EXTR_OVERWRITE ).
- * @return array On success, returns an associative array of file attributes. On failure, returns $overrides['upload_error_handler'](&$file, $message ) or array( 'error'=>$message ).
+ * @since unknown
+ *
+ * @param unknown_type $file
+ * @param unknown_type $overrides
+ * @return unknown
  */
 function wp_handle_sideload( &$file, $overrides = false ) {
 	// The default error handler.
@@ -458,7 +429,7 @@ function wp_handle_sideload( &$file, $overrides = false ) {
 			$file['name'] = $proper_filename;
 
 		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) )
-			return $upload_error_handler( $file, __( 'Sorry, this file type is not permitted for security reasons.' ));
+			return $upload_error_handler( $file, __( 'File type does not meet security guidelines. Try another.' ));
 
 		if ( !$ext )
 			$ext = ltrim(strrchr($file['name'], '.'), '.');
@@ -1000,7 +971,7 @@ jQuery(function($){
 <p><?php
 	$label_user = __('Username');
 	$label_pass = __('Password');
-	_e('To perform the requested action, WordPress needs to access your web server.');
+	_e('To perform the requested action, WordPress needs to access to your web server.');
 	echo ' ';
 	if ( ( isset( $types['ftp'] ) || isset( $types['ftps'] ) ) ) {
 		if ( isset( $types['ssh'] ) ) {
@@ -1066,8 +1037,10 @@ foreach ( (array) $extra_fields as $field ) {
 	if ( isset( $_POST[ $field ] ) )
 		echo '<input type="hidden" name="' . esc_attr( $field ) . '" value="' . esc_attr( stripslashes( $_POST[ $field ] ) ) . '" />';
 }
-submit_button( __( 'Proceed' ), 'button', 'upgrade' );
 ?>
+<p class="submit">
+<input id="upgrade" name="upgrade" type="submit" class="button" value="<?php esc_attr_e('Proceed'); ?>" />
+</p>
 </div>
 </form>
 <?php

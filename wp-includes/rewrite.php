@@ -34,7 +34,7 @@ function add_rewrite_rule($regex, $redirect, $after = 'bottom') {
  */
 function add_rewrite_tag($tagname, $regex) {
 	//validation
-	if ( strlen($tagname) < 3 || $tagname[0] != '%' || $tagname[strlen($tagname)-1] != '%' )
+	if ( strlen($tagname) < 3 || $tagname{0} != '%' || $tagname{strlen($tagname)-1} != '%' )
 		return;
 
 	$qv = trim($tagname, '%');
@@ -205,7 +205,7 @@ define('EP_ALL', 8191);
  * The endpoints are added to the end of the request. So a request matching
  * "/2008/10/14/my_post/myep/", the endpoint will be "/myep/".
  *
- * Be sure to flush the rewrite rules (wp_rewrite->flush_rules()) when your plugin gets
+ * Be sure to flush the rewrite rules (wp_rewrite->flush()) when your plugin gets
  * activated (register_activation_hook()) and deactivated (register_deactivation_hook())
  *
  * @since 2.1.0
@@ -299,7 +299,7 @@ function url_to_postid($url) {
 	} else {
 		// Chop off /path/to/blog
 		$home_path = parse_url(home_url());
-		$home_path = isset( $home_path['path'] ) ? $home_path['path'] : '' ;
+		$home_path = $home_path['path'];
 		$url = str_replace($home_path, '', $url);
 	}
 
@@ -381,6 +381,42 @@ class WP_Rewrite {
 	var $use_trailing_slashes;
 
 	/**
+	 * Customized or default category permalink base ( example.com/xx/tagname ).
+	 *
+	 * @since 1.5.0
+	 * @access private
+	 * @var string
+	 */
+	var $category_base;
+
+	/**
+	 * Customized or default tag permalink base ( example.com/xx/tagname ).
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 * @var string
+	 */
+	var $tag_base;
+
+	/**
+	 * Permalink request structure for categories.
+	 *
+	 * @since 1.5.0
+	 * @access private
+	 * @var string
+	 */
+	var $category_structure;
+
+	/**
+	 * Permalink request structure for tags.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 * @var string
+	 */
+	var $tag_structure;
+
+	/**
 	 * Permalink author request base ( example.com/author/authorname ).
 	 *
 	 * @since 1.5.0
@@ -442,15 +478,6 @@ class WP_Rewrite {
 	 * @var string
 	 */
 	var $comments_base = 'comments';
-
-	/**
-	 * Pagination permalink base.
-	 *
-	 * @since 3.1.0
-	 * @access private
-	 * @var string
-	 */
-	var $pagination_base = 'page';
 
 	/**
 	 * Feed permalink base.
@@ -621,6 +648,8 @@ class WP_Rewrite {
 					'%second%',
 					'%postname%',
 					'%post_id%',
+					'%category%',
+					'%tag%',
 					'%author%',
 					'%pagename%',
 					'%search%'
@@ -643,6 +672,8 @@ class WP_Rewrite {
 					'([0-9]{1,2})',
 					'([^/]+)',
 					'([0-9]+)',
+					'(.+?)',
+					'(.+?)',
 					'([^/]+)',
 					'([^/]+?)',
 					'(.+)'
@@ -665,6 +696,8 @@ class WP_Rewrite {
 					'second=',
 					'name=',
 					'p=',
+					'category_name=',
+					'tag=',
 					'author_name=',
 					'pagename=',
 					's='
@@ -986,7 +1019,22 @@ class WP_Rewrite {
 	 * @return bool|string False on failure. Category permalink structure.
 	 */
 	function get_category_permastruct() {
-		return $this->get_extra_permastruct('category');
+		if ( isset($this->category_structure) )
+			return $this->category_structure;
+
+		if ( empty($this->permalink_structure) ) {
+			$this->category_structure = '';
+			return false;
+		}
+
+		if ( empty($this->category_base) )
+			$this->category_structure = trailingslashit( $this->front . 'category' );
+		else
+			$this->category_structure = trailingslashit( '/' . $this->root . $this->category_base );
+
+		$this->category_structure .= '%category%';
+
+		return $this->category_structure;
 	}
 
 	/**
@@ -1003,7 +1051,22 @@ class WP_Rewrite {
 	 * @return bool|string False on failure. Tag permalink structure.
 	 */
 	function get_tag_permastruct() {
-		return $this->get_extra_permastruct('post_tag');
+		if ( isset($this->tag_structure) )
+			return $this->tag_structure;
+
+		if ( empty($this->permalink_structure) ) {
+			$this->tag_structure = '';
+			return false;
+		}
+
+		if ( empty($this->tag_base) )
+			$this->tag_structure = trailingslashit( $this->front . 'tag' );
+		else
+			$this->tag_structure = trailingslashit( '/' . $this->root . $this->tag_base );
+
+		$this->tag_structure .= '%tag%';
+
+		return $this->tag_structure;
 	}
 
 	/**
@@ -1216,7 +1279,7 @@ class WP_Rewrite {
 
 		//build a regex to match the trackback and page/xx parts of URLs
 		$trackbackregex = 'trackback/?$';
-		$pageregex = $this->pagination_base . '/?([0-9]{1,})/?$';
+		$pageregex = 'page/?([0-9]{1,})/?$';
 		$commentregex = 'comment-page-([0-9]{1,})/?$';
 
 		//build up an array of endpoint regexes to append => queries to append
@@ -1541,6 +1604,14 @@ class WP_Rewrite {
 		$search_rewrite = $this->generate_rewrite_rules($search_structure, EP_SEARCH);
 		$search_rewrite = apply_filters('search_rewrite_rules', $search_rewrite);
 
+		// Categories
+		$category_rewrite = $this->generate_rewrite_rules($this->get_category_permastruct(), EP_CATEGORIES);
+		$category_rewrite = apply_filters('category_rewrite_rules', $category_rewrite);
+
+		// Tags
+		$tag_rewrite = $this->generate_rewrite_rules($this->get_tag_permastruct(), EP_TAGS);
+		$tag_rewrite = apply_filters('tag_rewrite_rules', $tag_rewrite);
+
 		// Authors
 		$author_rewrite = $this->generate_rewrite_rules($this->get_author_permastruct(), EP_AUTHORS);
 		$author_rewrite = apply_filters('author_rewrite_rules', $author_rewrite);
@@ -1550,24 +1621,18 @@ class WP_Rewrite {
 		$page_rewrite = apply_filters('page_rewrite_rules', $page_rewrite);
 
 		// Extra permastructs
-		foreach ( $this->extra_permastructs as $permastructname => $permastruct ) {
+		foreach ( $this->extra_permastructs as $permastruct ) {
 			if ( is_array($permastruct) )
-				$rules = $this->generate_rewrite_rules($permastruct[0], $permastruct[1]);
+				$this->extra_rules_top = array_merge($this->extra_rules_top, $this->generate_rewrite_rules($permastruct[0], $permastruct[1]));
 			else
-				$rules = $this->generate_rewrite_rules($permastruct, EP_NONE);
-
-			$rules = apply_filters($permastructname . '_rewrite_rules', $rules);
-			if ( 'post_tag' == $permastructname )
-				$rules = apply_filters('tag_rewrite_rules', $rules);
-
-			$this->extra_rules_top = array_merge($this->extra_rules_top, $rules);
+				$this->extra_rules_top = array_merge($this->extra_rules_top, $this->generate_rewrite_rules($permastruct, EP_NONE));
 		}
 
 		// Put them together.
 		if ( $this->use_verbose_page_rules )
-			$this->rules = array_merge($this->extra_rules_top, $robots_rewrite, $default_feeds, $registration_pages, $page_rewrite, $root_rewrite, $comments_rewrite, $search_rewrite,  $author_rewrite, $date_rewrite, $post_rewrite, $this->extra_rules);
+			$this->rules = array_merge($this->extra_rules_top, $robots_rewrite, $default_feeds, $registration_pages, $page_rewrite, $root_rewrite, $comments_rewrite, $search_rewrite, $category_rewrite, $tag_rewrite, $author_rewrite, $date_rewrite, $post_rewrite, $this->extra_rules);
 		else
-			$this->rules = array_merge($this->extra_rules_top, $robots_rewrite, $default_feeds, $registration_pages, $root_rewrite, $comments_rewrite, $search_rewrite,  $author_rewrite, $date_rewrite, $post_rewrite, $page_rewrite, $this->extra_rules);
+			$this->rules = array_merge($this->extra_rules_top, $robots_rewrite, $default_feeds, $registration_pages, $root_rewrite, $comments_rewrite, $search_rewrite, $category_rewrite, $tag_rewrite, $author_rewrite, $date_rewrite, $post_rewrite, $page_rewrite, $this->extra_rules);
 
 		do_action_ref_array('generate_rewrite_rules', array(&$this));
 		$this->rules = apply_filters('rewrite_rules_array', $this->rules);
@@ -1876,7 +1941,7 @@ class WP_Rewrite {
 	 *
 	 * @since 2.0.1
 	 * @access public
-	 * @param bool $hard Whether to update .htaccess (hard flush) or just update rewrite_rules option (soft flush). Default is true (hard).
+	 * @param $hard bool Whether to update .htaccess (hard flush) or just update rewrite_rules option (soft flush). Default is true (hard).
 	 */
 	function flush_rules($hard = true) {
 		delete_option('rewrite_rules');
@@ -1904,17 +1969,22 @@ class WP_Rewrite {
 		$this->root = '';
 		if ( $this->using_index_permalinks() )
 			$this->root = $this->index . '/';
-
+		$this->category_base = get_option( 'category_base' );
+		$this->tag_base = get_option( 'tag_base' );
+		unset($this->category_structure);
 		unset($this->author_structure);
 		unset($this->date_structure);
 		unset($this->page_structure);
 		unset($this->search_structure);
 		unset($this->feed_structure);
 		unset($this->comment_feed_structure);
-
 		$this->use_trailing_slashes = ( '/' == substr($this->permalink_structure, -1, 1) );
 
-		$this->use_verbose_page_rules = (bool) preg_match( "#^/%(postname|category|tag|author)%#", $this->permalink_structure );
+		// Enable generic rules for pages if permalink structure doesn't begin with a wildcard.
+		if ( preg_match("/^[^%]*%(?:postname|category|tag|author)%/", $this->permalink_structure) )
+			 $this->use_verbose_page_rules = true;
+		else
+			$this->use_verbose_page_rules = false;
 	}
 
 	/**
@@ -1953,7 +2023,7 @@ class WP_Rewrite {
 	 * @param string $category_base Category permalink structure base.
 	 */
 	function set_category_base($category_base) {
-		if ( $category_base != get_option('category_base') ) {
+		if ( $category_base != $this->category_base ) {
 			update_option('category_base', $category_base);
 			$this->init();
 		}
@@ -1972,7 +2042,7 @@ class WP_Rewrite {
 	 * @param string $tag_base Tag permalink structure base.
 	 */
 	function set_tag_base( $tag_base ) {
-		if ( $tag_base != get_option( 'tag_base') ) {
+		if ( $tag_base != $this->tag_base ) {
 			update_option( 'tag_base', $tag_base );
 			$this->init();
 		}

@@ -155,12 +155,14 @@ function iis7_save_url_rewrite_rules(){
 	$web_config_file = $home_path . 'web.config';
 
 	// Using win_is_writable() instead of is_writable() because of a bug in Windows PHP
-	if ( iis7_supports_permalinks() && ( ( ! file_exists($web_config_file) && win_is_writable($home_path) && $wp_rewrite->using_mod_rewrite_permalinks() ) || win_is_writable($web_config_file) ) ) {
-		$rule = $wp_rewrite->iis7_url_rewrite_rules(false, '', '');
-		if ( ! empty($rule) ) {
-			return iis7_add_rewrite_rule($web_config_file, $rule);
-		} else {
-			return iis7_delete_rewrite_rule($web_config_file);
+	if ( ( ! file_exists($web_config_file) && win_is_writable($home_path) && $wp_rewrite->using_mod_rewrite_permalinks() ) || win_is_writable($web_config_file) ) {
+		if ( iis7_supports_permalinks() ) {
+			$rule = $wp_rewrite->iis7_url_rewrite_rules(false, '', '');
+			if ( ! empty($rule) ) {
+				return iis7_add_rewrite_rule($web_config_file, $rule);
+			} else {
+				return iis7_delete_rewrite_rule($web_config_file);
+			}
 		}
 	}
 	return false;
@@ -210,12 +212,12 @@ add_action( 'update_option_home', 'update_home_siteurl', 10, 2 );
 add_action( 'update_option_siteurl', 'update_home_siteurl', 10, 2 );
 
 /**
- * Shorten an URL, to be used as link text
+ * {@internal Missing Short Description}}
  *
- * @since 1.2.1
+ * @since unknown
  *
- * @param string $url
- * @return string
+ * @param unknown_type $url
+ * @return unknown
  */
 function url_shorten( $url ) {
 	$short_url = str_replace( 'http://', '', stripslashes( $url ));
@@ -341,18 +343,12 @@ function set_screen_options() {
 
 		switch ( $map_option ) {
 			case 'edit_per_page':
-			case 'users_per_page':
+			case 'ms_sites_per_page':
+			case 'ms_users_per_page':
 			case 'edit_comments_per_page':
 			case 'upload_per_page':
 			case 'edit_tags_per_page':
 			case 'plugins_per_page':
-			// Network admin
-			case 'sites_network_per_page':
-			case 'users_network_per_page':
-			case 'site_users_network_per_page':
-			case 'plugins_network_per_page':
-			case 'themes_network_per_page':
-			case 'site_themes_network_per_page':
 				$value = (int) $value;
 				if ( $value < 1 || $value > 999 )
 					return;
@@ -565,29 +561,29 @@ function saveDomDocument($doc, $filename) {
  *
  * @since 2.8.0
  *
- * @param string $path
+ * @param object $path
  * @return bool
  */
-function win_is_writable( $path ) {
+function win_is_writable($path) {
 	/* will work in despite of Windows ACLs bug
 	 * NOTE: use a trailing slash for folders!!!
 	 * see http://bugs.php.net/bug.php?id=27609
 	 * see http://bugs.php.net/bug.php?id=30931
 	 */
 
-	if ( $path[strlen( $path ) - 1] == '/' ) // recursively return a temporary file path
-		return win_is_writable( $path . uniqid( mt_rand() ) . '.tmp');
-	else if ( is_dir( $path ) )
-		return win_is_writable( $path . '/' . uniqid( mt_rand() ) . '.tmp' );
-	// check tmp file for read/write capabilities
-	$should_delete_tmp_file = !file_exists( $path );
-	$f = @fopen( $path, 'a' );
-	if ( $f === false )
-		return false;
-	fclose( $f );
-	if ( $should_delete_tmp_file )
-		unlink( $path );
-	return true;
+    if ( $path{strlen($path)-1} == '/' ) // recursively return a temporary file path
+        return win_is_writable($path . uniqid(mt_rand()) . '.tmp');
+    else if ( is_dir($path) )
+        return win_is_writable($path . '/' . uniqid(mt_rand()) . '.tmp');
+    // check tmp file for read/write capabilities
+    $rm = file_exists($path);
+    $f = @fopen($path, 'a');
+    if ($f===false)
+        return false;
+    fclose($f);
+    if ( ! $rm )
+        unlink($path);
+    return true;
 }
 
 /**

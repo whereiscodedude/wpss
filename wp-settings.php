@@ -35,7 +35,7 @@ if ( function_exists( 'date_default_timezone_set' ) )
 wp_unregister_GLOBALS();
 
 // Ensure these global variables do not exist so they do not interfere with WordPress.
-unset( $wp_filter, $cache_lastcommentmodified );
+unset( $wp_filter, $cache_lastcommentmodified, $cache_lastpostdate );
 
 // Standardize $_SERVER variables across setups.
 wp_fix_server_vars();
@@ -65,11 +65,9 @@ wp_set_lang_dir();
 // Load early WordPress files.
 require( ABSPATH . WPINC . '/compat.php' );
 require( ABSPATH . WPINC . '/functions.php' );
-require( ABSPATH . WPINC . '/class-wp.php' );
-require( ABSPATH . WPINC . '/class-wp-error.php' );
-require( ABSPATH . WPINC . '/plugin.php' );
+require( ABSPATH . WPINC . '/classes.php' );
 
-// Include the wpdb class and, if present, a db.php database drop-in.
+// Include the wpdb class, or a db.php database drop-in if present.
 require_wp_db();
 
 // Set the database table prefix and the format specifiers for database table columns.
@@ -79,6 +77,7 @@ wp_set_wpdb_vars();
 wp_start_object_cache();
 
 // Load early WordPress files.
+require( ABSPATH . WPINC . '/plugin.php' );
 require( ABSPATH . WPINC . '/default-filters.php' );
 require( ABSPATH . WPINC . '/pomo/mo.php' );
 
@@ -101,8 +100,6 @@ require( ABSPATH . WPINC . '/l10n.php' );
 wp_not_installed();
 
 // Load most of WordPress.
-require( ABSPATH . WPINC . '/class-wp-walker.php' );
-require( ABSPATH . WPINC . '/class-wp-ajax-response.php' );
 require( ABSPATH . WPINC . '/formatting.php' );
 require( ABSPATH . WPINC . '/capabilities.php' );
 require( ABSPATH . WPINC . '/query.php' );
@@ -136,7 +133,6 @@ require( ABSPATH . WPINC . '/class-http.php' );
 require( ABSPATH . WPINC . '/widgets.php' );
 require( ABSPATH . WPINC . '/nav-menu.php' );
 require( ABSPATH . WPINC . '/nav-menu-template.php' );
-require( ABSPATH . WPINC . '/admin-bar.php' );
 
 // Load multisite-specific files.
 if ( is_multisite() ) {
@@ -154,14 +150,6 @@ foreach ( wp_get_mu_plugins() as $mu_plugin ) {
 	include_once( $mu_plugin );
 }
 unset( $mu_plugin );
-
-// Load network activated plugins.
-if ( is_multisite() ) {
-	foreach( wp_get_active_network_plugins() as $network_plugin ) {
-		include_once( $network_plugin );
-	}
-	unset( $network_plugin );
-}
 
 do_action( 'muplugins_loaded' );
 
@@ -181,9 +169,6 @@ require( ABSPATH . WPINC . '/vars.php' );
 // @plugin authors: warning: these get registered again on the init hook.
 create_initial_taxonomies();
 create_initial_post_types();
-
-// Register the default theme directory root
-register_theme_directory( get_theme_root() );
 
 // Load active plugins.
 foreach ( wp_get_active_and_valid_plugins() as $plugin )
