@@ -53,14 +53,11 @@
 	 *
 	 * Without further ado, the loop:
 	 */ ?>
-<?php while ( have_posts() ) : the_post();
+<?php while ( have_posts() ) : the_post(); ?>
 
-$comment_number_template = _n( '1 Comment', '% Comments', get_comments_number(), 'twentyten' );
-?>
+<?php /* How to display posts in the Gallery category. */ ?>
 
-<?php /* How to display posts of the Gallery format. The gallery category is the old way. */ ?>
-
-	<?php if ( 'gallery' == get_post_format( $post->ID ) || in_category( _x( 'gallery', 'gallery category slug', 'twentyten' ) ) ) : ?>
+	<?php if ( in_category( _x('gallery', 'gallery category slug', 'twentyten') ) ) : ?>
 		<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<h2 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php printf( esc_attr__( 'Permalink to %s', 'twentyten' ), the_title_attribute( 'echo=0' ) ); ?>" rel="bookmark"><?php the_title(); ?></a></h2>
 
@@ -71,8 +68,8 @@ $comment_number_template = _n( '1 Comment', '% Comments', get_comments_number(),
 			<div class="entry-content">
 <?php if ( post_password_required() ) : ?>
 				<?php the_content(); ?>
-<?php else : ?>
-				<?php
+<?php else : ?>			
+				<?php 
 					$images = get_children( array( 'post_parent' => $post->ID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'orderby' => 'menu_order', 'order' => 'ASC', 'numberposts' => 999 ) );
 					if ( $images ) :
 						$total_images = count( $images );
@@ -92,21 +89,16 @@ $comment_number_template = _n( '1 Comment', '% Comments', get_comments_number(),
 			</div><!-- .entry-content -->
 
 			<div class="entry-utility">
-			<?php if ( 'gallery' == get_post_format( $post->ID ) ) : ?>
-				<a href="<?php echo get_post_format_link( 'gallery' ); ?>" title="<?php esc_attr_e( 'View Galleries', 'twentyten' ); ?>"><?php _e( 'More Galleries', 'twentyten' ); ?></a>
+				<a href="<?php echo get_term_link( _x('gallery', 'gallery category slug', 'twentyten'), 'category' ); ?>" title="<?php esc_attr_e( 'View posts in the Gallery category', 'twentyten' ); ?>"><?php _e( 'More Galleries', 'twentyten' ); ?></a>
 				<span class="meta-sep">|</span>
-			<?php elseif ( in_category( _x( 'gallery', 'gallery category slug', 'twentyten' ) ) ) : ?>
-				<a href="<?php echo get_term_link( _x( 'gallery', 'gallery category slug', 'twentyten' ), 'category' ); ?>" title="<?php esc_attr_e( 'View posts in the Gallery category', 'twentyten' ); ?>"><?php _e( 'More Galleries', 'twentyten' ); ?></a>
-				<span class="meta-sep">|</span>
-			<?php endif; ?>
-				<span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'twentyten' ), $comment_number_template, $comment_number_template ); ?></span>
+				<span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'twentyten' ), __( '1 Comment', 'twentyten' ), __( '% Comments', 'twentyten' ) ); ?></span>
 				<?php edit_post_link( __( 'Edit', 'twentyten' ), '<span class="meta-sep">|</span> <span class="edit-link">', '</span>' ); ?>
 			</div><!-- .entry-utility -->
 		</div><!-- #post-## -->
 
-<?php /* How to display posts of the Aside format. The asides category is the old way. */ ?>
+<?php /* How to display posts in the asides category */ ?>
 
-	<?php elseif ( 'aside' == get_post_format( $post->ID ) || in_category( _x( 'asides', 'asides category slug', 'twentyten' ) )  ) : ?>
+	<?php elseif ( in_category( _x('asides', 'asides category slug', 'twentyten') ) ) : ?>
 		<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 		<?php if ( is_archive() || is_search() ) : // Display excerpts for archives and search. ?>
@@ -122,7 +114,7 @@ $comment_number_template = _n( '1 Comment', '% Comments', get_comments_number(),
 			<div class="entry-utility">
 				<?php twentyten_posted_on(); ?>
 				<span class="meta-sep">|</span>
-				<span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'twentyten' ), $comment_number_template, $comment_number_template ); ?></span>
+				<span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'twentyten' ), __( '1 Comment', 'twentyten' ), __( '% Comments', 'twentyten' ) ); ?></span>
 				<?php edit_post_link( __( 'Edit', 'twentyten' ), '<span class="meta-sep">|</span> <span class="edit-link">', '</span>' ); ?>
 			</div><!-- .entry-utility -->
 		</div><!-- #post-## -->
@@ -164,7 +156,7 @@ $comment_number_template = _n( '1 Comment', '% Comments', get_comments_number(),
 					</span>
 					<span class="meta-sep">|</span>
 				<?php endif; ?>
-				<span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'twentyten' ), $comment_number_template, $comment_number_template ); ?></span>
+				<span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'twentyten' ), __( '1 Comment', 'twentyten' ), __( '% Comments', 'twentyten' ) ); ?></span>
 				<?php edit_post_link( __( 'Edit', 'twentyten' ), '<span class="meta-sep">|</span> <span class="edit-link">', '</span>' ); ?>
 			</div><!-- .entry-utility -->
 		</div><!-- #post-## -->

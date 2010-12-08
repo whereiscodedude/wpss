@@ -102,7 +102,9 @@ if ( $updated ) { ?>
 	</table>
 	<input type="hidden" name="action" value="updateblogsettings" />
 	<?php wp_nonce_field( 'update-my-sites' ); ?>
-	<?php submit_button(); ?>
+	<p>
+	 <input type="submit" class="button-primary" value="<?php _e( 'Save Changes' ) ?>" />
+	</p>
 	</form>
 	</div>
 <?php

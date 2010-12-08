@@ -39,6 +39,7 @@ function &get_manifest() {
 		array('images/icons32.png'),
 		array('images/icons32-vs.png'),
 		array('images/list.png'),
+		array('images/list-vs.png'),
 		array('images/wpspin_light.gif'),
 		array('images/wpspin_dark.gif'),
 		array('images/logo.gif'),

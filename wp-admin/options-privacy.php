@@ -50,7 +50,9 @@ include('./admin-header.php');
 
 <?php do_settings_sections('privacy'); ?>
 
-<?php submit_button(); ?>
+<p class="submit">
+	<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+</p>
 </form>
 
 </div>

@@ -157,7 +157,7 @@ if ( 'update' == $action ) {
 	/**
 	 * Redirect back to the settings page that was submitted
 	 */
-	$goback = add_query_arg( 'settings-updated', 'true',  wp_get_referer() );
+	$goback = add_query_arg( 'updated', 'true',  wp_get_referer() );
 	wp_redirect( $goback );
 	exit;
 }
@@ -201,7 +201,7 @@ foreach ( (array) $options as $option ) :
 	<th scope='row'><label for='$name'>" . esc_html( $option->option_name ) . "</label></th>
 <td>";
 	if ( strpos( $value, "\n" ) !== false )
-		echo "<textarea class='$class' name='$name' id='$name' cols='30' rows='5'>" . esc_textarea( $value ) . "</textarea>";
+		echo "<textarea class='$class' name='$name' id='$name' cols='30' rows='5'>" . wp_htmledit_pre( $value ) . "</textarea>";
 	else
 		echo "<input class='regular-text $class' type='text' name='$name' id='$name' value='" . esc_attr( $value ) . "'" . disabled( $disabled, true, false ) . " />";
 	echo "</td>
@@ -209,11 +209,7 @@ foreach ( (array) $options as $option ) :
 endforeach;
 ?>
   </table>
-
-<input type="hidden" name="page_options" value="<?php echo esc_attr( implode( ',', $options_to_update ) ); ?>" />
-
-<?php submit_button( __( 'Save Changes' ), 'primary', 'Update' ); ?>
-
+<p class="submit"><input type="hidden" name="page_options" value="<?php echo esc_attr( implode( ',', $options_to_update ) ); ?>" /><input type="submit" name="Update" value="<?php esc_attr_e( 'Save Changes' ); ?>" class="button-primary" /></p>
   </form>
 </div>
 

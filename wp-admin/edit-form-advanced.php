@@ -108,9 +108,6 @@ require_once('./includes/meta-boxes.php');
 
 add_meta_box('submitdiv', __('Publish'), 'post_submit_meta_box', $post_type, 'side', 'core');
 
-if ( current_theme_supports( 'post-formats' ) && post_type_supports( $post_type, 'post-formats' ) )
-	add_meta_box( 'formatdiv', __('Format'), 'post_format_meta_box', $post_type, 'side', 'core' );
-
 // all taxonomies
 foreach ( get_object_taxonomies($post_type) as $tax_name ) {
 	$taxonomy = get_taxonomy($tax_name);
@@ -152,7 +149,10 @@ if ( !( 'pending' == $post->post_status && !current_user_can( $post_type_object-
 	add_meta_box('slugdiv', __('Slug'), 'post_slug_meta_box', $post_type, 'normal', 'core');
 
 if ( post_type_supports($post_type, 'author') ) {
-	if ( is_super_admin() || current_user_can( $post_type_object->cap->edit_others_posts ) )
+	$authors = get_editable_user_ids( $current_user->id ); // TODO: ROLE SYSTEM
+	if ( $post->post_author && !in_array($post->post_author, $authors) )
+		$authors[] = $post->post_author;
+	if ( ( $authors && count( $authors ) > 1 ) || is_super_admin() )
 		add_meta_box('authordiv', __('Author'), 'post_author_meta_box', $post_type, 'normal', 'core');
 }
 
@@ -166,14 +166,12 @@ do_action('do_meta_boxes', $post_type, 'normal', $post);
 do_action('do_meta_boxes', $post_type, 'advanced', $post);
 do_action('do_meta_boxes', $post_type, 'side', $post);
 
-add_screen_option('layout_columns', array('max' => 2) );
-
 if ( 'post' == $post_type ) {
 	add_contextual_help($current_screen,
 	'<p>' . __('The title field and the big Post Editing Area are fixed in place, but you can reposition all the other boxes that allow you to add metadata to your post using drag and drop, and can minimize or expand them by clicking the title bar of the box. You can also hide any of the boxes by using the Screen Options tab, where you can also choose a 1- or 2-column layout for this screen.') . '</p>' .
 	'<p>' . __('<strong>Title</strong> - Enter a title for your post. After you enter a title, you&#8217;ll see the permalink below, which you can edit.') . '</p>' .
 	'<p>' . __('<strong>Post editor</strong> - Enter the text for your post. There are two modes of editing: Visual and HTML. Choose the mode by clicking on the appropriate tab. Visual mode gives you a WYSIWYG editor. Click the last icon in the row to get a second row of controls. The HTML mode allows you to enter raw HTML along with your post text. You can insert media files by clicking the icons above the post editor and following the directions.') . '</p>' .
-	'<p>' . __('<strong>Publish</strong> - You can set the terms of publishing your post in the Publish box. For Status, Visibility, Format, and Publish (immediately), click on the Edit link to reveal more options. Visibility includes options for password-protecting a post or making it stay at the top of your blog indefinitely (sticky). Format includes options for setting your post format as Default (a normal post), Aside or Gallery. Publish (immediately) allows you to set a future or past date and time, so you can schedule a post to be published in the future or backdate a post.') . '</p>' .
+	'<p>' . __('<strong>Publish</strong> - You can set the terms of publishing your post in the Publish box. For Status, Visibility, and Publish (immediately), click on the Edit link to reveal more options. Visibility includes options for password-protecting a post or making it stay at the top of your blog indefinitely (sticky). Publish (immediately) allows you to set a future or past date and time, so you can schedule a post to be published in the future or backdate a post.') . '</p>' .
 	'<p>' . __('<strong>Featured Image</strong> - This allows you to associate an image with your post without inserting it. This is usually useful only if your theme makes use of the featured image as a post thumbnail on the home page, a custom header, etc.') . '</p>' .
 	'<p>' . __('<strong>Send Trackbacks</strong> - Trackbacks are a way to notify legacy blog systems that you&#8217;ve linked to them. Enter the URL(s) you want to send trackbacks. If you link to other WordPress sites they&#8217;ll be notified automatically using pingbacks, and this field is unnecessary.') . '</p>' .
 	'<p>' . __('<strong>Discussion</strong> - You can turn comments and pings on or off, and if there are comments on the post, you can see them here and moderate them.') . '</p>' .
@@ -208,13 +206,12 @@ require_once('./admin-header.php');
 <?php endif; ?>
 <form name="post" action="post.php" method="post" id="post"<?php do_action('post_edit_form_tag'); ?>>
 <?php wp_nonce_field($nonce_action); ?>
-<input type="hidden" id="parent_id" name="parent_id" value="<?php echo esc_attr( $post->post_parent ); ?>" />
 <input type="hidden" id="user-id" name="user_ID" value="<?php echo (int) $user_ID ?>" />
-<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ) ?>" />
-<input type="hidden" id="originalaction" name="originalaction" value="<?php echo esc_attr( $form_action ) ?>" />
+<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr($form_action) ?>" />
+<input type="hidden" id="originalaction" name="originalaction" value="<?php echo esc_attr($form_action) ?>" />
 <input type="hidden" id="post_author" name="post_author" value="<?php echo esc_attr( $post->post_author ); ?>" />
-<input type="hidden" id="post_type" name="post_type" value="<?php echo esc_attr( $post_type ) ?>" />
-<input type="hidden" id="original_post_status" name="original_post_status" value="<?php echo esc_attr( $post->post_status) ?>" />
+<input type="hidden" id="post_type" name="post_type" value="<?php echo esc_attr($post_type) ?>" />
+<input type="hidden" id="original_post_status" name="original_post_status" value="<?php echo esc_attr($post->post_status) ?>" />
 <input type="hidden" id="referredby" name="referredby" value="<?php echo esc_url(stripslashes(wp_get_referer())); ?>" />
 <?php
 if ( 'draft' != $post->post_status )
@@ -241,17 +238,17 @@ $side_meta_boxes = do_meta_boxes($post_type, 'side', $post);
 <?php if ( post_type_supports($post_type, 'title') ) { ?>
 <div id="titlediv">
 <div id="titlewrap">
-	<label class="hide-if-no-js" style="visibility:hidden" id="title-prompt-text" for="title"><?php echo apply_filters( 'enter_title_here', __( 'Enter title here' ), $post ); ?></label>
+	<label class="hide-if-no-js" style="visibility:hidden" id="title-prompt-text" for="title"><?php _e('Enter title here') ?></label>
 	<input type="text" name="post_title" size="30" tabindex="1" value="<?php echo esc_attr( htmlspecialchars( $post->post_title ) ); ?>" id="title" autocomplete="off" />
 </div>
 <div class="inside">
 <?php
-$sample_permalink_html = ! empty( $post_type_object->publicly_queryable ) ? get_sample_permalink_html($post->ID) : '';
+$sample_permalink_html = get_sample_permalink_html($post->ID);
 $shortlink = wp_get_shortlink($post->ID, 'post');
 if ( !empty($shortlink) )
     $sample_permalink_html .= '<input id="shortlink" type="hidden" value="' . esc_attr($shortlink) . '" /><a href="#" class="button" onclick="prompt(&#39;URL:&#39;, jQuery(\'#shortlink\').val()); return false;">' . __('Get Shortlink') . '</a>';
 
-if ( ! empty( $post_type_object->publicly_queryable ) && ! ( 'pending' == $post->post_status && !current_user_can( $post_type_object->cap->publish_posts ) ) ) { ?>
+if ( !( 'pending' == $post->post_status && !current_user_can( $post_type_object->cap->publish_posts ) ) ) { ?>
 	<div id="edit-slug-box">
 	<?php
 		if ( ! empty($post->ID) && ! empty($sample_permalink_html) && 'auto-draft' != $post->post_status )

@@ -6,11 +6,8 @@
  * @subpackage Press_This
  */
 
-define('IFRAME_REQUEST' , true);
-
 /** WordPress Administration Bootstrap */
 require_once('./admin.php');
-
 header('Content-Type: ' . get_option('html_type') . '; charset=' . get_option('blog_charset'));
 
 if ( ! current_user_can('edit_posts') )
@@ -113,7 +110,7 @@ if ( !empty($_REQUEST['ajax']) ) {
 			<div class="postbox">
 				<h2><label for="embed-code"><?php _e('Embed Code') ?></label></h2>
 				<div class="inside">
-					<textarea name="embed-code" id="embed-code" rows="8" cols="40"><?php echo esc_textarea( $selection ); ?></textarea>
+					<textarea name="embed-code" id="embed-code" rows="8" cols="40"><?php echo wp_htmledit_pre( $selection ); ?></textarea>
 					<p id="options"><a href="#" class="select button"><?php _e('Insert Video'); ?></a> <a href="#" class="close button"><?php _e('Cancel'); ?></a></p>
 				</div>
 			</div>
@@ -320,7 +317,7 @@ die;
 //<![CDATA[
 addLoadEvent = function(func){if(typeof jQuery!="undefined")jQuery(document).ready(func);else if(typeof wpOnload!='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
 var userSettings = {'url':'<?php echo SITECOOKIEPATH; ?>','uid':'<?php if ( ! isset($current_user) ) $current_user = wp_get_current_user(); echo $current_user->ID; ?>','time':'<?php echo time() ?>'};
-var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>', pagenow = 'press-this', isRtl = <?php echo (int) is_rtl(); ?>;
+var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>', pagenow = 'press-this';
 var photostorage = false;
 //]]>
 </script>
@@ -330,10 +327,8 @@ var photostorage = false;
 	do_action('admin_print_scripts');
 	do_action('admin_head');
 
-	if ( user_can_richedit() ) {
+	if ( user_can_richedit() )
 		wp_tiny_mce( true, array( 'height' => '370' ) );
-		wp_tiny_mce_preload_dialogs();	
-	}
 ?>
 	<script type="text/javascript">
 	function insert_plain_editor(text) {
@@ -474,14 +469,12 @@ var photostorage = false;
 				<h3><?php _e('Publish') ?></h3>
 				<div class="inside">
 					<p>
-					<?php
-						submit_button( __( 'Save Draft' ), 'button', 'draft', false, array( 'id' => 'save' ) );
-						if ( current_user_can('publish_posts') ) {
-							submit_button( __( 'Publish' ), 'primary', 'publish', false );
-						} else {
-							echo '<br /><br />';
-							submit_button( __( 'Submit for Review' ), 'primary', 'review', false );
-						} ?>
+						<input class="button" type="submit" name="draft" value="<?php esc_attr_e('Save Draft') ?>" id="save" />
+						<?php if ( current_user_can('publish_posts') ) { ?>
+							<input class="button-primary" type="submit" name="publish" value="<?php esc_attr_e('Publish') ?>" id="publish" />
+						<?php } else { ?>
+							<br /><br /><input class="button-primary" type="submit" name="review" value="<?php esc_attr_e('Submit for Review') ?>" id="review" />
+						<?php } ?>
 						<img src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" alt="" id="saving" style="display:none;" />
 					</p>
 				</div>

@@ -56,7 +56,7 @@ function wptexturize($text) {
 		$static_characters = array_merge(array('---', ' -- ', '--', ' - ', 'xn&#8211;', '...', '``', '\'\'', ' (tm)'), $cockney);
 		$static_replacements = array_merge(array('&#8212;', ' &#8212; ', '&#8211;', ' &#8211; ', 'xn--', '&#8230;', $opening_quote, $closing_quote, ' &#8482;'), $cockneyreplace);
 
-		$dynamic_characters = array('/\'(\d\d(?:&#8217;|\')?s)/', '/\'(\d)/', '/(\s|\A|[([{<]|")\'/', '/(\d)"/', '/(\d)\'/', '/(\S)\'([^\'\s])/', '/(\s|\A|[([{<])"(?!\s)/', '/"(\s|\S|\Z)/', '/\'([\s.]|\Z)/', '/\b(\d+)x(\d+)\b/');
+		$dynamic_characters = array('/\'(\d\d(?:&#8217;|\')?s)/', '/\'(\d+)/', '/(\s|\A|[([{<]|")\'/', '/(\d+)"/', '/(\d+)\'/', '/(\S)\'([^\'\s])/', '/(\s|\A|[([{<])"(?!\s)/', '/"(\s|\S|\Z)/', '/\'([\s.]|\Z)/', '/\b(\d+)x(\d+)\b/');
 		$dynamic_replacements = array('&#8217;$1','&#8217;$1', '$1&#8216;', '$1&#8243;', '$1&#8242;', '$1&#8217;$2', '$1' . $opening_quote . '$2', $closing_quote . '$1', '&#8217;$1', '$1&#215;$2');
 
 		$static_setup = true;
@@ -73,7 +73,7 @@ function wptexturize($text) {
 	for ( $i = 0; $i < $stop; $i++ ) {
 		$curl = $textarr[$i];
 
-		if ( !empty($curl) && '<' != $curl[0] && '[' != $curl[0]
+		if ( !empty($curl) && '<' != $curl{0} && '[' != $curl{0}
 				&& empty($no_texturize_shortcodes_stack) && empty($no_texturize_tags_stack)) {
 			// This is not a tag, nor is the texturization disabled
 			// static strings
@@ -85,9 +85,9 @@ function wptexturize($text) {
 			 * Only call _wptexturize_pushpop_element if first char is correct
 			 * tag opening
 			 */
-			if ('<' == $curl[0])
+			if ('<' == $curl{0})
 				_wptexturize_pushpop_element($curl, $no_texturize_tags_stack, $no_texturize_tags, '<', '>');
-			elseif ('[' == $curl[0])
+			elseif ('[' == $curl{0})
 				_wptexturize_pushpop_element($curl, $no_texturize_shortcodes_stack, $no_texturize_shortcodes, '[', ']');
 		}
 
@@ -208,7 +208,7 @@ function wpautop($pee, $br = 1) {
 	$pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)!', "$1", $pee);
 	$pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*</p>!', "$1", $pee);
 	if ($br) {
-		$pee = preg_replace_callback('/<(script|style).*?<\/\\1>/s', '_autop_newline_preservation_helper', $pee);
+		$pee = preg_replace_callback('/<(script|style).*?<\/\\1>/s', create_function('$matches', 'return str_replace("\n", "<WPPreserveNewline />", $matches[0]);'), $pee);
 		$pee = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $pee); // optionally make line breaks
 		$pee = str_replace('<WPPreserveNewline />', "\n", $pee);
 	}
@@ -219,18 +219,6 @@ function wpautop($pee, $br = 1) {
 	$pee = preg_replace( "|\n</p>$|", '</p>', $pee );
 
 	return $pee;
-}
-
-/**
- * Newline preservation help function for wpautop
- *
- * @since 3.1.0
- * @access private
- * @param array $matches preg_replace_callback matches array
- * @returns string
- */
-function _autop_newline_preservation_helper( $matches ) {
-	return str_replace("\n", "<WPPreserveNewline />", $matches[0]);
 }
 
 /**
@@ -550,33 +538,30 @@ function remove_accents($string) {
 		chr(195).chr(128) => 'A', chr(195).chr(129) => 'A',
 		chr(195).chr(130) => 'A', chr(195).chr(131) => 'A',
 		chr(195).chr(132) => 'A', chr(195).chr(133) => 'A',
-		chr(195).chr(134) => 'AE',chr(195).chr(135) => 'C',
-		chr(195).chr(136) => 'E', chr(195).chr(137) => 'E',
-		chr(195).chr(138) => 'E', chr(195).chr(139) => 'E',
-		chr(195).chr(140) => 'I', chr(195).chr(141) => 'I',
-		chr(195).chr(142) => 'I', chr(195).chr(143) => 'I',
-		chr(195).chr(144) => 'D', chr(195).chr(145) => 'N',
+		chr(195).chr(135) => 'C', chr(195).chr(136) => 'E',
+		chr(195).chr(137) => 'E', chr(195).chr(138) => 'E',
+		chr(195).chr(139) => 'E', chr(195).chr(140) => 'I',
+		chr(195).chr(141) => 'I', chr(195).chr(142) => 'I',
+		chr(195).chr(143) => 'I', chr(195).chr(145) => 'N',
 		chr(195).chr(146) => 'O', chr(195).chr(147) => 'O',
 		chr(195).chr(148) => 'O', chr(195).chr(149) => 'O',
 		chr(195).chr(150) => 'O', chr(195).chr(153) => 'U',
 		chr(195).chr(154) => 'U', chr(195).chr(155) => 'U',
 		chr(195).chr(156) => 'U', chr(195).chr(157) => 'Y',
-		chr(195).chr(158) => 'TH',chr(195).chr(159) => 's',
-		chr(195).chr(160) => 'a', chr(195).chr(161) => 'a',
-		chr(195).chr(162) => 'a', chr(195).chr(163) => 'a',
-		chr(195).chr(164) => 'a', chr(195).chr(165) => 'a',
-		chr(195).chr(166) => 'ae',chr(195).chr(167) => 'c',
+		chr(195).chr(159) => 's', chr(195).chr(160) => 'a',
+		chr(195).chr(161) => 'a', chr(195).chr(162) => 'a',
+		chr(195).chr(163) => 'a', chr(195).chr(164) => 'a',
+		chr(195).chr(165) => 'a', chr(195).chr(167) => 'c',
 		chr(195).chr(168) => 'e', chr(195).chr(169) => 'e',
 		chr(195).chr(170) => 'e', chr(195).chr(171) => 'e',
 		chr(195).chr(172) => 'i', chr(195).chr(173) => 'i',
 		chr(195).chr(174) => 'i', chr(195).chr(175) => 'i',
-		chr(195).chr(176) => 'd', chr(195).chr(177) => 'n',
-		chr(195).chr(178) => 'o', chr(195).chr(179) => 'o',
-		chr(195).chr(180) => 'o', chr(195).chr(181) => 'o',
-		chr(195).chr(182) => 'o', chr(195).chr(182) => 'o',
-		chr(195).chr(185) => 'u', chr(195).chr(186) => 'u',
-		chr(195).chr(187) => 'u', chr(195).chr(188) => 'u',
-		chr(195).chr(189) => 'y', chr(195).chr(190) => 'th',
+		chr(195).chr(177) => 'n', chr(195).chr(178) => 'o',
+		chr(195).chr(179) => 'o', chr(195).chr(180) => 'o',
+		chr(195).chr(181) => 'o', chr(195).chr(182) => 'o',
+		chr(195).chr(182) => 'o', chr(195).chr(185) => 'u',
+		chr(195).chr(186) => 'u', chr(195).chr(187) => 'u',
+		chr(195).chr(188) => 'u', chr(195).chr(189) => 'y',
 		chr(195).chr(191) => 'y',
 		// Decompositions for Latin Extended-A
 		chr(196).chr(128) => 'A', chr(196).chr(129) => 'a',
@@ -643,9 +628,6 @@ function remove_accents($string) {
 		chr(197).chr(186) => 'z', chr(197).chr(187) => 'Z',
 		chr(197).chr(188) => 'z', chr(197).chr(189) => 'Z',
 		chr(197).chr(190) => 'z', chr(197).chr(191) => 's',
-		// Decompositions for Latin Extended-B
-		chr(200).chr(152) => 'S', chr(200).chr(153) => 's',
-		chr(200).chr(154) => 'T', chr(200).chr(155) => 't',
 		// Euro Sign
 		chr(226).chr(130).chr(172) => 'E',
 		// GBP (Pound) Sign
@@ -736,10 +718,12 @@ function sanitize_file_name( $filename ) {
 /**
  * Sanitize username stripping out unsafe characters.
  *
- * Removes tags, octets, entities, and if strict is enabled, will only keep
- * alphanumeric, _, space, ., -, @. After sanitizing, it passes the username,
- * raw username (the username in the parameter), and the value of $strict as
- * parameters for the 'sanitize_user' filter.
+ * If $strict is true, only alphanumeric characters (as well as _, space, ., -,
+ * @) are returned.
+ * Removes tags, octets, entities, and if strict is enabled, will remove all
+ * non-ASCII characters. After sanitizing, it passes the username, raw username
+ * (the username in the parameter), and the strict parameter as parameters for
+ * the filter.
  *
  * @since 2.0.0
  * @uses apply_filters() Calls 'sanitize_user' hook on username, raw username,
@@ -761,7 +745,6 @@ function sanitize_user( $username, $strict = false ) {
 	if ( $strict )
 		$username = preg_replace( '|[^a-z0-9 _.\-@]|i', '', $username );
 
-	$username = trim( $username );
 	// Consolidate contiguous whitespace
 	$username = preg_replace( '|\s+|', ' ', $username );
 
@@ -771,7 +754,7 @@ function sanitize_user( $username, $strict = false ) {
 /**
  * Sanitize a string key.
  *
- * Keys are used as internal identifiers. Lowercase alphanumeric characters, dashes and underscores are allowed.
+ * Keys are used as internal identifiers. They should be lowercase ASCII.  Dashes and underscores are allowed.
  *
  * @since 3.0.0
  *
@@ -780,9 +763,17 @@ function sanitize_user( $username, $strict = false ) {
  */
 function sanitize_key( $key ) {
 	$raw_key = $key;
-	$key = strtolower( $key );
-	$key = preg_replace( '/[^a-z0-9_\-]/', '', $key );
-	return apply_filters( 'sanitize_key', $key, $raw_key );
+	$key = wp_strip_all_tags($key);
+	// Kill octets
+	$key = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '', $key);
+	$key = preg_replace('/&.+?;/', '', $key); // Kill entities
+
+	$key = preg_replace('|[^a-z0-9 _.\-@]|i', '', $key);
+
+	// Consolidate contiguous whitespace
+	$key = preg_replace('|\s+|', ' ', $key);
+
+	return apply_filters('sanitize_key', $key, $raw_key);
 }
 
 /**
@@ -796,25 +787,17 @@ function sanitize_key( $key ) {
  *
  * @param string $title The string to be sanitized.
  * @param string $fallback_title Optional. A title to use if $title is empty.
- * @param string $context Optional. The operation for which the string is sanitized
  * @return string The sanitized string.
  */
-function sanitize_title($title, $fallback_title = '', $context = 'save') {
+function sanitize_title($title, $fallback_title = '') {
 	$raw_title = $title;
-
-	if ( 'save' == $context )
-		$title = remove_accents($title);
-
-	$title = apply_filters('sanitize_title', $title, $raw_title, $context);
+	$title = strip_tags($title);
+	$title = apply_filters('sanitize_title', $title, $raw_title);
 
 	if ( '' === $title || false === $title )
 		$title = $fallback_title;
 
 	return $title;
-}
-
-function sanitize_title_for_query($title) {
-	return sanitize_title($title, '', 'query');
 }
 
 /**
@@ -837,6 +820,7 @@ function sanitize_title_with_dashes($title) {
 	// Restore octets.
 	$title = preg_replace('|---([a-fA-F0-9][a-fA-F0-9])---|', '%$1', $title);
 
+	$title = remove_accents($title);
 	if (seems_utf8($title)) {
 		if (function_exists('mb_strtolower')) {
 			$title = mb_strtolower($title, 'UTF-8');
@@ -996,7 +980,7 @@ function balanceTags( $text, $force = false ) {
  * @since 2.0.4
  *
  * @author Leonard Lin <leonard@acm.org>
- * @license GPL
+ * @license GPL v2.0
  * @copyright November 4, 2001
  * @version 1.1
  * @todo Make better - change loop condition to $text in 1.2
@@ -1379,7 +1363,7 @@ function _make_email_clickable_cb($matches) {
 function make_clickable($ret) {
 	$ret = ' ' . $ret;
 	// in testing, using arrays here was found to be faster
-	$ret = preg_replace_callback('#(?<=[\s>])(\()?([\w]+?://(?:[\w\\x80-\\xff\#$%&~/=?@\[\](!+-]|[.,;:](?![\s<]|(\))?([\s]|$))|(?(1)\)(?![\s<.,;:]|$)|\)))+)#is', '_make_url_clickable_cb', $ret);
+	$ret = preg_replace_callback('#(?<=[\s>])(\()?([\w]+?://(?:[\w\\x80-\\xff\#$%&~/=?@\[\](+-]|[.,;:](?![\s<]|(\))?([\s]|$))|(?(1)\)(?![\s<.,;:]|$)|\)))+)#is', '_make_url_clickable_cb', $ret);
 	$ret = preg_replace_callback('#([\s>])((www|ftp)\.[\w\\x80-\\xff\#$%&~/.\-;:=,?@\[\]+]+)#is', '_make_web_ftp_clickable_cb', $ret);
 	$ret = preg_replace_callback('#([\s>])([.0-9a-z_+-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,})#i', '_make_email_clickable_cb', $ret);
 	// this one is not in an array because we need it to run last, for cleanup of accidental links within links
@@ -1440,11 +1424,13 @@ function translate_smiley($smiley) {
 		return '';
 	}
 
+	$siteurl = get_option( 'siteurl' );
+
 	$smiley = trim(reset($smiley));
 	$img = $wpsmiliestrans[$smiley];
 	$smiley_masked = esc_attr($smiley);
 
-	$srcurl = apply_filters('smilies_src', includes_url("images/smilies/$img"), $img, site_url());
+	$srcurl = apply_filters('smilies_src', "$siteurl/wp-includes/images/smilies/$img", $img, $siteurl);
 
 	return " <img src='$srcurl' alt='$smiley_masked' class='wp-smiley' /> ";
 }
@@ -1470,7 +1456,7 @@ function convert_smilies($text) {
 		$stop = count($textarr);// loop stuff
 		for ($i = 0; $i < $stop; $i++) {
 			$content = $textarr[$i];
-			if ((strlen($content) > 0) && ('<' != $content[0])) { // If it's not a tag
+			if ((strlen($content) > 0) && ('<' != $content{0})) { // If it's not a tag
 				$content = preg_replace_callback($wp_smiliessearch, 'translate_smiley', $content);
 			}
 			$output .= $content;
@@ -1490,7 +1476,7 @@ function convert_smilies($text) {
  * @since 0.71
  *
  * @param string $email Email address to verify.
- * @param boolean $deprecated Deprecated.
+ * @param boolean $deprecated. Deprecated.
  * @return string|bool Either false or the valid email address.
  */
 function is_email( $email, $deprecated = false ) {
@@ -1567,20 +1553,9 @@ function wp_iso_descrambler($string) {
 		return $string;
 	} else {
 		$subject = str_replace('_', ' ', $matches[2]);
-		$subject = preg_replace_callback('#\=([0-9a-f]{2})#i', '_wp_iso_convert', $subject);
+		$subject = preg_replace_callback('#\=([0-9a-f]{2})#i', create_function('$match', 'return chr(hexdec(strtolower($match[1])));'), $subject);
 		return $subject;
 	}
-}
-
-/**
- * Helper function to convert hex encoded chars to ascii
- *
- * @since 3.1.0
- * @access private
- * @param array $match the preg_replace_callback matches array
- */
-function _wp_iso_convert( $match ) {
-	return chr( hexdec( strtolower( $match[1] ) ) );
 }
 
 /**
@@ -1768,7 +1743,7 @@ function sanitize_email( $email ) {
 		$sub = trim( $sub, " \t\n\r\0\x0B-" );
 
 		// Test for invalid characters
-		$sub = preg_replace( '/[^a-z0-9-]+/i', '', $sub );
+		$sub = preg_replace( '/^[^a-z0-9-]+$/i', '', $sub );
 
 		// If there's anything left, add it to the valid subs
 		if ( '' !== $sub ) {
@@ -2353,19 +2328,6 @@ function esc_attr( $text ) {
 }
 
 /**
- * Escaping for textarea values.
- *
- * @since 3.1
- *
- * @param string $text
- * @return string
- */
-function esc_textarea( $text ) {
-	$safe_text = htmlspecialchars( $text );
-	return apply_filters( 'esc_textarea', $safe_text, $text );
-}
-
-/**
  * Escape a HTML tag name.
  *
  * @since 2.5.0
@@ -2617,7 +2579,7 @@ function wp_sprintf( $pattern ) {
 		$fragment = substr($pattern, $start, $end - $start);
 
 		// Fragment has a specifier
-		if ( $pattern[$start] == '%' ) {
+		if ( $pattern{$start} == '%' ) {
 			// Find numbered arguments or take the next one in order
 			if ( preg_match('/^%(\d+)\$/', $fragment, $matches) ) {
 				$arg = isset($args[$matches[1]]) ? $args[$matches[1]] : '';
@@ -2857,25 +2819,13 @@ function sanitize_text_field($str) {
 }
 
 /**
- * i18n friendly version of basename()
- *
- * @since 3.1.0
- *
- * @param string $path A path.
- * @param string $suffix If the filename ends in suffix this will also be cut off.
- * @return string
- */
-function wp_basename( $path, $suffix = '' ) {
-	return urldecode( basename( str_replace( '%2F', '/', urlencode( $path ) ), $suffix ) );
-}
-
-/**
  * Forever eliminate "Wordpress" from the planet (or at least the little bit we can influence).
  *
  * Violating our coding standards for a good function name.
  *
  * @since 3.0.0
  */
+
 function capital_P_dangit( $text ) {
 	// Simple replacement for titles
 	if ( 'the_title' === current_filter() )

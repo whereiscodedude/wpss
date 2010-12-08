@@ -100,8 +100,6 @@ function get_plugin_data( $plugin_file, $markup = true, $translate = true ) {
 
 	if ( $markup || $translate )
 		$plugin_data = _get_plugin_data_markup_translate( $plugin_file, $plugin_data, $markup, $translate );
-	else
-		$plugin_data['AuthorName'] = $plugin_data['Author'];
 
 	return $plugin_data;
 }
@@ -119,17 +117,6 @@ function _get_plugin_data_markup_translate($plugin_file, $plugin_data, $markup =
 			$plugin_data[ $field ] = translate($plugin_data[ $field ], $plugin_data['TextDomain']);
 	}
 
-	$plugins_allowedtags = array(
-		'a'       => array( 'href' => array(), 'title' => array() ),
-		'abbr'    => array( 'title' => array() ),
-		'acronym' => array( 'title' => array() ),
-		'code'    => array(),
-		'em'      => array(),
-		'strong'  => array(),
-	);
-
-	$plugin_data['AuthorName'] = $plugin_data['Author'] = wp_kses( $plugin_data['Author'], $plugins_allowedtags );
-
 	//Apply Markup
 	if ( $markup ) {
 		if ( ! empty($plugin_data['PluginURI']) && ! empty($plugin_data['Name']) )
@@ -145,10 +132,13 @@ function _get_plugin_data_markup_translate($plugin_file, $plugin_data, $markup =
 			$plugin_data['Description'] .= ' <cite>' . sprintf( __('By %s'), $plugin_data['Author'] ) . '.</cite>';
 	}
 
-	// Sanitize all displayed data. Author and AuthorName sanitized above.
-	$plugin_data['Title']       = wp_kses( $plugin_data['Title'],       $plugins_allowedtags );
-	$plugin_data['Version']     = wp_kses( $plugin_data['Version'],     $plugins_allowedtags );
-	$plugin_data['Description'] = wp_kses( $plugin_data['Description'], $plugins_allowedtags );
+	$plugins_allowedtags = array('a' => array('href' => array(),'title' => array()),'abbr' => array('title' => array()),'acronym' => array('title' => array()),'code' => array(),'em' => array(),'strong' => array());
+
+	// Sanitize all displayed data
+	$plugin_data['Title']       = wp_kses($plugin_data['Title'], $plugins_allowedtags);
+	$plugin_data['Version']     = wp_kses($plugin_data['Version'], $plugins_allowedtags);
+	$plugin_data['Description'] = wp_kses($plugin_data['Description'], $plugins_allowedtags);
+	$plugin_data['Author']      = wp_kses($plugin_data['Author'], $plugins_allowedtags);
 
 	return $plugin_data;
 }
@@ -208,7 +198,7 @@ function get_plugin_files($plugin) {
  * be split for maintainability. Keep everything in one file for extreme
  * optimization purposes.
  *
- * @since 1.5.0
+ * @since unknown
  *
  * @param string $plugin_folder Optional. Relative path to single plugin folder.
  * @return array Key is the plugin file path and the value is an array of the plugin data.
@@ -270,7 +260,7 @@ function get_plugins($plugin_folder = '') {
 		$wp_plugins[plugin_basename( $plugin_file )] = $plugin_data;
 	}
 
-	uasort( $wp_plugins, '_sort_uname_callback' );
+	uasort( $wp_plugins, create_function( '$a, $b', 'return strnatcasecmp( $a["Name"], $b["Name"] );' ));
 
 	$cache_plugins[ $plugin_folder ] = $wp_plugins;
 	wp_cache_set('plugins', $cache_plugins, 'plugins');
@@ -322,19 +312,9 @@ function get_mu_plugins() {
 	if ( isset( $wp_plugins['index.php'] ) && filesize( WPMU_PLUGIN_DIR . '/index.php') <= 30 ) // silence is golden
 		unset( $wp_plugins['index.php'] );
 
-	uasort( $wp_plugins, '_sort_uname_callback' );
+	uasort( $wp_plugins, create_function( '$a, $b', 'return strnatcasecmp( $a["Name"], $b["Name"] );' ));
 
 	return $wp_plugins;
-}
-
-/**
- * Callback to sort array by a 'Name' key.
- *
- * @since 3.1.0
- * @access private
- */
-function _sort_uname_callback( $a, $b ) {
-	return strnatcasecmp( $a['Name'], $b['Name'] );
 }
 
 /**
@@ -373,7 +353,7 @@ function get_dropins() {
 		$dropins[ $plugin_file ] = $plugin_data;
 	}
 
-	uksort( $dropins, 'strnatcasecmp' );
+	uksort( $dropins, create_function( '$a, $b', 'return strnatcasecmp( $a, $b );' ));
 
 	return $dropins;
 }
@@ -421,21 +401,6 @@ function is_plugin_active( $plugin ) {
 }
 
 /**
- * Check whether the plugin is inactive.
- *
- * Reverse of is_plugin_active(). Used as a callback.
- *
- * @since 3.1.0
- * @see is_plugin_active()
- *
- * @param string $plugin Base plugin path from plugins directory.
- * @return bool True if inactive. False if active.
- */
-function is_plugin_inactive( $plugin ) {
-	return ! is_plugin_active( $plugin );
-}
-
-/**
  * Check whether the plugin is active for the entire network.
  *
  * @since 3.0.0
@@ -463,8 +428,8 @@ function is_plugin_active_for_network( $plugin ) {
  *
  * @since 3.0.0
  *
- * @param string $plugin Plugin to check
- * @return bool True if plugin is network only, false otherwise.
+ * @param $file Plugin to check
+ * $return bool True if plugin is network only, false otherwise.
  */
 function is_network_only_plugin( $plugin ) {
 	$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
@@ -491,17 +456,15 @@ function is_network_only_plugin( $plugin ) {
  * If any errors are found or text is outputted, then it will be captured to
  * ensure that the success redirection will update the error redirection.
  *
- * @since 2.5.0
+ * @since unknown
  *
  * @param string $plugin Plugin path to main plugin file with plugin data.
  * @param string $redirect Optional. URL to redirect to.
- * @param bool $network_wide Whether to enable the plugin for all sites in the
- *   network or just the current site. Multisite only. Default is false.
- * @param bool $silent Prevent calling activation hooks. Optional, default is false.
+ * @param bool $network_wide Whether to enable the plugin for all sites in the network or just the current site.  Multisite only. Default is false.
  * @return WP_Error|null WP_Error on invalid file or null on success.
  */
-function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silent = false ) {
-	$plugin = plugin_basename( trim( $plugin ) );
+function activate_plugin( $plugin, $redirect = '', $network_wide = false) {
+	$plugin  = plugin_basename( trim( $plugin ) );
 
 	if ( is_multisite() && ( $network_wide || is_network_only_plugin($plugin) ) ) {
 		$network_wide = true;
@@ -518,13 +481,9 @@ function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silen
 		if ( !empty($redirect) )
 			wp_redirect(add_query_arg('_error_nonce', wp_create_nonce('plugin-activation-error_' . $plugin), $redirect)); // we'll override this later if the plugin can be included without fatal error
 		ob_start();
-		include_once(WP_PLUGIN_DIR . '/' . $plugin);
-
-		if ( ! $silent ) {
-			do_action( 'activate_plugin', $plugin, $network_wide );
-			do_action( 'activate_' . $plugin, $network_wide );
-		}
-
+		include(WP_PLUGIN_DIR . '/' . $plugin);
+		do_action( 'activate_plugin', trim( $plugin) );
+		do_action( 'activate_' . trim( $plugin ) );
 		if ( $network_wide ) {
 			$current[$plugin] = time();
 			update_site_option( 'active_sitewide_plugins', $current );
@@ -533,11 +492,7 @@ function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silen
 			sort($current);
 			update_option('active_plugins', $current);
 		}
-
-		if ( ! $silent ) {
-			do_action( 'activated_plugin', $plugin, $network_wide );
-		}
-
+		do_action( 'activated_plugin', trim( $plugin) );
 		if ( ob_get_length() > 0 ) {
 			$output = ob_get_clean();
 			return new WP_Error('unexpected_output', __('The plugin generated unexpected output.'), $output);
@@ -554,41 +509,40 @@ function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silen
  * The deactivation hook is disabled by the plugin upgrader by using the $silent
  * parameter.
  *
- * @since 2.5.0
+ * @since unknown
  *
  * @param string|array $plugins Single plugin or list of plugins to deactivate.
- * @param bool $silent Prevent calling deactivation hooks. Default is false.
+ * @param bool $silent Optional, default is false. Prevent calling deactivate hook.
  */
 function deactivate_plugins( $plugins, $silent = false ) {
-	if ( is_multisite() )
-		$network_current = get_site_option( 'active_sitewide_plugins', array() );
+	$network_current = get_site_option( 'active_sitewide_plugins', array() );
 	$current = get_option( 'active_plugins', array() );
 	$do_blog = $do_network = false;
 
 	foreach ( (array) $plugins as $plugin ) {
-		$plugin = plugin_basename( trim( $plugin ) );
+		$plugin = plugin_basename($plugin);
 		if ( ! is_plugin_active($plugin) )
 			continue;
-
-		$network_wide = is_plugin_active_for_network( $plugin );
-
 		if ( ! $silent )
-			do_action( 'deactivate_plugin', $plugin, $network_wide );
+			do_action( 'deactivate_plugin', trim( $plugin ) );
 
-		if ( $network_wide ) {
+		if ( is_plugin_active_for_network($plugin) ) {
+			// Deactivate network wide
 			$do_network = true;
 			unset( $network_current[ $plugin ] );
 		} else {
-			$key = array_search( $plugin, $current );
+			// Deactivate for this blog only
+			$key = array_search( $plugin, (array) $current );
 			if ( false !== $key ) {
 				$do_blog = true;
 				array_splice( $current, $key, 1 );
 			}
 		}
 
+		//Used by Plugin updater to internally deactivate plugin, however, not to notify plugins of the fact to prevent plugin output.
 		if ( ! $silent ) {
-			do_action( 'deactivate_' . $plugin, $network_wide );
-			do_action( 'deactivated_plugin', $plugin, $network_wide );
+			do_action( 'deactivate_' . trim( $plugin ) );
+			do_action( 'deactivated_plugin', trim( $plugin ) );
 		}
 	}
 
@@ -606,23 +560,22 @@ function deactivate_plugins( $plugins, $silent = false ) {
  *
  * The execution will be halted as soon as one of the plugins has an error.
  *
- * @since 2.6.0
+ * @since unknown
  *
  * @param string|array $plugins
  * @param string $redirect Redirect to page after successful activation.
  * @param bool $network_wide Whether to enable the plugin for all sites in the network.
- * @param bool $silent Prevent calling activation hooks. Default is false.
  * @return bool|WP_Error True when finished or WP_Error if there were errors during a plugin activation.
  */
-function activate_plugins( $plugins, $redirect = '', $network_wide = false, $silent = false ) {
+function activate_plugins($plugins, $redirect = '', $network_wide) {
 	if ( !is_array($plugins) )
 		$plugins = array($plugins);
 
 	$errors = array();
-	foreach ( $plugins as $plugin ) {
+	foreach ( (array) $plugins as $plugin ) {
 		if ( !empty($redirect) )
 			$redirect = add_query_arg('plugin', $plugin, $redirect);
-		$result = activate_plugin($plugin, $redirect, $network_wide, $silent);
+		$result = activate_plugin($plugin, $redirect, $network_wide);
 		if ( is_wp_error($result) )
 			$errors[$plugin] = $result;
 	}
@@ -639,7 +592,7 @@ function activate_plugins( $plugins, $redirect = '', $network_wide = false, $sil
  * If the plugins parameter list is empty, false will be returned. True when
  * completed.
  *
- * @since 2.6.0
+ * @since unknown
  *
  * @param array $plugins List of plugin
  * @param string $redirect Redirect to page when complete.
@@ -656,7 +609,7 @@ function delete_plugins($plugins, $redirect = '' ) {
 		$checked[] = 'checked[]=' . $plugin;
 
 	ob_start();
-	$url = wp_nonce_url('plugins.php?action=delete-selected&verify-delete=1&' . implode('&', $checked), 'bulk-plugins');
+	$url = wp_nonce_url('plugins.php?action=delete-selected&verify-delete=1&' . implode('&', $checked), 'bulk-manage-plugins');
 	if ( false === ($credentials = request_filesystem_credentials($url)) ) {
 		$data = ob_get_contents();
 		ob_end_clean();
@@ -731,7 +684,7 @@ function delete_plugins($plugins, $redirect = '' ) {
  * Validate all active plugins, deactivates invalid and
  * returns an array of deactivated ones.
  *
- * @since 2.5.0
+ * @since unknown
  * @return array invalid plugins, plugin as key, error as value
  */
 function validate_active_plugins() {
@@ -768,7 +721,7 @@ function validate_active_plugins() {
  *
  * Checks that the file exists and {@link validate_file() is valid file}.
  *
- * @since 2.5.0
+ * @since unknown
  *
  * @param string $plugin Plugin Path
  * @return WP_Error|int 0 on success, WP_Error on failure.
@@ -1218,53 +1171,6 @@ function add_comments_page( $page_title, $menu_title, $capability, $menu_slug, $
 	return add_submenu_page( 'edit-comments.php', $page_title, $menu_title, $capability, $menu_slug, $function );
 }
 
-
-/**
- * Remove a top level admin menu
- *
- * @since 3.1.0
- *
- * @param string $menu_slug The slug of the menu
- * @return array|bool The removed menu on success, False if not found
- */
-function remove_menu_page( $menu_slug ) {
-	global $menu;
-
-	foreach ( $menu as $i => $item ) {
-		if ( $menu_slug == $item[2] ) {
-			unset( $menu[$i] );
-			return $item;
-		}
-	}
-
-	return false;
-}
-
-/**
- * Remove an admin submenu
- *
- * @since 3.1.0
- *
- * @param string $menu_slug The slug for the parent menu
- * @param string $submenu_slug The slug of the submenu
- * @return array|bool The removed submenu on success, False if not found
- */
-function remove_submenu_page( $menu_slug, $submenu_slug ) {
-	global $submenu;
-
-	if ( !isset( $submenu[$menu_slug] ) )
-		return false;
-
-	foreach ( $submenu[$menu_slug] as $i => $item ) {
-		if ( $submenu_slug == $item[2] ) {
-			unset( $submenu[$menu_slug][$i] );
-			return $item;
-		}
-	}
-
-	return false;
-}
-
 /**
  * Get the url to access a particular menu page based on the slug it was registered with.
  *
@@ -1607,7 +1513,7 @@ function unregister_setting( $option_group, $option_name, $sanitize_callback = '
 /**
  * {@internal Missing Short Description}}
  *
- * @since 2.7.0
+ * @since unknown
  *
  * @param unknown_type $options
  * @return unknown
@@ -1625,7 +1531,7 @@ add_filter( 'whitelist_options', 'option_update_filter' );
 /**
  * {@internal Missing Short Description}}
  *
- * @since 2.7.0
+ * @since unknown
  *
  * @param unknown_type $new_options
  * @param unknown_type $options
@@ -1656,7 +1562,7 @@ function add_option_whitelist( $new_options, $options = '' ) {
 /**
  * {@internal Missing Short Description}}
  *
- * @since 2.7.0
+ * @since unknown
  *
  * @param unknown_type $del_options
  * @param unknown_type $options

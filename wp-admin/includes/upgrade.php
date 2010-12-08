@@ -24,7 +24,7 @@ if ( !function_exists('wp_install') ) :
  *
  * {@internal Missing Long Description}}
  *
- * @since 2.1.0
+ * @since unknown
  *
  * @param string $blog_title Blog title.
  * @param string $user_name User's username.
@@ -64,7 +64,7 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 	$user_password = trim($user_password);
 	$email_password = false;
 	if ( !$user_id && empty($user_password) ) {
-		$user_password = wp_generate_password( 12, false );
+		$user_password = wp_generate_password();
 		$message = __('<strong><em>Note that password</em></strong> carefully! It is a <em>random</em> password that was generated just for you.');
 		$user_id = wp_create_user($user_name, $user_password, $user_email);
 		update_user_option($user_id, 'default_password_nag', true, true);
@@ -98,7 +98,7 @@ if ( !function_exists('wp_install_defaults') ) :
  *
  * {@internal Missing Long Description}}
  *
- * @since 2.1.0
+ * @since unknown
  *
  * @param int $user_id User ID.
  */
@@ -243,7 +243,7 @@ function wp_install_defaults($user_id) {
 								));
 
 	// First Page
-	$first_page = __('This is an example of a WordPress page. You could edit this to put information about yourself or your site so readers know where you are coming from. You can create as many pages like this one or sub-pages as you like and manage all of your content inside of WordPress.');
+	$first_page = __('This is an example of a WordPress page, you could edit this to put information about yourself or your site so readers know where you are coming from. You can create as many pages like this one or sub-pages as you like and manage all of your content inside of WordPress.');
 	if ( is_multisite() )
 		$first_page = get_site_option( 'first_page', $first_page );
 	$first_post_guid = get_option('home') . '/?page_id=2';
@@ -266,7 +266,7 @@ function wp_install_defaults($user_id) {
 								));
 	$wpdb->insert( $wpdb->postmeta, array( 'post_id' => 2, 'meta_key' => '_wp_page_template', 'meta_value' => 'default' ) );
 
-	// Set up default widgets for default theme.
+	// Setup default widgets for default theme.
 	update_option( 'widget_search', array ( 2 => array ( 'title' => '' ), '_multiwidget' => 1 ) );
 	update_option( 'widget_recent-posts', array ( 2 => array ( 'title' => '', 'number' => 5 ), '_multiwidget' => 1 ) );
 	update_option( 'widget_recent-comments', array ( 2 => array ( 'title' => '', 'number' => 5 ), '_multiwidget' => 1 ) );
@@ -300,7 +300,7 @@ if ( !function_exists('wp_new_blog_notification') ) :
  *
  * {@internal Missing Long Description}}
  *
- * @since 2.1.0
+ * @since unknown
  *
  * @param string $blog_title Blog title.
  * @param string $blog_url Blog url.
@@ -336,7 +336,7 @@ if ( !function_exists('wp_upgrade') ) :
  *
  * {@internal Missing Long Description}}
  *
- * @since 2.1.0
+ * @since unknown
  *
  * @return null
  */
@@ -375,7 +375,7 @@ endif;
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.0.1
+ * @since unknown
  */
 function upgrade_all() {
 	global $wp_current_db_version, $wp_db_version, $wp_rewrite;
@@ -1187,7 +1187,7 @@ function upgrade_network() {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.0.0
+ * @since unknown
  *
  * @param string $table_name Database table name to create.
  * @param string $create_ddl SQL statement to create table.
@@ -1210,7 +1210,7 @@ function maybe_create_table($table_name, $create_ddl) {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.0.1
+ * @since unknown
  *
  * @param string $table Database table name.
  * @param string $index Index name to drop.
@@ -1233,7 +1233,7 @@ function drop_index($table, $index) {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.0.1
+ * @since unknown
  *
  * @param string $table Database table name.
  * @param string $index Database table index column.
@@ -1296,7 +1296,7 @@ function get_alloptions_110() {
 /**
  * Version of get_option that is private to install/upgrade.
  *
- * @since 1.5.1
+ * @since unknown
  * @access private
  *
  * @param string $setting Option name.
@@ -1333,7 +1333,7 @@ function __get_option($setting) {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.5.0
+ * @since unknown
  *
  * @param string $content
  * @return string
@@ -1360,7 +1360,7 @@ function deslash($content) {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.5.0
+ * @since unknown
  *
  * @param unknown_type $queries
  * @param unknown_type $execute
@@ -1567,7 +1567,7 @@ function dbDelta($queries, $execute = true) {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.5.0
+ * @since unknown
  */
 function make_db_current() {
 	global $wp_queries;
@@ -1583,7 +1583,7 @@ function make_db_current() {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.5.0
+ * @since unknown
  */
 function make_db_current_silent() {
 	global $wp_queries;
@@ -1596,7 +1596,7 @@ function make_db_current_silent() {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.5.0
+ * @since unknown
  *
  * @param unknown_type $theme_name
  * @param unknown_type $template
@@ -1656,7 +1656,7 @@ function make_site_theme_from_oldschool($theme_name, $template) {
 	}
 
 	// Add a theme header.
-	$header = "/*\nTheme Name: $theme_name\nTheme URI: " . __get_option('siteurl') . "\nDescription: A theme automatically created by the update.\nVersion: 1.0\nAuthor: Moi\n*/\n";
+	$header = "/*\nTheme Name: $theme_name\nTheme URI: " . __get_option('siteurl') . "\nDescription: A theme automatically created by the upgrade.\nVersion: 1.0\nAuthor: Moi\n*/\n";
 
 	$stylelines = file_get_contents("$site_dir/style.css");
 	if ($stylelines) {
@@ -1675,7 +1675,7 @@ function make_site_theme_from_oldschool($theme_name, $template) {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.5.0
+ * @since unknown
  *
  * @param unknown_type $theme_name
  * @param unknown_type $template
@@ -1741,7 +1741,7 @@ function make_site_theme_from_default($theme_name, $template) {
  *
  * {@internal Missing Long Description}}
  *
- * @since 1.5.0
+ * @since unknown
  *
  * @return unknown
  */
@@ -1789,7 +1789,7 @@ function make_site_theme() {
 /**
  * Translate user level to user role name.
  *
- * @since 2.0.0
+ * @since unknown
  *
  * @param int $level User level.
  * @return string User role name.
@@ -1820,7 +1820,7 @@ function translate_level_to_role($level) {
  *
  * {@internal Missing Long Description}}
  *
- * @since 2.1.0
+ * @since unknown
  */
 function wp_check_mysql_version() {
 	global $wpdb;
@@ -1834,7 +1834,7 @@ function wp_check_mysql_version() {
  *
  * {@internal Missing Long Description}}
  *
- * @since 2.2.0
+ * @since unknown
  */
 function maybe_disable_automattic_widgets() {
 	$plugins = __get_option( 'active_plugins' );
@@ -1850,8 +1850,6 @@ function maybe_disable_automattic_widgets() {
 
 /**
  * Runs before the schema is upgraded.
- *
- * @since 2.9.0
  */
 function pre_schema_upgrade() {
 	global $wp_current_db_version, $wp_db_version, $wpdb;

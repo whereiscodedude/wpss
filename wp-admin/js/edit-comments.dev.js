@@ -209,14 +209,7 @@ setCommentsList = function() {
 		}
 
 		theList.get(0).wpList.add( theExtraList.children(':eq(0)').remove().clone() );
-
-		// Refill the extra list
-		var args = $.query.get();
-		args.number = 1;
-		args.paged++;
-		listTable.fetch_list(args, function(response) {
-			theExtraList.get(0).wpList.add( response.rows );
-		});
+		$('#get-extra-comments').submit();
 	};
 
 	theExtraList = $('#the-extra-comment-list').wpList( { alt: '', delColor: 'none', addColor: 'none' } );
@@ -395,7 +388,6 @@ commentReply = {
 		post.content = $('#replycontent').val();
 		post.id = post.comment_post_ID;
 		post.comments_listing = this.comments_listing;
-		post.p = $('[name=p]').val();
 
 		$.ajax({
 			type : 'POST',
@@ -461,7 +453,7 @@ $(document).ready(function(){
 
 	setCommentsList();
 	commentReply.init();
-	$(document).delegate('span.delete a.delete', 'click', function(){return false;});
+	$('span.delete a.delete').click(function(){return false;});
 
 	if ( typeof QTags != 'undefined' )
 		ed_reply = new QTags('ed_reply', 'replycontent', 'replycontainer', 'more');
@@ -492,14 +484,14 @@ $(document).ready(function(){
 			return function() {
 				var scope = $('select[name="action"]');
 				$('option[value='+value+']', scope).attr('selected', 'selected');
-				$('#doaction').click();
+				$('#comments-form').submit();
 			}
 		};
 
 		$.table_hotkeys(
 			$('table.widefat'),
 			['a', 'u', 's', 'd', 'r', 'q', 'z', ['e', edit_comment], ['shift+x', toggle_all],
-			['shift+a', make_bulk('approve')], ['shift+s', make_bulk('spam')],
+			['shift+a', make_bulk('approve')], ['shift+s', make_bulk('markspam')],
 			['shift+d', make_bulk('delete')], ['shift+t', make_bulk('trash')],
 			['shift+z', make_bulk('untrash')], ['shift+u', make_bulk('unapprove')]],
 			{ highlight_first: adminCommentsL10n.hotkeys_highlight_first, highlight_last: adminCommentsL10n.hotkeys_highlight_last,
