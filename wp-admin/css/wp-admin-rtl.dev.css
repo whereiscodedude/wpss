@@ -68,13 +68,6 @@ td.available-theme {
 * html #template div {
 	margin-left: 0;
 }
-
-.list-ajax-loading {
-	float: left;
-	margin-right: 0;
-	margin-left: 9px;
-}
-
 #your-profile legend {
 	font-family: Tahoma, Arial, sans-serif;
 }
@@ -101,7 +94,6 @@ td.available-theme {
 	margin-right: 0;
 	margin-left: 10px;
 	font-family: Tahoma, Arial, sans-serif;
-	font-style:normal;
 }
 #postcustomstuff table input,
 #postcustomstuff table select,
@@ -253,18 +245,6 @@ td.available-theme {
 .description, .form-wrap p {
 	font-family: Tahoma, Arial, sans-serif;
 }
-.sorting-indicator {
-	margin-left: 0;
-	margin-right: 7px;
-}
-th.sortable a span,
-th.sorted a span {
-	float: right;
-}
-.fixed .column-comments a {
-	float: right;
-}
-
 /* 1500 - 1800
 =================================== */
 .autosave-info {
@@ -441,7 +421,7 @@ td.action-links, th.action-links {
 }
 #screen-meta a.show-settings {
 	padding: 0 6px 0 16px;
-	background-position: left top;
+	background-position: left bottom;
 }
 .metabox-prefs label {
 	padding-right: 0;
@@ -669,13 +649,12 @@ button.dismiss {
 }
 
 /* Custom Header */
-.appearance_page_custom-header #available-headers .default-header {
-	float: right;
-	margin: 0 0 20px 20px;
+table#available-headers td {
+	padding: 0 0 10px 20px;
 }
-.appearance_page_custom-header #available-headers label input {
+table#available-headers label input {
 	margin-right: 0;
-	margin-left: 10px;
+	margin-left: 8px;
 }
 
 /* ltr

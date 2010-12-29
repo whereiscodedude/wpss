@@ -15,12 +15,7 @@
 // On which page are we ?
 if ( is_admin() ) {
 	// wp-admin pages are checked more carefully
-	if ( is_network_admin() )
-		preg_match('#/wp-admin/network/?(.*?)$#i', $PHP_SELF, $self_matches);
-	elseif ( is_user_admin() )
-		preg_match('#/wp-admin/user/?(.*?)$#i', $PHP_SELF, $self_matches);
-	else
-		preg_match('#/wp-admin/?(.*?)$#i', $PHP_SELF, $self_matches);
+	preg_match('#/wp-admin/?(.*?)$#i', $PHP_SELF, $self_matches);
 	$pagenow = $self_matches[1];
 	$pagenow = trim($pagenow, '/');
 	$pagenow = preg_replace('#\?.*?$#', '', $pagenow);
@@ -38,7 +33,6 @@ if ( is_admin() ) {
 	else
 		$pagenow = 'index.php';
 }
-unset($self_matches);
 
 // Simple browser detection
 $is_lynx = $is_gecko = $is_winIE = $is_macIE = $is_opera = $is_NS4 = $is_safari = $is_chrome = $is_iphone = false;
@@ -80,12 +74,13 @@ $is_apache = (strpos($_SERVER['SERVER_SOFTWARE'], 'Apache') !== false || strpos(
  * Whether the server software is IIS or something else
  * @global bool $is_IIS
  */
-$is_IIS = !$is_apache && (strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false || strpos($_SERVER['SERVER_SOFTWARE'], 'ExpressionDevServer') !== false);
+$is_IIS = (strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false || strpos($_SERVER['SERVER_SOFTWARE'], 'ExpressionDevServer') !== false);
 
 /**
  * Whether the server software is IIS 7.X
  * @global bool $is_iis7
  */
-$is_iis7 = $is_IIS && (strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS/7.') !== false);
+$is_iis7 = (strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS/7.') !== false);
+
 
 ?>

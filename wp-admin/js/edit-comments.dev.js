@@ -204,38 +204,12 @@ setCommentsList = function() {
 			}
 		}
 
-
-		if ( ! theExtraList || theExtraList.size() == 0 || theExtraList.children().size() == 0 || untrash || unspam ) {
+		if ( theExtraList.size() == 0 || theExtraList.children().size() == 0 || untrash ) {
 			return;
 		}
 
 		theList.get(0).wpList.add( theExtraList.children(':eq(0)').remove().clone() );
-
-		refillTheExtraList();
-	};
-	
-	var refillTheExtraList = function(ev) {
-		var args = $.query.get(), total_pages = listTable.get_total_pages(), per_page = $('input[name=_per_page]', '#comments-form').val();
-		
-		if (args.paged > total_pages) {
-			return;
-		}
-
-		if (ev) {
-			theExtraList.empty();
-			args.number = Math.min(8, per_page); // see WP_Comments_List_Table::prepare_items() @ class-wp-comments-list-table.php
-		} else {
-			args.number = 1;
-			args.offset = per_page - 1; // fetch only the last item of the next page
-		}
-		
-		args.no_placeholder = true;
-
-		args.paged ++;
-
-		listTable.fetch_list(args, function(response) {
-			theExtraList.get(0).wpList.add( response.rows );
-		});
+		$('#get-extra-comments').submit();
 	};
 
 	theExtraList = $('#the-extra-comment-list').wpList( { alt: '', delColor: 'none', addColor: 'none' } );
@@ -246,7 +220,6 @@ setCommentsList = function() {
 			if ( s.target.className.indexOf(':trash=1') != -1 || s.target.className.indexOf(':spam=1') != -1 )
 				$('#undo-' + id).fadeIn(300, function(){ $(this).show() });
 		});
-	$(listTable).bind('changePage', refillTheExtraList);
 };
 
 commentReply = {
@@ -277,10 +250,7 @@ commentReply = {
 		});
 
 		this.comments_listing = $('#comments-form > input[name="comment_status"]').val() || '';
-		
-		$(listTable).bind('beforeChangePage', function(){
-			commentReply.close();
-		});
+
 	},
 
 	addEvents : function(r) {
@@ -338,6 +308,7 @@ commentReply = {
 		t.close();
 		t.cid = id;
 
+		$('td', '#replyrow').attr('colspan', $('table.widefat thead th:visible').length);
 		editRow = $('#replyrow');
 		rowData = $('#inline-'+id);
 		act = t.act = (a == 'edit') ? 'edit-comment' : 'replyto-comment';
@@ -408,7 +379,6 @@ commentReply = {
 	send : function() {
 		var post = {};
 
-		$('#replysubmit .error').hide();
 		$('#replysubmit .waiting').show();
 
 		$('#replyrow input').each(function() {
@@ -418,7 +388,6 @@ commentReply = {
 		post.content = $('#replycontent').val();
 		post.id = post.comment_post_ID;
 		post.comments_listing = this.comments_listing;
-		post.p = $('[name=p]').val();
 
 		$.ajax({
 			type : 'POST',
@@ -462,7 +431,7 @@ commentReply = {
 			.animate( { 'backgroundColor':'#CCEEBB' }, 600 )
 			.animate( { 'backgroundColor': bg }, 600 );
 
-		$.fn.wpList.process($(id));
+		$.fn.wpList.process($(id))
 	},
 
 	error : function(r) {
@@ -484,7 +453,7 @@ $(document).ready(function(){
 
 	setCommentsList();
 	commentReply.init();
-	$(document).delegate('span.delete a.delete', 'click', function(){return false;});
+	$('span.delete a.delete').click(function(){return false;});
 
 	if ( typeof QTags != 'undefined' )
 		ed_reply = new QTags('ed_reply', 'replycontent', 'replycontainer', 'more');
@@ -515,14 +484,14 @@ $(document).ready(function(){
 			return function() {
 				var scope = $('select[name="action"]');
 				$('option[value='+value+']', scope).attr('selected', 'selected');
-				$('#doaction').click();
+				$('#comments-form').submit();
 			}
 		};
 
 		$.table_hotkeys(
 			$('table.widefat'),
 			['a', 'u', 's', 'd', 'r', 'q', 'z', ['e', edit_comment], ['shift+x', toggle_all],
-			['shift+a', make_bulk('approve')], ['shift+s', make_bulk('spam')],
+			['shift+a', make_bulk('approve')], ['shift+s', make_bulk('markspam')],
 			['shift+d', make_bulk('delete')], ['shift+t', make_bulk('trash')],
 			['shift+z', make_bulk('untrash')], ['shift+u', make_bulk('unapprove')]],
 			{ highlight_first: adminCommentsL10n.hotkeys_highlight_first, highlight_last: adminCommentsL10n.hotkeys_highlight_last,
