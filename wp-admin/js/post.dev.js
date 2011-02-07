@@ -180,9 +180,9 @@ commentsBox = {
 			'action' : 'get-comments',
 			'mode' : 'single',
 			'_ajax_nonce' : $('#add_comment_nonce').val(),
-			'p' : $('#post_ID').val(),
+			'post_ID' : $('#post_ID').val(),
 			'start' : st,
-			'number' : num
+			'num' : num
 		};
 
 		$.post(ajaxurl, data,
@@ -196,6 +196,7 @@ commentsBox = {
 
 					theList = theExtraList = null;
 					$("a[className*=':']").unbind();
+					setCommentsList();
 
 					if ( commentsBox.st > commentsBox.total )
 						$('#show-comments').hide();
@@ -368,8 +369,8 @@ jQuery(document).ready( function($) {
 		}
 
 		function updateText() {
-			var attemptedDate, originalDate, currentDate, publishOn, postStatus = $('#post_status'),
-				optPublish = $('option[value=publish]', postStatus), aa = $('#aa').val(),
+			var attemptedDate, originalDate, currentDate, publishOn, page = 'page' == pagenow || 'page-new' == pagenow,
+				postStatus = $('#post_status'),	optPublish = $('option[value=publish]', postStatus), aa = $('#aa').val(),
 				mm = $('#mm').val(), jj = $('#jj').val(), hh = $('#hh').val(), mn = $('#mn').val();
 
 			attemptedDate = new Date( aa, mm - 1, jj, hh, mn );
@@ -391,7 +392,10 @@ jQuery(document).ready( function($) {
 				$('#publish').val( postL10n.publish );
 			} else {
 				publishOn = postL10n.publishOnPast;
-				$('#publish').val( postL10n.update );
+				if ( page )
+					$('#publish').val( postL10n.updatePage );
+				else
+					$('#publish').val( postL10n.updatePost );
 			}
 			if ( originalDate.toUTCString() == attemptedDate.toUTCString() ) { //hack
 				$('#timestamp').html(stamp);
@@ -407,7 +411,10 @@ jQuery(document).ready( function($) {
 			}
 
 			if ( $('input:radio:checked', '#post-visibility-select').val() == 'private' ) {
-				$('#publish').val( postL10n.update );
+				if ( page )
+					$('#publish').val( postL10n.updatePage );
+				else
+					$('#publish').val( postL10n.updatePost );
 				if ( optPublish.length == 0 ) {
 					postStatus.append('<option value="publish">' + postL10n.privatelyPublished + '</option>');
 				} else {

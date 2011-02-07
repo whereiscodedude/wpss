@@ -51,7 +51,12 @@ if ( $post_id ) {
  * @param int $post_id Optional. Post ID.
  */
 function redirect_post($post_id = '') {
-	if ( isset($_POST['save']) || isset($_POST['publish']) ) {
+	if ( !empty($_POST['mode']) && 'sidebar' == $_POST['mode'] ) {
+		if ( isset($_POST['saveasdraft']) )
+			$location = 'sidebar.php?a=c';
+		elseif ( isset($_POST['publish']) )
+			$location = 'sidebar.php?a=b';
+	} elseif ( isset($_POST['save']) || isset($_POST['publish']) ) {
 		$status = get_post_status( $post_id );
 
 		if ( isset( $_POST['publish'] ) ) {
@@ -85,7 +90,6 @@ function redirect_post($post_id = '') {
 	}
 
 	wp_redirect( apply_filters( 'redirect_post_location', $location, $post_id ) );
-	exit;
 }
 
 if ( isset( $_POST['deletepost'] ) )
@@ -139,7 +143,7 @@ case 'edit':
 	$editing = true;
 
 	if ( empty( $post_id ) ) {
-		wp_redirect( admin_url('post.php') );
+		wp_redirect("post.php");
 		exit();
 	}
 
@@ -162,10 +166,7 @@ case 'edit':
 		$parent_file = "edit.php";
 		$submenu_file = "edit.php";
 	} else {
-		if ( isset( $post_type_object ) && $post_type_object->show_in_menu && $post_type_object->show_in_menu !== true )
-			$parent_file = $post_type_object->show_in_menu;
-		else
-			$parent_file = "edit.php?post_type=$post_type";
+		$parent_file = "edit.php?post_type=$post_type";
 		$submenu_file = "edit.php?post_type=$post_type";
 	}
 
@@ -269,7 +270,7 @@ case 'preview':
 	break;
 
 default:
-	wp_redirect( admin_url('edit.php') );
+		wp_redirect('edit.php');
 	exit();
 	break;
 } // end switch
