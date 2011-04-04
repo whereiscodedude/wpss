@@ -593,10 +593,7 @@ require_once( './admin-header.php' );
 					<div id="nav-menu-footer">
 						<div class="major-publishing-actions">
 						<div class="publishing-action">
-							<?php
-							if ( ! empty( $nav_menu_selected_id ) )
-								submit_button( __( 'Save Menu' ), 'button-primary menu-save', 'save_menu', false );
-							?>
+							<?php submit_button( empty( $nav_menu_selected_id ) ? __( 'Create Menu' ) : __( 'Save Menu' ), 'button-primary menu-save', 'save_menu', false ); ?>
 						</div>
 						</div>
 					</div><!-- /#nav-menu-footer -->

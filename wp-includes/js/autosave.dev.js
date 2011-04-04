@@ -161,10 +161,8 @@ function autosave_update_slug(post_id) {
 				samplepermalinknonce: jQuery('#samplepermalinknonce').val()
 			},
 			function(data) {
-				if ( data !== '-1' ) {
-					jQuery('#edit-slug-box').html(data);
-					makeSlugeditClickable();
-				}
+				jQuery('#edit-slug-box').html(data);
+				makeSlugeditClickable();
 			}
 		);
 	}

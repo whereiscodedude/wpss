@@ -181,9 +181,6 @@ function get_page_templates() {
 			if ( false !== strpos($basename, '/') )
 				continue;
 
-			if ( 'functions.php' == $basename )
-				continue;
-
 			$template_data = implode( '', file( $template ));
 
 			$name = '';

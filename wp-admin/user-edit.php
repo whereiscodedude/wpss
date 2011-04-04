@@ -51,7 +51,10 @@ add_contextual_help($current_screen,
 
 $wp_http_referer = remove_query_arg(array('update', 'delete_count'), stripslashes($wp_http_referer));
 
-$user_can_edit = current_user_can( 'edit_posts' ) || current_user_can( 'edit_pages' );
+$all_post_caps = array('posts', 'pages');
+$user_can_edit = false;
+foreach ( $all_post_caps as $post_cap )
+	$user_can_edit |= current_user_can("edit_$post_cap");
 
 /**
  * Optional SSL preference that can be turned on by hooking to the 'personal_options' action.
@@ -210,7 +213,7 @@ if ( !( IS_PROFILE_PAGE && !$user_can_edit ) ) : ?>
 <?php /* translators: Show admin bar when viewing site */ _e( 'when viewing site' ); ?></label><br />
 <label for="admin_bar_admin">
 <input name="admin_bar_admin" type="checkbox" id="admin_bar_admin" value="1" <?php checked( _get_admin_bar_pref( 'admin', $profileuser->ID ) ); ?> />
-<?php /* translators: Show admin bar in dashboard */ _e( 'in dashboard' ); ?></label></fieldset>
+<?php /* translators: Show admin bar in dashboard */ _e( 'in dashboard' ); ?></label>
 </td>
 </tr>
 <?php do_action('personal_options', $profileuser); ?>
@@ -281,29 +284,23 @@ if ( is_multisite() && is_network_admin() && ! IS_PROFILE_PAGE && current_user_c
 		<select name="display_name" id="display_name">
 		<?php
 			$public_display = array();
-			$public_display['display_nickname']  = $profileuser->nickname;
 			$public_display['display_username']  = $profileuser->user_login;
-
+			$public_display['display_nickname']  = $profileuser->nickname;
 			if ( !empty($profileuser->first_name) )
 				$public_display['display_firstname'] = $profileuser->first_name;
-
 			if ( !empty($profileuser->last_name) )
 				$public_display['display_lastname'] = $profileuser->last_name;
-
 			if ( !empty($profileuser->first_name) && !empty($profileuser->last_name) ) {
 				$public_display['display_firstlast'] = $profileuser->first_name . ' ' . $profileuser->last_name;
 				$public_display['display_lastfirst'] = $profileuser->last_name . ' ' . $profileuser->first_name;
 			}
-
 			if ( !in_array( $profileuser->display_name, $public_display ) ) // Only add this if it isn't duplicated elsewhere
 				$public_display = array( 'display_displayname' => $profileuser->display_name ) + $public_display;
-
 			$public_display = array_map( 'trim', $public_display );
 			$public_display = array_unique( $public_display );
-
 			foreach ( $public_display as $id => $item ) {
 		?>
-			<option id="<?php echo $id; ?>"<?php selected( $profileuser->display_name, $item ); ?>><?php echo $item; ?></option>
+			<option id="<?php echo $id; ?>" value="<?php echo esc_attr($item); ?>"<?php selected( $profileuser->display_name, $item ); ?>><?php echo $item; ?></option>
 		<?php
 			}
 		?>
