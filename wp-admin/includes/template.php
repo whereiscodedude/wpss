@@ -1623,16 +1623,16 @@ function _post_states($post) {
 		$post_status = '';
 
 	if ( !empty($post->post_password) )
-		$post_states['protected'] = __('Password protected');
+		$post_states[] = __('Password protected');
 	if ( 'private' == $post->post_status && 'private' != $post_status )
-		$post_states['private'] = __('Private');
+		$post_states[] = __('Private');
 	if ( 'draft' == $post->post_status && 'draft' != $post_status )
-		$post_states['draft'] = __('Draft');
+		$post_states[] = __('Draft');
 	if ( 'pending' == $post->post_status && 'pending' != $post_status )
 		/* translators: post state */
-		$post_states['pending'] = _x('Pending', 'post state');
+		$post_states[] = _x('Pending', 'post state');
 	if ( is_sticky($post->ID) )
-		$post_states['sticky'] = __('Sticky');
+		$post_states[] = __('Sticky');
 
 	$post_states = apply_filters( 'display_post_states', $post_states );
 
@@ -1918,11 +1918,7 @@ function screen_options($screen) {
 	return $return;
 }
 
-function screen_icon( $screen = '' ) {
-	echo get_screen_icon( $screen );
-}
-
-function get_screen_icon( $screen = '' ) {
+function screen_icon($screen = '') {
 	global $current_screen, $typenow;
 
 	if ( empty($screen) )
@@ -1950,7 +1946,9 @@ function get_screen_icon( $screen = '' ) {
 			$class .= ' ' . sanitize_html_class( 'icon32-posts-' . $post_type );
 	}
 
-	return '<div id="icon-' . esc_attr( $name ) . '" class="' . $class . '"><br /></div>';
+?>
+	<div id="icon-<?php echo $name; ?>" class="<?php echo $class; ?>"><br /></div>
+<?php
 }
 
 /**
@@ -2187,3 +2185,4 @@ function get_submit_button( $text = NULL, $type = 'primary', $name = 'submit', $
 
 	return $button;
 }
+

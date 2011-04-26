@@ -12,6 +12,12 @@ if ( !defined('ABSPATH') )
 
 wp_enqueue_script('post');
 
+if ( post_type_supports($post_type, 'editor') ) {
+	if ( user_can_richedit() )
+		wp_enqueue_script('editor');
+	wp_enqueue_script('word-count');
+}
+
 if ( post_type_supports($post_type, 'editor') || post_type_supports($post_type, 'thumbnail') ) {
 	add_thickbox();
 	wp_enqueue_script('media-upload');

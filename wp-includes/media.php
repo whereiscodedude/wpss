@@ -125,7 +125,7 @@ function image_hwstring($width, $height) {
  *		resize services.
  *
  * @param int $id Attachment ID for image.
- * @param array|string $size Optional, default is 'medium'. Size of image, either array or string.
+ * @param string $size Optional, default is 'medium'. Size of image, can be 'thumbnail'.
  * @return bool|array False on failure, array on success.
  */
 function image_downsize($id, $size = 'medium') {
@@ -1025,7 +1025,14 @@ class WP_Embed {
 	var $linkifunknown = true;
 
 	/**
-	 * Constructor
+	 * PHP4 constructor
+	 */
+	function WP_Embed() {
+		return $this->__construct();
+	}
+
+	/**
+	 * PHP5 constructor
 	 */
 	function __construct() {
 		// Hack to get the [embed] shortcode to run before wpautop()

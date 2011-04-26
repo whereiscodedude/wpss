@@ -1,4 +1,4 @@
-var tagBox, commentsBox, editPermalink, makeSlugeditClickable, WPSetThumbnailHTML, WPSetThumbnailID, WPRemoveThumbnail, wptitlehint;
+var tagBox, commentsBox, editPermalink, makeSlugeditClickable, WPSetThumbnailHTML, WPSetThumbnailID, WPRemoveThumbnail;
 
 // return an array with any duplicate, whitespace or values removed
 function array_unique_noempty(a) {
@@ -600,29 +600,18 @@ jQuery(document).ready( function($) {
 		makeSlugeditClickable();
 	}
 
-	wptitlehint = function(id) {
-		id = id || 'title';
-
-		var title = $('#' + id), titleprompt = $('#' + id + '-prompt-text');
-
-		if ( title.val() == '' )
-			titleprompt.css('visibility', '');
-
-		titleprompt.click(function(){
-			$(this).css('visibility', 'hidden');
-			title.focus();
-		});
-
-		title.blur(function(){
-			if ( this.value == '' )
-				titleprompt.css('visibility', '');
-		}).focus(function(){
-			titleprompt.css('visibility', 'hidden');
-		}).keydown(function(e){
-			titleprompt.css('visibility', 'hidden');
-			$(this).unbind(e);
-		});
-	}
-
-	wptitlehint();
+	if ( $('#title').val() == '' )
+		$('#title').siblings('#title-prompt-text').css('visibility', '');
+	$('#title-prompt-text').click(function(){
+		$(this).css('visibility', 'hidden').siblings('#title').focus();
+	});
+	$('#title').blur(function(){
+		if (this.value == '')
+			$(this).siblings('#title-prompt-text').css('visibility', '');
+	}).focus(function(){
+		$(this).siblings('#title-prompt-text').css('visibility', 'hidden');
+	}).keydown(function(e){
+		$(this).siblings('#title-prompt-text').css('visibility', 'hidden');
+		$(this).unbind(e);
+	});
 });

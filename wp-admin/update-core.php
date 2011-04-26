@@ -412,7 +412,6 @@ if ( 'upgrade-core' == $action ) {
 	wp_version_check();
 	require_once(ABSPATH . 'wp-admin/admin-header.php');
 	core_upgrade_preamble();
-	include(ABSPATH . 'wp-admin/admin-footer.php');
 
 } elseif ( 'do-core-upgrade' == $action || 'do-core-reinstall' == $action ) {
 	check_admin_referer('upgrade-core');
@@ -432,8 +431,6 @@ if ( 'upgrade-core' == $action ) {
 
 	if ( isset( $_POST['upgrade'] ) )
 		do_core_upgrade($reinstall);
-
-	include(ABSPATH . 'wp-admin/admin-footer.php');
 
 } elseif ( 'do-plugin-upgrade' == $action ) {
 
@@ -462,7 +459,6 @@ if ( 'upgrade-core' == $action ) {
 	echo '<h2>' . esc_html__('Update Plugins') . '</h2>';
 	echo "<iframe src='$url' style='width: 100%; height: 100%; min-height: 750px;' frameborder='0'></iframe>";
 	echo '</div>';
-	include(ABSPATH . 'wp-admin/admin-footer.php');
 
 } elseif ( 'do-theme-upgrade' == $action ) {
 
@@ -491,8 +487,6 @@ if ( 'upgrade-core' == $action ) {
 	echo '<h2>' . esc_html__('Update Themes') . '</h2>';
 	echo "<iframe src='$url' style='width: 100%; height: 100%; min-height: 750px;' frameborder='0'></iframe>";
 	echo '</div>';
-	include(ABSPATH . 'wp-admin/admin-footer.php');
-
-} else {
-	do_action('update-core-custom_' . $action);
 }
+
+include(ABSPATH . 'wp-admin/admin-footer.php');

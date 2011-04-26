@@ -243,15 +243,18 @@ function get_plugins($plugin_folder = '') {
 						if ( substr($subfile, -4) == '.php' )
 							$plugin_files[] = "$file/$subfile";
 					}
-					closedir( $plugins_subdir );
 				}
 			} else {
 				if ( substr($file, -4) == '.php' )
 					$plugin_files[] = $file;
 			}
 		}
-		closedir( $plugins_dir );
+	} else {
+		return $wp_plugins;
 	}
+
+	@closedir( $plugins_dir );
+	@closedir( $plugins_subdir );
 
 	if ( empty($plugin_files) )
 		return $wp_plugins;

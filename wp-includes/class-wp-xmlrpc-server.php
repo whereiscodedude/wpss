@@ -286,7 +286,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * @since 2.6.0
 	 */
 	function initialise_blog_option_info( ) {
-		global $wp_version, $content_width;
+		global $wp_version;
 
 		$this->blog_options = array(
 			// Read only options
@@ -304,11 +304,6 @@ class wp_xmlrpc_server extends IXR_Server {
 				'desc'			=> __( 'Site URL' ),
 				'readonly'		=> true,
 				'option'		=> 'siteurl'
-			),
-			'content_width'			=> array(
-				'desc'			=> __( 'Content Width' ),
-				'readonly'		=> true,
-				'value'			=> isset( $content_width ) ? (int) $content_width : 0,
 			),
 
 			// Updatable options
@@ -387,15 +382,8 @@ class wp_xmlrpc_server extends IXR_Server {
 	 *
 	 * @since 2.6.0
 	 *
-	 * @param array $args Method parameters. Contains:
-	 *  - username
-	 *  - password
-	 * @return array. Contains:
-	 *  - 'isAdmin'
-	 *  - 'url'
-	 *  - 'blogid'
-	 *  - 'blogName'
-	 *  - 'xmlrpc' - url of xmlrpc endpoint
+	 * @param array $args Method parameters.
+	 * @return array
 	 */
 	function wp_getUsersBlogs( $args ) {
 		global $current_site;
@@ -447,11 +435,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 *
 	 * @since 2.2.0
 	 *
-	 * @param array $args Method parameters. Contains:
-	 *  - blog_id
-	 *  - page_id
-	 *  - username
-	 *  - password
+	 * @param array $args Method parameters.
 	 * @return array
 	 */
 	function wp_getPage($args) {
@@ -552,11 +536,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 *
 	 * @since 2.2.0
 	 *
-	 * @param array $args Method parameters. Contains:
-	 *  - blog_id
-	 *  - username
-	 *  - password
-	 *  - num_pages
+	 * @param array $args Method parameters.
 	 * @return array
 	 */
 	function wp_getPages($args) {
@@ -602,7 +582,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 *
 	 * @since 2.2.0
 	 *
-	 * @param array $args Method parameters. See {@link wp_xmlrpc_server::mw_newPost()}
+	 * @param array $args Method parameters.
 	 * @return unknown
 	 */
 	function wp_newPage($args) {
@@ -1040,21 +1020,10 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Retrieve comments.
 	 *
-	 * Besides the common blog_id, username, and password arguments, it takes a filter
-	 * array as last argument.
-	 *
-	 * Accepted 'filter' keys are 'status', 'post_id', 'offset', and 'number'.
-	 *
-	 * The defaults are as follows:
-	 * - 'status' - Default is ''. Filter by status (e.g., 'approve', 'hold')
-	 * - 'post_id' - Default is ''. The post where the comment is posted. Empty string shows all comments.
-	 * - 'number' - Default is 10. Total number of media items to retrieve.
-	 * - 'offset' - Default is 0. See {@link WP_Query::query()} for more.
-	 * 
 	 * @since 2.7.0
 	 *
 	 * @param array $args Method parameters.
-	 * @return array. Contains a collection of comments. See {@link wp_xmlrpc_server::wp_getComment()} for a description of each item contents
+	 * @return array
 	 */
 	function wp_getComments($args) {
 		$raw_args = $args;
@@ -1098,7 +1067,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$comments_struct = array();
 
-    // FIXME: we already have the comments, why query them again?
 		for ( $i = 0; $i < $num_comments; $i++ ) {
 			$comment = wp_xmlrpc_server::wp_getComment(array(
 				$raw_args[0], $raw_args[1], $raw_args[2], $comments[$i]->comment_ID,
@@ -1110,19 +1078,11 @@ class wp_xmlrpc_server extends IXR_Server {
 	}
 
 	/**
-	 * Delete a comment.
-	 *
-	 * By default, the comment will be moved to the trash instead of deleted.
-	 * See {@link wp_delete_comment()} for more information on
-	 * this behavior.
+	 * Remove comment.
 	 *
 	 * @since 2.7.0
 	 *
-	 * @param array $args Method parameters. Contains:
-	 *  - blog_id
-	 *  - username
-	 *  - password
-	 *  - comment_id
+	 * @param array $args Method parameters.
 	 * @return mixed {@link wp_delete_comment()}
 	 */
 	function wp_deleteComment($args) {
@@ -1153,25 +1113,9 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Edit comment.
 	 *
-	 * Besides the common blog_id, username, and password arguments, it takes a 
-	 * comment_id integer and a content_struct array as last argument.
-	 *
-	 * The allowed keys in the content_struct array are:
-	 *  - 'author'
-	 *  - 'author_url'
-	 *  - 'author_email'
-	 *  - 'content'
-	 *  - 'date_created_gmt'
-	 *  - 'status'. Common statuses are 'approve', 'hold', 'spam'. See {@link get_comment_statuses()} for more details
-	 *
 	 * @since 2.7.0
 	 *
-	 * @param array $args. Contains:
-	 *  - blog_id
-	 *  - username
-	 *  - password
-	 *  - comment_id
-	 *  - content_struct
+	 * @param array $args Method parameters.
 	 * @return bool True, on success.
 	 */
 	function wp_editComment($args) {
@@ -1578,7 +1522,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return $this->error;
 
 		if ( !current_user_can( 'upload_files' ) )
-			return new IXR_Error( 403, __( 'You are not allowed to upload files to this site.' ) );
+			return new IXR_Error( 403, __( 'You are not allowed to upload files on this site.' ) );
 
 		do_action('xmlrpc_call', 'wp.getMediaItem');
 
@@ -1687,24 +1631,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return $this->error;
 
 		do_action( 'xmlrpc_call', 'wp.getPostFormats' );
-
-		$formats = get_post_format_strings(); 
-
-		# find out if they want a list of currently supports formats 
-		if ( isset( $args[3] ) && is_array( $args[3] ) ) { 
-			if ( $args[3]['show-supported'] ) { 
-				if ( current_theme_supports( 'post-formats' ) ) { 
-					$supported = get_theme_support( 'post-formats' ); 
-
-					$data['all'] = $formats; 
-					$data['supported'] = $supported[0]; 
-
-					$formats = $data; 
-				} 
-			} 
-		} 
-
-		return $formats;
+		return get_post_format_strings();
 	}
 
 	/* Blogger API functions.
@@ -2146,36 +2073,10 @@ class wp_xmlrpc_server extends IXR_Server {
 
 	/**
 	 * Create a new post.
-	 * 
-	 * The 'content_struct' argument must contain:
-	 *  - title
-	 *  - description
-	 *  - mt_excerpt
-	 *  - mt_text_more
-	 *  - mt_keywords
-	 *  - mt_tb_ping_urls
-	 *  - categories
-	 * 
-	 * Also, it can optionally contain:
-	 *  - wp_slug
-	 *  - wp_password
-	 *  - wp_page_parent_id
-	 *  - wp_page_order
-	 *  - wp_author_id
-	 *  - post_status | page_status - can be 'draft', 'private', 'publish', or 'pending'
-	 *  - mt_allow_comments - can be 'open' or 'closed'
-	 *  - mt_allow_pings - can be 'open' or 'closed'
-	 *  - date_created_gmt
-	 *  - dateCreated
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param array $args Method parameters. Contains:
-	 *  - blog_id
-	 *  - username
-	 *  - password
-	 *  - content_struct
-	 *  - publish
+	 * @param array $args Method parameters.
 	 * @return int
 	 */
 	function mw_newPost($args) {
@@ -2286,10 +2187,14 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( isset( $content_struct["{$post_type}_status"] ) ) {
 			switch ( $content_struct["{$post_type}_status"] ) {
 				case 'draft':
-				case 'pending':
 				case 'private':
 				case 'publish':
 					$post_status = $content_struct["{$post_type}_status"];
+					break;
+				case 'pending':
+					// Pending is only valid for posts, not pages.
+					if ( $post_type === 'post' )
+						$post_status = $content_struct["{$post_type}_status"];
 					break;
 				default:
 					$post_status = $publish ? 'publish' : 'draft';
@@ -2558,7 +2463,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		// Let WordPress manage slug if none was provided.
 		$post_name = "";
-		$post_name = $postdata['post_name'];
 		if ( isset($content_struct["wp_slug"]) )
 			$post_name = $content_struct["wp_slug"];
 
@@ -2671,10 +2575,14 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( isset( $content_struct["{$post_type}_status"] ) ) {
 			switch( $content_struct["{$post_type}_status"] ) {
 				case 'draft':
-				case 'pending':
 				case 'private':
 				case 'publish':
 					$post_status = $content_struct["{$post_type}_status"];
+					break;
+				case 'pending':
+					// Pending is only valid for posts, not pages.
+					if ( $post_type === 'post' )
+						$post_status = $content_struct["{$post_type}_status"];
 					break;
 				default:
 					$post_status = $publish ? 'publish' : 'draft';
@@ -3160,7 +3068,6 @@ class wp_xmlrpc_server extends IXR_Server {
 				'userid' => $entry['post_author'],
 				'postid' => (string) $entry['ID'],
 				'title' => $entry['post_title'],
-				'post_status' => $entry['post_status'],
 				'date_created_gmt' => new IXR_Date($post_date_gmt)
 			);
 

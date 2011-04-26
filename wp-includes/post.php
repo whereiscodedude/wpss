@@ -1061,7 +1061,7 @@ function register_post_type($post_type, $args = array()) {
  *   can be deleted. If the post type does not support an author, then this will
  *   behave like delete_posts.
  * - edit_private_posts - Controls whether private objects can be edited.
- * - edit_published_posts - Controls whether published objects can be edited.
+ * - edit_published_posts - Controls whether published objects can be deleted.
  *
  * These additional capabilities are only used in map_meta_cap(). Thus, they are
  * only assigned by default if the post type is registered with the 'map_meta_cap'
@@ -2455,7 +2455,7 @@ function wp_insert_post($postarr, $wp_error = false) {
 		$post_before = get_post($post_ID);
 	}
 
-	// Don't allow contributors to set the post slug for pending review posts
+	// Don't allow contributors to set to set the post slug for pending review posts
 	if ( 'pending' == $post_status && !current_user_can( 'publish_posts' ) )
 		$post_name = '';
 

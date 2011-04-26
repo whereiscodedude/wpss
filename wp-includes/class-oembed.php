@@ -21,7 +21,14 @@ class WP_oEmbed {
 	var $providers = array();
 
 	/**
-	 * Constructor
+	 * PHP4 constructor
+	 */
+	function WP_oEmbed() {
+		return $this->__construct();
+	}
+
+	/**
+	 * PHP5 constructor
 	 *
 	 * @uses apply_filters() Filters a list of pre-defined oEmbed providers.
 	 */

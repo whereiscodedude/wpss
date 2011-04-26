@@ -120,7 +120,7 @@ function date_i18n( $dateformatstring, $unixtimestamp = false, $gmt = false ) {
 	}
 	$timezone_formats = array( 'P', 'I', 'O', 'T', 'Z', 'e' );
 	$timezone_formats_re = implode( '|', $timezone_formats );
-	if ( preg_match( "/$timezone_formats_re/", $dateformatstring ) ) {
+	if ( preg_match( "/$timezone_formats_re/", $dateformatstring ) && wp_timezone_supported() ) {
 		$timezone_string = get_option( 'timezone_string' );
 		if ( $timezone_string ) {
 			$timezone_object = timezone_open( $timezone_string );
@@ -509,7 +509,7 @@ function update_option( $option, $newvalue ) {
 	wp_protect_special_option( $option );
 
 	if ( is_object($newvalue) )
-		$newvalue = clone $newvalue;
+		$newvalue = wp_clone($newvalue);
 
 	$newvalue = sanitize_option( $option, $newvalue );
 	$oldvalue = get_option( $option );
@@ -590,12 +590,8 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 
 	wp_protect_special_option( $option );
 
-	/* 
-	 * FIXME the next two lines of code are not necessary and should be removed.
-	 * @see http://core.trac.wordpress.org/ticket/13480
-	 */
 	if ( is_object($value) )
-		$value = clone $value;
+		$value = wp_clone($value);
 
 	$value = sanitize_option( $option, $value );
 
@@ -1374,36 +1370,6 @@ function build_query( $data ) {
 	return _http_build_query( $data, null, '&', '', false );
 }
 
-// from php.net (modified by Mark Jaquith to behave like the native PHP5 function)
-function _http_build_query($data, $prefix=null, $sep=null, $key='', $urlencode=true) {
-	$ret = array();
-
-	foreach ( (array) $data as $k => $v ) {
-		if ( $urlencode)
-			$k = urlencode($k);
-		if ( is_int($k) && $prefix != null )
-			$k = $prefix.$k;
-		if ( !empty($key) )
-			$k = $key . '%5B' . $k . '%5D';
-		if ( $v === NULL )
-			continue;
-		elseif ( $v === FALSE )
-			$v = '0';
-
-		if ( is_array($v) || is_object($v) )
-			array_push($ret,_http_build_query($v, '', $sep, $k, $urlencode));
-		elseif ( $urlencode )
-			array_push($ret, $k.'='.urlencode($v));
-		else
-			array_push($ret, $k.'='.$v);
-	}
-
-	if ( NULL === $sep )
-		$sep = ini_get('arg_separator.output');
-
-	return implode($sep, $ret);
-}
-
 /**
  * Retrieve a modified URL query string.
  *
@@ -2145,42 +2111,6 @@ function path_join( $base, $path ) {
 }
 
 /**
- * Determines a writable directory for temporary files.
- * Function's preference is to WP_CONTENT_DIR followed by the return value of <code>sys_get_temp_dir()</code>, before finally defaulting to /tmp/
- *
- * In the event that this function does not find a writable location, It may be overridden by the <code>WP_TEMP_DIR</code> constant in your <code>wp-config.php</code> file.
- *
- * @since 2.5.0
- *
- * @return string Writable temporary directory
- */
-function get_temp_dir() {
-	static $temp;
-	if ( defined('WP_TEMP_DIR') )
-		return trailingslashit(WP_TEMP_DIR);
-
-	if ( $temp )
-		return trailingslashit($temp);
-
-	$temp = WP_CONTENT_DIR . '/';
-	if ( is_dir($temp) && @is_writable($temp) )
-		return $temp;
-
-	if  ( function_exists('sys_get_temp_dir') ) {
-		$temp = sys_get_temp_dir();
-		if ( @is_writable($temp) )
-			return trailingslashit($temp);
-	}
-
-	$temp = ini_get('upload_tmp_dir');
-	if ( is_dir($temp) && @is_writable($temp) )
-		return trailingslashit($temp);
-
-	$temp = '/tmp/';
-	return $temp;
-}
-
-/**
  * Get an array containing the current upload directory's path and url.
  *
  * Checks the 'upload_path' option, which should be from the web root folder,
@@ -2855,42 +2785,6 @@ if ( 'rtl' == $text_direction ) : ?>
 }
 
 /**
- * Kill WordPress execution and display XML message with error message.
- *
- * This is the handler for wp_die when processing XMLRPC requests.
- *
- * @since 3.2.0
- * @access private
- *
- * @param string $message Error message.
- * @param string $title Error title.
- * @param string|array $args Optional arguements to control behaviour.
- */
-function _xmlrpc_wp_die_handler( $message, $title = '', $args = array() ) { 
-	global $wp_xmlrpc_server;
-	$defaults = array( 'response' => 500 );
-
-	$r = wp_parse_args($args, $defaults);
-
-	if ( $wp_xmlrpc_server ) { 
-		$error = new IXR_Error( $r['response'] , $message); 
-		$wp_xmlrpc_server->output( $error->getXml() ); 
-	}
-	die();
-}
-
-/**
- * Filter to enable special wp_die handler for xmlrpc requests.
- * 
- * @since 3.2.0
- * @access private
- */
-function _xmlrpc_wp_die_filter() { 
-	return '_xmlrpc_wp_die_handler';
-}
-
-
-/**
  * Retrieve the WordPress home page URL.
  *
  * If the constant named 'WP_HOME' exists, then it willl be used and returned by
@@ -3356,6 +3250,22 @@ function url_is_accessable_via_ssl($url)
 		}
 	}
 	return false;
+}
+
+/**
+ * Secure URL, if available or the given URL.
+ *
+ * @since 2.5.0
+ *
+ * @param string $url Complete URL path with transport.
+ * @return string Secure or regular URL path.
+ */
+function atom_service_url_filter($url)
+{
+	if ( url_is_accessable_via_ssl($url) )
+		return preg_replace( '/^http:\/\//', 'https://',  $url );
+	else
+		return $url;
 }
 
 /**
@@ -4082,6 +3992,9 @@ function global_terms_enabled() {
  * @return float|bool
  */
 function wp_timezone_override_offset() {
+	if ( !wp_timezone_supported() ) {
+		return false;
+	}
 	if ( !$timezone_string = get_option( 'timezone_string' ) ) {
 		return false;
 	}
@@ -4092,6 +4005,27 @@ function wp_timezone_override_offset() {
 		return false;
 	}
 	return round( timezone_offset_get( $timezone_object, $datetime_object ) / 3600, 2 );
+}
+
+/**
+ * Check for PHP timezone support
+ *
+ * @since 2.9.0
+ *
+ * @return bool
+ */
+function wp_timezone_supported() {
+	$support = false;
+	if (
+		function_exists( 'date_create' ) &&
+		function_exists( 'date_default_timezone_set' ) &&
+		function_exists( 'timezone_identifiers_list' ) &&
+		function_exists( 'timezone_open' ) &&
+		function_exists( 'timezone_offset_get' )
+	) {
+		$support = true;
+	}
+	return apply_filters( 'timezone_support', $support );
 }
 
 /**
