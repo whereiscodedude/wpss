@@ -422,8 +422,7 @@ table.ie-fixed {
 	background: #298CBA;
 }
 
-#wpcontent #ajax-loading,
-#wpcontent .ajax-loading {
+#wpcontent #ajax-loading {
 	vertical-align: baseline;
 }
 

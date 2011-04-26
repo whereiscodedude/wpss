@@ -23,8 +23,7 @@ function wp_version_check() {
 	if ( defined('WP_INSTALLING') )
 		return;
 
-	global $wpdb, $wp_local_package;
-	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
+	global $wp_version, $wpdb, $wp_local_package;
 	$php_version = phpversion();
 
 	$current = get_site_transient( 'update_core' );
@@ -45,16 +44,14 @@ function wp_version_check() {
 	else
 		$mysql_version = 'N/A';
 
+	$num_blogs = 1;
+	$wp_install = home_url( '/' );
+	$multisite_enabled = 0;
+	$user_count = count_users( );
 	if ( is_multisite( ) ) {
-		$user_count = get_user_count( );
 		$num_blogs = get_blog_count( );
 		$wp_install = network_site_url( );
 		$multisite_enabled = 1;
-	} else {
-		$user_count = count_users( );
-		$multisite_enabled = 0;
-		$num_blogs = 1;
-		$wp_install = home_url( '/' );
 	}
 
 	$local_package = isset( $wp_local_package )? $wp_local_package : '';
@@ -115,12 +112,12 @@ function wp_version_check() {
  *
  * @package WordPress
  * @since 2.3.0
- * @uses $wp_version Used to notify the WordPress version.
+ * @uses $wp_version Used to notidy the WordPress version.
  *
  * @return mixed Returns null if update is unsupported. Returns false if check is too soon.
  */
 function wp_update_plugins() {
-	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
+	global $wp_version;
 
 	if ( defined('WP_INSTALLING') )
 		return false;
@@ -200,12 +197,12 @@ function wp_update_plugins() {
  *
  * @package WordPress
  * @since 2.7.0
- * @uses $wp_version Used to notify the WordPress version.
+ * @uses $wp_version Used to notidy the WordPress version.
  *
  * @return mixed Returns null if update is unsupported. Returns false if check is too soon.
  */
-function wp_update_themes() {
-	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
+function wp_update_themes( ) {
+	global $wp_version;
 
 	if ( defined( 'WP_INSTALLING' ) )
 		return false;
@@ -281,17 +278,17 @@ function wp_update_themes() {
 
 	$new_update = new stdClass;
 	$new_update->last_checked = time( );
-	$new_update->checked = $checked;
-
 	$response = unserialize( $raw_response['body'] );
-	if ( false !== $response )
+	if ( $response ) {
+		$new_update->checked = $checked;
 		$new_update->response = $response;
+	}
 
 	set_site_transient( 'update_themes', $new_update );
 }
 
 function _maybe_update_core() {
-	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
+	global $wp_version;
 
 	$current = get_site_transient( 'update_core' );
 
@@ -337,25 +334,6 @@ function _maybe_update_themes( ) {
 	wp_update_themes();
 }
 
-/**
- * Schedule core, theme, and plugin update checks.
- *
- * @since 3.1.0
- */
-function wp_schedule_update_checks() {
-	if ( !wp_next_scheduled('wp_version_check') && !defined('WP_INSTALLING') )
-		wp_schedule_event(time(), 'twicedaily', 'wp_version_check');
-
-	if ( !wp_next_scheduled('wp_update_plugins') && !defined('WP_INSTALLING') )
-		wp_schedule_event(time(), 'twicedaily', 'wp_update_plugins');
-
-	if ( !wp_next_scheduled('wp_update_themes') && !defined('WP_INSTALLING') )
-		wp_schedule_event(time(), 'twicedaily', 'wp_update_themes');
-}
-
-if ( ! is_main_site() )
-	return;
-
 add_action( 'admin_init', '_maybe_update_core' );
 add_action( 'wp_version_check', 'wp_version_check' );
 
@@ -371,6 +349,13 @@ add_action( 'load-update-core.php', 'wp_update_themes' );
 add_action( 'admin_init', '_maybe_update_themes' );
 add_action( 'wp_update_themes', 'wp_update_themes' );
 
-add_action('init', 'wp_schedule_update_checks');
+if ( !wp_next_scheduled('wp_version_check') && !defined('WP_INSTALLING') )
+	wp_schedule_event(time(), 'twicedaily', 'wp_version_check');
+
+if ( !wp_next_scheduled('wp_update_plugins') && !defined('WP_INSTALLING') )
+	wp_schedule_event(time(), 'twicedaily', 'wp_update_plugins');
+
+if ( !wp_next_scheduled('wp_update_themes') && !defined('WP_INSTALLING') )
+	wp_schedule_event(time(), 'twicedaily', 'wp_update_themes');
 
 ?>

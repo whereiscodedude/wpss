@@ -1,11 +1,3 @@
-.alignleft h3 {
-	margin: 0;
-}
-
-h3 span {
-	font-weight: normal;
-}
-
 #template textarea {
 	font-family: Consolas, Monaco, Courier, monospace;
 	font-size: 12px;

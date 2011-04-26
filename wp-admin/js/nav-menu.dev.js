@@ -890,25 +890,22 @@ var wpNavMenu;
 		 * @param jQuery panel The tabs panel we're searching in.
 		 */
 		processQuickSearchQueryResponse : function(resp, req, panel) {
-			var matched, newID,
+			var i, matched, newID,
 			takenIDs = {},
 			form = document.getElementById('nav-menu-meta'),
 			pattern = new RegExp('menu-item\\[(\[^\\]\]*)', 'g'),
-			$items = $('<div>').html(resp).find('li'),
-			$item;
+			items = resp.match(/<li>.*<\/li>/g);
 
-			if( ! $items.length ) {
+			if( ! items ) {
 				$('.categorychecklist', panel).html( '<li><p>' + navMenuL10n.noResultsFound + '</p></li>' );
 				$('img.waiting', panel).hide();
 				return;
 			}
 
-			$items.each(function(){
-				$item = $(this);
-
+			i = items.length;
+			while( i-- ) {
 				// make a unique DB ID number
-				matched = pattern.exec($item.html());
-
+				matched = pattern.exec(items[i]);
 				if ( matched && matched[1] ) {
 					newID = matched[1];
 					while( form.elements['menu-item[' + newID + '][menu-item-type]'] || takenIDs[ newID ] ) {
@@ -917,15 +914,12 @@ var wpNavMenu;
 
 					takenIDs[newID] = true;
 					if ( newID != matched[1] ) {
-						$item.html( $item.html().replace(new RegExp(
-							'menu-item\\[' + matched[1] + '\\]', 'g'),
-							'menu-item[' + newID + ']'
-						) );
+						items[i] = items[i].replace(new RegExp('menu-item\\[' + matched[1] + '\\]', 'g'), 'menu-item[' + newID + ']');
 					}
 				}
-			});
+			}
 
-			$('.categorychecklist', panel).html( $items );
+			$('.categorychecklist', panel).html( items.join('') );
 			$('img.waiting', panel).hide();
 		},
 

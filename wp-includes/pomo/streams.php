@@ -22,7 +22,7 @@ class POMO_Reader {
 	/**
 	 * Sets the endianness of the file.
 	 *
-	 * @param string $endian 'big' or 'little'
+	 * @param $endian string 'big' or 'little'
 	 */
 	function setEndian($endian) {
 		$this->endian = $endian;

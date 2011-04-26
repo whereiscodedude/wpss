@@ -56,7 +56,7 @@ function wp_import_cleanup( $id ) {
  *
  * @since 2.0.0
  *
- * @return array Uploaded file's details on success, error message on failure
+ * @return array
  */
 function wp_import_handle_upload() {
 	if ( !isset($_FILES['import']) ) {
@@ -73,7 +73,7 @@ function wp_import_handle_upload() {
 
 	$url = $file['url'];
 	$type = $file['type'];
-	$file = $file['file'];
+	$file = addslashes( $file['file'] );
 	$filename = basename( $file );
 
 	// Construct the object array

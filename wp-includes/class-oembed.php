@@ -21,7 +21,14 @@ class WP_oEmbed {
 	var $providers = array();
 
 	/**
-	 * Constructor
+	 * PHP4 constructor
+	 */
+	function WP_oEmbed() {
+		return $this->__construct();
+	}
+
+	/**
+	 * PHP5 constructor
 	 *
 	 * @uses apply_filters() Filters a list of pre-defined oEmbed providers.
 	 */
@@ -235,7 +242,7 @@ class WP_oEmbed {
 					return false;
 
 				$title = ( !empty($data->title) ) ? $data->title : '';
-				$return = '<a href="' . esc_url( $url ) . '"><img src="' . esc_url( $data->url ) . '" alt="' . esc_attr($title) . '" width="' . esc_attr($data->width) . '" height="' . esc_attr($data->height) . '" /></a>';
+				$return = '<img src="' . esc_url( $data->url ) . '" alt="' . esc_attr($title) . '" width="' . esc_attr($data->width) . '" height="' . esc_attr($data->height) . '" />';
 				break;
 
 			case 'video':

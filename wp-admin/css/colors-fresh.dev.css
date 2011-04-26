@@ -1,5 +1,4 @@
-html,
-.wp-dialog {
+html {
 	background-color: #f9f9f9;
 }
 
@@ -111,16 +110,13 @@ div.dashboard-widget-submit {
 }
 
 div.tabs-panel,
-.wp-tab-panel,
 ul.category-tabs li.tabs,
-ul.add-menu-item-tabs li.tabs,
-.wp-tab-active {
+ul.add-menu-item-tabs li.tabs {
 	border-color: #dfdfdf;
 }
 
 ul.category-tabs li.tabs,
-ul.add-menu-item-tabs li.tabs,
-.wp-tab-active {
+ul.add-menu-item-tabs li.tabs {
 	background-color: #f1f1f1;
 }
 
@@ -207,13 +203,13 @@ strong .post-com-count span {
 	border-top-color: #dfdfdf;
 }
 
-div.error,
+.error,
 .login #login_error {
 	background-color: #ffebe8;
 	border-color: #c00;
 }
 
-div.error a {
+.error a {
 	color: #c00;
 }
 
@@ -232,7 +228,7 @@ div.error a {
 
 .highlight {
 	background-color: #e4f2fd;
-	color: #000;
+	color: #d54e21;
 }
 
 .howto,
@@ -386,8 +382,7 @@ div.dashboard-widget-submit input:hover,
 }
 
 #side-sortables .category-tabs .tabs a,
-#side-sortables .add-menu-item-tabs .tabs a,
-.wp-tab-bar .wp-tab-active a {
+#side-sortables .add-menu-item-tabs .tabs a {
 	color: #333;
 }
 
@@ -438,7 +433,7 @@ div.dashboard-widget-submit input:hover,
 	color: #d54e21;
 }
 
-div.updated,
+.updated,
 .login .message {
 	background-color: #ffffe0;
 	border-color: #e6db55;
@@ -457,7 +452,9 @@ a.page-numbers {
 }
 
 .widefat td,
-.widefat th {
+.widefat th,
+#install-plugins .plugins td,
+#install-plugins .plugins th {
 	border-color: #dfdfdf;
 }
 
@@ -473,10 +470,6 @@ h3.dashboard-widget-title small,
 .find-box-head {
 	color: #333;
 	background: #dfdfdf url(../images/gray-grad.png) repeat-x scroll left top;
-}
-
-th.sortable a:hover, th.sortable a:active, th.sortable a:focus {
-	color: #333;
 }
 
 h3.dashboard-widget-title small a {
@@ -497,6 +490,15 @@ a,
 .plugins a.delete,
 .ui-tabs-nav a {
 	color: #21759b;
+}
+
+/* Because we don't want visited on these links */
+body.press-this .tabs a,
+body.press-this .tabs a:hover {
+	background-color: #fff;
+	border-color: #c6d9e9;
+	border-bottom-color: #fff;
+	color: #d54e21;
 }
 
 #adminmenu #awaiting-mod,
@@ -554,8 +556,7 @@ input.readonly, textarea.readonly {
 
 #edit-slug-box strong,
 .tablenav .displaying-num,
-#submitted-on,
-.submitted-on {
+#submitted-on {
 	color: #777;
 }
 
@@ -723,6 +724,11 @@ table.widefat span.spam a,
 	text-decoration: underline !important;
 }
 
+#user_info a:active,
+#footer a:active {
+	color: #ccc !important;
+}
+
 div#media-upload-error,
 .file-error,
 abbr.required,
@@ -765,7 +771,6 @@ table.widefat .spam a:hover,
 #quicktags {
 	border-color: #dfdfdf;
 	background-color: #dfdfdf;
-	background-image: url("../images/ed-bg.gif");
 }
 
 #ed_toolbar input {
@@ -827,7 +832,7 @@ table.widefat .spam a:hover,
 .wp_themeSkin a.mceButtonEnabled:hover,
 .wp_themeSkin a.mceButtonActive,
 .wp_themeSkin a.mceButtonSelected {
-	background: #d5d5d5;
+	background-color: #d5d5d5;
 	border-color: #777 !important;
 }
 
@@ -1399,15 +1404,13 @@ fieldset.inline-edit-col-right .inline-edit-col {
 	background: #eee url('../images/menu-bits.gif?ver=20100610') repeat-x scroll left -379px;
 }
 
-.tablenav .tablenav-pages a:hover,
-.tablenav .tablenav-pages a:focus {
+.tablenav .tablenav-pages a:hover {
 	color: #d54e21;
+	border-color: #d54321;
 }
 
-.tablenav .tablenav-pages a.disabled,
-.tablenav .tablenav-pages a.disabled:hover,
-.tablenav .tablenav-pages a.disabled:focus {
-	color: #aaa;
+.tablenav .tablenav-pages a:active {
+	color: #fff !important;
 }
 
 .tablenav .tablenav-pages .current {
@@ -1460,8 +1463,7 @@ fieldset.inline-edit-col-right .inline-edit-col {
 }
 
 #post-body ul.category-tabs li.tabs a,
-#post-body ul.add-menu-item-tabs li.tabs a,
-body.press-this ul.category-tabs li.tabs a {
+#post-body ul.add-menu-item-tabs li.tabs a {
 	color: #333;
 }
 
@@ -1509,9 +1511,9 @@ body.press-this ul.category-tabs li.tabs a {
 	text-decoration: underline;
 }
 
-#screen-meta a.show-settings,
-.toggle-arrow {
-	background-image:url("../images/screen-options-toggle.gif?ver=20100531");
+#screen-meta a.show-settings {
+	background-color: transparent;
+	text-shadow: rgba(255,255,255,0.7) 0 1px 0;
 }
 
 #icon-edit,
@@ -1573,7 +1575,7 @@ body.press-this ul.category-tabs li.tabs a {
 	background: transparent url(../images/list.png) no-repeat 0 0;
 }
 
-.view-switch .current #view-switch-list {
+.view-switch #view-switch-list.current {
 	background: transparent url(../images/list.png) no-repeat -40px 0;
 }
 
@@ -1581,7 +1583,7 @@ body.press-this ul.category-tabs li.tabs a {
 	background: transparent url(../images/list.png) no-repeat -20px 0;
 }
 
-.view-switch .current #view-switch-excerpt {
+.view-switch #view-switch-excerpt.current {
 	background: transparent url(../images/list.png) no-repeat -60px 0;
 }
 
@@ -1684,7 +1686,7 @@ div.widgets-sortables,
 	background-color: #f1f1f1;
 }
 
-#nav-menu-header, #nav-menu-footer, .menu-item-handle {
+#nav-menu-header, .menu-item-handle {
 	background: url("../images/gray-grad.png") repeat-x scroll left top #dfdfdf;
 }
 
