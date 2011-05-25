@@ -39,8 +39,9 @@ define( 'ARRAY_N', 'ARRAY_N' );
  *
  * It is possible to replace this class with your own
  * by setting the $wpdb global variable in wp-content/db.php
- * file to your class. The wpdb class will still be included,
- * so you can extend it or simply use your own.
+ * file with your class. You can name it wpdb also, since
+ * this file will not be included, if the other file is
+ * available.
  *
  * @link http://codex.wordpress.org/Function_Reference/wpdb_Class
  *
@@ -459,6 +460,23 @@ class wpdb {
 	 * @var string
 	 */
 	var $func_call;
+
+	/**
+	 * Connects to the database server and selects a database
+	 *
+	 * PHP4 compatibility layer for calling the PHP5 constructor.
+	 *
+	 * @uses wpdb::__construct() Passes parameters and returns result
+	 * @since 0.71
+	 *
+	 * @param string $dbuser MySQL database user
+	 * @param string $dbpassword MySQL database password
+	 * @param string $dbname MySQL database name
+	 * @param string $dbhost MySQL database host
+	 */
+	function wpdb( $dbuser, $dbpassword, $dbname, $dbhost ) {
+		return $this->__construct( $dbuser, $dbpassword, $dbname, $dbhost );
+	}
 
 	/**
 	 * Connects to the database server and selects a database
@@ -1012,6 +1030,8 @@ class wpdb {
 	 * @since 3.0.0
 	 */
 	function db_connect() {
+		global $db_list, $global_db_list;
+
 		if ( WP_DEBUG ) {
 			$this->dbh = mysql_connect( $this->dbhost, $this->dbuser, $this->dbpassword, true );
 		} else {

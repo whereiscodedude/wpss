@@ -23,8 +23,7 @@ function wp_version_check() {
 	if ( defined('WP_INSTALLING') )
 		return;
 
-	global $wpdb, $wp_local_package;
-	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
+	global $wp_version, $wpdb, $wp_local_package;
 	$php_version = phpversion();
 
 	$current = get_site_transient( 'update_core' );
@@ -71,10 +70,13 @@ function wp_version_check() {
 
 	$response = wp_remote_get($url, $options);
 
-	if ( is_wp_error( $response ) || 200 != wp_remote_retrieve_response_code( $response ) )
+	if ( is_wp_error( $response ) )
 		return false;
 
-	$body = trim( wp_remote_retrieve_body( $response ) );
+	if ( 200 != $response['response']['code'] )
+		return false;
+
+	$body = trim( $response['body'] );
 	$body = str_replace(array("\r\n", "\r"), "\n", $body);
 	$new_options = array();
 	foreach ( explode( "\n\n", $body ) as $entry ) {
@@ -117,7 +119,7 @@ function wp_version_check() {
  * @return mixed Returns null if update is unsupported. Returns false if check is too soon.
  */
 function wp_update_plugins() {
-	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
+	global $wp_version;
 
 	if ( defined('WP_INSTALLING') )
 		return false;
@@ -172,10 +174,13 @@ function wp_update_plugins() {
 
 	$raw_response = wp_remote_post('http://api.wordpress.org/plugins/update-check/1.0/', $options);
 
-	if ( is_wp_error( $raw_response ) || 200 != wp_remote_retrieve_response_code( $raw_response ) )
+	if ( is_wp_error( $raw_response ) )
 		return false;
 
-	$response = unserialize( wp_remote_retrieve_body( $raw_response ) );
+	if ( 200 != $raw_response['response']['code'] )
+		return false;
+
+	$response = unserialize( $raw_response['body'] );
 
 	if ( false !== $response )
 		$new_option->response = $response;
@@ -198,8 +203,8 @@ function wp_update_plugins() {
  *
  * @return mixed Returns null if update is unsupported. Returns false if check is too soon.
  */
-function wp_update_themes() {
-	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
+function wp_update_themes( ) {
+	global $wp_version;
 
 	if ( defined( 'WP_INSTALLING' ) )
 		return false;
@@ -267,22 +272,25 @@ function wp_update_themes() {
 
 	$raw_response = wp_remote_post( 'http://api.wordpress.org/themes/update-check/1.0/', $options );
 
-	if ( is_wp_error( $raw_response ) || 200 != wp_remote_retrieve_response_code( $raw_response ) )
+	if ( is_wp_error( $raw_response ) )
+		return false;
+
+	if ( 200 != $raw_response['response']['code'] )
 		return false;
 
 	$new_update = new stdClass;
 	$new_update->last_checked = time( );
-	$new_update->checked = $checked;
-
-	$response = unserialize( wp_remote_retrieve_body( $raw_response ) );
-	if ( false !== $response )
+	$response = unserialize( $raw_response['body'] );
+	if ( $response ) {
+		$new_update->checked = $checked;
 		$new_update->response = $response;
+	}
 
 	set_site_transient( 'update_themes', $new_update );
 }
 
 function _maybe_update_core() {
-	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
+	global $wp_version;
 
 	$current = get_site_transient( 'update_core' );
 

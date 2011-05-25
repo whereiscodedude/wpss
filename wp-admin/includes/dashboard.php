@@ -1,6 +1,6 @@
 <?php
 /**
- * WordPress Dashboard Widget Administration Screen API
+ * WordPress Dashboard Widget Administration Panel API
  *
  * @package WordPress
  * @subpackage Administration
@@ -24,16 +24,6 @@ function wp_dashboard_setup() {
 		$widget_options = array();
 
 	/* Register Widgets and Controls */
-
-	$response = wp_check_browser_version();
-
-	if ( $response['upgrade'] ) {
-		add_filter( 'postbox_classes_dashboard_dashboard_browser_nag', 'dashboard_browser_nag_class' );
-		if ( $response['insecure'] )
-			wp_add_dashboard_widget( 'dashboard_browser_nag', __( 'You are using an insecure browser!' ), 'wp_dashboard_browser_nag' );
-		else
-			wp_add_dashboard_widget( 'dashboard_browser_nag', __( 'Your browser is out of date!' ), 'wp_dashboard_browser_nag' );
-	}
 
 	// Right Now
 	if ( is_blog_admin() && current_user_can('edit_posts') )
@@ -394,28 +384,24 @@ function wp_dashboard_right_now() {
 		$num = number_format_i18n( $num_widgets );
 
 		$switch_themes = $ct->title;
-		if ( current_user_can( 'switch_themes') )
+		if ( current_user_can( 'switch_themes') ) {
+			echo '<a href="themes.php" class="button rbutton">' . __('Change Theme') . '</a>';
 			$switch_themes = '<a href="themes.php">' . $switch_themes . '</a>';
+		}
 		if ( current_user_can( 'edit_theme_options' ) ) {
 			printf(_n('Theme <span class="b">%1$s</span> with <span class="b"><a href="widgets.php">%2$s Widget</a></span>', 'Theme <span class="b">%1$s</span> with <span class="b"><a href="widgets.php">%2$s Widgets</a></span>', $num_widgets), $switch_themes, $num);
 		} else {
 			printf(_n('Theme <span class="b">%1$s</span> with <span class="b">%2$s Widget</span>', 'Theme <span class="b">%1$s</span> with <span class="b">%2$s Widgets</span>', $num_widgets), $switch_themes, $num);
 		}
 	} else {
-		if ( current_user_can( 'switch_themes' ) )
+		if ( current_user_can( 'switch_themes' ) ) {
+			echo '<a href="themes.php" class="button rbutton">' . __('Change Theme') . '</a>';
 			printf( __('Theme <span class="b"><a href="themes.php">%1$s</a></span>'), $ct->title );
-		else
+		} else {
 			printf( __('Theme <span class="b">%1$s</span>'), $ct->title );
+		}
 	}
 	echo '</p>';
-
-	// Check if search engines are blocked.
-	if ( !is_network_admin() && !is_user_admin() && current_user_can('manage_options') && '1' != get_option('blog_public') ) {
-		$title = apply_filters('privacy_on_link_title', __('Your site is asking search engines not to index its content') );
-		$content = apply_filters('privacy_on_link_text', __('Search Engines Blocked') );
-
-		echo "<p><a href='options-privacy.php' title='$title'>$content</a></p>";
-	}
 
 	update_right_now_message();
 
@@ -471,7 +457,7 @@ function wp_network_dashboard_right_now() {
 	do_action( 'mu_activity_box_end' );
 }
 
-function wp_dashboard_quick_press() {
+function wp_dashboard_quick_press_output() {
 	global $post_ID;
 
 	$drafts = false;
@@ -552,7 +538,7 @@ function wp_dashboard_quick_press() {
 			<input type="reset" value="<?php esc_attr_e( 'Reset' ); ?>" class="button" />
 			<span id="publishing-action">
 				<input type="submit" name="publish" id="publish" accesskey="p" tabindex="5" class="button-primary" value="<?php current_user_can('publish_posts') ? esc_attr_e('Publish') : esc_attr_e('Submit for Review'); ?>" />
-				<img class="waiting" src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" alt="" />
+				<img class="waiting" src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" />
 			</span>
 			<br class="clear" />
 		</p>
@@ -562,6 +548,10 @@ function wp_dashboard_quick_press() {
 <?php
 	if ( $drafts )
 		wp_dashboard_recent_drafts( $drafts );
+}
+
+function wp_dashboard_quick_press() {
+	echo '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="describe hide-if-js">' . __('This widget requires JavaScript.') . '</p>';
 }
 
 function wp_dashboard_recent_drafts( $drafts = false ) {
@@ -591,7 +581,7 @@ function wp_dashboard_recent_drafts( $drafts = false ) {
 	<ul>
 		<li><?php echo join( "</li>\n<li>", $list ); ?></li>
 	</ul>
-	<p class="textright"><a href="edit.php?post_status=draft" ><?php _e('View all'); ?></a></p>
+	<p class="textright"><a href="edit.php?post_status=draft" class="button"><?php _e('View all'); ?></a></p>
 <?php
 	} else {
 		_e('There are no drafts at the moment');
@@ -644,7 +634,7 @@ function wp_dashboard_recent_comments() {
 
 <?php
 		if ( current_user_can('edit_posts') ) { ?>
-			<?php _get_list_table('WP_Comments_List_Table')->views(); ?>
+			<p class="textright"><a href="edit-comments.php" class="button"><?php _e('View all'); ?></a></p>
 <?php	}
 
 		wp_comment_reply( -1, false, 'dashboard', false );
@@ -777,7 +767,7 @@ function wp_dashboard_recent_comments_control() {
 }
 
 function wp_dashboard_incoming_links() {
-	wp_dashboard_cached_rss_widget( 'dashboard_incoming_links', 'wp_dashboard_incoming_links_output' );
+	echo '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="describe hide-if-js">' . __('This widget requires JavaScript.') . '</p>';
 }
 
 /**
@@ -865,7 +855,7 @@ function wp_dashboard_incoming_links_control() {
 }
 
 function wp_dashboard_primary() {
-	wp_dashboard_cached_rss_widget( 'dashboard_primary', 'wp_dashboard_rss_output' );
+	echo '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="describe hide-if-js">' . __('This widget requires JavaScript.') . '</p>';
 }
 
 function wp_dashboard_primary_control() {
@@ -887,7 +877,7 @@ function wp_dashboard_rss_output( $widget_id ) {
 }
 
 function wp_dashboard_secondary() {
-	wp_dashboard_cached_rss_widget( 'dashboard_secondary', 'wp_dashboard_secondary_output' );
+	echo '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="describe hide-if-js">' . __('This widget requires JavaScript.') . '</p>';
 }
 
 function wp_dashboard_secondary_control() {
@@ -926,11 +916,7 @@ function wp_dashboard_secondary_output() {
 }
 
 function wp_dashboard_plugins() {
-	wp_dashboard_cached_rss_widget( 'dashboard_plugins', 'wp_dashboard_plugins_output', array(
-		'http://wordpress.org/extend/plugins/rss/browse/popular/',
-		'http://wordpress.org/extend/plugins/rss/browse/new/',
-		'http://wordpress.org/extend/plugins/rss/browse/updated/'
-	) );
+	echo '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="describe hide-if-js">' . __('This widget requires JavaScript.') . '</p>';
 }
 
 /**
@@ -1030,7 +1016,7 @@ function wp_dashboard_plugins_output() {
  * @return bool False on failure. True on success.
  */
 function wp_dashboard_cached_rss_widget( $widget_id, $callback, $check_urls = array() ) {
-	$loading = '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="hide-if-js">' . __( 'This widget requires JavaScript.' ) . '</p>';
+	$loading = '<p class="widget-loading">' . __( 'Loading&#8230;' ) . '</p>';
 
 	if ( empty($check_urls) ) {
 		$widgets = get_option( 'dashboard_widget_options' );
@@ -1120,7 +1106,7 @@ function wp_dashboard_rss_control( $widget_id, $form_inputs = array() ) {
 
 // Display File upload quota on dashboard
 function wp_dashboard_quota() {
-	if ( !is_multisite() || !current_user_can('upload_files') || get_site_option( 'upload_space_check_disabled' ) )
+	if ( !is_multisite() || !current_user_can('edit_posts') || get_site_option( 'upload_space_check_disabled' ) )
 		return true;
 
 	$quota = get_space_allowed();
@@ -1130,7 +1116,7 @@ function wp_dashboard_quota() {
 		$percentused = '100';
 	else
 		$percentused = ( $used / $quota ) * 100;
-	$used_color = ( $percentused >= 70 ) ? ' spam' : '';
+	$used_color = ( $percentused < 70 ) ? ( ( $percentused >= 40 ) ? 'waiting' : 'approved' ) : 'spam';
 	$used = round( $used, 2 );
 	$percentused = number_format( $percentused );
 
@@ -1148,7 +1134,7 @@ function wp_dashboard_quota() {
 	<table>
 		<tr class="first">
 			<td class="b b-comments"><?php printf( __( '<a href="%1$s" title="Manage Uploads" class="musublink">%2$sMB (%3$s%%)</a>' ), esc_url( admin_url( 'upload.php' ) ), $used, $percentused ); ?></td>
-			<td class="last t comments<?php echo $used_color;?>"><?php _e( 'Space Used' );?></td>
+			<td class="last t comments <?php echo $used_color;?>"><?php _e( 'Space Used' );?></td>
 		</tr>
 	</table>
 	</div>
@@ -1156,84 +1142,6 @@ function wp_dashboard_quota() {
 	<?php
 }
 add_action( 'activity_box_end', 'wp_dashboard_quota' );
-
-// Display Browser Nag Meta Box
-function wp_dashboard_browser_nag() {
-	$notice = '';
-	$response = wp_check_browser_version();
-
-	if ( $response['insecure'] ) {
-		$msg = sprintf( __( 'It looks like you\'re using an insecure version of <a href="%1$s">%2$s</a>. Using an outdated browser makes your computer unsafe.  For the best WordPress experience, please update your browser.' ), esc_attr( $response['update_url'] ), esc_html( $response['name'] ) );
-	} else {
-		$msg = sprintf( __( 'It looks like you\'re using an old version of <a href="%1$s">%2$s</a>. Using an outdated browser makes your computer unsafe.  For the best WordPress experience, please update your browser.' ), esc_attr( $response['update_url'] ), esc_html( $response['name'] ) );
-	}
-
-	$browser_nag_class = '';
-	if ( !empty( $response['img_src'] ) ) {
-		$img_src = ( is_ssl() && ! empty( $response['img_src_ssl'] ) )? $response['img_src_ssl'] : $response['img_src'];
-
-		$notice .= '<div class="alignright browser-icon"><a href="' . esc_attr($response['update_url']) . '"><img src="' . esc_attr( $img_src ) . '" alt="" /></a></div>';
-		$browser_nag_class = ' has-browser-icon';
-	}
-	$notice .= "<p class='browser-update-nag{$browser_nag_class}'>{$msg}</p>";
-	$notice .= sprintf( __( '<p><a href="%1$s" class="update-browser-link">Update %2$s</a> or learn how to <a href="%3$s" class="browse-happy-link">browse happy</a></p>' ), esc_attr( $response['update_url'] ), esc_html( $response['name'] ), 'http://browsehappy.com/' );
-	$notice .= '<p><a href="" class="dismiss">' . __( 'Dismiss' ) . '</a></p>';
-	$notice .= '<div class="clear"></div>';
-
-	echo apply_filters( 'browse-happy-notice', $notice, $response );
-}
-
-function dashboard_browser_nag_class( $classes ) {
-	$response = wp_check_browser_version();
-
-	if ( $response['insecure'] )
-		$classes[] = 'browser-insecure';
-
-	return $classes;
-}
-
-/**
- * Check if the user needs a browser update
- *
- * @since 3.2
- */
-function wp_check_browser_version() {
-	$key = md5( $_SERVER['HTTP_USER_AGENT'] );
-
-	if ( false === ($response = get_site_transient('browser_' . $key) ) ) {
-		global $wp_version;
-
-		$options = array(
-			'body'			=> array( 'useragent' => $_SERVER['HTTP_USER_AGENT'] ),
-			'user-agent'	=> 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' )
-		);
-
-		$response = wp_remote_post( 'http://api.wordpress.org/core/browse-happy/1.0/', $options );
-
-		if ( is_wp_error( $response ) || 200 != wp_remote_retrieve_response_code( $response ) )
-			return false;
-
-		/**
-		 * Response should be an array with:
-		 *  'name' - string- A user friendly browser name
-		 *  'version' - string - The most recent version of the browser
-		 *  'current_version' - string - The version of the browser the user is using
-		 *  'upgrade' - boolean - Whether the browser needs an upgrade
-		 *  'insecure' - boolean - Whether the browser is deemed insecure
-		 *  'upgrade_url' - string - The url to visit to upgrade
-		 *  'img_src' - string - An image representing the browser
-		 *  'img_src_ssl' - string - An image (over SSL) representing the browser
-		 */
-		$response = unserialize( wp_remote_retrieve_body( $response ) );
-
-		if ( ! $response )
-			return;
-
-		set_site_transient( 'browser_' . $key, $response, 604800 ); // cache for 1 week
-	}
-
-	return $response;
-}
 
 /**
  * Empty function usable by plugins to output empty dashboard widget (to be populated later by JS).

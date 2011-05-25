@@ -165,19 +165,18 @@ function count_user_posts($userid) {
  * Number of posts written by a list of users.
  *
  * @since 3.0.0
- * @param array $user_ids Array of user IDs.
- * @param string|array $post_type Optional. Post type to check. Defaults to post.
+ * @param array $users User ID number list.
  * @return array Amount of posts each user has written.
  */
-function count_many_users_posts($users, $post_type = 'post' ) {
+function count_many_users_posts($users) {
 	global $wpdb;
 
 	$count = array();
-	if ( empty( $users ) || ! is_array( $users ) )
+	if ( ! is_array($users) || empty( $users ) )
 		return $count;
 
-	$userlist = implode( ',', array_map( 'absint', $users ) );
-	$where = get_posts_by_author_sql( $post_type );
+	$userlist = implode( ',', $users );
+	$where = get_posts_by_author_sql( 'post' );
 
 	$result = $wpdb->get_results( "SELECT post_author, COUNT(*) FROM $wpdb->posts $where AND post_author IN ($userlist) GROUP BY post_author", ARRAY_N );
 	foreach ( $result as $row ) {
@@ -361,6 +360,12 @@ class WP_User_Query {
 	var $query_orderby;
 	var $query_limit;
 
+	/**
+	 * PHP4 constructor
+	 */
+	function WP_User_Query( $query = null ) {
+		$this->__construct( $query );
+	}
 
 	/**
 	 * PHP5 constructor
@@ -491,10 +496,12 @@ class WP_User_Query {
 
 		if ( 'authors' == $qv['who'] && $blog_id ) {
 			$qv['meta_key'] = $wpdb->get_blog_prefix( $blog_id ) . 'user_level';
-			$qv['meta_value'] = 0;
+			$qv['meta_value'] = '_wp_zero_value'; // Hack to pass '0'
 			$qv['meta_compare'] = '!=';
 			$qv['blog_id'] = $blog_id = 0; // Prevent extra meta query
 		}
+
+		_parse_meta_query( $qv );
 
 		$role = trim( $qv['role'] );
 
@@ -510,11 +517,8 @@ class WP_User_Query {
 			$qv['meta_query'][] = $cap_meta_query;
 		}
 
-		$meta_query = new WP_Meta_Query();
-		$meta_query->parse_query_vars( $qv );
-
-		if ( !empty( $meta_query->queries ) ) {
-			$clauses = $meta_query->get_sql( 'user', $wpdb->users, 'ID', $this );
+		if ( !empty( $qv['meta_query'] ) ) {
+			$clauses = call_user_func_array( '_get_meta_sql', array( $qv['meta_query'], 'user', $wpdb->users, 'ID', &$this ) );
 			$this->query_from .= $clauses['join'];
 			$this->query_where .= $clauses['where'];
 		}
@@ -736,7 +740,7 @@ function is_blog_user( $blog_id = 0 ) {
 /**
  * Add meta data field to a user.
  *
- * Post meta data is called "Custom Fields" on the Administration Screens.
+ * Post meta data is called "Custom Fields" on the Administration Panels.
  *
  * @since 3.0.0
  * @uses add_metadata()

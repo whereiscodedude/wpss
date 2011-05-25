@@ -67,6 +67,7 @@
 			// Register buttons
 			ed.addButton('wp_more', {
 				title : 'wordpress.wp_more_desc',
+				image : url + '/img/more.gif',
 				cmd : 'WP_More'
 			});
 
@@ -78,11 +79,13 @@
 
 			ed.addButton('wp_help', {
 				title : 'wordpress.wp_help_desc',
+				image : url + '/img/help.gif',
 				cmd : 'WP_Help'
 			});
 
 			ed.addButton('wp_adv', {
 				title : 'wordpress.wp_adv_desc',
+				image : url + '/img/toolbars.gif',
 				cmd : 'WP_Adv'
 			});
 
@@ -195,18 +198,12 @@
 				});
 			});
 
-			// Word count
-			if ( 'undefined' != typeof(jQuery) ) {
+			// Word count if script is loaded
+			if ( 'undefined' != typeof wpWordCount ) {
 				ed.onKeyUp.add(function(ed, e) {
-					var k = e.keyCode || e.charCode;
-
-					if ( k == last )
-						return;
-
-					if ( 13 == k || 8 == last || 46 == last )
-						jQuery(document).triggerHandler('wpcountwords', [ ed.getContent({format : 'raw'}) ]);
-
-					last = k;
+					if ( e.keyCode == last ) return;
+					if ( 13 == e.keyCode || 8 == last || 46 == last ) wpWordCount.wc( ed.getContent({format : 'raw'}) );
+					last = e.keyCode;
 				});
 			};
 

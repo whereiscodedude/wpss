@@ -73,11 +73,14 @@ class WP_Roles {
 	var $use_db = true;
 
 	/**
-	 * Constructor
+	 * PHP4 Constructor - Call {@link WP_Roles::_init()} method.
 	 *
 	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @return WP_Roles
 	 */
-	function __construct() {
+	function WP_Roles() {
 		$this->_init();
 	}
 
@@ -266,7 +269,7 @@ class WP_Role {
 	var $capabilities;
 
 	/**
-	 * Constructor - Set up object properties.
+	 * PHP4 Constructor - Set up object properties.
 	 *
 	 * The list of capabilities, must have the key as the name of the capability
 	 * and the value a boolean of whether it is granted to the role.
@@ -276,8 +279,9 @@ class WP_Role {
 	 *
 	 * @param string $role Role name.
 	 * @param array $capabilities List of capabilities.
+	 * @return WP_Role
 	 */
-	function __construct( $role, $capabilities ) {
+	function WP_Role( $role, $capabilities ) {
 		$this->name = $role;
 		$this->capabilities = $capabilities;
 	}
@@ -456,7 +460,7 @@ class WP_User {
 	var $filter = null;
 
 	/**
-	 * Constructor - Sets up the object properties.
+	 * PHP4 Constructor - Sets up the object properties.
 	 *
 	 * Retrieves the userdata and then assigns all of the data keys to direct
 	 * properties of the object. Calls {@link WP_User::_init_caps()} after
@@ -470,7 +474,7 @@ class WP_User {
 	 * @param int $blog_id Optional Blog ID, defaults to current blog.
 	 * @return WP_User
 	 */
-	function __construct( $id, $name = '', $blog_id = '' ) {
+	function WP_User( $id, $name = '', $blog_id = '' ) {
 
 		if ( empty( $id ) && empty( $name ) )
 			return;

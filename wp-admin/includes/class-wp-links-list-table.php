@@ -9,8 +9,8 @@
  */
 class WP_Links_List_Table extends WP_List_Table {
 
-	function __construct() {
-		parent::__construct( array(
+	function WP_Links_List_Table() {
+		parent::WP_List_Table( array(
 			'plural' => 'bookmarks',
 		) );
 	}

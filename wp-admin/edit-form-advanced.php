@@ -12,6 +12,12 @@ if ( !defined('ABSPATH') )
 
 wp_enqueue_script('post');
 
+if ( post_type_supports($post_type, 'editor') ) {
+	if ( user_can_richedit() )
+		wp_enqueue_script('editor');
+	wp_enqueue_script('word-count');
+}
+
 if ( post_type_supports($post_type, 'editor') || post_type_supports($post_type, 'thumbnail') ) {
 	add_thickbox();
 	wp_enqueue_script('media-upload');
@@ -174,7 +180,7 @@ if ( 'post' == $post_type ) {
 	'<p>' . __('<strong>Discussion</strong> - You can turn comments and pings on or off, and if there are comments on the post, you can see them here and moderate them.') . '</p>' .
 	'<p>' . sprintf(__('You can also create posts with the <a href="%s">Press This bookmarklet</a>.'), 'options-writing.php') . '</p>' .
 	'<p><strong>' . __('For more information:') . '</strong></p>' .
-	'<p>' . __('<a href="http://codex.wordpress.org/Posts_Add_New_Screen" target="_blank">Documentation on Writing and Editing Posts</a>') . '</p>' .
+	'<p>' . __('<a href="http://codex.wordpress.org/Posts_Add_New_SubPanel" target="_blank">Documentation on Writing and Editing Posts</a>') . '</p>' .
 	'<p>' . __('<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 	);
 } elseif ( 'page' == $post_type ) {
@@ -184,8 +190,8 @@ if ( 'post' == $post_type ) {
 	'<p>' . __('<strong>Template</strong> - Some themes have custom templates you can use for certain pages that might have additional features or custom layouts. If so, you&#8217;ll see them in this dropdown menu.') . '</p>' .
 	'<p>' . __('<strong>Order</strong> - Pages are usually ordered alphabetically, but you can choose your own order by entering a number (1 for first, etc.) in this field.') . '</p>' .
 	'<p><strong>' . __('For more information:') . '</strong></p>' .
-	'<p>' . __('<a href="http://codex.wordpress.org/Pages_Add_New_Screen" target="_blank">Documentation on Adding New Pages</a>') . '</p>' .
-	'<p>' . __('<a href="http://codex.wordpress.org/Pages_Screen#Editing_Individual_Pages" target="_blank">Documentation on Editing Pages</a>') . '</p>' .
+	'<p>' . __('<a href="http://codex.wordpress.org/Pages_Add_New_SubPanel" target="_blank">Documentation on Adding New Pages</a>') . '</p>' .
+	'<p>' . __('<a href="http://codex.wordpress.org/Pages_Pages_SubPanel#Editing_Individual_Pages" target="_blank">Documentation on Editing Pages</a>') . '</p>' .
 	'<p>' . __('<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 	);
 }
@@ -195,7 +201,7 @@ require_once('./admin-header.php');
 
 <div class="wrap">
 <?php screen_icon(); ?>
-<h2><?php echo esc_html( $title ); ?><?php if ( isset( $post_new_file ) ) : ?> <a href="<?php echo esc_url( $post_new_file ) ?>" class="add-new-h2"><?php echo esc_html($post_type_object->labels->add_new); ?></a><?php endif; ?></h2>
+<h2><?php echo esc_html( $title ); ?></h2>
 <?php if ( $notice ) : ?>
 <div id="notice" class="error"><p><?php echo $notice ?></p></div>
 <?php endif; ?>
@@ -270,7 +276,7 @@ wp_nonce_field( 'samplepermalink', 'samplepermalinknonce', false );
 <?php the_editor($post->post_content); ?>
 
 <table id="post-status-info" cellspacing="0"><tbody><tr>
-	<td id="wp-word-count"><?php printf( __( 'Word count: %s' ), '<span class="word-count">0</span>' ); ?></td>
+	<td id="wp-word-count"></td>
 	<td class="autosave-info">
 	<span id="autosave">&nbsp;</span>
 <?php

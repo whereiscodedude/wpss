@@ -79,7 +79,7 @@ function get_stylesheet_directory_uri() {
  */
 function get_stylesheet_uri() {
 	$stylesheet_dir_uri = get_stylesheet_directory_uri();
-	$stylesheet_uri = $stylesheet_dir_uri . '/style.css';
+	$stylesheet_uri = $stylesheet_dir_uri . "/style.css";
 	return apply_filters('stylesheet_uri', $stylesheet_uri, $stylesheet_dir_uri);
 }
 
@@ -827,7 +827,7 @@ function get_category_template() {
 
 	$templates[] = "category-{$category->slug}.php";
 	$templates[] = "category-{$category->term_id}.php";
-	$templates[] = 'category.php';
+	$templates[] = "category.php";
 
 	return get_query_template( 'category', $templates );
 }
@@ -851,7 +851,7 @@ function get_tag_template() {
 
 	$templates[] = "tag-{$tag->slug}.php";
 	$templates[] = "tag-{$tag->term_id}.php";
-	$templates[] = 'tag.php';
+	$templates[] = "tag.php";
 
 	return get_query_template( 'tag', $templates );
 }
@@ -881,7 +881,7 @@ function get_taxonomy_template() {
 
 	$templates[] = "taxonomy-$taxonomy-{$term->slug}.php";
 	$templates[] = "taxonomy-$taxonomy.php";
-	$templates[] = 'taxonomy.php';
+	$templates[] = "taxonomy.php";
 
 	return get_query_template( 'taxonomy', $templates );
 }
@@ -963,7 +963,7 @@ function get_page_template() {
 		$templates[] = "page-$pagename.php";
 	if ( $id )
 		$templates[] = "page-$id.php";
-	$templates[] = 'page.php';
+	$templates[] = "page.php";
 
 	return get_query_template( 'page', $templates );
 }
@@ -1427,13 +1427,8 @@ function header_textcolor() {
  */
 function get_header_image() {
 	$default = defined( 'HEADER_IMAGE' ) ? HEADER_IMAGE : '';
+
 	$url = get_theme_mod( 'header_image', $default );
-
-	if ( 'remove-header' == $url )
-		return false;
-
-	if ( is_random_header_image() )
-		$url = get_random_header_image();
 
 	if ( is_ssl() )
 		$url = str_replace( 'http://', 'https://', $url );
@@ -1444,96 +1439,12 @@ function get_header_image() {
 }
 
 /**
- * Get random header image from registered images in theme.
- *
- * @since 3.2
- *
- * @return string Path to header image
- */
-function get_random_header_image() {
-	global $_wp_default_headers;
-
-	$header_image_mod = get_theme_mod( 'header_image', '' );
-	$headers = array();
-
-	if ( 'random-uploaded-image' == $header_image_mod )
-		$headers = get_uploaded_header_images();
-	elseif ( ! empty( $_wp_default_headers ) )
-		$headers = $_wp_default_headers;
-
-	if ( empty( $headers ) )
-		return '';
-
-	$random_image = array_rand( $headers );
-	$header_url = sprintf( $headers[$random_image]['url'], get_template_directory_uri(), get_stylesheet_directory_uri() );
-
-	return $header_url;
-}
-
-/**
- * Check if random header image is in use.
- *
- * Always true if user expressly chooses the option in Appearance > Header.
- * Also true if theme has multiple header images registered and no specific header image is chosen.
- *
- * @since 3.2
- * @uses HEADER_IMAGE
- *
- * @param string $type The random pool to use. any|default|uploaded
- * @return boolean
- */
-function is_random_header_image( $type = 'any' ) {
-	$default = defined( 'HEADER_IMAGE' ) ? HEADER_IMAGE : '';
-	$header_image_mod = get_theme_mod( 'header_image', $default );
-
-	if ( 'any' == $type ) {
-		if ( 'random-default-image' == $header_image_mod || 'random-uploaded-image' == $header_image_mod || ( '' != get_random_header_image() && empty( $header_image_mod ) ) )
-			return true;
-	} else {
-		if ( "random-$type-image" == $header_image_mod )
-			return true;
-		elseif ( 'default' == $type && empty( $header_image_mod ) && '' != get_random_header_image()  )
-			return true;
-	}
-
-	return false;
-}
-
-/**
  * Display header image path.
  *
  * @since 2.1.0
  */
 function header_image() {
 	echo get_header_image();
-}
-
-/**
- * Get the header images uploaded for the current theme.
- *
- * @since 3.2.0
- *
- * @return array
- */
-function get_uploaded_header_images() {
-	$header_images = array();
-
-	// @todo caching
-	$headers = get_posts( array( 'post_type' => 'attachment', 'meta_key' => '_wp_attachment_is_custom_header', 'meta_value' => get_option('stylesheet'), 'orderby' => 'none', 'nopaging' => true ) );
-
-	if ( empty( $headers ) )
-		return array();
-
-	foreach ( (array) $headers as $header ) {
-		$url = esc_url_raw( $header->guid );
-		$header = basename($url);
-		$header_images[$header] = array();
-		$header_images[$header]['url'] =  $url;
-		$header_images[$header]['thumbnail_url'] =  $url;
-		$header_images[$header]['uploaded'] = true;
-	}
-
-	return $header_images;
 }
 
 /**
