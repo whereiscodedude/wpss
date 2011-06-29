@@ -216,14 +216,14 @@ class AtomServer {
 	var $do_output = true;
 
 	/**
-	 * Constructor - Sets up object properties.
+	 * PHP4 constructor - Sets up object properties.
 	 *
 	 * @since 2.2.0
 	 * @return AtomServer
 	 */
-	function __construct() {
+	function AtomServer() {
 
-		$this->script_name = array_pop( explode( '/', $_SERVER['SCRIPT_NAME'] ) );
+		$this->script_name = array_pop( $var_by_ref = explode( '/', $_SERVER['SCRIPT_NAME'] ) );
 		$this->app_base = site_url( $this->script_name . '/' );
 
 		$this->selectors = array(
