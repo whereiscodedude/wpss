@@ -570,25 +570,6 @@ function update_comment_meta($comment_id, $meta_key, $meta_value, $prev_value = 
 	return update_metadata('comment', $comment_id, $meta_key, $meta_value, $prev_value);
 }
 
-/**  
- * Sets the cookies used to store an unauthenticated commentator's identity. Typically used  
- * to recall previous comments by this commentator that are still held in moderation.  
- *  
- * @param object $comment Comment object.
- * @param object $user Comment author's object.
- *
- * @since 3.4.0
- */  
-function wp_set_comment_cookies($comment, $user) {  
-	if ( $user->ID )
-		return;
-
-	$comment_cookie_lifetime = apply_filters('comment_cookie_lifetime', 30000000);
-	setcookie('comment_author_' . COOKIEHASH, $comment->comment_author, time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
-	setcookie('comment_author_email_' . COOKIEHASH, $comment->comment_author_email, time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
-	setcookie('comment_author_url_' . COOKIEHASH, esc_url($comment->comment_author_url), time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
-}  
-
 /**
  * Sanitizes the cookies sent to the user already.
  *
@@ -704,9 +685,9 @@ function check_comment_flood_db( $ip, $email, $date ) {
 			do_action('comment_flood_trigger', $time_lastcomment, $time_newcomment);
 
 			if ( defined('DOING_AJAX') )
-				die( __('You are posting comments too quickly. Slow down.') );
+				die( __('You are posting comments too quickly.  Slow down.') );
 
-			wp_die( __('You are posting comments too quickly. Slow down.'), '', array('response' => 403) );
+			wp_die( __('You are posting comments too quickly.  Slow down.'), '', array('response' => 403) );
 		}
 	}
 }
@@ -742,7 +723,7 @@ function &separate_comments(&$comments) {
  * @uses get_option() Used to fill in defaults for parameters.
  * @uses Walker_Comment
  *
- * @param array $comments Optional array of comment objects. Defaults to $wp_query->comments
+ * @param array $comments Optional array of comment objects.  Defaults to $wp_query->comments
  * @param int $per_page Optional comments per page.
  * @param boolean $threaded Optional control over flat or threaded comments.
  * @return int Number of comment pages.
@@ -1966,7 +1947,7 @@ function update_comment_cache($comments) {
 //
 
 /**
- * Close comments on old posts on the fly, without any extra DB queries. Hooked to the_posts.
+ * Close comments on old posts on the fly, without any extra DB queries.  Hooked to the_posts.
  *
  * @access private
  * @since 2.7.0
@@ -1996,7 +1977,7 @@ function _close_comments_for_old_posts( $posts, $query ) {
 }
 
 /**
- * Close comments on an old post. Hooked to comments_open and pings_open.
+ * Close comments on an old post.  Hooked to comments_open and pings_open.
  *
  * @access private
  * @since 2.7.0

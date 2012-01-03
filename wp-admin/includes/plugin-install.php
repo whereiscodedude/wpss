@@ -167,6 +167,7 @@ add_action('install_plugins_search', 'display_plugins_table');
 add_action('install_plugins_featured', 'display_plugins_table');
 add_action('install_plugins_popular', 'display_plugins_table');
 add_action('install_plugins_new', 'display_plugins_table');
+add_action('install_plugins_updated', 'display_plugins_table');
 
 /**
  * Determine the status we can perform on a plugin.
@@ -198,7 +199,7 @@ function install_plugin_install_status($api, $loop = false) {
 	}
 
 	if ( 'install' == $status ) {
-		if ( is_dir( WP_PLUGIN_DIR . '/' . $api->slug ) ) {
+		if ( is_dir( WP_PLUGIN_DIR  . '/' . $api->slug ) ) {
 			$installed_plugin = get_plugins('/' . $api->slug);
 			if ( empty($installed_plugin) ) {
 				if ( current_user_can('install_plugins') )
@@ -321,7 +322,7 @@ function install_plugin_information() {
 <?php endif; if ( ! empty($api->slug) && empty($api->external) ) : ?>
 			<li><a target="_blank" href="http://wordpress.org/extend/plugins/<?php echo $api->slug ?>/"><?php _e('WordPress.org Plugin Page &#187;') ?></a></li>
 <?php endif; if ( ! empty($api->homepage) ) : ?>
-			<li><a target="_blank" href="<?php echo $api->homepage ?>"><?php _e('Plugin Homepage &#187;') ?></a></li>
+			<li><a target="_blank" href="<?php echo $api->homepage ?>"><?php _e('Plugin Homepage  &#187;') ?></a></li>
 <?php endif; ?>
 		</ul>
 		<?php if ( ! empty($api->rating) ) : ?>

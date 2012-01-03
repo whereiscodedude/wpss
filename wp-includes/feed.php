@@ -489,7 +489,8 @@ function self_link() {
 	$host = @parse_url(home_url());
 	$host = $host['host'];
 	echo esc_url(
-		( is_ssl() ? 'https' : 'http' ) . '://'
+		'http'
+		. ( (isset($_SERVER['https']) && $_SERVER['https'] == 'on') ? 's' : '' ) . '://'
 		. $host
 		. stripslashes($_SERVER['REQUEST_URI'])
 		);

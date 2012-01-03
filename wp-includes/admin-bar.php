@@ -96,7 +96,7 @@ function wp_admin_bar_wp_menu( $wp_admin_bar ) {
 		'parent'    => 'wp-logo-external',
 		'id'        => 'wporg',
 		'title'     => __('WordPress.org'),
-		'href'      => __('http://wordpress.org/'),
+		'href'      => __('http://wordpress.org'),
 	) );
 
 	// Add codex link
@@ -104,7 +104,7 @@ function wp_admin_bar_wp_menu( $wp_admin_bar ) {
 		'parent'    => 'wp-logo-external',
 		'id'        => 'documentation',
 		'title'     => __('Documentation'),
-		'href'      => __('http://codex.wordpress.org/'),
+		'href'      => __('http://codex.wordpress.org'),
 	) );
 
 	// Add forums link
@@ -680,7 +680,7 @@ function _admin_bar_bump_cb() { ?>
 /**
  * Set the display status of the admin bar.
  *
- * This can be called immediately upon plugin load. It does not need to be called from a function hooked to the init action.
+ * This can be called immediately upon plugin load.  It does not need to be called from a function hooked to the init action.
  *
  * @since 3.1.0
  *

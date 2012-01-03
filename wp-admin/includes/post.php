@@ -171,7 +171,7 @@ function edit_post( $post_data = null ) {
 	$post_data = _wp_translate_postdata( true, $post_data );
 	if ( is_wp_error($post_data) )
 		wp_die( $post_data->get_error_message() );
-	if ( 'autosave' != $post_data['action'] && 'auto-draft' == $post_data['post_status'] )
+	if ( 'autosave' != $post_data['action']  && 'auto-draft' == $post_data['post_status'] )
 		$post_data['post_status'] = 'draft';
 
 	if ( isset($post_data['visibility']) ) {
@@ -352,7 +352,7 @@ function bulk_edit_posts( $post_data = null ) {
 		$tax_names = get_object_taxonomies( $post );
 		foreach ( $tax_names as $tax_name ) {
 			$taxonomy_obj = get_taxonomy($tax_name);
-			if ( isset( $tax_input[$tax_name]) && current_user_can( $taxonomy_obj->cap->assign_terms ) )
+			if (  isset( $tax_input[$tax_name]) && current_user_can( $taxonomy_obj->cap->assign_terms ) )
 				$new_terms = $tax_input[$tax_name];
 			else
 				$new_terms = array();
@@ -1259,7 +1259,7 @@ function wp_create_post_autosave( $post_id ) {
 	if ( is_wp_error( $translated ) )
 		return $translated;
 
-	// Only store one autosave. If there is already an autosave, overwrite it.
+	// Only store one autosave.  If there is already an autosave, overwrite it.
 	if ( $old_autosave = wp_get_post_autosave( $post_id ) ) {
 		$new_autosave = _wp_post_revision_fields( $_POST, true );
 		$new_autosave['ID'] = $old_autosave->ID;
@@ -1320,7 +1320,7 @@ function post_preview() {
 
 	if ( 'draft' == $post->post_status ) {
 		$id = edit_post();
-	} else { // Non drafts are not overwritten. The autosave is stored in a special post revision.
+	} else { // Non drafts are not overwritten.  The autosave is stored in a special post revision.
 		$id = wp_create_post_autosave( $post->ID );
 		if ( ! is_wp_error($id) )
 			$id = $post->ID;

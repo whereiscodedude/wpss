@@ -732,7 +732,7 @@ function sanitize_file_name( $filename ) {
 	$extension = array_pop($parts);
 	$mimes = get_allowed_mime_types();
 
-	// Loop over any intermediate extensions. Munge them with a trailing underscore if they are a 2 - 5 character
+	// Loop over any intermediate extensions.  Munge them with a trailing underscore if they are a 2 - 5 character
 	// long alpha string not in the extension whitelist.
 	foreach ( (array) $parts as $part) {
 		$filename .= '.' . $part;
@@ -1012,12 +1012,14 @@ function convert_chars($content, $deprecated = '') {
 /**
  * Will only balance the tags if forced to and the option is set to balance tags.
  *
- * The option 'use_balanceTags' is used to determine whether the tags will be balanced.
+ * The option 'use_balanceTags' is used for whether the tags will be balanced.
+ * Both the $force parameter and 'use_balanceTags' option will have to be true
+ * before the tags will be balanced.
  *
  * @since 0.71
  *
  * @param string $text Text to be balanced
- * @param bool $force If true, forces balancing, ignoring the value of the option. Default false.
+ * @param bool $force Forces balancing, ignoring the value of the option. Default false.
  * @return string Balanced text
  */
 function balanceTags( $text, $force = false ) {

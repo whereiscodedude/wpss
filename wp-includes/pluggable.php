@@ -111,8 +111,8 @@ if ( !function_exists('get_user_by') ) :
  *
  * @since 2.8.0
  *
- * @param string $field The field to retrieve the user with. id | slug | email | login
- * @param int|string $value A value for $field. A user ID, slug, email address, or login name.
+ * @param string $field The field to retrieve the user with.  id | slug | email | login
+ * @param int|string $value A value for $field.  A user ID, slug, email address, or login name.
  * @return bool|object False on failure, WP_User object on success
  */
 function get_user_by( $field, $value ) {
@@ -929,7 +929,7 @@ if ( !function_exists('wp_validate_redirect') ) :
  *		WordPress host string and $location host string.
  *
  * @param string $location The redirect to validate
- * @param string $default The value to return if $location is not allowed
+ * @param string $default The value to return is $location is not allowed
  * @return string redirect-sanitized URL
  **/
 function wp_validate_redirect($location, $default = '') {
@@ -1629,7 +1629,7 @@ function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
 	}
 
 	if ( !empty($email) )
-		$email_hash = md5( strtolower( trim( $email ) ) );
+		$email_hash = md5( strtolower( $email ) );
 
 	if ( is_ssl() ) {
 		$host = 'https://secure.gravatar.com';

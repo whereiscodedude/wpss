@@ -76,7 +76,7 @@ require_once('./admin-header.php');
 ?>
 
 <?php if ( ! validate_current_theme() ) : ?>
-<div id="message1" class="updated"><p><?php _e('The active theme is broken. Reverting to the default theme.'); ?></p></div>
+<div id="message1" class="updated"><p><?php _e('The active theme is broken.  Reverting to the default theme.'); ?></p></div>
 <?php elseif ( isset($_GET['activated']) ) :
 		if ( isset($wp_registered_sidebars) && count( (array) $wp_registered_sidebars ) && current_user_can('edit_theme_options') ) { ?>
 <div id="message2" class="updated"><p><?php printf( __('New theme activated. This theme supports widgets, please visit the <a href="%s">widgets settings</a> screen to configure them.'), admin_url( 'widgets.php' ) ); ?></p></div><?php
@@ -120,7 +120,7 @@ if ( ! is_multisite() && current_user_can( 'install_themes' ) ) : ?>
 			if ( ( strcmp($self, $item[2]) == 0 && empty($parent_file)) || ($parent_file && ($item[2] == $parent_file)) ) $class = ' class="current"';
 
 			if ( !empty($submenu[$item[2]]) ) {
-				$submenu[$item[2]] = array_values($submenu[$item[2]]); // Re-index.
+				$submenu[$item[2]] = array_values($submenu[$item[2]]);  // Re-index.
 				$menu_hook = get_plugin_page_hook($submenu[$item[2]][0][2], $item[2]);
 				if ( file_exists(WP_PLUGIN_DIR . "/{$submenu[$item[2]][0][2]}") || !empty($menu_hook))
 					$options[] = "<a href='admin.php?page={$submenu[$item[2]][0][2]}'$class>{$item[0]}</a>";

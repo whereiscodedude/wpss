@@ -390,15 +390,24 @@ var photostorage = false;
 				function setup_photo_actions() {
 					jQuery('.close').click(function() {
 						jQuery('#extra-fields').hide();
+						jQuery('body').append( jQuery('#photo-add-url-div') );
 						jQuery('#extra-fields').html('');
 					});
 					jQuery('.refresh').click(function() {
 						photostorage = false;
+						jQuery('body').append( jQuery('#photo-add-url-div') );
 						show('photo');
 					});
 					jQuery('#photo-add-url').click(function(){
-						var form = jQuery('#photo-add-url-div').clone();
-						jQuery('#img_container').empty().append( form.show() );
+						var container = jQuery('#img_container');
+
+						if ( container.children('#photo-add-url-div:visible').length ) {
+							container.children('a').show();
+							jQuery('#photo-add-url-div').hide();
+						} else {
+							container.children('a').hide();
+							container.append( jQuery('#photo-add-url-div').show() );
+						}
 					});
 					jQuery('#waiting').hide();
 					jQuery('#extra-fields').show();
@@ -437,7 +446,7 @@ var photostorage = false;
 			show('video');
 		<?php } elseif ( preg_match("/vimeo\.com\/[0-9]+/i", $url) ) { ?>
 			show('video');
-		<?php } elseif ( preg_match("/flickr\.com/i", $url) ) { ?>
+		<?php  } elseif ( preg_match("/flickr\.com/i", $url) ) { ?>
 			show('photo');
 		<?php } ?>
 		jQuery('#title').unbind();
@@ -610,7 +619,7 @@ var photostorage = false;
 
 		$content = '';
 		if ( $selection )
-			$content .= $selection;
+			$content .=  $selection;
 
 		if ( $url ) {
 			$content .= '<p>';

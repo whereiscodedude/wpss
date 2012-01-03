@@ -917,6 +917,8 @@ function get_attachment_fields_to_edit($post, $errors = null) {
 
 	$edit_post = sanitize_post($post, 'edit');
 
+
+
 	$form_fields = array(
 		'post_title'   => array(
 			'label'      => __('Title'),
@@ -1126,6 +1128,8 @@ function get_media_item( $attachment_id, $args = null ) {
 				$item .= "<p><strong>" . __('Dimensions:') . "</strong> $media_dims</p>\n";
 
 			$item .= "</td></tr>\n";
+
+
 
 	$item .= "
 		</thead>

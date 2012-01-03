@@ -206,6 +206,8 @@ class MagpieRSS {
 		}
 	}
 
+
+
 	function feed_cdata ($p, $text) {
 
 		if ($this->feed_type == ATOM and $this->incontent)

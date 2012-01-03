@@ -196,7 +196,7 @@ function get_current_screen() {
  * @param mixed $hook_name Optional. The hook name (also known as the hook suffix) used to determine the screen,
  *	or an existing screen object.
  */
-function set_current_screen( $hook_name = '' ) {
+function set_current_screen( $hook_name =  '' ) {
 	WP_Screen::get( $hook_name )->set_current_screen();
 }
 
@@ -208,7 +208,7 @@ function set_current_screen( $hook_name = '' ) {
  */
 final class WP_Screen {
 	/**
-	 * Any action associated with the screen. 'add' for *-add.php and *-new.php screens. Empty otherwise.
+	 * Any action associated with the screen. 'add' for *-add.php and *-new.php screens.  Empty otherwise.
 	 *
 	 * @since 3.3.0
 	 * @var string
@@ -217,7 +217,7 @@ final class WP_Screen {
 	public $action;
 
 	/**
-	 * The base type of the screen. This is typically the same as $id but with any post types and taxonomies stripped.
+	 * The base type of the screen.  This is typically the same as $id but with any post types and taxonomies stripped.
 	 * For example, for an $id of 'edit-post' the base is 'edit'.
 	 *
 	 * @since 3.3.0
@@ -539,7 +539,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 *
-	 * @param string $parent_file The parent file of the screen. Typically the $parent_file global.
+	 * @param string $parent_file The parent file of the screen.  Typically the $parent_file global.
 	 */
 	function set_parentage( $parent_file ) {
 		$this->parent_file = $parent_file;
@@ -809,7 +809,7 @@ final class WP_Screen {
 								$welcome_checked = false;
 						}
 						echo '<label for="wp_welcome_panel-hide">';
-						echo '<input type="checkbox" id="wp_welcome_panel-hide"' . checked( (bool) $welcome_checked, true, false ) . ' />';
+						echo '<input type="checkbox" id="wp_welcome_panel-hide"' . checked( (bool) $welcome_checked, true, false )  . ' />';
 						echo __( 'Welcome' ) . "</label>\n";
 					}
 				?>
@@ -817,7 +817,7 @@ final class WP_Screen {
 			</div>
 			<?php endif;
 			if ( ! empty( $columns ) ) : ?>
-			<h5><?php echo ( isset( $columns['_title'] ) ? $columns['_title'] : _x('Show on screen', 'Columns') ) ?></h5>
+			<h5><?php echo ( isset( $columns['_title'] ) ?  $columns['_title'] :  _x('Show on screen', 'Columns') ) ?></h5>
 			<div class="metabox-prefs">
 				<?php
 				$special = array('_title', 'cb', 'comment', 'media', 'name', 'title', 'username', 'blogname');

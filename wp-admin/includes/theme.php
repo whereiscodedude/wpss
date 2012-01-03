@@ -253,7 +253,7 @@ function theme_update_available( $theme ) {
 		$theme_name = is_object($theme) ? $theme->name : (is_array($theme) ? $theme['Name'] : '');
 		$details_url = add_query_arg(array('TB_iframe' => 'true', 'width' => 1024, 'height' => 800), $update['url']); //Theme browser inside WP? replace this, Also, theme preview JS will override this on the available list.
 		$update_url = wp_nonce_url('update.php?action=upgrade-theme&amp;theme=' . urlencode($stylesheet), 'upgrade-theme_' . $stylesheet);
-		$update_onclick = 'onclick="if ( confirm(\'' . esc_js( __("Updating this theme will lose any customizations you have made. 'Cancel' to stop, 'OK' to update.") ) . '\') ) {return true;}return false;"';
+		$update_onclick = 'onclick="if ( confirm(\'' . esc_js( __("Updating this theme will lose any customizations you have made.  'Cancel' to stop, 'OK' to update.") ) . '\') ) {return true;}return false;"';
 
 		if ( !is_multisite() ) {
 			if ( ! current_user_can('update_themes') )
@@ -271,7 +271,7 @@ function theme_update_available( $theme ) {
  *
  * @since 3.1.0
  *
- * @return array Array of features keyed by category with translations keyed by slug.
+ * @return array  Array of features keyed by category with translations keyed by slug.
  */
 function get_theme_feature_list() {
 	// Hard-coded list is used if api not accessible.
@@ -340,7 +340,7 @@ function get_theme_feature_list() {
 		return $features;
 
 	if ( !$feature_list = get_site_transient( 'wporg_theme_feature_list' ) )
-		set_site_transient( 'wporg_theme_feature_list', array( ), 10800);
+		set_site_transient( 'wporg_theme_feature_list', array( ),  10800);
 
 	if ( !$feature_list ) {
 		$feature_list = themes_api( 'feature_list', array( ) );
