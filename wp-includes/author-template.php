@@ -397,3 +397,5 @@ function __clear_multi_author_cache() {
 	wp_cache_delete('is_multi_author', 'posts');
 }
 add_action('transition_post_status', '__clear_multi_author_cache');
+
+?>

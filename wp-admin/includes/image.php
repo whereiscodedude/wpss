@@ -32,7 +32,7 @@ function wp_create_thumbnail( $file, $max_side, $deprecated = '' ) {
  *
  * @since 2.1.0
  *
- * @param string|int $src The source file or Attachment ID.
+ * @param string|int $src_file The source file or Attachment ID.
  * @param int $src_x The start x position to crop from.
  * @param int $src_y The start y position to crop from.
  * @param int $src_w The width to crop.
@@ -43,22 +43,13 @@ function wp_create_thumbnail( $file, $max_side, $deprecated = '' ) {
  * @param string $dst_file Optional. The destination file to write to.
  * @return string|WP_Error|false New filepath on success, WP_Error or false on failure.
  */
-function wp_crop_image( $src, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $src_abs = false, $dst_file = false ) {
-	if ( is_numeric( $src ) ) { // Handle int as attachment ID
-		$src_file = get_attached_file( $src );
-		if ( ! file_exists( $src_file ) ) {
-			// If the file doesn't exist, attempt a url fopen on the src link.
-			// This can occur with certain file replication plugins.
-			$post = get_post( $src );
-			$src = load_image_to_edit( $src, $post->post_mime_type, 'full' );
-		} else {
-			$src = wp_load_image( $src_file );
-		}
-	} else {
-		$src = wp_load_image( $src );
-	}
+function wp_crop_image( $src_file, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $src_abs = false, $dst_file = false ) {
+	if ( is_numeric( $src_file ) ) // Handle int as attachment ID
+		$src_file = get_attached_file( $src_file );
 
-	if ( ! is_resource( $src ) )
+	$src = wp_load_image( $src_file );
+
+	if ( !is_resource( $src ) )
 		return new WP_Error( 'error_loading_image', $src, $src_file );
 
 	$dst = wp_imagecreatetruecolor( $dst_w, $dst_h );
@@ -68,7 +59,7 @@ function wp_crop_image( $src, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $s
 		$src_h -= $src_y;
 	}
 
-	if ( function_exists( 'imageantialias' ) )
+	if (function_exists('imageantialias'))
 		imageantialias( $dst, true );
 
 	imagecopyresampled( $dst, $src, 0, 0, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h );
@@ -79,10 +70,6 @@ function wp_crop_image( $src, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $s
 		$dst_file = str_replace( basename( $src_file ), 'cropped-' . basename( $src_file ), $src_file );
 
 	$dst_file = preg_replace( '/\\.[^\\.]+$/', '.jpg', $dst_file );
-
-	// The directory containing the original file may no longer exist when
-	// using a replication plugin.
-	wp_mkdir_p( dirname( $dst_file ) );
 
 	if ( imagejpeg( $dst, $dst_file, apply_filters( 'jpeg_quality', 90, 'wp_crop_image' ) ) )
 		return $dst_file;
@@ -117,7 +104,7 @@ function wp_generate_attachment_metadata( $attachment_id, $file ) {
 		global $_wp_additional_image_sizes;
 
 		foreach ( get_intermediate_image_sizes() as $s ) {
-			$sizes[$s] = array( 'width' => '', 'height' => '', 'crop' => false );
+			$sizes[$s] = array( 'width' => '', 'height' => '', 'crop' => FALSE );
 			if ( isset( $_wp_additional_image_sizes[$s]['width'] ) )
 				$sizes[$s]['width'] = intval( $_wp_additional_image_sizes[$s]['width'] ); // For theme-added sizes
 			else
@@ -218,7 +205,7 @@ function wp_read_image_metadata( $file ) {
 
 	// exif contains a bunch of data we'll probably never need formatted in ways
 	// that are difficult to use. We'll normalize it and just extract the fields
-	// that are likely to be useful. Fractions and numbers are converted to
+	// that are likely to be useful.  Fractions and numbers are converted to
 	// floats, dates to unix timestamps, and everything else to strings.
 	$meta = array(
 		'aperture' => 0,
@@ -351,43 +338,4 @@ function file_is_displayable_image($path) {
 		$result = true;
 
 	return apply_filters('file_is_displayable_image', $result, $path);
-}
-
-function load_image_to_edit($post_id, $mime_type, $size = 'full') {
-	$filepath = get_attached_file($post_id);
-
-	if ( $filepath && file_exists($filepath) ) {
-		if ( 'full' != $size && ( $data = image_get_intermediate_size($post_id, $size) ) ) {
-			$filepath = apply_filters('load_image_to_edit_filesystempath', path_join( dirname($filepath), $data['file'] ), $post_id, $size);
-		}
-	} elseif ( function_exists('fopen') && function_exists('ini_get') && true == ini_get('allow_url_fopen') ) {
-		$filepath = apply_filters('load_image_to_edit_attachmenturl', wp_get_attachment_url($post_id) , $post_id, $size);
-	}
-
-	$filepath = apply_filters('load_image_to_edit_path', $filepath, $post_id, $size);
-	if ( empty($filepath) )
-		return false;
-
-	switch ( $mime_type ) {
-		case 'image/jpeg':
-			$image = imagecreatefromjpeg($filepath);
-			break;
-		case 'image/png':
-			$image = imagecreatefrompng($filepath);
-			break;
-		case 'image/gif':
-			$image = imagecreatefromgif($filepath);
-			break;
-		default:
-			$image = false;
-			break;
-	}
-	if ( is_resource($image) ) {
-		$image = apply_filters('load_image_to_edit', $image, $post_id, $size);
-		if ( function_exists('imagealphablending') && function_exists('imagesavealpha') ) {
-			imagealphablending($image, false);
-			imagesavealpha($image, true);
-		}
-	}
-	return $image;
 }

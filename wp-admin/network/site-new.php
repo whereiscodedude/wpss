@@ -148,3 +148,4 @@ if ( ! empty( $messages ) ) {
 </div>
 <?php
 require('../admin-footer.php');
+?>

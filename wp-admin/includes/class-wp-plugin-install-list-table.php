@@ -33,6 +33,7 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 		$tabs['featured'] = _x( 'Featured','Plugin Installer' );
 		$tabs['popular']  = _x( 'Popular','Plugin Installer' );
 		$tabs['new']      = _x( 'Newest','Plugin Installer' );
+		$tabs['updated']  = _x( 'Recently Updated','Plugin Installer' );
 
 		$nonmenu_tabs = array( 'plugin-information' ); //Valid actions to perform which do not have a Menu item.
 
@@ -68,6 +69,7 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 			case 'featured':
 			case 'popular':
 			case 'new':
+			case 'updated':
 				$args['browse'] = $tab;
 				break;
 
@@ -238,3 +240,5 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 		}
 	}
 }
+
+?>

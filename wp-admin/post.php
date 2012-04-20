@@ -262,3 +262,4 @@ default:
 	break;
 } // end switch
 include('./admin-footer.php');
+?>

@@ -66,7 +66,6 @@ get_header(); ?>
 					 */
 					$counter_slider = 0;
 
-					$header_image_width  = get_theme_support( 'custom-header', 'width' );
 					?>
 
 				<div class="featured-posts">
@@ -90,10 +89,10 @@ get_header(); ?>
 						$feature_class = 'feature-image small';
 
 						// Hang on. Let's check this here image out.
-						$image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), array( $header_image_width, $header_image_width ) );
+						$image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), array( HEADER_IMAGE_WIDTH, HEADER_IMAGE_WIDTH ) );
 
 						// Is it bigger than or equal to our header?
-						if ( $image[1] >= $header_image_width ) {
+						if ( $image[1] >= HEADER_IMAGE_WIDTH ) {
 							// If bigger, let's add a BIGGER class. It's EXTRA classy now.
 							$feature_class = 'feature-image large';
 						}
@@ -108,7 +107,7 @@ get_header(); ?>
 							 * make it a large featured post, otherwise render it small
 							 */
 							if ( has_post_thumbnail() ) {
-								if ( $image[1] >= $header_image_width )
+								if ( $image[1] >= HEADER_IMAGE_WIDTH )
 									$thumbnail_size = 'large-feature';
 								else
 									$thumbnail_size = 'small-feature';

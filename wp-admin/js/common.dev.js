@@ -172,9 +172,6 @@ $(document).ready( function() {
 	$('#collapse-menu', menu).click(function(){
 		var body = $(document.body);
 
-		// reset any compensation for submenus near the bottom of the screen
-		$('#adminmenu div.wp-submenu').css('margin-top', '');
-
 		if ( body.hasClass('folded') ) {
 			body.removeClass('folded');
 			setUserSetting('mfold', 'o');
@@ -208,9 +205,9 @@ $(document).ready( function() {
 				o = maxtop;
 
 			if ( o > 1 )
-				m.css('margin-top', '-'+o+'px');
-			else
-				m.css('margin-top', '');
+				m.css({'marginTop':'-'+o+'px'});
+			else if ( m.css('marginTop') )
+				m.css({'marginTop':''});
 
 			menu.find('.wp-submenu').removeClass('sub-open');
 			m.addClass('sub-open');
@@ -320,7 +317,7 @@ $(document).ready( function() {
 		var el = e.target, selStart = el.selectionStart, selEnd = el.selectionEnd, val = el.value, scroll, sel;
 
 		try {
-			this.lastKey = 9; // not a standard DOM property, lastKey is to help stop Opera tab event. See blur handler below.
+			this.lastKey = 9; // not a standard DOM property, lastKey is to help stop Opera tab event.  See blur handler below.
 		} catch(err) {}
 
 		if ( document.selection ) {
@@ -354,7 +351,7 @@ $(document).ready( function() {
 		});
 	}
 
-	// auto-fold the menu when screen is under 900px
+	// auto-fold the menu when screen is under 800px
 	$(window).bind('resize.autofold', function(){
 		if ( getUserSetting('mfold') == 'f' )
 			return;
@@ -362,7 +359,7 @@ $(document).ready( function() {
 		var width = $(window).width();
 
 		// fold admin menu
-		if ( width <= 900 ) {
+		if ( width <= 800 ) {
 			if ( !folded ) {
 				$(document.body).addClass('folded');
 				folded = true;

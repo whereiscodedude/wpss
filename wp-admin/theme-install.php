@@ -30,7 +30,9 @@ if ( !is_network_admin() )
 	$submenu_file = 'themes.php';
 
 wp_enqueue_script( 'theme-install' );
-wp_enqueue_script( 'theme' );
+
+add_thickbox();
+wp_enqueue_script( 'theme-preview' );
 
 $body_id = $tab;
 
@@ -73,3 +75,4 @@ $wp_list_table->views(); ?>
 </div>
 <?php
 include(ABSPATH . 'wp-admin/admin-footer.php');
+

@@ -28,33 +28,18 @@
  */
 function wptexturize($text) {
 	global $wp_cockneyreplace;
-	static $static_characters, $static_replacements, $dynamic_characters, $dynamic_replacements,
-		$default_no_texturize_tags, $default_no_texturize_shortcodes;
+	static $opening_quote, $closing_quote, $en_dash, $em_dash, $default_no_texturize_tags, $default_no_texturize_shortcodes, $static_characters, $static_replacements, $dynamic_characters, $dynamic_replacements;
 
 	// No need to set up these static variables more than once
-	if ( ! isset( $static_characters ) ) {
-		/* translators: opening curly double quote */
-		$opening_quote = _x( '&#8220;', 'opening curly double quote' );
-		/* translators: closing curly double quote */
-		$closing_quote = _x( '&#8221;', 'closing curly double quote' );
-
-		/* translators: apostrophe, for example in 'cause or can't */
-		$apos = _x( '&#8217;', 'apostrophe' );
-
-		/* translators: prime, for example in 9' (nine feet) */
-		$prime = _x( '&#8242;', 'prime' );
-		/* translators: double prime, for example in 9" (nine inches) */
-		$double_prime = _x( '&#8243;', 'double prime' );
-
-		/* translators: opening curly single quote */
-		$opening_single_quote = _x( '&#8216;', 'opening curly single quote' );
-		/* translators: closing curly single quote */
-		$closing_single_quote = _x( '&#8217;', 'closing curly single quote' );
-
+	if ( empty( $opening_quote ) ) {
+		/* translators: opening curly quote */
+		$opening_quote = _x('&#8220;', 'opening curly quote');
+		/* translators: closing curly quote */
+		$closing_quote = _x('&#8221;', 'closing curly quote');
 		/* translators: en dash */
-		$en_dash = _x( '&#8211;', 'en dash' );
+		$en_dash = _x('&#8211;', 'en dash');
 		/* translators: em dash */
-		$em_dash = _x( '&#8212;', 'em dash' );
+		$em_dash = _x('&#8212;', 'em dash');
 
 		$default_no_texturize_tags = array('pre', 'code', 'kbd', 'style', 'script', 'tt');
 		$default_no_texturize_shortcodes = array('code');
@@ -63,40 +48,16 @@ function wptexturize($text) {
 		if ( isset($wp_cockneyreplace) ) {
 			$cockney = array_keys($wp_cockneyreplace);
 			$cockneyreplace = array_values($wp_cockneyreplace);
-		} elseif ( "'" != $apos ) { // Only bother if we're doing a replacement.
-			$cockney = array( "'tain't", "'twere", "'twas", "'tis", "'twill", "'til", "'bout", "'nuff", "'round", "'cause" );
-			$cockneyreplace = array( $apos . "tain" . $apos . "t", $apos . "twere", $apos . "twas", $apos . "tis", $apos . "twill", $apos . "til", $apos . "bout", $apos . "nuff", $apos . "round", $apos . "cause" );
 		} else {
-			$cockney = $cockneyreplace = array();
+			$cockney = array("'tain't","'twere","'twas","'tis","'twill","'til","'bout","'nuff","'round","'cause");
+			$cockneyreplace = array("&#8217;tain&#8217;t","&#8217;twere","&#8217;twas","&#8217;tis","&#8217;twill","&#8217;til","&#8217;bout","&#8217;nuff","&#8217;round","&#8217;cause");
 		}
 
-		$static_characters = array_merge( array( '---', ' -- ', '--', ' - ', 'xn&#8211;', '...', '``', '\'\'', ' (tm)' ), $cockney );
-		$static_replacements = array_merge( array( $em_dash, ' ' . $em_dash . ' ', $en_dash, ' ' . $en_dash . ' ', 'xn--', '&#8230;', $opening_quote, $closing_quote, ' &#8482;' ), $cockneyreplace );
+		$static_characters = array_merge( array('---', ' -- ', '--', ' - ', 'xn&#8211;', '...', '``', '\'\'', ' (tm)'), $cockney );
+		$static_replacements = array_merge( array($em_dash, ' ' . $em_dash . ' ', $en_dash, ' ' . $en_dash . ' ', 'xn--', '&#8230;', $opening_quote, $closing_quote, ' &#8482;'), $cockneyreplace );
 
-		$dynamic = array();
-		if ( "'" != $apos ) {
-			$dynamic[ '/\'(\d\d(?:&#8217;|\')?s)/' ] = $apos . '$1'; // '99's
-			$dynamic[ '/\'(\d)/'                   ] = $apos . '$1'; // '99
-		}
-		if ( "'" != $opening_single_quote )
-			$dynamic[ '/(\s|\A|[([{<]|")\'/'       ] = '$1' . $opening_single_quote; // opening single quote, even after (, {, <, [
-		if ( '"' != $double_prime )
-			$dynamic[ '/(\d)"/'                    ] = '$1' . $double_prime; // 9" (double prime)
-		if ( "'" != $prime )
-			$dynamic[ '/(\d)\'/'                   ] = '$1' . $prime; // 9' (prime)
-		if ( "'" != $apos )
-			$dynamic[ '/(\S)\'([^\'\s])/'          ] = '$1' . $apos . '$2'; // apostrophe in a word
-		if ( '"' != $opening_quote )
-			$dynamic[ '/(\s|\A|[([{<])"(?!\s)/'    ] = '$1' . $opening_quote . '$2'; // opening double quote, even after (, {, <, [
-		if ( '"' != $closing_quote )
-			$dynamic[ '/"(\s|\S|\Z)/'              ] = $closing_quote . '$1'; // closing double quote
-		if ( "'" != $closing_single_quote )
-			$dynamic[ '/\'([\s.]|\Z)/'             ] = $closing_single_quote . '$1'; // closing single quote
-
-		$dynamic[ '/\b(\d+)x(\d+)\b/'              ] = '$1&#215;$2'; // 9x9 (times)
-
-		$dynamic_characters = array_keys( $dynamic );
-		$dynamic_replacements = array_values( $dynamic );
+		$dynamic_characters = array('/\'(\d\d(?:&#8217;|\')?s)/', '/\'(\d)/', '/(\s|\A|[([{<]|")\'/', '/(\d)"/', '/(\d)\'/', '/(\S)\'([^\'\s])/', '/(\s|\A|[([{<])"(?!\s)/', '/"(\s|\S|\Z)/', '/\'([\s.]|\Z)/', '/\b(\d+)x(\d+)\b/');
+		$dynamic_replacements = array('&#8217;$1','&#8217;$1', '$1&#8216;', '$1&#8243;', '$1&#8242;', '$1&#8217;$2', '$1' . $opening_quote . '$2', $closing_quote . '$1', '&#8217;$1', '$1&#215;$2');
 	}
 
 	// Transform into regexp sub-expression used in _wptexturize_pushpop_element
@@ -173,6 +134,30 @@ function _wptexturize_pushpop_element($text, &$stack, $disabled_elements, $openi
 }
 
 /**
+ * Accepts matches array from preg_replace_callback in wpautop() or a string.
+ *
+ * Ensures that the contents of a <<pre>>...<</pre>> HTML block are not
+ * converted into paragraphs or line-breaks.
+ *
+ * @since 1.2.0
+ *
+ * @param array|string $matches The array or string
+ * @return string The pre block without paragraph/line-break conversion.
+ */
+function clean_pre($matches) {
+	if ( is_array($matches) )
+		$text = $matches[1] . $matches[2] . "</pre>";
+	else
+		$text = $matches;
+
+	$text = str_replace('<br />', '', $text);
+	$text = str_replace('<p>', "\n", $text);
+	$text = str_replace('</p>', '', $text);
+
+	return $text;
+}
+
+/**
  * Replaces double line-breaks with paragraph elements.
  *
  * A group of regex replaces used to identify text formatted with newlines and
@@ -183,45 +168,17 @@ function _wptexturize_pushpop_element($text, &$stack, $disabled_elements, $openi
  * @since 0.71
  *
  * @param string $pee The text which has to be formatted.
- * @param bool $br Optional. If set, this will convert all remaining line-breaks after paragraphing. Default true.
+ * @param int|bool $br Optional. If set, this will convert all remaining line-breaks after paragraphing. Default true.
  * @return string Text which has been converted into correct paragraph tags.
  */
-function wpautop($pee, $br = true) {
-	$pre_tags = array();
+function wpautop($pee, $br = 1) {
 
 	if ( trim($pee) === '' )
 		return '';
-
 	$pee = $pee . "\n"; // just to make things a little easier, pad the end
-
-	if ( strpos($pee, '<pre') !== false ) {
-		$pee_parts = explode( '</pre>', $pee );
-		$last_pee = array_pop($pee_parts);
-		$pee = '';
-		$i = 0;
-
-		foreach ( $pee_parts as $pee_part ) {
-			$start = strpos($pee_part, '<pre');
-
-			// Malformed html?
-			if ( $start === false ) {
-				$pee .= $pee_part;
-				continue;
-			}
-
-			$name = "<pre wp-pre-tag-$i></pre>";
-			$pre_tags[$name] = substr( $pee_part, $start ) . '</pre>';
-
-			$pee .= substr( $pee_part, 0, $start ) . $name;
-			$i++;
-		}
-
-		$pee .= $last_pee;
-	}
-
 	$pee = preg_replace('|<br />\s*<br />|', "\n\n", $pee);
 	// Space things out a little
-	$allblocks = '(?:table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|select|option|form|map|area|blockquote|address|math|style|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
+	$allblocks = '(?:table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|select|option|form|map|area|blockquote|address|math|style|input|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
 	$pee = preg_replace('!(<' . $allblocks . '[^>]*>)!', "\n$1", $pee);
 	$pee = preg_replace('!(</' . $allblocks . '>)!', "$1\n\n", $pee);
 	$pee = str_replace(array("\r\n", "\r"), "\n", $pee); // cross-platform newlines
@@ -243,17 +200,16 @@ function wpautop($pee, $br = true) {
 	$pee = str_replace('</blockquote></p>', '</p></blockquote>', $pee);
 	$pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)!', "$1", $pee);
 	$pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*</p>!', "$1", $pee);
-	if ( $br ) {
+	if ($br) {
 		$pee = preg_replace_callback('/<(script|style).*?<\/\\1>/s', '_autop_newline_preservation_helper', $pee);
 		$pee = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $pee); // optionally make line breaks
 		$pee = str_replace('<WPPreserveNewline />', "\n", $pee);
 	}
 	$pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*<br />!', "$1", $pee);
 	$pee = preg_replace('!<br />(\s*</?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)[^>]*>)!', '$1', $pee);
+	if (strpos($pee, '<pre') !== false)
+		$pee = preg_replace_callback('!(<pre[^>]*>)(.*?)</pre>!is', 'clean_pre', $pee );
 	$pee = preg_replace( "|\n</p>$|", '</p>', $pee );
-
-	if ( !empty($pre_tags) )
-		$pee = str_replace(array_keys($pre_tags), array_values($pre_tags), $pee);
 
 	return $pee;
 }
@@ -776,7 +732,7 @@ function sanitize_file_name( $filename ) {
 	$extension = array_pop($parts);
 	$mimes = get_allowed_mime_types();
 
-	// Loop over any intermediate extensions. Munge them with a trailing underscore if they are a 2 - 5 character
+	// Loop over any intermediate extensions.  Munge them with a trailing underscore if they are a 2 - 5 character
 	// long alpha string not in the extension whitelist.
 	foreach ( (array) $parts as $part) {
 		$filename .= '.' . $part;
@@ -1056,12 +1012,14 @@ function convert_chars($content, $deprecated = '') {
 /**
  * Will only balance the tags if forced to and the option is set to balance tags.
  *
- * The option 'use_balanceTags' is used to determine whether the tags will be balanced.
+ * The option 'use_balanceTags' is used for whether the tags will be balanced.
+ * Both the $force parameter and 'use_balanceTags' option will have to be true
+ * before the tags will be balanced.
  *
  * @since 0.71
  *
  * @param string $text Text to be balanced
- * @param bool $force If true, forces balancing, ignoring the value of the option. Default false.
+ * @param bool $force Forces balancing, ignoring the value of the option. Default false.
  * @return string Balanced text
  */
 function balanceTags( $text, $force = false ) {
@@ -1193,14 +1151,14 @@ function force_balance_tags( $text ) {
 /**
  * Acts on text which is about to be edited.
  *
- * The $content is run through esc_textarea(), which uses htmlspecialchars()
- * to convert special characters to HTML entities. If $richedit is set to true,
- * it is simply a holder for the 'format_to_edit' filter.
+ * Unless $richedit is set, it is simply a holder for the 'format_to_edit'
+ * filter. If $richedit is set true htmlspecialchars(), through esc_textarea(),
+ * will be run on the content, converting special characters to HTML entities.
  *
  * @since 0.71
  *
  * @param string $content The text about to be edited.
- * @param bool $richedit Whether the $content should not pass through htmlspecialchars(). Default false (meaning it will be passed).
+ * @param bool $richedit Whether the $content should pass through htmlspecialchars(). Default false.
  * @return string The text after the filter (and possibly htmlspecialchars()) has been run.
  */
 function format_to_edit( $content, $richedit = false ) {
@@ -2635,13 +2593,21 @@ function wp_make_link_relative( $link ) {
 function sanitize_option($option, $value) {
 
 	switch ( $option ) {
-		case 'admin_email' :
-		case 'new_admin_email' :
-			$value = sanitize_email( $value );
-			if ( ! is_email( $value ) ) {
+		case 'admin_email':
+			$value = sanitize_email($value);
+			if ( !is_email($value) ) {
 				$value = get_option( $option ); // Resets option to stored value in the case of failed sanitization
-				if ( function_exists( 'add_settings_error' ) )
-					add_settings_error( $option, 'invalid_admin_email', __( 'The email address entered did not appear to be a valid email address. Please enter a valid email address.' ) );
+				if ( function_exists('add_settings_error') )
+					add_settings_error('admin_email', 'invalid_admin_email', __('The email address entered did not appear to be a valid email address. Please enter a valid email address.'));
+			}
+			break;
+
+		case 'new_admin_email':
+			$value = sanitize_email($value);
+			if ( !is_email($value) ) {
+				$value = get_option( $option ); // Resets option to stored value in the case of failed sanitization
+				if ( function_exists('add_settings_error') )
+					add_settings_error('new_admin_email', 'invalid_admin_email', __('The email address entered did not appear to be a valid email address. Please enter a valid email address.'));
 			}
 			break;
 
@@ -2981,9 +2947,9 @@ function _links_add_base($m) {
 	global $_links_add_base;
 	//1 = attribute name  2 = quotation mark  3 = URL
 	return $m[1] . '=' . $m[2] .
-		( preg_match( '#^(\w{1,20}):#', $m[3], $protocol ) && in_array( $protocol[1], wp_allowed_protocols() ) ?
-			$m[3] :
-			path_join( $_links_add_base, $m[3] ) )
+		(strpos($m[3], 'http://') === false ?
+			path_join($_links_add_base, $m[3]) :
+			$m[3])
 		. $m[2];
 }
 
@@ -3140,21 +3106,4 @@ function sanitize_mime_type( $mime_type ) {
 	return apply_filters( 'sanitize_mime_type', $sani_mime_type, $mime_type );
 }
 
-/**
- * Sanitize space or carriage return separated URLs that are used to send trackbacks.
- *
- * @since 3.4.0
- *
- * @param string $to_ping Space or carriage return separated URLs
- * @return string URLs starting with the http or https protocol, separated by a carriage return.
- */
-function sanitize_trackback_urls( $to_ping ) {
-	$urls_to_ping = preg_split( '/\r\n\t /', trim( $to_ping ), -1, PREG_SPLIT_NO_EMPTY );
-	foreach ( $urls_to_ping as $k => $url ) {
-		if ( !preg_match( '#^https?://.#i', $url ) )
-			unset( $urls_to_ping[$k] );
-	}
-	$urls_to_ping = array_map( 'esc_url_raw', $urls_to_ping );
-	$urls_to_ping = implode( "\n", $urls_to_ping );
-	return apply_filters( 'sanitize_trackback_urls', $urls_to_ping, $to_ping );
-}
+?>

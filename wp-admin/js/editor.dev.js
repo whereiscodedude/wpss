@@ -62,22 +62,13 @@ var switchEditors = {
 	},
 
 	_wp_Nop : function(content) {
-		var blocklist1, blocklist2, preserve_linebreaks = false, preserve_br = false;
+		var blocklist1, blocklist2;
 
 		// Protect pre|script tags
 		if ( content.indexOf('<pre') != -1 || content.indexOf('<script') != -1 ) {
-			preserve_linebreaks = true;
 			content = content.replace(/<(pre|script)[^>]*>[\s\S]+?<\/\1>/g, function(a) {
-				a = a.replace(/<br ?\/?>(\r\n|\n)?/g, '<wp-temp-lb>');
-				return a.replace(/<\/?p( [^>]*)?>(\r\n|\n)?/g, '<wp-temp-lb>');
-			});
-		}
-
-		// keep <br> tags inside captions
-		if ( content.indexOf('[caption') != -1 ) {
-			preserve_br = true;
-			content = content.replace(/\[caption[^\]]+\]/g, function(a) {
-				return a.replace(/<br([^>]*)>[\r\n]*/g, '<wp-temp-br$1>');
+				a = a.replace(/<br ?\/?>(\r\n|\n)?/g, '<wp_temp>');
+				return a.replace(/<\/?p( [^>]*)?>(\r\n|\n)?/g, '<wp_temp>');
 			});
 		}
 
@@ -128,12 +119,7 @@ var switchEditors = {
 		content = content.replace(/[\s\u00a0]+$/, '');
 
 		// put back the line breaks in pre|script
-		if ( preserve_linebreaks )
-			content = content.replace(/<wp-temp-lb>/g, '\n');
-
-		// and the <br> tags in captions
-		if ( preserve_br )
-			content = content.replace(/<wp-temp-br([^>]*)>/g, '<br$1>');
+		content = content.replace(/<wp_temp>/g, '\n');
 
 		return content;
 	},
@@ -217,3 +203,4 @@ var switchEditors = {
 		return o.data;
 	}
 }
+

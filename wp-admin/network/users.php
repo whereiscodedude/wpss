@@ -119,7 +119,9 @@ if ( isset( $_GET['action'] ) ) {
 			if ( ( isset( $_POST['action']) || isset($_POST['action2'] ) ) && isset( $_POST['allusers'] ) ) {
 				check_admin_referer( 'bulk-users-network' );
 
-				$doaction = $_POST['action'] != -1 ? $_POST['action'] : $_POST['action2'];
+				if ( $_GET['action'] != -1 || $_POST['action2'] != -1 )
+					$doaction = $_POST['action'] != -1 ? $_POST['action'] : $_POST['action2'];
+
 				$userfunction = '';
 
 				foreach ( (array) $_POST['allusers'] as $key => $val ) {
@@ -134,9 +136,9 @@ if ( isset( $_GET['action'] ) ) {
 								echo '<div class="wrap">';
 								confirm_delete_users( $_POST['allusers'] );
 								echo '</div>';
-								require_once( '../admin-footer.php' );
-								exit();
-							break;
+					            require_once( '../admin-footer.php' );
+					            exit();
+	       					break;
 
 							case 'spam':
 								$user = new WP_User( $val );
@@ -245,9 +247,6 @@ get_current_screen()->set_help_sidebar(
 	'<p>' . __('<a href="http://wordpress.org/support/forum/multisite/" target="_blank">Support Forums</a>') . '</p>'
 );
 
-if ( ! wp_is_large_network( 'users' ) )
-	wp_enqueue_script( 'user-search' );
-
 require_once( '../admin-header.php' );
 
 if ( isset( $_REQUEST['updated'] ) && $_REQUEST['updated'] == 'true' && ! empty( $_REQUEST['action'] ) ) {
@@ -291,7 +290,7 @@ if ( isset( $_REQUEST['updated'] ) && $_REQUEST['updated'] == 'true' && ! empty(
 	<?php $wp_list_table->views(); ?>
 
 	<form action="" method="get" class="search-form">
-		<?php $wp_list_table->search_box( __( 'Search Users' ), 'all-user' ); ?>
+		<?php $wp_list_table->search_box( __( 'Search Users' ), 'user' ); ?>
 	</form>
 
 	<form id="form-user-list" action='users.php?action=allusers' method='post'>

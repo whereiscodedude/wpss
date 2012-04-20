@@ -22,7 +22,6 @@ wp_enqueue_script('plupload-handlers');
 wp_enqueue_script('image-edit');
 wp_enqueue_script('set-post-thumbnail' );
 wp_enqueue_style('imgareaselect');
-wp_enqueue_script( 'media-gallery' );
 
 @header('Content-Type: ' . get_option('html_type') . '; charset=' . get_option('blog_charset'));
 
@@ -32,7 +31,7 @@ $post_id = isset($post_id)? (int) $post_id : 0;
 
 // Require an ID for the edit screen
 if ( isset($action) && $action == 'edit' && !$ID )
-	wp_die( __( 'Cheatin&#8217; uh?' ) );
+	wp_die(__("You are not allowed to be here"));
 
 if ( isset($_GET['inline']) ) {
 	$errors = array();
@@ -137,3 +136,4 @@ if ( isset($_GET['inline']) ) {
 	else
 		do_action("media_upload_$tab");
 }
+?>

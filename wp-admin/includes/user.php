@@ -9,12 +9,38 @@
 /**
  * Creates a new user from the "Users" form using $_POST information.
  *
+ * It seems that the first half is for backwards compatibility, but only
+ * has the ability to alter the user's role. WordPress core seems to
+ * use this function only in the second way, running edit_user() with
+ * no id so as to create a new user.
+ *
  * @since 2.0
  *
+ * @param int $user_id Optional. User ID.
  * @return null|WP_Error|int Null when adding user, WP_Error or User ID integer when no parameters.
  */
 function add_user() {
-	return edit_user();
+	if ( func_num_args() ) { // The hackiest hack that ever did hack
+		global $wp_roles;
+		$user_id = (int) func_get_arg( 0 );
+
+		if ( isset( $_POST['role'] ) ) {
+			$new_role = sanitize_text_field( $_POST['role'] );
+			// Don't let anyone with 'edit_users' (admins) edit their own role to something without it.
+			if ( $user_id != get_current_user_id() || $wp_roles->role_objects[$new_role]->has_cap( 'edit_users' ) ) {
+				// If the new role isn't editable by the logged-in user die with error
+				$editable_roles = get_editable_roles();
+				if ( empty( $editable_roles[$new_role] ) )
+					wp_die(__('You can&#8217;t give users that role.'));
+
+				$user = new WP_User( $user_id );
+				$user->set_role( $new_role );
+			}
+		}
+	} else {
+		add_action( 'user_register', 'add_user' ); // See above
+		return edit_user();
+	}
 }
 
 /**
@@ -237,7 +263,6 @@ function wp_delete_user( $id, $reassign = 'novalue' ) {
 	global $wpdb;
 
 	$id = (int) $id;
-	$user = new WP_User( $id );
 
 	// allow for transaction statement
 	do_action('delete_user', $id);
@@ -263,16 +288,16 @@ function wp_delete_user( $id, $reassign = 'novalue' ) {
 		$wpdb->update( $wpdb->links, array('link_owner' => $reassign), array('link_owner' => $id) );
 	}
 
+	clean_user_cache($id);
+
 	// FINALLY, delete user
 	if ( !is_multisite() ) {
-		$wpdb->delete( $wpdb->usermeta, array( 'user_id' => $id ) );
-		$wpdb->delete( $wpdb->users, array( 'ID' => $id ) );
+		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->usermeta WHERE user_id = %d", $id) );
+		$wpdb->query( $wpdb->prepare("DELETE FROM $wpdb->users WHERE ID = %d", $id) );
 	} else {
 		$level_key = $wpdb->get_blog_prefix() . 'capabilities'; // wpmu site admins don't have user_levels
-		$wpdb->delete( $wpdb->usermeta, array( 'user_id' => $id , 'meta_key' => $level_key ) );
+		$wpdb->query("DELETE FROM $wpdb->usermeta WHERE user_id = $id AND meta_key = '{$level_key}'");
 	}
-
-	clean_user_cache( $user );
 
 	// allow for commit transaction
 	do_action('deleted_user', $id);
@@ -344,3 +369,5 @@ function default_password_nag() {
 	printf( '<a href="%s" id="default-password-nag-no">' . __('No thanks, do not remind me again') . '</a>', '?default_password_nag=0' );
 	echo '</p></div>';
 }
+
+?>

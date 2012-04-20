@@ -29,49 +29,39 @@
 		}
 	}
 
-	$(document).ready( function() {
-		var select = $('#display_name');
-
+	$(document).ready(function() {
 		$('#pass1').val('').keyup( check_pass_strength );
 		$('#pass2').val('').keyup( check_pass_strength );
 		$('#pass-strength-result').show();
-		$('.color-palette').click( function() {
-			$(this).siblings('input[name="admin_color"]').prop('checked', true);
-		});
+		$('.color-palette').click(function(){$(this).siblings('input[name="admin_color"]').prop('checked', true)});
+		$('#first_name, #last_name, #nickname').blur(function(){
+			var select = $('#display_name'), current = select.find('option:selected').attr('id'), dub = [],
+				inputs = {
+					display_nickname : $('#nickname').val(),
+					display_username : $('#user_login').val(),
+					display_firstname : $('#first_name').val(),
+					display_lastname : $('#last_name').val()
+				};
 
-		if ( select.length ) {
-			$('#first_name, #last_name, #nickname').bind( 'blur.user_profile', function() {
-				var current = select.find('option:selected').attr('id'), dub = [],
-					inputs = {
-						display_nickname  : $('#nickname').val() || '',
-						display_username  : $('#user_login').val() || '',
-						display_firstname : $('#first_name').val() || '',
-						display_lastname  : $('#last_name').val() || ''
-					};
+			if ( inputs.display_firstname && inputs.display_lastname ) {
+				inputs['display_firstlast'] = inputs.display_firstname + ' ' + inputs.display_lastname;
+				inputs['display_lastfirst'] = inputs.display_lastname + ' ' + inputs.display_firstname;
+			}
 
-				if ( inputs.display_firstname && inputs.display_lastname ) {
-					inputs['display_firstlast'] = inputs.display_firstname + ' ' + inputs.display_lastname;
-					inputs['display_lastfirst'] = inputs.display_lastname + ' ' + inputs.display_firstname;
+			$('option', select).remove();
+			$.each(inputs, function( id, value ) {
+				var val = value.replace(/<\/?[a-z][^>]*>/gi, '');
+
+				if ( inputs[id].length && $.inArray( val, dub ) == -1 ) {
+					dub.push(val);
+					$('<option />', {
+					  	'id': id,
+						'text': val,
+						'selected': (id == current)
+					}).appendTo( select );
 				}
-
-				$('option', select).remove();
-				$.each(inputs, function( id, value ) {
-					if ( ! value )
-						return;
-
-					var val = value.replace(/<\/?[a-z][^>]*>/gi, '');
-
-					if ( inputs[id].length && $.inArray( val, dub ) == -1 ) {
-						dub.push(val);
-						$('<option />', {
-						  	'id': id,
-							'text': val,
-							'selected': (id == current)
-						}).appendTo( select );
-					}
-				});
 			});
-		}
+		});
 	});
 
 })(jQuery);
