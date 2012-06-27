@@ -599,18 +599,6 @@ class WP_User {
 	}
 
 	/**
-	 * Determine whether the user exists in the database.
-	 *
-	 * @since 3.4.0
-	 * @access public
-	 *
-	 * @return bool True if user exists in the database, false if not.
-	 */
-	function exists() {
-		return ! empty( $this->ID );
-	}
-
-	/**
 	 * Retrieve the value of a property or meta key.
 	 *
 	 * Retrieves from the users and usermeta table.
@@ -853,12 +841,13 @@ class WP_User {
 	 *
 	 * This is useful for looking up whether the user has a specific role
 	 * assigned to the user. The second optional parameter can also be used to
-	 * check for capabilities against a specific object, such as a post or user.
+	 * check for capabilities against a specific post.
 	 *
 	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param string|int $cap Capability or role name to search.
+	 * @param int $post_id Optional. Post ID to check capability against specific post.
 	 * @return bool True, if user has capability; false, if user does not have capability.
 	 */
 	function has_cap( $cap ) {
@@ -947,16 +936,16 @@ function map_meta_cap( $cap, $user_id ) {
 		$caps[] = 'promote_users';
 		break;
 	case 'edit_user':
-	case 'edit_users':
 		// Allow user to edit itself
-		if ( 'edit_user' == $cap && isset( $args[0] ) && $user_id == $args[0] )
+		if ( isset( $args[0] ) && $user_id == $args[0] )
 			break;
-
+		// Fall through
+	case 'edit_users':
 		// If multisite these caps are allowed only for super admins.
 		if ( is_multisite() && !is_super_admin( $user_id ) )
 			$caps[] = 'do_not_allow';
 		else
-			$caps[] = 'edit_users'; // edit_user maps to edit_users.
+			$caps[] = 'edit_users'; // Explicit due to primitive fall through
 		break;
 	case 'delete_post':
 	case 'delete_page':
@@ -1126,28 +1115,14 @@ function map_meta_cap( $cap, $user_id ) {
 		else
 			$caps[] = 'do_not_allow';
 		break;
-	case 'unfiltered_html' :
-		// Disallow unfiltered_html for all users, even admins and super admins.
-		if ( defined( 'DISALLOW_UNFILTERED_HTML' ) && DISALLOW_UNFILTERED_HTML )
-			$caps[] = 'do_not_allow';
-		elseif ( is_multisite() && ! is_super_admin( $user_id ) )
-			$caps[] = 'do_not_allow';
-		else
-			$caps[] = $cap;
-		break;
 	case 'edit_files':
 	case 'edit_plugins':
 	case 'edit_themes':
-		// Disallow the file editors.
-		if ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT )
+		if ( defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT ) {
 			$caps[] = 'do_not_allow';
-		elseif ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS )
-			$caps[] = 'do_not_allow';
-		elseif ( is_multisite() && ! is_super_admin( $user_id ) )
-			$caps[] = 'do_not_allow';
-		else
-			$caps[] = $cap;
-		break;
+			break;
+		}
+		// Fall through if not DISALLOW_FILE_EDIT.
 	case 'update_plugins':
 	case 'delete_plugins':
 	case 'install_plugins':
@@ -1155,22 +1130,30 @@ function map_meta_cap( $cap, $user_id ) {
 	case 'delete_themes':
 	case 'install_themes':
 	case 'update_core':
-		// Disallow anything that creates, deletes, or updates core, plugin, or theme files.
+		// Disallow anything that creates, deletes, or edits core, plugin, or theme files.
 		// Files in uploads are excepted.
-		if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS )
+		if ( defined('DISALLOW_FILE_MODS') && DISALLOW_FILE_MODS ) {
 			$caps[] = 'do_not_allow';
-		elseif ( is_multisite() && ! is_super_admin( $user_id ) )
+			break;
+		}
+		// Fall through if not DISALLOW_FILE_MODS.
+	case 'unfiltered_html':
+		// Disallow unfiltered_html for all users, even admins and super admins.
+		if ( defined('DISALLOW_UNFILTERED_HTML') && DISALLOW_UNFILTERED_HTML ) {
 			$caps[] = 'do_not_allow';
-		else
-			$caps[] = $cap;
-		break;
+			break;
+		}
+		// Fall through if not DISALLOW_UNFILTERED_HTML
 	case 'delete_user':
 	case 'delete_users':
-		// If multisite only super admins can delete users.
-		if ( is_multisite() && ! is_super_admin( $user_id ) )
+		// If multisite these caps are allowed only for super admins.
+		if ( is_multisite() && !is_super_admin( $user_id ) ) {
 			$caps[] = 'do_not_allow';
-		else
-			$caps[] = 'delete_users'; // delete_user maps to delete_users.
+		} else {
+			if ( 'delete_user' == $cap )
+				$cap = 'delete_users';
+			$caps[] = $cap;
+		}
 		break;
 	case 'create_users':
 		if ( !is_multisite() )
@@ -1233,7 +1216,7 @@ function current_user_can_for_blog( $blog_id, $capability ) {
 	// Create new object to avoid stomping the global current_user.
 	$user = new WP_User( $current_user->ID) ;
 
-	// Set the blog id. @todo add blog id arg to WP_User constructor?
+	// Set the blog id.  @todo add blog id arg to WP_User constructor?
 	$user->for_blog( $blog_id );
 
 	$args = array_slice( func_get_args(), 2 );
@@ -1279,7 +1262,7 @@ function user_can( $user, $capability ) {
 	if ( ! is_object( $user ) )
 		$user = new WP_User( $user );
 
-	if ( ! $user || ! $user->exists() )
+	if ( ! $user || ! $user->ID )
 		return false;
 
 	$args = array_slice( func_get_args(), 2 );
@@ -1376,7 +1359,7 @@ function is_super_admin( $user_id = false ) {
 	else
 		$user = wp_get_current_user();
 
-	if ( ! $user->exists() )
+	if ( empty( $user->ID ) )
 		return false;
 
 	if ( is_multisite() ) {
@@ -1390,3 +1373,5 @@ function is_super_admin( $user_id = false ) {
 
 	return false;
 }
+
+?>
