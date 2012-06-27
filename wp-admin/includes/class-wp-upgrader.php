@@ -763,7 +763,10 @@ class Theme_Upgrader extends WP_Upgrader {
 			return $this->result;
 
 		// Force refresh of theme update information
-		wp_clean_themes_cache();
+		delete_site_transient('update_themes');
+		search_theme_directories( true );
+		foreach ( wp_get_themes() as $theme )
+			$theme->cache_delete();
 
 		return true;
 	}
@@ -809,7 +812,10 @@ class Theme_Upgrader extends WP_Upgrader {
 			return $this->result;
 
 		// Force refresh of theme update information
-		wp_clean_themes_cache();
+		delete_site_transient('update_themes');
+		search_theme_directories( true );
+		foreach ( wp_get_themes() as $theme )
+			$theme->cache_delete();
 
 		return true;
 	}
@@ -896,7 +902,10 @@ class Theme_Upgrader extends WP_Upgrader {
 		remove_filter('upgrader_clear_destination', array(&$this, 'delete_old_theme'), 10, 4);
 
 		// Force refresh of theme update information
-		wp_clean_themes_cache();
+		delete_site_transient('update_themes');
+		search_theme_directories( true );
+		foreach ( wp_get_themes() as $theme )
+			$theme->cache_delete();
 
 		return $results;
 	}
@@ -953,11 +962,13 @@ class Theme_Upgrader extends WP_Upgrader {
 		if ( $theme != get_stylesheet() ) // If not current
 			return $return;
 
-		// Ensure stylesheet name hasn't changed after the upgrade:
+		// Ensure stylesheet name hasnt changed after the upgrade:
+		// @TODO: Note, This doesn't handle the Template changing, or the Template name changing.
 		if ( $theme == get_stylesheet() && $theme != $this->result['destination_name'] ) {
-			wp_clean_themes_cache();
+			$theme_info = $this->theme_info();
 			$stylesheet = $this->result['destination_name'];
-			switch_theme( $stylesheet );
+			$template = $theme_info->get_template();
+			switch_theme($template, $stylesheet, true);
 		}
 
 		//Time to remove maintenance mode

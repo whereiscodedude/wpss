@@ -476,7 +476,7 @@ function post_comment_meta_box($post) {
 	<p class="hide-if-no-js" id="add-new-comment"><a href="#commentstatusdiv" onclick="commentReply.addcomment(<?php echo $post_ID; ?>);return false;"><?php _e('Add comment'); ?></a></p>
 	<?php
 
-	$total = get_comments( array( 'post_id' => $post_ID, 'number' => 1, 'count' => true ) );
+	$total = $wpdb->get_var($wpdb->prepare("SELECT count(1) FROM $wpdb->comments WHERE comment_post_ID = '%d' AND ( comment_approved = '0' OR comment_approved = '1')", $post_ID));
 	$wp_list_table = _get_list_table('WP_Post_Comments_List_Table');
 	$wp_list_table->display( true );
 

@@ -3156,21 +3156,3 @@ function clean_page_cache( $id ) {
 
 	clean_post_cache( $id );
 }
-
-/**
- * Retrieve nonce action "Are you sure" message.
- *
- * Deprecated in 3.4.1 and 3.5.0. Backported to 3.3.3.
- *
- * @since 2.0.4
- * @deprecated 3.4.1
- * @deprecated Use wp_nonce_ays()
- * @see wp_nonce_ays()
- *
- * @param string $action Nonce action.
- * @return string Are you sure message.
- */
-function wp_explain_nonce( $action ) {
-	_deprecated_function( __FUNCTION__, '3.4.1', 'wp_nonce_ays()' );
-	return __( 'Are you sure you want to do this?' );
-}
