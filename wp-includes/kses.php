@@ -321,7 +321,6 @@ if ( ! CUSTOM_TAGS ) {
 			'style' => true,
 			'xml:lang' => true,
 		),
-		'small' => array(),
 		'strike' => array(),
 		'strong' => array(),
 		'sub' => array(),

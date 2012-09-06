@@ -89,12 +89,6 @@ function create_initial_taxonomies() {
 			'add_or_remove_items' => null,
 			'choose_from_most_used' => null,
 		),
-		'capabilities' => array(
-			'manage_terms' => 'manage_links',
-			'edit_terms'   => 'manage_links',
-			'delete_terms' => 'manage_links',
-			'assign_terms' => 'manage_links',
-		),
 		'query_var' => false,
 		'rewrite' => false,
 		'public' => false,
@@ -331,8 +325,7 @@ function register_taxonomy( $taxonomy, $object_type, $args = array() ) {
 	if ( false !== $args['query_var'] && !empty($wp) ) {
 		if ( true === $args['query_var'] )
 			$args['query_var'] = $taxonomy;
-		else
-			$args['query_var'] = sanitize_title_with_dashes($args['query_var']);
+		$args['query_var'] = sanitize_title_with_dashes($args['query_var']);
 		$wp->add_query_var($args['query_var']);
 	}
 
@@ -791,14 +784,7 @@ class WP_Tax_Query {
 					AND $wpdb->terms.{$query['field']} IN ($terms)
 				" );
 				break;
-			case 'term_taxonomy_id':
-				$terms = implode( ',', array_map( 'intval', $query['terms'] ) );
-				$terms = $wpdb->get_col( "
-					SELECT $resulting_field
-					FROM $wpdb->term_taxonomy
-					WHERE term_taxonomy_id IN ($terms)
-				" );
-				break;
+
 			default:
 				$terms = implode( ',', array_map( 'intval', $query['terms'] ) );
 				$terms = $wpdb->get_col( "
@@ -2225,8 +2211,7 @@ function wp_set_object_terms($object_id, $terms, $taxonomy, $append = false) {
 			if ( in_array($tt_id, $final_tt_ids) )
 				$values[] = $wpdb->prepare( "(%d, %d, %d)", $object_id, $tt_id, ++$term_order);
 		if ( $values )
-			if ( false === $wpdb->query( "INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES " . join( ',', $values ) . " ON DUPLICATE KEY UPDATE term_order = VALUES(term_order)" ) )
-				return new WP_Error( 'db_insert_error', __( 'Could not insert term relationship into the database' ), $wpdb->last_error );
+			$wpdb->query("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES " . join(',', $values) . " ON DUPLICATE KEY UPDATE term_order = VALUES(term_order)");
 	}
 
 	do_action('set_object_terms', $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids);
@@ -3078,7 +3063,10 @@ function the_taxonomies($args = array()) {
  * @return array
  */
 function get_the_taxonomies($post = 0, $args = array() ) {
-	$post = get_post( $post );
+	if ( is_int($post) )
+		$post =& get_post($post);
+	elseif ( !is_object($post) )
+		$post =& $GLOBALS['post'];
 
 	$args = wp_parse_args( $args, array(
 		'template' => '%s: %l.',
@@ -3124,7 +3112,7 @@ function get_the_taxonomies($post = 0, $args = array() ) {
  * @return array
  */
 function get_post_taxonomies($post = 0) {
-	$post = get_post( $post );
+	$post =& get_post($post);
 
 	return get_object_taxonomies($post);
 }
@@ -3223,8 +3211,16 @@ function get_ancestors($object_id = 0, $object_type = '') {
 			$ancestors[] = (int) $term->parent;
 			$term = get_term($term->parent, $object_type);
 		}
-	} elseif ( post_type_exists( $object_type ) ) {
-		$ancestors = get_post_ancestors($object_id);
+	} elseif ( null !== get_post_type_object( $object_type ) ) {
+		$object = get_post($object_id);
+		if ( ! is_wp_error( $object ) && isset( $object->ancestors ) && is_array( $object->ancestors ) )
+			$ancestors = $object->ancestors;
+		else {
+			while ( ! is_wp_error($object) && ! empty( $object->post_parent ) && ! in_array( $object->post_parent, $ancestors ) ) {
+				$ancestors[] = (int) $object->post_parent;
+				$object = get_post($object->post_parent);
+			}
+		}
 	}
 
 	return apply_filters('get_ancestors', $ancestors, $object_id, $object_type);
