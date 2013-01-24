@@ -220,7 +220,7 @@ function wpautop($pee, $br = true) {
 
 	$pee = preg_replace('|<br />\s*<br />|', "\n\n", $pee);
 	// Space things out a little
-	$allblocks = '(?:table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|select|option|form|map|area|blockquote|address|math|style|p|h[1-6]|hr|fieldset|noscript|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
+	$allblocks = '(?:table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|select|option|form|map|area|blockquote|address|math|style|p|h[1-6]|hr|fieldset|noscript|samp|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
 	$pee = preg_replace('!(<' . $allblocks . '[^>]*>)!', "\n$1", $pee);
 	$pee = preg_replace('!(</' . $allblocks . '>)!', "$1\n\n", $pee);
 	$pee = str_replace(array("\r\n", "\r"), "\n", $pee); // cross-platform newlines
@@ -999,10 +999,8 @@ function sanitize_title_with_dashes($title, $raw_title = '', $context = 'display
 			'%e2%80%9a', '%e2%80%9b', '%e2%80%9e', '%e2%80%9f',
 			// copy, reg, deg, hellip and trade
 			'%c2%a9', '%c2%ae', '%c2%b0', '%e2%80%a6', '%e2%84%a2',
-			// acute accents
-			'%c2%b4', '%cb%8a', '%cc%81', '%cd%81',
-			// grave accent, macron, caron
-			'%cc%80', '%cc%84', '%cc%8c',
+			// grave accent, acute accent, macron, caron
+			'%cc%80', '%cc%81', '%cc%84', '%cc%8c',
 		), '', $title );
 
 		// Convert times to x
@@ -1036,7 +1034,7 @@ function sanitize_sql_orderby( $orderby ){
 }
 
 /**
- * Sanitizes a html classname to ensure it only contains valid characters
+ * Santizes a html classname to ensure it only contains valid characters
  *
  * Strips the string down to A-Z,a-z,0-9,_,-. If this results in an empty
  * string then it will return the alternative value supplied.
@@ -2603,11 +2601,10 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 
 	if ( ! is_array( $protocols ) )
 		$protocols = wp_allowed_protocols();
-	$good_protocol_url = wp_kses_bad_protocol( $url, $protocols );
-	if ( strtolower( $good_protocol_url ) != strtolower( $url ) )
+	if ( wp_kses_bad_protocol( $url, $protocols ) != $url )
 		return '';
 
-	return apply_filters('clean_url', $good_protocol_url, $original_url, $_context);
+	return apply_filters('clean_url', $url, $original_url, $_context);
 }
 
 /**
@@ -2978,7 +2975,7 @@ function wp_pre_kses_less_than_callback( $matches ) {
  * @return string The formatted string.
  */
 function wp_sprintf( $pattern ) {
-	$args = func_get_args();
+	$args = func_get_args( );
 	$len = strlen($pattern);
 	$start = 0;
 	$result = '';

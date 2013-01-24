@@ -1143,11 +1143,6 @@ form.upgrade .hint {
 	margin: -0.5em 0 2em 0;
 }
 
-.update-php .spinner {
-	float: none;
-	margin: -4px 0;
-}
-
 #ajax-loading,
 .ajax-loading,
 .ajax-feedback,
@@ -2791,7 +2786,6 @@ tr.inline-edit-row td,
 
 .inline-edit-row fieldset label.inline-edit-tags span.title {
 	margin: .2em 0;
-	width: auto;
 }
 
 .inline-edit-row fieldset label span.title {
@@ -4602,7 +4596,7 @@ span.imgedit-scale-warn {
 }
 
 h3.available-themes {
-	margin: 0.3em 0 1em;
+	margin: 0 0 1em;
 	float: left;
 }
 
@@ -8579,4 +8573,9 @@ a.widget-control-edit {
 }
 .locale-lt-lt .inline-edit-row fieldset label span.input-text-wrap {
 	margin-left: 8em;
+}
+
+.update-php .spinner {
+	float: none;
+	margin: -4px 0;
 }

@@ -903,7 +903,6 @@ function wp_ajax_add_menu_item() {
 		);
 		echo walk_nav_menu_tree( $menu_items, 0, (object) $args );
 	}
-	wp_die();
 }
 
 function wp_ajax_add_meta() {
