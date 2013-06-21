@@ -1,7 +1,7 @@
 window.wp = window.wp || {};
 
 (function($){
-	var Attachment, Attachments, Query, compare, l10n, media, bindSyncEvents;
+	var Attachment, Attachments, Query, compare, l10n, media;
 
 	/**
 	 * wp.media( attributes )
@@ -67,51 +67,95 @@ window.wp = window.wp || {};
 			return a > b ? -1 : 1;
 	};
 
-	// Ensures the 'sync' and 'error' events are always
-	// correctly triggered when overloading `Backbone.sync`.
-	bindSyncEvents = function( model, options ) {
-		var success = options.success,
-			error = options.error;
-
-		options.success = function( resp ) {
-			if ( success )
-				success( resp );
-			model.trigger( 'sync', model, resp, options );
-		};
-
-		options.error = function( xhr ) {
-			if ( error )
-				error( xhr );
-			model.trigger( 'error', model, xhr, options );
-		};
-
-		return options;
-	};
-
 	_.extend( media, {
 		/**
 		 * media.template( id )
 		 *
 		 * Fetches a template by id.
-		 * See wp.template() in `wp-includes/js/wp-util.js`.
+		 *
+		 * @param  {string} id   A string that corresponds to a DOM element with an id prefixed with "tmpl-".
+		 *                       For example, "attachment" maps to "tmpl-attachment".
+		 * @return {function}    A function that lazily-compiles the template requested.
 		 */
-		template: wp.template,
+		template: _.memoize( function( id ) {
+			var compiled,
+				options = {
+					evaluate:    /<#([\s\S]+?)#>/g,
+					interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+					escape:      /\{\{([^\}]+?)\}\}(?!\})/g,
+					variable:    'data'
+				};
+
+			return function( data ) {
+				compiled = compiled || _.template( $( '#tmpl-' + id ).html(), null, options );
+				return compiled( data );
+			};
+		}),
 
 		/**
 		 * media.post( [action], [data] )
 		 *
 		 * Sends a POST request to WordPress.
-		 * See wp.xhr.post() in `wp-includes/js/wp-util.js`.
+		 *
+		 * @param  {string} action The slug of the action to fire in WordPress.
+		 * @param  {object} data   The data to populate $_POST with.
+		 * @return {$.promise}     A jQuery promise that represents the request.
 		 */
-		post: wp.xhr.post,
+		post: function( action, data ) {
+			return media.ajax({
+				data: _.isObject( action ) ? action : _.extend( data || {}, { action: action })
+			});
+		},
 
 		/**
 		 * media.ajax( [action], [options] )
 		 *
-		 * Sends an XHR request to WordPress.
-		 * See wp.xhr.send() in `wp-includes/js/wp-util.js`.
+		 * Sends a POST request to WordPress.
+		 *
+		 * @param  {string} action  The slug of the action to fire in WordPress.
+		 * @param  {object} options The options passed to jQuery.ajax.
+		 * @return {$.promise}      A jQuery promise that represents the request.
 		 */
-		ajax: wp.xhr.send,
+		ajax: function( action, options ) {
+			if ( _.isObject( action ) ) {
+				options = action;
+			} else {
+				options = options || {};
+				options.data = _.extend( options.data || {}, { action: action });
+			}
+
+			options = _.defaults( options || {}, {
+				type:    'POST',
+				url:     media.model.settings.ajaxurl,
+				context: this
+			});
+
+			return $.Deferred( function( deferred ) {
+				// Transfer success/error callbacks.
+				if ( options.success )
+					deferred.done( options.success );
+				if ( options.error )
+					deferred.fail( options.error );
+
+				delete options.success;
+				delete options.error;
+
+				// Use with PHP's wp_send_json_success() and wp_send_json_error()
+				$.ajax( options ).done( function( response ) {
+					// Treat a response of `1` as successful for backwards
+					// compatibility with existing handlers.
+					if ( response === '1' || response === 1 )
+						response = { success: true };
+
+					if ( _.isObject( response ) && ! _.isUndefined( response.success ) )
+						deferred[ response.success ? 'resolveWith' : 'rejectWith' ]( this, [response.data] );
+					else
+						deferred.rejectWith( this, [response] );
+				}).fail( function() {
+					deferred.rejectWith( this, arguments );
+				});
+			}).promise();
+		},
 
 		// Scales a set of dimensions to fit within bounding dimensions.
 		fit: function( dimensions ) {
@@ -197,7 +241,6 @@ window.wp = window.wp || {};
 					action: 'get-attachment',
 					id: this.id
 				});
-				bindSyncEvents( model, options );
 				return media.ajax( options );
 
 			// Overload the `update` request so properties can be saved.
@@ -218,15 +261,15 @@ window.wp = window.wp || {};
 				});
 
 				// Record the values of the changed attributes.
-				if ( model.hasChanged() ) {
-					options.data.changes = {};
-
-					_.each( model.changed, function( value, key ) {
-						options.data.changes[ key ] = this.get( key );
+				if ( options.changes ) {
+					_.each( options.changes, function( value, key ) {
+						options.changes[ key ] = this.get( key );
 					}, this );
+
+					options.data.changes = options.changes;
+					delete options.changes;
 				}
 
-				bindSyncEvents( model, options );
 				return media.ajax( options );
 
 			// Overload the `delete` request so attachments can be removed.
@@ -244,16 +287,11 @@ window.wp = window.wp || {};
 					_wpnonce: this.get('nonces')['delete']
 				});
 
-				bindSyncEvents( model, options );
 				return media.ajax( options ).done( function() {
 					this.destroyed = true;
 				}).fail( function() {
 					this.destroyed = false;
 				});
-
-			// Otherwise, fall back to `Backbone.sync()`.
-			} else {
-				return Backbone.Model.prototype.sync.apply( this, arguments );
 			}
 		},
 
@@ -354,7 +392,7 @@ window.wp = window.wp || {};
 			if ( this.props.get('query') )
 				return;
 
-			var changed = _.chain( model.changed ).map( function( t, prop ) {
+			var changed = _.chain( options.changes ).map( function( t, prop ) {
 				var filter = Attachments.filters[ prop ],
 					term = model.get( prop );
 
@@ -396,7 +434,7 @@ window.wp = window.wp || {};
 
 		validate: function( attachment, options ) {
 			var valid = this.validator( attachment ),
-				hasAttachment = !! this.get( attachment.cid );
+				hasAttachment = !! this.getByCid( attachment.cid );
 
 			if ( ! valid && hasAttachment )
 				this.remove( attachment, options );
@@ -504,6 +542,13 @@ window.wp = window.wp || {};
 
 		hasMore: function() {
 			return this.mirroring ? this.mirroring.hasMore() : false;
+		},
+
+		parse: function( resp, xhr ) {
+			return _.map( resp, function( attrs ) {
+				var attachment = Attachment.get( attrs.id );
+				return attachment.set( attachment.parse( attrs, xhr ) );
+			});
 		},
 
 		_requery: function() {
@@ -673,7 +718,7 @@ window.wp = window.wp || {};
 				return $.Deferred().resolveWith( this ).promise();
 
 			options = options || {};
-			options.remove = false;
+			options.add = true;
 
 			return this._more = this.fetch( options ).done( function( resp ) {
 				if ( _.isEmpty( resp ) || -1 === this.args.posts_per_page || resp.length < this.args.posts_per_page )
@@ -701,7 +746,6 @@ window.wp = window.wp || {};
 					args.paged = Math.floor( this.length / args.posts_per_page ) + 1;
 
 				options.data.query = args;
-				bindSyncEvents( model, options );
 				return media.ajax( options );
 
 			// Otherwise, fall back to Backbone.sync()
@@ -832,7 +876,7 @@ window.wp = window.wp || {};
 				this._single = model;
 
 			// If the single model isn't in the selection, remove it.
-			if ( this._single && ! this.get( this._single.cid ) )
+			if ( this._single && ! this.getByCid( this._single.cid ) )
 				delete this._single;
 
 			this._single = this._single || this.last();
@@ -844,7 +888,7 @@ window.wp = window.wp || {};
 
 					// If the model was already removed, trigger the collection
 					// event manually.
-					if ( ! this.get( previous.cid ) )
+					if ( ! this.getByCid( previous.cid ) )
 						this.trigger( 'selection:unsingle', previous, this );
 				}
 				if ( this._single )

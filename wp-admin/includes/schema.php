@@ -505,11 +505,13 @@ function populate_options() {
 		else
 			$autoload = 'yes';
 
+		$option = $wpdb->escape($option);
 		if ( is_array($value) )
 			$value = serialize($value);
+		$value = $wpdb->escape($value);
 		if ( !empty($insert) )
 			$insert .= ', ';
-		$insert .= $wpdb->prepare( "(%s, %s, %s)", $option, $value, $autoload );
+		$insert .= "('$option', '$value', '$autoload')";
 	}
 
 	if ( !empty($insert) )
@@ -586,7 +588,7 @@ function populate_roles_160() {
 	add_role('subscriber', 'Subscriber');
 
 	// Add caps for Administrator role
-	$role = get_role('administrator');
+	$role =& get_role('administrator');
 	$role->add_cap('switch_themes');
 	$role->add_cap('edit_themes');
 	$role->add_cap('activate_plugins');
@@ -619,7 +621,7 @@ function populate_roles_160() {
 	$role->add_cap('level_0');
 
 	// Add caps for Editor role
-	$role = get_role('editor');
+	$role =& get_role('editor');
 	$role->add_cap('moderate_comments');
 	$role->add_cap('manage_categories');
 	$role->add_cap('manage_links');
@@ -641,7 +643,7 @@ function populate_roles_160() {
 	$role->add_cap('level_0');
 
 	// Add caps for Author role
-	$role = get_role('author');
+	$role =& get_role('author');
 	$role->add_cap('upload_files');
 	$role->add_cap('edit_posts');
 	$role->add_cap('edit_published_posts');
@@ -652,14 +654,14 @@ function populate_roles_160() {
 	$role->add_cap('level_0');
 
 	// Add caps for Contributor role
-	$role = get_role('contributor');
+	$role =& get_role('contributor');
 	$role->add_cap('edit_posts');
 	$role->add_cap('read');
 	$role->add_cap('level_1');
 	$role->add_cap('level_0');
 
 	// Add caps for Subscriber role
-	$role = get_role('subscriber');
+	$role =& get_role('subscriber');
 	$role->add_cap('read');
 	$role->add_cap('level_0');
 }
@@ -672,7 +674,7 @@ function populate_roles_160() {
 function populate_roles_210() {
 	$roles = array('administrator', 'editor');
 	foreach ($roles as $role) {
-		$role = get_role($role);
+		$role =& get_role($role);
 		if ( empty($role) )
 			continue;
 
@@ -693,19 +695,19 @@ function populate_roles_210() {
 		$role->add_cap('read_private_pages');
 	}
 
-	$role = get_role('administrator');
+	$role =& get_role('administrator');
 	if ( ! empty($role) ) {
 		$role->add_cap('delete_users');
 		$role->add_cap('create_users');
 	}
 
-	$role = get_role('author');
+	$role =& get_role('author');
 	if ( ! empty($role) ) {
 		$role->add_cap('delete_posts');
 		$role->add_cap('delete_published_posts');
 	}
 
-	$role = get_role('contributor');
+	$role =& get_role('contributor');
 	if ( ! empty($role) ) {
 		$role->add_cap('delete_posts');
 	}
@@ -717,7 +719,7 @@ function populate_roles_210() {
  * @since 2.3.0
  */
 function populate_roles_230() {
-	$role = get_role( 'administrator' );
+	$role =& get_role( 'administrator' );
 
 	if ( !empty( $role ) ) {
 		$role->add_cap( 'unfiltered_upload' );
@@ -730,7 +732,7 @@ function populate_roles_230() {
  * @since 2.5.0
  */
 function populate_roles_250() {
-	$role = get_role( 'administrator' );
+	$role =& get_role( 'administrator' );
 
 	if ( !empty( $role ) ) {
 		$role->add_cap( 'edit_dashboard' );
@@ -743,7 +745,7 @@ function populate_roles_250() {
  * @since 2.6.0
  */
 function populate_roles_260() {
-	$role = get_role( 'administrator' );
+	$role =& get_role( 'administrator' );
 
 	if ( !empty( $role ) ) {
 		$role->add_cap( 'update_plugins' );
@@ -757,7 +759,7 @@ function populate_roles_260() {
  * @since 2.7.0
  */
 function populate_roles_270() {
-	$role = get_role( 'administrator' );
+	$role =& get_role( 'administrator' );
 
 	if ( !empty( $role ) ) {
 		$role->add_cap( 'install_plugins' );
@@ -771,7 +773,7 @@ function populate_roles_270() {
  * @since 2.8.0
  */
 function populate_roles_280() {
-	$role = get_role( 'administrator' );
+	$role =& get_role( 'administrator' );
 
 	if ( !empty( $role ) ) {
 		$role->add_cap( 'install_themes' );
@@ -784,7 +786,7 @@ function populate_roles_280() {
  * @since 3.0.0
  */
 function populate_roles_300() {
-	$role = get_role( 'administrator' );
+	$role =& get_role( 'administrator' );
 
 	if ( !empty( $role ) ) {
 		$role->add_cap( 'update_core' );
@@ -919,11 +921,13 @@ We hope you enjoy your new site. Thanks!
 
 	$insert = '';
 	foreach ( $sitemeta as $meta_key => $meta_value ) {
+		$meta_key = $wpdb->escape( $meta_key );
 		if ( is_array( $meta_value ) )
 			$meta_value = serialize( $meta_value );
+		$meta_value = $wpdb->escape( $meta_value );
 		if ( !empty( $insert ) )
 			$insert .= ', ';
-		$insert .= $wpdb->prepare( "( %d, %s, %s)", $network_id, $meta_key, $meta_value );
+		$insert .= "( $network_id, '$meta_key', '$meta_value')";
 	}
 	$wpdb->query( "INSERT INTO $wpdb->sitemeta ( site_id, meta_key, meta_value ) VALUES " . $insert );
 

@@ -280,16 +280,16 @@ class wp_xmlrpc_server extends IXR_Server {
 				$meta['id'] = (int) $meta['id'];
 				$pmeta = get_metadata_by_mid( 'post', $meta['id'] );
 				if ( isset($meta['key']) ) {
-					$meta['key'] = wp_unslash( $meta['key'] );
+					$meta['key'] = stripslashes( $meta['key'] );
 					if ( $meta['key'] != $pmeta->meta_key )
 						continue;
-					$meta['value'] = wp_unslash( $meta['value'] );
+					$meta['value'] = stripslashes_deep( $meta['value'] );
 					if ( current_user_can( 'edit_post_meta', $post_id, $meta['key'] ) )
 						update_metadata_by_mid( 'post', $meta['id'], $meta['value'] );
 				} elseif ( current_user_can( 'delete_post_meta', $post_id, $pmeta->meta_key ) ) {
 					delete_metadata_by_mid( 'post', $meta['id'] );
 				}
-			} elseif ( current_user_can( 'add_post_meta', $post_id, wp_unslash( $meta['key'] ) ) ) {
+			} elseif ( current_user_can( 'add_post_meta', $post_id, stripslashes( $meta['key'] ) ) ) {
 				add_post_meta( $post_id, $meta['key'], $meta['value'] );
 			}
 		}
@@ -318,24 +318,14 @@ class wp_xmlrpc_server extends IXR_Server {
 				'value'         => $wp_version
 			),
 			'blog_url'          => array(
-				'desc'          => __( 'WordPress Address (URL)' ),
+				'desc'          => __( 'Site URL' ),
 				'readonly'      => true,
 				'option'        => 'siteurl'
 			),
 			'home_url'          => array(
-				'desc'          => __( 'Site Address (URL)' ),
+				'desc'          => __( 'Home URL' ),
 				'readonly'      => true,
 				'option'        => 'home'
-			),
-			'login_url'          => array(
-				'desc'          => __( 'Login Address (URL)' ),
-				'readonly'      => true,
-				'value'         => wp_login_url( )
-			),
-			'admin_url'          => array(
-				'desc'          => __( 'The URL to the admin area' ),
-				'readonly'      => true,
-				'value'         => get_admin_url( )
 			),
 			'image_default_link_type' => array(
 				'desc'          => __( 'Image default link type' ),
@@ -572,13 +562,13 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( ! is_array( $_term) )
 			$_term = get_object_vars( $_term );
 
-		// For integers which may be larger than XML-RPC supports ensure we return strings.
+		// For Intergers which may be largeer than XMLRPC supports ensure we return strings.
 		$_term['term_id'] = strval( $_term['term_id'] );
 		$_term['term_group'] = strval( $_term['term_group'] );
 		$_term['term_taxonomy_id'] = strval( $_term['term_taxonomy_id'] );
 		$_term['parent'] = strval( $_term['parent'] );
 
-		// Count we are happy to return as an integer because people really shouldn't use terms that much.
+		// Count we are happy to return as an Integer because people really shouldn't use Terms that much.
 		$_term['count'] = intval( $_term['count'] );
 
 		return apply_filters( 'xmlrpc_prepare_term', $_term, $term );
@@ -3545,7 +3535,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit posts.' ) );
 
 		// Check if revisions are enabled.
-		if ( ! wp_revisions_enabled( $post ) )
+		if ( ! WP_POST_REVISIONS || ! post_type_supports( $post->post_type, 'revisions' ) )
 			return new IXR_Error( 401, __( 'Sorry, revisions are disabled.' ) );
 
 		$revisions = wp_get_post_revisions( $post_id );
@@ -3612,7 +3602,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error( 401, __( 'Sorry, you cannot edit this post.' ) );
 
 		// Check if revisions are disabled.
-		if ( ! wp_revisions_enabled( $post ) )
+		if ( ! WP_POST_REVISIONS || ! post_type_supports( $post->post_type, 'revisions' ) )
 			return new IXR_Error( 401, __( 'Sorry, revisions are disabled.' ) );
 
 		$post = wp_restore_post_revision( $revision_id );
@@ -3756,9 +3746,9 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$categories = implode(',', wp_get_post_categories($post_ID));
 
-		$content  = '<title>'.wp_unslash($post_data['post_title']).'</title>';
+		$content  = '<title>'.stripslashes($post_data['post_title']).'</title>';
 		$content .= '<category>'.$categories.'</category>';
-		$content .= wp_unslash($post_data['post_content']);
+		$content .= stripslashes($post_data['post_content']);
 
 		$struct = array(
 			'userid'    => $post_data['post_author'],
@@ -3794,9 +3784,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( !$user = $this->login($username, $password) )
 			return $this->error;
 
-		if ( ! current_user_can( 'edit_posts' ) )
-			return new IXR_Error( 401, __( 'Sorry, you cannot edit posts on this site.' ) );
-
 		do_action('xmlrpc_call', 'blogger.getRecentPosts');
 
 		$posts_list = wp_get_recent_posts( $query );
@@ -3813,9 +3800,9 @@ class wp_xmlrpc_server extends IXR_Server {
 			$post_date  = $this->_convert_date( $entry['post_date'] );
 			$categories = implode(',', wp_get_post_categories($entry['ID']));
 
-			$content  = '<title>'.wp_unslash($entry['post_title']).'</title>';
+			$content  = '<title>'.stripslashes($entry['post_title']).'</title>';
 			$content .= '<category>'.$categories.'</category>';
-			$content .= wp_unslash($entry['post_content']);
+			$content .= stripslashes($entry['post_content']);
 
 			$struct[] = array(
 				'userid' => $entry['post_author'],
@@ -4770,9 +4757,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( !$user = $this->login($username, $password) )
 			return $this->error;
 
-		if ( ! current_user_can( 'edit_posts' ) )
-			return new IXR_Error( 401, __( 'Sorry, you cannot edit posts on this site.' ) );
-
 		do_action('xmlrpc_call', 'metaWeblog.getRecentPosts');
 
 		$posts_list = wp_get_recent_posts( $query );
@@ -5405,7 +5389,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		// Work around bug in strip_tags():
 		$linea = str_replace('<!DOC', '<DOC', $linea);
-		$linea = preg_replace( '/[\r\n\t ]+/', ' ', $linea ); // normalize spaces
+		$linea = preg_replace( '/[\s\r\n\t]+/', ' ', $linea ); // normalize spaces
 		$linea = preg_replace( "/<\/*(h1|h2|h3|h4|h5|h6|p|th|td|li|dt|dd|pre|caption|input|textarea|button|body)[^>]*>/", "\n\n", $linea );
 
 		preg_match('|<title>([^<]*?)</title>|is', $linea, $matchtitle);
@@ -5433,7 +5417,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 				// prevent really long link text
 				if ( strlen($context[1]) > 100 )
-					$context[1] = substr($context[1], 0, 100) . '&#8230;';
+					$context[1] = substr($context[1], 0, 100) . '...';
 
 				$marker = '<wpcontext>'.$context[1].'</wpcontext>';    // set up our marker
 				$excerpt= str_replace($context[0], $marker, $excerpt); // swap out the link for our marker
@@ -5451,7 +5435,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$pagelinkedfrom = str_replace('&', '&amp;', $pagelinkedfrom);
 
-		$context = '[&#8230;] ' . esc_html( $excerpt ) . ' [&#8230;]';
+		$context = '[...] ' . esc_html( $excerpt ) . ' [...]';
 		$pagelinkedfrom = $wpdb->escape( $pagelinkedfrom );
 
 		$comment_post_ID = (int) $post_ID;

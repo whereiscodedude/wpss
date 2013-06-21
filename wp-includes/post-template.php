@@ -96,7 +96,7 @@ function the_title_attribute( $args = '' ) {
  *
  * @since 0.71
  *
- * @param int|object $post Optional. Post ID or object.
+ * @param mixed $post Optional. Post ID or object.
  * @return string
  */
 function get_the_title( $post = 0 ) {
@@ -159,22 +159,13 @@ function get_the_guid( $id = 0 ) {
  * @since 0.71
  *
  * @param string $more_link_text Optional. Content for when there is more text.
- * @param bool $strip_teaser Optional. Strip teaser content before the more text. Default is false.
- * @param int $id Optional. A post id. Defaults to the current post when in The Loop, undefined otherwise.
+ * @param bool $stripteaser Optional. Strip teaser content before the more text. Default is false.
  */
-function the_content( $more_link_text = null, $strip_teaser = false, $id = 0 ) {
-	$post = get_post( $id );
-
-	/*
-	 * Filter: the_content
-	 *
-	 * param string Post content as returned by get_the_content()
-	 * param int The ID of the post to which the content belongs. This was introduced
-	 *           in 3.6.0 and is not reliably passed by all plugins and themes that
-	 *           directly apply the_content. As such, it is not considered portable.
-	 */
-	$content = apply_filters( 'the_content', get_the_content( $more_link_text, $strip_teaser, $post->ID ), $post->ID );
-	echo str_replace( ']]>', ']]&gt;', $content );
+function the_content($more_link_text = null, $stripteaser = false) {
+	$content = get_the_content($more_link_text, $stripteaser);
+	$content = apply_filters('the_content', $content);
+	$content = str_replace(']]>', ']]&gt;', $content);
+	echo $content;
 }
 
 /**
@@ -184,66 +175,54 @@ function the_content( $more_link_text = null, $strip_teaser = false, $id = 0 ) {
  *
  * @param string $more_link_text Optional. Content for when there is more text.
  * @param bool $stripteaser Optional. Strip teaser content before the more text. Default is false.
- * @param int $id Optional. A post id. Defaults to the current post when in The Loop, undefined otherwise.
  * @return string
  */
-function get_the_content( $more_link_text = null, $strip_teaser = false, $id = 0 ) {
-	global $page, $more, $preview;
+function get_the_content( $more_link_text = null, $stripteaser = false ) {
+	global $more, $page, $pages, $multipage, $preview;
 
-	$post = get_post( $id );
-	// Avoid parsing again if the post is the same one parsed by setup_postdata().
-	// The extract() will set up $pages and $multipage.
-	if ( $post->ID != get_post()->ID )
-		extract( wp_parse_post_content( $post, false ) );
-	else
-		global $pages, $multipage;
+	$post = get_post();
 
 	if ( null === $more_link_text )
-		$more_link_text = __( '(more&hellip;)' );
+		$more_link_text = __( '(more...)' );
 
 	$output = '';
-	$has_teaser = false;
+	$hasTeaser = false;
 
 	// If post password required and it doesn't match the cookie.
-	if ( post_password_required( $post ) )
-		return get_the_password_form( $post );
+	if ( post_password_required() )
+		return get_the_password_form();
 
-	if ( $page > count( $pages ) ) // if the requested page doesn't exist
-		$page = count( $pages ); // give them the highest numbered page that DOES exist
+	if ( $page > count($pages) ) // if the requested page doesn't exist
+		$page = count($pages); // give them the highest numbered page that DOES exist
 
-	$content = $pages[$page - 1];
-	if ( preg_match( '/<!--more(.*?)?-->/', $content, $matches ) ) {
-		$content = explode( $matches[0], $content, 2 );
-		if ( ! empty( $matches[1] ) && ! empty( $more_link_text ) )
-			$more_link_text = strip_tags( wp_kses_no_null( trim( $matches[1] ) ) );
+	$content = $pages[$page-1];
+	if ( preg_match('/<!--more(.*?)?-->/', $content, $matches) ) {
+		$content = explode($matches[0], $content, 2);
+		if ( !empty($matches[1]) && !empty($more_link_text) )
+			$more_link_text = strip_tags(wp_kses_no_null(trim($matches[1])));
 
-		$has_teaser = true;
+		$hasTeaser = true;
 	} else {
-		$content = array( $content );
+		$content = array($content);
 	}
-
-	if ( false !== strpos( $post->post_content, '<!--noteaser-->' ) && ( ! $multipage || $page == 1 ) )
-		$strip_teaser = true;
-
+	if ( (false !== strpos($post->post_content, '<!--noteaser-->') && ((!$multipage) || ($page==1))) )
+		$stripteaser = true;
 	$teaser = $content[0];
-
-	if ( $more && $strip_teaser && $has_teaser )
+	if ( $more && $stripteaser && $hasTeaser )
 		$teaser = '';
-
 	$output .= $teaser;
-
-	if ( count( $content ) > 1 ) {
+	if ( count($content) > 1 ) {
 		if ( $more ) {
 			$output .= '<span id="more-' . $post->ID . '"></span>' . $content[1];
 		} else {
-			if ( ! empty( $more_link_text ) )
+			if ( ! empty($more_link_text) )
 				$output .= apply_filters( 'the_content_more_link', ' <a href="' . get_permalink() . "#more-{$post->ID}\" class=\"more-link\">$more_link_text</a>", $more_link_text );
-			$output = force_balance_tags( $output );
+			$output = force_balance_tags($output);
 		}
-	}
 
+	}
 	if ( $preview ) // preview fix for javascript bug with foreign languages
-		$output =	preg_replace_callback( '/\%u([0-9A-F]{4})/', '_convert_urlencoded_to_entities', $output );
+		$output =	preg_replace_callback('/\%u([0-9A-F]{4})/', '_convert_urlencoded_to_entities', $output);
 
 	return $output;
 }
@@ -584,7 +563,7 @@ function get_body_class( $class = '' ) {
  *
  * @since 2.7.0
  *
- * @param int|WP_Post $post An optional post. Global $post used if not provided.
+ * @param int|object $post An optional post. Global $post used if not provided.
  * @return bool false if a password is not required or the correct password cookie is present, true otherwise.
  */
 function post_password_required( $post = null ) {
@@ -599,7 +578,7 @@ function post_password_required( $post = null ) {
 	require_once ABSPATH . 'wp-includes/class-phpass.php';
 	$hasher = new PasswordHash( 8, true );
 
-	$hash = wp_unslash( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+	$hash = stripslashes( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
 	if ( 0 !== strpos( $hash, '$P$B' ) )
 		return true;
 
@@ -620,6 +599,15 @@ function post_password_required( $post = null ) {
  * Quicktag one or more times). This tag must be within The Loop.
  *
  * The defaults for overwriting are:
+ * 'next_or_number' - Default is 'number' (string). Indicates whether page
+ *      numbers should be used. Valid values are number and next.
+ * 'nextpagelink' - Default is 'Next Page' (string). Text for link to next page.
+ *      of the bookmark.
+ * 'previouspagelink' - Default is 'Previous Page' (string). Text for link to
+ *      previous page, if available.
+ * 'pagelink' - Default is '%' (String).Format string for page numbers. The % in
+ *      the parameter string will be replaced with the page number, so Page %
+ *      generates "Page 1", "Page 2", etc. Defaults to %, just the page number.
  * 'before' - Default is '<p> Pages:' (string). The html or text to prepend to
  *      each bookmarks.
  * 'after' - Default is '</p>' (string). The html or text to append to each
@@ -630,36 +618,20 @@ function post_password_required( $post = null ) {
  * 'link_after' - Default is '' (string). The html or text to append to each
  *      Pages link inside the <a> tag. Also appended to the current item, which
  *      is not linked.
- * 'next_or_number' - Default is 'number' (string). Indicates whether page
- *      numbers should be used. Valid values are number and next.
- * 'separator' - Default is ' ' (string). Text used between pagination links.
- * 'nextpagelink' - Default is 'Next Page' (string). Text for link to next page.
- *      of the bookmark.
- * 'previouspagelink' - Default is 'Previous Page' (string). Text for link to
- *      previous page, if available.
- * 'pagelink' - Default is '%' (String).Format string for page numbers. The % in
- *      the parameter string will be replaced with the page number, so Page %
- *      generates "Page 1", "Page 2", etc. Defaults to %, just the page number.
- * 'echo' - Default is 1 (integer). When not 0, this triggers the HTML to be
- *      echoed and then returned.
  *
  * @since 1.2.0
+ * @access private
  *
  * @param string|array $args Optional. Overwrite the defaults.
  * @return string Formatted output in HTML.
  */
-function wp_link_pages( $args = '' ) {
+function wp_link_pages($args = '') {
 	$defaults = array(
-		'before'           => '<p>' . __( 'Pages:' ),
-		'after'            => '</p>',
-		'link_before'      => '',
-		'link_after'       => '',
-		'next_or_number'   => 'number',
-		'separator'        => ' ',
-		'nextpagelink'     => __( 'Next page' ),
-		'previouspagelink' => __( 'Previous page' ),
-		'pagelink'         => '%',
-		'echo'             => 1
+		'before' => '<p>' . __('Pages:'), 'after' => '</p>',
+		'link_before' => '', 'link_after' => '',
+		'next_or_number' => 'number', 'nextpagelink' => __('Next page'),
+		'previouspagelink' => __('Previous page'), 'pagelink' => '%',
+		'echo' => 1
 	);
 
 	$r = wp_parse_args( $args, $defaults );
@@ -672,33 +644,34 @@ function wp_link_pages( $args = '' ) {
 	if ( $multipage ) {
 		if ( 'number' == $next_or_number ) {
 			$output .= $before;
-			for ( $i = 1; $i <= $numpages; $i++ ) {
-				$link = $link_before . str_replace( '%', $i, $pagelink ) . $link_after;
-				if ( $i != $page || ! $more && 1 == $page )
-					$link = _wp_link_page( $i ) . $link . '</a>';
-				$link = apply_filters( 'wp_link_pages_link', $link, $i );
-				$output .= $separator . $link;
+			for ( $i = 1; $i < ($numpages+1); $i = $i + 1 ) {
+				$j = str_replace('%',$i,$pagelink);
+				$output .= ' ';
+				if ( ($i != $page) || ((!$more) && ($page==1)) ) {
+					$output .= _wp_link_page($i);
+				}
+				$output .= $link_before . $j . $link_after;
+				if ( ($i != $page) || ((!$more) && ($page==1)) )
+					$output .= '</a>';
 			}
 			$output .= $after;
-		} elseif ( $more ) {
-			$output .= $before;
-			$i = $page - 1;
-			if ( $i ) {
-				$link = _wp_link_page( $i ) . $link_before . $previouspagelink . $link_after . '</a>';
-				$link = apply_filters( 'wp_link_pages_link', $link, $i );
-				$output .= $separator . $link;
+		} else {
+			if ( $more ) {
+				$output .= $before;
+				$i = $page - 1;
+				if ( $i && $more ) {
+					$output .= _wp_link_page($i);
+					$output .= $link_before. $previouspagelink . $link_after . '</a>';
+				}
+				$i = $page + 1;
+				if ( $i <= $numpages && $more ) {
+					$output .= _wp_link_page($i);
+					$output .= $link_before. $nextpagelink . $link_after . '</a>';
+				}
+				$output .= $after;
 			}
-			$i = $page + 1;
-			if ( $i <= $numpages ) {
-				$link = _wp_link_page( $i ) . $link_before . $nextpagelink . $link_after . '</a>';
-				$link = apply_filters( 'wp_link_pages_link', $link, $i );
-				$output .= $separator . $link;
-			}
-			$output .= $after;
 		}
 	}
-
-	$output = apply_filters( 'wp_link_pages', $output, $args );
 
 	if ( $echo )
 		echo $output;
@@ -1050,7 +1023,7 @@ class Walker_Page extends Walker {
 	 * @param int $current_page Page ID.
 	 * @param array $args
 	 */
-	function start_el( &$output, $page, $depth = 0, $args = array(), $current_page = 0 ) {
+	function start_el( &$output, $page, $depth, $args, $current_page = 0 ) {
 		if ( $depth )
 			$indent = str_repeat("\t", $depth);
 		else
@@ -1132,7 +1105,7 @@ class Walker_PageDropdown extends Walker {
 	 * @param array $args Uses 'selected' argument for selected page to set selected HTML attribute for option element.
 	 * @param int $id
 	 */
-	function start_el( &$output, $page, $depth = 0, $args = array(), $id = 0 ) {
+	function start_el(&$output, $page, $depth, $args, $id = 0) {
 		$pad = str_repeat('&nbsp;', $depth * 3);
 
 		$output .= "\t<option class=\"level-$depth\" value=\"$page->ID\"";
@@ -1240,11 +1213,11 @@ function prepend_attachment($content) {
  *
  * @since 1.0.0
  * @uses apply_filters() Calls 'the_password_form' filter on output.
- * @param int|WP_Post $post Optional. A post id or post object. Defaults to the current post when in The Loop, undefined otherwise.
+ *
  * @return string HTML content for password form for password protected post.
  */
-function get_the_password_form( $post = 0 ) {
-	$post = get_post( $post );
+function get_the_password_form() {
+	$post = get_post();
 	$label = 'pwbox-' . ( empty($post->ID) ? rand() : $post->ID );
 	$output = '<form action="' . esc_url( site_url( 'wp-login.php?action=postpass', 'login_post' ) ) . '" method="post">
 	<p>' . __("This post is password protected. To view it please enter your password below:") . '</p>
@@ -1265,7 +1238,7 @@ function get_the_password_form( $post = 0 ) {
  * @uses $wp_query
  *
  * @param string $template The specific template name if specific matching is required.
- * @return bool True on success, false on failure.
+ * @return bool False on failure, true if success.
  */
 function is_page_template( $template = '' ) {
 	if ( ! is_page() )
@@ -1290,13 +1263,13 @@ function is_page_template( $template = '' ) {
  *
  * @since 3.4.0
  *
- * @param int $post_id Optional. The page ID to check. Defaults to the current post, when used in the loop.
+ * @param int $post_id The page ID to check. Defaults to the current post, when used in the loop.
  * @return string|bool Page template filename. Returns an empty string when the default page template
  * 	is in use. Returns false if the post is not a page.
  */
 function get_page_template_slug( $post_id = null ) {
 	$post = get_post( $post_id );
-	if ( ! $post || 'page' != $post->post_type )
+	if ( 'page' != $post->post_type )
 		return false;
 	$template = get_post_meta( $post->ID, '_wp_page_template', true );
 	if ( ! $template || 'default' == $template )
@@ -1327,9 +1300,9 @@ function wp_post_revision_title( $revision, $link = true ) {
 	/* translators: revision date format, see http://php.net/date */
 	$datef = _x( 'j F, Y @ G:i', 'revision date format');
 	/* translators: 1: date */
-	$autosavef = _x( '%1$s [Autosave]', 'post revision title extra' );
+	$autosavef = __( '%1$s [Autosave]' );
 	/* translators: 1: date */
-	$currentf  = _x( '%1$s [Current Revision]', 'post revision title extra' );
+	$currentf  = __( '%1$s [Current Revision]' );
 
 	$date = date_i18n( $datef, strtotime( $revision->post_modified ) );
 	if ( $link && current_user_can( 'edit_post', $revision->ID ) && $link = get_edit_post_link( $revision->ID ) )
@@ -1344,126 +1317,144 @@ function wp_post_revision_title( $revision, $link = true ) {
 }
 
 /**
- * Retrieve formatted date timestamp of a revision (linked to that revisions's page).
- *
- * @package WordPress
- * @subpackage Post_Revisions
- * @since 3.6.0
- *
- * @uses date_i18n()
- *
- * @param int|object $revision Revision ID or revision object.
- * @param bool $link Optional, default is true. Link to revisions's page?
- * @return string gravatar, user, i18n formatted datetimestamp or localized 'Current Revision'.
- */
-function wp_post_revision_title_expanded( $revision, $link = true ) {
-	if ( !$revision = get_post( $revision ) )
-		return $revision;
-
-	if ( !in_array( $revision->post_type, array( 'post', 'page', 'revision' ) ) )
-		return false;
-
-	$author = get_the_author_meta( 'display_name', $revision->post_author );
-	/* translators: revision date format, see http://php.net/date */
-	$datef = _x( 'j F, Y @ G:i:s', 'revision date format');
-
-	$gravatar = get_avatar( $revision->post_author, 24 );
-
-	$date = date_i18n( $datef, strtotime( $revision->post_modified ) );
-	if ( $link && current_user_can( 'edit_post', $revision->ID ) && $link = get_edit_post_link( $revision->ID ) )
-		$date = "<a href='$link'>$date</a>";
-
-	$revision_date_author = sprintf(
-		/* translators: post revision title: 1: author avatar, 2: author name, 3: time ago, 4: date */
-		_x( '%1$s %2$s, %3$s ago (%4$s)', 'post revision title' ),
-		$gravatar,
-		$author,
-		human_time_diff( strtotime( $revision->post_modified ), current_time( 'timestamp' ) ),
-		$date
-	);
-
-	$autosavef = __( '%1$s [Autosave]' );
-	$currentf  = __( '%1$s [Current Revision]' );
-
-	if ( !wp_is_post_revision( $revision ) )
-		$revision_date_author = sprintf( $currentf, $revision_date_author );
-	elseif ( wp_is_post_autosave( $revision ) )
-		$revision_date_author = sprintf( $autosavef, $revision_date_author );
-
-	return $revision_date_author;
-}
-
-/**
  * Display list of a post's revisions.
  *
  * Can output either a UL with edit links or a TABLE with diff interface, and
  * restore action links.
+ *
+ * Second argument controls parameters:
+ *   (bool)   parent : include the parent (the "Current Revision") in the list.
+ *   (string) format : 'list' or 'form-table'. 'list' outputs UL, 'form-table'
+ *                     outputs TABLE with UI.
+ *   (int)    right  : what revision is currently being viewed - used in
+ *                     form-table format.
+ *   (int)    left   : what revision is currently being diffed against right -
+ *                     used in form-table format.
  *
  * @package WordPress
  * @subpackage Post_Revisions
  * @since 2.6.0
  *
  * @uses wp_get_post_revisions()
- * @uses wp_post_revision_title_expanded()
+ * @uses wp_post_revision_title()
  * @uses get_edit_post_link()
  * @uses get_the_author_meta()
  *
+ * @todo split into two functions (list, form-table) ?
+ *
  * @param int|object $post_id Post ID or post object.
- * @param string $type 'all' (default), 'revision' or 'autosave'
+ * @param string|array $args See description {@link wp_parse_args()}.
  * @return null
  */
-function wp_list_post_revisions( $post_id = 0, $type = 'all' ) {
-	if ( ! $post = get_post( $post_id ) )
+function wp_list_post_revisions( $post_id = 0, $args = null ) {
+	if ( !$post = get_post( $post_id ) )
 		return;
 
-	// $args array with (parent, format, right, left, type) deprecated since 3.6
-	if ( is_array( $type ) ) {
-		$type = ! empty( $type['type'] ) ? $type['type']  : $type;
-		_deprecated_argument( __FUNCTION__, '3.6' );
+	$defaults = array( 'parent' => false, 'right' => false, 'left' => false, 'format' => 'list', 'type' => 'all' );
+	extract( wp_parse_args( $args, $defaults ), EXTR_SKIP );
+
+	switch ( $type ) {
+		case 'autosave' :
+			if ( !$autosave = wp_get_post_autosave( $post->ID ) )
+				return;
+			$revisions = array( $autosave );
+			break;
+		case 'revision' : // just revisions - remove autosave later
+		case 'all' :
+		default :
+			if ( !$revisions = wp_get_post_revisions( $post->ID ) )
+				return;
+			break;
 	}
 
-	if ( ! $revisions = wp_get_post_revisions( $post->ID ) )
-		return;
+	/* translators: post revision: 1: when, 2: author name */
+	$titlef = _x( '%1$s by %2$s', 'post revision' );
 
-	$rows = '';
+	if ( $parent )
+		array_unshift( $revisions, $post );
+
+	$rows = $right_checked = '';
+	$class = false;
+	$can_edit_post = current_user_can( 'edit_post', $post->ID );
 	foreach ( $revisions as $revision ) {
-		if ( ! current_user_can( 'read_post', $revision->ID ) )
+		if ( !current_user_can( 'read_post', $revision->ID ) )
+			continue;
+		if ( 'revision' === $type && wp_is_post_autosave( $revision ) )
 			continue;
 
-		$is_autosave = wp_is_post_autosave( $revision );
-		if ( ( 'revision' === $type && $is_autosave ) || ( 'autosave' === $type && ! $is_autosave ) )
-			continue;
+		$date = wp_post_revision_title( $revision );
+		$name = get_the_author_meta( 'display_name', $revision->post_author );
 
-		$rows .= "\t<li>" . wp_post_revision_title_expanded( $revision ) . "</li>\n";
+		if ( 'form-table' == $format ) {
+			if ( $left )
+				$left_checked = $left == $revision->ID ? ' checked="checked"' : '';
+			else
+				$left_checked = $right_checked ? ' checked="checked"' : ''; // [sic] (the next one)
+			$right_checked = $right == $revision->ID ? ' checked="checked"' : '';
+
+			$class = $class ? '' : " class='alternate'";
+
+			if ( $post->ID != $revision->ID && $can_edit_post )
+				$actions = '<a href="' . wp_nonce_url( add_query_arg( array( 'revision' => $revision->ID, 'action' => 'restore' ) ), "restore-post_$post->ID|$revision->ID" ) . '">' . __( 'Restore' ) . '</a>';
+			else
+				$actions = '';
+
+			$rows .= "<tr$class>\n";
+			$rows .= "\t<th style='white-space: nowrap' scope='row'><input type='radio' name='left' value='$revision->ID'$left_checked /></th>\n";
+			$rows .= "\t<th style='white-space: nowrap' scope='row'><input type='radio' name='right' value='$revision->ID'$right_checked /></th>\n";
+			$rows .= "\t<td>$date</td>\n";
+			$rows .= "\t<td>$name</td>\n";
+			$rows .= "\t<td class='action-links'>$actions</td>\n";
+			$rows .= "</tr>\n";
+		} else {
+			$title = sprintf( $titlef, $date, $name );
+			$rows .= "\t<li>$title</li>\n";
+		}
 	}
 
-	echo "<ul class='post-revisions'>\n";
-	echo $rows;
+	if ( 'form-table' == $format ) : ?>
 
-	// if the post was previously restored from a revision
-	// show the restore event details
-	if ( $restored_from_meta = get_post_meta( $post->ID, '_post_restored_from', true ) ) {
-		$author = get_user_by( 'id', $restored_from_meta[ 'restored_by_user' ] );
-		/* translators: revision date format, see http://php.net/date */
-		$datef = _x( 'j F, Y @ G:i:s', 'revision date format');
-		$date = date_i18n( $datef, strtotime( $restored_from_meta[ 'restored_time' ] ) );
-		$time_diff = human_time_diff( $restored_from_meta[ 'restored_time' ] ) ;
-		?>
-		<hr />
-		<div id="revisions-meta-restored">
-			<?php
-			printf(
-				/* translators: restored revision details: 1: gravatar image, 2: author name, 3: time ago, 4: date */
-				__( 'Previously restored by %1$s %2$s, %3$s ago (%4$s)' ),
-				get_avatar( $author->ID, 24 ),
-				$author->display_name,
-				$time_diff,
-				$date
-			);
-			?>
-		</div>
-		<?php
+<form action="revision.php" method="get">
+
+<div class="tablenav">
+	<div class="alignleft">
+		<input type="submit" class="button-secondary" value="<?php esc_attr_e( 'Compare Revisions' ); ?>" />
+		<input type="hidden" name="action" value="diff" />
+		<input type="hidden" name="post_type" value="<?php echo esc_attr($post->post_type); ?>" />
+	</div>
+</div>
+
+<br class="clear" />
+
+<table class="widefat post-revisions" cellspacing="0" id="post-revisions">
+	<col />
+	<col />
+	<col style="width: 33%" />
+	<col style="width: 33%" />
+	<col style="width: 33%" />
+<thead>
+<tr>
+	<th scope="col"><?php /* translators: column name in revisions */ _ex( 'Old', 'revisions column name' ); ?></th>
+	<th scope="col"><?php /* translators: column name in revisions */ _ex( 'New', 'revisions column name' ); ?></th>
+	<th scope="col"><?php /* translators: column name in revisions */ _ex( 'Date Created', 'revisions column name' ); ?></th>
+	<th scope="col"><?php _e( 'Author' ); ?></th>
+	<th scope="col" class="action-links"><?php _e( 'Actions' ); ?></th>
+</tr>
+</thead>
+<tbody>
+
+<?php echo $rows; ?>
+
+</tbody>
+</table>
+
+</form>
+
+<?php
+	else :
+		echo "<ul class='post-revisions'>\n";
+		echo $rows;
 		echo "</ul>";
-	}
+	endif;
 
 }

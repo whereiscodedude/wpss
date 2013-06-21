@@ -27,6 +27,7 @@ function wp_unregister_GLOBALS() {
 	$input = array_merge( $_GET, $_POST, $_COOKIE, $_SERVER, $_ENV, $_FILES, isset( $_SESSION ) && is_array( $_SESSION ) ? $_SESSION : array() );
 	foreach ( $input as $k => $v )
 		if ( !in_array( $k, $no_unset ) && isset( $GLOBALS[$k] ) ) {
+			$GLOBALS[$k] = null;
 			unset( $GLOBALS[$k] );
 		}
 }
@@ -258,7 +259,12 @@ function timer_stop( $display = 0, $precision = 3 ) { // if called like timer_st
  */
 function wp_debug_mode() {
 	if ( WP_DEBUG ) {
-		error_reporting( E_ALL );
+		// E_DEPRECATED is a core PHP constant in PHP 5.3. Don't define this yourself.
+		// The two statements are equivalent, just one is for 5.3+ and for less than 5.3.
+		if ( defined( 'E_DEPRECATED' ) )
+			error_reporting( E_ALL & ~E_DEPRECATED & ~E_STRICT );
+		else
+			error_reporting( E_ALL );
 
 		if ( WP_DEBUG_DISPLAY )
 			ini_set( 'display_errors', 1 );
@@ -508,8 +514,7 @@ function wp_get_active_and_valid_plugins() {
  */
 function wp_set_internal_encoding() {
 	if ( function_exists( 'mb_internal_encoding' ) ) {
-		$charset = get_option( 'blog_charset' );
-		if ( ! $charset || ! @mb_internal_encoding( $charset ) )
+		if ( !@mb_internal_encoding( get_option( 'blog_charset' ) ) )
 			mb_internal_encoding( 'UTF-8' );
 	}
 }

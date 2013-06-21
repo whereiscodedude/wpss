@@ -1,6 +1,6 @@
 /*
 Theme Name: Twenty Eleven
-Theme URI: http://wordpress.org/themes/twentyeleven
+Theme URI: http://wordpress.org/extend/themes/twentyeleven
 Author: the WordPress team
 Author URI: http://wordpress.org/
 Description: The 2011 theme for WordPress is sophisticated, lightweight, and adaptable. Make it yours with a custom menu, header image, and background -- then go further with available theme options for light or dark color scheme, custom link colors, and three layout choices. Twenty Eleven comes equipped with a Showcase page template that transforms your front page into a showcase to show off your best content, widget support galore (sidebar, three footer areas, and a Showcase page widget area), and a custom "Ephemera" widget to display your Aside, Link, Quote, or Status posts. Included are styles for print and for the admin editor, support for featured images (as custom header images on posts and pages and as large images on featured "sticky" posts), and special styles for six different post formats.
@@ -498,6 +498,7 @@ a:hover {
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);
 }
+#access a.assistive-text:active,
 #access a.assistive-text:focus {
 	background: #eee;
 	border-bottom: 1px solid #ddd;
@@ -866,7 +867,7 @@ dl.gallery-item {
 .entry-content img,
 .comment-content img,
 .widget img {
-	max-width: 100%; /* Fluid images for posts, comments, and widgets */
+	max-width: 97.5%; /* Fluid images for posts, comments, and widgets */
 }
 img[class*="align"],
 img[class*="wp-image-"],
@@ -902,7 +903,7 @@ p img,
 }
 .wp-caption img {
 	display: block;
-	margin: -2px 0 0 -2px;
+	margin: 0 auto;
 	max-width: 98%;
 }
 .wp-caption .wp-caption-text,
@@ -952,7 +953,6 @@ img[class*="wp-image-"],
 #content .gallery .gallery-icon img {/* Add fancy borders to all WordPress-added images but not things like badges and icons and the like */
 	border: 1px solid #ddd;
 	padding: 6px;
-	max-width: 97.5%;
 }
 .wp-caption img {
 	border-color: #eee;
@@ -2394,6 +2394,7 @@ p.comment-form-comment {
 		margin-right: 0;
 		width: auto;
 	}
+
 }
 @media (max-width: 650px) {
 	/* @media (max-width: 650px) Reduce font-sizes for better readability on smaller devices */
@@ -2495,6 +2496,7 @@ p.comment-form-comment {
 		width: 100%;
 		height: auto;
 	}
+
 }
 @media (max-width: 450px) {
 	#content .gallery-columns-2 .gallery-item {
@@ -2505,6 +2507,7 @@ p.comment-form-comment {
 		width: 100%;
 		height: auto;
 	}
+
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
 	body {
@@ -2516,6 +2519,7 @@ p.comment-form-comment {
 	#branding {
 		border-top: none;
 	}
+
 }
 
 
@@ -2684,6 +2688,7 @@ p.comment-form-comment {
 	.commentlist .children > li.bypostauthor > article .comment-meta {
 		color: #666;
 	}
+
 }
 
 
@@ -2697,25 +2702,18 @@ p.comment-form-comment {
 	padding-right: -7.6%;
 	max-width: 1000px;
 }
-#ie7 .featured-posts {
-	margin: 0 -7.6%;
-}
-#ie7 .featured-post {
-	margin-left: 0;
-	margin-right: 0;
-	max-width: 100%;
+#ie7 section.featured-post {
+	margin-left: -7.6%;
+	margin-right: -7.6%;
+	max-width: 850px;
 }
 #ie7 section.recent-posts {
 	margin-right: 7.6%;
 }
 
-
 /* =IE8
 ----------------------------------------------- */
 
 #ie8 section.feature-image.large img {
-	width: auto;
-}
-#ie8 section.featured-post .attachment-small-feature {
-	max-width: none;
+	width: 100%;
 }

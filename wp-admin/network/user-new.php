@@ -1,6 +1,6 @@
 <?php
 /**
- * Add New User network administration panel.
+ * Add Site Administration Screen
  *
  * @package WordPress
  * @subpackage Multisite

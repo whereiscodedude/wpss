@@ -158,7 +158,7 @@ class WP_Roles {
 	 * @param string $role Role name.
 	 * @param string $display_name Role display name.
 	 * @param array $capabilities List of role capabilities in the above format.
-	 * @return WP_Role|null WP_Role object if role is added, null if already exists.
+	 * @return null|WP_Role WP_Role object if role is added, null if already exists.
 	 */
 	function add_role( $role, $display_name, $capabilities = array() ) {
 		if ( isset( $this->roles[$role] ) )
@@ -239,7 +239,7 @@ class WP_Roles {
 	 * @access public
 	 *
 	 * @param string $role Role name.
-	 * @return WP_Role|null WP_Role object if found, null if the role does not exist.
+	 * @return object|null Null, if role does not exist. WP_Role object, if found.
 	 */
 	function get_role( $role ) {
 		if ( isset( $this->role_objects[$role] ) )
@@ -535,9 +535,7 @@ class WP_User {
 			// to int 1.
 			if ( ! is_numeric( $value ) )
 				return false;
-			$value = intval( $value );
-			if ( $value < 1 )
-				return false;
+			$value = absint( $value );
 		} else {
 			$value = trim( $value );
 		}
@@ -805,7 +803,6 @@ class WP_User {
 		foreach ( (array) $this->roles as $oldrole )
 			unset( $this->caps[$oldrole] );
 
-		$old_roles = $this->roles;
 		if ( !empty( $role ) ) {
 			$this->caps[$role] = true;
 			$this->roles = array( $role => true );
@@ -815,7 +812,7 @@ class WP_User {
 		update_user_meta( $this->ID, $this->cap_key, $this->caps );
 		$this->get_role_caps();
 		$this->update_user_level_from_caps();
-		do_action( 'set_user_role', $this->ID, $role, $old_roles );
+		do_action( 'set_user_role', $this->ID, $role );
 	}
 
 	/**
@@ -1374,7 +1371,7 @@ function user_can( $user, $capability ) {
  * @since 2.0.0
  *
  * @param string $role Role name.
- * @return WP_Role|null WP_Role object if found, null if the role does not exist.
+ * @return object
  */
 function get_role( $role ) {
 	global $wp_roles;
@@ -1394,7 +1391,7 @@ function get_role( $role ) {
  * @param string $role Role name.
  * @param string $display_name Display name for role.
  * @param array $capabilities List of capabilities, e.g. array( 'edit_posts' => true, 'delete_posts' => false );
- * @return WP_Role|null WP_Role object if role is added, null if already exists.
+ * @return null|WP_Role WP_Role object if role is added, null if already exists.
  */
 function add_role( $role, $display_name, $capabilities = array() ) {
 	global $wp_roles;
