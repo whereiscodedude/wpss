@@ -593,46 +593,6 @@ class WP_Http {
 
 		return $absolute_path . '/' . ltrim( $path, '/' );
 	}
-
-	/**
-	 * Handles HTTP Redirects and follows them if appropriate.
-	 *
-	 * @since 3.7.0
-	 *
-	 * @param string $url The URL which was requested.
-	 * @param array $args The Arguements which were used to make the request.
-	 * @param array $response The Response of the HTTP request.
-	 * @return false|object False if no redirect is present, a WP_HTTP or WP_Error result otherwise.
-	 */
-	static function handle_redirects( $url, $args, $response ) {
-		// If no redirects are present, or, redirects were not requested, perform no action.
-		if ( ! isset( $response['headers']['location'] ) || 0 === $args['_redirection'] )
-			return false;
-
-		// Only perform redirections on redirection http codes
-		if ( $response['response']['code'] > 399 || $response['response']['code'] < 300 )
-			return false;
-
-		// Don't redirect if we've run out of redirects
-		if ( $args['redirection']-- <= 0 )
-			return new WP_Error( 'http_request_failed', __('Too many redirects.') );
-
-		$redirect_location = $response['headers']['location'];
-
-		// If there were multiple Location headers, use the last header specified
-		if ( is_array( $redirect_location ) )
-			$redirect_location = array_pop( $redirect_location );
-
-		$redirect_location = WP_HTTP::make_absolute_url( $redirect_location, $url );
-
-		// POST requests should not POST to a redirected location
-		if ( 'POST' == $args['method'] ) {
-			if ( in_array( $response['response']['code'], array( 302, 303 ) ) )
-				$args['method'] = 'GET';
-		}
-
-		return wp_remote_request( $redirect_location, $args );	
-	}
 }
 
 /**
@@ -697,14 +657,6 @@ class WP_Http_Fsockopen {
 			} else {
 				$arrURL['port'] = 80;
 			}
-		}
-
-		if ( isset( $r['headers']['Host'] ) || isset( $r['headers']['host'] ) ) {
-			if ( isset( $r['headers']['Host'] ) )
-				$arrURL['host'] = $r['headers']['Host'];
-			else
-				$arrURL['host'] = $r['headers']['host'];
-			unset( $r['headers']['Host'], $r['headers']['host'] );
 		}
 
 		//fsockopen has issues with 'localhost' with IPv6 with certain versions of PHP, It attempts to connect to ::1,
@@ -852,17 +804,14 @@ class WP_Http_Fsockopen {
 
 		$arrHeaders = WP_Http::processHeaders( $process['headers'] );
 
-		$response = array(
-			'headers' => $arrHeaders['headers'],
-			'body' => null, // Not yet processed
-			'response' => $arrHeaders['response'],
-			'cookies' => $arrHeaders['cookies'],
-			'filename' => $r['filename']
-		);
-
-		// Handle redirects
-		if ( false !== ( $redirect_response = WP_HTTP::handle_redirects( $url, $r, $response ) ) )
-			return $redirect_response;
+		// If location is found, then assume redirect and redirect to location.
+		if ( isset($arrHeaders['headers']['location']) && 0 !== $r['_redirection'] ) {
+			if ( $r['redirection']-- > 0 ) {
+				return wp_remote_request( WP_HTTP::make_absolute_url( $arrHeaders['headers']['location'], $url ), $r);
+			} else {
+				return new WP_Error('http_request_failed', __('Too many redirects.'));
+			}
+		}
 
 		// If the body was chunk encoded, then decode it.
 		if ( ! empty( $process['body'] ) && isset( $arrHeaders['headers']['transfer-encoding'] ) && 'chunked' == $arrHeaders['headers']['transfer-encoding'] )
@@ -874,9 +823,7 @@ class WP_Http_Fsockopen {
 		if ( isset( $r['limit_response_size'] ) && strlen( $process['body'] ) > $r['limit_response_size'] )
 			$process['body'] = substr( $process['body'], 0, $r['limit_response_size'] );
 
-		$response['body'] = $process['body'];
-
-		return $response;
+		return array( 'headers' => $arrHeaders['headers'], 'body' => $process['body'], 'response' => $arrHeaders['response'], 'cookies' => $arrHeaders['cookies'], 'filename' => $r['filename'] );
 	}
 
 	/**
@@ -1048,17 +995,13 @@ class WP_Http_Streams {
 		else
 			$processedHeaders = WP_Http::processHeaders($meta['wrapper_data']);
 
-		$response = array(
-			'headers' => $processedHeaders['headers'],
-			'body' => null,
-			'response' => $processedHeaders['response'],
-			'cookies' => $processedHeaders['cookies'],
-			'filename' => $r['filename']
-		);
-
-		// Handle redirects
-		if ( false !== ( $redirect_response = WP_HTTP::handle_redirects( $url, $r, $response ) ) )
-			return $redirect_response;
+		if ( ! empty( $processedHeaders['headers']['location'] ) && 0 !== $r['_redirection'] ) { // _redirection: The requested number of redirections
+			if ( $r['redirection']-- > 0 ) {
+				return wp_remote_request( WP_HTTP::make_absolute_url( $processedHeaders['headers']['location'], $url ), $r );
+			} else {
+				return new WP_Error( 'http_request_failed', __( 'Too many redirects.' ) );
+			}
+		}
 
 		if ( ! empty( $strResponse ) && isset( $processedHeaders['headers']['transfer-encoding'] ) && 'chunked' == $processedHeaders['headers']['transfer-encoding'] )
 			$strResponse = WP_Http::chunkTransferDecode($strResponse);
@@ -1066,9 +1009,7 @@ class WP_Http_Streams {
 		if ( true === $r['decompress'] && true === WP_Http_Encoding::should_decode($processedHeaders['headers']) )
 			$strResponse = WP_Http_Encoding::decompress( $strResponse );
 
-		$response['body'] = $strResponse;
-
-		return $response;
+		return array( 'headers' => $processedHeaders['headers'], 'body' => $strResponse, 'response' => $processedHeaders['response'], 'cookies' => $processedHeaders['cookies'], 'filename' => $r['filename'] );
 	}
 
 	/**
@@ -1321,24 +1262,19 @@ class WP_Http_Curl {
 		if ( $r['stream'] )
 			fclose( $this->stream_handle );
 
-		$response = array(
-			'headers' => $theHeaders['headers'],
-			'body' => null,
-			'response' => $response,
-			'cookies' => $theHeaders['cookies'],
-			'filename' => $r['filename']
-		);
-
-		// Handle redirects
-		if ( false !== ( $redirect_response = WP_HTTP::handle_redirects( $url, $r, $response ) ) )
-			return $redirect_response;
+		// See #11305 - When running under safe mode, redirection is disabled above. Handle it manually.
+		if ( ! empty( $theHeaders['headers']['location'] ) && 0 !== $r['_redirection'] ) { // _redirection: The requested number of redirections
+			if ( $r['redirection']-- > 0 ) {
+				return wp_remote_request( WP_HTTP::make_absolute_url( $theHeaders['headers']['location'], $url ), $r );
+			} else {
+				return new WP_Error( 'http_request_failed', __( 'Too many redirects.' ) );
+			}
+		}
 
 		if ( true === $r['decompress'] && true === WP_Http_Encoding::should_decode($theHeaders['headers']) )
 			$theBody = WP_Http_Encoding::decompress( $theBody );
 
-		$response['body'] = $theBody;
-
-		return $response;
+		return array( 'headers' => $theHeaders['headers'], 'body' => $theBody, 'response' => $response, 'cookies' => $theHeaders['cookies'], 'filename' => $r['filename'] );
 	}
 
 	/**
