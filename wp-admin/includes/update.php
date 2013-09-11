@@ -6,6 +6,8 @@
  * @subpackage Administration
  */
 
+// The admin side of our 1.1 update system
+
 /**
  * Selects the first update version from the update_core option
  *
@@ -13,10 +15,10 @@
  */
 function get_preferred_from_update_core() {
 	$updates = get_core_updates();
-	if ( ! is_array( $updates ) )
+	if ( !is_array( $updates ) )
 		return false;
 	if ( empty( $updates ) )
-		return (object) array( 'response' => 'latest' );
+		return (object)array('response' => 'latest');
 	return $updates[0];
 }
 
@@ -28,29 +30,26 @@ function get_preferred_from_update_core() {
  * @return array Array of the update objects
  */
 function get_core_updates( $options = array() ) {
-	$options = array_merge( array( 'available' => true, 'dismissed' => false ), $options );
+	$options = array_merge( array('available' => true, 'dismissed' => false ), $options );
 	$dismissed = get_site_option( 'dismissed_update_core' );
-
-	if ( ! is_array( $dismissed ) )
-		$dismissed = array();
-
+	if ( !is_array( $dismissed ) ) $dismissed = array();
 	$from_api = get_site_transient( 'update_core' );
-
-	if ( ! isset( $from_api->updates ) || ! is_array( $from_api->updates ) )
+	if ( empty($from_api) )
 		return false;
-
+	if ( !isset( $from_api->updates ) || !is_array( $from_api->updates ) ) return false;
 	$updates = $from_api->updates;
+	if ( !is_array( $updates ) ) return false;
 	$result = array();
-	foreach ( $updates as $update ) {
-		if ( array_key_exists( $update->current . '|' . $update->locale, $dismissed ) ) {
+	foreach($updates as $update) {
+		if ( array_key_exists( $update->current.'|'.$update->locale, $dismissed ) ) {
 			if ( $options['dismissed'] ) {
 				$update->dismissed = true;
-				$result[] = $update;
+				$result[]= $update;
 			}
 		} else {
 			if ( $options['available'] ) {
 				$update->dismissed = false;
-				$result[] = $update;
+				$result[]= $update;
 			}
 		}
 	}
@@ -59,29 +58,23 @@ function get_core_updates( $options = array() ) {
 
 function dismiss_core_update( $update ) {
 	$dismissed = get_site_option( 'dismissed_update_core' );
-	$dismissed[ $update->current . '|' . $update->locale ] = true;
+	$dismissed[ $update->current.'|'.$update->locale ] = true;
 	return update_site_option( 'dismissed_update_core', $dismissed );
 }
 
 function undismiss_core_update( $version, $locale ) {
 	$dismissed = get_site_option( 'dismissed_update_core' );
-	$key = $version . '|' . $locale;
-
-	if ( ! isset( $dismissed[$key] ) )
-		return false;
-
+	$key = $version.'|'.$locale;
+	if ( !isset( $dismissed[$key] ) ) return false;
 	unset( $dismissed[$key] );
 	return update_site_option( 'dismissed_update_core', $dismissed );
 }
 
 function find_core_update( $version, $locale ) {
 	$from_api = get_site_transient( 'update_core' );
-
-	if ( ! isset( $from_api->updates ) || ! is_array( $from_api->updates ) )
-		return false;
-
+	if ( !is_array( $from_api->updates ) ) return false;
 	$updates = $from_api->updates;
-	foreach ( $updates as $update ) {
+	foreach($updates as $update) {
 		if ( $update->current == $version && $update->locale == $locale )
 			return $update;
 	}
@@ -218,6 +211,15 @@ function wp_plugin_update_row( $file, $plugin_data ) {
 	}
 }
 
+function wp_update_plugin($plugin, $feedback = '') {
+	if ( !empty($feedback) )
+		add_filter('update_feedback', $feedback);
+
+	include ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	$upgrader = new Plugin_Upgrader();
+	return $upgrader->upgrade($plugin);
+}
+
 function get_theme_updates() {
 	$themes = wp_get_themes();
 	$current = get_site_transient('update_themes');
@@ -232,6 +234,15 @@ function get_theme_updates() {
 	}
 
 	return $update_themes;
+}
+
+function wp_update_theme($theme, $feedback = '') {
+	if ( !empty($feedback) )
+		add_filter('update_feedback', $feedback);
+
+	include ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	$upgrader = new Theme_Upgrader();
+	return $upgrader->upgrade($theme);
 }
 
 function wp_theme_update_rows() {
@@ -272,6 +283,16 @@ function wp_theme_update_row( $theme_key, $theme ) {
 	do_action( "in_theme_update_message-$theme_key", $theme, $r );
 
 	echo '</div></td></tr>';
+}
+
+function wp_update_core($current, $feedback = '') {
+	if ( !empty($feedback) )
+		add_filter('update_feedback', $feedback);
+
+	include ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	$upgrader = new Core_Upgrader();
+	return $upgrader->upgrade($current);
+
 }
 
 function maintenance_nag() {

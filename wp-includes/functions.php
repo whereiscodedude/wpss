@@ -412,26 +412,6 @@ function xmlrpc_removepostdata( $content ) {
 }
 
 /**
- * Use RegEx to extract URLs from arbitrary content
- *
- * @since 3.7.0
- *
- * @param string $content
- * @return array URLs found in passed string
- */
-function wp_extract_urls( $content ) {
-	preg_match_all(
-		"#((?:[\w-]+://?|[\w\d]+[.])[^\s()<>]+[.](?:\([\w\d]+\)|(?:[^`!()\[\]{};:'\".,<>?«»“”‘’\s]|(?:[:]\d+)?/?)+))#",
-		$content,
-		$post_links
-	);
-
-	$post_links = array_unique( array_map( 'html_entity_decode', $post_links[0] ) );
-
-	return array_values( $post_links );
-}
-
-/**
  * Check content for video and audio links to add as enclosures.
  *
  * Will not add enclosures that have already been added and will
@@ -456,17 +436,22 @@ function do_enclose( $content, $post_ID ) {
 
 	$pung = get_enclosed( $post_ID );
 
-	$post_links_temp = wp_extract_urls( $content );
+	$ltrs = '\w';
+	$gunk = '/#~:.?+=&%@!\-';
+	$punc = '.:?\-';
+	$any = $ltrs . $gunk . $punc;
+
+	preg_match_all( "{\b http : [$any] +? (?= [$punc] * [^$any] | $)}x", $content, $post_links_temp );
 
 	foreach ( $pung as $link_test ) {
-		if ( ! in_array( $link_test, $post_links_temp ) ) { // link no longer in post
+		if ( !in_array( $link_test, $post_links_temp[0] ) ) { // link no longer in post
 			$mids = $wpdb->get_col( $wpdb->prepare("SELECT meta_id FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = 'enclosure' AND meta_value LIKE (%s)", $post_ID, like_escape( $link_test ) . '%') );
 			foreach ( $mids as $mid )
 				delete_metadata_by_mid( 'post', $mid );
 		}
 	}
 
-	foreach ( (array) $post_links_temp as $link_test ) {
+	foreach ( (array) $post_links_temp[0] as $link_test ) {
 		if ( !in_array( $link_test, $pung ) ) { // If we haven't pung it already
 			$test = @parse_url( $link_test );
 			if ( false === $test )
@@ -700,8 +685,14 @@ function add_query_arg() {
 	}
 
 	if ( strpos( $uri, '?' ) !== false ) {
-		list( $base, $query ) = explode( '?', $uri, 2 );
-		$base .= '?';
+		$parts = explode( '?', $uri, 2 );
+		if ( 1 == count( $parts ) ) {
+			$base = '?';
+			$query = $parts[0];
+		} else {
+			$base = $parts[0] . '?';
+			$query = $parts[1];
+		}
 	} elseif ( $protocol || strpos( $uri, '=' ) === false ) {
 		$base = $uri . '?';
 		$query = '';
@@ -1033,8 +1024,10 @@ function do_feed() {
 		$feed = get_default_feed();
 
 	$hook = 'do_feed_' . $feed;
-	if ( ! has_action( $hook ) )
-		wp_die( __( 'ERROR: This is not a valid feed template.' ), '', array( 'response' => 404 ) );
+	if ( !has_action($hook) ) {
+		$message = sprintf( __( 'ERROR: %s is not a valid feed template.' ), esc_html($feed));
+		wp_die( $message, '', array( 'response' => 404 ) );
+	}
 
 	do_action( $hook, $wp_query->is_comment_feed );
 }
@@ -1362,23 +1355,19 @@ function wp_mkdir_p( $target ) {
 	if ( file_exists( $target ) )
 		return @is_dir( $target );
 
-	// We need to find the permissions of the parent folder that exists and inherit that.
-	$target_parent = dirname( $target );
-	while ( '.' != $target_parent && ! is_dir( $target_parent ) ) {
-		$target_parent = dirname( $target_parent );
-	}
-
-	// Get the permission bits.
-	if ( $target_parent && '.' != $target_parent ) {
-		$stat = @stat( $target_parent );
-		$dir_perms = $stat['mode'] & 0007777;
-	} else {
-		$dir_perms = 0777;
-	}
-
-	if ( @mkdir( $target, $dir_perms, true ) ) {
+	// Attempting to create the directory may clutter up our display.
+	if ( @mkdir( $target ) ) {
+		$stat = @stat( dirname( $target ) );
+		$dir_perms = $stat['mode'] & 0007777;  // Get the permission bits.
+		@chmod( $target, $dir_perms );
 		return true;
+	} elseif ( is_dir( dirname( $target ) ) ) {
+			return false;
 	}
+
+	// If the above failed, attempt to create the parent node, then try again.
+	if ( ( $target != '/' ) && ( wp_mkdir_p( dirname( $target ) ) ) )
+		return wp_mkdir_p( $target );
 
 	return false;
 }
@@ -1454,7 +1443,7 @@ function get_temp_dir() {
 	}
 
 	$temp = ini_get('upload_tmp_dir');
-	if ( @is_dir( $temp ) && wp_is_writable( $temp ) )
+	if ( is_dir( $temp ) && wp_is_writable( $temp ) )
 		return trailingslashit( rtrim( $temp, '\\' ) );
 
 	$temp = WP_CONTENT_DIR . '/';
@@ -1580,7 +1569,7 @@ function wp_upload_dir( $time = null ) {
 	}
 
 	// If multisite (and if not the main site in a post-MU network)
-	if ( is_multisite() && ! ( is_main_network() && is_main_site() && defined( 'MULTISITE' ) ) ) {
+	if ( is_multisite() && ! ( is_main_site() && defined( 'MULTISITE' ) ) ) {
 
 		if ( ! get_site_option( 'ms_files_rewriting' ) ) {
 			// If ms-files rewriting is disabled (networks created post-3.5), it is fairly straightforward:
@@ -3282,61 +3271,25 @@ function wp_suspend_cache_invalidation($suspend = true) {
 }
 
 /**
- * Whether a site is the main site of the current network.
+ * Is main site?
+ *
  *
  * @since 3.0.0
+ * @package WordPress
  *
- * @param int $site_id Optional. Site ID to test. Defaults to current site.
- * @return bool True if $site_id is the main site of the network, or if not running multisite.
+ * @param int $blog_id optional blog id to test (default current blog)
+ * @return bool True if not multisite or $blog_id is main site
  */
-function is_main_site( $site_id = null ) {
-	// This is the current network's information; 'site' is old terminology.
+function is_main_site( $blog_id = '' ) {
 	global $current_site;
 
 	if ( ! is_multisite() )
 		return true;
 
-	if ( ! $site_id )
-		$site_id = get_current_blog_id();
+	if ( ! $blog_id )
+		$blog_id = get_current_blog_id();
 
-	return (int) $site_id === (int) $current_site->blog_id;
-}
-
-/**
- * Whether a network is the main network of the multisite install.
- *
- * @since 3.7.0
- *
- * @param int $network_id Optional. Network ID to test. Defaults to current network.
- * @return bool True if $network_id is the main network, or if not running multisite.
- */
-function is_main_network( $network_id = null ) {
-	global $current_site, $wpdb;
-
-	$current_network_id = (int) $current_site->id;
-
-	if ( ! is_multisite() )
-		return true;
-
-	if ( ! $network_id )
-		$network_id = $current_network_id;
-	$network_id = (int) $network_id;
-
-	if ( defined( 'PRIMARY_NETWORK_ID' ) )
-		return $network_id === (int) PRIMARY_NETWORK_ID;
-
-	if ( 1 === $current_network_id )
-		return $network_id === $current_network_id;
-
-	$primary_network_id = (int) wp_cache_get( 'primary_network_id', 'site-options' );
-
-	if ( $primary_network_id )
-		return $network_id === $primary_network_id;
-
-	$primary_network_id = (int) $wpdb->get_var( "SELECT id FROM $wpdb->site ORDER BY id LIMIT 1" );
-	wp_cache_add( 'primary_network_id', $primary_network_id, 'site-options' );
-
-	return $network_id === $primary_network_id;
+	return $blog_id == $current_site->blog_id;
 }
 
 /**
@@ -3386,12 +3339,12 @@ function wp_timezone_override_offset() {
 }
 
 /**
- * Sort-helper for timezones.
+ * {@internal Missing Short Description}}
  *
  * @since 2.9.0
  *
- * @param array $a
- * @param array $b
+ * @param unknown_type $a
+ * @param unknown_type $b
  * @return int
  */
 function _wp_timezone_choice_usort_callback( $a, $b ) {
@@ -3741,19 +3694,6 @@ function __return_empty_array() {
  */
 function __return_null() {
 	return null;
-}
-
-/**
- * Returns an empty string.
- *
- * Useful for returning an empty string to filters easily.
- *
- * @since 3.7.0
- * @see __return_null()
- * @return string Empty string
- */
-function __return_empty_string() {
-	return '';
 }
 
 /**
@@ -4129,55 +4069,4 @@ function _canonical_charset( $charset ) {
 		return 'ISO-8859-1';
 
 	return $charset;
-}
-
-/**
- * Sets the mbstring internal encoding to a binary safe encoding whne func_overload is enabled.
- *
- * When mbstring.func_overload is in use for multi-byte encodings, the results from strlen() and
- * similar functions respect the utf8 characters, causing binary data to return incorrect lengths.
- *
- * This function overrides the mbstring encoding to a binary-safe encoding, and resets it to the
- * users expected encoding afterwards through the `reset_mbstring_encoding` function.
- *
- * It is safe to recursively call this function, however each `mbstring_binary_safe_encoding()`
- * call must be followed up with an equal number of `reset_mbstring_encoding()` calls.
- *
- * @see reset_mbstring_encoding()
- *
- * @since 3.7.0
- *
- * @param bool $reset Whether to reset the encoding back to a previously-set encoding.
- */
-function mbstring_binary_safe_encoding( $reset = false ) {
-	static $encodings = array();
-	static $overloaded = null;
-
-	if ( is_null( $overloaded ) )
-		$overloaded = function_exists( 'mb_internal_encoding' ) && ( ini_get( 'mbstring.func_overload' ) & 2 );
-
-	if ( false === $overloaded )
-		return;
-
-	if ( ! $reset ) {
-		$encoding = mb_internal_encoding();
-		array_push( $encodings, $encoding );
-		mb_internal_encoding( 'ISO-8859-1' );
-	}
-
-	if ( $reset && $encodings ) {
-		$encoding = array_pop( $encodings );
-		mb_internal_encoding( $encoding );
-	}
-}
-
-/**
- * Resets the mbstring internal encoding to a users previously set encoding.
- *
- * @see mbstring_binary_safe_encoding()
- *
- * @since 3.7.0
- */
-function reset_mbstring_encoding() {
-	mbstring_binary_safe_encoding( true );
 }

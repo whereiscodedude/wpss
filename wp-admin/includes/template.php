@@ -1072,6 +1072,13 @@ function add_settings_section($id, $title, $callback, $page) {
 		$page = 'reading';
 	}
 
+	if ( !isset($wp_settings_sections) )
+		$wp_settings_sections = array();
+	if ( !isset($wp_settings_sections[$page]) )
+		$wp_settings_sections[$page] = array();
+	if ( !isset($wp_settings_sections[$page][$id]) )
+		$wp_settings_sections[$page][$id] = array();
+
 	$wp_settings_sections[$page][$id] = array('id' => $id, 'title' => $title, 'callback' => $callback);
 }
 
@@ -1110,6 +1117,13 @@ function add_settings_field($id, $title, $callback, $page, $section = 'default',
 		$page = 'reading';
 	}
 
+	if ( !isset($wp_settings_fields) )
+		$wp_settings_fields = array();
+	if ( !isset($wp_settings_fields[$page]) )
+		$wp_settings_fields[$page] = array();
+	if ( !isset($wp_settings_fields[$page][$section]) )
+		$wp_settings_fields[$page][$section] = array();
+
 	$wp_settings_fields[$page][$section][$id] = array('id' => $id, 'title' => $title, 'callback' => $callback, 'args' => $args);
 }
 
@@ -1129,7 +1143,7 @@ function add_settings_field($id, $title, $callback, $page, $section = 'default',
 function do_settings_sections( $page ) {
 	global $wp_settings_sections, $wp_settings_fields;
 
-	if ( ! isset( $wp_settings_sections[$page] ) )
+	if ( ! isset( $wp_settings_sections ) || !isset( $wp_settings_sections[$page] ) )
 		return;
 
 	foreach ( (array) $wp_settings_sections[$page] as $section ) {
@@ -1164,7 +1178,7 @@ function do_settings_sections( $page ) {
 function do_settings_fields($page, $section) {
 	global $wp_settings_fields;
 
-	if ( ! isset( $wp_settings_fields[$page][$section] ) )
+	if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section]) )
 		return;
 
 	foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
@@ -1205,6 +1219,9 @@ function do_settings_fields($page, $section) {
 function add_settings_error( $setting, $code, $message, $type = 'error' ) {
 	global $wp_settings_errors;
 
+	if ( !isset($wp_settings_errors) )
+		$wp_settings_errors = array();
+
 	$new_error = array(
 		'setting' => $setting,
 		'code' => $code,
@@ -1239,7 +1256,7 @@ function add_settings_error( $setting, $code, $message, $type = 'error' ) {
 function get_settings_errors( $setting = '', $sanitize = false ) {
 	global $wp_settings_errors;
 
-	// If $sanitize is true, manually re-run the sanitization for this option
+	// If $sanitize is true, manually re-run the sanitizisation for this option
 	// This allows the $sanitize_callback from register_setting() to run, adding
 	// any settings errors you want to show by default.
 	if ( $sanitize )
@@ -1436,10 +1453,6 @@ do_action("admin_head-$hook_suffix");
 do_action('admin_head');
 
 $admin_body_class .= ' locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_locale() ) ) );
-
-if ( is_rtl() )
-	$admin_body_class .= ' rtl';
-
 ?>
 </head>
 <body<?php if ( isset($GLOBALS['body_id']) ) echo ' id="' . $GLOBALS['body_id'] . '"'; ?> class="wp-admin wp-core-ui no-js iframe <?php echo apply_filters( 'admin_body_class', '' ) . ' ' . $admin_body_class; ?>">
@@ -1892,7 +1905,7 @@ final class WP_Internal_Pointers {
 		$content  = '<h3>' . __( 'Compare Revisions' ) . '</h3>';
 		$content .= '<p>' . __( 'View, compare, and restore other versions of this content on the improved revisions screen.' ) . '</p>';
 
-		self::print_js( 'wp360_revisions', '.misc-pub-section.misc-pub-revisions', array(
+		self::print_js( 'wp360_revisions', '.misc-pub-section.num-revisions', array(
 			'content' => $content,
 			'position' => array( 'edge' => is_rtl() ? 'left' : 'right', 'align' => 'center', 'my' => is_rtl() ? 'left' : 'right-14px' ),
 		) );

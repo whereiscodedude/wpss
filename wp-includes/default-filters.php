@@ -74,7 +74,9 @@ foreach ( array( 'user_url', 'link_url', 'link_image', 'link_rss', 'comment_url'
 }
 
 // Slugs
-add_filter( 'pre_term_slug', 'sanitize_title' );
+foreach ( array( 'pre_term_slug' ) as $filter ) {
+	add_filter( $filter, 'sanitize_title' );
+}
 
 // Keys
 foreach ( array( 'pre_post_type', 'pre_post_status', 'pre_post_comment_status', 'pre_post_ping_status' ) as $filter ) {
@@ -98,7 +100,7 @@ foreach ( array( 'comment_author', 'term_name', 'link_name', 'link_description',
 }
 
 // Format WordPress
-foreach ( array( 'the_content', 'the_title', 'wp_title' ) as $filter )
+foreach ( array( 'the_content', 'the_title' ) as $filter )
 	add_filter( $filter, 'capital_P_dangit', 11 );
 add_filter( 'comment_text', 'capital_P_dangit', 31 );
 
@@ -117,7 +119,9 @@ foreach ( array( 'term_description' ) as $filter ) {
 }
 
 // Format for RSS
-add_filter( 'term_name_rss', 'convert_chars' );
+foreach ( array( 'term_name_rss' ) as $filter ) {
+	add_filter( $filter, 'convert_chars' );
+}
 
 // Pre save hierarchy
 add_filter( 'wp_insert_post_parent', 'wp_check_post_hierarchy_for_loops', 10, 2 );
@@ -262,7 +266,7 @@ add_action( 'welcome_panel',              'wp_welcome_panel'                    
 
 // Navigation menu actions
 add_action( 'delete_post',                '_wp_delete_post_menu_item'         );
-add_action( 'delete_term',                '_wp_delete_tax_menu_item',   10, 3 );
+add_action( 'delete_term',                '_wp_delete_tax_menu_item'          );
 add_action( 'transition_post_status',     '_wp_auto_add_pages_to_menu', 10, 3 );
 
 // Post Thumbnail CSS class filtering
@@ -296,9 +300,5 @@ add_filter( 'heartbeat_settings', 'wp_heartbeat_settings' );
 add_action( 'admin_enqueue_scripts',     'wp_auth_check_load'   );
 add_filter( 'heartbeat_received',        'wp_auth_check', 10, 2 );
 add_filter( 'heartbeat_nopriv_received', 'wp_auth_check', 10, 2 );
-
-// Default authentication filters
-add_filter( 'authenticate', 'wp_authenticate_username_password',  20, 3 );
-add_filter( 'authenticate', 'wp_authenticate_spam_check',         99    );
 
 unset($filter, $action);

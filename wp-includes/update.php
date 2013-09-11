@@ -75,9 +75,7 @@ function wp_version_check() {
 		'multisite_enabled' => $multisite_enabled
 	);
 
-	$url = 'http://api.wordpress.org/core/version-check/1.7/?' . http_build_query( $query, null, '&' );
-	if ( wp_http_supports( array( 'ssl' ) ) )
-		$url = set_url_scheme( $url, 'https' );
+	$url = 'http://api.wordpress.org/core/version-check/1.6/?' . http_build_query( $query, null, '&' );
 
 	$options = array(
 		'timeout' => ( ( defined('DOING_CRON') && DOING_CRON ) ? 30 : 3 ),
@@ -94,7 +92,7 @@ function wp_version_check() {
 		return false;
 
 	$body = trim( wp_remote_retrieve_body( $response ) );
-	$body = json_decode( $body, true );
+	$body = maybe_unserialize( $body );
 
 	if ( ! is_array( $body ) || ! isset( $body['offers'] ) )
 		return false;
@@ -112,7 +110,7 @@ function wp_version_check() {
 				$offer[ $offer_key ] = esc_html( $value );
 		}
 		$offer = (object) array_intersect_key( $offer, array_fill_keys( array( 'response', 'download', 'locale',
-			'packages', 'current', 'version', 'php_version', 'mysql_version', 'new_bundled', 'partial_version' ), '' ) );
+			'packages', 'current', 'php_version', 'mysql_version', 'new_bundled', 'partial_version' ), '' ) );
 	}
 
 	$updates = new stdClass();
@@ -204,11 +202,7 @@ function wp_update_plugins() {
 		'user-agent' => 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' )
 	);
 
-	$url = 'http://api.wordpress.org/plugins/update-check/1.0/';
-	if ( wp_http_supports( array( 'ssl' ) ) )
-		$url = set_url_scheme( $url, 'https' );
-
-	$raw_response = wp_remote_post( $url, $options );
+	$raw_response = wp_remote_post('http://api.wordpress.org/plugins/update-check/1.0/', $options);
 
 	if ( is_wp_error( $raw_response ) || 200 != wp_remote_retrieve_response_code( $raw_response ) )
 		return false;
@@ -313,11 +307,7 @@ function wp_update_themes() {
 		'user-agent'	=> 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' )
 	);
 
-	$url = 'http://api.wordpress.org/themes/update-check/1.0/';
-	if ( wp_http_supports( array( 'ssl' ) ) )
-		$url = set_url_scheme( $url, 'https' );
-
-	$raw_response = wp_remote_post( $url, $options );
+	$raw_response = wp_remote_post( 'http://api.wordpress.org/themes/update-check/1.0/', $options );
 
 	if ( is_wp_error( $raw_response ) || 200 != wp_remote_retrieve_response_code( $raw_response ) )
 		return false;

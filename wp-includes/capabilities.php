@@ -936,7 +936,7 @@ class WP_User {
 		}
 
 		// Must have ALL requested caps
-		$capabilities = apply_filters( 'user_has_cap', $this->allcaps, $caps, $args, $this );
+		$capabilities = apply_filters( 'user_has_cap', $this->allcaps, $caps, $args );
 		$capabilities['exist'] = true; // Everyone is allowed to exist
 		foreach ( (array) $caps as $cap ) {
 			if ( empty( $capabilities[ $cap ] ) )
@@ -1039,8 +1039,10 @@ function map_meta_cap( $cap, $user_id ) {
 		if ( ! $post_author_id )
 			$post_author_id = $user_id;
 
+		$post_author_data = $post_author_id == get_current_user_id() ? wp_get_current_user() : get_userdata( $post_author_id );
+
 		// If the user is the author...
-		if ( $user_id == $post_author_id ) {
+		if ( is_object( $post_author_data ) && $user_id == $post_author_data->ID ) {
 			// If the post is published...
 			if ( 'publish' == $post->post_status ) {
 				$caps[] = $post_type->cap->delete_published_posts;
@@ -1087,8 +1089,10 @@ function map_meta_cap( $cap, $user_id ) {
 		if ( ! $post_author_id )
 			$post_author_id = $user_id;
 
+		$post_author_data = $post_author_id == get_current_user_id() ? wp_get_current_user() : get_userdata( $post_author_id );
+
 		// If the user is the author...
-		if ( $user_id == $post_author_id ) {
+		if ( is_object( $post_author_data ) && $user_id == $post_author_data->ID ) {
 			// If the post is published...
 			if ( 'publish' == $post->post_status ) {
 				$caps[] = $post_type->cap->edit_published_posts;
@@ -1139,7 +1143,9 @@ function map_meta_cap( $cap, $user_id ) {
 		if ( ! $post_author_id )
 			$post_author_id = $user_id;
 
-		if ( $user_id == $post_author_id )
+		$post_author_data = $post_author_id == get_current_user_id() ? wp_get_current_user() : get_userdata( $post_author_id );
+
+		if ( is_object( $post_author_data ) && $user_id == $post_author_data->ID )
 			$caps[] = $post_type->cap->read;
 		elseif ( $status_obj->private )
 			$caps[] = $post_type->cap->read_private_posts;

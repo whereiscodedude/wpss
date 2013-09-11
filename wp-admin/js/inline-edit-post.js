@@ -258,10 +258,6 @@ inlineEditPost = {
 				} else {
 					$('#edit-'+id+' .inline-edit-save .error').html(inlineEditL10n.error).show();
 				}
-
-				if ( $('#post-'+id).prev().hasClass('alternate') ) {
-					$('#post-'+id).removeClass('alternate');
-				}
 			}
 		, 'html');
 		return false;

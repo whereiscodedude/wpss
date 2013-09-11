@@ -22,9 +22,9 @@ get_admin_page_title();
 $title = esc_html( strip_tags( $title ) );
 
 if ( is_network_admin() )
-	$admin_title = sprintf( __('Network Admin: %s'), esc_html( $current_site->site_name ) );
+	$admin_title = __( 'Network Admin' );
 elseif ( is_user_admin() )
-	$admin_title = sprintf( __('Global Dashboard: %s'), esc_html( $current_site->site_name ) );
+	$admin_title = __( 'Global Dashboard' );
 else
 	$admin_title = get_bloginfo( 'name' );
 
@@ -79,12 +79,6 @@ if ( is_admin_bar_showing() )
 
 if ( is_rtl() )
 	$admin_body_class .= ' rtl';
-
-if ( $current_screen->post_type )
-	$admin_body_class .= ' post-type-' . $current_screen->post_type;
-
-if ( $current_screen->taxonomy )
-	$admin_body_class .= ' taxonomy-' . $current_screen->taxonomy;
 
 $admin_body_class .= ' branch-' . str_replace( array( '.', ',' ), '-', floatval( $wp_version ) );
 $admin_body_class .= ' version-' . str_replace( '.', '-', preg_replace( '/^([.0-9]+).*/', '$1', $wp_version ) );

@@ -511,7 +511,10 @@ function confirm_blog_signup( $domain, $path, $blog_title, $user_name = '', $use
 }
 
 // Main
-$active_signup = get_site_option( 'registration', 'none' );
+$active_signup = get_site_option( 'registration' );
+if ( !$active_signup )
+	$active_signup = 'all';
+
 $active_signup = apply_filters( 'wpmu_active_signup', $active_signup ); // return "all", "none", "blog" or "user"
 
 // Make the signup type translatable.

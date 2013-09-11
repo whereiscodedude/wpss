@@ -338,18 +338,11 @@ function get_http_origin() {
 	if ( ! empty ( $_SERVER[ 'HTTP_ORIGIN' ] ) )
 		$origin = $_SERVER[ 'HTTP_ORIGIN' ];
 
-	/**
-	 * Change the origin of an HTTP request.
-	 *
-	 * @since 3.4.0
-	 *
-	 * @param string $origin The original origin for the request.
-	 */
 	return apply_filters( 'http_origin', $origin );
 }
 
 /**
- * Retrieve list of allowed HTTP origins.
+ * Retrieve list of allowed http origins.
  *
  * @since 3.4.0
  *
@@ -367,24 +360,11 @@ function get_allowed_http_origins() {
 		'https://' . $home_origin[ 'host' ],
 	) );
 
-	/**
-	 * Change the origin types allowed for HTTP requests.
-	 *
-	 * @since 3.4.0
-	 *
-	 * @param array $allowed_origins {
-	 *     Default allowed HTTP origins.
-	 *     @type string Non-secure URL for admin origin.
-	 *     @type string Secure URL for admin origin.
-	 *     @type string Non-secure URL for home origin.
-	 *     @type string Secure URL for home origin.
-	 * }
-	 */
 	return apply_filters( 'allowed_http_origins' , $allowed_origins );
 }
 
 /**
- * Determines if the HTTP origin is an authorized one.
+ * Determines if the http origin is an authorized one.
  *
  * @since 3.4.0
  *
@@ -400,14 +380,6 @@ function is_allowed_http_origin( $origin = null ) {
 	if ( $origin && ! in_array( $origin, get_allowed_http_origins() ) )
 		$origin = '';
 
-	/**
-	 * Change the allowed HTTP origin result.
-	 *
-	 * @since 3.4.0
-	 *
-	 * @param string $origin Result of check for allowed origin.
-	 * @param string $origin_arg original origin string passed into is_allowed_http_origin function.
-	 */
 	return apply_filters( 'allowed_http_origin', $origin, $origin_arg );
 }
 
@@ -486,17 +458,6 @@ function wp_http_validate_url( $url ) {
 				|| ( 192 === $parts[0] && 168 === $parts[1] )
 			) {
 				// If host appears local, reject unless specifically allowed.
-				/**
-				 * Check if HTTP request is external or not.
-				 *
-				 * Allows to change and allow external requests for the HTTP request.
-				 *
-				 * @since 3.6.0
-				 *
-				 * @param bool false Whether HTTP request is external or not.
-				 * @param string $host IP of the requested host.
-				 * @param string $url URL of the requested host.
-				 */
 				if ( ! apply_filters( 'http_request_host_is_external', false, $host, $url ) )
 					return false;
 			}

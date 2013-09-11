@@ -94,6 +94,30 @@ function get_home_path() {
 }
 
 /**
+ * Get the real file system path to a file to edit within the admin
+ *
+ * If the $file is index.php or .htaccess this function will assume it is relative
+ * to the install root, otherwise it is assumed the file is relative to the wp-content
+ * directory
+ *
+ * @since 1.5.0
+ *
+ * @uses get_home_path
+ * @uses WP_CONTENT_DIR full filesystem path to the wp-content directory
+ * @param string $file filesystem path relative to the WordPress install directory or to the wp-content directory
+ * @return string full file system path to edit
+ */
+function get_real_file_to_edit( $file ) {
+	if ('index.php' == $file || '.htaccess' == $file ) {
+		$real_file = get_home_path() . $file;
+	} else {
+		$real_file = WP_CONTENT_DIR . $file;
+	}
+
+	return $real_file;
+}
+
+/**
  * Returns a listing of all files in the specified folder and all subdirectories up to 100 levels deep.
  * The depth of the recursiveness can be controlled by the $levels param.
  *
@@ -642,7 +666,11 @@ function _unzip_file_ziparchive($file, $to, $needed_dirs = array() ) {
 function _unzip_file_pclzip($file, $to, $needed_dirs = array()) {
 	global $wp_filesystem;
 
-	mbstring_binary_safe_encoding();
+	// See #15789 - PclZip uses string functions on binary data, If it's overloaded with Multibyte safe functions the results are incorrect.
+	if ( ini_get('mbstring.func_overload') && function_exists('mb_internal_encoding') ) {
+		$previous_encoding = mb_internal_encoding();
+		mb_internal_encoding('ISO-8859-1');
+	}
 
 	require_once(ABSPATH . 'wp-admin/includes/class-pclzip.php');
 
@@ -650,7 +678,8 @@ function _unzip_file_pclzip($file, $to, $needed_dirs = array()) {
 
 	$archive_files = $archive->extract(PCLZIP_OPT_EXTRACT_AS_STRING);
 
-	reset_mbstring_encoding();
+	if ( isset($previous_encoding) )
+		mb_internal_encoding($previous_encoding);
 
 	// Is the archive valid?
 	if ( !is_array($archive_files) )
@@ -996,8 +1025,7 @@ jQuery(function($){
 
 <tr valign="top">
 <th scope="row"><label for="password"><?php echo $label_pass; ?></label></th>
-<td><div><input name="password" type="password" id="password" value="<?php if ( defined('FTP_PASS') ) echo '*****'; ?>"<?php disabled( defined('FTP_PASS') ); ?> size="40" /></div>
-<div><em><?php if ( ! defined('FTP_PASS') ) _e( 'This password will not be stored on the server.' ); ?></em></div></td>
+<td><input name="password" type="password" id="password" value="<?php if ( defined('FTP_PASS') ) echo '*****'; ?>"<?php disabled( defined('FTP_PASS') ); ?> size="40" /></td>
 </tr>
 
 <?php if ( isset($types['ssh']) ) : ?>

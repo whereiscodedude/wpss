@@ -205,34 +205,12 @@ function _ex( $text, $context, $domain = 'default' ) {
 	echo _x( $text, $context, $domain );
 }
 
-/**
- * Displays translated string with gettext context and escapes it for safe use in an attribute.
- *
- * @see esc_attr()
- * @since 2.8.0
- *
- * @param string $text Text to translate
- * @param string $context Context information for the translators
- * @param string $domain Optional. Domain to retrieve the translated text
- * @return string Translated text
- */
-function esc_attr_x( $text, $context, $domain = 'default' ) {
-	return esc_attr( translate_with_gettext_context( $text, $context, $domain ) );
+function esc_attr_x( $single, $context, $domain = 'default' ) {
+	return esc_attr( translate_with_gettext_context( $single, $context, $domain ) );
 }
 
-/**
- * Displays translated string with gettext context and escapes it for safe use in HTML output.
- *
- * @see esc_html()
- * @since 2.9.0
- *
- * @param string $text Text to translate
- * @param string $context Context information for the translators
- * @param string $domain Optional. Domain to retrieve the translated text
- * @return string Translated text
- */
-function esc_html_x( $text, $context, $domain = 'default' ) {
-	return esc_html( translate_with_gettext_context( $text, $context, $domain ) );
+function esc_html_x( $single, $context, $domain = 'default' ) {
+	return esc_html( translate_with_gettext_context( $single, $context, $domain ) );
 }
 
 /**
@@ -447,13 +425,7 @@ function load_plugin_textdomain( $domain, $abs_rel_path = false, $plugin_rel_pat
 		$path = WP_PLUGIN_DIR;
 	}
 
-	// Load the textdomain according to the plugin first
-	$mofile = $domain . '-' . $locale . '.mo';
-	if ( $loaded = load_textdomain( $domain, $path . '/'. $mofile ) )
-		return $loaded;
-
-	// Otherwise, load from the languages directory
-	$mofile = WP_LANG_DIR . '/plugins/' . $mofile;
+	$mofile = $path . '/'. $domain . '-' . $locale . '.mo';
 	return load_textdomain( $domain, $mofile );
 }
 
@@ -468,16 +440,8 @@ function load_plugin_textdomain( $domain, $abs_rel_path = false, $plugin_rel_pat
  */
 function load_muplugin_textdomain( $domain, $mu_plugin_rel_path = '' ) {
 	$locale = apply_filters( 'plugin_locale', get_locale(), $domain );
-	$path = trailingslashit( WPMU_PLUGIN_DIR . '/' . ltrim( $mu_plugin_rel_path, '/' ) );
-
-	// Load the textdomain according to the plugin first
-	$mofile = $domain . '-' . $locale . '.mo';
-	if ( $loaded = load_textdomain( $domain, $path . $mofile ) )
-		return $loaded;
-
-	// Otherwise, load from the languages directory
-	$mofile = WP_LANG_DIR . '/plugins/' . $mofile;
-	return load_textdomain( $domain, $mofile );
+	$path = WPMU_PLUGIN_DIR . '/' . ltrim( $mu_plugin_rel_path, '/' );
+	load_textdomain( $domain, trailingslashit( $path ) . "$domain-$locale.mo" );
 }
 
 /**
@@ -498,14 +462,14 @@ function load_theme_textdomain( $domain, $path = false ) {
 	if ( ! $path )
 		$path = get_template_directory();
 
-	// Load the textdomain according to the theme
+	// Load the textdomain from the Theme provided location, or theme directory first
 	$mofile = "{$path}/{$locale}.mo";
-	if ( $loaded = load_textdomain( $domain, $mofile ) )
+	if ( $loaded = load_textdomain($domain, $mofile) )
 		return $loaded;
 
-	// Otherwise, load from the languages directory
+	// Else, load textdomain from the Language directory
 	$mofile = WP_LANG_DIR . "/themes/{$domain}-{$locale}.mo";
-	return load_textdomain( $domain, $mofile );
+	return load_textdomain($domain, $mofile);
 }
 
 /**

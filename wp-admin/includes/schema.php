@@ -272,7 +272,6 @@ CREATE TABLE $wpdb->sitemeta (
   KEY site_id (site_id)
 ) $charset_collate;
 CREATE TABLE $wpdb->signups (
-  signup_id bigint(20) NOT NULL auto_increment,
   domain varchar(200) NOT NULL default '',
   path varchar(100) NOT NULL default '',
   title longtext NOT NULL,
@@ -283,11 +282,8 @@ CREATE TABLE $wpdb->signups (
   active tinyint(1) NOT NULL default '0',
   activation_key varchar(50) NOT NULL default '',
   meta longtext,
-  PRIMARY KEY  (signup_id),
   KEY activation_key (activation_key),
-  KEY user_email (user_email)
-  KEY user_login_email (user_login,user_email),
-  KEY domain_path (domain,path),
+  KEY domain (domain)
 ) $charset_collate;";
 
 	switch ( $scope ) {
@@ -940,7 +936,7 @@ We hope you enjoy your new site. Thanks!
 		$current_site->domain = $domain;
 		$current_site->path = $path;
 		$current_site->site_name = ucfirst( $domain );
-		$wpdb->insert( $wpdb->blogs, array( 'site_id' => $network_id, 'blog_id' => 1, 'domain' => $domain, 'path' => $path, 'registered' => current_time( 'mysql' ) ) );
+		$wpdb->insert( $wpdb->blogs, array( 'site_id' => $network_id, 'domain' => $domain, 'path' => $path, 'registered' => current_time( 'mysql' ) ) );
 		$current_site->blog_id = $blog_id = $wpdb->insert_id;
 		update_user_meta( $site_user->ID, 'source_domain', $domain );
 		update_user_meta( $site_user->ID, 'primary_blog', $blog_id );
@@ -951,10 +947,9 @@ We hope you enjoy your new site. Thanks!
 			$wp_rewrite->set_permalink_structure( '/blog/%year%/%monthnum%/%day%/%postname%/' );
 
 		flush_rewrite_rules();
+	}
 
-		if ( ! $subdomain_install )
-			return true;
-
+	if ( $subdomain_install ) {
 		$vhost_ok = false;
 		$errstr = '';
 		$hostname = substr( md5( time() ), 0, 6 ) . '.' . $domain; // Very random hostname!

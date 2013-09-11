@@ -114,9 +114,6 @@ function get_plugin_data( $plugin_file, $markup = true, $translate = true ) {
  */
 function _get_plugin_data_markup_translate( $plugin_file, $plugin_data, $markup = true, $translate = true ) {
 
-	// Sanitize the plugin filename to a WP_PLUGIN_DIR relative path
-	$plugin_file = plugin_basename( $plugin_file );
-
 	// Translate fields
 	if ( $translate ) {
 		if ( $textdomain = $plugin_data['TextDomain'] ) {
@@ -1763,17 +1760,4 @@ function settings_fields($option_group) {
 	echo "<input type='hidden' name='option_page' value='" . esc_attr($option_group) . "' />";
 	echo '<input type="hidden" name="action" value="update" />';
 	wp_nonce_field("$option_group-options");
-}
-
-/**
- * Clears the Plugins cache used by get_plugins() and by default, the Plugin Update cache.
- *
- * @since 3.7.0
- *
- * @param bool $clear_update_cache Whether to clear the Plugin updates cache
- */
-function wp_clean_plugins_cache( $clear_update_cache = true ) {
-	if ( $clear_update_cache )
-		delete_site_transient( 'update_plugins' );
-	wp_cache_delete( 'plugins', 'plugins' );
 }

@@ -577,16 +577,6 @@ function wp_title($sep = '&raquo;', $display = true, $seplocation = '') {
 		$title = single_post_title( '', false );
 	}
 
-	// If there's a post type archive
-	if ( is_post_type_archive() ) {
-		$post_type = get_query_var( 'post_type' );
-		if ( is_array( $post_type ) )
-			$post_type = reset( $post_type );
-		$post_type_object = get_post_type_object( $post_type );
-		if ( ! $post_type_object->has_archive )
-			$title = post_type_archive_title( '', false );
-	}
-
 	// If there's a category or tag
 	if ( is_category() || is_tag() ) {
 		$title = single_term_title( '', false );
@@ -595,21 +585,18 @@ function wp_title($sep = '&raquo;', $display = true, $seplocation = '') {
 	// If there's a taxonomy
 	if ( is_tax() ) {
 		$term = get_queried_object();
-		if ( $term ) {
-			$tax = get_taxonomy( $term->taxonomy );
-			$title = single_term_title( $tax->labels->name . $t_sep, false );
-		}
+		$tax = get_taxonomy( $term->taxonomy );
+		$title = single_term_title( $tax->labels->name . $t_sep, false );
 	}
 
 	// If there's an author
 	if ( is_author() ) {
 		$author = get_queried_object();
-		if ( $author )
-			$title = $author->display_name;
+		$title = $author->display_name;
 	}
 
-	// Post type archives with has_archive should override terms.
-	if ( is_post_type_archive() && $post_type_object->has_archive )
+	// If there's a post type archive
+	if ( is_post_type_archive() )
 		$title = post_type_archive_title( '', false );
 
 	// If there's a month
@@ -690,7 +677,7 @@ function single_post_title($prefix = '', $display = true) {
 	if ( $display )
 		echo $prefix . $title;
 	else
-		return $prefix . $title;
+		return $title;
 }
 
 /**
@@ -709,17 +696,13 @@ function post_type_archive_title( $prefix = '', $display = true ) {
 	if ( ! is_post_type_archive() )
 		return;
 
-	$post_type = get_query_var( 'post_type' );
-	if ( is_array( $post_type ) )
-		$post_type = reset( $post_type );
-
-	$post_type_obj = get_post_type_object( $post_type );
+	$post_type_obj = get_queried_object();
 	$title = apply_filters('post_type_archive_title', $post_type_obj->labels->name );
 
 	if ( $display )
 		echo $prefix . $title;
 	else
-		return $prefix . $title;
+		return $title;
 }
 
 /**
@@ -802,7 +785,7 @@ function single_term_title( $prefix = '', $display = true ) {
 	if ( $display )
 		echo $prefix . $term_name;
 	else
-		return $prefix . $term_name;
+		return $term_name;
 }
 
 /**
@@ -1656,8 +1639,8 @@ function feed_links( $args = array() ) {
 
 	$args = wp_parse_args( $args, $defaults );
 
-	echo '<link rel="alternate" type="' . feed_content_type() . '" title="' . esc_attr( sprintf( $args['feedtitle'], get_bloginfo('name'), $args['separator'] ) ) . '" href="' . esc_url( get_feed_link() ) . "\" />\n";
-	echo '<link rel="alternate" type="' . feed_content_type() . '" title="' . esc_attr( sprintf( $args['comstitle'], get_bloginfo('name'), $args['separator'] ) ) . '" href="' . esc_url( get_feed_link( 'comments_' . get_default_feed() ) ) . "\" />\n";
+	echo '<link rel="alternate" type="' . feed_content_type() . '" title="' . esc_attr(sprintf( $args['feedtitle'], get_bloginfo('name'), $args['separator'] )) . '" href="' . get_feed_link() . "\" />\n";
+	echo '<link rel="alternate" type="' . feed_content_type() . '" title="' . esc_attr(sprintf( $args['comstitle'], get_bloginfo('name'), $args['separator'] )) . '" href="' . get_feed_link( 'comments_' . get_default_feed() ) . "\" />\n";
 }
 
 /**
@@ -1687,7 +1670,7 @@ function feed_links_extra( $args = array() ) {
 
 	$args = wp_parse_args( $args, $defaults );
 
-	if ( is_singular() ) {
+	if ( is_single() || is_page() ) {
 		$id = 0;
 		$post = get_post( $id );
 
@@ -1695,28 +1678,16 @@ function feed_links_extra( $args = array() ) {
 			$title = sprintf( $args['singletitle'], get_bloginfo('name'), $args['separator'], esc_html( get_the_title() ) );
 			$href = get_post_comments_feed_link( $post->ID );
 		}
-	} elseif ( is_post_type_archive() ) {
-		$post_type = get_query_var( 'post_type' );
-		if ( is_array( $post_type ) )
-			$post_type = reset( $post_type );
-
-		$post_type_obj = get_post_type_object( $post_type );
-		$title = sprintf( $args['posttypetitle'], get_bloginfo( 'name' ), $args['separator'], $post_type_obj->labels->name );
-		$href = get_post_type_archive_feed_link( $post_type_obj->name );
 	} elseif ( is_category() ) {
 		$term = get_queried_object();
 
-		if ( $term ) {
-			$title = sprintf( $args['cattitle'], get_bloginfo('name'), $args['separator'], $term->name );
-			$href = get_category_feed_link( $term->term_id );
-		}
+		$title = sprintf( $args['cattitle'], get_bloginfo('name'), $args['separator'], $term->name );
+		$href = get_category_feed_link( $term->term_id );
 	} elseif ( is_tag() ) {
 		$term = get_queried_object();
 
-		if ( $term ) {
-			$title = sprintf( $args['tagtitle'], get_bloginfo('name'), $args['separator'], $term->name );
-			$href = get_tag_feed_link( $term->term_id );
-		}
+		$title = sprintf( $args['tagtitle'], get_bloginfo('name'), $args['separator'], $term->name );
+		$href = get_tag_feed_link( $term->term_id );
 	} elseif ( is_author() ) {
 		$author_id = intval( get_query_var('author') );
 
@@ -1727,9 +1698,7 @@ function feed_links_extra( $args = array() ) {
 		$href = get_search_feed_link();
 	} elseif ( is_post_type_archive() ) {
 		$title = sprintf( $args['posttypetitle'], get_bloginfo('name'), $args['separator'], post_type_archive_title( '', false ) );
-		$post_type_obj = get_queried_object();
-		if ( $post_type_obj )
-			$href = get_post_type_archive_feed_link( $post_type_obj->name );
+		$href = get_post_type_archive_feed_link( get_queried_object()->name );
 	}
 
 	if ( isset($title) && isset($href) )

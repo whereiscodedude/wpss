@@ -23,11 +23,12 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 		$this->method = 'ftpsockets';
 		$this->errors = new WP_Error();
 
-		// Check if possible to use ftp functions.
+		//Check if possible to use ftp functions.
 		if ( ! @include_once ABSPATH . 'wp-admin/includes/class-ftp.php' )
 				return false;
 		$this->ftp = new ftp();
 
+		//Set defaults:
 		if ( empty($opt['port']) )
 			$this->options['port'] = 21;
 		else
@@ -74,35 +75,32 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 			return false;
 		}
 
-		$this->ftp->SetType( FTP_BINARY );
-		$this->ftp->Passive( true );
-		$this->ftp->setTimeout( FS_TIMEOUT );
+		$this->ftp->SetType(FTP_AUTOASCII);
+		$this->ftp->Passive(true);
+		$this->ftp->setTimeout(FS_TIMEOUT);
 		return true;
 	}
 
-	function get_contents( $file ) {
+	function get_contents($file, $type = '', $resumepos = 0) {
 		if ( ! $this->exists($file) )
 			return false;
+
+		if ( empty($type) )
+			$type = FTP_AUTOASCII;
+		$this->ftp->SetType($type);
 
 		$temp = wp_tempnam( $file );
 
 		if ( ! $temphandle = fopen($temp, 'w+') )
 			return false;
 
-		mbstring_binary_safe_encoding();
-
 		if ( ! $this->ftp->fget($temphandle, $file) ) {
 			fclose($temphandle);
 			unlink($temp);
-
-			reset_mbstring_encoding();
-
-			return ''; // Blank document, File does exist, It's just blank.
+			return ''; //Blank document, File does exist, It's just blank.
 		}
 
-		reset_mbstring_encoding();
-
-		fseek( $temphandle, 0 ); // Skip back to the start of the file being written to
+		fseek($temphandle, 0); //Skip back to the start of the file being written to
 		$contents = '';
 
 		while ( ! feof($temphandle) )
@@ -124,24 +122,13 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 			return false;
 		}
 
-		// The FTP class uses string functions internally during file download/upload
-		mbstring_binary_safe_encoding();
+		fwrite($temphandle, $contents);
+		fseek($temphandle, 0); //Skip back to the start of the file being written to
 
-		$bytes_written = fwrite( $temphandle, $contents );
-		if ( false === $bytes_written || $bytes_written != strlen( $contents ) ) {
-			fclose( $temphandle );
-			unlink( $temp );
-
-			reset_mbstring_encoding();
-
-			return false;
-		}
-
-		fseek( $temphandle, 0 ); // Skip back to the start of the file being written to
+		$type = $this->is_binary($contents) ? FTP_BINARY : FTP_ASCII;
+		$this->ftp->SetType($type);
 
 		$ret = $this->ftp->fput($file, $temphandle);
-
-		reset_mbstring_encoding();
 
 		fclose($temphandle);
 		unlink($temp);
@@ -232,10 +219,8 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 		return $this->ftp->mdel($file);
 	}
 
-	function exists( $file ) {
-		$list = $this->ftp->nlist( $file );
-		return !empty( $list ); //empty list = no file, so invert.
-		// return $this->ftp->is_exists($file); has issues with ABOR+426 responses on the ncFTPd server
+	function exists($file) {
+		return $this->ftp->is_exists($file);
 	}
 
 	function is_file($file) {
@@ -256,10 +241,12 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 	}
 
 	function is_readable($file) {
+		//Get dir list, Check if the file is writable by the current user??
 		return true;
 	}
 
 	function is_writable($file) {
+		//Get dir list, Check if the file is writable by the current user??
 		return true;
 	}
 
@@ -308,15 +295,9 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 			$limit_file = false;
 		}
 
-		mbstring_binary_safe_encoding();
-
 		$list = $this->ftp->dirlist($path);
-		if ( empty( $list ) && ! $this->exists( $path ) ) {
-
-			reset_mbstring_encoding();
-
+		if ( empty($list) && !$this->exists($path) )
 			return false;
-		}
 
 		$ret = array();
 		foreach ( $list as $struc ) {
@@ -343,9 +324,6 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 
 			$ret[ $struc['name'] ] = $struc;
 		}
-
-		reset_mbstring_encoding();
-
 		return $ret;
 	}
 

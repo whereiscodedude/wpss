@@ -73,25 +73,6 @@ function get_archive_template() {
 }
 
 /**
- * Retrieve path of post type archive template in current or parent template.
- *
- * @since 3.7.0
- *
- * @return string
- */
-function get_post_type_archive_template() {
-	$post_type = get_query_var( 'post_type' );
-	if ( is_array( $post_type ) )
-		$post_type = reset( $post_type );
-	
-	$obj = get_post_type_object( $post_type );
-	if ( ! $obj->has_archive )
-		return '';
-
-	return get_archive_template();
-}
-
-/**
  * Retrieve path of author template in current or parent template.
  *
  * @since 1.5.0
@@ -260,8 +241,7 @@ function get_page_template() {
 	if ( ! $pagename && $id ) {
 		// If a static page is set as the front page, $pagename will not be set. Retrieve it from the queried object
 		$post = get_queried_object();
-		if ( $post )
-			$pagename = $post->post_name;
+		$pagename = $post->post_name;
 	}
 
 	$templates = array();

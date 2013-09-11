@@ -650,7 +650,7 @@ function wp_link_pages( $args = '' ) {
 	$r = apply_filters( 'wp_link_pages_args', $r );
 	extract( $r, EXTR_SKIP );
 
-	global $page, $numpages, $multipage, $more;
+	global $page, $numpages, $multipage, $more, $pagenow;
 
 	$output = '';
 	if ( $multipage ) {
@@ -875,7 +875,7 @@ function wp_list_pages($args = '') {
  *
  * <ul>
  * <li><strong>sort_column</strong> - How to sort the list of pages. Defaults
- * to 'menu_order, post_title'. Use column for posts table.</li>
+ * to page title. Use column for posts table.</li>
  * <li><strong>menu_class</strong> - Class to use for the div ID which contains
  * the page list. Defaults to 'menu'.</li>
  * <li><strong>echo</strong> - Whether to echo list or return it. Defaults to
@@ -1233,12 +1233,12 @@ function prepend_attachment($content) {
 function get_the_password_form( $post = 0 ) {
 	$post = get_post( $post );
 	$label = 'pwbox-' . ( empty($post->ID) ? rand() : $post->ID );
-	$output = '<form action="' . esc_url( site_url( 'wp-login.php?action=postpass', 'login_post' ) ) . '" class="post-password-form" method="post">
-	<p>' . __( 'This post is password protected. To view it please enter your password below:' ) . '</p>
-	<p><label for="' . $label . '">' . __( 'Password:' ) . ' <input name="post_password" id="' . $label . '" type="password" size="20" /></label> <input type="submit" name="Submit" value="' . esc_attr__( 'Submit' ) . '" /></p>
-	</form>
+	$output = '<form action="' . esc_url( site_url( 'wp-login.php?action=postpass', 'login_post' ) ) . '" method="post">
+	<p>' . __("This post is password protected. To view it please enter your password below:") . '</p>
+	<p><label for="' . $label . '">' . __("Password:") . ' <input name="post_password" id="' . $label . '" type="password" size="20" /></label> <input type="submit" name="Submit" value="' . esc_attr__("Submit") . '" /></p>
+</form>
 	';
-	return apply_filters( 'the_password_form', $output );
+	return apply_filters('the_password_form', $output);
 }
 
 /**

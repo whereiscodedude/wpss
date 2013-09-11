@@ -862,7 +862,7 @@
 			if ( 9 === event.which ) // tab
 				return;
 			if ( 13 === event.which ) // enter
-				this.click();
+				parent.send( 'close' );
 			event.preventDefault();
 		});
 

@@ -17,6 +17,8 @@
  * @return array Site and user count for the network.
  */
 function get_sitestats() {
+	global $wpdb;
+
 	$stats = array(
 		'blogs' => get_blog_count(),
 		'users' => get_user_count(),
@@ -136,13 +138,10 @@ function get_user_count() {
  *
  * @since MU 1.0
  *
- * @param int $network_id Deprecated, not supported.
+ * @param int $id Optional. A site_id.
  * @return int
  */
-function get_blog_count( $network_id = 0 ) {
-	if ( func_num_args() )
-		_deprecated_argument( __FUNCTION__, '3.1' );
-
+function get_blog_count( $id = 0 ) {
 	return get_site_option( 'blog_count' );
 }
 
@@ -628,7 +627,7 @@ function wpmu_validate_blog_signup($blogname, $blog_title, $user = '') {
  * @param string $user_email The user's email address.
  * @param array $meta By default, contains the requested privacy setting and lang_id.
  */
-function wpmu_signup_blog( $domain, $path, $title, $user, $user_email, $meta = array() )  {
+function wpmu_signup_blog($domain, $path, $title, $user, $user_email, $meta = '') {
 	global $wpdb;
 
 	$key = substr( md5( time() . rand() . $domain ), 0, 16 );
@@ -661,7 +660,7 @@ function wpmu_signup_blog( $domain, $path, $title, $user, $user_email, $meta = a
  * @param string $user_email The user's email address.
  * @param array $meta By default, this is an empty array.
  */
-function wpmu_signup_user( $user, $user_email, $meta = array() ) {
+function wpmu_signup_user($user, $user_email, $meta = '') {
 	global $wpdb;
 
 	// Format data
@@ -704,11 +703,11 @@ function wpmu_signup_user( $user, $user_email, $meta = array() ) {
  * @param string $title The site title.
  * @param string $user The user's login name.
  * @param string $user_email The user's email address.
- * @param string $key The activation key created in wpmu_signup_blog()
  * @param array $meta By default, contains the requested privacy setting and lang_id.
+ * @param string $key The activation key created in wpmu_signup_blog()
  * @return bool
  */
-function wpmu_signup_blog_notification( $domain, $path, $title, $user, $user_email, $key, $meta = array() ) {
+function wpmu_signup_blog_notification($domain, $path, $title, $user, $user_email, $key, $meta = '') {
 	global $current_site;
 
 	if ( !apply_filters('wpmu_signup_blog_notification', $domain, $path, $title, $user, $user_email, $key, $meta) )
@@ -765,11 +764,11 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user, $user_ema
  *
  * @param string $user The user's login name.
  * @param string $user_email The user's email address.
- * @param string $key The activation key created in wpmu_signup_user()
  * @param array $meta By default, an empty array.
+ * @param string $key The activation key created in wpmu_signup_user()
  * @return bool
  */
-function wpmu_signup_user_notification( $user, $user_email, $key, $meta = array() ) {
+function wpmu_signup_user_notification($user, $user_email, $key, $meta = '') {
 	if ( !apply_filters('wpmu_signup_user_notification', $user, $user_email, $key, $meta) )
 		return false;
 
@@ -819,7 +818,7 @@ function wpmu_signup_user_notification( $user, $user_email, $key, $meta = array(
  * @return array An array containing information about the activated user and/or blog
  */
 function wpmu_activate_signup($key) {
-	global $wpdb;
+	global $wpdb, $current_site;
 
 	$signup = $wpdb->get_row( $wpdb->prepare("SELECT * FROM $wpdb->signups WHERE activation_key = %s", $key) );
 
@@ -937,10 +936,7 @@ function wpmu_create_user( $user_name, $password, $email ) {
  * @param int $site_id Optional. Only relevant on multi-network installs.
  * @return mixed Returns WP_Error object on failure, int $blog_id on success
  */
-function wpmu_create_blog( $domain, $path, $title, $user_id, $meta = array(), $site_id = 1 ) {
-	$defaults = array( 'public' => 0 );
-	$meta = wp_parse_args( $meta, $defaults );
-
+function wpmu_create_blog($domain, $path, $title, $user_id, $meta = '', $site_id = 1) {
 	$domain = preg_replace( '/\s+/', '', sanitize_user( $domain, true ) );
 
 	if ( is_subdomain_install() )
@@ -968,15 +964,15 @@ function wpmu_create_blog( $domain, $path, $title, $user_id, $meta = array(), $s
 
 	add_user_to_blog($blog_id, $user_id, 'administrator');
 
-	foreach ( $meta as $key => $value ) {
-		if ( in_array( $key, array( 'public', 'archived', 'mature', 'spam', 'deleted', 'lang_id' ) ) )
+	if ( is_array($meta) ) foreach ($meta as $key => $value) {
+		if ( $key == 'public' || $key == 'archived' || $key == 'mature' || $key == 'spam' || $key == 'deleted' || $key == 'lang_id' )
 			update_blog_status( $blog_id, $key, $value );
 		else
 			update_option( $key, $value );
 	}
 
 	add_option( 'WPLANG', get_site_option( 'WPLANG' ) );
-	update_option( 'blog_public', (int) $meta['public'] );
+	update_option( 'blog_public', (int)$meta['public'] );
 
 	if ( ! is_super_admin( $user_id ) && ! get_user_meta( $user_id, 'primary_blog', true ) )
 		update_user_meta( $user_id, 'primary_blog', $blog_id );
@@ -1201,7 +1197,7 @@ function install_blog_defaults($blog_id, $user_id) {
  * @param array $meta Optional. Not used in the default function, but is passed along to hooks for customization.
  * @return bool
  */
-function wpmu_welcome_notification( $blog_id, $user_id, $password, $title, $meta = array() ) {
+function wpmu_welcome_notification($blog_id, $user_id, $password, $title, $meta = '') {
 	global $current_site;
 
 	if ( !apply_filters('wpmu_welcome_notification', $blog_id, $user_id, $password, $title, $meta) )
@@ -1265,7 +1261,7 @@ We hope you enjoy your new site. Thanks!
  * @param array $meta Optional. Not used in the default function, but is passed along to hooks for customization.
  * @return bool
  */
-function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) {
+function wpmu_welcome_user_notification($user_id, $password, $meta = '') {
 	global $current_site;
 
 	if ( !apply_filters('wpmu_welcome_user_notification', $user_id, $password, $meta) )
@@ -1301,10 +1297,8 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 /**
  * Get the current site info.
  *
- * Returns an object containing the 'id', 'domain', 'path', and 'site_name'
- * properties of the site being viewed.
- *
- * @see wpmu_current_site()
+ * Returns an object containing the ID, domain, path, and site_name
+ * of the site being viewed.
  *
  * @since MU
  *
@@ -1615,6 +1609,7 @@ function signup_nonce_check( $result ) {
  * @since MU
  */
 function maybe_redirect_404() {
+	global $current_site;
 	if ( is_main_site() && is_404() && defined( 'NOBLOGREDIRECT' ) && ( $destination = apply_filters( 'blog_redirect_404', NOBLOGREDIRECT ) ) ) {
 		if ( $destination == '%siteurl%' )
 			$destination = network_home_url();
@@ -1711,17 +1706,14 @@ function fix_phpmailer_messageid( $phpmailer ) {
  * @since MU
  * @uses get_user_by()
  *
- * @param string|WP_User $user Optional. Defaults to current user. WP_User object,
- * 	or user login name as a string.
+ * @param string $user_login Optional. Defaults to current user.
  * @return bool
  */
-function is_user_spammy( $user = null ) {
-    if ( ! is_a( $user, 'WP_User' ) ) {
-		if ( $user )
-			$user = get_user_by( 'login', $user );
-		else
-			$user = wp_get_current_user();
-	}
+function is_user_spammy( $user_login = null ) {
+	if ( $user_login )
+		$user = get_user_by( 'login', $user_login );
+	else
+		$user = wp_get_current_user();
 
 	return $user && isset( $user->spam ) && 1 == $user->spam;
 }
@@ -1742,6 +1734,21 @@ function update_blog_public( $old_value, $value ) {
 	update_blog_status( get_current_blog_id(), 'public', (int) $value );
 }
 add_action('update_option_blog_public', 'update_blog_public', 10, 2);
+
+/**
+ * Get the "dashboard blog", the blog where users without a blog edit their profile data.
+ *
+ * @since MU
+ * @uses get_blog_details()
+ *
+ * @return int
+ */
+function get_dashboard_blog() {
+	if ( $blog = get_site_option( 'dashboard_blog' ) )
+		return get_blog_details( $blog );
+
+	return get_blog_details( $GLOBALS['current_site']->blog_id );
+}
 
 /**
  * Check whether a usermeta key has to do with the current blog.
@@ -1916,9 +1923,9 @@ function get_space_allowed() {
 		$space_allowed = get_site_option( 'blog_upload_space' );
 
 	if ( empty( $space_allowed ) || ! is_numeric( $space_allowed ) )
-		$space_allowed = 100;
+		$space_allowed = 50;
 
-	return apply_filters( 'get_space_allowed', $space_allowed );
+	return $space_allowed;
 }
 
 /**
