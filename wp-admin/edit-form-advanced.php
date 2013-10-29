@@ -147,7 +147,7 @@ if ( current_theme_supports( 'post-formats' ) && post_type_supports( $post_type,
 // all taxonomies
 foreach ( get_object_taxonomies( $post ) as $tax_name ) {
 	$taxonomy = get_taxonomy( $tax_name );
-	if ( ! $taxonomy->show_ui || false === $taxonomy->meta_box_cb )
+	if ( ! $taxonomy->show_ui )
 		continue;
 
 	$label = $taxonomy->labels->name;

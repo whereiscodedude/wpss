@@ -120,15 +120,6 @@ class WP {
 	function parse_request($extra_query_vars = '') {
 		global $wp_rewrite;
 
-		/**
-		 * Filter whether to parse the request.
-		 *
-		 * @since 3.5.0
-		 *
-		 * @param bool         $bool             Whether or not to parse the request. Default true.
-		 * @param WP           $this             Current WordPress environment instance.
-		 * @param array|string $extra_query_vars Extra passed query variables.
-		 */
 		if ( ! apply_filters( 'do_parse_request', true, $this, $extra_query_vars ) )
 			return;
 
@@ -245,18 +236,7 @@ class WP {
 			}
 		}
 
-		/**
-		 * Filter the query variables whitelist before processing.
-		 *
-		 * Allows (publicly allowed) query vars to be added, removed, or changed prior
-		 * to executing the query. Needed to allow custom rewrite rules using your own arguments
-		 * to work, or any other custom query variables you want to be publicly available.
-		 *
-		 * @since 1.5.2
-		 *
-		 * @param array $public_query_vars The array of whitelisted query variables.
-		 */
-		$this->public_query_vars = apply_filters( 'query_vars', $this->public_query_vars );
+		$this->public_query_vars = apply_filters('query_vars', $this->public_query_vars);
 
 		foreach ( get_post_types( array(), 'objects' ) as $post_type => $t )
 			if ( $t->query_var )
@@ -314,23 +294,9 @@ class WP {
 		if ( isset($error) )
 			$this->query_vars['error'] = $error;
 
-		/**
-		 * Filter the array of parsed query variables.
-		 *
-		 * @since 2.1.0
-		 *
-		 * @param array $query_vars The array of requested query variables.
-		 */
-		$this->query_vars = apply_filters( 'request', $this->query_vars );
+		$this->query_vars = apply_filters('request', $this->query_vars);
 
-		/**
-		 * Fires once all query variables for the current request have been parsed.
-		 *
-		 * @since 2.1.0
-		 *
-		 * @param WP &$this Current WordPress environment instance (passed by reference).
-		 */
-		do_action_ref_array( 'parse_request', array( &$this ) );
+		do_action_ref_array('parse_request', array(&$this));
 	}
 
 	/**
@@ -400,15 +366,7 @@ class WP {
 			}
 		}
 
-		/**
-		 * Filter the HTTP headers before they're sent to the browser.
-		 *
-		 * @since 2.8.0
-		 *
-		 * @param array $headers The list of headers to be sent.
-		 * @param WP    $this    Current WordPress environment instance.
-		 */
-		$headers = apply_filters( 'wp_headers', $headers, $this );
+		$headers = apply_filters('wp_headers', $headers, $this);
 
 		if ( ! empty( $status ) )
 			status_header( $status );
@@ -438,14 +396,7 @@ class WP {
 		if ( $exit_required )
 			exit();
 
-		/**
-		 * Fires once the requested HTTP headers for caching, content type, etc. have been sent.
-		 *
-		 * @since 2.1.0
-		 *
-		 * @param WP &$this Current WordPress environment instance (passed by reference).
-		 */
-		do_action_ref_array( 'send_headers', array( &$this ) );
+		do_action_ref_array('send_headers', array(&$this));
 	}
 
 	/**
@@ -467,16 +418,9 @@ class WP {
 			}
 		}
 
-		if ( has_filter( 'query_string' ) ) {  // Don't bother filtering and parsing if no plugins are hooked in.
-			/**
-			 * Filter the query string before parsing.
-			 *
-			 * @since 1.5.2
-			 * @deprecated 2.1.0 Use 'query_vars' or 'request' filters instead.
-			 *
-			 * @param string $query_string The query string to modify.
-			 */
-			$this->query_string = apply_filters( 'query_string', $this->query_string );
+		// query_string filter deprecated. Use request filter instead.
+		if ( has_filter('query_string') ) {  // Don't bother filtering and parsing if no plugins are hooked in.
+			$this->query_string = apply_filters('query_string', $this->query_string);
 			parse_str($this->query_string, $this->query_vars);
 		}
 	}
@@ -605,15 +549,7 @@ class WP {
 		$this->query_posts();
 		$this->handle_404();
 		$this->register_globals();
-		
-		/**
-		 * Fires once the WordPress environment has been set up.
-		 *
-		 * @since 2.1.0
-		 *
-		 * @param WP &$this Current WordPress environment instance (passed by reference).
-		 */
-		do_action_ref_array( 'wp', array( &$this ) );
+		do_action_ref_array('wp', array(&$this));
 	}
 
 }
