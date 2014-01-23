@@ -13,8 +13,7 @@
 /**
  * Retrieve the author of the current post.
  *
- * @since 1.5.0
- *
+ * @since 1.5
  * @uses $authordata The current author's DB object.
  * @uses apply_filters() Calls 'the_author' hook on the author display name.
  *
@@ -69,8 +68,7 @@ function the_author( $deprecated = '', $deprecated_echo = true ) {
 /**
  * Retrieve the author who last edited the current post.
  *
- * @since 2.8.0
- *
+ * @since 2.8
  * @uses $post The current post's DB object.
  * @uses get_post_meta() Retrieves the ID of the author who last edited the current post.
  * @uses get_userdata() Retrieves the author's DB object.
@@ -95,8 +93,7 @@ function get_the_modified_author() {
 /**
  * Display the name of the author who last edited the current post.
  *
- * @since 2.8.0
- *
+ * @since 2.8
  * @see get_the_author()
  * @return string The author's display name, from get_the_modified_author().
  */
@@ -187,9 +184,7 @@ function get_the_author_link() {
  * author's name.
  *
  * @link http://codex.wordpress.org/Template_Tags/the_author_link
- *
- * @since 2.1.0
- *
+ * @since 2.1
  * @uses get_the_author_link()
  */
 function the_author_link() {
@@ -199,8 +194,7 @@ function the_author_link() {
 /**
  * Retrieve the number of posts by the author of the current post.
  *
- * @since 1.5.0
- *
+ * @since 1.5
  * @uses $post The current post in the Loop's DB object.
  * @uses count_user_posts()
  * @return int The number of posts by the author.

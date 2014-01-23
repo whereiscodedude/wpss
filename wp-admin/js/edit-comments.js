@@ -1,5 +1,6 @@
 /* global adminCommentsL10n, thousandsSeparator, list_args, QTags, ajaxurl, wpAjax */
-var setCommentsList, theList, theExtraList, commentReply;
+var setCommentsList, theList, theExtraList, commentReply,
+	toggleWithKeyboard = false;
 
 (function($) {
 var getCount, updateCount, updatePending, dashboardTotals;
@@ -593,7 +594,9 @@ $(document).ready(function(){
 		};
 
 		toggle_all = function() {
-			$('#cb-select-all-1').data( 'wp-toggle', 1 ).trigger( 'click' ).removeData( 'wp-toggle' );
+			toggleWithKeyboard = true;
+			$('input:checkbox', '#cb').click().prop('checked', false);
+			toggleWithKeyboard = false;
 		};
 
 		make_bulk = function(value) {
@@ -606,28 +609,12 @@ $(document).ready(function(){
 
 		$.table_hotkeys(
 			$('table.widefat'),
-			[
-				'a', 'u', 's', 'd', 'r', 'q', 'z',
-				['e', edit_comment],
-				['shift+x', toggle_all],
-				['shift+a', make_bulk('approve')],
-				['shift+s', make_bulk('spam')],
-				['shift+d', make_bulk('delete')],
-				['shift+t', make_bulk('trash')],
-				['shift+z', make_bulk('untrash')],
-				['shift+u', make_bulk('unapprove')]
-			],
-			{
-				highlight_first: adminCommentsL10n.hotkeys_highlight_first,
-				highlight_last: adminCommentsL10n.hotkeys_highlight_last,
-				prev_page_link_cb: make_hotkeys_redirect('prev'),
-				next_page_link_cb: make_hotkeys_redirect('next'), 
-				hotkeys_opts: {
-					disableInInput: true,
-					type: 'keypress',
-					noDisable: '.check-column input[type="checkbox"]'
-				}
-			}
+			['a', 'u', 's', 'd', 'r', 'q', 'z', ['e', edit_comment], ['shift+x', toggle_all],
+			['shift+a', make_bulk('approve')], ['shift+s', make_bulk('spam')],
+			['shift+d', make_bulk('delete')], ['shift+t', make_bulk('trash')],
+			['shift+z', make_bulk('untrash')], ['shift+u', make_bulk('unapprove')]],
+			{ highlight_first: adminCommentsL10n.hotkeys_highlight_first, highlight_last: adminCommentsL10n.hotkeys_highlight_last,
+			prev_page_link_cb: make_hotkeys_redirect('prev'), next_page_link_cb: make_hotkeys_redirect('next') }
 		);
 	}
 });

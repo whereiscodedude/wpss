@@ -13,15 +13,15 @@ window.switchEditors = {
 
 	// mode can be 'html', 'tmce', or 'toggle'; 'html' is used for the 'Text' editor tab.
 	go: function( id, mode ) {
-		var t = this, ed, wrap_id, txtarea_el, editorHeight, toolbarHeight,
-			DOM = tinymce.DOM; //DOMUtils outside the editor iframe
+		var t = this, ed, wrap_id, txtarea_el,
+			dom = tinymce.DOM;
 
 		id = id || 'content';
 		mode = mode || 'toggle';
 
 		ed = tinymce.get( id );
 		wrap_id = 'wp-' + id + '-wrap';
-		txtarea_el = DOM.get( id );
+		txtarea_el = dom.get( id );
 
 		if ( 'toggle' === mode ) {
 			if ( ed && ! ed.isHidden() ) {
@@ -29,20 +29,6 @@ window.switchEditors = {
 			} else {
 				mode = 'tmce';
 			}
-		}
-
-		function getToolbarHeight() {
-			var height;
-
-			try {
-				height = DOM.getSize( DOM.select( '.mce-toolbar-grp', ed.getContainer() )[0] );
-			} catch(e){}
-
-			if ( height && height.h && height.h > 10 && height.h < 100 ) {
-				return height.h;
-			}
-
-			return 0;
 		}
 
 		if ( 'tmce' === mode || 'tinymce' === mode ) {
@@ -54,32 +40,19 @@ window.switchEditors = {
 				QTags.closeAllTags( id );
 			}
 
-			editorHeight = txtarea_el ? parseInt( txtarea_el.style.height, 10 ) : 0;
-
 			if ( tinyMCEPreInit.mceInit[ id ] && tinyMCEPreInit.mceInit[ id ].wpautop ) {
 				txtarea_el.value = t.wpautop( txtarea_el.value );
 			}
 
 			if ( ed ) {
 				ed.show();
-
-				if ( editorHeight && ( toolbarHeight = getToolbarHeight() ) ) {
-					editorHeight = editorHeight - toolbarHeight + 11;
-
-					// height cannot be under 50 or over 5000
-					if ( editorHeight > 50 && editorHeight < 5000 ) {
-						ed.theme.resizeTo( null, editorHeight );
-					}
-				}
 			} else {
-				tinymce.init( tinyMCEPreInit.mceInit[id] );
-
-		//		ed = tinymce.createEditor( id, tinyMCEPreInit.mceInit[id] );
-		//		ed.render();
+				ed = new tinymce.Editor( id, tinyMCEPreInit.mceInit[ id ] );
+				ed.render();
 			}
 
-			DOM.removeClass( wrap_id, 'html-active' );
-			DOM.addClass( wrap_id, 'tmce-active' );
+			dom.removeClass( wrap_id, 'html-active' );
+			dom.addClass( wrap_id, 'tmce-active' );
 			setUserSetting( 'editor', 'tinymce' );
 
 		} else if ( 'html' === mode ) {
@@ -89,18 +62,6 @@ window.switchEditors = {
 			}
 
 			if ( ed ) {
-				editorHeight = DOM.get( id + '_ifr' );
-				editorHeight = editorHeight ? parseInt( editorHeight.style.height, 10 ) : 0;
-
-				if ( editorHeight && ( toolbarHeight = getToolbarHeight() ) ) {
-					editorHeight = editorHeight + toolbarHeight - 11;
-
-					// height cannot be under 50 or over 5000
-					if ( editorHeight > 50 && editorHeight < 5000 ) {
-						txtarea_el.style.height = editorHeight + 'px';
-					}
-				}
-
 				ed.hide();
 			} else {
 				// The TinyMCE instance doesn't exist, run the content through 'pre_wpautop()' and show the textarea
@@ -108,11 +69,11 @@ window.switchEditors = {
 					txtarea_el.value = t.pre_wpautop( txtarea_el.value );
 				}
 
-				DOM.setStyles( txtarea_el, {'display': '', 'visibility': ''} );
+				dom.setStyles( txtarea_el, {'display': '', 'visibility': ''} );
 			}
 
-			DOM.removeClass( wrap_id, 'tmce-active' );
-			DOM.addClass( wrap_id, 'html-active' );
+			dom.removeClass( wrap_id, 'tmce-active' );
+			dom.addClass( wrap_id, 'html-active' );
 			setUserSetting( 'editor', 'html' );
 		}
 		return false;
@@ -127,9 +88,8 @@ window.switchEditors = {
 		if ( content.indexOf( '<pre' ) !== -1 || content.indexOf( '<script' ) !== -1 ) {
 			preserve_linebreaks = true;
 			content = content.replace( /<(pre|script)[^>]*>[\s\S]+?<\/\1>/g, function( a ) {
-				a = a.replace( /<br ?\/?>(\r\n|\n)?/g, '<wp-line-break>' );
-				a = a.replace( /<\/?p( [^>]*)?>(\r\n|\n)?/g, '<wp-line-break>' );
-				return a.replace( /\r?\n/g, '<wp-line-break>' );
+				a = a.replace( /<br ?\/?>(\r\n|\n)?/g, '<wp-temp-lb>' );
+				return a.replace( /<\/?p( [^>]*)?>(\r\n|\n)?/g, '<wp-temp-lb>' );
 			});
 		}
 
@@ -189,7 +149,7 @@ window.switchEditors = {
 
 		// put back the line breaks in pre|script
 		if ( preserve_linebreaks ) {
-			content = content.replace( /<wp-line-break>/g, '\n' );
+			content = content.replace( /<wp-temp-lb>/g, '\n' );
 		}
 
 		// and the <br> tags in captions
@@ -221,7 +181,7 @@ window.switchEditors = {
 		if ( pee.indexOf( '<pre' ) !== -1 || pee.indexOf( '<script' ) !== -1 ) {
 			preserve_linebreaks = true;
 			pee = pee.replace( /<(pre|script)[^>]*>[\s\S]+?<\/\1>/g, function( a ) {
-				return a.replace( /(\r\n|\n)/g, '<wp-line-break>' );
+				return a.replace( /(\r\n|\n)/g, '<wp-temp-lb>' );
 			});
 		}
 
@@ -270,7 +230,7 @@ window.switchEditors = {
 
 		// put back the line breaks in pre|script
 		if ( preserve_linebreaks ) {
-			pee = pee.replace( /<wp-line-break>/g, '\n' );
+			pee = pee.replace( /<wp-temp-lb>/g, '\n' );
 		}
 
 		if ( preserve_br ) {

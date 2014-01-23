@@ -163,8 +163,7 @@ function wp_cache_replace( $key, $data, $group = '', $expire = 0 ) {
 /**
  * Saves the data to the cache.
  *
- * @since 2.0.0
- *
+ * @since 2.0
  * @uses $wp_object_cache Object Cache Class
  * @see WP_Object_Cache::set()
  *
@@ -257,7 +256,7 @@ function wp_cache_reset() {
  *
  * @package WordPress
  * @subpackage Cache
- * @since 2.0.0
+ * @since 2.0
  */
 class WP_Object_Cache {
 

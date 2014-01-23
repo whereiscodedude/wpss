@@ -3349,7 +3349,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	  * Retrieves a list of post formats used by the site
 	  *
-	  * @since 3.1.0
+	  * @since 3.1
 	  *
 	  * @param array $args Method parameters. Contains:
 	  *  - blog_id

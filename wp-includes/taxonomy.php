@@ -289,8 +289,6 @@ function is_taxonomy_hierarchical($taxonomy) {
  *     * If not set, the default is inherited from public.
  * - show_tagcloud - Whether to list the taxonomy in the Tag Cloud Widget.
  *     * If not set, the default is inherited from show_ui.
- * - show_admin_column - Whether to display a column for the taxonomy on its post type listing screens.
- *     * Defaults to false.
  * - meta_box_cb - Provide a callback function for the meta box display.
  *     * If not set, defaults to post_categories_meta_box for hierarchical taxonomies
  *     and post_tags_meta_box for non-hierarchical.
@@ -338,7 +336,6 @@ function register_taxonomy( $taxonomy, $object_type, $args = array() ) {
 		'show_in_menu'          => null,
 		'show_in_nav_menus'     => null,
 		'show_tagcloud'         => null,
-		'show_admin_column'     => false,
 		'meta_box_cb'           => null,
 		'capabilities'          => array(),
 		'rewrite'               => true,
@@ -2340,7 +2337,7 @@ function wp_set_object_terms($object_id, $terms, $taxonomy, $append = false) {
  *
  * @package WordPress
  * @subpackage Taxonomy
- * @since 3.6.0
+ * @since 3.6
  * @uses wp_set_object_terms()
  *
  * @param int $object_id The ID of the object to which the terms will be added.
@@ -2357,7 +2354,7 @@ function wp_add_object_terms( $object_id, $terms, $taxonomy ) {
  *
  * @package WordPress
  * @subpackage Taxonomy
- * @since 3.6.0
+ * @since 3.6
  * @uses $wpdb
  *
  * @uses apply_filters() Calls 'delete_term_relationships' hook with object_id and tt_ids as parameters.

@@ -1395,15 +1395,14 @@ class WP_Http_Curl {
  *
  * @link http://core.trac.wordpress.org/ticket/4011 Proxy support ticket in WordPress.
  * @link http://core.trac.wordpress.org/ticket/14636 Allow wildcard domains in WP_PROXY_BYPASS_HOSTS
- * @since 2.8.0
+ * @since 2.8
  */
 class WP_HTTP_Proxy {
 
 	/**
 	 * Whether proxy connection should be used.
 	 *
-	 * @since 2.8.0
-	 *
+	 * @since 2.8
 	 * @use WP_PROXY_HOST
 	 * @use WP_PROXY_PORT
 	 *
@@ -1416,8 +1415,7 @@ class WP_HTTP_Proxy {
 	/**
 	 * Whether authentication should be used.
 	 *
-	 * @since 2.8.0
-	 *
+	 * @since 2.8
 	 * @use WP_PROXY_USERNAME
 	 * @use WP_PROXY_PASSWORD
 	 *
@@ -1430,7 +1428,7 @@ class WP_HTTP_Proxy {
 	/**
 	 * Retrieve the host for the proxy server.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return string
 	 */
@@ -1444,7 +1442,7 @@ class WP_HTTP_Proxy {
 	/**
 	 * Retrieve the port for the proxy server.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return string
 	 */
@@ -1458,7 +1456,7 @@ class WP_HTTP_Proxy {
 	/**
 	 * Retrieve the username for proxy authentication.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return string
 	 */
@@ -1472,7 +1470,7 @@ class WP_HTTP_Proxy {
 	/**
 	 * Retrieve the password for proxy authentication.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return string
 	 */
@@ -1486,7 +1484,7 @@ class WP_HTTP_Proxy {
 	/**
 	 * Retrieve authentication string for proxy authentication.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return string
 	 */
@@ -1497,7 +1495,7 @@ class WP_HTTP_Proxy {
 	/**
 	 * Retrieve header string for proxy authentication.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return string
 	 */
@@ -1764,7 +1762,7 @@ class WP_Http_Cookie {
  *
  * Includes RFC 1950, RFC 1951, and RFC 1952.
  *
- * @since 2.8.0
+ * @since 2.8
  * @package WordPress
  * @subpackage HTTP
  */
@@ -1775,7 +1773,7 @@ class WP_Http_Encoding {
 	 *
 	 * Supports the RFC 1951 standard.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @param string $raw String to compress.
 	 * @param int $level Optional, default is 9. Compression level, 9 is highest.
@@ -1794,7 +1792,7 @@ class WP_Http_Encoding {
 	 * 1952 standard gzip decode will be attempted. If all fail, then the
 	 * original compressed string will be returned.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @param string $compressed String to decompress.
 	 * @param int $length The optional length of the compressed data.
@@ -1878,7 +1876,7 @@ class WP_Http_Encoding {
 	/**
 	 * What encoding types to accept and their priority values.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return string Types of encoding to accept.
 	 */
@@ -1912,7 +1910,7 @@ class WP_Http_Encoding {
 	/**
 	 * What encoding the content used when it was compressed to send in the headers.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return string Content-Encoding string to send in the header.
 	 */
@@ -1923,7 +1921,7 @@ class WP_Http_Encoding {
 	/**
 	 * Whether the content be decoded based on the headers.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @param array|string $headers All of the available headers.
 	 * @return bool
@@ -1946,7 +1944,7 @@ class WP_Http_Encoding {
 	 * ensure that the functions all exist in the PHP version and aren't
 	 * disabled.
 	 *
-	 * @since 2.8.0
+	 * @since 2.8
 	 *
 	 * @return bool
 	 */

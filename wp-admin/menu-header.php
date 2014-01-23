@@ -19,17 +19,7 @@ $self = preg_replace('|^.*/plugins/|i', '', $self);
 $self = preg_replace('|^.*/mu-plugins/|i', '', $self);
 
 global $menu, $submenu, $parent_file; //For when admin-header is included from within a function.
-
-/**
- * Filter the parent file of an admin menu sub-menu item.
- *
- * Allows plugins to move sub-menu items around.
- *
- * @since MU
- *
- * @param string $parent_file The parent file.
- */
-$parent_file = apply_filters( 'parent_file', $parent_file );
+$parent_file = apply_filters("parent_file", $parent_file); // For plugins to move submenu tabs around.
 
 get_admin_page_parent();
 
@@ -205,11 +195,6 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 <?php
 
 _wp_menu_output( $menu, $submenu );
-/**
- * Fires after the admin menu has been output.
- *
- * @since 2.5.0
- */
 do_action( 'adminmenu' );
 
 ?>

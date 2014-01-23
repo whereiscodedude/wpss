@@ -248,7 +248,7 @@ do_action( 'sanitize_comment_cookies' );
  * @global object $wp_the_query
  * @since 2.0.0
  */
-$GLOBALS['wp_the_query'] = new WP_Query();
+$wp_the_query = new WP_Query();
 
 /**
  * Holds the reference to @see $wp_the_query
@@ -256,7 +256,7 @@ $GLOBALS['wp_the_query'] = new WP_Query();
  * @global object $wp_query
  * @since 1.5.0
  */
-$GLOBALS['wp_query'] = $GLOBALS['wp_the_query'];
+$wp_query = $wp_the_query;
 
 /**
  * Holds the WordPress Rewrite object for creating pretty URLs
@@ -270,7 +270,7 @@ $GLOBALS['wp_rewrite'] = new WP_Rewrite();
  * @global object $wp
  * @since 2.0.0
  */
-$GLOBALS['wp'] = new WP();
+$wp = new WP();
 
 /**
  * WordPress Widget Factory Object
@@ -331,7 +331,7 @@ if ( ! defined( 'WP_INSTALLING' ) || 'wp-activate.php' === $pagenow ) {
 do_action( 'after_setup_theme' );
 
 // Set up current user.
-$GLOBALS['wp']->init();
+$wp->init();
 
 /**
  * Fires after WordPress has finished loading but before any headers are sent.

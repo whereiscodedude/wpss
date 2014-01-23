@@ -259,7 +259,7 @@ function wp_ajax_logged_in() {
  *
  * Contrary to normal success AJAX response ("1"), die with time() on success.
  *
- * @since 2.7.0
+ * @since 2.7
  *
  * @param int $comment_id
  * @return die
@@ -1089,6 +1089,68 @@ function wp_ajax_add_user( $action ) {
 	$x->send();
 }
 
+function wp_ajax_autosave() {
+	define( 'DOING_AUTOSAVE', true );
+
+	check_ajax_referer( 'autosave', 'autosavenonce' );
+
+	if ( ! empty( $_POST['catslist'] ) )
+		$_POST['post_category'] = explode( ',', $_POST['catslist'] );
+	if ( $_POST['post_type'] == 'page' || empty( $_POST['post_category'] ) )
+		unset( $_POST['post_category'] );
+
+	$data = '';
+	$supplemental = array();
+	$id = $revision_id = 0;
+
+	$post_id = (int) $_POST['post_id'];
+	$_POST['ID'] = $_POST['post_ID'] = $post_id;
+	$post = get_post( $post_id );
+	if ( empty( $post->ID ) || ! current_user_can( 'edit_post', $post->ID ) )
+		wp_die( __( 'You are not allowed to edit this post.' ) );
+
+	if ( 'page' == $post->post_type && ! current_user_can( 'edit_page', $post->ID ) )
+		wp_die( __( 'You are not allowed to edit this page.' ) );
+
+	if ( 'auto-draft' == $post->post_status )
+		$_POST['post_status'] = 'draft';
+
+	if ( ! empty( $_POST['autosave'] ) ) {
+		if ( ! wp_check_post_lock( $post->ID ) && get_current_user_id() == $post->post_author && ( 'auto-draft' == $post->post_status || 'draft' == $post->post_status ) ) {
+			// Drafts and auto-drafts are just overwritten by autosave for the same user if the post is not locked
+			$id = edit_post();
+		} else {
+			// Non drafts or other users drafts are not overwritten. The autosave is stored in a special post revision for each user.
+			$revision_id = wp_create_post_autosave( $post->ID );
+			if ( is_wp_error($revision_id) )
+				$id = $revision_id;
+			else
+				$id = $post->ID;
+		}
+
+		if ( ! is_wp_error($id) ) {
+			/* translators: draft saved date format, see http://php.net/date */
+			$draft_saved_date_format = __('g:i:s a');
+			/* translators: %s: date and time */
+			$data = sprintf( __('Draft saved at %s.'), date_i18n( $draft_saved_date_format ) );
+		}
+	} else {
+		if ( ! empty( $_POST['auto_draft'] ) )
+			$id = 0; // This tells us it didn't actually save
+		else
+			$id = $post->ID;
+	}
+
+	// @todo Consider exposing any errors, rather than having 'Saving draft...'
+	$x = new WP_Ajax_Response( array(
+		'what' => 'autosave',
+		'id' => $id,
+		'data' => $data,
+		'supplemental' => $supplemental
+	) );
+	$x->send();
+}
+
 function wp_ajax_closed_postboxes() {
 	check_ajax_referer( 'closedpostboxes', 'closedpostboxesnonce' );
 	$closed = isset( $_POST['closed'] ) ? explode( ',', $_POST['closed']) : array();
@@ -1168,8 +1230,7 @@ function wp_ajax_menu_get_metabox() {
 		 *
 		 * @since 3.0.0
 		 *
-		 * @param object $menus_meta_box_object A nav menu meta box object, such as Page,
-		 *                                      Post, Category, Tag, etc.
+		 * @param object $menus_meta_box_object A nav menu meta box object, such as Page, Post, Category, Tag, etc.
 		 */
 		$item = apply_filters( 'nav_menu_meta_box_object', $menus_meta_box_object );
 		ob_start();
@@ -1726,8 +1787,16 @@ function wp_ajax_wp_fullscreen_save_post() {
 
 	$post_id = edit_post();
 
-	if ( is_wp_error( $post_id ) ) {
-		wp_send_json_error();
+	if ( is_wp_error($post_id) ) {
+		if ( $post_id->get_error_message() )
+			$message = $post_id->get_error_message();
+		else
+			$message = __('Save failed');
+
+		echo json_encode( array( 'message' => $message, 'last_edited' => '' ) );
+		wp_die();
+	} else {
+		$message = __('Saved.');
 	}
 
 	if ( $post ) {
@@ -1738,14 +1807,15 @@ function wp_ajax_wp_fullscreen_save_post() {
 		$last_time = date_i18n( get_option('time_format') );
 	}
 
-	if ( $last_id = get_post_meta( $post_id, '_edit_last', true ) ) {
-		$last_user = get_userdata( $last_id );
+	if ( $last_id = get_post_meta($post_id, '_edit_last', true) ) {
+		$last_user = get_userdata($last_id);
 		$last_edited = sprintf( __('Last edited by %1$s on %2$s at %3$s'), esc_html( $last_user->display_name ), $last_date, $last_time );
 	} else {
 		$last_edited = sprintf( __('Last edited on %1$s at %2$s'), $last_date, $last_time );
 	}
 
-	wp_send_json_success( array( 'last_edited' => $last_edited ) );
+	echo json_encode( array( 'message' => $message, 'last_edited' => $last_edited ) );
+	wp_die();
 }
 
 function wp_ajax_wp_remove_post_lock() {
@@ -1769,10 +1839,9 @@ function wp_ajax_wp_remove_post_lock() {
 	 *
 	 * @since 3.3.0
 	 *
-	 * @param int $interval The interval in seconds the post lock duration
-	 *                      should last, plus 5 seconds. Default 150.
+	 * @param int $interval The interval in seconds the post lock duration should last, plus 5 seconds. Default 120.
 	 */
-	$new_lock = ( time() - apply_filters( 'wp_check_post_lock_window', 150 ) + 5 ) . ':' . $active_lock[1];
+	$new_lock = ( time() - apply_filters( 'wp_check_post_lock_window', 120 ) + 5 ) . ':' . $active_lock[1];
 	update_post_meta( $post_id, '_edit_lock', $new_lock, implode( ':', $active_lock ) );
 	wp_die( 1 );
 }
@@ -1844,14 +1913,11 @@ function wp_ajax_query_attachments() {
 		$query['post_status'] .= ',private';
 
 	/**
-	 * Filter the arguments passed to WP_Query during an AJAX
-	 * call for querying attachments.
+	 * Filter the arguments passed to WP_Query during an AJAX call for querying attachments.
 	 *
 	 * @since 3.7.0
 	 *
-	 * @see WP_Query::parse_query()
-	 *
-	 * @param array $query An array of query variables.
+	 * @param array $query An array of query variables. @see WP_Query::parse_query()
 	 */
 	$query = apply_filters( 'ajax_query_attachments_args', $query );
 	$query = new WP_Query( $query );

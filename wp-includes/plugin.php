@@ -16,7 +16,7 @@
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 1.5.0
+ * @since 1.5
  */
 
 // Initialize the filter globals.
@@ -93,8 +93,7 @@ function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 2.5.0
- *
+ * @since 2.5
  * @global array $wp_filter Stores all of the filters
  *
  * @param string $tag The name of the filter hook.
@@ -276,8 +275,7 @@ function apply_filters_ref_array($tag, $args) {
  *
  * @package WordPress
  * @subpackage Plugin
- *
- * @since 1.2.0
+ * @since 1.2
  *
  * @param string $tag The filter hook to which the function to be removed is hooked.
  * @param callback $function_to_remove The name of the function which should be removed.
@@ -303,7 +301,7 @@ function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
 /**
  * Remove all of the hooks from a filter.
  *
- * @since 2.7.0
+ * @since 2.7
  *
  * @param string $tag The filter to remove hooks from.
  * @param int $priority The priority number to remove.
@@ -330,7 +328,7 @@ function remove_all_filters($tag, $priority = false) {
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 2.5.0
+ * @since 2.5
  *
  * @return string Hook name of the current filter or action.
  */
@@ -351,8 +349,7 @@ function current_filter() {
  *
  * @package WordPress
  * @subpackage Plugin
- *
- * @since 1.2.0
+ * @since 1.2
  *
  * @param string $tag The name of the action to which the $function_to_add is hooked.
  * @param callback $function_to_add The name of the function you wish to be called.
@@ -378,9 +375,7 @@ function add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1) 
  *
  * @package WordPress
  * @subpackage Plugin
- *
- * @since 1.2.0
- *
+ * @since 1.2
  * @global array $wp_filter Stores all of the filters
  * @global array $wp_actions Increments the amount of times action was triggered.
  *
@@ -443,8 +438,7 @@ function do_action($tag, $arg = '') {
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 2.1.0
- *
+ * @since 2.1
  * @global array $wp_actions Increments the amount of times action was triggered.
  *
  * @param string $tag The name of the action hook.
@@ -467,8 +461,7 @@ function did_action($tag) {
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 2.1.0
- *
+ * @since 2.1
  * @global array $wp_filter Stores all of the filters
  * @global array $wp_actions Increments the amount of times action was triggered.
  *
@@ -523,8 +516,7 @@ function do_action_ref_array($tag, $args) {
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 2.5.0
- *
+ * @since 2.5
  * @see has_filter() has_action() is an alias of has_filter().
  *
  * @param string $tag The name of the action hook.
@@ -547,8 +539,7 @@ function has_action($tag, $function_to_check = false) {
  *
  * @package WordPress
  * @subpackage Plugin
- *
- * @since 1.2.0
+ * @since 1.2
  *
  * @param string $tag The action hook to which the function to be removed is hooked.
  * @param callback $function_to_remove The name of the function which should be removed.
@@ -562,7 +553,7 @@ function remove_action( $tag, $function_to_remove, $priority = 10 ) {
 /**
  * Remove all of the hooks from an action.
  *
- * @since 2.7.0
+ * @since 2.7
  *
  * @param string $tag The action to remove hooks from.
  * @param int $priority The priority number to remove them from.
@@ -583,8 +574,7 @@ function remove_all_actions($tag, $priority = false) {
  *
  * @package WordPress
  * @subpackage Plugin
- *
- * @since 1.5.0
+ * @since 1.5
  *
  * @access private
  *
@@ -608,7 +598,7 @@ function plugin_basename($file) {
  * Gets the filesystem directory path (with trailing slash) for the plugin __FILE__ passed in
  * @package WordPress
  * @subpackage Plugin
- * @since 2.8.0
+ * @since 2.8
  *
  * @param string $file The filename of the plugin (__FILE__)
  * @return string the filesystem path of the directory that contains the plugin
@@ -621,7 +611,7 @@ function plugin_dir_path( $file ) {
  * Gets the URL directory path (with trailing slash) for the plugin __FILE__ passed in
  * @package WordPress
  * @subpackage Plugin
- * @since 2.8.0
+ * @since 2.8
  *
  * @param string $file The filename of the plugin (__FILE__)
  * @return string the URL path of the directory that contains the plugin
@@ -645,7 +635,7 @@ function plugin_dir_url( $file ) {
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 2.0.0
+ * @since 2.0
  *
  * @param string $file The filename of the plugin including the path.
  * @param callback $function the function hooked to the 'activate_PLUGIN' action.
@@ -670,7 +660,7 @@ function register_activation_hook($file, $function) {
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 2.0.0
+ * @since 2.0
  *
  * @param string $file The filename of the plugin including the path.
  * @param callback $function the function hooked to the 'deactivate_PLUGIN' action.
@@ -700,7 +690,7 @@ function register_deactivation_hook($file, $function) {
  * should always check for the 'WP_UNINSTALL_PLUGIN' constant, before
  * executing.
  *
- * @since 2.7.0
+ * @since 2.7
  *
  * @param string $file
  * @param callback $callback The callback to run when the hook is called. Must be a static method or function.
@@ -732,7 +722,7 @@ function register_uninstall_hook( $file, $callback ) {
  *
  * @package WordPress
  * @subpackage Plugin
- * @since 2.5.0
+ * @since 2.5
  * @access private
  *
  * @uses $wp_filter Used to process all of the functions in the 'all' hook
