@@ -9,7 +9,7 @@
 /**
  * Creates a new user from the "Users" form using $_POST information.
  *
- * @since 2.0.0
+ * @since 2.0
  *
  * @return null|WP_Error|int Null when adding user, WP_Error or User ID integer when no parameters.
  */
@@ -22,7 +22,7 @@ function add_user() {
  *
  * Used on user-edit.php and profile.php to manage and process user options, passwords etc.
  *
- * @since 2.0.0
+ * @since 2.0
  *
  * @param int $user_id Optional. User ID.
  * @return int user id of the updated user
@@ -193,7 +193,7 @@ function edit_user( $user_id = 0 ) {
  * only editors or authors. This filter allows admins to delegate
  * user management.
  *
- * @since 2.8.0
+ * @since 2.8
  *
  * @return unknown
  */
@@ -268,7 +268,7 @@ function get_users_drafts( $user_id ) {
  * @param int $reassign Optional. Reassign posts and links to new User ID.
  * @return bool True when finished.
  */
-function wp_delete_user( $id, $reassign = null ) {
+function wp_delete_user( $id, $reassign = 'novalue' ) {
 	global $wpdb;
 
 	$id = (int) $id;
@@ -277,25 +277,16 @@ function wp_delete_user( $id, $reassign = null ) {
 	if ( !$user->exists() )
 		return false;
 
-	// Normalize $reassign to null or a user ID. 'novalue' was an older default.
-	if ( 'novalue' === $reassign ) {
-		$reassign = null;
-	} elseif ( null !== $reassign ) {
-		$reassign = (int) $reassign;
-	}
-
 	/**
 	 * Fires immediately before a user is deleted from the database.
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param int      $id       ID of the user to delete.
-	 * @param int|null $reassign ID of the user to reassign posts and links to.
-	 *                           Default null, for no reassignment.
+	 * @param int $id User ID.
 	 */
-	do_action( 'delete_user', $id, $reassign );
+	do_action( 'delete_user', $id );
 
-	if ( null === $reassign ) {
+	if ( 'novalue' === $reassign || null === $reassign ) {
 		$post_types_to_delete = array();
 		foreach ( get_post_types( array(), 'objects' ) as $post_type ) {
 			if ( $post_type->delete_with_user ) {
@@ -329,6 +320,7 @@ function wp_delete_user( $id, $reassign = null ) {
 				wp_delete_link($link_id);
 		}
 	} else {
+		$reassign = (int) $reassign;
 		$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_author = %d", $id ) );
 		$wpdb->update( $wpdb->posts, array('post_author' => $reassign), array('post_author' => $id) );
 		if ( ! empty( $post_ids ) ) {
@@ -361,11 +353,9 @@ function wp_delete_user( $id, $reassign = null ) {
 	 *
 	 * @since 2.9.0
 	 *
-	 * @param int      $id       ID of the deleted user.
-	 * @param int|null $reassign ID of the user to reassign posts and links to.
-	 *                           Default null, for no reassignment.
+	 * @param int $id ID of the deleted user.
 	 */
-	do_action( 'deleted_user', $id, $reassign );
+	do_action( 'deleted_user', $id );
 
 	return true;
 }
@@ -430,7 +420,7 @@ function default_password_nag() {
 	echo '<strong>' . __('Notice:') . '</strong> ';
 	_e('You&rsquo;re using the auto-generated password for your account. Would you like to change it to something easier to remember?');
 	echo '</p><p>';
-	printf( '<a href="%s">' . __('Yes, take me to my profile page') . '</a> | ', get_edit_profile_url() . '#password' );
+	printf( '<a href="%s">' . __('Yes, take me to my profile page') . '</a> | ', get_edit_profile_url( get_current_user_id() ) . '#password' );
 	printf( '<a href="%s" id="default-password-nag-no">' . __('No thanks, do not remind me again') . '</a>', '?default_password_nag=0' );
 	echo '</p></div>';
 }

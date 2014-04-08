@@ -187,7 +187,7 @@ function get_stylesheet_directory() {
  * @return string
  */
 function get_stylesheet_directory_uri() {
-	$stylesheet = str_replace( '%2F', '/', rawurlencode( get_stylesheet() ) );
+	$stylesheet = get_stylesheet();
 	$theme_root_uri = get_theme_root_uri( $stylesheet );
 	$stylesheet_dir_uri = "$theme_root_uri/$stylesheet";
 
@@ -318,7 +318,7 @@ function get_template_directory() {
  * @return string Template directory URI.
  */
 function get_template_directory_uri() {
-	$template = str_replace( '%2F', '/', rawurlencode( get_template() ) );
+	$template = get_template();
 	$theme_root_uri = get_theme_root_uri( $template );
 	$template_dir_uri = "$theme_root_uri/$template";
 
@@ -913,21 +913,8 @@ function get_theme_mod( $name, $default = false ) {
  */
 function set_theme_mod( $name, $value ) {
 	$mods = get_theme_mods();
-	$old_value = isset( $mods[ $name ] ) ? $mods[ $name ] : false;
 
-	/**
-	 * Filter the theme mod value on save.
-	 *
-	 * The dynamic portion of the hook name, $name, refers to the key name of
-	 * the modification array. For example, 'header_textcolor', 'header_image',
-	 * and so on depending on the theme options.
-	 *
-	 * @since 3.9.0
-	 *
-	 * @param string $value     The new value of the theme mod.
-	 * @param string $old_value The current value of the theme mod.
-	 */
-	$mods[ $name ] = apply_filters( "pre_set_theme_mod_$name", $value, $old_value );
+	$mods[ $name ] = $value;
 
 	$theme = get_option( 'stylesheet' );
 	update_option( "theme_mods_$theme", $mods );
@@ -1137,7 +1124,7 @@ function get_uploaded_header_images() {
 		return array();
 
 	foreach ( (array) $headers as $header ) {
-		$url = esc_url_raw( wp_get_attachment_url( $header->ID ) );
+		$url = esc_url_raw( $header->guid );
 		$header_data = wp_get_attachment_metadata( $header->ID );
 		$header_index = basename($url);
 		$header_images[$header_index] = array();
@@ -1217,8 +1204,7 @@ function register_default_headers( $headers ) {
  * @since 3.0.0
  *
  * @param string|array $header The header string id (key of array) to remove, or an array thereof.
- * @return bool|void A single header returns true on success, false on failure.
- *                   There is currently no return value for multiple headers.
+ * @return True on success, false on failure.
  */
 function unregister_default_headers( $header ) {
 	global $_wp_default_headers;
@@ -1284,11 +1270,7 @@ function _custom_background_cb() {
 
 	// $color is the saved custom color.
 	// A default has to be specified in style.css. It will not be printed here.
-	$color = get_background_color();
-
-	if ( $color === get_theme_support( 'custom-background', 'default-color' ) ) {
-		$color = false;
-	}
+	$color = get_theme_mod( 'background_color' );
 
 	if ( ! $background && ! $color )
 		return;
@@ -1384,9 +1366,7 @@ function remove_editor_styles() {
  * The init hook may be too late for some features.
  *
  * @since 2.9.0
- *
- * @param string $feature The feature being added.
- * @return void|bool False on failure, void otherwise.
+ * @param string $feature the feature being added
  */
 function add_theme_support( $feature ) {
 	global $_wp_theme_features;
@@ -1405,7 +1385,6 @@ function add_theme_support( $feature ) {
 		case 'html5' :
 			// You can't just pass 'html5', you need to pass an array of types.
 			if ( empty( $args[0] ) ) {
-				// Build an array of types for back-compat.
 				$args = array( 0 => array( 'comment-list', 'comment-form', 'search-form' ) );
 			} elseif ( ! is_array( $args[0] ) ) {
 				_doing_it_wrong( "add_theme_support( 'html5' )", 'You need to pass an array of types.', '3.6.1' );
@@ -1580,8 +1559,7 @@ add_action( 'wp_loaded', '_custom_header_background_just_in_time' );
 /**
  * Gets the theme support arguments passed when registering that support
  *
- * @since 3.1.0
- *
+ * @since 3.1
  * @param string $feature the feature to check
  * @return array The array of extra arguments
  */
@@ -1745,17 +1723,12 @@ function current_theme_supports( $feature ) {
  * Checks a theme's support for a given feature before loading the functions which implement it.
  *
  * @since 2.9.0
- *
- * @param string $feature The feature being checked.
- * @param string $include Path to the file.
- * @return bool True if the current theme supports the supplied feature, false otherwise.
+ * @param string $feature the feature being checked
+ * @param string $include the file containing the functions that implement the feature
  */
-function require_if_theme_supports( $feature, $include ) {
-	if ( current_theme_supports( $feature ) ) {
+function require_if_theme_supports( $feature, $include) {
+	if ( current_theme_supports( $feature ) )
 		require ( $include );
-		return true;
-	}
-	return false;
 }
 
 /**
