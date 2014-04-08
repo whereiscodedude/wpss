@@ -714,15 +714,7 @@ function post_type_archive_title( $prefix = '', $display = true ) {
 		$post_type = reset( $post_type );
 
 	$post_type_obj = get_post_type_object( $post_type );
-	/**
-	 * Filter the post type archive title.
-	 *
-	 * @since 3.1.0
-	 *
-	 * @param string $post_type_name Post type 'name' label.
-	 * @param string $post_type      Post type.
-	 */
-	$title = apply_filters( 'post_type_archive_title', $post_type_obj->labels->name, $post_type );
+	$title = apply_filters('post_type_archive_title', $post_type_obj->labels->name );
 
 	if ( $display )
 		echo $prefix . $title;
@@ -1382,7 +1374,7 @@ function the_date_xml() {
 }
 
 /**
- * Display or Retrieve the date the current post was written (once per date)
+ * Display or Retrieve the date the current $post was written (once per date)
  *
  * Will only output the date if the current post's date is different from the
  * previous one output.
@@ -1403,12 +1395,14 @@ function the_date_xml() {
  */
 function the_date( $d = '', $before = '', $after = '', $echo = true ) {
 	global $currentday, $previousday;
-
+	$the_date = '';
 	if ( $currentday != $previousday ) {
-		$the_date = $before . get_the_date( $d ) . $after;
+		$the_date .= $before;
+		$the_date .= get_the_date( $d );
+		$the_date .= $after;
 		$previousday = $currentday;
 
-		$the_date = apply_filters( 'the_date', $the_date, $d, $before, $after );
+		$the_date = apply_filters('the_date', $the_date, $d, $before, $after);
 
 		if ( $echo )
 			echo $the_date;
@@ -1420,36 +1414,26 @@ function the_date( $d = '', $before = '', $after = '', $echo = true ) {
 }
 
 /**
- * Retrieve the date on which the post was written.
+ * Retrieve the date the current $post was written.
  *
  * Unlike the_date() this function will always return the date.
  * Modify output with 'get_the_date' filter.
  *
  * @since 3.0.0
  *
- * @param  string      $d    Optional. PHP date format defaults to the date_format option if not specified.
- * @param  int|WP_Post $post Optional. Post ID or WP_Post object. Default current post.
- * @return string Date the current post was written.
+ * @param string $d Optional. PHP date format defaults to the date_format option if not specified.
+ * @return string|null Null if displaying, string if retrieving.
  */
-function get_the_date( $d = '', $post = null ) {
-	$post = get_post( $post );
+function get_the_date( $d = '' ) {
+	$post = get_post();
+	$the_date = '';
 
-	if ( '' == $d ) {
-		$the_date = mysql2date( get_option( 'date_format' ), $post->post_date );
-	} else {
-		$the_date = mysql2date( $d, $post->post_date );
-	}
+	if ( '' == $d )
+		$the_date .= mysql2date(get_option('date_format'), $post->post_date);
+	else
+		$the_date .= mysql2date($d, $post->post_date);
 
-	/**
-	 * Filter the date returned from the get_the_date function.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @param string      $the_date The formatted date.
-	 * @param string      $d        The date format.
-	 * @param int|WP_Post $post     The post object or id.
-	 */
-	return apply_filters( 'get_the_date', $the_date, $d, $post );
+	return apply_filters('get_the_date', $the_date, $d);
 }
 
 /**
@@ -1507,11 +1491,9 @@ function the_time( $d = '' ) {
  *
  * @since 1.5.0
  *
- * @param string      $d    Optional. Format to use for retrieving the time the post
- *                          was written. Either 'G', 'U', or php date format defaults
- *                          to the value specified in the time_format option. Default empty.
- * @param int|WP_Post $post WP_Post object or ID. Default is global $post object.
- * @return string|int Formatted date string, or Unix timestamp.
+ * @param string $d Optional Either 'G', 'U', or php date format defaults to the value specified in the time_format option.
+ * @param int|object $post Optional post ID or object. Default is global $post object.
+ * @return string
  */
 function get_the_time( $d = '', $post = null ) {
 	$post = get_post($post);
@@ -1528,14 +1510,13 @@ function get_the_time( $d = '', $post = null ) {
  *
  * @since 2.0.0
  *
- * @param string      $d         Optional. Format to use for retrieving the time the post
- *                               was written. Either 'G', 'U', or php date format. Default 'U'.
- * @param bool        $gmt       Optional. Whether to retrieve the GMT time. Default false.
- * @param int|WP_Post $post      WP_Post object or ID. Default is global $post object.
- * @param bool        $translate Whether to translate the time string. Default false.
- * @return string|int Formatted date string, or Unix timestamp.
+ * @param string $d Optional Either 'G', 'U', or php date format.
+ * @param bool $gmt Optional, default is false. Whether to return the gmt time.
+ * @param int|object $post Optional post ID or object. Default is global $post object.
+ * @param bool $translate Whether to translate the time string
+ * @return string
  */
-function get_post_time( $d = 'U', $gmt = false, $post = null, $translate = false ) {
+function get_post_time( $d = 'U', $gmt = false, $post = null, $translate = false ) { // returns timestamp
 	$post = get_post($post);
 
 	if ( $gmt )
@@ -1713,7 +1694,7 @@ function feed_links_extra( $args = array() ) {
 		$post = get_post( $id );
 
 		if ( comments_open() || pings_open() || $post->comment_count > 0 ) {
-			$title = sprintf( $args['singletitle'], get_bloginfo('name'), $args['separator'], the_title_attribute( array( 'echo' => false ) ) );
+			$title = sprintf( $args['singletitle'], get_bloginfo('name'), $args['separator'], esc_html( get_the_title() ) );
 			$href = get_post_comments_feed_link( $post->ID );
 		}
 	} elseif ( is_post_type_archive() ) {
@@ -1804,7 +1785,23 @@ function noindex() {
  * @since 3.3.0
  */
 function wp_no_robots() {
-	echo "<meta name='robots' content='noindex,follow' />\n";
+	echo "<meta name='robots' content='noindex,nofollow' />\n";
+}
+
+/**
+ * Determine if TinyMCE is available.
+ *
+ * Checks to see if the user has deleted the tinymce files to slim down there WordPress install.
+ *
+ * @since 2.1.0
+ *
+ * @return bool Whether TinyMCE exists.
+ */
+function rich_edit_exists() {
+	global $wp_rich_edit_exists;
+	if ( !isset($wp_rich_edit_exists) )
+		$wp_rich_edit_exists = file_exists(ABSPATH . WPINC . '/js/tinymce/tiny_mce.js');
+	return $wp_rich_edit_exists;
 }
 
 /**
@@ -1983,12 +1980,6 @@ function language_attributes($doctype = 'html') {
  * It is possible to add query vars to the link by using the 'add_args' argument
  * and see {@link add_query_arg()} for more information.
  *
- * The 'before_page_number' and 'after_page_number' arguments allow users to 
- * augment the links themselves. Typically this might be to add context to the
- * numbered links so that screen reader users understand what the links are for.
- * The text strings are added before and after the page number - within the 
- * anchor tag.
- *
  * @since 2.1.0
  *
  * @param string|array $args Optional. Override defaults.
@@ -2008,9 +1999,7 @@ function paginate_links( $args = '' ) {
 		'mid_size' => 2,
 		'type' => 'plain',
 		'add_args' => false, // array of query args to add
-		'add_fragment' => '',
-		'before_page_number' => '',
-		'after_page_number' => ''
+		'add_fragment' => ''
 	);
 
 	$args = wp_parse_args( $args, $defaults );
@@ -2038,8 +2027,9 @@ function paginate_links( $args = '' ) {
 		$page_links[] = '<a class="prev page-numbers" href="' . esc_url( apply_filters( 'paginate_links', $link ) ) . '">' . $prev_text . '</a>';
 	endif;
 	for ( $n = 1; $n <= $total; $n++ ) :
+		$n_display = number_format_i18n($n);
 		if ( $n == $current ) :
-			$page_links[] = "<span class='page-numbers current'>" . $before_page_number . number_format_i18n( $n ) . $after_page_number . "</span>";
+			$page_links[] = "<span class='page-numbers current'>$n_display</span>";
 			$dots = true;
 		else :
 			if ( $show_all || ( $n <= $end_size || ( $current && $n >= $current - $mid_size && $n <= $current + $mid_size ) || $n > $total - $end_size ) ) :
@@ -2048,7 +2038,7 @@ function paginate_links( $args = '' ) {
 				if ( $add_args )
 					$link = add_query_arg( $add_args, $link );
 				$link .= $add_fragment;
-				$page_links[] = "<a class='page-numbers' href='" . esc_url( apply_filters( 'paginate_links', $link ) ) . "'>" . $before_page_number . number_format_i18n( $n ) . $after_page_number . "</a>";
+				$page_links[] = "<a class='page-numbers' href='" . esc_url( apply_filters( 'paginate_links', $link ) ) . "'>$n_display</a>";
 				$dots = true;
 			elseif ( $dots && !$show_all ) :
 				$page_links[] = '<span class="page-numbers dots">' . __( '&hellip;' ) . '</span>';
@@ -2095,20 +2085,14 @@ function paginate_links( $args = '' ) {
  * @param string $name The name of the theme.
  * @param string $url The url of the css file containing the colour scheme.
  * @param array $colors Optional An array of CSS color definitions which are used to give the user a feel for the theme.
- * @param array $icons Optional An array of CSS color definitions used to color any SVG icons
  */
-function wp_admin_css_color( $key, $name, $url, $colors = array(), $icons = array() ) {
+function wp_admin_css_color($key, $name, $url, $colors = array()) {
 	global $_wp_admin_css_colors;
 
 	if ( !isset($_wp_admin_css_colors) )
 		$_wp_admin_css_colors = array();
 
-	$_wp_admin_css_colors[$key] = (object) array(
-		'name' => $name,
-		'url' => $url,
-		'colors' => $colors,
-		'icon_colors' => $icons,
-	);
+	$_wp_admin_css_colors[$key] = (object) array('name' => $name, 'url' => $url, 'colors' => $colors);
 }
 
 /**
@@ -2117,61 +2101,10 @@ function wp_admin_css_color( $key, $name, $url, $colors = array(), $icons = arra
  * @since 3.0.0
  */
 function register_admin_color_schemes() {
-	$suffix = is_rtl() ? '-rtl' : '';
-	$suffix .= defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-
-	wp_admin_css_color( 'fresh', _x( 'Default', 'admin color scheme' ),
-		false,
-		array( '#222', '#333', '#0074a2', '#2ea2cc' ),
-		array( 'base' => '#999', 'focus' => '#2ea2cc', 'current' => '#fff' )
-	);
-
-	// Other color schemes are not available when running out of src
-	if ( false !== strpos( $GLOBALS['wp_version'], '-src' ) )
-		return;
-
-	wp_admin_css_color( 'light', _x( 'Light', 'admin color scheme' ),
-		admin_url( "css/colors/light/colors$suffix.css" ),
-		array( '#e5e5e5', '#999', '#d64e07', '#04a4cc' ),
-		array( 'base' => '#999', 'focus' => '#ccc', 'current' => '#ccc' )
-	);
-
-	wp_admin_css_color( 'blue', _x( 'Blue', 'admin color scheme' ),
-		admin_url( "css/colors/blue/colors$suffix.css" ),
-		array( '#096484', '#4796b3', '#52accc', '#74B6CE' ),
-		array( 'base' => '#e5f8ff', 'focus' => '#fff', 'current' => '#fff' )
-	);
-
-	wp_admin_css_color( 'midnight', _x( 'Midnight', 'admin color scheme' ),
-		admin_url( "css/colors/midnight/colors$suffix.css" ),
-		array( '#25282b', '#363b3f', '#69a8bb', '#e14d43' ),
-		array( 'base' => '#f1f2f3', 'focus' => '#fff', 'current' => '#fff' )
-	);
-
-	wp_admin_css_color( 'sunrise', _x( 'Sunrise', 'admin color scheme' ),
-		admin_url( "css/colors/sunrise/colors$suffix.css" ),
-		array( '#b43c38', '#cf4944', '#dd823b', '#ccaf0b' ),
-		array( 'base' => '#f3f1f1', 'focus' => '#fff', 'current' => '#fff' )
-	);
-
-	wp_admin_css_color( 'ectoplasm', _x( 'Ectoplasm', 'admin color scheme' ),
-		admin_url( "css/colors/ectoplasm/colors$suffix.css" ),
-		array( '#413256', '#523f6d', '#a3b745', '#d46f15' ),
-		array( 'base' => '#ece6f6', 'focus' => '#fff', 'current' => '#fff' )
-	);
-
-	wp_admin_css_color( 'ocean', _x( 'Ocean', 'admin color scheme' ),
-		admin_url( "css/colors/ocean/colors$suffix.css" ),
-		array( '#627c83', '#738e96', '#9ebaa0', '#aa9d88' ),
-		array( 'base' => '#f2fcff', 'focus' => '#fff', 'current' => '#fff' )
-	);
-
-	wp_admin_css_color( 'coffee', _x( 'Coffee', 'admin color scheme' ),
-		admin_url( "css/colors/coffee/colors$suffix.css" ),
-		array( '#46403c', '#59524c', '#c7a589', '#9ea476' ),
-		array( 'base' => '#f3f2f1', 'focus' => '#fff', 'current' => '#fff' )
-	);
-
+	wp_admin_css_color( 'classic', _x( 'Blue', 'admin color scheme' ), admin_url( 'css/colors-classic.min.css' ),
+		array( '#5589aa', '#cfdfe9', '#d1e5ee', '#eff8ff' ) );
+	wp_admin_css_color( 'fresh', _x( 'Gray', 'admin color scheme' ), admin_url( 'css/colors-fresh.min.css' ),
+		array( '#555', '#a0a0a0', '#ccc', '#f1f1f1' ) );
 }
 
 /**
@@ -2208,6 +2141,7 @@ function wp_admin_css_uri( $file = 'wp-admin' ) {
  * $file is a file relative to wp-admin/ without its ".css" extension. A
  * stylesheet link to that generated URL is printed.
  *
+ * @package WordPress
  * @since 2.3.0
  * @uses $wp_styles WordPress Styles Object
  *
