@@ -106,10 +106,6 @@ case 'post-quickdraft-save':
 	// Check nonce and capabilities
 	$nonce = $_REQUEST['_wpnonce'];
 	$error_msg = false;
-
-	// For output of the quickdraft dashboard widget
-	require_once ABSPATH . 'wp-admin/includes/dashboard.php';
-
 	if ( ! wp_verify_nonce( $nonce, 'add-post' ) )
 		$error_msg = __( 'Unable to submit this form, please refresh and try again.' );
 
@@ -126,6 +122,8 @@ case 'post-quickdraft-save':
 	$_POST['ping_status'] = get_option( 'default_ping_status' );
 
 	edit_post();
+	// output the quickdraft dashboard widget
+	require_once(ABSPATH . 'wp-admin/includes/dashboard.php');
 	wp_dashboard_quick_press();
 	exit;
 	break;
@@ -309,7 +307,7 @@ case 'delete':
 	break;
 
 case 'preview':
-	check_admin_referer( 'update-post_' . $post_id );
+	check_admin_referer( 'autosave', 'autosavenonce' );
 
 	$url = post_preview();
 
