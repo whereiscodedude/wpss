@@ -13,13 +13,15 @@ $title = __( 'About' );
 
 list( $display_version ) = explode( '-', $wp_version );
 
+wp_enqueue_script( 'about' );
+
 include( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
 <div class="wrap about-wrap">
 
-<h1><?php printf( __( 'Welcome to WordPress&nbsp;%s' ), $display_version ); ?></h1>
+<h1><?php printf( __( 'Welcome to WordPress %s' ), $display_version ); ?></h1>
 
-<div class="about-text"><?php printf( ( 'Thank you for updating! WordPress %s refines the way you write and edit.<br />We hope you like&nbsp;it.' ), $display_version ); ?></div>
+<div class="about-text"><?php echo str_replace( '3.7', $display_version, __( 'Thank you for updating to WordPress 3.7! You might not notice a thing, and we&#8217;re okay with that.' ) ); ?></div>
 
 <div class="wp-badge"><?php printf( __( 'Version %s' ), $display_version ); ?></div>
 
@@ -33,90 +35,118 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 	</a>
 </h2>
 
+<div class="changelog point-releases">
+	<h3><?php echo _n( 'Maintenance and Security Release', 'Maintenance and Security Releases', 3 ); ?></h3>
+	<p><?php printf( _n( '<strong>Version %1$s</strong> addressed %2$s bug.',
+		'<strong>Version %1$s</strong> addressed %2$s bugs.', 2 ), '3.7.3', number_format_i18n( 2 ) ); ?>
+		<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'http://codex.wordpress.org/Version_3.7.3' ); ?>
+ 	</p>
+	<p><?php printf( _n( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+         '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.', 9 ), '3.7.2', number_format_i18n( 9 ) ); ?>
+		<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'http://codex.wordpress.org/Version_3.7.2' ); ?>
+ 	</p>
+	<p><?php printf( _n( '<strong>Version %1$s</strong> addressed %2$s bug.',
+		'<strong>Version %1$s</strong> addressed %2$s bugs.', 11 ), '3.7.1', number_format_i18n( 11 ) ); ?>
+		<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'http://codex.wordpress.org/Version_3.7.1' ); ?>
+ 	</p>
+</div>
+
 <div class="changelog">
-	<h2 class="about-headline-callout"><?php echo ( 'A smoother media editing&nbsp;experience' ); ?></h2>
-	<img class="about-overview-img" src="<?php echo is_ssl() ? 'https://' : '//s.'; ?>wordpress.org/images/core/3.8/overview.png?1" />
-	<div class="feature-section col three-col">
+	<h3><?php _e( 'Background Updates' ); ?></h3>
+
+	<div class="feature-section col three-col about-updates">
 		<div class="col-1">
-			<h4><?php echo ( 'Gallery previews' ); ?></h4>
-			<p><?php echo ( 'Galleries display a beautiful grid of images right in the editor, just like they do in your published post.' ); ?></p>
+			<h4><?php _e( 'Updates While You Sleep' ); ?></h4>
+			<p><?php _e( 'With WordPress 3.7, you don&#8217;t have to lift a finger to apply maintenance and security updates. Most sites are now able to automatically apply these updates in the background, though some configurations may not allow it.' ); ?></p>
 		</div>
 		<div class="col-2">
-			<h4><?php echo ( 'Improved image editing' ); ?></h4>
-			<p><?php echo ( 'We&#8217;ve made it much easier to edit your images, with quicker access to cropping and rotation tools. You can also scale images directly in the editor to find just the right fit.' ); ?></p>
+			<img alt="" src="<?php echo admin_url( 'images/about-updates-2x.png' ); ?>" />
 		</div>
 		<div class="col-3 last-feature">
-			<h4><?php echo ( 'Drag and drop your images' ); ?></h4>
-			<p><?php echo ( 'Grab images from your desktop and drop them directly onto the editor, saving yourself that extra step.' ); ?></p>
+			<h4><?php _e( 'More Reliable Than Ever' ); ?></h4>
+			<p><?php _e( 'The update process has been made even more reliable and secure, with dozens of new checks and safeguards.' ); ?></p>
+			<p><?php _e( 'You&#8217;ll still need to click &#8220;Update Now&#8221; once WordPress 3.8 is released, but we&#8217;ve never had more confidence in that beautiful blue button.' ); ?></p>
 		</div>
-	</div>
-	<div class="feature-section col three-col">
-		<div class="col-1">
-			<h4><?php echo ( 'Improved visual editor' ); ?></h4>
-			<p><?php echo ( 'We&#8217;ve updated the visual editor with better mobile support, improved speed and accessibility, and a modern API for developers.' ); ?></p>
-			<p><?php echo ( 'The visual editor will now automatically clean up the messy styling that certain word processing applications insert when copying and pasting. Yeah, we&#8217;re talking about you, Microsoft Word.' ); ?></p>
-		</div>
-		<div class="col-2">
-			<h4><?php echo ( 'Do more with audio and video' ); ?></h4>
-			<p><?php echo ( 'Images have galleries; now we&#8217;ve added simple audio and video playlists, so you can showcase your music and clips.' ); ?></p>
-			<!-- maybe insert note about playing/editing audio/video from the editor -->
-		</div>
-		<div class="col-3 last-feature">
-			<img src="<?php echo is_ssl() ? 'https://' : '//s.'; ?>wordpress.org/images/core/3.8/colors.png?1" />
-			<!-- embedded playlist? -->
-		</div>
+		<?php
+		if ( current_user_can( 'update_core' ) ) {
+			$future_minor_update = (object) array(
+				'current'       => $wp_version . '.1.next.minor',
+				'version'       => $wp_version . '.1.next.minor',
+				'php_version'   => $required_php_version,
+				'mysql_version' => $required_mysql_version,
+			);
+			require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+			$updater = new WP_Automatic_Updater;
+			$can_auto_update = wp_http_supports( array( 'ssl' ) ) && $updater->should_update( 'core', $future_minor_update, ABSPATH );
+
+			if ( $can_auto_update ) {
+				echo '<p class="about-auto-update cool">' . __( 'This site <strong>is</strong> able to apply these updates automatically. Cool!' ). '</p>';
+
+			// If the updater is disabled entirely, don't show them anything.
+			} elseif ( ! $updater->is_disabled() ) {
+				echo '<p class="about-auto-update">';
+				// If this is is filtered to false, they won't get emails, so don't claim we will.
+				// Assumption: If the user can update core, they can see what the admin email is.
+
+				/** This filter is documented in wp-admin/includes/class-wp-upgrader.php */
+				if ( apply_filters( 'send_core_update_notification_email', true, $future_minor_update ) ) {
+					printf( __( 'This site <strong>is not</strong> able to apply these updates automatically. But we&#8217;ll email %s when there is a new security release.' ), esc_html( get_site_option( 'admin_email' ) ) );
+				} else {
+					_e( 'This site <strong>is not</strong> able to apply these updates automatically.' );
+				}
+				echo '</p>';
+			}
+		}
+		?>
 	</div>
 </div>
 
-<hr>
-
-<div class="changelog">
-	<h3><?php echo ( 'Customize your heart out' ); ?></h3>
+<div class="changelog about-passwords">
+	<h3><?php _e( 'Create Stronger Passwords' ); ?></h3>
 
 	<div class="feature-section col two-col">
 		<div>
-			<img src="<?php echo is_ssl() ? 'https://' : '//s.'; ?>wordpress.org/images/core/3.8/twentyfourteen.jpg?1" />
-			<h4><?php echo ( 'Live widget previews' ); ?></h4>
-			<p><?php echo ( 'Add, edit, and rearrange your site&#8217;s widgets right in the theme customizer. No &#8220;save and surprise&#8221; &mdash; preview your changes live and only save them when you&#8217;re ready.' ); ?></p>
-			<p><?php echo ( 'The improved header image tool also lets you upload, crop, and manage headers while customizing your theme.' ); ?></p>
+			<p><?php _e( 'Your password is your site&#8217;s first line of defense. It&#8217;s best to create passwords that are complex, long, and unique. To that end, our password meter has been updated in WordPress 3.7 to recognize common mistakes that can weaken your password: dates, names, keyboard patterns (123456789), and even pop culture references.' ); ?></p>
+			<p><strong><?php _e( 'Try it out on the right.' ); ?></strong></p>
 		</div>
-		<div class="last-feature">
-			<img src="<?php echo is_ssl() ? 'https://' : '//s.'; ?>wordpress.org/images/core/3.8/twentyfourteen.jpg?1" />
-			<h4><?php _e( 'Stunning new theme browser' ); ?></h4>
-			<p><?php _e( 'Looking for a new theme should be easy and fun. Lose yourself in the boundless supply of free WordPress.org themes with the beautiful new theme browser.' ); ?></p>
-			<p><a href="<?php echo network_admin_url( 'theme-install.php' ); ?>" class="button button-primary">Browse Themes</a></p>
+		<div class="last-feature about-password-meter">
+			<input type="password" id="pass" size="25" value="" />
+			<p id="pass-strength-result" ><?php _e( 'Strength indicator' ); ?></p>
+			<?php printf( __( 'Getting the urge to <a href="%s">change your password</a>?' ), esc_url( self_admin_url( 'profile.php' ) ) ); ?>
 		</div>
 	</div>
 </div>
 
-<hr>
+<div class="changelog">
+	<div class="feature-section col two-col">
+		<div>
+			<h3><?php _e( 'Improved Search Results' ); ?></h3>
+			<p><img alt="" src="<?php echo admin_url( 'images/about-search-2x.png' ); ?>" /><?php _e( 'Search results are now ordered by how well the search query matches a post, instead of ordered only by date. For example, when your search terms match a post title, that result will be pushed to the top.' ); ?></p>
+		</div>
+		<div class="last-feature">
+			<h3><?php _e( 'Better Global Support' ); ?></h3>
+			<p><img alt="" src="<?php echo admin_url( 'images/about-globe-2x.png' ); ?>" /><?php _e( 'Localized versions of WordPress will receive faster and more complete translations. WordPress 3.7 adds support for automatically installing the right language files and keeping them up to date.' ); ?></p>
+		</div>
+	</div>
+</div>
 
 <div class="changelog">
 	<h3><?php _e( 'Under the Hood' ); ?></h3>
 
 	<div class="feature-section col three-col">
 		<div>
-			<h4><?php _e( 'Semantic Captions and Galleries' ); ?></h4>
-			<p><?php _e( 'Theme developers have new options for images and galleries that use intelligent HTML5 markup.' ); ?></p>
-
-			<h4><?php _e( 'Inline Code Documentation' ); ?></h4>
-			<p><?php _e( 'Every action and filter hook in WordPress is now documented, along with expanded documentation for the media manager and customizer APIs.' ); ?></p>
+			<h4><?php _e( 'More Background Updates (Experimental)' ); ?></h4>
+			<p><?php _e( 'Want WordPress to always update automatically, even for major feature releases? Want to always keep a certain plugin up to date in the background? WordPress 3.7 comes with fine-grained update controls for developers and systems administrators.' ); ?></p>
 		</div>
 		<div>
-			<h4><?php _e( 'External Libraries' ); ?></h4>
-			<p><?php _e( 'Updated libraries: TinyMCE&nbsp;4, jQuery&nbsp;1.11, Backbone&nbsp;1.1, Underscore&nbsp;1.6, Plupload&nbsp;2, MediaElement&nbsp;2.14, Masonry&nbsp;3.' ); ?></p>
-
-			<h4><?php _e( 'Improved Database Layer' ); ?></h4>
-			<p><?php _e( 'Database connections are now more fault-resistant and have improved compatibility with PHP 5.5 and MySQL 5.6.' ); ?></p>
+			<h4><?php _e( 'Advanced Date Queries' ); ?></h4>
+			<p><?php _e( 'Developers can now query for posts within a date range, or that are older than or newer than a specific point in time. Or get really fancy: all posts written on Friday afternoons? Not&nbsp;a&nbsp;problem.' ); ?></p>
 		</div>
 		<div class="last-feature">
-			<h4><?php _e( 'New Utility Functions' ); ?></h4>
-			<p><?php _e( 'Identify a hook in progress with <code>doing_action()</code> and <code>doing_filter()</code>, and manipulate custom image sizes with <code>has_image_size()</code> and <code>remove_image_size()</code>.' ); ?></p>
-			<p><?php _e( 'Plugins and themes registering custom theme sizes can now register suggested cropping points. For example, prevent heads from being cropped out of photos with a top-center crop.' ); ?></p>
+			<h4><?php _e( 'Multisite Improvements' ); ?></h4>
+			<p><?php _e( '<code>wp_get_sites()</code> allows developers to easily get an array of all the sites on your network without resorting to a direct database query &mdash; just one of many improvements to multisite in WordPress 3.7.' ); ?></p>
 		</div>
 </div>
-
-<hr>
 
 <div class="return-to-dashboard">
 	<?php if ( current_user_can( 'update_core' ) && isset( $_GET['updated'] ) ) : ?>
