@@ -612,10 +612,10 @@ function get_body_class( $class = '' ) {
 
 	$page = $wp_query->get( 'page' );
 
-	if ( ! $page || $page < 2 )
+	if ( !$page || $page < 2)
 		$page = $wp_query->get( 'paged' );
 
-	if ( $page && $page > 1 && ! is_404() ) {
+	if ( $page && $page > 1 ) {
 		$classes[] = 'paged-' . $page;
 
 		if ( is_single() )
@@ -1411,6 +1411,8 @@ function wp_get_attachment_link( $id = 0, $size = 'thumbnail', $permalink = fals
 
 	if ( $permalink )
 		$url = get_attachment_link( $_post->ID );
+
+	$post_title = esc_attr( $_post->post_title );
 
 	if ( $text )
 		$link_text = $text;

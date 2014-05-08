@@ -202,7 +202,7 @@ if ( $tab ) {
 	</div>
 
 	<# if ( data.installed ) { #>
-		<div class="theme-installed"><?php _ex( 'Already Installed', 'theme' ); ?></div>
+		<div class="theme-installed"><?php _e( 'Already Installed' ); ?></div>
 	<# } #>
 </script>
 
@@ -211,7 +211,7 @@ if ( $tab ) {
 		<div class="wp-full-overlay-header">
 			<a href="#" class="close-full-overlay button-secondary"><?php _e( 'Close' ); ?></a>
 		<# if ( data.installed ) { #>
-			<a href="#" class="button button-primary theme-install disabled"><?php _ex( 'Installed', 'theme' ); ?></a>
+			<a href="#" class="button button-primary theme-install disabled"><?php _e( 'Installed' ); ?></a>
 		<# } else { #>
 			<a href="{{ data.install_url }}" class="button button-primary theme-install"><?php _e( 'Install' ); ?></a>
 		<# } #>
@@ -247,8 +247,8 @@ if ( $tab ) {
 				<span class="collapse-sidebar-arrow"></span>
 			</a>
 			<div class="theme-navigation">
-				<a class="previous-theme button" href="#"><?php _ex( 'Previous', 'Button label for a theme' ); ?></a>
-				<a class="next-theme button" href="#"><?php _ex( 'Next', 'Button label for a theme' ); ?></a>
+				<a class="previous-theme button" href="#"><?php _e( 'Previous' ); ?></a>
+				<a class="next-theme button" href="#"><?php _e( 'Next' ); ?></a>
 			</div>
 		</div>
 	</div>

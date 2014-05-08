@@ -159,8 +159,8 @@ function wp_default_scripts( &$scripts ) {
 	$scripts->add( 'cropper', '/wp-includes/js/crop/cropper.js', array('scriptaculous-dragdrop') );
 
 	// jQuery
-	$scripts->add( 'jquery', false, array( 'jquery-core', 'jquery-migrate' ), '1.11.1' );
-	$scripts->add( 'jquery-core', '/wp-includes/js/jquery/jquery.js', array(), '1.11.1' );
+	$scripts->add( 'jquery', false, array( 'jquery-core', 'jquery-migrate' ), '1.11.0' );
+	$scripts->add( 'jquery-core', '/wp-includes/js/jquery/jquery.js', array(), '1.11.0' );
 	$scripts->add( 'jquery-migrate', "/wp-includes/js/jquery/jquery-migrate$suffix.js", array(), '1.2.1' );
 
 	// full jQuery UI
@@ -233,6 +233,12 @@ function wp_default_scripts( &$scripts ) {
 	$scripts->add( 'jcrop', "/wp-includes/js/jcrop/jquery.Jcrop.min.js", array('jquery'), '0.9.12');
 
 	$scripts->add( 'swfobject', "/wp-includes/js/swfobject.js", array(), '2.2-20120417');
+
+	// common bits for both uploaders
+	$max_upload_size = ( (int) ( $max_up = @ini_get('upload_max_filesize') ) < (int) ( $max_post = @ini_get('post_max_size') ) ) ? $max_up : $max_post;
+
+	if ( empty($max_upload_size) )
+		$max_upload_size = __('not configured');
 
 	// error message for both plupload and swfupload
 	$uploader_l10n = array(
@@ -918,13 +924,17 @@ function wp_enqueue_scripts() {
  * @since 2.8.0
  */
 function print_admin_styles() {
-	global $wp_styles, $concatenate_scripts;
+	global $wp_styles, $concatenate_scripts, $compress_css;
 
 	if ( !is_a($wp_styles, 'WP_Styles') )
 		$wp_styles = new WP_Styles();
 
 	script_concat_settings();
 	$wp_styles->do_concat = $concatenate_scripts;
+	$zip = $compress_css ? 1 : 0;
+	if ( $zip && defined('ENFORCE_GZIP') && ENFORCE_GZIP )
+		$zip = 'gzip';
+
 	$wp_styles->do_items(false);
 
 	/**

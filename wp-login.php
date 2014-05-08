@@ -469,6 +469,8 @@ case 'postpass' :
 	wp_safe_redirect( wp_get_referer() );
 	exit();
 
+break;
+
 case 'logout' :
 	check_admin_referer('log-out');
 	wp_logout();
@@ -476,6 +478,8 @@ case 'logout' :
 	$redirect_to = !empty( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : 'wp-login.php?loggedout=true';
 	wp_safe_redirect( $redirect_to );
 	exit();
+
+break;
 
 case 'lostpassword' :
 case 'retrievepassword' :
@@ -540,8 +544,13 @@ case 'retrievepassword' :
 <?php
 if ( get_option( 'users_can_register' ) ) :
 	$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
-
-	/** This filter is documented in wp-includes/general-template.php */
+	/**
+	 * Filter the registration URL below the login form.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $registration_url Registration URL.
+	 */
 	echo ' | ' . apply_filters( 'register', $registration_url );
 endif;
 ?>
@@ -626,8 +635,7 @@ case 'rp' :
 <?php
 if ( get_option( 'users_can_register' ) ) :
 	$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
-
-	/** This filter is documented in wp-includes/general-template.php */
+	/** This filter is documented in wp-login.php */
 	echo ' | ' . apply_filters( 'register', $registration_url );
 endif;
 ?>
@@ -639,6 +647,7 @@ break;
 
 case 'register' :
 	if ( is_multisite() ) {
+		$sign_up_url = network_site_url( 'wp-signup.php' );
 		/**
 		 * Filter the Multisite sign up URL.
 		 *
@@ -646,7 +655,7 @@ case 'register' :
 		 *
 		 * @param string $sign_up_url The sign up URL.
 		 */
-		wp_redirect( apply_filters( 'wp_signup_location', network_site_url( 'wp-signup.php' ) ) );
+		wp_redirect( apply_filters( 'wp_signup_location', $sign_up_url ) );
 		exit;
 	}
 
@@ -883,8 +892,7 @@ default:
 <?php if ( ! isset( $_GET['checkemail'] ) || ! in_array( $_GET['checkemail'], array( 'confirm', 'newpass' ) ) ) :
 	if ( get_option( 'users_can_register' ) ) :
 		$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
-
-		/** This filter is documented in wp-includes/general-template.php */
+		/** This filter is documented in wp-login.php */
 		echo apply_filters( 'register', $registration_url ) . ' | ';
 	endif;
 	?>

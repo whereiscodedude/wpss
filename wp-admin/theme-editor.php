@@ -92,6 +92,7 @@ case 'update':
 	}
 	wp_redirect( $location );
 	exit;
+break;
 
 default:
 

@@ -137,6 +137,8 @@ case 'promote':
 	wp_redirect(add_query_arg('update', $update, $redirect));
 	exit();
 
+break;
+
 case 'dodelete':
 	if ( is_multisite() )
 		wp_die( __('User deletion is not allowed from this screen.') );
@@ -185,6 +187,8 @@ case 'dodelete':
 	$redirect = add_query_arg( array('delete_count' => $delete_count, 'update' => $update), $redirect);
 	wp_redirect($redirect);
 	exit();
+
+break;
 
 case 'delete':
 	if ( is_multisite() )
@@ -288,6 +292,8 @@ case 'doremove':
 	$redirect = add_query_arg( array('update' => $update), $redirect);
 	wp_redirect($redirect);
 	exit;
+
+break;
 
 case 'remove':
 

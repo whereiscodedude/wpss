@@ -34,7 +34,7 @@ function get_column_headers( $screen ) {
 		 *
 		 * @param array $columns An array of column headers. Default empty.
 		 */
-		$column_headers[ $screen->id ] = apply_filters( "manage_{$screen->id}_columns", array() );
+		$column_headers[ $screen->id ] = apply_filters( 'manage_' . $screen->id . '_columns', array() );
 	}
 
 	return $column_headers[ $screen->id ];
@@ -1011,10 +1011,11 @@ final class WP_Screen {
 	 * @since 3.3.0
 	 */
 	public function render_screen_options() {
-		global $wp_meta_boxes;
+		global $wp_meta_boxes, $wp_list_table;
 
 		$columns = get_column_headers( $this );
 		$hidden  = get_hidden_columns( $this );
+		$post    = get_post();
 
 		?>
 		<div id="screen-options-wrap" class="hidden" tabindex="-1" aria-label="<?php esc_attr_e('Screen Options Tab'); ?>">

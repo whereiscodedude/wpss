@@ -325,20 +325,11 @@ class Custom_Image_Header {
 	 *
 	 * @since 2.6.0
 	 */
-	function js_1() {
-		$default_color = '';
-		if ( current_theme_supports( 'custom-header', 'default-text-color' ) ) {
-			$default_color = get_theme_support( 'custom-header', 'default-text-color' );
-			if ( $default_color && false === strpos( $default_color, '#' ) ) {
-				$default_color = '#' . $default_color;
-			}
-		}
-		?>
-
+	function js_1() { ?>
 <script type="text/javascript">
 /* <![CDATA[ */
 (function($){
-	var default_color = '<?php echo $default_color; ?>',
+	var default_color = '#<?php echo get_theme_support( 'custom-header', 'default-text-color' ); ?>',
 		header_text_fields;
 
 	function pickColor(color) {
@@ -633,27 +624,17 @@ class Custom_Image_Header {
 <th scope="row"><?php _e( 'Text Color' ); ?></th>
 <td>
 	<p>
-	<?php
-	$default_color = '';
-	if ( current_theme_supports( 'custom-header', 'default-text-color' ) ) {
-		$default_color = get_theme_support( 'custom-header', 'default-text-color' );
-		if ( $default_color && false === strpos( $default_color, '#' ) ) {
-			$default_color = '#' . $default_color;
-		}
-	}
-
-	$default_color_attr = $default_color ? ' data-default-color="' . esc_attr( $default_color ) . '"' : '';
-
-	$header_textcolor = display_header_text() ? get_header_textcolor() : get_theme_support( 'custom-header', 'default-text-color' );
-	if ( $header_textcolor && false === strpos( $header_textcolor, '#' ) ) {
-		$header_textcolor = '#' . $header_textcolor;
-	}
-
-	echo '<input type="text" name="text-color" id="text-color" value="' . esc_attr( $header_textcolor ) . '"' . $default_color_attr . ' />';
-	if ( $default_color ) {
-		echo ' <span class="description hide-if-js">' . sprintf( _x( 'Default: %s', 'color' ), esc_html( $default_color ) ) . '</span>';
-	}
-	?>
+<?php
+$header_textcolor = display_header_text() ? get_header_textcolor() : get_theme_support( 'custom-header', 'default-text-color' );
+$default_color = '';
+if ( current_theme_supports( 'custom-header', 'default-text-color' ) ) {
+	$default_color = '#' . get_theme_support( 'custom-header', 'default-text-color' );
+	$default_color_attr = ' data-default-color="' . esc_attr( $default_color ) . '"';
+	echo '<input type="text" name="text-color" id="text-color" value="#' . esc_attr( $header_textcolor ) . '"' . $default_color_attr . ' />';
+	if ( $default_color )
+		echo ' <span class="description hide-if-js">' . sprintf( _x( 'Default: %s', 'color' ), $default_color ) . '</span>';
+}
+?>
 	</p>
 </td>
 </tr>
@@ -1172,7 +1153,6 @@ wp_nonce_field( 'custom-header-options', '_wpnonce-custom-header-options' ); ?>
 			wp_send_json_error( array( 'message' => __( 'Image could not be processed. Please go back and try again.' ) ) );
 		}
 
-		/** This filter is documented in wp-admin/custom-header.php */
 		$cropped = apply_filters( 'wp_create_file_in_uploads', $cropped, $attachment_id ); // For replication
 
 		$object = $this->create_attachment_object( $cropped, $attachment_id );

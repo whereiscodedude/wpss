@@ -93,7 +93,14 @@ class WP_Styles extends WP_Dependencies {
 				$rtl_href = $this->_css_href( $obj->extra['rtl'], $ver, "$handle-rtl" );
 			}
 
-			/** This filter is documented in wp-includes/class.wp-styles.php */
+			/**
+			 * Filter the right-to-left (RTL) HTML link tag of an enqueued style.
+			 *
+			 * @since 2.6.0
+			 *
+			 * @param string $rtl_style The right to left link tag for the enqueued style.
+			 * @param string $handle    The style's registered handle.
+			 */
 			$rtl_tag = apply_filters( 'style_loader_tag', "<link rel='$rel' id='$handle-rtl-css' $title href='$rtl_href' type='text/css' media='$media' />\n", $handle );
 
 			if ( $obj->extra['rtl'] === 'replace' ) {

@@ -638,6 +638,7 @@ function wp_ajax_add_tag() {
 	global $wp_list_table;
 
 	check_ajax_referer( 'add-tag', '_wpnonce_add-tag' );
+	$post_type = !empty($_POST['post_type']) ? $_POST['post_type'] : 'post';
 	$taxonomy = !empty($_POST['taxonomy']) ? $_POST['taxonomy'] : 'post_tag';
 	$tax = get_taxonomy($taxonomy);
 
@@ -877,6 +878,8 @@ function wp_ajax_edit_comment() {
 	edit_comment();
 
 	$position = ( isset($_POST['position']) && (int) $_POST['position']) ? (int) $_POST['position'] : '-1';
+	$comments_status = isset($_POST['comments_listing']) ? $_POST['comments_listing'] : '';
+
 	$checkbox = ( isset($_POST['checkbox']) && true == $_POST['checkbox'] ) ? 1 : 0;
 	$wp_list_table = _get_list_table( $checkbox ? 'WP_Comments_List_Table' : 'WP_Post_Comments_List_Table', array( 'screen' => 'edit-comments' ) );
 
@@ -953,7 +956,14 @@ function wp_ajax_add_menu_item() {
 		}
 	}
 
-	/** This filter is documented in wp-admin/includes/nav-menu.php */
+	/**
+	 * Filter the Walker class used when adding nav menu items.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param string $class   The walker class to use. Default 'Walker_Nav_Menu_Edit'.
+	 * @param int    $menu_id The menu id, derived from $_POST['menu'].
+	 */
 	$walker_class_name = apply_filters( 'wp_edit_nav_menu_walker', 'Walker_Nav_Menu_Edit', $_POST['menu'] );
 
 	if ( ! class_exists( $walker_class_name ) )
@@ -1119,7 +1129,8 @@ function wp_ajax_closed_postboxes() {
 
 function wp_ajax_hidden_columns() {
 	check_ajax_referer( 'screen-options-nonce', 'screenoptionnonce' );
-	$hidden = explode( ',', isset( $_POST['hidden'] ) ? $_POST['hidden'] : '' );
+	$hidden = isset( $_POST['hidden'] ) ? $_POST['hidden'] : '';
+	$hidden = explode( ',', $_POST['hidden'] );
 	$page = isset( $_POST['page'] ) ? $_POST['page'] : '';
 
 	if ( $page != sanitize_key( $page ) )
@@ -1163,8 +1174,14 @@ function wp_ajax_menu_get_metabox() {
 
 	if ( ! empty( $_POST['item-object'] ) && isset( $items[$_POST['item-object']] ) ) {
 		$menus_meta_box_object = $items[ $_POST['item-object'] ];
-
-		/** This filter is documented in wp-admin/includes/nav-menu.php */
+		/**
+		 * Filter a nav menu meta box object.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param object $menus_meta_box_object A nav menu meta box object, such as Page,
+		 *                                      Post, Category, Tag, etc.
+		 */
 		$item = apply_filters( 'nav_menu_meta_box_object', $menus_meta_box_object );
 		ob_start();
 		call_user_func_array($callback, array(
@@ -1328,6 +1345,8 @@ function wp_ajax_inline_save() {
 
 	$wp_list_table = _get_list_table( 'WP_Posts_List_Table', array( 'screen' => $_POST['screen'] ) );
 
+	$mode = $_POST['post_view'];
+
 	$level = 0;
 	$request_post = array( get_post( $_POST['post_ID'] ) );
 	$parent = $request_post[0]->post_parent;
@@ -1389,12 +1408,15 @@ function wp_ajax_inline_save_tax() {
 }
 
 function wp_ajax_find_posts() {
+	global $wpdb;
+
 	check_ajax_referer( 'find-posts' );
 
 	$post_types = get_post_types( array( 'public' => true ), 'objects' );
 	unset( $post_types['attachment'] );
 
 	$s = wp_unslash( $_POST['ps'] );
+	$searchand = $search = '';
 	$args = array(
 		'post_type' => array_keys( $post_types ),
 		'post_status' => 'any',
@@ -1700,10 +1722,15 @@ function wp_ajax_time_format() {
 function wp_ajax_wp_fullscreen_save_post() {
 	$post_id = isset( $_POST['post_ID'] ) ? (int) $_POST['post_ID'] : 0;
 
-	$post = null;
+	$post = $post_type = null;
 
 	if ( $post_id )
 		$post = get_post( $post_id );
+
+	if ( $post )
+		$post_type = $post->post_type;
+	elseif ( isset( $_POST['post_type'] ) && post_type_exists( $_POST['post_type'] ) )
+		$post_type = $_POST['post_type'];
 
 	check_ajax_referer('update-post_' . $post_id, '_wpnonce');
 
@@ -1953,6 +1980,8 @@ function wp_ajax_save_attachment_order() {
 	if ( ! current_user_can( 'edit_post', $post_id ) )
 		wp_send_json_error();
 
+	$post = get_post( $post_id, ARRAY_A );
+
 	foreach ( $attachments as $attachment_id => $menu_order ) {
 		if ( ! current_user_can( 'edit_post', $attachment_id ) )
 			continue;
@@ -1995,7 +2024,7 @@ function wp_ajax_send_attachment_to_editor() {
 	}
 
 	$rel = $url = '';
-	$html = isset( $attachment['post_title'] ) ? $attachment['post_title'] : '';
+	$html = $title = isset( $attachment['post_title'] ) ? $attachment['post_title'] : '';
 	if ( ! empty( $attachment['url'] ) ) {
 		$url = $attachment['url'];
 		if ( strpos( $url, 'attachment_id') || get_attachment_link( $id ) == $url )

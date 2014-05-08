@@ -889,8 +889,7 @@ h3:hover .edit-box {
 
 /* QuickDraft */
 
-#title-wrap label,
-#description-wrap label {
+#title-wrap label {
 	cursor: text;
 }
 

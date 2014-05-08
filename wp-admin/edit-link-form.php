@@ -118,7 +118,11 @@ wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false ); ?>
 <div id="postbox-container-1" class="postbox-container">
 <?php
 
-/** This action is documented in wp-admin/includes/meta-boxes.php */
+/**
+ * Fires before the Save meta box in the sidebar.
+ *
+ * @since 2.5.0
+ */
 do_action( 'submitlink_box' );
 $side_meta_boxes = do_meta_boxes( 'link', 'side', $link );
 

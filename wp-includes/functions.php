@@ -55,16 +55,19 @@ function mysql2date( $format, $date, $translate = true ) {
  *
  * @param string $type 'mysql', 'timestamp', or PHP date format string (e.g. 'Y-m-d').
  * @param int|bool $gmt Optional. Whether to use GMT timezone. Default is false.
- * @return int|string Integer if $type is 'timestamp', string otherwise.
+ * @return int|string String if $type is 'gmt', int if $type is 'timestamp'.
  */
 function current_time( $type, $gmt = 0 ) {
 	switch ( $type ) {
 		case 'mysql':
 			return ( $gmt ) ? gmdate( 'Y-m-d H:i:s' ) : gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) );
+			break;
 		case 'timestamp':
 			return ( $gmt ) ? time() : time() + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
+			break;
 		default:
 			return ( $gmt ) ? date( $type ) : date( $type, time() + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) );
+			break;
 	}
 }
 
@@ -142,7 +145,7 @@ function date_i18n( $dateformatstring, $unixtimestamp = false, $gmt = false ) {
 	 * Filter the date formatted based on the locale.
 	 *
 	 * @since 2.8.0
-	 *
+	 * 
 	 * @param string $j          Formatted date string.
 	 * @param string $req_format Format to display the date.
 	 * @param int    $i          Unix timestamp.
@@ -689,6 +692,7 @@ function _http_build_query($data, $prefix=null, $sep=null, $key='', $urlencode=t
  * @return string New URL query string.
  */
 function add_query_arg() {
+	$ret = '';
 	$args = func_get_args();
 	if ( is_array( $args[0] ) ) {
 		if ( count( $args ) < 2 || false === $args[1] )
@@ -1423,6 +1427,7 @@ function wp_mkdir_p( $target ) {
 	}
 
 	// Get the permission bits.
+	$dir_perms = false;
 	if ( $stat = @stat( $target_parent ) ) {
 		$dir_perms = $stat['mode'] & 0007777;
 	} else {
@@ -2090,7 +2095,7 @@ function wp_get_mime_types() {
 	'webm' => 'video/webm',
 	'mkv' => 'video/x-matroska',
 	// Text formats
-	'txt|asc|c|cc|h|srt' => 'text/plain',
+	'txt|asc|c|cc|h' => 'text/plain',
 	'csv' => 'text/csv',
 	'tsv' => 'text/tab-separated-values',
 	'ics' => 'text/calendar',
@@ -2098,7 +2103,6 @@ function wp_get_mime_types() {
 	'css' => 'text/css',
 	'htm|html' => 'text/html',
 	'vtt' => 'text/vtt',
-	'dfxp' => 'application/ttaf+xml',
 	// Audio formats
 	'mp3|m4a|m4b' => 'audio/mpeg',
 	'ra|ram' => 'audio/x-realaudio',
@@ -4117,8 +4121,8 @@ function wp_allowed_protocols() {
 
 		/**
 		 * Filter the list of protocols allowed in HTML attributes.
-		 *
-		 * @since 3.0.0
+		 * 
+		 * @since 3.0.0 
 		 *
 		 * @param array $protocols Array of allowed protocols e.g. 'http', 'ftp', 'tel', and more.
 		 */

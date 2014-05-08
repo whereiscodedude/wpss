@@ -1306,6 +1306,12 @@ function get_media_item( $attachment_id, $args = null ) {
 	$filename = esc_html( wp_basename( $post->guid ) );
 	$title = esc_attr( $post->post_title );
 
+	if ( $_tags = get_the_tags( $attachment_id ) ) {
+		foreach ( $_tags as $tag )
+			$tags[] = $tag->name;
+		$tags = esc_attr( join( ', ', $tags ) );
+	}
+
 	$post_mime_types = get_post_mime_types();
 	$keys = array_keys( wp_match_mime_types( array_keys( $post_mime_types ), $post->post_mime_type ) );
 	$type = array_shift( $keys );
@@ -1690,9 +1696,18 @@ function media_upload_form( $errors = null ) {
 	$_type = isset($type) ? $type : '';
 	$_tab = isset($tab) ? $tab : '';
 
-	$max_upload_size = wp_max_upload_size();
-	if ( ! $max_upload_size ) {
-		$max_upload_size = 0;
+	$upload_size_unit = $max_upload_size = wp_max_upload_size();
+	$sizes = array( 'KB', 'MB', 'GB' );
+
+	for ( $u = -1; $upload_size_unit > 1024 && $u < count( $sizes ) - 1; $u++ ) {
+		$upload_size_unit /= 1024;
+	}
+
+	if ( $u < 0 ) {
+		$upload_size_unit = 0;
+		$u = 0;
+	} else {
+		$upload_size_unit = (int) $upload_size_unit;
 	}
 ?>
 
@@ -1727,11 +1742,11 @@ if ( is_multisite() && !is_upload_space_available() ) {
 do_action( 'pre-upload-ui' );
 
 $post_params = array(
-	"post_id" => $post_id,
-	"_wpnonce" => wp_create_nonce('media-form'),
-	"type" => $_type,
-	"tab" => $_tab,
-	"short" => "1",
+		"post_id" => $post_id,
+		"_wpnonce" => wp_create_nonce('media-form'),
+		"type" => $_type,
+		"tab" => $_tab,
+		"short" => "1",
 );
 
 /**
@@ -1841,7 +1856,7 @@ do_action( 'post-html-upload-ui' );
 ?>
 </div>
 
-<span class="max-upload-size"><?php printf( __( 'Maximum upload file size: %s.' ), esc_html( size_format( $max_upload_size ) ) ); ?></span>
+<span class="max-upload-size"><?php printf( __( 'Maximum upload file size: %d%s.' ), esc_html($upload_size_unit), esc_html($sizes[$u]) ); ?></span>
 <?php
 
 	/**
@@ -2592,6 +2607,8 @@ function edit_form_image_editor( $post ) {
 	if ( $attachment_id = intval( $post->ID ) )
 		$thumb_url = wp_get_attachment_image_src( $attachment_id, array( 900, 450 ), true );
 
+	$filename = esc_html( basename( $post->guid ) );
+	$title = esc_attr( $post->post_title );
 	$alt_text = get_post_meta( $post->ID, '_wp_attachment_image_alt', true );
 
 	$att_url = wp_get_attachment_url( $post->ID ); ?>

@@ -1187,9 +1187,15 @@ function wp_delete_comment($comment_id, $force_delete = false) {
 
 	clean_comment_cache($comment_id);
 
-	/** This action is documented in wp-includes/comment.php */
+	/**
+	 * Fires immediately before changing the comment's status to 'delete'.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int    $comment_id The comment ID.
+	 * @param string $status     The new 'delete' comment status.
+	 */
 	do_action( 'wp_set_comment_status', $comment_id, 'delete' );
-
 	wp_transition_comment_status('delete', $comment->comment_approved, $comment);
 	return true;
 }
@@ -1734,6 +1740,7 @@ function wp_new_comment( $commentdata ) {
 function wp_set_comment_status($comment_id, $comment_status, $wp_error = false) {
 	global $wpdb;
 
+	$status = '0';
 	switch ( $comment_status ) {
 		case 'hold':
 		case '0':
@@ -1770,17 +1777,17 @@ function wp_set_comment_status($comment_id, $comment_status, $wp_error = false) 
 	$comment = get_comment($comment_id);
 
 	/**
-	 * Fires immediately before transitioning a comment's status from one to another
-	 * in the database.
+	 * Fires after a comment status has been updated in the database.
+	 *
+	 * The hook also fires immediately before comment status transition hooks are fired.
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param int         $comment_id     Comment ID.
-	 * @param string|bool $comment_status Current comment status. Possible values include
-	 *                                    'hold', 'approve', 'spam', 'trash', or false.
+	 * @param int         $comment_id     The comment ID.
+	 * @param string|bool $comment_status The comment status. Possible values include 'hold',
+	 *                                    'approve', 'spam', 'trash', or false.
 	 */
 	do_action( 'wp_set_comment_status', $comment_id, $comment_status );
-
 	wp_transition_comment_status($comment_status, $comment_old->comment_approved, $comment);
 
 	wp_update_comment_count($comment->comment_post_ID);

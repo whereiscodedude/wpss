@@ -266,6 +266,7 @@ case 'unapprovecomment' :
 
 	wp_redirect( $redir );
 	die;
+	break;
 
 case 'editedcomment' :
 
@@ -290,9 +291,11 @@ case 'editedcomment' :
 	wp_redirect( $location );
 
 	exit();
+	break;
 
 default:
 	wp_die( __('Unknown action.') );
+	break;
 
 } // end switch
 

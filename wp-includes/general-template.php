@@ -544,22 +544,21 @@ function wp_register( $before = '<li>', $after = '</li>', $echo = true ) {
 		$link = $before . '<a href="' . admin_url() . '">' . __('Site Admin') . '</a>' . $after;
 	}
 
-	/**
-	 * Filter the HTML link to the Registration or Admin page.
-	 *
-	 * Users are sent to the admin page if logged-in, or the registration page
-	 * if enabled and logged-out.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @param string $link The HTML code for the link to the Registration or Admin page.
-	 */
-	$link = apply_filters( 'register', $link );
-
 	if ( $echo ) {
-		echo $link;
+		/**
+		 * Filter the HTML link to the Registration or Admin page.
+		 *
+		 * Users are sent to the admin page if logged-in, or the registration page
+		 * if enabled and logged-out.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param string $link The HTML code for the link to the Registration or Admin page.
+		 */
+		echo apply_filters( 'register', $link );
 	} else {
-		return $link;
+		/** This filter is documented in wp-includes/general-template.php */
+		return apply_filters( 'register', $link );
 	}
 }
 
@@ -794,7 +793,7 @@ function wp_title($sep = '&raquo;', $display = true, $seplocation = '') {
 	}
 
 	// If there's an author
-	if ( is_author() && ! is_post_type_archive() ) {
+	if ( is_author() ) {
 		$author = get_queried_object();
 		if ( $author )
 			$title = $author->display_name;
@@ -1388,6 +1387,7 @@ function calendar_week_mod($num) {
 function get_calendar($initial = true, $echo = true) {
 	global $wpdb, $m, $monthnum, $year, $wp_locale, $posts;
 
+	$cache = array();
 	$key = md5( $m . $monthnum . $year );
 	if ( $cache = wp_cache_get( 'get_calendar', 'calendar' ) ) {
 		if ( is_array($cache) && isset( $cache[ $key ] ) ) {
@@ -1976,7 +1976,7 @@ function the_weekday() {
 	 *
 	 * @since 0.71
 	 *
-	 * @param string $the_weekday
+	 * @param string $the_weekday 
 	 */
 	$the_weekday = apply_filters( 'the_weekday', $the_weekday );
 	echo $the_weekday;
@@ -2008,7 +2008,7 @@ function the_weekday_date($before='',$after='') {
 	 *
 	 * @since 0.71
 	 *
-	 * @param string $the_weekday_date
+	 * @param string $the_weekday_date 
 	 * @param string $before           The HTML to output before the date.
 	 * @param string $after            The HTML to output after the date.
 	 */
@@ -2243,7 +2243,7 @@ function user_can_richedit() {
  */
 function wp_default_editor() {
 	$r = user_can_richedit() ? 'tinymce' : 'html'; // defaults
-	if ( wp_get_current_user() ) { // look for cookie
+	if ( $user = wp_get_current_user() ) { // look for cookie
 		$ed = get_user_setting('editor', 'tinymce');
 		$r = ( in_array($ed, array('tinymce', 'html', 'test') ) ) ? $ed : $r;
 	}
@@ -2344,6 +2344,7 @@ function the_search_query() {
  */
 function language_attributes($doctype = 'html') {
 	$attributes = array();
+	$output = '';
 
 	if ( function_exists( 'is_rtl' ) && is_rtl() )
 		$attributes[] = 'dir="rtl"';
@@ -2408,10 +2409,10 @@ function language_attributes($doctype = 'html') {
  * It is possible to add query vars to the link by using the 'add_args' argument
  * and see {@link add_query_arg()} for more information.
  *
- * The 'before_page_number' and 'after_page_number' arguments allow users to
+ * The 'before_page_number' and 'after_page_number' arguments allow users to 
  * augment the links themselves. Typically this might be to add context to the
  * numbered links so that screen reader users understand what the links are for.
- * The text strings are added before and after the page number - within the
+ * The text strings are added before and after the page number - within the 
  * anchor tag.
  *
  * @since 2.1.0
@@ -2451,6 +2452,7 @@ function paginate_links( $args = '' ) {
 	$add_args = is_array($add_args) ? $add_args : false;
 	$r = '';
 	$page_links = array();
+	$n = 0;
 	$dots = false;
 
 	if ( $prev_next && $current && 1 < $current ) :
@@ -2500,20 +2502,19 @@ function paginate_links( $args = '' ) {
 		/** This filter is documented in wp-includes/general-template.php */
 		$page_links[] = '<a class="next page-numbers" href="' . esc_url( apply_filters( 'paginate_links', $link ) ) . '">' . $next_text . '</a>';
 	endif;
-	switch ( $type ) {
+	switch ( $type ) :
 		case 'array' :
 			return $page_links;
-
+			break;
 		case 'list' :
 			$r .= "<ul class='page-numbers'>\n\t<li>";
 			$r .= join("</li>\n\t<li>", $page_links);
 			$r .= "</li>\n</ul>\n";
 			break;
-		
 		default :
 			$r = join("\n", $page_links);
 			break;
-	}
+	endswitch;
 	return $r;
 }
 

@@ -294,6 +294,9 @@ function wp_handle_upload( &$file, $overrides = false, $time = null ) {
 		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) )
 			return call_user_func($upload_error_handler, $file, __( 'Sorry, this file type is not permitted for security reasons.' ));
 
+		if ( !$ext )
+			$ext = ltrim(strrchr($file['name'], '.'), '.');
+
 		if ( !$type )
 			$type = $file['type'];
 	} else {
@@ -430,6 +433,9 @@ function wp_handle_sideload( &$file, $overrides = false, $time = null ) {
 
 		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) )
 			return $upload_error_handler( $file, __( 'Sorry, this file type is not permitted for security reasons.' ));
+
+		if ( !$ext )
+			$ext = ltrim(strrchr($file['name'], '.'), '.');
 
 		if ( !$type )
 			$type = $file['type'];
@@ -1056,6 +1062,7 @@ function request_filesystem_credentials($form_post, $type = '', $error = false, 
 	}
 	$hostname = '';
 	$username = '';
+	$password = '';
 	$connection_type = '';
 	if ( !empty($credentials) )
 		extract($credentials, EXTR_OVERWRITE);

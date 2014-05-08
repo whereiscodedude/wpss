@@ -1085,8 +1085,7 @@ i.mce-i-hr:before {
 	padding: 0;
 }
 
-#wp-link-search-toggle:after {
-	display: inline-block;
+#wp-link-search-toggle::after {
 	font: normal 20px/1 'dashicons';
 	vertical-align: top;
 	speak: none;
@@ -1095,7 +1094,7 @@ i.mce-i-hr:before {
 	content: '\f140';
 }
 
-.search-panel-visible #wp-link-search-toggle:after {
+.search-panel-visible #wp-link-search-toggle::after {
 	content: '\f142';
 }
 

@@ -26,7 +26,7 @@ nocache_headers();
 /** This action is documented in wp-admin/admin.php */
 do_action( 'admin_init' );
 
-$action = '';
+$action = 'admin_post';
 
 if ( !wp_validate_auth_cookie() )
 	$action .= '_nopriv';
@@ -37,20 +37,9 @@ if ( !empty($_REQUEST['action']) )
 /**
  * Fires the requested handler action.
  *
- * The dynamic portion of the hook name, $action, refers to a combination
- * of whether the user is logged-in or not, and the requested handler action.
- *
- * If the user is logged-out, '_nopriv' will be affixed to the
- * base "admin_post" hook name. If a handler action was passed, that action
- * will also be affixed.
- * 
- * For example:
- * Hook combinations fired for logged-out users:
- * `admin_post_nopriv_{$action}` and `admin_post_nopriv` (no action supplied).
- *
- * Hook combinations fired for logged-in users:
- * `admin_post_{$action}` and `admin_post` (no action supplied).
+ * admin_post_nopriv_{$_REQUEST['action']} is called for not-logged-in users.
+ * admin_post_{$_REQUEST['action']} is called for logged-in users.
  *
  * @since 2.6.0
  */
-do_action( "admin_post{$action}" );
+do_action( $action );
