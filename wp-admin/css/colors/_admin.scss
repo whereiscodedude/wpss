@@ -20,10 +20,12 @@ a {
 	}
 }
 
+#rightnow a:hover,
 #media-upload a.del-link:hover,
 div.dashboard-widget-submit input:hover,
 .subsubsub a:hover,
-.subsubsub a.current:hover {
+.subsubsub a.current:hover,
+.ui-tabs-nav a:hover {
 	color: $link-focus;
 }
 
@@ -31,11 +33,11 @@ div.dashboard-widget-submit input:hover,
 /* Forms */
 
 input[type=checkbox]:checked:before {
-	color: $form-checked;
+    color: $form-checked;
 }
 
 input[type=radio]:checked:before {
-	background: $form-checked;
+    background: $form-checked;
 }
 
 .wp-core-ui input[type="reset"]:hover,
@@ -150,7 +152,6 @@ strong .post-com-count span {
 .about-wrap h2 .nav-tab-active,
 .nav-tab-active,
 .nav-tab-active:hover {
-	background-color: $body-background;
 	border-bottom-color: $body-background;
 }
 
@@ -387,7 +388,6 @@ ul#adminmenu > li.current > a.current:after {
 
 .wp-pointer .wp-pointer-content h3 {
 	background-color: $highlight-color;
-	border-color: darken( $highlight-color, 5% );
 }
 
 .wp-pointer .wp-pointer-content h3:before {
@@ -416,15 +416,6 @@ ul#adminmenu > li.current > a.current:after {
 	box-shadow: 0 0 0 1px #fff, 0 0 0 2px $highlight-color;
 }
 
-.media-modal-close:hover,
-.edit-attachment-frame .edit-media-header .right:hover,
-.edit-attachment-frame .edit-media-header .left:hover,
-.media-modal-close:focus,
-.edit-attachment-frame .edit-media-header .right:focus,
-.edit-attachment-frame .edit-media-header .left:focus {
-	background: $menu-highlight-background;
-	color: $menu-highlight-text;
-}
 
 /* Themes */
 
@@ -443,68 +434,6 @@ ul#adminmenu > li.current > a.current:after {
 	background: $highlight-color;
 }
 
-.theme-section.current,
-.theme-filter.current {
-	border-bottom-color: $menu-background;
-}
-
-body.more-filters-opened .more-filters {
-	color: $menu-text;
-	background-color: $menu-background;
-}
-
-body.more-filters-opened .more-filters:before {
-	color: $menu-text;
-}
-
-body.more-filters-opened .more-filters:hover,
-body.more-filters-opened .more-filters:focus {
-	background-color: $menu-highlight-background;
-	color: $menu-highlight-text;
-}
-
-body.more-filters-opened .more-filters:hover:before,
-body.more-filters-opened .more-filters:focus:before {
-	color: $menu-highlight-text;
-}
-
-.theme-install-overlay .close-full-overlay:hover,
-.theme-install-overlay .close-full-overlay:focus,
-.theme-install-overlay .previous-theme:hover,
-.theme-install-overlay .previous-theme:focus,
-.theme-install-overlay .next-theme:hover,
-.theme-install-overlay .next-theme:focus {
-	background-color: $menu-highlight-background;
-	color: $menu-highlight-text;
-}
-
-/* Widgets */
-
-.widgets-chooser li.widgets-chooser-selected {
-	background-color: $menu-highlight-background;
-	color: $menu-highlight-text;
-}
-
-.widgets-chooser li.widgets-chooser-selected:before,
-.widgets-chooser li.widgets-chooser-selected:focus:before {
-	color: $menu-highlight-text;
-}
-
-/* Customize */
-
-#customize-theme-controls .widget-area-select .selected {
-	background-color: $menu-highlight-background;
-	color: $menu-highlight-text;
-}
-
-.customize-controls-close:focus,
-.customize-controls-close:hover,
-.control-panel-back:focus,
-.control-panel-back:hover {
-	background-color: $menu-highlight-background;
-	color: $menu-highlight-text;
-}
-
 /* jQuery UI Slider */
 
 .wp-slider .ui-slider-handle,
@@ -512,6 +441,7 @@ body.more-filters-opened .more-filters:focus:before {
 .wp-slider .ui-slider-handle.focus {
 	background: $button-color;
 	border-color: darken( $button-color, 10% );
+	-webkit-box-shadow: inset 0 1px 0 lighten( $button-color, 15% ), 0 1px 0 rgba(0,0,0,.15);
 	box-shadow: inset 0 1px 0 lighten( $button-color, 15% ), 0 1px 0 rgba(0,0,0,.15);
 }
 

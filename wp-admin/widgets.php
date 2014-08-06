@@ -35,8 +35,7 @@ if ( 'on' == $widgets_access ) {
 }
 
 /**
- * Fires early before the Widgets administration screen loads,
- * after scripts are enqueued.
+ * Fires early before the Widgets administration screen loads, after scripts are enqueued.
  *
  * @since 2.2.0
  */
@@ -71,7 +70,7 @@ get_current_screen()->add_help_tab( array(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __('For more information:') . '</strong></p>' .
 	'<p>' . __('<a href="http://codex.wordpress.org/Appearance_Widgets_Screen" target="_blank">Documentation on Widgets</a>') . '</p>' .
-	'<p>' . __('<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
+	'<p>' . __('<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 );
 
 if ( ! current_theme_supports( 'widgets' ) ) {
@@ -141,7 +140,7 @@ if ( isset($_POST['savewidget']) || isset($_POST['removewidget']) ) {
 	$id_base = $_POST['id_base'];
 	$sidebar = isset($sidebars_widgets[$sidebar_id]) ? $sidebars_widgets[$sidebar_id] : array();
 
-	// Delete.
+	// delete
 	if ( isset($_POST['removewidget']) && $_POST['removewidget'] ) {
 
 		if ( !in_array($widget_id, $sidebar, true) ) {
@@ -168,7 +167,7 @@ if ( isset($_POST['savewidget']) || isset($_POST['removewidget']) ) {
 
 	$sidebars_widgets[$sidebar_id] = $sidebar;
 
-	// Remove old position.
+	// remove old position
 	if ( !isset($_POST['delete_widget']) ) {
 		foreach ( $sidebars_widgets as $key => $sb ) {
 			if ( is_array($sb) )
@@ -224,7 +223,7 @@ if ( isset($_GET['editwidget']) && $_GET['editwidget'] ) {
 
 	$id_base = isset($control['id_base']) ? $control['id_base'] : $control['id'];
 
-	// Show the widget form.
+	// show the widget form
 	$width = ' style="width:' . max($control['width'], 350) . 'px"';
 	$key = isset($_GET['key']) ? (int) $_GET['key'] : 0;
 

@@ -1,4 +1,4 @@
-/* global setUserSetting, ajaxurl, commonL10n, alert, confirm, pagenow */
+/* global setUserSetting, ajaxurl, commonL10n, alert, confirm, toggleWithKeyboard, pagenow */
 var showNotice, adminMenu, columns, validateForm, screenMeta;
 ( function( $, window, undefined ) {
 // Removed in 3.3.
@@ -131,8 +131,6 @@ screenMeta = {
 			panel.focus();
 			link.addClass('screen-meta-active').attr('aria-expanded', true);
 		});
-
-		$( document ).trigger( 'screen:options:open' );
 	},
 
 	close: function( panel, link ) {
@@ -141,15 +139,13 @@ screenMeta = {
 			$('.screen-meta-toggle').css('visibility', '');
 			panel.parent().hide();
 		});
-
-		$( document ).trigger( 'screen:options:close' );
 	}
 };
 
 /**
  * Help tabs.
  */
-$('.contextual-help-tabs').delegate('a', 'click', function(e) {
+$('.contextual-help-tabs').delegate('a', 'click focus', function(e) {
 	var link = $(this),
 		panel;
 
@@ -183,7 +179,7 @@ $(document).ready( function() {
 	});
 
 	$('#collapse-menu').on('click.collapse-menu', function() {
-		var body = $( document.body ), respWidth, state;
+		var body = $( document.body ), respWidth;
 
 		// reset any compensation for submenus near the bottom of the screen
 		$('#adminmenu div.wp-submenu').css('margin-top', '');
@@ -201,25 +197,19 @@ $(document).ready( function() {
 				body.removeClass('auto-fold').removeClass('folded');
 				setUserSetting('unfold', 1);
 				setUserSetting('mfold', 'o');
-				state = 'open';
 			} else {
 				body.addClass('auto-fold');
 				setUserSetting('unfold', 0);
-				state = 'folded';
 			}
 		} else {
 			if ( body.hasClass('folded') ) {
 				body.removeClass('folded');
 				setUserSetting('mfold', 'o');
-				state = 'open';
 			} else {
 				body.addClass('folded');
 				setUserSetting('mfold', 'f');
-				state = 'folded';
 			}
 		}
-
-		$( document ).trigger( 'wp-collapse-menu', { state: state } );
 	});
 
 	if ( 'ontouchstart' in window || /IEMobile\/[1-9]/.test(navigator.userAgent) ) { // touch screen device
@@ -238,10 +228,7 @@ $(document).ready( function() {
 		});
 
 		menu.find('a.wp-has-submenu').on( mobileEvent+'.wp-mobile-hover', function(e) {
-			var b, h, o, f, menutop, wintop, maxtop,
-				el = $(this),
-				parent = el.parent(),
-				m = parent.find('.wp-submenu');
+			var el = $(this), parent = el.parent();
 
 			if ( menu.data('wp-responsive') ) {
 				return;
@@ -252,30 +239,6 @@ $(document).ready( function() {
 			//	- the submenu is not shown inline or the menu is not folded
 			if ( !parent.hasClass('opensub') && ( !parent.hasClass('wp-menu-open') || parent.width() < 40 ) ) {
 				e.preventDefault();
-
-				menutop = parent.offset().top;
-				wintop = $(window).scrollTop();
-				maxtop = menutop - wintop - 30; // max = make the top of the sub almost touch admin bar
-
-				b = menutop + m.height() + 1; // Bottom offset of the menu
-				h = $('#wpwrap').height(); // Height of the entire page
-				o = 60 + b - h;
-				f = $(window).height() + wintop - 50; // The fold
-
-				if ( f < (b - o) ) {
-					o = b - f;
-				}
-
-				if ( o > maxtop ) {
-					o = maxtop;
-				}
-
-				if ( o > 1 ) {
-					m.css('margin-top', '-'+o+'px');
-				} else {
-					m.css('margin-top', '');
-				}
-
 				menu.find('li.opensub').removeClass('opensub');
 				parent.addClass('opensub');
 			}
@@ -286,9 +249,8 @@ $(document).ready( function() {
 		over: function() {
 			var b, h, o, f, m = $(this).find('.wp-submenu'), menutop, wintop, maxtop, top = parseInt( m.css('top'), 10 );
 
-			if ( isNaN(top) || top > -5 ) { // meaning the submenu is visible
+			if ( isNaN(top) || top > -5 ) // meaning the submenu is visible
 				return;
-			}
 
 			if ( menu.data('wp-responsive') ) {
 				// The menu is in responsive mode, bail
@@ -304,19 +266,16 @@ $(document).ready( function() {
 			o = 60 + b - h;
 			f = $(window).height() + wintop - 15; // The fold
 
-			if ( f < (b - o) ) {
+			if ( f < (b - o) )
 				o = b - f;
-			}
 
-			if ( o > maxtop ) {
+			if ( o > maxtop )
 				o = maxtop;
-			}
 
-			if ( o > 1 ) {
+			if ( o > 1 )
 				m.css('margin-top', '-'+o+'px');
-			} else {
+			else
 				m.css('margin-top', '');
-			}
 
 			menu.find('li.menu-top').removeClass('opensub');
 			$(this).addClass('opensub');
@@ -387,39 +346,32 @@ $(document).ready( function() {
 		return true;
 	});
 
-	$('thead, tfoot').find('.check-column :checkbox').on( 'click.wp-toggle-checkboxes', function( event ) {
-		var $this = $(this),
-			$table = $this.closest( 'table' ),
-			controlChecked = $this.prop('checked'),
-			toggle = event.shiftKey || $this.data('wp-toggle');
+	$('thead, tfoot').find('.check-column :checkbox').click( function(e) {
+		var c = $(this).prop('checked'),
+			kbtoggle = 'undefined' == typeof toggleWithKeyboard ? false : toggleWithKeyboard,
+			toggle = e.shiftKey || kbtoggle;
 
-		$table.children( 'tbody' ).filter(':visible')
-			.children().children('.check-column').find(':checkbox')
-			.prop('checked', function() {
-				if ( $(this).is(':hidden') ) {
-					return false;
-				}
-
-				if ( toggle ) {
-					return ! $(this).prop( 'checked' );
-				} else if ( controlChecked ) {
-					return true;
-				}
-
+		$(this).closest( 'table' ).children( 'tbody' ).filter(':visible')
+		.children().children('.check-column').find(':checkbox')
+		.prop('checked', function() {
+			if ( $(this).is(':hidden') )
 				return false;
-			});
+			if ( toggle )
+				return $(this).prop( 'checked' );
+			else if (c)
+				return true;
+			return false;
+		});
 
-		$table.children('thead,  tfoot').filter(':visible')
-			.children().children('.check-column').find(':checkbox')
-			.prop('checked', function() {
-				if ( toggle ) {
-					return false;
-				} else if ( controlChecked ) {
-					return true;
-				}
-
+		$(this).closest('table').children('thead,  tfoot').filter(':visible')
+		.children().children('.check-column').find(':checkbox')
+		.prop('checked', function() {
+			if ( toggle )
 				return false;
-			});
+			else if (c)
+				return true;
+			return false;
+		});
 	});
 
 	// Show row actions on keyboard focus of its parent container element or any other elements contained within
@@ -591,7 +543,8 @@ $(document).ready( function() {
 
 	window.wpResponsive = {
 		init: function() {
-			var self = this;
+			var self = this,
+				scrollStart = 0;
 
 			// Modify functionality based on custom activate/deactivate event
 			$document.on( 'wp-responsive-activate.wp-responsive', function() {
@@ -615,8 +568,12 @@ $(document).ready( function() {
 			} );
 
 			// Add menu events
-			$adminmenu.on( 'click.wp-responsive', 'li.wp-has-submenu > a', function( event ) {
-				if ( ! $adminmenu.data('wp-responsive') ) {
+			$adminmenu.on( 'touchstart.wp-responsive', 'li.wp-has-submenu > a', function() {
+				scrollStart = $window.scrollTop();
+			}).on( 'touchend.wp-responsive click.wp-responsive', 'li.wp-has-submenu > a', function( event ) {
+				if ( ! $adminmenu.data('wp-responsive') ||
+					( event.type === 'touchend' && $window.scrollTop() !== scrollStart ) ) {
+
 					return;
 				}
 
@@ -726,7 +683,7 @@ $(document).ready( function() {
 	window.wpResponsive.init();
 });
 
-// Make Windows 8 devices play along nicely.
+// make Windows 8 devices playing along nicely
 (function(){
 	if ( '-ms-user-select' in document.documentElement.style && navigator.userAgent.match(/IEMobile\/10\.0/) ) {
 		var msViewportStyle = document.createElement( 'style' );
@@ -736,5 +693,16 @@ $(document).ready( function() {
 		document.getElementsByTagName( 'head' )[0].appendChild( msViewportStyle );
 	}
 })();
+
+// internal use
+$(document).bind( 'wp_CloseOnEscape', function( e, data ) {
+	if ( typeof(data.cb) != 'function' )
+		return;
+
+	if ( typeof(data.condition) != 'function' || data.condition() )
+		data.cb();
+
+	return true;
+});
 
 }( jQuery, window ));

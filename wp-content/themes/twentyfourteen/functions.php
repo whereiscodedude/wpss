@@ -68,7 +68,7 @@ function twentyfourteen_setup() {
 	load_theme_textdomain( 'twentyfourteen', get_template_directory() . '/languages' );
 
 	// This theme styles the visual editor to resemble the theme style.
-	add_editor_style( array( 'css/editor-style.css', twentyfourteen_font_url(), 'genericons/genericons.css' ) );
+	add_editor_style( array( 'css/editor-style.css', twentyfourteen_font_url() ) );
 
 	// Add RSS feed links to <head> for posts and comments.
 	add_theme_support( 'automatic-feed-links' );
@@ -89,7 +89,7 @@ function twentyfourteen_setup() {
 	 * to output valid HTML5.
 	 */
 	add_theme_support( 'html5', array(
-		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
+		'search-form', 'comment-form', 'comment-list',
 	) );
 
 	/*
@@ -121,6 +121,8 @@ add_action( 'after_setup_theme', 'twentyfourteen_setup' );
  * Adjust content_width value for image attachment template.
  *
  * @since Twenty Fourteen 1.0
+ *
+ * @return void
  */
 function twentyfourteen_content_width() {
 	if ( is_attachment() && wp_attachment_is_image() ) {
@@ -162,6 +164,8 @@ function twentyfourteen_has_featured_posts() {
  * Register three Twenty Fourteen widget areas.
  *
  * @since Twenty Fourteen 1.0
+ *
+ * @return void
  */
 function twentyfourteen_widgets_init() {
 	require get_template_directory() . '/inc/widgets.php';
@@ -221,13 +225,15 @@ function twentyfourteen_font_url() {
  * Enqueue scripts and styles for the front end.
  *
  * @since Twenty Fourteen 1.0
+ *
+ * @return void
  */
 function twentyfourteen_scripts() {
 	// Add Lato font, used in the main stylesheet.
 	wp_enqueue_style( 'twentyfourteen-lato', twentyfourteen_font_url(), array(), null );
 
 	// Add Genericons font, used in the main stylesheet.
-	wp_enqueue_style( 'genericons', get_template_directory_uri() . '/genericons/genericons.css', array(), '3.0.3' );
+	wp_enqueue_style( 'genericons', get_template_directory_uri() . '/genericons/genericons.css', array(), '3.0.2' );
 
 	// Load our main stylesheet.
 	wp_enqueue_style( 'twentyfourteen-style', get_stylesheet_uri(), array( 'genericons' ) );
@@ -256,7 +262,7 @@ function twentyfourteen_scripts() {
 		) );
 	}
 
-	wp_enqueue_script( 'twentyfourteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20140616', true );
+	wp_enqueue_script( 'twentyfourteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20131209', true );
 }
 add_action( 'wp_enqueue_scripts', 'twentyfourteen_scripts' );
 
@@ -264,6 +270,8 @@ add_action( 'wp_enqueue_scripts', 'twentyfourteen_scripts' );
  * Enqueue Google fonts style to admin screen for custom header display.
  *
  * @since Twenty Fourteen 1.0
+ *
+ * @return void
  */
 function twentyfourteen_admin_fonts() {
 	wp_enqueue_style( 'twentyfourteen-lato', twentyfourteen_font_url(), array(), null );
@@ -275,6 +283,8 @@ if ( ! function_exists( 'twentyfourteen_the_attached_image' ) ) :
  * Print the attached image with a link to the next attached image.
  *
  * @since Twenty Fourteen 1.0
+ *
+ * @return void
  */
 function twentyfourteen_the_attached_image() {
 	$post                = get_post();
@@ -342,6 +352,8 @@ if ( ! function_exists( 'twentyfourteen_list_authors' ) ) :
  * Print a list of all site contributors who published at least one post.
  *
  * @since Twenty Fourteen 1.0
+ *
+ * @return void
  */
 function twentyfourteen_list_authors() {
 	$contributor_ids = get_users( array(
@@ -368,7 +380,7 @@ function twentyfourteen_list_authors() {
 				<p class="contributor-bio">
 					<?php echo get_the_author_meta( 'description', $contributor_id ); ?>
 				</p>
-				<a class="button contributor-posts-link" href="<?php echo esc_url( get_author_posts_url( $contributor_id ) ); ?>">
+				<a class="contributor-posts-link" href="<?php echo esc_url( get_author_posts_url( $contributor_id ) ); ?>">
 					<?php printf( _n( '%d Article', '%d Articles', $post_count, 'twentyfourteen' ), $post_count ); ?>
 				</a>
 			</div><!-- .contributor-summary -->
@@ -385,7 +397,7 @@ endif;
  *
  * Adds body classes to denote:
  * 1. Single or multiple authors.
- * 2. Presence of header image except in Multisite signup and activate pages.
+ * 2. Presence of header image.
  * 3. Index views.
  * 4. Full-width content layout.
  * 5. Presence of footer widgets.
@@ -404,7 +416,7 @@ function twentyfourteen_body_classes( $classes ) {
 
 	if ( get_header_image() ) {
 		$classes[] = 'header-image';
-	} elseif ( ! in_array( $GLOBALS['pagenow'], array( 'wp-activate.php', 'wp-signup.php' ) ) ) {
+	} else {
 		$classes[] = 'masthead-fixed';
 	}
 
@@ -449,7 +461,7 @@ add_filter( 'body_class', 'twentyfourteen_body_classes' );
  * @return array The filtered post class list.
  */
 function twentyfourteen_post_classes( $classes ) {
-	if ( ! post_password_required() && ! is_attachment() && has_post_thumbnail() ) {
+	if ( ! post_password_required() && has_post_thumbnail() ) {
 		$classes[] = 'has-post-thumbnail';
 	}
 
@@ -463,9 +475,6 @@ add_filter( 'post_class', 'twentyfourteen_post_classes' );
  *
  * @since Twenty Fourteen 1.0
  *
- * @global int $paged WordPress archive pagination page count.
- * @global int $page  WordPress paginated post page count.
- *
  * @param string $title Default title text for current view.
  * @param string $sep Optional separator.
  * @return string The filtered title.
@@ -478,7 +487,7 @@ function twentyfourteen_wp_title( $title, $sep ) {
 	}
 
 	// Add the site name.
-	$title .= get_bloginfo( 'name', 'display' );
+	$title .= get_bloginfo( 'name' );
 
 	// Add the site description for the home/front page.
 	$site_description = get_bloginfo( 'description', 'display' );
@@ -487,7 +496,7 @@ function twentyfourteen_wp_title( $title, $sep ) {
 	}
 
 	// Add a page number if necessary.
-	if ( ( $paged >= 2 || $page >= 2 ) && ! is_404() ) {
+	if ( $paged >= 2 || $page >= 2 ) {
 		$title = "$title $sep " . sprintf( __( 'Page %s', 'twentyfourteen' ), max( $paged, $page ) );
 	}
 

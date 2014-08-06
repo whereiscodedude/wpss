@@ -95,9 +95,7 @@
                 preview.send( 'nonce', api.settings.nonce );
         });
 
-		preview.send( 'ready', {
-			activeControls: api.settings.activeControls
-		} );
+		preview.send( 'ready' );
 
 		/* Custom Backgrounds */
 		bg = $.map(['color', 'image', 'position_x', 'repeat', 'attachment'], function( prop ) {
@@ -109,6 +107,11 @@
 				head = $('head'),
 				style = $('#custom-background-css'),
 				update;
+
+			// If custom backgrounds are active and we can't find the
+			// default output, bail.
+			if ( body.hasClass('custom-background') && ! style.length )
+				return;
 
 			update = function() {
 				var css = '';

@@ -852,42 +852,42 @@ function favorite_actions() {
 }
 
 function media_upload_image() {
-	_deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
+	__deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
 	return wp_media_upload_handler();
 }
 
 function media_upload_audio() {
-	_deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
+	__deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
 	return wp_media_upload_handler();
 }
 
 function media_upload_video() {
-	_deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
+	__deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
 	return wp_media_upload_handler();
 }
 
 function media_upload_file() {
-	_deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
+	__deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
 	return wp_media_upload_handler();
 }
 
 function type_url_form_image() {
-	_deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('image')" );
+	__deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('image')" );
 	return wp_media_insert_url_form( 'image' );
 }
 
 function type_url_form_audio() {
-	_deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('audio')" );
+	__deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('audio')" );
 	return wp_media_insert_url_form( 'audio' );
 }
 
 function type_url_form_video() {
-	_deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('video')" );
+	__deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('video')" );
 	return wp_media_insert_url_form( 'video' );
 }
 
 function type_url_form_file() {
-	_deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('file')" );
+	__deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('file')" );
 	return wp_media_insert_url_form( 'file' );
 }
 
@@ -1070,7 +1070,7 @@ function wp_update_core($current, $feedback = '') {
 	if ( !empty($feedback) )
 		add_filter('update_feedback', $feedback);
 
-	include( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+	include ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	$upgrader = new Core_Upgrader();
 	return $upgrader->upgrade($current);
 
@@ -1093,7 +1093,7 @@ function wp_update_plugin($plugin, $feedback = '') {
 	if ( !empty($feedback) )
 		add_filter('update_feedback', $feedback);
 
-	include( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+	include ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	$upgrader = new Plugin_Upgrader();
 	return $upgrader->upgrade($plugin);
 }
@@ -1115,7 +1115,7 @@ function wp_update_theme($theme, $feedback = '') {
 	if ( !empty($feedback) )
 		add_filter('update_feedback', $feedback);
 
-	include( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+	include ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	$upgrader = new Theme_Upgrader();
 	return $upgrader->upgrade($theme);
 }
@@ -1174,17 +1174,3 @@ function wp_dashboard_recent_comments_control() {}
 function wp_dashboard_secondary() {}
 function wp_dashboard_secondary_control() {}
 /**#@-*/
-
-/**
- * This was once used to move child posts to a new parent.
- *
- * @since 2.3.0
- * @deprecated 3.9.0
- * @access private
- *
- * @param int $old_ID
- * @param int $new_ID
- */
-function _relocate_children( $old_ID, $new_ID ) {
-	_deprecated_function( __FUNCTION__, '3.9' );
-}
