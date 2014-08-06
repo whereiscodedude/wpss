@@ -238,7 +238,7 @@ function get_theme_feature_list( $api = true ) {
 		return $features;
 
 	if ( !$feature_list = get_site_transient( 'wporg_theme_feature_list' ) )
-		set_site_transient( 'wporg_theme_feature_list', array(), 3 * HOUR_IN_SECONDS );
+		set_site_transient( 'wporg_theme_feature_list', array(), 10800);
 
 	if ( !$feature_list ) {
 		$feature_list = themes_api( 'feature_list', array() );
@@ -249,7 +249,7 @@ function get_theme_feature_list( $api = true ) {
 	if ( !$feature_list )
 		return $features;
 
-	set_site_transient( 'wporg_theme_feature_list', $feature_list, 3 * HOUR_IN_SECONDS );
+	set_site_transient( 'wporg_theme_feature_list', $feature_list, 10800 );
 
 	$category_translations = array(
 		'Colors'   => __( 'Colors' ),
@@ -430,7 +430,7 @@ function wp_prepare_themes_for_js( $themes = null ) {
 			'update'       => get_theme_update_available( $theme ),
 			'actions'      => array(
 				'activate' => current_user_can( 'switch_themes' ) ? wp_nonce_url( admin_url( 'themes.php?action=activate&amp;stylesheet=' . $encoded_slug ), 'switch-theme_' . $slug ) : null,
-				'customize' => ( current_user_can( 'edit_theme_options' ) && current_user_can( 'customize' ) ) ? wp_customize_url( $slug ) : null,
+				'customize'=> current_user_can( 'edit_theme_options' ) ? wp_customize_url( $slug ) : null,
 				'preview'   => add_query_arg( array(
 					'preview'        => 1,
 					'template'       => urlencode( $theme->get_template() ),

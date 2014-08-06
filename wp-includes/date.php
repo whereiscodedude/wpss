@@ -48,9 +48,6 @@ class WP_Date_Query {
 	/**
 	 * Constructor.
 	 *
-	 * @since 3.7.0
-	 * @since 4.0.0 The $inclusive logic was updated to include all times within the date range.
-	 *
 	 * @param array $date_query {
 	 *     One or more associative arrays of date query parameters.
 	 *
@@ -108,7 +105,7 @@ class WP_Date_Query {
 	 *                              Accepts 'post_date', 'post_date_gmt', 'post_modified', 'post_modified_gmt',
 	 *                              'comment_date', 'comment_date_gmt'.
 	 */
-	public function __construct( $date_query, $default_column = 'post_date' ) {
+	function __construct( $date_query, $default_column = 'post_date' ) {
 		if ( empty( $date_query ) || ! is_array( $date_query ) )
 			return;
 
@@ -238,23 +235,19 @@ class WP_Date_Query {
 
 		$compare = $this->get_compare( $query );
 
-		$inclusive = ! empty( $query['inclusive'] );
-
-		// Assign greater- and less-than values.
 		$lt = '<';
 		$gt = '>';
-
-		if ( $inclusive ) {
+		if ( ! empty( $query['inclusive'] ) ) {
 			$lt .= '=';
 			$gt .= '=';
 		}
 
 		// Range queries
 		if ( ! empty( $query['after'] ) )
-			$where_parts[] = $wpdb->prepare( "$column $gt %s", $this->build_mysql_datetime( $query['after'], ! $inclusive ) );
+			$where_parts[] = $wpdb->prepare( "$column $gt %s", $this->build_mysql_datetime( $query['after'], true ) );
 
 		if ( ! empty( $query['before'] ) )
-			$where_parts[] = $wpdb->prepare( "$column $lt %s", $this->build_mysql_datetime( $query['before'], $inclusive ) );
+			$where_parts[] = $wpdb->prepare( "$column $lt %s", $this->build_mysql_datetime( $query['before'], false ) );
 
 		// Specific value queries
 
@@ -263,12 +256,16 @@ class WP_Date_Query {
 
 		if ( isset( $query['month'] ) && $value = $this->build_value( $compare, $query['month'] ) )
 			$where_parts[] = "MONTH( $column ) $compare $value";
-		else if ( isset( $query['monthnum'] ) && $value = $this->build_value( $compare, $query['monthnum'] ) )
+
+		// Legacy
+		if ( isset( $query['monthnum'] ) && $value = $this->build_value( $compare, $query['monthnum'] ) )
 			$where_parts[] = "MONTH( $column ) $compare $value";
 
 		if ( isset( $query['week'] ) && false !== ( $value = $this->build_value( $compare, $query['week'] ) ) )
 			$where_parts[] = _wp_mysql_week( $column ) . " $compare $value";
-		else if ( isset( $query['w'] ) && false !== ( $value = $this->build_value( $compare, $query['w'] ) ) )
+
+		// Legacy
+		if ( isset( $query['w'] ) && false !== ( $value = $this->build_value( $compare, $query['w'] ) ) )
 			$where_parts[] = _wp_mysql_week( $column ) . " $compare $value";
 
 		if ( isset( $query['dayofyear'] ) && $value = $this->build_value( $compare, $query['dayofyear'] ) )

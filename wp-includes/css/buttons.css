@@ -67,8 +67,9 @@ TABLE OF CONTENTS:
 .wp-core-ui input[type="reset"]::-moz-focus-inner,
 .wp-core-ui input[type="button"]::-moz-focus-inner,
 .wp-core-ui input[type="submit"]::-moz-focus-inner {
-	border-width: 0;
-	border-style: none;
+	border-width: 1px 0;
+	border-style: solid none;
+	border-color: transparent;
 	padding: 0;
 }
 
@@ -300,10 +301,6 @@ TABLE OF CONTENTS:
 		height: 24px;
 		line-height: 22px;
 		font-size: 13px;
-	}
-
-	.media-frame.mode-grid .bulk-select .button {
-		margin-bottom: 0;
 	}
 
 	/* Publish Metabox Options */

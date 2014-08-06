@@ -309,13 +309,8 @@ tinymce.PluginManager.add('charmap', function(editor) {
 			html: gridHtml,
 			onclick: function(e) {
 				var target = e.target;
-
-				if (target.tagName == 'TD') {
-					target = target.firstChild;
-				}
-
-				if (target.tagName == 'DIV') {
-					editor.execCommand('mceInsertContent', false, target.firstChild.data);
+				if (/^(TD|DIV)$/.test(target.nodeName)) {
+					editor.execCommand('mceInsertContent', false, tinymce.trim(target.innerText || target.textContent));
 
 					if (!e.ctrlKey) {
 						win.close();

@@ -57,10 +57,9 @@ function maybe_create_table($table_name, $create_ddl) {
 			return true;
 		}
 	}
-	// Didn't find it, so try to create it.
+	//didn't find it try to create it.
 	$wpdb->query($create_ddl);
-
-	// We cannot directly tell that whether this succeeded!
+	// we cannot directly tell that whether this succeeded!
 	foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
 		if ($table == $table_name) {
 			return true;
@@ -91,11 +90,9 @@ function maybe_add_column($table_name, $column_name, $create_ddl) {
 			return true;
 		}
 	}
-
-	// Didn't find it, so try to create it.
+	//didn't find it try to create it.
 	$wpdb->query($create_ddl);
-
-	// We cannot directly tell that whether this succeeded!
+	// we cannot directly tell that whether this succeeded!
 	foreach ($wpdb->get_col("DESC $table_name",0) as $column ) {
 		if ($column == $column_name) {
 			return true;
@@ -121,11 +118,9 @@ function maybe_drop_column($table_name, $column_name, $drop_ddl) {
 	global $wpdb;
 	foreach ($wpdb->get_col("DESC $table_name",0) as $column ) {
 		if ($column == $column_name) {
-
-			// Found it, so try to drop it.
+			//found it try to drop it.
 			$wpdb->query($drop_ddl);
-
-			// We cannot directly tell that whether this succeeded!
+			// we cannot directly tell that whether this succeeded!
 			foreach ($wpdb->get_col("DESC $table_name",0) as $column ) {
 				if ($column == $column_name) {
 					return false;
@@ -133,7 +128,7 @@ function maybe_drop_column($table_name, $column_name, $drop_ddl) {
 			}
 		}
 	}
-	// Else didn't find it.
+	// else didn't find it
 	return true;
 }
 
@@ -172,8 +167,7 @@ function check_column($table_name, $col_name, $col_type, $is_null = null, $key =
 	foreach ($results as $row ) {
 
 		if ($row->Field == $col_name) {
-
-			// Got our column, check the params.
+			// got our column, check the params
 			if (($col_type != null) && ($row->Type != $col_type)) {
 				++$diffs;
 			}

@@ -141,7 +141,7 @@ if ( isset($_POST['savewidget']) || isset($_POST['removewidget']) ) {
 	$id_base = $_POST['id_base'];
 	$sidebar = isset($sidebars_widgets[$sidebar_id]) ? $sidebars_widgets[$sidebar_id] : array();
 
-	// Delete.
+	// delete
 	if ( isset($_POST['removewidget']) && $_POST['removewidget'] ) {
 
 		if ( !in_array($widget_id, $sidebar, true) ) {
@@ -168,7 +168,7 @@ if ( isset($_POST['savewidget']) || isset($_POST['removewidget']) ) {
 
 	$sidebars_widgets[$sidebar_id] = $sidebar;
 
-	// Remove old position.
+	// remove old position
 	if ( !isset($_POST['delete_widget']) ) {
 		foreach ( $sidebars_widgets as $key => $sb ) {
 			if ( is_array($sb) )
@@ -224,7 +224,7 @@ if ( isset($_GET['editwidget']) && $_GET['editwidget'] ) {
 
 	$id_base = isset($control['id_base']) ? $control['id_base'] : $control['id'];
 
-	// Show the widget form.
+	// show the widget form
 	$width = ' style="width:' . max($control['width'], 350) . 'px"';
 	$key = isset($_GET['key']) ? (int) $_GET['key'] : 0;
 

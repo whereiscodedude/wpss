@@ -131,8 +131,6 @@ screenMeta = {
 			panel.focus();
 			link.addClass('screen-meta-active').attr('aria-expanded', true);
 		});
-
-		$( document ).trigger( 'screen:options:open' );
 	},
 
 	close: function( panel, link ) {
@@ -141,15 +139,13 @@ screenMeta = {
 			$('.screen-meta-toggle').css('visibility', '');
 			panel.parent().hide();
 		});
-
-		$( document ).trigger( 'screen:options:close' );
 	}
 };
 
 /**
  * Help tabs.
  */
-$('.contextual-help-tabs').delegate('a', 'click', function(e) {
+$('.contextual-help-tabs').delegate('a', 'click focus', function(e) {
 	var link = $(this),
 		panel;
 
@@ -183,7 +179,7 @@ $(document).ready( function() {
 	});
 
 	$('#collapse-menu').on('click.collapse-menu', function() {
-		var body = $( document.body ), respWidth, state;
+		var body = $( document.body ), respWidth;
 
 		// reset any compensation for submenus near the bottom of the screen
 		$('#adminmenu div.wp-submenu').css('margin-top', '');
@@ -201,25 +197,19 @@ $(document).ready( function() {
 				body.removeClass('auto-fold').removeClass('folded');
 				setUserSetting('unfold', 1);
 				setUserSetting('mfold', 'o');
-				state = 'open';
 			} else {
 				body.addClass('auto-fold');
 				setUserSetting('unfold', 0);
-				state = 'folded';
 			}
 		} else {
 			if ( body.hasClass('folded') ) {
 				body.removeClass('folded');
 				setUserSetting('mfold', 'o');
-				state = 'open';
 			} else {
 				body.addClass('folded');
 				setUserSetting('mfold', 'f');
-				state = 'folded';
 			}
 		}
-
-		$( document ).trigger( 'wp-collapse-menu', { state: state } );
 	});
 
 	if ( 'ontouchstart' in window || /IEMobile\/[1-9]/.test(navigator.userAgent) ) { // touch screen device
@@ -591,7 +581,8 @@ $(document).ready( function() {
 
 	window.wpResponsive = {
 		init: function() {
-			var self = this;
+			var self = this,
+				scrollStart = 0;
 
 			// Modify functionality based on custom activate/deactivate event
 			$document.on( 'wp-responsive-activate.wp-responsive', function() {
@@ -615,8 +606,12 @@ $(document).ready( function() {
 			} );
 
 			// Add menu events
-			$adminmenu.on( 'click.wp-responsive', 'li.wp-has-submenu > a', function( event ) {
-				if ( ! $adminmenu.data('wp-responsive') ) {
+			$adminmenu.on( 'touchstart.wp-responsive', 'li.wp-has-submenu > a', function() {
+				scrollStart = $window.scrollTop();
+			}).on( 'touchend.wp-responsive click.wp-responsive', 'li.wp-has-submenu > a', function( event ) {
+				if ( ! $adminmenu.data('wp-responsive') ||
+					( event.type === 'touchend' && $window.scrollTop() !== scrollStart ) ) {
+
 					return;
 				}
 
@@ -726,7 +721,7 @@ $(document).ready( function() {
 	window.wpResponsive.init();
 });
 
-// Make Windows 8 devices play along nicely.
+// make Windows 8 devices playing along nicely
 (function(){
 	if ( '-ms-user-select' in document.documentElement.style && navigator.userAgent.match(/IEMobile\/10\.0/) ) {
 		var msViewportStyle = document.createElement( 'style' );

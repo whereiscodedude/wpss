@@ -17,25 +17,25 @@
  * @since r16
  */
 class WP_Scripts extends WP_Dependencies {
-	public $base_url; // Full URL with trailing slash
-	public $content_url;
-	public $default_version;
-	public $in_footer = array();
-	public $concat = '';
-	public $concat_version = '';
-	public $do_concat = false;
-	public $print_html = '';
-	public $print_code = '';
-	public $ext_handles = '';
-	public $ext_version = '';
-	public $default_dirs;
+	var $base_url; // Full URL with trailing slash
+	var $content_url;
+	var $default_version;
+	var $in_footer = array();
+	var $concat = '';
+	var $concat_version = '';
+	var $do_concat = false;
+	var $print_html = '';
+	var $print_code = '';
+	var $ext_handles = '';
+	var $ext_version = '';
+	var $default_dirs;
 
-	public function __construct() {
+	function __construct() {
 		$this->init();
 		add_action( 'init', array( $this, 'init' ), 0 );
 	}
 
-	public function init() {
+	function init() {
 		/**
 		 * Fires when the WP_Scripts instance is initialized.
 		 *
@@ -55,17 +55,17 @@ class WP_Scripts extends WP_Dependencies {
 	 * @param int $group (optional) If scripts were queued in groups prints this group number.
 	 * @return array Scripts that have been printed
 	 */
-	public function print_scripts( $handles = false, $group = false ) {
+	function print_scripts( $handles = false, $group = false ) {
 		return $this->do_items( $handles, $group );
 	}
 
 	// Deprecated since 3.3, see print_extra_script()
-	public function print_scripts_l10n( $handle, $echo = true ) {
+	function print_scripts_l10n( $handle, $echo = true ) {
 		_deprecated_function( __FUNCTION__, '3.3', 'print_extra_script()' );
 		return $this->print_extra_script( $handle, $echo );
 	}
 
-	public function print_extra_script( $handle, $echo = true ) {
+	function print_extra_script( $handle, $echo = true ) {
 		if ( !$output = $this->get_data( $handle, 'data' ) )
 			return;
 
@@ -81,7 +81,7 @@ class WP_Scripts extends WP_Dependencies {
 		return true;
 	}
 
-	public function do_item( $handle, $group = false ) {
+	function do_item( $handle, $group = false ) {
 		if ( !parent::do_item($handle) )
 			return false;
 
@@ -151,7 +151,7 @@ class WP_Scripts extends WP_Dependencies {
 	 *
 	 * Localizes only if the script has already been added
 	 */
-	public function localize( $handle, $object_name, $l10n ) {
+	function localize( $handle, $object_name, $l10n ) {
 		if ( $handle === 'jquery' )
 			$handle = 'jquery-core';
 
@@ -180,7 +180,7 @@ class WP_Scripts extends WP_Dependencies {
 		return $this->add_data( $handle, 'data', $script );
 	}
 
-	public function set_group( $handle, $recursion, $group = false ) {
+	function set_group( $handle, $recursion, $group = false ) {
 
 		if ( $this->registered[$handle]->args === 1 )
 			$grp = 1;
@@ -193,7 +193,7 @@ class WP_Scripts extends WP_Dependencies {
 		return parent::set_group( $handle, $recursion, $grp );
 	}
 
-	public function all_deps( $handles, $recursion = false, $group = false ) {
+	function all_deps( $handles, $recursion = false, $group = false ) {
 		$r = parent::all_deps( $handles, $recursion );
 		if ( ! $recursion ) {
 			/**
@@ -208,34 +208,31 @@ class WP_Scripts extends WP_Dependencies {
 		return $r;
 	}
 
-	public function do_head_items() {
+	function do_head_items() {
 		$this->do_items(false, 0);
 		return $this->done;
 	}
 
-	public function do_footer_items() {
+	function do_footer_items() {
 		$this->do_items(false, 1);
 		return $this->done;
 	}
 
-	public function in_default_dir( $src ) {
-		if ( ! $this->default_dirs ) {
+	function in_default_dir($src) {
+		if ( ! $this->default_dirs )
 			return true;
-		}
 
-		if ( 0 === strpos( $src, '/' . WPINC . '/js/l10n' ) ) {
+		if ( 0 === strpos( $src, '/wp-includes/js/l10n' ) )
 			return false;
-		}
 
 		foreach ( (array) $this->default_dirs as $test ) {
-			if ( 0 === strpos( $src, $test ) ) {
+			if ( 0 === strpos($src, $test) )
 				return true;
-			}
 		}
 		return false;
 	}
 
-	public function reset() {
+	function reset() {
 		$this->do_concat = false;
 		$this->print_code = '';
 		$this->concat = '';

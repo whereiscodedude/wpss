@@ -95,9 +95,7 @@
                 preview.send( 'nonce', api.settings.nonce );
         });
 
-		preview.send( 'ready', {
-			activeControls: api.settings.activeControls
-		} );
+		preview.send( 'ready' );
 
 		/* Custom Backgrounds */
 		bg = $.map(['color', 'image', 'position_x', 'repeat', 'attachment'], function( prop ) {

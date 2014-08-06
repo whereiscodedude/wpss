@@ -22,10 +22,9 @@ function got_mod_rewrite() {
 	 * This filter was previously used to force URL rewriting for other servers,
 	 * like nginx. Use the got_url_rewrite filter in got_url_rewrite() instead.
 	 *
-	 * @since 2.5.0
-	 *
 	 * @see got_url_rewrite()
 	 *
+	 * @since 2.5.0
 	 * @param bool $got_rewrite Whether Apache and mod_rewrite are present.
 	 */
 	return apply_filters( 'got_rewrite', $got_rewrite );
@@ -47,7 +46,6 @@ function got_url_rewrite() {
 	 * Filter whether URL rewriting is available.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param bool $got_url_rewrite Whether URL rewriting is available.
 	 */
 	return apply_filters( 'got_url_rewrite', $got_url_rewrite );
@@ -163,10 +161,8 @@ function save_mod_rewrite_rules() {
 	$home_path = get_home_path();
 	$htaccess_file = $home_path.'.htaccess';
 
-	/*
-	 * If the file doesn't already exist check for write access to the directory
-	 * and whether we have some rules. Else check for write access to the file.
-	 */
+	// If the file doesn't already exist check for write access to the directory and whether we have some rules.
+	// else check for write access to the file.
 	if ((!file_exists($htaccess_file) && is_writable($home_path) && $wp_rewrite->using_mod_rewrite_permalinks()) || is_writable($htaccess_file)) {
 		if ( got_mod_rewrite() ) {
 			$rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
@@ -276,15 +272,17 @@ function url_shorten( $url ) {
  * @param array $vars An array of globals to reset.
  */
 function wp_reset_vars( $vars ) {
-	foreach ( $vars as $var ) {
-		if ( empty( $_POST[ $var ] ) ) {
-			if ( empty( $_GET[ $var ] ) ) {
-				$GLOBALS[ $var ] = '';
-			} else {
-				$GLOBALS[ $var ] = $_GET[ $var ];
-			}
+	for ( $i=0; $i<count( $vars ); $i += 1 ) {
+		$var = $vars[$i];
+		global $$var;
+
+		if ( empty( $_POST[$var] ) ) {
+			if ( empty( $_GET[$var] ) )
+				$$var = '';
+			else
+				$$var = $_GET[$var];
 		} else {
-			$GLOBALS[ $var ] = $_POST[ $var ];
+			$$var = $_POST[$var];
 		}
 	}
 }
@@ -338,11 +336,11 @@ function wp_doc_link_parse( $content ) {
 	sort( $functions );
 
 	/**
-	 * Filter the list of functions and classes to be ignored from the documentation lookup.
+	 * Filter the list of functions/classes to be ignored from the documentation lookup.
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array $ignore_functions Functions and classes to be ignored.
+	 * @param array $ignore_functions Functions/Classes to be ignored.
 	 */
 	$ignore_functions = apply_filters( 'documentation_ignore_functions', $ignore_functions );
 
@@ -804,7 +802,7 @@ add_filter( 'heartbeat_settings', 'wp_heartbeat_set_suspension' );
 /**
  * Autosave with heartbeat
  *
- * @since 3.9.0
+ * @since 3.9
  */
 function heartbeat_autosave( $response, $data ) {
 	if ( ! empty( $data['wp_autosave'] ) ) {

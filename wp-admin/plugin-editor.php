@@ -83,6 +83,8 @@ case 'update':
 	}
 	exit;
 
+break;
+
 default:
 
 	if ( isset($_GET['liveupdate']) ) {

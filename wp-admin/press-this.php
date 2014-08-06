@@ -40,7 +40,7 @@ function press_it() {
 	$upload = false;
 	if ( !empty($_POST['photo_src']) && current_user_can('upload_files') ) {
 		foreach( (array) $_POST['photo_src'] as $key => $image) {
-			// See if files exist in content - we don't want to upload non-used selected files.
+			// see if files exist in content - we don't want to upload non-used selected files.
 			if ( strpos($_POST['content'], htmlspecialchars($image)) !== false ) {
 				$desc = isset($_POST['photo_description'][$key]) ? $_POST['photo_description'][$key] : '';
 				$upload = media_sideload_image($image, $post_ID, $desc);
@@ -51,7 +51,7 @@ function press_it() {
 			}
 		}
 	}
-	// Set the post_content and status.
+	// set the post_content and status
 	$post['post_content'] = $content;
 	if ( isset( $_POST['publish'] ) && current_user_can( 'publish_posts' ) )
 		$post['post_status'] = 'publish';
@@ -60,12 +60,12 @@ function press_it() {
 	else
 		$post['post_status'] = 'draft';
 
-	// Error handling for media_sideload.
+	// error handling for media_sideload
 	if ( is_wp_error($upload) ) {
 		wp_delete_post($post_ID);
 		wp_die($upload);
 	} else {
-		// Post formats.
+		// Post formats
 		if ( isset( $_POST['post_format'] ) ) {
 			if ( current_theme_supports( 'post-formats', $_POST['post_format'] ) )
 				set_post_format( $post_ID, $_POST['post_format'] );
@@ -181,10 +181,9 @@ if ( !empty($_REQUEST['ajax']) ) {
 				return '';
 			$sources = array();
 			foreach ($matches[3] as $src) {
-
-				// If no http in URL.
+				// if no http in url
 				if (strpos($src, 'http') === false)
-					// If it doesn't have a relative URI.
+					// if it doesn't have a relative uri
 					if ( strpos($src, '../') === false && strpos($src, './') === false && strpos($src, '/') === 0)
 						$src = 'http://'.str_replace('//','/', $host['host'].'/'.$src);
 					else
@@ -198,7 +197,7 @@ if ( !empty($_REQUEST['ajax']) ) {
 		break;
 
 	case 'photo_js': ?>
-		// Gather images and load some default JS.
+		// gather images and load some default JS
 		var last = null
 		var img, img_tag, aspect, w, h, skip, i, strtoappend = "";
 		if(photostorage == false) {
@@ -439,16 +438,12 @@ var photostorage = false;
 		}
 	}
 	jQuery(document).ready(function($) {
-		var $contnet = $( '#content' );
-
-		// Resize screen.
+		//resize screen
 		window.resizeTo(760,580);
-
-		// Set button actions.
+		// set button actions
 		jQuery('#photo_button').click(function() { show('photo'); return false; });
 		jQuery('#video_button').click(function() { show('video'); return false; });
-
-		// Auto select.
+		// auto select
 		<?php if ( preg_match("/youtube\.com\/watch/i", $url) ) { ?>
 			show('video');
 		<?php } elseif ( preg_match("/vimeo\.com\/[0-9]+/i", $url) ) { ?>
@@ -462,12 +457,6 @@ var photostorage = false;
 		$('#tagsdiv-post_tag, #categorydiv').children('h3, .handlediv').click(function(){
 			$(this).siblings('.inside').toggle();
 		});
-
-		if ( $( '#wp-content-wrap' ).hasClass( 'html-active' ) && window.switchEditors &&
-			( tinyMCEPreInit.mceInit.content && tinyMCEPreInit.mceInit.content.wpautop ) ) {
-			// The Text editor is default, run the initial content through pre_wpautop() to convert the paragraphs
-			$contnet.text( window.switchEditors.pre_wpautop( $contnet.text() ) );
-		}
 	});
 </script>
 </head>

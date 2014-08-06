@@ -662,7 +662,10 @@ final class WP_Theme implements ArrayAccess {
 				break;
 			case 'Author' :
 				if ( $this->get('AuthorURI') ) {
-					$value = sprintf( '<a href="%1$s">%2$s</a>', $this->display( 'AuthorURI', true, $translate ), $value );
+					static $attr = null;
+					if ( ! isset( $attr ) )
+						$attr = esc_attr__( 'Visit author homepage' );
+					$value = sprintf( '<a href="%1$s" title="%2$s">%3$s</a>', $this->display( 'AuthorURI', true, $translate ), $attr, $value );
 				} elseif ( ! $value ) {
 					$value = __( 'Anonymous' );
 				}
@@ -723,7 +726,7 @@ final class WP_Theme implements ArrayAccess {
 				}
 
 				return $value;
-
+				break;
 			default :
 				$value = translate( $value, $this->get('TextDomain') );
 		}

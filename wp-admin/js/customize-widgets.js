@@ -5,7 +5,7 @@
 
 	// Set up our namespace...
 	var api = wp.customize,
-		l10n;
+		l10n, OldPreviewer;
 
 	api.Widgets = api.Widgets || {};
 
@@ -185,7 +185,7 @@
 			} );
 
 			// Close the panel if the URL in the preview changes
-			api.previewer.bind( 'url', this.close );
+			api.Widgets.Previewer.bind( 'url', this.close );
 		},
 
 		// Performs a search and handles selected widget
@@ -316,13 +316,10 @@
 				isEsc = ( event.which === 27 ),
 				isDown = ( event.which === 40 ),
 				isUp = ( event.which === 38 ),
-				isTab = ( event.which === 9 ),
-				isShift = ( event.shiftKey ),
 				selected = null,
 				firstVisible = this.$el.find( '> .widget-tpl:visible:first' ),
 				lastVisible = this.$el.find( '> .widget-tpl:visible:last' ),
-				isSearchFocused = $( event.target ).is( this.$search ),
-				isLastWidgetFocused = $( event.target ).is( '.widget-tpl:visible:last' );
+				isSearchFocused = $( event.target ).is( this.$search );
 
 			if ( isDown || isUp ) {
 				if ( isDown ) {
@@ -359,11 +356,6 @@
 				this.submit();
 			} else if ( isEsc ) {
 				this.close( { returnFocus: true } );
-			}
-
-			if ( isTab && ( isShift && isSearchFocused || ! isShift && isLastWidgetFocused ) ) {
-				this.currentSidebarControl.container.find( '.add-new-widget' ).focus();
-				event.preventDefault();
 			}
 		}
 	});
@@ -623,9 +615,7 @@
 			 * Handle clicks for up/down/move on the reorder nav
 			 */
 			$reorderNav = this.container.find( '.widget-reorder-nav' );
-			$reorderNav.find( '.move-widget, .move-widget-down, .move-widget-up' ).each( function() {
-				$( this ).prepend( self.container.find( '.widget-title' ).text() + ': ' );
-			} ).on( 'click keypress', function( event ) {
+			$reorderNav.find( '.move-widget, .move-widget-down, .move-widget-up' ).on( 'click keypress', function( event ) {
 				if ( event.type === 'keypress' && ( event.which !== 13 && event.which !== 32 ) ) {
 					return;
 				}
@@ -755,10 +745,17 @@
 				self.container.removeClass( 'previewer-loading' );
 			} );
 
-			api.previewer.bind( 'widget-updated', function( updatedWidgetId ) {
+			api.Widgets.Previewer.bind( 'widget-updated', function( updatedWidgetId ) {
 				if ( updatedWidgetId === self.params.widget_id ) {
 					self.container.removeClass( 'previewer-loading' );
 				}
+			} );
+
+			// Update widget control to indicate whether it is currently rendered
+			api.Widgets.Previewer.bind( 'rendered-widgets', function( renderedWidgets ) {
+				var isRendered = !! renderedWidgets[self.params.widget_id];
+
+				self.container.toggleClass( 'widget-rendered', isRendered );
 			} );
 
 			formSyncHandler = api.Widgets.formSyncHandlers[ this.params.widget_id_base ];
@@ -769,17 +766,6 @@
 					}
 				} );
 			}
-		},
-
-		/**
-		 * Update widget control to indicate whether it is currently rendered.
-		 *
-		 * Overrides api.Control.toggle()
-		 *
-		 * @param {Boolean} active
-		 */
-		toggle: function ( active ) {
-			this.container.toggleClass( 'widget-rendered', active );
 		},
 
 		/**
@@ -985,17 +971,17 @@
 
 				// Check if the user is logged out.
 				if ( '0' === r ) {
-					api.previewer.preview.iframe.hide();
-					api.previewer.login().done( function() {
+					api.Widgets.Previewer.preview.iframe.hide();
+					api.Widgets.Previewer.login().done( function() {
 						self.updateWidget( args );
-						api.previewer.preview.iframe.show();
+						api.Widgets.Previewer.preview.iframe.show();
 					} );
 					return;
 				}
 
 				// Check for cheaters.
 				if ( '-1' === r ) {
-					api.previewer.cheatin();
+					api.Widgets.Previewer.cheatin();
 					return;
 				}
 
@@ -1432,38 +1418,32 @@
 			} );
 
 			// Update the model with whether or not the sidebar is rendered
-			self.active.bind( function ( active ) {
-				registeredSidebar.set( 'is_rendered', active );
+			api.Widgets.Previewer.bind( 'rendered-sidebars', function( renderedSidebars ) {
+				var isRendered = !! renderedSidebars[self.params.sidebar_id];
+
+				registeredSidebar.set( 'is_rendered', isRendered );
 			} );
-		},
 
-		/**
-		 * Show the sidebar section when it becomes visible.
-		 *
-		 * Overrides api.Control.toggle()
-		 *
-		 * @param {Boolean} active
-		 */
-		toggle: function ( active ) {
-			var $section, sectionSelector;
+			// Show the sidebar section when it becomes visible
+			registeredSidebar.on( 'change:is_rendered', function( ) {
+				var sectionSelector = '#accordion-section-sidebar-widgets-' + this.get( 'id' ), $section;
 
-			sectionSelector = '#accordion-section-sidebar-widgets-' + this.params.sidebar_id;
-			$section = $( sectionSelector );
+				$section = $( sectionSelector );
+				if ( this.get( 'is_rendered' ) ) {
+					$section.stop().slideDown( function() {
+						$( this ).css( 'height', 'auto' ); // so that the .accordion-section-content won't overflow
+					} );
 
-			if ( active ) {
-				$section.stop().slideDown( function() {
-					$( this ).css( 'height', 'auto' ); // so that the .accordion-section-content won't overflow
-				} );
+				} else {
+					// Make sure that hidden sections get closed first
+					if ( $section.hasClass( 'open' ) ) {
+						// it would be nice if accordionSwitch() in accordion.js was public
+						$section.find( '.accordion-section-title' ).trigger( 'click' );
+					}
 
-			} else {
-				// Make sure that hidden sections get closed first
-				if ( $section.hasClass( 'open' ) ) {
-					// it would be nice if accordionSwitch() in accordion.js was public
-					$section.find( '.accordion-section-title' ).trigger( 'click' );
+					$section.stop().slideUp();
 				}
-
-				$section.stop().slideUp();
-			}
+			} );
 		},
 
 		/**
@@ -1586,11 +1566,6 @@
 				_( this.getWidgetFormControls() ).each( function( formControl ) {
 					formControl.collapseForm();
 				} );
-
-				this.$sectionContent.find( '.first-widget .move-widget' ).focus();
-				this.$sectionContent.find( '.add-new-widget' ).prop( 'tabIndex', -1 );
-			} else {
-				this.$sectionContent.find( '.add-new-widget' ).prop( 'tabIndex', 0 );
 			}
 		},
 
@@ -1764,6 +1739,18 @@
 	});
 
 	/**
+	 * Capture the instance of the Previewer since it is private
+	 */
+	OldPreviewer = api.Previewer;
+	api.Previewer = OldPreviewer.extend({
+		initialize: function( params, options ) {
+			api.Widgets.Previewer = this;
+			OldPreviewer.prototype.initialize.call( this, params, options );
+			this.bind( 'refresh', this.refresh );
+		}
+	} );
+
+	/**
 	 * Init Customizer for widgets.
 	 */
 	api.bind( 'ready', function() {
@@ -1773,10 +1760,10 @@
 		});
 
 		// Highlight widget control
-		api.previewer.bind( 'highlight-widget-control', api.Widgets.highlightWidgetFormControl );
+		api.Widgets.Previewer.bind( 'highlight-widget-control', api.Widgets.highlightWidgetFormControl );
 
 		// Open and focus widget control
-		api.previewer.bind( 'focus-widget-control', api.Widgets.focusWidgetFormControl );
+		api.Widgets.Previewer.bind( 'focus-widget-control', api.Widgets.focusWidgetFormControl );
 	} );
 
 	/**

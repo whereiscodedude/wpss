@@ -18,7 +18,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 
 	protected $image = null; // Imagick Object
 
-	public function __destruct() {
+	function __destruct() {
 		if ( $this->image instanceof Imagick ) {
 			// we don't need the original in memory anymore
 			$this->image->clear();
@@ -143,7 +143,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 		if ( is_wp_error( $updated_size ) )
 				return $updated_size;
 
-		return true;
+		return $this->set_quality( $this->quality );
 	}
 
 	/**
@@ -160,7 +160,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 		if ( is_wp_error( $quality_result ) ) {
 			return $quality_result;
 		} else {
-			$quality = $this->get_quality();
+			$quality = $this->quality;
 		}
 
 		try {

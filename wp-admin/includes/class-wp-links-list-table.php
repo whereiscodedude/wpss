@@ -9,18 +9,18 @@
  */
 class WP_Links_List_Table extends WP_List_Table {
 
-	public function __construct( $args = array() ) {
+	function __construct( $args = array() ) {
 		parent::__construct( array(
 			'plural' => 'bookmarks',
 			'screen' => isset( $args['screen'] ) ? $args['screen'] : null,
 		) );
 	}
 
-	public function ajax_user_can() {
+	function ajax_user_can() {
 		return current_user_can( 'manage_links' );
 	}
 
-	public function prepare_items() {
+	function prepare_items() {
 		global $cat_id, $s, $orderby, $order;
 
 		wp_reset_vars( array( 'action', 'cat_id', 'link_id', 'orderby', 'order', 's' ) );
@@ -39,18 +39,18 @@ class WP_Links_List_Table extends WP_List_Table {
 		$this->items = get_bookmarks( $args );
 	}
 
-	public function no_items() {
+	function no_items() {
 		_e( 'No links found.' );
 	}
 
-	protected function get_bulk_actions() {
+	function get_bulk_actions() {
 		$actions = array();
 		$actions['delete'] = __( 'Delete' );
 
 		return $actions;
 	}
 
-	protected function extra_tablenav( $which ) {
+	function extra_tablenav( $which ) {
 		global $cat_id;
 
 		if ( 'top' != $which )
@@ -69,13 +69,13 @@ class WP_Links_List_Table extends WP_List_Table {
 				'orderby' => 'name',
 			);
 			wp_dropdown_categories( $dropdown_options );
-			submit_button( __( 'Filter' ), 'button', 'filter_action', false, array( 'id' => 'post-query-submit' ) );
+			submit_button( __( 'Filter' ), 'button', false, false, array( 'id' => 'post-query-submit' ) );
 ?>
 		</div>
 <?php
 	}
 
-	public function get_columns() {
+	function get_columns() {
 		return array(
 			'cb'         => '<input type="checkbox" />',
 			'name'       => _x( 'Name', 'link name' ),
@@ -87,7 +87,7 @@ class WP_Links_List_Table extends WP_List_Table {
 		);
 	}
 
-	protected function get_sortable_columns() {
+	function get_sortable_columns() {
 		return array(
 			'name'    => 'name',
 			'url'     => 'url',
@@ -96,7 +96,7 @@ class WP_Links_List_Table extends WP_List_Table {
 		);
 	}
 
-	public function display_rows() {
+	function display_rows() {
 		global $cat_id;
 
 		$alt = 0;

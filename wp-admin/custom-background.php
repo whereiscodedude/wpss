@@ -22,7 +22,7 @@ class Custom_Background {
 	 * @since 3.0.0
 	 * @access private
 	 */
-	private $admin_header_callback;
+	var $admin_header_callback;
 
 	/**
 	 * Callback for header div.
@@ -31,7 +31,7 @@ class Custom_Background {
 	 * @since 3.0.0
 	 * @access private
 	 */
-	private $admin_image_div_callback;
+	var $admin_image_div_callback;
 
 	/**
 	 * Holds the page menu hook.
@@ -40,7 +40,7 @@ class Custom_Background {
 	 * @since 3.0.0
 	 * @access private
 	 */
-	private $page = '';
+	var $page = '';
 
 	/**
 	 * Constructor - Register administration header callback.
@@ -50,7 +50,7 @@ class Custom_Background {
 	 * @param callback $admin_image_div_callback Optional custom image div output callback.
 	 * @return Custom_Background
 	 */
-	public function __construct($admin_header_callback = '', $admin_image_div_callback = '') {
+	function __construct($admin_header_callback = '', $admin_image_div_callback = '') {
 		$this->admin_header_callback = $admin_header_callback;
 		$this->admin_image_div_callback = $admin_image_div_callback;
 
@@ -59,63 +59,11 @@ class Custom_Background {
 	}
 
 	/**
-	 * Make private properties readable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property name.
-	 * @return mixed Property.
-	 */
-	public function __get( $name ) {
-		return $this->$name;
-	}
-
-	/**
-	 * Make private properties setable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name  Property to set.
-	 * @param mixed  $value Property value.
-	 * @return mixed Newly-set property.
-	 */
-	public function __set( $name, $value ) {
-		return $this->$name = $value;
-	}
-
-	/**
-	 * Make private properties checkable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property to check if set.
-	 * @return bool Whether the property is set.
-	 */
-	public function __isset( $name ) {
-		return isset( $this->$name );
-	}
-
-	/**
-	 * Make private properties unsetable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property to unset.
-	 */
-	public function __unset( $name ) {
-		unset( $this->$name );
-	}
-
-	/**
 	 * Set up the hooks for the Custom Background admin page.
 	 *
 	 * @since 3.0.0
 	 */
-	public function init() {
+	function init() {
 		if ( ! current_user_can('edit_theme_options') )
 			return;
 
@@ -134,7 +82,7 @@ class Custom_Background {
 	 *
 	 * @since 3.0.0
 	 */
-	public function admin_load() {
+	function admin_load() {
 		get_current_screen()->add_help_tab( array(
 			'id'      => 'overview',
 			'title'   => __('Overview'),
@@ -161,7 +109,7 @@ class Custom_Background {
 	 *
 	 * @since 3.0.0
 	 */
-	public function take_action() {
+	function take_action() {
 
 		if ( empty($_POST) )
 			return;
@@ -228,7 +176,7 @@ class Custom_Background {
 	 *
 	 * @since 3.0.0
 	 */
-	public function admin_page() {
+	function admin_page() {
 ?>
 <div class="wrap" id="custom-background">
 <h2><?php _e( 'Custom Background' ); ?></h2>
@@ -256,8 +204,7 @@ class Custom_Background {
 
 		if ( get_background_image() ) {
 			$background_image_thumb = esc_url( set_url_scheme( get_theme_mod( 'background_image_thumb', str_replace( '%', '%%', get_background_image() ) ) ) );
-
-			// Background-image URL must be single quote, see below.
+			// background-image URL must be single quote, see below
 			$background_styles .= ' background-image: url(\'' . $background_image_thumb . '\');'
 				. ' background-repeat: ' . get_theme_mod( 'background_repeat', get_theme_support( 'custom-background', 'default-repeat' ) ) . ';'
 				. ' background-position: top ' . get_theme_mod( 'background_position_x', get_theme_support( 'custom-background', 'default-position-x' ) );
@@ -396,7 +343,7 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 	 *
 	 * @since 3.0.0
 	 */
-	public function handle_upload() {
+	function handle_upload() {
 
 		if ( empty($_FILES) )
 			return;
@@ -450,7 +397,7 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 	 *
 	 * @since 3.4.0
 	 */
-	public function attachment_fields_to_edit( $form_fields ) {
+	function attachment_fields_to_edit( $form_fields ) {
 		return $form_fields;
 	}
 
@@ -459,7 +406,7 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 	 *
 	 * @since 3.4.0
 	 */
-	public function filter_upload_tabs( $tabs ) {
+	function filter_upload_tabs( $tabs ) {
 		return $tabs;
 	}
 

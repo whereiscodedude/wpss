@@ -18,7 +18,7 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 
 	protected $image = false; // GD Resource
 
-	public function __destruct() {
+	function __destruct() {
 		if ( $this->image ) {
 			// we don't need the original in memory anymore
 			imagedestroy( $this->image );
@@ -114,7 +114,7 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 		$this->update_size( $size[0], $size[1] );
 		$this->mime_type = $size['mime'];
 
-		return true;
+		return $this->set_quality( $this->quality );
 	}
 
 	/**
@@ -387,7 +387,7 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 				return new WP_Error( 'image_save_error', __('Image Editor Save Failed') );
 		}
 		elseif ( 'image/jpeg' == $mime_type ) {
-			if ( ! $this->make_image( $filename, 'imagejpeg', array( $image, $filename, $this->get_quality() ) ) )
+			if ( ! $this->make_image( $filename, 'imagejpeg', array( $image, $filename, $this->quality ) ) )
 				return new WP_Error( 'image_save_error', __('Image Editor Save Failed') );
 		}
 		else {
@@ -435,7 +435,7 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 				return imagegif( $this->image );
 			default:
 				header( 'Content-Type: image/jpeg' );
-				return imagejpeg( $this->image, null, $this->get_quality() );
+				return imagejpeg( $this->image, null, $this->quality );
 		}
 	}
 
