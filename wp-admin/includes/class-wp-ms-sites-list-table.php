@@ -9,21 +9,19 @@
  */
 class WP_MS_Sites_List_Table extends WP_List_Table {
 
-	public function __construct( $args = array() ) {
+	function __construct( $args = array() ) {
 		parent::__construct( array(
 			'plural' => 'sites',
 			'screen' => isset( $args['screen'] ) ? $args['screen'] : null,
 		) );
 	}
 
-	public function ajax_user_can() {
+	function ajax_user_can() {
 		return current_user_can( 'manage_sites' );
 	}
 
-	public function prepare_items() {
-		global $s, $mode, $wpdb;
-
-		$current_site = get_current_site();
+	function prepare_items() {
+		global $s, $mode, $wpdb, $current_site;
 
 		$mode = ( empty( $_REQUEST['mode'] ) ) ? 'list' : $_REQUEST['mode'];
 
@@ -38,10 +36,10 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 			$s = trim($s, '*');
 		}
 
-		/*
-		 * If the network is large and a search is not being performed, show only
-		 * the latest blogs with no paging in order to avoid expensive count queries.
-		 */
+		$like_s = esc_sql( like_escape( $s ) );
+
+		// If the network is large and a search is not being performed, show only the latest blogs with no paging in order
+		// to avoid expensive count queries.
 		if ( !$s && wp_is_large_network() ) {
 			if ( !isset($_REQUEST['orderby']) )
 				$_GET['orderby'] = $_REQUEST['orderby'] = '';
@@ -58,8 +56,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 					preg_match( '/^[0-9]{1,3}\.[0-9]{1,3}\.?$/', $s ) ||
 					preg_match( '/^[0-9]{1,3}\.$/', $s ) ) {
 			// IPv4 address
-			$sql = $wpdb->prepare( "SELECT blog_id FROM {$wpdb->registration_log} WHERE {$wpdb->registration_log}.IP LIKE %s", $wpdb->esc_like( $s ) . $wild );
-			$reg_blog_ids = $wpdb->get_col( $sql );
+			$reg_blog_ids = $wpdb->get_col( "SELECT blog_id FROM {$wpdb->registration_log} WHERE {$wpdb->registration_log}.IP LIKE ( '{$like_s}$wild' )" );
 
 			if ( !$reg_blog_ids )
 				$reg_blog_ids = array( 0 );
@@ -70,18 +67,17 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 				AND {$wpdb->blogs}.blog_id IN (" . implode( ', ', $reg_blog_ids ) . ")";
 		} else {
 			if ( is_numeric($s) && empty( $wild ) ) {
-				$query .= $wpdb->prepare( " AND ( {$wpdb->blogs}.blog_id = %s )", $s );
+				$query .= " AND ( {$wpdb->blogs}.blog_id = '{$like_s}' )";
 			} elseif ( is_subdomain_install() ) {
-				$blog_s = str_replace( '.' . $current_site->domain, '', $s );
-				$blog_s = $wpdb->esc_like( $blog_s ) . $wild . $wpdb->esc_like( '.' . $current_site->domain );
-				$query .= $wpdb->prepare( " AND ( {$wpdb->blogs}.domain LIKE %s ) ", $blog_s );
+				$blog_s = str_replace( '.' . $current_site->domain, '', $like_s );
+				$blog_s .= $wild . '.' . $current_site->domain;
+				$query .= " AND ( {$wpdb->blogs}.domain LIKE '$blog_s' ) ";
 			} else {
-				if ( $s != trim('/', $current_site->path) ) {
-					$blog_s = $wpdb->esc_like( $current_site->path . $s ) . $wild . $wpdb->esc_like( '/' );
-				} else {
-					$blog_s = $wpdb->esc_like( $s );
-				}
-				$query .= $wpdb->prepare( " AND  ( {$wpdb->blogs}.path LIKE %s )", $blog_s );
+				if ( $like_s != trim('/', $current_site->path) )
+					$blog_s = $current_site->path . $like_s . $wild . '/';
+				else
+					$blog_s = $like_s;
+				$query .= " AND  ( {$wpdb->blogs}.path LIKE '$blog_s' )";
 			}
 		}
 
@@ -122,11 +118,11 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		) );
 	}
 
-	public function no_items() {
+	function no_items() {
 		_e( 'No sites found.' );
 	}
 
-	protected function get_bulk_actions() {
+	function get_bulk_actions() {
 		$actions = array();
 		if ( current_user_can( 'delete_sites' ) )
 			$actions['delete'] = __( 'Delete' );
@@ -136,7 +132,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		return $actions;
 	}
 
-	protected function pagination( $which ) {
+	function pagination( $which ) {
 		global $mode;
 
 		parent::pagination( $which );
@@ -145,7 +141,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 			$this->view_switcher( $mode );
 	}
 
-	public function get_columns() {
+	function get_columns() {
 		$blogname_columns = ( is_subdomain_install() ) ? __( 'Domain' ) : __( 'Path' );
 		$sites_columns = array(
 			'cb'          => '<input type="checkbox" />',
@@ -158,20 +154,12 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		if ( has_filter( 'wpmublogsaction' ) )
 			$sites_columns['plugins'] = __( 'Actions' );
 
-		/**
-		 * Filter the displayed site columns in Sites list table.
-		 *
-		 * @since MU
-		 *
-		 * @param array $sites_columns An array of displayed site columns. Default 'cb',
-		 *                             'blogname', 'lastupdated', 'registered', 'users'.
-		 */
 		$sites_columns = apply_filters( 'wpmu_blogs_columns', $sites_columns );
 
 		return $sites_columns;
 	}
 
-	protected function get_sortable_columns() {
+	function get_sortable_columns() {
 		return array(
 			'blogname'    => 'blogname',
 			'lastupdated' => 'lastupdated',
@@ -179,8 +167,8 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		);
 	}
 
-	public function display_rows() {
-		global $mode;
+	function display_rows() {
+		global $current_site, $mode;
 
 		$status_list = array(
 			'archived' => array( 'site-archived', __( 'Archived' ) ),
@@ -188,12 +176,6 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 			'deleted'  => array( 'site-deleted', __( 'Deleted' ) ),
 			'mature'   => array( 'site-mature', __( 'Mature' ) )
 		);
-
-		if ( 'list' == $mode ) {
-			$date = 'Y/m/d';
-		} else {
-			$date = 'Y/m/d \<\b\r \/\> g:i:s a';
-		}
 
 		$class = '';
 		foreach ( $this->items as $blog ) {
@@ -220,7 +202,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 			}
 			echo "<tr class='$class'>";
 
-			$blogname = ( is_subdomain_install() ) ? str_replace( '.' . get_current_site()->domain, '', $blog['domain'] ) : $blog['path'];
+			$blogname = ( is_subdomain_install() ) ? str_replace( '.'.$current_site->domain, '', $blog['domain'] ) : $blog['path'];
 
 			list( $columns, $hidden ) = $this->get_column_info();
 
@@ -241,7 +223,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 					break;
 
 					case 'id':?>
-						<th scope="row">
+						<th valign="top" scope="row">
 							<?php echo $blog['blog_id'] ?>
 						</th>
 					<?php
@@ -269,7 +251,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 
 							$actions['edit']	= '<span class="edit"><a href="' . esc_url( network_admin_url( 'site-info.php?id=' . $blog['blog_id'] ) ) . '">' . __( 'Edit' ) . '</a></span>';
 							$actions['backend']	= "<span class='backend'><a href='" . esc_url( get_admin_url( $blog['blog_id'] ) ) . "' class='edit'>" . __( 'Dashboard' ) . '</a></span>';
-							if ( get_current_site()->blog_id != $blog['blog_id'] ) {
+							if ( $current_site->blog_id != $blog['blog_id'] ) {
 								if ( get_blog_status( $blog['blog_id'], 'deleted' ) == '1' )
 									$actions['activate']	= '<span class="activate"><a href="' . esc_url( wp_nonce_url( network_admin_url( 'sites.php?action=confirm&amp;action2=activateblog&amp;id=' . $blog['blog_id'] . '&amp;msg=' . urlencode( sprintf( __( 'You are about to activate the site %s' ), $blogname ) ) ), 'confirm' ) ) . '">' . __( 'Activate' ) . '</a></span>';
 								else
@@ -291,21 +273,6 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 
 							$actions['visit']	= "<span class='view'><a href='" . esc_url( get_home_url( $blog['blog_id'], '/' ) ) . "' rel='permalink'>" . __( 'Visit' ) . '</a></span>';
 
-							/**
-							 * Filter the action links displayed for each site in the Sites list table.
-							 *
-							 * The 'Edit', 'Dashboard', 'Delete', and 'Visit' links are displayed by
-							 * default for each site. The site's status determines whether to show the
-							 * 'Activate' or 'Deactivate' link, 'Unarchive' or 'Archive' links, and
-							 * 'Not Spam' or 'Spam' link for each site.
-							 *
-							 * @since 3.1.0
-							 *
-							 * @param array  $actions  An array of action links to be displayed.
-							 * @param int    $blog_id  The site ID.
-							 * @param string $blogname Site path, formatted depending on whether it is a sub-domain
-							 *                         or subdirectory multisite install.
-							 */
 							$actions = apply_filters( 'manage_sites_action_links', array_filter( $actions ), $blog['blog_id'], $blogname );
 							echo $this->row_actions( $actions );
 					?>
@@ -314,13 +281,17 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 					break;
 
 					case 'lastupdated':
-						echo "<td class='$column_name column-$column_name'$style>";
+						echo "<td valign='top' class='$column_name column-$column_name'$style>";
+							if ( 'list' == $mode )
+								$date = 'Y/m/d';
+							else
+								$date = 'Y/m/d \<\b\r \/\> g:i:s a';
 							echo ( $blog['last_updated'] == '0000-00-00 00:00:00' ) ? __( 'Never' ) : mysql2date( $date, $blog['last_updated'] ); ?>
 						</td>
 					<?php
 					break;
 				case 'registered':
-						echo "<td class='$column_name column-$column_name'$style>";
+						echo "<td valign='top' class='$column_name column-$column_name'$style>";
 						if ( $blog['registered'] == '0000-00-00 00:00:00' )
 							echo '&#x2014;';
 						else
@@ -330,7 +301,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 					<?php
 					break;
 				case 'users':
-						echo "<td class='$column_name column-$column_name'$style>";
+						echo "<td valign='top' class='$column_name column-$column_name'$style>";
 							$blogusers = get_users( array( 'blog_id' => $blog['blog_id'], 'number' => 6) );
 							if ( is_array( $blogusers ) ) {
 								$blogusers_warning = '';
@@ -354,16 +325,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 
 				case 'plugins': ?>
 					<?php if ( has_filter( 'wpmublogsaction' ) ) {
-					echo "<td class='$column_name column-$column_name'$style>";
-						/**
-						 * Fires inside the auxiliary 'Actions' column of the Sites list table.
-						 *
-						 * By default this column is hidden unless something is hooked to the action.
-						 *
-						 * @since MU
-						 *
-						 * @param int $blog_id The site ID.
-						 */
+					echo "<td valign='top' class='$column_name column-$column_name'$style>";
 						do_action( 'wpmublogsaction', $blog['blog_id'] ); ?>
 					</td>
 					<?php }
@@ -371,14 +333,6 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 
 				default:
 					echo "<td class='$column_name column-$column_name'$style>";
-					/**
-					 * Fires for each registered custom column in the Sites list table.
-					 *
-					 * @since 3.1.0
-					 *
-					 * @param string $column_name The name of the column to display.
-					 * @param int    $blog_id     The site ID.
-					 */
 					do_action( 'manage_sites_custom_column', $column_name, $blog['blog_id'] );
 					echo "</td>";
 					break;

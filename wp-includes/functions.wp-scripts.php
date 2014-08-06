@@ -25,11 +25,6 @@
  * @return array On success, a processed array of WP_Dependencies items; otherwise, an empty array.
  */
 function wp_print_scripts( $handles = false ) {
-	/**
-	 * Fires before scripts in the $handles queue are printed.
-	 *
-	 * @since 2.1.0
-	 */
 	do_action( 'wp_print_scripts' );
 	if ( '' === $handles ) // for wp_head
 		$handles = false;
@@ -116,7 +111,8 @@ function wp_localize_script( $handle, $object_name, $l10n ) {
 		if ( ! did_action( 'init' ) )
 			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Scripts and styles should not be registered or enqueued until the %1$s, %2$s, or %3$s hooks.' ),
 				'<code>wp_enqueue_scripts</code>', '<code>admin_enqueue_scripts</code>', '<code>login_enqueue_scripts</code>' ), '3.3' );
-		$wp_scripts = new WP_Scripts();
+
+		return false;
 	}
 
 	return $wp_scripts->localize( $handle, $object_name, $l10n );

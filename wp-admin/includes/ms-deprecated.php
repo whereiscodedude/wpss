@@ -14,7 +14,7 @@
  */
 function wpmu_menu() {
 	_deprecated_function(__FUNCTION__, '3.0' );
-	// Deprecated. See #11763.
+	// deprecated. See #11763
 }
 
 /**

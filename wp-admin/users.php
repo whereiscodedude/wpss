@@ -43,9 +43,9 @@ $help = '<p>' . __('Hovering over a row in the users list will display action li
 	'<li>' . __('Edit takes you to the editable profile screen for that user. You can also reach that screen by clicking on the username.') . '</li>';
 
 if ( is_multisite() )
-	$help .= '<li>' . __( 'Remove allows you to remove a user from your site. It does not delete their content. You can also remove multiple users at once by using Bulk Actions.' ) . '</li>';
+	$help .= '<li>' . __( 'Remove allows you to remove a user from your site. It does not delete their posts. You can also remove multiple users at once by using Bulk Actions.' ) . '</li>';
 else
-	$help .= '<li>' . __( 'Delete brings you to the Delete Users screen for confirmation, where you can permanently remove a user from your site and delete their content. You can also delete multiple users at once by using Bulk Actions.' ) . '</li>';
+	$help .= '<li>' . __( 'Delete brings you to the Delete Users screen for confirmation, where you can permanently remove a user from your site and delete their posts. You can also delete multiple users at once by using Bulk Actions.' ) . '</li>';
 
 $help .= '</ul>';
 
@@ -60,7 +60,7 @@ get_current_screen()->set_help_sidebar(
     '<p><strong>' . __('For more information:') . '</strong></p>' .
     '<p>' . __('<a href="http://codex.wordpress.org/Users_Screen" target="_blank">Documentation on Managing Users</a>') . '</p>' .
     '<p>' . __('<a href="http://codex.wordpress.org/Roles_and_Capabilities" target="_blank">Descriptions of Roles and Capabilities</a>') . '</p>' .
-    '<p>' . __('<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
+    '<p>' . __('<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 );
 
 if ( empty($_REQUEST) ) {
@@ -137,6 +137,8 @@ case 'promote':
 	wp_redirect(add_query_arg('update', $update, $redirect));
 	exit();
 
+break;
+
 case 'dodelete':
 	if ( is_multisite() )
 		wp_die( __('User deletion is not allowed from this screen.') );
@@ -186,6 +188,8 @@ case 'dodelete':
 	wp_redirect($redirect);
 	exit();
 
+break;
+
 case 'delete':
 	if ( is_multisite() )
 		wp_die( __('User deletion is not allowed from this screen.') );
@@ -214,6 +218,7 @@ case 'delete':
 <?php echo $referer; ?>
 
 <div class="wrap">
+<?php screen_icon(); ?>
 <h2><?php _e('Delete Users'); ?></h2>
 <?php if ( isset( $_REQUEST['error'] ) ) : ?>
 <div class="error">
@@ -236,24 +241,14 @@ case 'delete':
 	?>
 	</ul>
 <?php if ( $go_delete ) : ?>
-	<fieldset><p><legend><?php echo _n( 'What should be done with content owned by this user?', 'What should be done with content owned by these users?', $go_delete ); ?></legend></p>
+	<fieldset><p><legend><?php echo _n( 'What should be done with posts owned by this user?', 'What should be done with posts owned by these users?', $go_delete ); ?></legend></p>
 	<ul style="list-style:none;">
 		<li><label><input type="radio" id="delete_option0" name="delete_option" value="delete" />
-		<?php _e('Delete all content.'); ?></label></li>
+		<?php _e('Delete all posts.'); ?></label></li>
 		<li><input type="radio" id="delete_option1" name="delete_option" value="reassign" />
-		<?php echo '<label for="delete_option1">' . __( 'Attribute all content to:' ) . '</label> ';
+		<?php echo '<label for="delete_option1">' . __( 'Attribute all posts to:' ) . '</label> ';
 		wp_dropdown_users( array( 'name' => 'reassign_user', 'exclude' => array_diff( $userids, array($current_user->ID) ) ) ); ?></li>
 	</ul></fieldset>
-	<?php
-	/**
-	 * Fires at the end of the delete users form prior to the confirm button.
-	 *
-	 * @since 4.0.0 
-	 *
-	 * @param WP_User $current_user WP_User object for the user being deleted.
-	 */
-	do_action( 'delete_user_form', $current_user );
-	?>
 	<input type="hidden" name="action" value="dodelete" />
 	<?php submit_button( __('Confirm Deletion'), 'secondary' ); ?>
 <?php else : ?>
@@ -299,6 +294,8 @@ case 'doremove':
 	wp_redirect($redirect);
 	exit;
 
+break;
+
 case 'remove':
 
 	check_admin_referer('bulk-users');
@@ -326,6 +323,7 @@ case 'remove':
 <?php echo $referer; ?>
 
 <div class="wrap">
+<?php screen_icon(); ?>
 <h2><?php _e('Remove Users from Site'); ?></h2>
 <p><?php _e('You have specified these users for removal:'); ?></p>
 <ul>
@@ -344,7 +342,6 @@ case 'remove':
 		}
  	}
  	?>
-</ul>
 <?php if ( $go_remove ) : ?>
 		<input type="hidden" name="action" value="doremove" />
 		<?php submit_button( __('Confirm Removal'), 'secondary' ); ?>
@@ -428,6 +425,7 @@ if ( ! empty($messages) ) {
 } ?>
 
 <div class="wrap">
+<?php screen_icon(); ?>
 <h2>
 <?php
 echo esc_html( $title );

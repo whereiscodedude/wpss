@@ -35,13 +35,13 @@
  */
 class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 
-	public $link = false;
-	public $sftp_link = false;
-	public $keys = false;
-	public $errors = array();
-	public $options = array();
+	var $link = false;
+	var $sftp_link = false;
+	var $keys = false;
+	var $errors = array();
+	var $options = array();
 
-	public function __construct($opt='') {
+	function __construct($opt='') {
 		$this->method = 'ssh2';
 		$this->errors = new WP_Error();
 
@@ -85,8 +85,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 			$this->options['username'] = $opt['username'];
 
 		if ( empty ($opt['password']) ) {
-			// Password can be blank if we are using keys.
-			if ( !$this->keys )
+			if ( !$this->keys )	//password can be blank if we are using keys
 				$this->errors->add('empty_password', __('SSH2 password is required'));
 		} else {
 			$this->options['password'] = $opt['password'];
@@ -94,7 +93,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 
 	}
 
-	public function connect() {
+	function connect() {
 		if ( ! $this->keys ) {
 			$this->link = @ssh2_connect($this->options['hostname'], $this->options['port']);
 		} else {
@@ -123,7 +122,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return true;
 	}
 
-	public function run_command( $command, $returnbool = false) {
+	function run_command( $command, $returnbool = false) {
 
 		if ( ! $this->link )
 			return false;
@@ -144,17 +143,17 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return false;
 	}
 
-	public function get_contents( $file ) {
+	function get_contents( $file ) {
 		$file = ltrim($file, '/');
 		return file_get_contents('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function get_contents_array($file) {
+	function get_contents_array($file) {
 		$file = ltrim($file, '/');
 		return file('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function put_contents($file, $contents, $mode = false ) {
+	function put_contents($file, $contents, $mode = false ) {
 		$ret = file_put_contents( 'ssh2.sftp://' . $this->sftp_link . '/' . ltrim( $file, '/' ), $contents );
 
 		if ( $ret !== strlen( $contents ) )
@@ -165,18 +164,18 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return true;
 	}
 
-	public function cwd() {
+	function cwd() {
 		$cwd = $this->run_command('pwd');
 		if ( $cwd )
 			$cwd = trailingslashit($cwd);
 		return $cwd;
 	}
 
-	public function chdir($dir) {
+	function chdir($dir) {
 		return $this->run_command('cd ' . $dir, true);
 	}
 
-	public function chgrp($file, $group, $recursive = false ) {
+	function chgrp($file, $group, $recursive = false ) {
 		if ( ! $this->exists($file) )
 			return false;
 		if ( ! $recursive || ! $this->is_dir($file) )
@@ -184,7 +183,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return $this->run_command(sprintf('chgrp -R %s %s', escapeshellarg($group), escapeshellarg($file)), true);
 	}
 
-	public function chmod($file, $mode = false, $recursive = false) {
+	function chmod($file, $mode = false, $recursive = false) {
 		if ( ! $this->exists($file) )
 			return false;
 
@@ -212,7 +211,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	 * @param bool $recursive Optional. If set True changes file owner recursivly. Defaults to False.
 	 * @return bool Returns true on success or false on failure.
 	 */
-	public function chown( $file, $owner, $recursive = false ) {
+	function chown( $file, $owner, $recursive = false ) {
 		if ( ! $this->exists($file) )
 			return false;
 		if ( ! $recursive || ! $this->is_dir($file) )
@@ -220,7 +219,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return $this->run_command(sprintf('chown -R %s %s', escapeshellarg($owner), escapeshellarg($file)), true);
 	}
 
-	public function owner($file) {
+	function owner($file) {
 		$owneruid = @fileowner('ssh2.sftp://' . $this->sftp_link . '/' . ltrim($file, '/'));
 		if ( ! $owneruid )
 			return false;
@@ -230,11 +229,11 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return $ownerarray['name'];
 	}
 
-	public function getchmod($file) {
-		return substr( decoct( @fileperms( 'ssh2.sftp://' . $this->sftp_link . '/' . ltrim( $file, '/' ) ) ), -3 );
+	function getchmod($file) {
+		return substr(decoct(@fileperms( 'ssh2.sftp://' . $this->sftp_link . '/' . ltrim($file, '/') )),3);
 	}
 
-	public function group($file) {
+	function group($file) {
 		$gid = @filegroup('ssh2.sftp://' . $this->sftp_link . '/' . ltrim($file, '/'));
 		if ( ! $gid )
 			return false;
@@ -244,7 +243,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return $grouparray['name'];
 	}
 
-	public function copy($source, $destination, $overwrite = false, $mode = false) {
+	function copy($source, $destination, $overwrite = false, $mode = false) {
 		if ( ! $overwrite && $this->exists($destination) )
 			return false;
 		$content = $this->get_contents($source);
@@ -253,11 +252,11 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return $this->put_contents($destination, $content, $mode);
 	}
 
-	public function move($source, $destination, $overwrite = false) {
+	function move($source, $destination, $overwrite = false) {
 		return @ssh2_sftp_rename($this->link, $source, $destination);
 	}
 
-	public function delete($file, $recursive = false, $type = false) {
+	function delete($file, $recursive = false, $type = false) {
 		if ( 'f' == $type || $this->is_file($file) )
 			return ssh2_sftp_unlink($this->sftp_link, $file);
 		if ( ! $recursive )
@@ -271,51 +270,51 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return ssh2_sftp_rmdir($this->sftp_link, $file);
 	}
 
-	public function exists($file) {
+	function exists($file) {
 		$file = ltrim($file, '/');
 		return file_exists('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function is_file($file) {
+	function is_file($file) {
 		$file = ltrim($file, '/');
 		return is_file('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function is_dir($path) {
+	function is_dir($path) {
 		$path = ltrim($path, '/');
 		return is_dir('ssh2.sftp://' . $this->sftp_link . '/' . $path);
 	}
 
-	public function is_readable($file) {
+	function is_readable($file) {
 		$file = ltrim($file, '/');
 		return is_readable('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function is_writable($file) {
+	function is_writable($file) {
 		$file = ltrim($file, '/');
 		return is_writable('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function atime($file) {
+	function atime($file) {
 		$file = ltrim($file, '/');
 		return fileatime('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function mtime($file) {
+	function mtime($file) {
 		$file = ltrim($file, '/');
 		return filemtime('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function size($file) {
+	function size($file) {
 		$file = ltrim($file, '/');
 		return filesize('ssh2.sftp://' . $this->sftp_link . '/' . $file);
 	}
 
-	public function touch($file, $time = 0, $atime = 0) {
+	function touch($file, $time = 0, $atime = 0) {
 		//Not implemented.
 	}
 
-	public function mkdir($path, $chmod = false, $chown = false, $chgrp = false) {
+	function mkdir($path, $chmod = false, $chown = false, $chgrp = false) {
 		$path = untrailingslashit($path);
 		if ( empty($path) )
 			return false;
@@ -331,11 +330,11 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		return true;
 	}
 
-	public function rmdir($path, $recursive = false) {
+	function rmdir($path, $recursive = false) {
 		return $this->delete($path, $recursive);
 	}
 
-	public function dirlist($path, $include_hidden = true, $recursive = false) {
+	function dirlist($path, $include_hidden = true, $recursive = false) {
 		if ( $this->is_file($path) ) {
 			$limit_file = basename($path);
 			$path = dirname($path);
