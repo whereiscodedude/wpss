@@ -1,18 +1,12 @@
 <?php
 /**
- * Server-side file upload handler from wp-plupload, swfupload or other asynchronous upload methods.
+ * Accepts file uploads from swfupload or other asynchronous upload methods.
  *
  * @package WordPress
  * @subpackage Administration
  */
 
-if ( isset( $_REQUEST['action'] ) && 'upload-attachment' === $_REQUEST['action'] ) {
-	define( 'DOING_AJAX', true );
-}
-
-if ( ! defined( 'WP_ADMIN' ) ) {
-	define( 'WP_ADMIN', true );
-}
+define('WP_ADMIN', true);
 
 if ( defined('ABSPATH') )
 	require_once(ABSPATH . 'wp-load.php');
@@ -32,8 +26,14 @@ if ( ! ( isset( $_REQUEST['action'] ) && 'upload-attachment' == $_REQUEST['actio
 
 require_once( ABSPATH . 'wp-admin/admin.php' );
 
+if ( !current_user_can('upload_files') )
+	wp_die(__('You do not have permission to upload files.'));
+
+header('Content-Type: text/html; charset=' . get_option('blog_charset'));
+
 if ( isset( $_REQUEST['action'] ) && 'upload-attachment' === $_REQUEST['action'] ) {
-	include( ABSPATH . 'wp-admin/includes/ajax-actions.php' );
+	define( 'DOING_AJAX', true );
+	include ABSPATH . 'wp-admin/includes/ajax-actions.php';
 
 	send_nosniff_header();
 	nocache_headers();
@@ -41,12 +41,6 @@ if ( isset( $_REQUEST['action'] ) && 'upload-attachment' === $_REQUEST['action']
 	wp_ajax_upload_attachment();
 	die( '0' );
 }
-
-if ( ! current_user_can( 'upload_files' ) ) {
-	wp_die( __( 'You do not have permission to upload files.' ) );
-}
-
-header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 
 // just fetch the detail form for that attachment
 if ( isset($_REQUEST['attachment_id']) && ($id = intval($_REQUEST['attachment_id'])) && $_REQUEST['fetch'] ) {
@@ -87,7 +81,7 @@ if ( isset( $_REQUEST['post_id'] ) ) {
 
 $id = media_handle_upload( 'async-upload', $post_id );
 if ( is_wp_error($id) ) {
-	echo '<div class="error-div error">
+	echo '<div class="error-div">
 	<a class="dismiss" href="#" onclick="jQuery(this).parents(\'div.media-item\').slideUp(200, function(){jQuery(this).remove();});">' . __('Dismiss') . '</a>
 	<strong>' . sprintf(__('&#8220;%s&#8221; has failed to upload due to an error'), esc_html($_FILES['async-upload']['name']) ) . '</strong><br />' .
 	esc_html($id->get_error_message()) . '</div>';
@@ -95,21 +89,10 @@ if ( is_wp_error($id) ) {
 }
 
 if ( $_REQUEST['short'] ) {
-	// Short form response - attachment ID only.
+	// short form response - attachment ID only
 	echo $id;
 } else {
-	// Long form response - big chunk o html.
+	// long form response - big chunk o html
 	$type = $_REQUEST['type'];
-
-	/**
-	 * Filter the returned ID of an uploaded attachment.
-	 *
-	 * The dynamic portion of the hook name, $type, refers to the attachment type,
-	 * such as 'image', 'audio', 'video', 'file', etc.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param int $id Uploaded attachment ID.
-	 */
-	echo apply_filters( "async_upload_{$type}", $id );
+	echo apply_filters("async_upload_{$type}", $id);
 }

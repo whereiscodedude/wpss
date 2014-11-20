@@ -15,6 +15,7 @@
  * passing an array with one string prints that style,
  * and passing an array of strings prints those styles.
  *
+ * @see do_action() Calls 'wp_print_styles' hook.
  * @global WP_Styles $wp_styles The WP_Styles object for printing styles.
  *
  * @since 2.6.0
@@ -25,11 +26,7 @@
 function wp_print_styles( $handles = false ) {
 	if ( '' === $handles ) // for wp_head
 		$handles = false;
-	/**
-	 * Fires before styles in the $handles queue are printed.
-	 *
-	 * @since 2.6.0
-	 */
+
 	if ( ! $handles )
 		do_action( 'wp_print_styles' );
 
@@ -75,7 +72,7 @@ function wp_add_inline_style( $handle, $data ) {
 	}
 
 	if ( false !== stripos( $data, '</style>' ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'Do not pass style tags to wp_add_inline_style().' ), '3.7' );
+		_doing_it_wrong( __FUNCTION__, 'Do not pass style tags to wp_add_inline_style().', '3.7' );
 		$data = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $data ) );
 	}
 

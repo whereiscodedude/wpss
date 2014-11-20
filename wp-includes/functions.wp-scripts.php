@@ -25,11 +25,6 @@
  * @return array On success, a processed array of WP_Dependencies items; otherwise, an empty array.
  */
 function wp_print_scripts( $handles = false ) {
-	/**
-	 * Fires before scripts in the $handles queue are printed.
-	 *
-	 * @since 2.1.0
-	 */
 	do_action( 'wp_print_scripts' );
 	if ( '' === $handles ) // for wp_head
 		$handles = false;
@@ -99,7 +94,7 @@ function wp_register_script( $handle, $src, $deps = array(), $ver = false, $in_f
  * </code>
  *
  * @see WP_Dependencies::localize()
- * @link https://core.trac.wordpress.org/ticket/11520
+ * @link http://core.trac.wordpress.org/ticket/11520
  * @global WP_Scripts $wp_scripts The WP_Scripts object for printing scripts.
  *
  * @since 2.6.0
