@@ -19,7 +19,7 @@ class WP_Filesystem_Base {
 	 * @since 2.5.0
 	 * @var bool
 	 */
-	public $verbose = false;
+	var $verbose = false;
 
 	/**
 	 * Cached list of local filepaths to mapped remote filepaths.
@@ -28,7 +28,7 @@ class WP_Filesystem_Base {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	private $cache = array();
+	var $cache = array();
 
 	/**
 	 * The Access method of the current connection, Set automatically.
@@ -37,59 +37,12 @@ class WP_Filesystem_Base {
 	 * @since 2.5.0
 	 * @var string
 	 */
-	public $method = '';
+	var $method = '';
 
 	/**
-	 * Make private properties readable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property to get.
-	 * @return mixed Property.
+	 * Constructor (empty).
 	 */
-	public function __get( $name ) {
-		return $this->$name;
-	}
-
-	/**
-	 * Make private properties settable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name  Property to set.
-	 * @param mixed  $value Property value.
-	 * @return mixed Newly-set property.
-	 */
-	public function __set( $name, $value ) {
-		return $this->$name = $value;
-	}
-
-	/**
-	 * Make private properties checkable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property to check if set.
-	 * @return bool Whether the property is set.
-	 */
-	public function __isset( $name ) {
-		return isset( $this->$name );
-	}
-
-	/**
-	 * Make private properties un-settable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property to unset.
-	 */
-	public function __unset( $name ) {
-		unset( $this->$name );
-	}
+	function __construct() {}
 
 	/**
 	 * Return the path on the remote filesystem of ABSPATH.
@@ -99,10 +52,10 @@ class WP_Filesystem_Base {
 	 *
 	 * @return string The location of the remote path.
 	 */
-	public function abspath() {
+	function abspath() {
 		$folder = $this->find_folder(ABSPATH);
 		// Perhaps the FTP folder is rooted at the WordPress install, Check for wp-includes folder in root, Could have some false positives, but rare.
-		if ( ! $folder && $this->is_dir( '/' . WPINC ) )
+		if ( ! $folder && $this->is_dir('/wp-includes') )
 			$folder = '/';
 		return $folder;
 	}
@@ -115,7 +68,7 @@ class WP_Filesystem_Base {
 	 *
 	 * @return string The location of the remote path.
 	 */
-	public function wp_content_dir() {
+	function wp_content_dir() {
 		return $this->find_folder(WP_CONTENT_DIR);
 	}
 
@@ -127,7 +80,7 @@ class WP_Filesystem_Base {
 	 *
 	 * @return string The location of the remote path.
 	 */
-	public function wp_plugins_dir() {
+	function wp_plugins_dir() {
 		return $this->find_folder(WP_PLUGIN_DIR);
 	}
 
@@ -140,7 +93,7 @@ class WP_Filesystem_Base {
 	 * @param string $theme The Theme stylesheet or template for the directory.
 	 * @return string The location of the remote path.
 	 */
-	public function wp_themes_dir( $theme = false ) {
+	function wp_themes_dir( $theme = false ) {
 		$theme_root = get_theme_root( $theme );
 
 		// Account for relative theme roots
@@ -158,7 +111,7 @@ class WP_Filesystem_Base {
 	 *
 	 * @return string The location of the remote path.
 	 */
-	public function wp_lang_dir() {
+	function wp_lang_dir() {
 		return $this->find_folder(WP_LANG_DIR);
 	}
 
@@ -179,7 +132,7 @@ class WP_Filesystem_Base {
 	 *                     Default false.
 	 * @return string The location of the remote path.
 	 */
-	public function find_base_dir( $base = '.', $echo = false ) {
+	function find_base_dir( $base = '.', $echo = false ) {
 		_deprecated_function(__FUNCTION__, '2.7', 'WP_Filesystem::abspath() or WP_Filesystem::wp_*_dir()' );
 		$this->verbose = $echo;
 		return $this->abspath();
@@ -201,7 +154,7 @@ class WP_Filesystem_Base {
 	 * @param bool   $echo True to display debug information.
 	 * @return string The location of the remote path.
 	 */
-	public function get_base_dir( $base = '.', $echo = false ) {
+	function get_base_dir( $base = '.', $echo = false ) {
 		_deprecated_function(__FUNCTION__, '2.7', 'WP_Filesystem::abspath() or WP_Filesystem::wp_*_dir()' );
 		$this->verbose = $echo;
 		return $this->abspath();
@@ -219,7 +172,7 @@ class WP_Filesystem_Base {
 	 * @param string $folder the folder to locate.
 	 * @return string The location of the remote path.
 	 */
-	public function find_folder( $folder ) {
+	function find_folder( $folder ) {
 
 		if ( isset( $this->cache[ $folder ] ) )
 			return $this->cache[ $folder ];
@@ -288,7 +241,7 @@ class WP_Filesystem_Base {
 	 * @param bool   $loop   If the function has recursed, Internal use only.
 	 * @return string The location of the remote path.
 	 */
-	public function search_for_folder( $folder, $base = '.', $loop = false ) {
+	function search_for_folder( $folder, $base = '.', $loop = false ) {
 		if ( empty( $base ) || '.' == $base )
 			$base = trailingslashit($this->cwd());
 
@@ -308,21 +261,16 @@ class WP_Filesystem_Base {
 			if ( $index == $last_index )
 				continue; // We want this to be caught by the next code block.
 
-			/*
-			 * Working from /home/ to /user/ to /wordpress/ see if that file exists within
-			 * the current folder, If it's found, change into it and follow through looking
-			 * for it. If it cant find WordPress down that route, it'll continue onto the next
-			 * folder level, and see if that matches, and so on. If it reaches the end, and still
-			 * cant find it, it'll return false for the entire function.
-			 */
+			// Working from /home/ to /user/ to /wordpress/ see if that file exists within the current folder,
+			// If it's found, change into it and follow through looking for it.
+			// If it cant find WordPress down that route, it'll continue onto the next folder level, and see if that matches, and so on.
+			// If it reaches the end, and still cant find it, it'll return false for the entire function.
 			if ( isset($files[ $key ]) ){
-
 				// Lets try that folder:
 				$newdir = trailingslashit(path_join($base, $key));
 				if ( $this->verbose )
 					printf( "\n" . __('Changing to %s') . "<br/>\n", $newdir );
-
-				// Only search for the remaining path tokens in the directory, not the full path again.
+				// only search for the remaining path tokens in the directory, not the full path again
 				$newfolder = implode( '/', array_slice( $folder_parts, $index + 1 ) );
 				if ( $ret = $this->search_for_folder( $newfolder, $newdir, $loop) )
 					return $ret;
@@ -360,7 +308,7 @@ class WP_Filesystem_Base {
 	 * @param string $file String filename.
 	 * @return string The *nix-style representation of permissions.
 	 */
-	public function gethchmod( $file ){
+	function gethchmod( $file ){
 		$perms = $this->getchmod($file);
 		if (($perms & 0xC000) == 0xC000) // Socket
 			$info = 's';
@@ -416,7 +364,7 @@ class WP_Filesystem_Base {
 	 * @param string $mode string The *nix-style file permission.
 	 * @return int octal representation
 	 */
-	public function getnumchmodfromh( $mode ) {
+	function getnumchmodfromh( $mode ) {
 		$realmode = '';
 		$legal =  array('', 'w', 'r', 'x', '-');
 		$attarray = preg_split('//', $mode);
@@ -445,7 +393,7 @@ class WP_Filesystem_Base {
 	 * @param string $text String to test against.
 	 * @return bool true if string is binary, false otherwise.
 	 */
-	public function is_binary( $text ) {
+	function is_binary( $text ) {
 		return (bool) preg_match( '|[^\x20-\x7E]|', $text ); // chr(32)..chr(127)
 	}
 
@@ -461,7 +409,7 @@ class WP_Filesystem_Base {
 	 * @param bool   $recursive Optional. If set True changes file owner recursivly. Defaults to False.
 	 * @return bool Returns true on success or false on failure.
 	 */
-	public function chown( $file, $owner, $recursive = false ) {
+	function chown( $file, $owner, $recursive = false ) {
 		return false;
 	}
 
@@ -472,7 +420,7 @@ class WP_Filesystem_Base {
 	 *
 	 * @return bool True on success or false on failure (always true for WP_Filesystem_Direct).
 	 */
-	public function connect() {
+	function connect() {
 		return true;
 	}
 
@@ -484,7 +432,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Name of the file to read.
 	 * @return string|bool Returns the read data or false on failure.
 	 */
-	public function get_contents( $file ) {
+	function get_contents( $file ) {
 		return false;
 	}
 
@@ -496,7 +444,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Path to the file.
 	 * @return array|bool the file contents in an array or false on failure.
 	 */
-	public function get_contents_array( $file ) {
+	function get_contents_array( $file ) {
 		return false;
 	}
 
@@ -510,7 +458,7 @@ class WP_Filesystem_Base {
 	 * @param int    $mode     Optional. The file permissions as octal number, usually 0644.
 	 * @return bool False on failure.
 	 */
-	public function put_contents( $file, $contents, $mode = false ) {
+	function put_contents( $file, $contents, $mode = false ) {
 		return false;
 	}
 
@@ -521,7 +469,7 @@ class WP_Filesystem_Base {
 	 *
 	 * @return string|bool The current working directory on success, or false on failure.
 	 */
-	public function cwd() {
+	function cwd() {
 		return false;
 	}
 
@@ -533,7 +481,7 @@ class WP_Filesystem_Base {
 	 * @param string $dir The new current directory.
 	 * @return bool Returns true on success or false on failure.
 	 */
-	public function chdir( $dir ) {
+	function chdir( $dir ) {
 		return false;
 	}
 
@@ -547,7 +495,7 @@ class WP_Filesystem_Base {
 	 * @param bool   $recursive Optional. If set True changes file group recursively. Defaults to False.
 	 * @return bool Returns true on success or false on failure.
 	 */
-	public function chgrp( $file, $group, $recursive = false ) {
+	function chgrp( $file, $group, $recursive = false ) {
 		return false;
 	}
 
@@ -561,7 +509,7 @@ class WP_Filesystem_Base {
 	 * @param bool   $recursive Optional. If set True changes file group recursively. Defaults to False.
 	 * @return bool Returns true on success or false on failure.
 	 */
-	public function chmod( $file, $mode = false, $recursive = false ) {
+	function chmod( $file, $mode = false, $recursive = false ) {
 		return false;
 	}
 
@@ -573,7 +521,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Path to the file.
 	 * @return string|bool Username of the user or false on error.
 	 */
-	public function owner( $file ) {
+	function owner( $file ) {
 		return false;
 	}
 
@@ -585,7 +533,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Path to the file.
 	 * @return string|bool The group or false on error.
 	 */
-	public function group( $file ) {
+	function group( $file ) {
 		return false;
 	}
 
@@ -602,7 +550,7 @@ class WP_Filesystem_Base {
 	 *                            Default false.
 	 * @return bool True if file copied successfully, False otherwise.
 	 */
-	public function copy( $source, $destination, $overwrite = false, $mode = false ) {
+	function copy( $source, $destination, $overwrite = false, $mode = false ) {
 		return false;
 	}
 
@@ -617,7 +565,7 @@ class WP_Filesystem_Base {
 	 *                            Default false.
 	 * @return bool True if file copied successfully, False otherwise.
 	 */
-	public function move( $source, $destination, $overwrite = false ) {
+	function move( $source, $destination, $overwrite = false ) {
 		return false;
 	}
 
@@ -633,7 +581,7 @@ class WP_Filesystem_Base {
 	 *                          Default false.
 	 * @return bool True if the file or directory was deleted, false on failure.
 	 */
-	public function delete( $file, $recursive = false, $type = false ) {
+	function delete( $file, $recursive = false, $type = false ) {
 		return false;
 	}
 
@@ -645,7 +593,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Path to file/directory.
 	 * @return bool Whether $file exists or not.
 	 */
-	public function exists( $file ) {
+	function exists( $file ) {
 		return false;
 	}
 
@@ -657,7 +605,7 @@ class WP_Filesystem_Base {
 	 * @param string $file File path.
 	 * @return bool Whether $file is a file.
 	 */
-	public function is_file( $file ) {
+	function is_file( $file ) {
 		return false;
 	}
 
@@ -669,7 +617,7 @@ class WP_Filesystem_Base {
 	 * @param string $path Directory path.
 	 * @return bool Whether $path is a directory.
 	 */
-	public function is_dir( $path ) {
+	function is_dir( $path ) {
 		return false;
 	}
 
@@ -681,7 +629,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Path to file.
 	 * @return bool Whether $file is readable.
 	 */
-	public function is_readable( $file ) {
+	function is_readable( $file ) {
 		return false;
 	}
 
@@ -693,7 +641,7 @@ class WP_Filesystem_Base {
 	 * @param string $path Path to file/directory.
 	 * @return bool Whether $file is writable.
 	 */
-	public function is_writable( $file ) {
+	function is_writable( $file ) {
 		return false;
 	}
 
@@ -705,7 +653,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Path to file.
 	 * @return int Unix timestamp representing last access time.
 	 */
-	public function atime( $file ) {
+	function atime( $file ) {
 		return false;
 	}
 
@@ -717,7 +665,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Path to file.
 	 * @return int Unix timestamp representing modification time.
 	 */
-	public function mtime( $file ) {
+	function mtime( $file ) {
 		return false;
 	}
 
@@ -729,7 +677,7 @@ class WP_Filesystem_Base {
 	 * @param string $file Path to file.
 	 * @return int Size of the file in bytes.
 	 */
-	public function size( $file ) {
+	function size( $file ) {
 		return false;
 	}
 
@@ -747,7 +695,7 @@ class WP_Filesystem_Base {
 	 *                      Default 0.
 	 * @return bool Whether operation was successful or not.
 	 */
-	public function touch( $file, $time = 0, $atime = 0 ) {
+	function touch( $file, $time = 0, $atime = 0 ) {
 		return false;
 	}
 
@@ -765,7 +713,7 @@ class WP_Filesystem_Base {
 	 *                      Default false.
 	 * @return bool False if directory cannot be created, true otherwise.
 	 */
-	public function mkdir( $path, $chmod = false, $chown = false, $chgrp = false ) {
+	function mkdir( $path, $chmod = false, $chown = false, $chgrp = false ) {
 		return false;
 	}
 
@@ -779,7 +727,7 @@ class WP_Filesystem_Base {
 	 *                          Default false.
 	 * @return bool Whether directory is deleted successfully or not.
 	 */
-	public function rmdir( $path, $recursive = false ) {
+	function rmdir( $path, $recursive = false ) {
 		return false;
 	}
 
@@ -808,7 +756,7 @@ class WP_Filesystem_Base {
 	 *     @type mixed  'files'       If a directory and $recursive is true, contains another array of files.
 	 * }
 	 */
-	public function dirlist( $path, $include_hidden = true, $recursive = false ) {
+	function dirlist( $path, $include_hidden = true, $recursive = false ) {
 		return false;
 	}
 

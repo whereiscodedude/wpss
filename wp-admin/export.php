@@ -53,10 +53,9 @@ get_current_screen()->add_help_tab( array(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __('For more information:') . '</strong></p>' .
 	'<p>' . __('<a href="http://codex.wordpress.org/Tools_Export_Screen" target="_blank">Documentation on Export</a>') . '</p>' .
-	'<p>' . __('<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
+	'<p>' . __('<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 );
 
-// If the 'download' URL parameter is set, a WXR export file is baked and returned.
 if ( isset( $_GET['download'] ) ) {
 	$args = array();
 
@@ -113,7 +112,7 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 /**
  * Create the date options fields for exporting a given post type.
  *
- * @global wpdb      $wpdb      WordPress database abstraction object.
+ * @global wpdb      $wpdb      WordPress database object.
  * @global WP_Locale $wp_locale Date and Time Locale object.
  *
  * @since 3.1.0

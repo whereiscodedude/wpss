@@ -1,4 +1,4 @@
-/* global ajaxurl, pwsL10n, _wpSessionMangager */
+/* global ajaxurl, pwsL10n */
 (function($){
 
 	function check_pass_strength() {
@@ -95,11 +95,7 @@
 
 			// Set color scheme
 			if ( user_id === current_user_id ) {
-				// Load the colors stylesheet.
-				// The default color scheme won't have one, so we'll need to create an element.
-				if ( 0 === $stylesheet.length ) {
-					$stylesheet = $( '<link rel="stylesheet" />' ).appendTo( 'head' );
-				}
+				// Load the colors stylesheet
 				$stylesheet.attr( 'href', $this.children( '.css_url' ).val() );
 
 				// repaint icons
@@ -122,30 +118,6 @@
 				});
 			}
 		});
-	});
-
-	$( '#destroy-sessions' ).on( 'click', function( e ) {
-
-		var $this = $(this);
-		var data = {
-			action      : 'destroy-sessions',
-			_ajax_nonce : _wpSessionMangager.nonce,
-			user_id     : _wpSessionMangager.user_id,
-			token       : $(this).data('token')
-		};
-
-		$.post( ajaxurl, data, function( response ) {
-
-			if ( response.success ) {
-				$this.prop( 'disabled', true );
-				$this.before( '<div class="updated inline"><p>' + response.data.message + '</p></div>' );
-			} else {
-				$this.before( '<div class="error inline"><p>' + response.data.message + '</p></div>' );
-			}
-
-		}, 'json' );
-
-		e.preventDefault();
 	});
 
 })(jQuery);

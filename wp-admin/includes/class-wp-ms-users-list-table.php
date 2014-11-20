@@ -9,14 +9,14 @@
  */
 class WP_MS_Users_List_Table extends WP_List_Table {
 
-	public function ajax_user_can() {
+	function ajax_user_can() {
 		return current_user_can( 'manage_network_users' );
 	}
 
-	public function prepare_items() {
+	function prepare_items() {
 		global $usersearch, $role, $wpdb, $mode;
 
-		$usersearch = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
+		$usersearch = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : '';
 
 		$users_per_page = $this->get_items_per_page( 'users_network_per_page' );
 
@@ -40,11 +40,8 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			$args['include'] = $wpdb->get_col( "SELECT ID FROM $wpdb->users WHERE user_login IN ('$logins')" );
 		}
 
-		/*
-		 * If the network is large and a search is not being performed,
-		 * show only the latest users with no paging in order to avoid
-		 * expensive count queries.
-		 */
+		// If the network is large and a search is not being performed, show only the latest users with no paging in order
+		// to avoid expensive count queries.
 		if ( !$usersearch && wp_is_large_network( 'users' ) ) {
 			if ( !isset($_REQUEST['orderby']) )
 				$_GET['orderby'] = $_REQUEST['orderby'] = 'id';
@@ -72,7 +69,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		) );
 	}
 
-	protected function get_bulk_actions() {
+	function get_bulk_actions() {
 		$actions = array();
 		if ( current_user_can( 'delete_users' ) )
 			$actions['delete'] = __( 'Delete' );
@@ -82,17 +79,18 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		return $actions;
 	}
 
-	public function no_items() {
+	function no_items() {
 		_e( 'No users found.' );
 	}
 
-	protected function get_views() {
-		global $role;
+	function get_views() {
+		global $wp_roles, $role;
 
 		$total_users = get_user_count();
 		$super_admins = get_super_admins();
 		$total_admins = count( $super_admins );
 
+		$current_role = false;
 		$class = $role != 'super' ? ' class="current"' : '';
 		$role_links = array();
 		$role_links['all'] = "<a href='" . network_admin_url('users.php') . "'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_users, 'users' ), number_format_i18n( $total_users ) ) . '</a>';
@@ -102,7 +100,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		return $role_links;
 	}
 
-	protected function pagination( $which ) {
+	function pagination( $which ) {
 		global $mode;
 
 		parent::pagination ( $which );
@@ -111,7 +109,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			$this->view_switcher( $mode );
 	}
 
-	public function get_columns() {
+	function get_columns() {
 		$users_columns = array(
 			'cb'         => '<input type="checkbox" />',
 			'username'   => __( 'Username' ),
@@ -133,7 +131,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		return $users_columns;
 	}
 
-	protected function get_sortable_columns() {
+	function get_sortable_columns() {
 		return array(
 			'username'   => 'login',
 			'name'       => 'name',
@@ -142,7 +140,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		);
 	}
 
-	public function display_rows() {
+	function display_rows() {
 		global $mode;
 
 		$alt = '';
