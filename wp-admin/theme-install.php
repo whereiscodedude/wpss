@@ -27,6 +27,12 @@ if ( ! is_network_admin() ) {
 	$submenu_file = 'themes.php';
 }
 
+$sections = array(
+	'featured' => __( 'Featured Themes' ),
+	'popular'  => __( 'Popular Themes' ),
+	'new'      => __( 'Newest Themes' ),
+);
+
 $installed_themes = search_theme_directories();
 foreach ( $installed_themes as $k => $v ) {
 	if ( false !== strpos( $k, '/' ) ) {
@@ -51,6 +57,9 @@ wp_localize_script( 'theme', '_wpThemeSettings', array(
 		'error'  => __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="https://wordpress.org/support/">support forums</a>.' )
 	),
 	'installedThemes' => array_keys( $installed_themes ),
+	'browse' => array(
+		'sections' => $sections,
+	),
 ) );
 
 wp_enqueue_script( 'theme' );
@@ -243,9 +252,9 @@ if ( $tab ) {
 						<span class="four"></span>
 						<span class="five"></span>
 					<# if ( data.num_ratings ) { #>
-						<small class="ratings">{{ data.num_ratings }}</small>
+						<p class="ratings">{{ data.num_ratings }}</p>
 					<# } else { #>
-						<small class="ratings"><?php _e( 'No ratings.' ); ?></small>
+						<p class="ratings"><?php _e( 'No ratings.' ); ?></p>
 					<# } #>
 					</div>
 					<div class="theme-version"><?php printf( __( 'Version: %s' ), '{{ data.version }}' ); ?></div>

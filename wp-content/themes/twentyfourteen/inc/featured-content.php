@@ -97,7 +97,7 @@ class Featured_Content {
 	/**
 	 * Hide "featured" tag from the front-end.
 	 *
-	 * Has to run on wp_loaded so that the preview filters of the Customizer
+	 * Has to run on wp_loaded so that the preview filters of the customizer
 	 * have a chance to alter the value.
 	 *
 	 * @static
@@ -235,8 +235,10 @@ class Featured_Content {
 			return;
 		}
 
+		$page_on_front = get_option( 'page_on_front' );
+
 		// Bail if the blog page is not the front page.
-		if ( 'posts' !== get_option( 'show_on_front' ) ) {
+		if ( ! empty( $page_on_front ) ) {
 			return;
 		}
 
@@ -396,7 +398,7 @@ class Featured_Content {
 	 * @access public
 	 * @since Twenty Fourteen 1.0
 	 *
-	 * @param WP_Customize_Manager $wp_customize Customizer object.
+	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	public static function customize_register( $wp_customize ) {
 		$wp_customize->add_section( 'featured_content', array(

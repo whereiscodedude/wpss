@@ -20,7 +20,6 @@ class WP_Upgrader_Skin {
 	public $done_header = false;
 	public $done_footer = false;
 	public $result = false;
-	public $options = array();
 
 	public function __construct($args = array()) {
 		$defaults = array( 'url' => '', 'nonce' => '', 'title' => '', 'context' => false );
@@ -40,18 +39,12 @@ class WP_Upgrader_Skin {
 		$this->result = $result;
 	}
 
-	public function request_filesystem_credentials( $error = false, $context = false, $allow_relaxed_file_ownership = false ) {
+	public function request_filesystem_credentials($error = false) {
 		$url = $this->options['url'];
-		if ( ! $context ) {
-			$context = $this->options['context'];
-		}
-		if ( !empty($this->options['nonce']) ) {
+		$context = $this->options['context'];
+		if ( !empty($this->options['nonce']) )
 			$url = wp_nonce_url($url, $this->options['nonce']);
-		}
-
-		$extra_fields = array();
-
-		return request_filesystem_credentials( $url, '', $error, $context, $extra_fields, $allow_relaxed_file_ownership );
+		return request_filesystem_credentials($url, '', $error, $context); //Possible to bring inline, Leaving as is for now.
 	}
 
 	public function header() {
@@ -705,14 +698,13 @@ class Language_Pack_Upgrader_Skin extends WP_Upgrader_Skin {
 class Automatic_Upgrader_Skin extends WP_Upgrader_Skin {
 	protected $messages = array();
 
-	public function request_filesystem_credentials( $error = false, $context = '', $allow_relaxed_file_ownership = false ) {
-		if ( $context ) {
+	public function request_filesystem_credentials( $error = false, $context = '' ) {
+		if ( $context )
 			$this->options['context'] = $context;
-		}
 		// TODO: fix up request_filesystem_credentials(), or split it, to allow us to request a no-output version
 		// This will output a credentials form in event of failure, We don't want that, so just hide with a buffer
 		ob_start();
-		$result = parent::request_filesystem_credentials( $error, $context, $allow_relaxed_file_ownership );
+		$result = parent::request_filesystem_credentials( $error );
 		ob_end_clean();
 		return $result;
 	}

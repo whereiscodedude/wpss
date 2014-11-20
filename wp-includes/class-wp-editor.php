@@ -177,8 +177,8 @@ final class _WP_Editors {
 				$switch_class = 'tmce-active';
 			}
 
-			$buttons .= '<button type="button" id="' . $editor_id . '-tmce" class="wp-switch-editor switch-tmce" onclick="switchEditors.switchto(this);">' . __('Visual') . "</button>\n";
-			$buttons .= '<button type="button" id="' . $editor_id . '-html" class="wp-switch-editor switch-html" onclick="switchEditors.switchto(this);">' . _x( 'Text', 'Name for the Text editor tab (formerly HTML)' ) . "</button>\n";
+			$buttons .= '<a id="' . $editor_id . '-html" class="wp-switch-editor switch-html" onclick="switchEditors.switchto(this);">' . _x( 'Text', 'Name for the Text editor tab (formerly HTML)' ) . "</a>\n";
+			$buttons .= '<a id="' . $editor_id . '-tmce" class="wp-switch-editor switch-tmce" onclick="switchEditors.switchto(this);">' . __('Visual') . "</a>\n";
 		}
 
 		$wrap_class = 'wp-core-ui wp-editor-wrap ' . $switch_class;
@@ -277,9 +277,6 @@ final class _WP_Editors {
 
 			if ( $set['dfw'] )
 				$qtInit['buttons'] .= ',fullscreen';
-
-			if ( $editor_id === 'content' && ! wp_is_mobile() )
-				$qtInit['buttons'] .= ',dfw';
 
 			/**
 			 * Filter the Quicktags settings.
@@ -421,7 +418,7 @@ final class _WP_Editors {
 							$url = set_url_scheme( $url );
 							$mce_external_plugins[ $name ] = $url;
 							$plugurl = dirname( $url );
-							$strings = '';
+							$strings = $str1 = $str2 = '';
 
 							// Try to load langs/[locale].js and langs/[locale]_dlg.js
 							if ( ! in_array( $name, $loaded_langs, true ) ) {
@@ -492,7 +489,6 @@ final class _WP_Editors {
 					'entities' => '38,amp,60,lt,62,gt',
 					'entity_encoding' => 'raw',
 					'keep_styles' => false,
-					'cache_suffix' => 'wp-mce-' . $GLOBALS['tinymce_version'],
 
 					// Limit the preview styles in the menu/toolbar
 					'preview_styles' => 'font-family font-size font-weight font-style text-decoration text-transform',
@@ -503,7 +499,7 @@ final class _WP_Editors {
 				);
 
 				if ( ! empty( $mce_external_plugins ) ) {
-					self::$first_init['external_plugins'] = wp_json_encode( $mce_external_plugins );
+					self::$first_init['external_plugins'] = json_encode( $mce_external_plugins );
 				}
 
 				$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
@@ -549,13 +545,6 @@ final class _WP_Editors {
 				$mce_buttons = apply_filters( 'teeny_mce_buttons', array('bold', 'italic', 'underline', 'blockquote', 'strikethrough', 'bullist', 'numlist', 'alignleft', 'aligncenter', 'alignright', 'undo', 'redo', 'link', 'unlink', 'fullscreen'), $editor_id );
 				$mce_buttons_2 = $mce_buttons_3 = $mce_buttons_4 = array();
 			} else {
-				$mce_buttons = array( 'bold', 'italic', 'strikethrough', 'bullist', 'numlist', 'blockquote', 'hr', 'alignleft', 'aligncenter', 'alignright', 'link', 'unlink', 'wp_more', 'spellchecker', 'wp_adv' );
-
-				if ( $editor_id ) {
-					$mce_buttons[] = 'dfw';
-				} else {
-					$mce_buttons[] = 'fullscreen';
-				}
 
 				/**
 				 * Filter the first-row list of TinyMCE buttons (Visual tab).
@@ -565,7 +554,7 @@ final class _WP_Editors {
 				 * @param array  $buttons   First-row list of buttons.
 				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 				 */
-				$mce_buttons = apply_filters( 'mce_buttons', $mce_buttons, $editor_id );
+				$mce_buttons = apply_filters( 'mce_buttons', array('bold', 'italic', 'strikethrough', 'bullist', 'numlist', 'blockquote', 'hr', 'alignleft', 'aligncenter', 'alignright', 'link', 'unlink', 'wp_more', 'spellchecker', 'fullscreen', 'wp_adv' ), $editor_id );
 
 				/**
 				 * Filter the second-row list of TinyMCE buttons (Visual tab).
@@ -610,8 +599,6 @@ final class _WP_Editors {
 						$body_class .= ' post-format-standard';
 				}
 			}
-
-			$body_class .= ' locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_locale() ) ) );
 
 			if ( !empty($set['tinymce']['body_class']) ) {
 				$body_class .= ' ' . $set['tinymce']['body_class'];
@@ -746,15 +733,7 @@ final class _WP_Editors {
 		) );
 	}
 
-	/**
-	 * Translates the default TinyMCE strings and returns them as JSON encoded object ready to be loaded with tinymce.addI18n().
-	 * Can be used directly (_WP_Editors::wp_mce_translation()) by passing the same locale as set in the TinyMCE init object.
-	 *
-	 * @param string $mce_locale The locale used for the editor.
-	 * @param bool $json_only optional Whether to include the Javascript calls to tinymce.addI18n() and tinymce.ScriptLoader.markDone().
-	 * @return The translation object, JSON encoded.
-	 */
-	public static function wp_mce_translation( $mce_locale = '', $json_only = false ) {
+	public static function wp_mce_translation() {
 
 		$mce_translation = array(
 			// Default TinyMCE strings
@@ -967,7 +946,6 @@ final class _WP_Editors {
 			'Insert Read More tag' => __( 'Insert Read More tag' ),
 			'Read more...' => __( 'Read more...' ), // Title on the placeholder inside the editor
 			'Distraction Free Writing' => __( 'Distraction Free Writing' ),
-			'No alignment' => __( 'No alignment' ), // Tooltip for the 'alignnone' button in the image toolbar
 		);
 
 		/**
@@ -981,9 +959,8 @@ final class _WP_Editors {
 		 *	Url
 		 */
 
-		if ( ! $mce_locale ) {
-			$mce_locale = self::$mce_locale;
-		}
+		$baseurl = self::$baseurl;
+		$mce_locale = self::$mce_locale;
 
 		/**
 		 * Filter translated strings prepared for TinyMCE.
@@ -996,12 +973,6 @@ final class _WP_Editors {
 		$mce_translation = apply_filters( 'wp_mce_translation', $mce_translation, $mce_locale );
 
 		foreach ( $mce_translation as $key => $value ) {
-			// Remove strings that are not translated.
-			if ( $key === $value ) {
-				unset( $mce_translation[$key] );
-				continue;
-			}
-
 			if ( false !== strpos( $value, '&' ) ) {
 				$mce_translation[$key] = html_entity_decode( $value, ENT_QUOTES, 'UTF-8' );
 			}
@@ -1012,13 +983,7 @@ final class _WP_Editors {
 			$mce_translation['_dir'] = 'rtl';
 		}
 
-		if ( $json_only ) {
-			return wp_json_encode( $mce_translation );
-		}
-
-		$baseurl = self::$baseurl ? self::$baseurl : includes_url( 'js/tinymce' );
-
-		return "tinymce.addI18n( '$mce_locale', " . wp_json_encode( $mce_translation ) . ");\n" .
+		return "tinymce.addI18n( '$mce_locale', " . json_encode( $mce_translation ) . ");\n" .
 			"tinymce.ScriptLoader.markDone( '$baseurl/langs/$mce_locale.js' );\n";
 	}
 

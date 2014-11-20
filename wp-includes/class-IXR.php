@@ -151,7 +151,7 @@ class IXR_Value {
     /**
      * Checks whether or not the supplied array is a struct or not
      *
-     * @param array $array
+     * @param unknown_type $array
      * @return boolean
      */
     function isStruct($array)

@@ -211,11 +211,7 @@ function twentyfourteen_font_url() {
 	 * by Lato, translate this to 'off'. Do not translate into your own language.
 	 */
 	if ( 'off' !== _x( 'on', 'Lato font: on or off', 'twentyfourteen' ) ) {
-		$query_args = array(
-			'family' => urlencode( 'Lato:300,400,700,900,300italic,400italic,700italic' ),
-			'subset' => urlencode( 'latin,latin-ext' ),
-		);
-		$font_url = add_query_arg( $query_args, '//fonts.googleapis.com/css' );
+		$font_url = add_query_arg( 'family', urlencode( 'Lato:300,400,700,900,300italic,400italic,700italic' ), "//fonts.googleapis.com/css" );
 	}
 
 	return $font_url;
@@ -505,7 +501,7 @@ require get_template_directory() . '/inc/custom-header.php';
 // Custom template tags for this theme.
 require get_template_directory() . '/inc/template-tags.php';
 
-// Add Customizer functionality.
+// Add Theme Customizer functionality.
 require get_template_directory() . '/inc/customizer.php';
 
 /*

@@ -1060,7 +1060,7 @@ function get_post_status_object( $post_status ) {
 }
 
 /**
- * Get a list of post statuses.
+ * Get a list of all registered post status objects.
  *
  * @since 3.0.0
  *
@@ -1068,9 +1068,9 @@ function get_post_status_object( $post_status ) {
  *
  * @see register_post_status()
  *
- * @param array|string $args     Optional. Array or string of post status arguments to compare against
- *                               properties of the global `$wp_post_statuses objects`. Default empty array.
- * @param string       $output   Optional. The type of output to return, either 'names' or 'objects'. Default 'names'.
+ * @param array|string $args     Optional. Array or string of post status arguments. Default array.
+ * @param string       $output   Optional. The type of output to return. Accepts post status 'names'
+ *                               or 'objects'. Default 'names'.
  * @param string       $operator Optional. The logical operation to perform. 'or' means only one element
  *                               from the array needs to match; 'and' means all elements must match.
  *                               Default 'and'.
@@ -1161,15 +1161,15 @@ function get_post_type_object( $post_type ) {
  *
  * @global array $wp_post_types List of post types.
  *
- * @see register_post_type() for accepted arguments.
+ * @see register_post_type()
  *
  * @param array|string $args     Optional. An array of key => value arguments to match against
  *                               the post type objects. Default empty array.
  * @param string       $output   Optional. The type of output to return. Accepts post type 'names'
  *                               or 'objects'. Default 'names'.
- * @param string       $operator Optional. The logical operation to perform. 'or' means only one
+ * @param string       $operator Optaionl. The logical operation to perform. 'or' means only one
  *                               element from the array needs to match; 'and' means all elements
- *                               must match. Accepts 'or' or 'and'. Default 'and'.
+ *                               must match. Default 'and'.
  * @return array A list of post type names or objects.
  */
 function get_post_types( $args = array(), $output = 'names', $operator = 'and' ) {
@@ -1352,7 +1352,7 @@ function register_post_type( $post_type, $args = array() ) {
 
 	// If not set, default to the whether the full UI is shown.
 	if ( null === $args->show_in_admin_bar )
-		$args->show_in_admin_bar = (bool) $args->show_in_menu;
+		$args->show_in_admin_bar = true === $args->show_in_menu;
 
 	// If not set, default to the setting for public.
 	if ( null === $args->show_in_nav_menus )
@@ -1789,7 +1789,7 @@ function post_type_supports( $post_type, $feature ) {
  *
  * @since 2.5.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb WordPress database access abstraction object.
  *
  * @param int    $post_id   Optional. Post ID to change post type. Default 0.
  * @param string $post_type Optional. Post type. Accepts 'post' or 'page' to
@@ -2554,7 +2554,7 @@ function wp_post_mime_type_where( $post_mime_types, $table_alias = '' ) {
  *
  * @since 1.0.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb WordPress database access abstraction object.
  * @see wp_delete_attachment()
  * @see wp_trash_post()
  *
@@ -2799,7 +2799,7 @@ function wp_untrash_post( $post_id = 0 ) {
  *
  * @since 2.9.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb WordPress database access abstraction object.
  *
  * @param int|WP_Post $post Optional. Post ID or post object. Defaults to global $post.
  * @return mixed False on failure.
@@ -2942,6 +2942,8 @@ function wp_get_post_categories( $post_id = 0, $args = array() ) {
  *
  * @since 2.3.0
  *
+ * @uses wp_get_object_terms()
+ *
  * @param int   $post_id Optional. The Post ID. Does not default to the ID of the
  *                       global $post. Defualt 0.
  * @param array $args Optional. Overwrite the defaults
@@ -2959,6 +2961,8 @@ function wp_get_post_tags( $post_id = 0, $args = array() ) {
  * {@link wp_get_object_terms()}.
  *
  * @since 2.8.0
+ *
+ * @uses wp_get_object_terms()
  *
  * @param int    $post_id  Optional. The Post ID. Does not default to the ID of the
  *                         global $post. Default 0.
@@ -3673,6 +3677,7 @@ function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_p
 	if ( ! is_array( $feeds ) )
 		$feeds = array();
 
+	$hierarchical_post_types = get_post_types( array('hierarchical' => true) );
 	if ( 'attachment' == $post_type ) {
 		// Attachment slugs must be unique across all types.
 		$check_sql = "SELECT post_name FROM $wpdb->posts WHERE post_name = %s AND ID != %d LIMIT 1";
@@ -3695,7 +3700,7 @@ function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_p
 			} while ( $post_name_check );
 			$slug = $alt_post_name;
 		}
-	} elseif ( is_post_type_hierarchical( $post_type ) ) {
+	} elseif ( in_array( $post_type, $hierarchical_post_types ) ) {
 		if ( 'nav_menu_item' == $post_type )
 			return $slug;
 
@@ -3703,8 +3708,8 @@ function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_p
 		 * Page slugs must be unique within their own trees. Pages are in a separate
 		 * namespace than posts so page slugs are allowed to overlap post slugs.
 		 */
-		$check_sql = "SELECT post_name FROM $wpdb->posts WHERE post_name = %s AND post_type = %s AND ID != %d AND post_parent = %d LIMIT 1";
-		$post_name_check = $wpdb->get_var( $wpdb->prepare( $check_sql, $slug, $post_type, $post_ID, $post_parent ) );
+		$check_sql = "SELECT post_name FROM $wpdb->posts WHERE post_name = %s AND post_type IN ( '" . implode( "', '", esc_sql( $hierarchical_post_types ) ) . "' ) AND ID != %d AND post_parent = %d LIMIT 1";
+		$post_name_check = $wpdb->get_var( $wpdb->prepare( $check_sql, $slug, $post_ID, $post_parent ) );
 
 		/**
 		 * Filter whether the post slug would make a bad hierarchical post slug.
@@ -3720,7 +3725,7 @@ function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_p
 			$suffix = 2;
 			do {
 				$alt_post_name = _truncate_post_slug( $slug, 200 - ( strlen( $suffix ) + 1 ) ) . "-$suffix";
-				$post_name_check = $wpdb->get_var( $wpdb->prepare( $check_sql, $alt_post_name, $post_type, $post_ID, $post_parent ) );	
+				$post_name_check = $wpdb->get_var( $wpdb->prepare( $check_sql, $alt_post_name, $post_ID, $post_parent ) );
 				$suffix++;
 			} while ( $post_name_check );
 			$slug = $alt_post_name;
@@ -4278,19 +4283,17 @@ function get_page_by_title( $page_title, $output = OBJECT, $post_type = 'page' )
  *
  * @since 1.5.1
  *
- * @param int   $page_id    Page ID.
- * @param array $pages      List of pages' objects.
- * @param bool  $ancestors  Whether to check a page's ancestors.
+ * @param int   $page_id Page ID.
+ * @param array $pages   List of pages' objects.
  * @return array List of page children.
  */
-function get_page_children( $page_id, $pages, $ancestors = true ) {
+function get_page_children($page_id, $pages) {
 	$page_list = array();
 	foreach ( (array) $pages as $page ) {
-		if ( $page->post_parent == $page_id || ( $ancestors && in_array( $page_id, $page->ancestors ) ) ) {
+		if ( $page->post_parent == $page_id ) {
 			$page_list[] = $page;
-			if ( $children = get_page_children( $page->ID, $pages, false ) ) {
-				$page_list = array_merge( $page_list, $children );
-			}
+			if ( $children = get_page_children($page->ID, $pages) )
+				$page_list = array_merge($page_list, $children);
 		}
 	}
 	return $page_list;
@@ -4621,9 +4624,6 @@ function get_pages( $args = array() ) {
 	// Update cache.
 	update_post_cache( $pages );
 
-	// Convert to WP_Post instances
-	$pages = array_map( 'get_post', $pages );
-
 	if ( $child_of || $hierarchical ) {
 		$pages = get_page_children($child_of, $pages);
 	}
@@ -4651,6 +4651,9 @@ function get_pages( $args = array() ) {
 	}
 
 	wp_cache_set( $cache_key, $page_structure, 'posts' );
+
+	// Convert to WP_Post instances.
+	$pages = array_map( 'get_post', $pages );
 
 	/**
 	 * Filter the retrieved list of pages.
@@ -4742,7 +4745,7 @@ function wp_insert_attachment( $args, $file = false, $parent = 0 ) {
  *
  * @since 2.0.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb WordPress database access abstraction object.
  *
  * @param int  $post_id      Attachment ID.
  * @param bool $force_delete Optional. Whether to bypass trash and force deletion.
@@ -4767,6 +4770,12 @@ function wp_delete_attachment( $post_id, $force_delete = false ) {
 	$meta = wp_get_attachment_metadata( $post_id );
 	$backup_sizes = get_post_meta( $post->ID, '_wp_attachment_backup_sizes', true );
 	$file = get_attached_file( $post_id );
+
+	$intermediate_sizes = array();
+	foreach ( get_intermediate_image_sizes() as $size ) {
+		if ( $intermediate = image_get_intermediate_size( $post_id, $size ) )
+			$intermediate_sizes[] = $intermediate;
+	}
 
 	if ( is_multisite() )
 		delete_transient( 'dirsize_cache' );
@@ -4816,13 +4825,10 @@ function wp_delete_attachment( $post_id, $force_delete = false ) {
 	}
 
 	// Remove intermediate and backup images if there are any.
-	if ( isset( $meta['sizes'] ) && is_array( $meta['sizes'] ) ) {
-		foreach ( $meta['sizes'] as $size => $sizeinfo ) {
-			$intermediate_file = str_replace( basename( $file ), $sizeinfo['file'], $file );
-			/** This filter is documented in wp-admin/custom-header.php */
-			$intermediate_file = apply_filters( 'wp_delete_file', $intermediate_file );
-			@ unlink( path_join( $uploadpath['basedir'], $intermediate_file ) );
-		}
+	foreach ( $intermediate_sizes as $intermediate ) {
+		/** This filter is documented in wp-admin/custom-header.php */
+		$intermediate_file = apply_filters( 'wp_delete_file', $intermediate['path'] );
+		@ unlink( path_join($uploadpath['basedir'], $intermediate_file) );
 	}
 
 	if ( is_array($backup_sizes) ) {
@@ -5327,7 +5333,7 @@ function get_lastpostdate( $timezone = 'server' ) {
 }
 
 /**
- * Get the timestamp of the last time any post was modified.
+ * Retrieve last post modified date depending on timezone.
  *
  * The server timezone is the default and is the difference between GMT and
  * server time. The 'blog' value is just when the last post was modified. The
@@ -5335,12 +5341,9 @@ function get_lastpostdate( $timezone = 'server' ) {
  *
  * @since 1.2.0
  *
- * @param string $timezone Optional. The timezone for the timestamp. Uses the server's internal timezone.
- *                         Accepts 'server', 'blog', 'gmt'. or 'server'. 'server' uses the server's
- *                         internal timezone. 'blog' uses the `post_modified` field, which proxies
- *                         to the timezone set for the site. 'gmt' uses the `post_modified_gmt` field.
+ * @param string $timezone The location to get the time. Accepts 'gmt', 'blog', or 'server'.
  *                         Default 'server'.
- * @return string The timestamp.
+ * @return string The date the post was last modified.
  */
 function get_lastpostmodified( $timezone = 'server' ) {
 	$lastpostmodified = _get_last_post_time( $timezone, 'modified' );
@@ -5356,21 +5359,19 @@ function get_lastpostmodified( $timezone = 'server' ) {
 	 *
 	 * @param string $lastpostmodified Date the last post was modified.
 	 * @param string $timezone         Location to use for getting the post modified date.
-	 *                                 See {@see get_lastpostmodified()} for accepted `$timezone` values.
 	 */
 	return apply_filters( 'get_lastpostmodified', $lastpostmodified, $timezone );
 }
 
 /**
- * Get the timestamp of the last time any post was modified or published.
+ * Retrieve latest post date data based on timezone.
  *
- * @since 3.1.0
  * @access private
+ * @since 3.1.0
  *
- * @param string $timezone The timezone for the timestamp. See {@see get_lastpostmodified()}
- *                         for information on accepted values.
- * @param string $field    Post field to check. Accepts 'date' or 'modified'.
- * @return string The timestamp.
+ * @param string $timezone The location to get the time. Accepts 'gmt', 'blog', or 'server'.
+ * @param string $field Field to check. Can be 'date' or 'modified'.
+ * @return string The date.
  */
 function _get_last_post_time( $timezone, $field ) {
 	global $wpdb;
@@ -5436,7 +5437,7 @@ function update_post_cache( &$posts ) {
  *
  * @since 2.0.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb WordPress database access abstraction object.
  *
  * @param int|WP_Post $post Post ID or post object to remove from the cache.
  */
@@ -5594,7 +5595,7 @@ function clean_attachment_cache( $id, $clean_terms = false ) {
  * @access private
  *
  * @see wp_clear_scheduled_hook()
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb WordPress database access abstraction object.
  *
  * @param string  $new_status New post status.
  * @param string  $old_status Previous post status.
@@ -5786,7 +5787,7 @@ function delete_post_thumbnail( $post ) {
  *
  * @since 3.4.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb WordPress database access abstraction object.
  */
 function wp_delete_auto_drafts() {
 	global $wpdb;

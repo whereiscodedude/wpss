@@ -7,11 +7,6 @@
  *
  */
 class WP_HTTP_IXR_Client extends IXR_Client {
-	public $scheme;
-	/**
-	 * @var IXR_Error
-	 */
-	public $error;
 
 	public function __construct($server, $path = false, $port = false, $timeout = 15) {
 		if ( ! $path ) {

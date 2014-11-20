@@ -20,11 +20,10 @@
  * @param array $args Optional. Arguments to pass to the hook's callback function.
  */
 function wp_schedule_single_event( $timestamp, $hook, $args = array()) {
-	// don't schedule a duplicate if there's already an identical event due within 10 minutes of it
+	// don't schedule a duplicate if there's already an identical event due in the next 10 minutes
 	$next = wp_next_scheduled($hook, $args);
-	if ( $next && abs( $next - $timestamp ) <= 10 * MINUTE_IN_SECONDS ) {
+	if ( $next && $next <= $timestamp + 10 * MINUTE_IN_SECONDS )
 		return;
-	}
 
 	$crons = _get_cron_array();
 	$event = (object) array( 'hook' => $hook, 'timestamp' => $timestamp, 'schedule' => false, 'args' => $args );
@@ -246,10 +245,9 @@ function spawn_cron( $gmt_time = 0 ) {
 	if ( isset($keys[0]) && $keys[0] > $gmt_time )
 		return;
 
-	if ( defined( 'ALTERNATE_WP_CRON' ) && ALTERNATE_WP_CRON ) {
-		if ( ! empty( $_POST ) || defined( 'DOING_AJAX' ) ||  defined( 'XMLRPC_REQUEST' ) ) {
+	if ( defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON ) {
+		if ( !empty($_POST) || defined('DOING_AJAX') )
 			return;
-		}
 
 		$doing_wp_cron = sprintf( '%.22F', $gmt_time );
 		set_transient( 'doing_cron', $doing_wp_cron );

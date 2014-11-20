@@ -290,7 +290,6 @@ ul.wp-tab-bar li {
 #postimagediv .inside img {
 	max-width: 100%;
 	height: auto;
-	width: auto;
 }
 
 form#tags-filter {
@@ -1432,11 +1431,11 @@ table.links-table {
 		padding: 10px 20px;
 	}
 
-	button.wp-switch-editor {
+	a.wp-switch-editor {
 		font-size: 16px;
 		line-height: 1em;
-		margin: 7px 7px 0 0;
-		padding: 8px 12px;
+		margin: 3px 7px 0 0;
+		padding: 12px 15px;
 	}
 
 	#wp-content-media-buttons a {

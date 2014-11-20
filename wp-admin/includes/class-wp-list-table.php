@@ -65,15 +65,6 @@ class WP_List_Table {
 	private $_pagination;
 
 	/**
-	 * The view switcher modes
-	 *
-	 * @since 4.1.0
-	 * @var array
-	 * @access protected
-	 */
-	protected $modes = array();
-
-	/**
 	 * Constructor.
 	 *
 	 * The child class should call this constructor from its own constructor to override
@@ -122,13 +113,6 @@ class WP_List_Table {
 		if ( $args['ajax'] ) {
 			// wp_enqueue_script( 'list-table' );
 			add_action( 'admin_footer', array( $this, '_js_vars' ) );
-		}
-
-		if ( empty( $this->modes ) ) {
-			$this->modes = array(
-				'list'    => __( 'List View' ),
-				'excerpt' => __( 'Excerpt View' )
-			);
 		}
 	}
 
@@ -200,6 +184,7 @@ class WP_List_Table {
 
 	/**
 	 * Checks the current user's permissions
+	 * @uses wp_die()
 	 *
 	 * @since 3.1.0
 	 * @access public
@@ -247,14 +232,13 @@ class WP_List_Table {
 	}
 
 	/**
-	 * Access the pagination args.
+	 * Access the pagination args
 	 *
 	 * @since 3.1.0
 	 * @access public
 	 *
-	 * @param string $key Pagination argument to retrieve. Common values include 'total_items',
-	 *                    'total_pages', 'per_page', or 'infinite_scroll'.
-	 * @return int Number of items that correspond to the given pagination argument.
+	 * @param string $key
+	 * @return array
 	 */
 	public function get_pagination_arg( $key ) {
 		if ( 'page' == $key )
@@ -537,11 +521,16 @@ class WP_List_Table {
 	 * @access protected
 	 */
 	protected function view_switcher( $current_mode ) {
+		$modes = array(
+			'list'    => __( 'List View' ),
+			'excerpt' => __( 'Excerpt View' )
+		);
+
 ?>
 		<input type="hidden" name="mode" value="<?php echo esc_attr( $current_mode ); ?>" />
 		<div class="view-switch">
 <?php
-			foreach ( $this->modes as $mode => $title ) {
+			foreach ( $modes as $mode => $title ) {
 				$classes = array( 'view-' . $mode );
 				if ( $current_mode == $mode )
 					$classes[] = 'current';
@@ -611,11 +600,10 @@ class WP_List_Table {
 		/**
 		 * Filter the number of items to be displayed on each page of the list table.
 		 *
-		 * The dynamic hook name, $option, refers to the `per_page` option depending
-		 * on the type of list table in use. Possible values include: 'edit_comments_per_page',
-		 * 'sites_network_per_page', 'site_themes_network_per_page', 'themes_network_per_page',
-		 * 'users_network_per_page', 'edit_post_per_page', 'edit_page_per_page',
-		 * 'edit_{$post_type}_per_page', etc.
+		 * The dynamic hook name, $option, refers to the per page option depending
+		 * on the type of list table in use. Possible values may include:
+		 * 'edit_comments_per_page', 'sites_network_per_page', 'site_themes_network_per_page',
+		 * 'themes_netework_per_page', 'users_network_per_page', 'edit_{$post_type}', etc.
 		 *
 		 * @since 2.9.0
 		 *
@@ -1070,7 +1058,7 @@ class WP_List_Table {
 			$response['total_pages_i18n'] = number_format_i18n( $this->_pagination_args['total_pages'] );
 		}
 
-		die( wp_json_encode( $response ) );
+		die( json_encode( $response ) );
 	}
 
 	/**
@@ -1087,6 +1075,6 @@ class WP_List_Table {
 			)
 		);
 
-		printf( "<script type='text/javascript'>list_args = %s;</script>\n", wp_json_encode( $args ) );
+		printf( "<script type='text/javascript'>list_args = %s;</script>\n", json_encode( $args ) );
 	}
 }

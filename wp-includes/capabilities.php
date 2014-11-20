@@ -104,8 +104,7 @@ class WP_Roles {
 	 *
 	 * @since 2.1.0
 	 * @access protected
-	 *
-	 * @global wpdb  $wpdb          WordPress database abstraction object.
+	 * @uses $wpdb Used to get the database prefix.
 	 * @global array $wp_user_roles Used to set the 'roles' property value.
 	 */
 	protected function _init() {

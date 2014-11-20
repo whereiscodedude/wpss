@@ -824,7 +824,7 @@ themes.view.Themes = wp.Backbone.View.extend({
 	index: 0,
 
 	// The theme count element
-	count: $( '.wp-filter .theme-count' ),
+	count: $( '.theme-count' ),
 
 	initialize: function( options ) {
 		var self = this;
@@ -1659,10 +1659,6 @@ $( document ).ready(function() {
 	} else {
 		themes.Run.init();
 	}
-
-	$( '.broken-themes .delete-theme' ).on( 'click', function() {
-		return confirm( _wpThemeSettings.settings.confirmDelete );
-	});
 });
 
 })( jQuery );

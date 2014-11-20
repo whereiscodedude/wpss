@@ -15,10 +15,8 @@
  * @uses WP_Image_Editor Extends class
  */
 class WP_Image_Editor_Imagick extends WP_Image_Editor {
-	/**
-	 * @var Imagick
-	 */
-	protected $image; // Imagick Object
+
+	protected $image = null; // Imagick Object
 
 	public function __destruct() {
 		if ( $this->image instanceof Imagick ) {
@@ -142,11 +140,10 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 		}
 
 		$updated_size = $this->update_size();
-		if ( is_wp_error( $updated_size ) ) {
-			return $updated_size;
-		}
+		if ( is_wp_error( $updated_size ) )
+				return $updated_size;
 
-		return $this->set_quality();
+		return true;
 	}
 
 	/**

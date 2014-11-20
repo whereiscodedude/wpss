@@ -215,30 +215,26 @@ function wptexturize($text, $reset = false) {
 		.     '-(?!->)' // Dash not followed by end of comment.
 		.     '[^\-]*+' // Consume non-dashes.
 		. ')*+'         // Loop possessively.
-		. '(?:-->)?';   // End of comment. If not found, match all input.
+		. '-->';        // End of comment.
 
-	$shortcode_regex =
-		  '\['              // Find start of shortcode.
-		. '[\/\[]?'         // Shortcodes may begin with [/ or [[
-		. $tagregexp        // Only match registered shortcodes, because performance.
-		. '(?:'
-		.     '[^\[\]<>]+'  // Shortcodes do not contain other shortcodes. Quantifier critical.
+	$regex =  '/('			// Capture the entire match.
+		.	'<'		// Find start of element.
+		.	'(?(?=!--)'	// Is this a comment?
+		.		$comment_regex	// Find end of comment
+		.	'|'
+		.		'[^>]+>'	// Find end of element
+		.	')'
 		. '|'
-		.     '<[^\[\]>]*>' // HTML elements permitted. Prevents matching ] before >.
-		. ')*+'             // Possessive critical.
-		. '\]'              // Find end of shortcode.
-		. '\]?';            // Shortcodes may end with ]]
-
-	$regex =
-		  '/('                   // Capture the entire match.
-		.     '<'                // Find start of element.
-		.     '(?(?=!--)'        // Is this a comment?
-		.         $comment_regex // Find end of comment.
-		.     '|'
-		.         '[^>]+>'       // Find end of element.
-		.     ')'
-		. '|'
-		.     $shortcode_regex   // Find shortcodes.
+		.	'\['		// Find start of shortcode.
+		.	'[\/\[]?'	// Shortcodes may begin with [/ or [[
+		.	$tagregexp	// Only match registered shortcodes, because performance.
+		.	'(?:'
+		.		'[^\[\]<>]+'	// Shortcodes do not contain other shortcodes. Quantifier critical.
+		.	'|'
+		.		'<[^\[\]>]*>' 	// HTML elements permitted. Prevents matching ] before >.
+		.	')*+'		// Possessive critical.
+		.	'\]'		// Find end of shortcode.
+		.	'\]?'		// Shortcodes may end with ]]
 		. ')/s';
 
 	$textarr = preg_split( $regex, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
@@ -246,31 +242,30 @@ function wptexturize($text, $reset = false) {
 	foreach ( $textarr as &$curl ) {
 		// Only call _wptexturize_pushpop_element if $curl is a delimiter.
 		$first = $curl[0];
-		if ( '<' === $first && '<!--' === substr( $curl, 0, 4 ) ) {
-			// This is an HTML comment delimeter.
+		if ( '<' === $first && '>' === substr( $curl, -1 ) ) {
+			// This is an HTML delimiter.
 
-			continue;
-
-		} elseif ( '<' === $first && '>' === substr( $curl, -1 ) ) {
-			// This is an HTML element delimiter.
-
-			_wptexturize_pushpop_element( $curl, $no_texturize_tags_stack, $no_texturize_tags );
+			if ( '<!--' !== substr( $curl, 0, 4 ) ) {
+				_wptexturize_pushpop_element( $curl, $no_texturize_tags_stack, $no_texturize_tags );
+			}
 
 		} elseif ( '' === trim( $curl ) ) {
 			// This is a newline between delimiters.  Performance improves when we check this.
 
 			continue;
 
-		} elseif ( '[' === $first && 1 === preg_match( '/^' . $shortcode_regex . '$/', $curl ) ) {
+		} elseif ( '[' === $first && 1 === preg_match( '/^\[\/?' . $tagregexp . '(?:[^\[\]<>]+|<[^\[\]>]*>)*+\]$/', $curl ) ) {
 			// This is a shortcode delimiter.
 
-			if ( '[[' !== substr( $curl, 0, 2 ) && ']]' !== substr( $curl, -2 ) ) {
-				// Looks like a normal shortcode.
-				_wptexturize_pushpop_element( $curl, $no_texturize_shortcodes_stack, $no_texturize_shortcodes );
-			} else {
-				// Looks like an escaped shortcode.
-				continue;
-			}
+			_wptexturize_pushpop_element( $curl, $no_texturize_shortcodes_stack, $no_texturize_shortcodes );
+
+		} elseif ( '[' === $first && 1 === preg_match( '/^\[[\/\[]?' . $tagregexp . '(?:[^\[\]<>]+|<[^\[\]>]*>)*+\]\]?$/', $curl ) ) {
+			// This is an escaped shortcode delimiter.
+
+			// Do not texturize.
+			// Do not push to the shortcodes stack.
+
+			continue;
 
 		} elseif ( empty( $no_texturize_shortcodes_stack ) && empty( $no_texturize_tags_stack ) ) {
 			// This is neither a delimiter, nor is this content inside of no_texturize pairs.  Do texturize.
@@ -331,7 +326,7 @@ function _wptexturize_pushpop_element($text, &$stack, $disabled_elements) {
 
 	// Parse out the tag name.
 	$space = strpos( $text, ' ' );
-	if ( false === $space ) {
+	if ( FALSE === $space ) {
 		$space = -1;
 	} else {
 		$space -= $name_offset;
@@ -1072,10 +1067,10 @@ function sanitize_file_name( $filename ) {
 	 */
 	$special_chars = apply_filters( 'sanitize_file_name_chars', $special_chars, $filename_raw );
 	$filename = preg_replace( "#\x{00a0}#siu", ' ', $filename );
-	$filename = str_replace( $special_chars, '', $filename );
+	$filename = str_replace($special_chars, '', $filename);
 	$filename = str_replace( array( '%20', '+' ), '-', $filename );
-	$filename = preg_replace( '/[\r\n\t -]+/', '-', $filename );
-	$filename = trim( $filename, '.-_' );
+	$filename = preg_replace('/[\s-]+/', '-', $filename);
+	$filename = trim($filename, '.-_');
 
 	// Split the filename into a base and extension[s]
 	$parts = explode('.', $filename);
@@ -1234,6 +1229,7 @@ function sanitize_title( $title, $fallback_title = '', $context = 'save' ) {
  * Used for querying the database for a value from URL.
  *
  * @since 3.1.0
+ * @uses sanitize_title()
  *
  * @param string $title The string to be sanitized.
  * @return string The sanitized string.
@@ -2237,6 +2233,7 @@ function _wp_iso_convert( $match ) {
  *
  * @since 1.2.0
  *
+ * @uses get_option() to retrieve the value of 'gmt_offset'.
  * @param string $string The date to be converted.
  * @param string $format The format string for the returned date (default is Y-m-d H:i:s)
  * @return string GMT version of the date provided.
@@ -3029,6 +3026,8 @@ function esc_sql( $data ) {
  * is applied to the returned cleaned URL.
  *
  * @since 2.8.0
+ * @uses wp_kses_bad_protocol() To only permit protocols in the URL set
+ *		via $protocols or the common ones set in the function.
  *
  * @param string $url The URL to be cleaned.
  * @param array $protocols Optional. An array of acceptable protocols.
@@ -3086,6 +3085,7 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
  * Performs esc_url() for database usage.
  *
  * @since 2.8.0
+ * @uses esc_url()
  *
  * @param string $url The URL to be cleaned.
  * @param array $protocols An array of acceptable protocols.
@@ -3247,7 +3247,7 @@ function tag_escape($tag_name) {
  * @return string Absolute path.
  */
 function wp_make_link_relative( $link ) {
-	return preg_replace( '|^(https?:)?//[^/]+(/.*)|i', '$2', $link );
+	return preg_replace( '|https?://[^/]+(/.*)|i', '$1', $link );
 }
 
 /**
@@ -3481,6 +3481,7 @@ function wp_parse_str( $string, &$array ) {
  *
  * KSES already converts lone greater than signs.
  *
+ * @uses wp_pre_kses_less_than_callback in the callback function.
  * @since 2.3.0
  *
  * @param string $text Text to be converted.
@@ -3493,6 +3494,7 @@ function wp_pre_kses_less_than( $text ) {
 /**
  * Callback function used by preg_replace.
  *
+ * @uses esc_html to format the $matches text.
  * @since 2.3.0
  *
  * @param array $matches Populated by matches to preg_replace.

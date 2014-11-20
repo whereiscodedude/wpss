@@ -97,10 +97,6 @@
 	height: auto;
 }
 
-.wp_attachment_holder .wp-video {
-	margin-top: 18px;
-}
-
 video.wp-video-shortcode,
 .wp-video-shortcode video {
 	max-width: 100%;
@@ -222,11 +218,11 @@ video.wp-video-shortcode,
 	border-bottom: 0;
 }
 
-.wp-playlist-light .wp-playlist-caption {
+.wp-playlist-light .wp-playlist-item {
 	color: #333;
 }
 
-.wp-playlist-dark .wp-playlist-caption {
+.wp-playlist-dark .wp-playlist-item {
 	color: #dedede;
 }
 
