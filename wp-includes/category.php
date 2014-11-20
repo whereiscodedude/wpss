@@ -6,6 +6,23 @@
  */
 
 /**
+ * Retrieves all category IDs.
+ *
+ * @since 2.0.0
+ * @link http://codex.wordpress.org/Function_Reference/get_all_category_ids
+ *
+ * @return object List of all of the category IDs.
+ */
+function get_all_category_ids() {
+	if ( ! $cat_ids = wp_cache_get( 'all_category_ids', 'category' ) ) {
+		$cat_ids = get_terms( 'category', array('fields' => 'ids', 'get' => 'all') );
+		wp_cache_add( 'all_category_ids', $cat_ids, 'category' );
+	}
+
+	return $cat_ids;
+}
+
+/**
  * Retrieve list of category objects.
  *
  * If you change the type to 'link' in the arguments, then the link categories
@@ -24,14 +41,13 @@ function get_categories( $args = '' ) {
 	$args = wp_parse_args( $args, $defaults );
 
 	$taxonomy = $args['taxonomy'];
-
 	/**
-	 * Filter the taxonomy used to retrieve terms when calling {@see get_categories()}.
+	 * Filter the taxonomy used to retrieve terms when calling get_categories().
 	 *
 	 * @since 2.7.0
 	 *
 	 * @param string $taxonomy Taxonomy to retrieve terms from.
-	 * @param array  $args     An array of arguments. See {@see get_terms()}.
+	 * @param array  $args     An array of arguments. @see get_terms()
 	 */
 	$taxonomy = apply_filters( 'get_categories_taxonomy', $taxonomy, $args );
 
@@ -64,6 +80,7 @@ function get_categories( $args = '' ) {
  * The category will converted to maintain backwards compatibility.
  *
  * @since 1.5.1
+ * @uses get_term() Used to get the category data from the taxonomy.
  *
  * @param int|object $category Category ID or Category row object
  * @param string $output Optional. Constant OBJECT, ARRAY_A, or ARRAY_N
@@ -210,6 +227,7 @@ function cat_is_ancestor_of( $cat1, $cat2 ) {
  * Sanitizes category data based on context.
  *
  * @since 2.3.0
+ * @uses sanitize_term() See this function for what context are supported.
  *
  * @param object|array $category Category data
  * @param string $context Optional. Default is 'display'.
@@ -223,6 +241,7 @@ function sanitize_category( $category, $context = 'display' ) {
  * Sanitizes data in single category key field.
  *
  * @since 2.3.0
+ * @uses sanitize_term_field() See function for more details.
  *
  * @param string $field Category key to sanitize
  * @param mixed $value Category value to sanitize
@@ -241,6 +260,7 @@ function sanitize_category_field( $field, $value, $cat_id, $context ) {
  *
  * @since 2.3.0
  * @see get_terms() For list of arguments to pass.
+ * @uses apply_filters() Calls 'get_tags' hook on array of tags and with $args.
  *
  * @param string|array $args Tag arguments to use when retrieving tags.
  * @return array List of tags.
@@ -294,6 +314,7 @@ function get_tag( $tag, $output = OBJECT, $filter = 'raw' ) {
  * Remove the category cache data based on ID.
  *
  * @since 2.1.0
+ * @uses clean_term_cache() Clears the cache for the category based on ID
  *
  * @param int $id Category ID
  */

@@ -22,10 +22,9 @@ function got_mod_rewrite() {
 	 * This filter was previously used to force URL rewriting for other servers,
 	 * like nginx. Use the got_url_rewrite filter in got_url_rewrite() instead.
 	 *
-	 * @since 2.5.0
-	 *
 	 * @see got_url_rewrite()
 	 *
+	 * @since 2.5.0
 	 * @param bool $got_rewrite Whether Apache and mod_rewrite are present.
 	 */
 	return apply_filters( 'got_rewrite', $got_rewrite );
@@ -47,7 +46,6 @@ function got_url_rewrite() {
 	 * Filter whether URL rewriting is available.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param bool $got_url_rewrite Whether URL rewriting is available.
 	 */
 	return apply_filters( 'got_url_rewrite', $got_url_rewrite );
@@ -58,8 +56,8 @@ function got_url_rewrite() {
  *
  * @since 1.5.0
  *
- * @param string $filename
- * @param string $marker
+ * @param unknown_type $filename
+ * @param unknown_type $marker
  * @return array An array of strings from a file (.htaccess ) from between BEGIN and END markers.
  */
 function extract_from_markers( $filename, $marker ) {
@@ -94,9 +92,9 @@ function extract_from_markers( $filename, $marker ) {
  *
  * @since 1.5.0
  *
- * @param string $filename
- * @param string $marker
- * @param array  $insertion
+ * @param unknown_type $filename
+ * @param unknown_type $marker
+ * @param unknown_type $insertion
  * @return bool True on write success, false on failure.
  */
 function insert_with_markers( $filename, $marker, $insertion ) {
@@ -163,10 +161,8 @@ function save_mod_rewrite_rules() {
 	$home_path = get_home_path();
 	$htaccess_file = $home_path.'.htaccess';
 
-	/*
-	 * If the file doesn't already exist check for write access to the directory
-	 * and whether we have some rules. Else check for write access to the file.
-	 */
+	// If the file doesn't already exist check for write access to the directory and whether we have some rules.
+	// else check for write access to the file.
 	if ((!file_exists($htaccess_file) && is_writable($home_path) && $wp_rewrite->using_mod_rewrite_permalinks()) || is_writable($htaccess_file)) {
 		if ( got_mod_rewrite() ) {
 			$rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
@@ -211,7 +207,7 @@ function iis7_save_url_rewrite_rules(){
  *
  * @since 1.5.0
  *
- * @param string $file
+ * @param unknown_type $file
  */
 function update_recently_edited( $file ) {
 	$oldfiles = (array ) get_option( 'recently_edited' );
@@ -276,15 +272,17 @@ function url_shorten( $url ) {
  * @param array $vars An array of globals to reset.
  */
 function wp_reset_vars( $vars ) {
-	foreach ( $vars as $var ) {
-		if ( empty( $_POST[ $var ] ) ) {
-			if ( empty( $_GET[ $var ] ) ) {
-				$GLOBALS[ $var ] = '';
-			} else {
-				$GLOBALS[ $var ] = $_GET[ $var ];
-			}
+	for ( $i=0; $i<count( $vars ); $i += 1 ) {
+		$var = $vars[$i];
+		global $$var;
+
+		if ( empty( $_POST[$var] ) ) {
+			if ( empty( $_GET[$var] ) )
+				$$var = '';
+			else
+				$$var = $_GET[$var];
 		} else {
-			$GLOBALS[ $var ] = $_POST[ $var ];
+			$$var = $_POST[$var];
 		}
 	}
 }
@@ -294,7 +292,7 @@ function wp_reset_vars( $vars ) {
  *
  * @since 2.1.0
  *
- * @param string|WP_Error $message
+ * @param unknown_type $message
  */
 function show_message($message) {
 	if ( is_wp_error($message) ){
@@ -338,11 +336,11 @@ function wp_doc_link_parse( $content ) {
 	sort( $functions );
 
 	/**
-	 * Filter the list of functions and classes to be ignored from the documentation lookup.
+	 * Filter the list of functions/classes to be ignored from the documentation lookup.
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array $ignore_functions Functions and classes to be ignored.
+	 * @param array $ignore_functions Functions/Classes to be ignored.
 	 */
 	$ignore_functions = apply_filters( 'documentation_ignore_functions', $ignore_functions );
 
@@ -621,7 +619,7 @@ function admin_color_scheme_picker( $user_id ) {
 			<div class="color-option <?php echo ( $color == $current_color ) ? 'selected' : ''; ?>">
 				<input name="admin_color" id="admin_color_<?php echo esc_attr( $color ); ?>" type="radio" value="<?php echo esc_attr( $color ); ?>" class="tog" <?php checked( $color, $current_color ); ?> />
 				<input type="hidden" class="css_url" value="<?php echo esc_url( $color_info->url ); ?>" />
-				<input type="hidden" class="icon_colors" value="<?php echo esc_attr( wp_json_encode( array( 'icons' => $color_info->icon_colors ) ) ); ?>" />
+				<input type="hidden" class="icon_colors" value="<?php echo esc_attr( json_encode( array( 'icons' => $color_info->icon_colors ) ) ); ?>" />
 				<label for="admin_color_<?php echo esc_attr( $color ); ?>"><?php echo esc_html( $color_info->name ); ?></label>
 				<table class="color-palette">
 					<tr>
@@ -665,7 +663,7 @@ function wp_color_scheme_settings() {
 		$icon_colors = array( 'base' => '#999', 'focus' => '#2ea2cc', 'current' => '#fff' );
 	}
 
-	echo '<script type="text/javascript">var _wpColorScheme = ' . wp_json_encode( array( 'icons' => $icon_colors ) ) . ";</script>\n";
+	echo '<script type="text/javascript">var _wpColorScheme = ' . json_encode( array( 'icons' => $icon_colors ) ) . ";</script>\n";
 }
 add_action( 'admin_head', 'wp_color_scheme_settings' );
 
@@ -804,7 +802,7 @@ add_filter( 'heartbeat_settings', 'wp_heartbeat_set_suspension' );
 /**
  * Autosave with heartbeat
  *
- * @since 3.9.0
+ * @since 3.9
  */
 function heartbeat_autosave( $response, $data ) {
 	if ( ! empty( $data['wp_autosave'] ) ) {
@@ -826,20 +824,3 @@ function heartbeat_autosave( $response, $data ) {
 }
 // Run later as we have to set DOING_AUTOSAVE for back-compat
 add_filter( 'heartbeat_received', 'heartbeat_autosave', 500, 2 );
-
-/**
- * Disables autocomplete on the 'post' form (Add/Edit Post screens) for WebKit browsers,
- * as they disregard the autocomplete setting on the editor textarea. That can break the editor
- * when the user navigates to it with the browser's Back button. See #28037
- *
- * @since 4.0
- */
-function post_form_autocomplete_off() {
-	global $is_safari, $is_chrome;
-
-	if ( $is_safari || $is_chrome ) {
-		echo ' autocomplete="off"';
-	}
-}
-
-add_action( 'post_edit_form_tag', 'post_form_autocomplete_off' );

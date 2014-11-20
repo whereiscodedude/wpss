@@ -2,11 +2,6 @@
 	var api = wp.customize,
 		debounce;
 
-	/**
-	 * Returns a debounced version of the function.
-	 *
-	 * @todo Require Underscore.js for this file and retire this.
-	 */
 	debounce = function( fn, delay, context ) {
 		var timeout;
 		return function() {
@@ -22,12 +17,6 @@
 		};
 	};
 
-	/**
-	 * @constructor
-	 * @augments wp.customize.Messenger
-	 * @augments wp.customize.Class
-	 * @mixes wp.customize.Events
-	 */
 	api.Preview = api.Messenger.extend({
 		/**
 		 * Requires params:
@@ -101,19 +90,12 @@
 			preview.send( 'synced' );
 		});
 
-		preview.bind( 'active', function() {
-			if ( api.settings.nonce ) {
-				preview.send( 'nonce', api.settings.nonce );
-			}
+        preview.bind( 'active', function() {
+            if ( api.settings.nonce )
+                preview.send( 'nonce', api.settings.nonce );
+        });
 
-			preview.send( 'documentTitle', document.title );
-		});
-
-		preview.send( 'ready', {
-			activePanels: api.settings.activePanels,
-			activeSections: api.settings.activeSections,
-			activeControls: api.settings.activeControls
-		} );
+		preview.send( 'ready' );
 
 		/* Custom Backgrounds */
 		bg = $.map(['color', 'image', 'position_x', 'repeat', 'attachment'], function( prop ) {

@@ -113,14 +113,7 @@ if ( ! empty( $messages ) ) {
 	<table class="form-table">
 		<?php
 		$blog_prefix = $wpdb->get_blog_prefix( $id );
-		$sql = "SELECT * FROM {$blog_prefix}options
-			WHERE option_name NOT LIKE %s
-			AND option_name NOT LIKE %s";
-		$query = $wpdb->prepare( $sql,
-			$wpdb->esc_like( '_' ) . '%',
-			'%' . $wpdb->esc_like( 'user_roles' )
-		);
-		$options = $wpdb->get_results( $query );
+		$options = $wpdb->get_results( "SELECT * FROM {$blog_prefix}options WHERE option_name NOT LIKE '\_%' AND option_name NOT LIKE '%user_roles'" );
 		foreach ( $options as $option ) {
 			if ( $option->option_name == 'default_role' )
 				$editblog_default_role = $option->option_value;

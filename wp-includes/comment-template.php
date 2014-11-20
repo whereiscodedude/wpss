@@ -35,13 +35,10 @@ function get_comment_author( $comment_ID = 0 ) {
 	 * Filter the returned comment author name.
 	 *
 	 * @since 1.5.0
-	 * @since 4.1.0 The `$comment_ID` and `$comment` parameters were added.
 	 *
-	 * @param string $author     The comment author's username.
-	 * @param int    $comment_ID The comment ID.
-	 * @param object $comment    The comment object.
+	 * @param string $author The comment author's username.
 	 */
-	return apply_filters( 'get_comment_author', $author, $comment_ID, $comment );
+	return apply_filters( 'get_comment_author', $author );
 }
 
 /**
@@ -57,12 +54,10 @@ function comment_author( $comment_ID = 0 ) {
 	 * Filter the comment author's name for display.
 	 *
 	 * @since 1.2.0
-	 * @since 4.1.0 The `$comment_ID` parameter was added.
 	 *
-	 * @param string $author     The comment author's username.
-	 * @param int    $comment_ID The comment ID.
+	 * @param string $author The comment author's username.
 	 */
-	$author = apply_filters( 'comment_author', $author, $comment_ID );
+	$author = apply_filters( 'comment_author', $author );
 	echo $author;
 }
 
@@ -80,13 +75,10 @@ function get_comment_author_email( $comment_ID = 0 ) {
 	 * Filter the comment author's returned email address.
 	 *
 	 * @since 1.5.0
-	 * @since 4.1.0 The `$comment_ID` and `$comment` parameters were added.
 	 *
 	 * @param string $comment_author_email The comment author's email address.
-	 * @param int    $comment_ID           The comment ID.
-	 * @param object $comment              The comment object.
 	 */
-	return apply_filters( 'get_comment_author_email', $comment->comment_author_email, $comment_ID, $comment );
+	return apply_filters( 'get_comment_author_email', $comment->comment_author_email );
 }
 
 /**
@@ -108,12 +100,10 @@ function comment_author_email( $comment_ID = 0 ) {
 	 * Filter the comment author's email for display.
 	 *
 	 * @since 1.2.0
-	 * @since 4.1.0 The `$comment_ID` parameter was added.
 	 *
 	 * @param string $author_email The comment author's email address.
-	 * @param int    $comment_ID   The comment ID.
 	 */
-	echo apply_filters( 'author_email', $author_email, $comment_ID );
+	echo apply_filters( 'author_email', $author_email );
 }
 
 /**
@@ -164,12 +154,10 @@ function get_comment_author_email_link( $linktext = '', $before = '', $after = '
 	 * harvesters do not capture your commenters' email address.
 	 *
 	 * @since 1.2.0
-	 * @since 4.1.0 The `$comment` parameter was added.
 	 *
 	 * @param string $comment_author_email The comment author's email address.
-	 * @param object $comment              The comment object.
 	 */
-	$email = apply_filters( 'comment_email', $comment->comment_author_email, $comment );
+	$email = apply_filters( 'comment_email', $comment->comment_author_email );
 	if ((!empty($email)) && ($email != '@')) {
 	$display = ($linktext != '') ? $linktext : $email;
 		$return  = $before;
@@ -206,14 +194,11 @@ function get_comment_author_link( $comment_ID = 0 ) {
 	 * Filter the comment author's link for display.
 	 *
 	 * @since 1.5.0
-	 * @since 4.1.0 The `$author` and `$comment_ID` parameters were added.
 	 *
-	 * @param string $return     The HTML-formatted comment author link.
-	 *                           Empty for an invalid URL.
-	 * @param string $author     The comment author's username.
-	 * @param int    $comment_ID The comment ID.
+	 * @param string $return The HTML-formatted comment author link.
+	 *                       Empty for an invalid URL.
 	 */
-	return apply_filters( 'get_comment_author_link', $return, $author, $comment_ID );
+	return apply_filters( 'get_comment_author_link', $return );
 }
 
 /**
@@ -246,13 +231,10 @@ function get_comment_author_IP( $comment_ID = 0 ) {
 	 * Filter the comment author's returned IP address.
 	 *
 	 * @since 1.5.0
-	 * @since 4.1.0 The `$comment_ID` and `$comment` parameters were added.
 	 *
 	 * @param string $comment_author_IP The comment author's IP address.
-	 * @param int    $comment_ID        The comment ID.
-	 * @param object $comment           The comment object.
 	 */
-	return apply_filters( 'get_comment_author_IP', $comment->comment_author_IP, $comment_ID, $comment );
+	return apply_filters( 'get_comment_author_IP', $comment->comment_author_IP );
 }
 
 /**
@@ -284,13 +266,10 @@ function get_comment_author_url( $comment_ID = 0 ) {
 	 * Filter the comment author's URL.
 	 *
 	 * @since 1.5.0
-	 * @since 4.1.0 The `$comment_ID` and `$comment` parameters were added.
 	 *
-	 * @param string $url        The comment author's URL.
-	 * @param int    $comment_ID The comment ID.
-	 * @param object $comment    The comment object.
+	 * @param string $url The comment author's URL.
 	 */
-	return apply_filters( 'get_comment_author_url', $url, $comment_ID, $comment );
+	return apply_filters( 'get_comment_author_url', $url );
 }
 
 /**
@@ -307,12 +286,10 @@ function comment_author_url( $comment_ID = 0 ) {
 	 * Filter the comment author's URL for display.
 	 *
 	 * @since 1.2.0
-	 * @since 4.1.0 The `$comment_ID` parameter was added.
 	 *
 	 * @param string $author_url The comment author's URL.
-	 * @param int    $comment_ID The comment ID.
 	 */
-	echo apply_filters( 'comment_url', $author_url, $comment_ID );
+	echo apply_filters( 'comment_url', $author_url );
 }
 
 /**
@@ -340,11 +317,8 @@ function get_comment_author_url_link( $linktext = '', $before = '', $after = '' 
 	$display = ($linktext != '') ? $linktext : $url;
 	$display = str_replace( 'http://www.', '', $display );
 	$display = str_replace( 'http://', '', $display );
-
-	if ( '/' == substr($display, -1) ) {
+	if ( '/' == substr($display, -1) )
 		$display = substr($display, 0, -1);
-	}
-
 	$return = "$before<a href='$url' rel='external'>$display</a>$after";
 
 	/**
@@ -471,10 +445,9 @@ function get_comment_class( $class = '', $comment_id = null, $post_id = null ) {
 	 * @param array       $classes    An array of comment classes.
 	 * @param string      $class      A comma-separated list of additional classes added to the list.
 	 * @param int         $comment_id The comment id.
-	 * @param object   	  $comment    The comment
 	 * @param int|WP_Post $post_id    The post ID or WP_Post object.
 	 */
-	return apply_filters( 'comment_class', $classes, $class, $comment_id, $comment, $post_id );
+	return apply_filters( 'comment_class', $classes, $class, $comment_id, $post_id );
 }
 
 /**
@@ -533,7 +506,6 @@ function get_comment_excerpt( $comment_ID = 0 ) {
 	$comment = get_comment( $comment_ID );
 	$comment_text = strip_tags($comment->comment_content);
 	$blah = explode(' ', $comment_text);
-
 	if (count($blah) > 20) {
 		$k = 20;
 		$use_dotdotdot = 1;
@@ -541,7 +513,6 @@ function get_comment_excerpt( $comment_ID = 0 ) {
 		$k = count($blah);
 		$use_dotdotdot = 0;
 	}
-
 	$excerpt = '';
 	for ($i=0; $i<$k; $i++) {
 		$excerpt .= $blah[$i] . ' ';
@@ -552,13 +523,10 @@ function get_comment_excerpt( $comment_ID = 0 ) {
 	 * Filter the retrieved comment excerpt.
 	 *
 	 * @since 1.5.0
-	 * @since 4.1.0 The `$comment_ID` and `$comment` parameters were added.
 	 *
-	 * @param string $excerpt    The comment excerpt text.
-	 * @param int    $comment_ID The comment ID.
-	 * @param object $comment    The comment object.
+	 * @param string $excerpt The comment excerpt text.
 	 */
-	return apply_filters( 'get_comment_excerpt', $excerpt, $comment_ID, $comment );
+	return apply_filters( 'get_comment_excerpt', $excerpt );
 }
 
 /**
@@ -575,12 +543,10 @@ function comment_excerpt( $comment_ID = 0 ) {
 	 * Filter the comment excerpt for display.
 	 *
 	 * @since 1.2.0
-	 * @since 4.1.0 The `$comment_ID` parameter was added.
 	 *
 	 * @param string $comment_excerpt The comment excerpt text.
-	 * @param int    $comment_ID      The comment ID.
 	 */
-	echo apply_filters( 'comment_excerpt', $comment_excerpt, $comment_ID );
+	echo apply_filters( 'comment_excerpt', $comment_excerpt );
 }
 
 /**
@@ -596,12 +562,10 @@ function get_comment_ID() {
 	 * Filter the returned comment ID.
 	 *
 	 * @since 1.5.0
-	 * @since 4.1.0 The `$comment_ID` parameter was added.
 	 *
-	 * @param int    $comment_ID The current comment ID.
-	 * @param object $comment    The comment object.
+	 * @param int $comment_ID The current comment ID.
 	 */
-	return apply_filters( 'get_comment_ID', $comment->comment_ID, $comment );
+	return apply_filters( 'get_comment_ID', $comment->comment_ID );
 }
 
 /**
@@ -677,7 +641,7 @@ function get_comment_link( $comment = null, $args = array() ) {
  *
  * @since 1.5.0
  *
- * @param int|WP_Post $post_id Optional. Post ID or WP_Post object. Default is global $post.
+ * @param int|WP_Post $post_id Post ID or WP_Post object. Default current post.
  * @return string The link to the comments.
  */
 function get_comments_link( $post_id = 0 ) {
@@ -714,26 +678,28 @@ function comments_link( $deprecated = '', $deprecated_2 = '' ) {
  *
  * @since 1.5.0
  *
- * @param int|WP_Post $post_id Optional. Post ID or WP_Post object. Default is global $post.
+ * @param int|WP_Post $post_id Post ID or WP_Post object. Default current post.
  * @return int The number of comments a post has.
  */
 function get_comments_number( $post_id = 0 ) {
-	$post = get_post( $post_id );
+	$post_id = absint( $post_id );
 
-	if ( ! $post ) {
+	if ( !$post_id )
+		$post_id = get_the_ID();
+
+	$post = get_post($post_id);
+	if ( ! isset($post->comment_count) )
 		$count = 0;
-	} else {
+	else
 		$count = $post->comment_count;
-		$post_id = $post->ID;
-	}
 
 	/**
 	 * Filter the returned comment count for a post.
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param int $count   Number of comments a post has.
-	 * @param int $post_id Post ID.
+	 * @param int         $count   Nnumber of comments a post has.
+	 * @param int|WP_Post $post_id Post ID or WP_Post object.
 	 */
 	return apply_filters( 'get_comments_number', $count, $post_id );
 }
@@ -749,31 +715,18 @@ function get_comments_number( $post_id = 0 ) {
  * @param string $deprecated Not used.
  */
 function comments_number( $zero = false, $one = false, $more = false, $deprecated = '' ) {
-	if ( ! empty( $deprecated ) ) {
+	if ( !empty( $deprecated ) )
 		_deprecated_argument( __FUNCTION__, '1.3' );
-	}
-	echo get_comments_number_text( $zero, $one, $more );
-}
 
-/**
- * Display the language string for the number of comments the current post has.
- *
- * @since 4.0.0
- *
- * @param string $zero Optional. Text for no comments. Default false.
- * @param string $one  Optional. Text for one comment. Default false.
- * @param string $more Optional. Text for more than one comment. Default false.
- */
-function get_comments_number_text( $zero = false, $one = false, $more = false ) {
 	$number = get_comments_number();
 
-	if ( $number > 1 ) {
-		$output = str_replace( '%', number_format_i18n( $number ), ( false === $more ) ? __( '% Comments' ) : $more );
-	} elseif ( $number == 0 ) {
-		$output = ( false === $zero ) ? __( 'No Comments' ) : $zero;
-	} else { // must be one
-		$output = ( false === $one ) ? __( '1 Comment' ) : $one;
-	}
+	if ( $number > 1 )
+		$output = str_replace('%', number_format_i18n($number), ( false === $more ) ? __('% Comments') : $more);
+	elseif ( $number == 0 )
+		$output = ( false === $zero ) ? __('No Comments') : $zero;
+	else // must be one
+		$output = ( false === $one ) ? __('1 Comment') : $one;
+
 	/**
 	 * Filter the comments count for display.
 	 *
@@ -785,7 +738,7 @@ function get_comments_number_text( $zero = false, $one = false, $more = false ) 
 	 *                       is equal to 0, 1, or 1+.
 	 * @param int    $number The number of post comments.
 	 */
-	return apply_filters( 'comments_number', $output, $number );
+	echo apply_filters( 'comments_number', $output, $number );
 }
 
 /**
@@ -905,13 +858,10 @@ function get_comment_type( $comment_ID = 0 ) {
 	 * Filter the returned comment type.
 	 *
 	 * @since 1.5.0
-	 * @since 4.1.0 The `$comment_ID` and `$comment` parameters were added.
 	 *
 	 * @param string $comment_type The type of comment, such as 'comment', 'pingback', or 'trackback'.
-	 * @param int 	 $comment_ID   The comment ID.
-	 * @param object $comment      The comment object.
 	 */
-	return apply_filters( 'get_comment_type', $comment->comment_type, $comment_ID, $comment );
+	return apply_filters( 'get_comment_type', $comment->comment_type );
 }
 
 /**
@@ -1151,20 +1101,14 @@ function comments_template( $file = '/comments.php', $separate_comments = false 
 	 */
 	$comment_author_url = esc_url($commenter['comment_author_url']);
 
-	$comment_args = array(
-		'order'   => 'ASC',
-		'orderby' => 'comment_date_gmt',
-		'status'  => 'approve',
-		'post_id' => $post->ID,
-	);
-
-	if ( $user_ID ) {
-		$comment_args['include_unapproved'] = array( $user_ID );
-	} else if ( ! empty( $comment_author ) ) {
-		$comment_args['include_unapproved'] = array( $comment_author_email );
+	/** @todo Use API instead of SELECTs. */
+	if ( $user_ID) {
+		$comments = $wpdb->get_results($wpdb->prepare("SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND (comment_approved = '1' OR ( user_id = %d AND comment_approved = '0' ) )  ORDER BY comment_date_gmt", $post->ID, $user_ID));
+	} else if ( empty($comment_author) ) {
+		$comments = get_comments( array('post_id' => $post->ID, 'status' => 'approve', 'order' => 'ASC') );
+	} else {
+		$comments = $wpdb->get_results($wpdb->prepare("SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND ( comment_approved = '1' OR ( comment_author = %s AND comment_author_email = %s AND comment_approved = '0' ) ) ORDER BY comment_date_gmt", $post->ID, wp_specialchars_decode($comment_author,ENT_QUOTES), $comment_author_email));
 	}
-
-	$comments = get_comments( $comment_args );
 
 	/**
 	 * Filter the comments array.
@@ -1347,66 +1291,40 @@ function comments_popup_link( $zero = false, $one = false, $more = false, $css_c
  *                             Default current post.
  * @return mixed Link to show comment form, if successful. False, if comments are closed.
  */
-function get_comment_reply_link( $args = array(), $comment = null, $post = null ) {
+function get_comment_reply_link($args = array(), $comment = null, $post = null) {
 
 	$defaults = array(
-		'add_below'     => 'comment',
-		'respond_id'    => 'respond',
-		'reply_text'    => __( 'Reply' ),
-		'reply_to_text' => __( 'Reply to %s' ),
-		'login_text'    => __( 'Log in to Reply' ),
-		'depth'         => 0,
-		'before'        => '',
-		'after'         => ''
+		'add_below'  => 'comment',
+		'respond_id' => 'respond',
+		'reply_text' => __('Reply'),
+		'login_text' => __('Log in to Reply'),
+		'depth'      => 0,
+		'before'     => '',
+		'after'      => ''
 	);
 
-	$args = wp_parse_args( $args, $defaults );
+	$args = wp_parse_args($args, $defaults);
 
-	if ( 0 == $args['depth'] || $args['max_depth'] <= $args['depth'] ) {
+	if ( 0 == $args['depth'] || $args['max_depth'] <= $args['depth'] )
 		return;
-	}
 
-	$comment = get_comment( $comment );
+	extract($args, EXTR_SKIP);
 
-	if ( empty( $post ) ) {
+	$comment = get_comment($comment);
+	if ( empty($post) )
 		$post = $comment->comment_post_ID;
-	}
+	$post = get_post($post);
 
-	$post = get_post( $post );
-
-	if ( ! comments_open( $post->ID ) ) {
+	if ( !comments_open($post->ID) )
 		return false;
-	}
 
-	/**
-	 * Filter the comment reply link arguments.
-	 *
-	 * @since 4.1.0
-	 *
-	 * @param array   $args    Comment reply link arguments. See {@see get_comment_reply_link()}
-	 *                         for more information on accepted arguments.
-	 * @param object  $comment The object of the comment being replied to.
-	 * @param WP_Post $post    The WP_Post object.
-	 */
-	$args = apply_filters( 'comment_reply_link_args', $args, $comment, $post );
+	$link = '';
 
-	if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
-		$link = sprintf( '<a rel="nofollow" class="comment-reply-login" href="%s">%s</a>',
-			esc_url( wp_login_url( get_permalink() ) ),
-			$args['login_text']
-		);
-	} else {
-		$onclick = sprintf( 'return addComment.moveForm( "%1$s-%2$s", "%2$s", "%3$s", "%4$s" )',
-			$args['add_below'], $comment->comment_ID, $args['respond_id'], $post->ID
-		);
+	if ( get_option('comment_registration') && ! is_user_logged_in() )
+		$link = '<a rel="nofollow" class="comment-reply-login" href="' . esc_url( wp_login_url( get_permalink() ) ) . '">' . $login_text . '</a>';
+	else
+		$link = "<a class='comment-reply-link' href='" . esc_url( add_query_arg( 'replytocom', $comment->comment_ID ) ) . "#" . $respond_id . "' onclick='return addComment.moveForm(\"$add_below-$comment->comment_ID\", \"$comment->comment_ID\", \"$respond_id\", \"$post->ID\")'>$reply_text</a>";
 
-		$link = sprintf( "<a class='comment-reply-link' href='%s' onclick='%s' aria-label='%s'>%s</a>",
-			esc_url( add_query_arg( 'replytocom', $comment->comment_ID ) ) . "#" . $args['respond_id'],
-			$onclick,
-			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
-			$args['reply_text']
-		);
-	}
 	/**
 	 * Filter the comment reply link.
 	 *
@@ -1417,7 +1335,7 @@ function get_comment_reply_link( $args = array(), $comment = null, $post = null 
 	 * @param object  $comment The object of the comment being replied.
 	 * @param WP_Post $post    The WP_Post object.
 	 */
-	return apply_filters( 'comment_reply_link', $args['before'] . $link . $args['after'], $args, $comment, $post );
+	return apply_filters( 'comment_reply_link', $before . $link . $after, $args, $comment, $post );
 }
 
 /**
@@ -1471,30 +1389,18 @@ function get_post_reply_link($args = array(), $post = null) {
 	);
 
 	$args = wp_parse_args($args, $defaults);
-
+	extract($args, EXTR_SKIP);
 	$post = get_post($post);
 
-	if ( ! comments_open( $post->ID ) ) {
+	if ( !comments_open($post->ID) )
 		return false;
-	}
 
-	if ( get_option('comment_registration') && ! is_user_logged_in() ) {
-		$link = sprintf( '<a rel="nofollow" href="%s">%s</a>',
-			wp_login_url( get_permalink() ),
-			$args['login_text']
-		);
-	} else {
-		$onclick = sprintf( 'return addComment.moveForm( "%1$s-%2$s", "0", "%3$s", "%2$s" )',
-			$args['add_below'], $post->ID, $args['respond_id']
-		);
+	if ( get_option('comment_registration') && ! is_user_logged_in() )
+		$link = '<a rel="nofollow" href="' . wp_login_url( get_permalink() ) . '">' . $login_text . '</a>';
+	else
+		$link = "<a rel='nofollow' class='comment-reply-link' href='" . get_permalink($post->ID) . "#$respond_id' onclick='return addComment.moveForm(\"$add_below-$post->ID\", \"0\", \"$respond_id\", \"$post->ID\")'>$reply_text</a>";
 
-		$link = sprintf( "<a rel='nofollow' class='comment-reply-link' href='%s' onclick='%s'>%s</a>",
-			get_permalink( $post->ID ) . '#' . $args['respond_id'],
-			$onclick,
-			$args['reply_text']
-		);
-	}
-	$formatted_link = $args['before'] . $link . $args['after'];
+	$formatted_link = $before . $link . $after;
 	/**
 	 * Filter the formatted post comments link HTML.
 	 *
@@ -1646,7 +1552,7 @@ class Walker_Comment extends Walker {
 	 * @since 2.7.0
 	 * @var string
 	 */
-	public $tree_type = 'comment';
+	var $tree_type = 'comment';
 
 	/**
 	 * DB fields to use.
@@ -1656,7 +1562,7 @@ class Walker_Comment extends Walker {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	public $db_fields = array ('parent' => 'comment_parent', 'id' => 'comment_ID');
+	var $db_fields = array ('parent' => 'comment_parent', 'id' => 'comment_ID');
 
 	/**
 	 * Start the list before the elements are added.
@@ -1669,7 +1575,7 @@ class Walker_Comment extends Walker {
 	 * @param int $depth Depth of comment.
 	 * @param array $args Uses 'style' argument for type of HTML list.
 	 */
-	public function start_lvl( &$output, $depth = 0, $args = array() ) {
+	function start_lvl( &$output, $depth = 0, $args = array() ) {
 		$GLOBALS['comment_depth'] = $depth + 1;
 
 		switch ( $args['style'] ) {
@@ -1678,8 +1584,8 @@ class Walker_Comment extends Walker {
 			case 'ol':
 				$output .= '<ol class="children">' . "\n";
 				break;
-			case 'ul':
 			default:
+			case 'ul':
 				$output .= '<ul class="children">' . "\n";
 				break;
 		}
@@ -1696,7 +1602,7 @@ class Walker_Comment extends Walker {
 	 * @param int    $depth  Depth of comment.
 	 * @param array  $args   Will only append content if style argument value is 'ol' or 'ul'.
 	 */
-	public function end_lvl( &$output, $depth = 0, $args = array() ) {
+	function end_lvl( &$output, $depth = 0, $args = array() ) {
 		$GLOBALS['comment_depth'] = $depth + 1;
 
 		switch ( $args['style'] ) {
@@ -1705,8 +1611,8 @@ class Walker_Comment extends Walker {
 			case 'ol':
 				$output .= "</ol><!-- .children -->\n";
 				break;
-			case 'ul':
 			default:
+			case 'ul':
 				$output .= "</ul><!-- .children -->\n";
 				break;
 		}
@@ -1744,7 +1650,7 @@ class Walker_Comment extends Walker {
 	 * @param string $output            Passed by reference. Used to append additional content.
 	 * @return null Null on failure with no changes to parameters.
 	 */
-	public function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
+	function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
 
 		if ( !$element )
 			return;
@@ -1778,7 +1684,7 @@ class Walker_Comment extends Walker {
 	 * @param int    $depth   Depth of comment in reference to parents.
 	 * @param array  $args    An array of arguments.
 	 */
-	public function start_el( &$output, $comment, $depth = 0, $args = array(), $id = 0 ) {
+	function start_el( &$output, $comment, $depth = 0, $args = array(), $id = 0 ) {
 		$depth++;
 		$GLOBALS['comment_depth'] = $depth;
 		$GLOBALS['comment'] = $comment;
@@ -1818,7 +1724,7 @@ class Walker_Comment extends Walker {
 	 * @param int    $depth   Depth of comment.
 	 * @param array  $args    An array of arguments.
 	 */
-	public function end_el( &$output, $comment, $depth = 0, $args = array() ) {
+	function end_el( &$output, $comment, $depth = 0, $args = array() ) {
 		if ( !empty( $args['end-callback'] ) ) {
 			ob_start();
 			call_user_func( $args['end-callback'], $comment, $args, $depth );
@@ -1874,7 +1780,7 @@ class Walker_Comment extends Walker {
 			$add_below = 'div-comment';
 		}
 ?>
-		<<?php echo $tag; ?> <?php comment_class( $this->has_children ? 'parent' : '' ); ?> id="comment-<?php comment_ID(); ?>">
+		<<?php echo $tag; ?> <?php comment_class( empty( $args['has_children'] ) ? '' : 'parent' ); ?> id="comment-<?php comment_ID(); ?>">
 		<?php if ( 'div' != $args['style'] ) : ?>
 		<div id="div-comment-<?php comment_ID(); ?>" class="comment-body">
 		<?php endif; ?>
@@ -1896,16 +1802,9 @@ class Walker_Comment extends Walker {
 
 		<?php comment_text( get_comment_id(), array_merge( $args, array( 'add_below' => $add_below, 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?>
 
-		<?php
-		comment_reply_link( array_merge( $args, array(
-			'add_below' => $add_below,
-			'depth'     => $depth,
-			'max_depth' => $args['max_depth'],
-			'before'    => '<div class="reply">',
-			'after'     => '</div>'
-		) ) );
-		?>
-
+		<div class="reply">
+			<?php comment_reply_link( array_merge( $args, array( 'add_below' => $add_below, 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?>
+		</div>
 		<?php if ( 'div' != $args['style'] ) : ?>
 		</div>
 		<?php endif; ?>
@@ -1927,7 +1826,7 @@ class Walker_Comment extends Walker {
 	protected function html5_comment( $comment, $depth, $args ) {
 		$tag = ( 'div' === $args['style'] ) ? 'div' : 'li';
 ?>
-		<<?php echo $tag; ?> id="comment-<?php comment_ID(); ?>" <?php comment_class( $this->has_children ? 'parent' : '' ); ?>>
+		<<?php echo $tag; ?> id="comment-<?php comment_ID(); ?>" <?php comment_class( empty( $args['has_children'] ) ? '' : 'parent' ); ?>>
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
 				<footer class="comment-meta">
 					<div class="comment-author vcard">
@@ -1953,15 +1852,9 @@ class Walker_Comment extends Walker {
 					<?php comment_text(); ?>
 				</div><!-- .comment-content -->
 
-				<?php
-				comment_reply_link( array_merge( $args, array(
-					'add_below' => 'div-comment',
-					'depth'     => $depth,
-					'max_depth' => $args['max_depth'],
-					'before'    => '<div class="reply">',
-					'after'     => '</div>'
-				) ) );
-				?>
+				<div class="reply">
+					<?php comment_reply_link( array_merge( $args, array( 'add_below' => 'div-comment', 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?>
+				</div><!-- .reply -->
 			</article><!-- .comment-body -->
 <?php
 	}
@@ -1979,7 +1872,7 @@ class Walker_Comment extends Walker {
  * @param string|array $args {
  *     Optional. Formatting options.
  *
- *     @type object $walker            Instance of a Walker class to list comments. Default null.
+ *     @type string $walker            The Walker class used to list comments. Default null.
  *     @type int    $max_depth         The maximum comments depth. Default empty.
  *     @type string $style             The style of list ordering. Default 'ul'. Accepts 'ul', 'ol'.
  *     @type string $callback          Callback function to use. Default null.
@@ -2024,17 +1917,6 @@ function wp_list_comments( $args = array(), $comments = null ) {
 	);
 
 	$r = wp_parse_args( $args, $defaults );
-
-	/**
-	 * Filter the arguments used in retrieving the comment list.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @see wp_list_comments()
-	 *
-	 * @param array $r An array of arguments for displaying comments.
-	 */
-	$r = apply_filters( 'wp_list_comments_args', $r );
 
 	// Figure out what comments we'll be looping through ($_comments)
 	if ( null !== $comments ) {
@@ -2095,22 +1977,20 @@ function wp_list_comments( $args = array(), $comments = null ) {
 	if ( null === $r['reverse_top_level'] )
 		$r['reverse_top_level'] = ( 'desc' == get_option('comment_order') );
 
-	if ( empty( $r['walker'] ) ) {
-		$walker = new Walker_Comment;
-	} else {
-		$walker = $r['walker'];
-	}
+	extract( $r, EXTR_SKIP );
 
-	$output = $walker->paged_walk( $_comments, $r['max_depth'], $r['page'], $r['per_page'], $r );
+	if ( empty($walker) )
+		$walker = new Walker_Comment;
+
+	$output = $walker->paged_walk($_comments, $max_depth, $page, $per_page, $r);
 	$wp_query->max_num_comment_pages = $walker->max_pages;
 
 	$in_comment_loop = false;
 
-	if ( $r['echo'] ) {
+	if ( $r['echo'] )
 		echo $output;
-	} else {
+	else
 		return $output;
-	}
 }
 
 /**
@@ -2144,8 +2024,6 @@ function wp_list_comments( $args = array(), $comments = null ) {
  *                                        Default 'You may use these HTML tags and attributes ...'.
  *     @type string $id_form              The comment form element id attribute. Default 'commentform'.
  *     @type string $id_submit            The comment submit element id attribute. Default 'submit'.
- *     @type string $class_submit         The comment submit element class attribute. Default 'submit'.
- *     @type string $name_submit          The comment submit element name attribute. Default 'submit'.
  *     @type string $title_reply          The translatable 'reply' button label. Default 'Leave a Reply'.
  *     @type string $title_reply_to       The translatable 'reply-to' button label. Default 'Leave a Reply to %s',
  *                                        where %s is the author of the comment being replied to.
@@ -2158,6 +2036,8 @@ function wp_list_comments( $args = array(), $comments = null ) {
 function comment_form( $args = array(), $post_id = null ) {
 	if ( null === $post_id )
 		$post_id = get_the_ID();
+	else
+		$id = $post_id;
 
 	$commenter = wp_get_current_commenter();
 	$user = wp_get_current_user();
@@ -2174,7 +2054,7 @@ function comment_form( $args = array(), $post_id = null ) {
 		'author' => '<p class="comment-form-author">' . '<label for="author">' . __( 'Name' ) . ( $req ? ' <span class="required">*</span>' : '' ) . '</label> ' .
 		            '<input id="author" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30"' . $aria_req . ' /></p>',
 		'email'  => '<p class="comment-form-email"><label for="email">' . __( 'Email' ) . ( $req ? ' <span class="required">*</span>' : '' ) . '</label> ' .
-		            '<input id="email" name="email" ' . ( $html5 ? 'type="email"' : 'type="text"' ) . ' value="' . esc_attr(  $commenter['comment_author_email'] ) . '" size="30" aria-describedby="email-notes"' . $aria_req . ' /></p>',
+		            '<input id="email" name="email" ' . ( $html5 ? 'type="email"' : 'type="text"' ) . ' value="' . esc_attr(  $commenter['comment_author_email'] ) . '" size="30"' . $aria_req . ' /></p>',
 		'url'    => '<p class="comment-form-url"><label for="url">' . __( 'Website' ) . '</label> ' .
 		            '<input id="url" name="url" ' . ( $html5 ? 'type="url"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" /></p>',
 	);
@@ -2191,17 +2071,15 @@ function comment_form( $args = array(), $post_id = null ) {
 	$fields = apply_filters( 'comment_form_default_fields', $fields );
 	$defaults = array(
 		'fields'               => $fields,
-		'comment_field'        => '<p class="comment-form-comment"><label for="comment">' . _x( 'Comment', 'noun' ) . '</label> <textarea id="comment" name="comment" cols="45" rows="8" aria-describedby="form-allowed-tags" aria-required="true"></textarea></p>',
+		'comment_field'        => '<p class="comment-form-comment"><label for="comment">' . _x( 'Comment', 'noun' ) . '</label> <textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>',
 		/** This filter is documented in wp-includes/link-template.php */
 		'must_log_in'          => '<p class="must-log-in">' . sprintf( __( 'You must be <a href="%s">logged in</a> to post a comment.' ), wp_login_url( apply_filters( 'the_permalink', get_permalink( $post_id ) ) ) ) . '</p>',
 		/** This filter is documented in wp-includes/link-template.php */
 		'logged_in_as'         => '<p class="logged-in-as">' . sprintf( __( 'Logged in as <a href="%1$s">%2$s</a>. <a href="%3$s" title="Log out of this account">Log out?</a>' ), get_edit_user_link(), $user_identity, wp_logout_url( apply_filters( 'the_permalink', get_permalink( $post_id ) ) ) ) . '</p>',
-		'comment_notes_before' => '<p class="comment-notes"><span id="email-notes">' . __( 'Your email address will not be published.' ) . '</span>'. ( $req ? $required_text : '' ) . '</p>',
-		'comment_notes_after'  => '<p class="form-allowed-tags" id="form-allowed-tags">' . sprintf( __( 'You may use these <abbr title="HyperText Markup Language">HTML</abbr> tags and attributes: %s' ), ' <code>' . allowed_tags() . '</code>' ) . '</p>',
+		'comment_notes_before' => '<p class="comment-notes">' . __( 'Your email address will not be published.' ) . ( $req ? $required_text : '' ) . '</p>',
+		'comment_notes_after'  => '<p class="form-allowed-tags">' . sprintf( __( 'You may use these <abbr title="HyperText Markup Language">HTML</abbr> tags and attributes: %s' ), ' <code>' . allowed_tags() . '</code>' ) . '</p>',
 		'id_form'              => 'commentform',
 		'id_submit'            => 'submit',
-		'class_submit'         => 'submit',
-		'name_submit'          => 'submit',
 		'title_reply'          => __( 'Leave a Reply' ),
 		'title_reply_to'       => __( 'Leave a Reply to %s' ),
 		'cancel_reply_link'    => __( 'Cancel reply' ),
@@ -2322,7 +2200,7 @@ function comment_form( $args = array(), $post_id = null ) {
 						?>
 						<?php echo $args['comment_notes_after']; ?>
 						<p class="form-submit">
-							<input name="<?php echo esc_attr( $args['name_submit'] ); ?>" type="submit" id="<?php echo esc_attr( $args['id_submit'] ); ?>" class="<?php echo esc_attr( $args['class_submit'] ); ?>" value="<?php echo esc_attr( $args['label_submit'] ); ?>" />
+							<input name="submit" type="submit" id="<?php echo esc_attr( $args['id_submit'] ); ?>" value="<?php echo esc_attr( $args['label_submit'] ); ?>" />
 							<?php comment_id_fields( $post_id ); ?>
 						</p>
 						<?php

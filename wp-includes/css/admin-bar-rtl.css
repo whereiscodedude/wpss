@@ -65,8 +65,6 @@ html:lang(he-il) .rtl #wpadminbar *  {
 #wpadminbar select,
 #wpadminbar textarea,
 #wpadminbar div {
-	-webkit-box-shadow: none;
-	box-shadow: none;
 	outline: none;
 }
 
@@ -99,6 +97,13 @@ html:lang(he-il) .rtl #wpadminbar *  {
 
 #wpadminbar ul#wp-admin-bar-root-default>li {
 	margin-left: 0;
+}
+
+/* Prevent a Chrome bug that inadvertantly activates
+   :hover states on an element that touches the extreme
+   top left corner of the viewport. See #18868 */
+#wpadminbar .quicklinks {
+	border-right: 1px solid transparent;
 }
 
 #wpadminbar .quicklinks ul {
@@ -211,13 +216,13 @@ html:lang(he-il) .rtl #wpadminbar *  {
 #wpadminbar .ab-top-menu > li:hover > .ab-item,
 #wpadminbar .ab-top-menu > li.hover > .ab-item {
 	background: #333;
-	color: #45bbe6;
+	color: #2ea2cc;
 }
 
 #wpadminbar > #wp-toolbar li:hover span.ab-label,
 #wpadminbar > #wp-toolbar li.hover span.ab-label,
 #wpadminbar > #wp-toolbar a:focus span.ab-label {
-	color: #45bbe6;
+	color: #2ea2cc;
 }
 
 #wpadminbar > #wp-toolbar > #wp-admin-bar-root-default .ab-icon,
@@ -279,7 +284,7 @@ html:lang(he-il) .rtl #wpadminbar *  {
 #wpadminbar li.hover .ab-icon:before,
 #wpadminbar li.hover .ab-item:before,
 #wpadminbar li:hover #adminbarsearch:before {
-	color: #45bbe6;
+	color: #2ea2cc;
 }
 
 #wpadminbar .menupop .menupop > .ab-item:before,
@@ -330,7 +335,7 @@ html:lang(he-il) .rtl #wpadminbar *  {
 
 #wpadminbar .quicklinks .menupop .ab-sub-secondary > li > a:hover,
 #wpadminbar .quicklinks .menupop .ab-sub-secondary > li .ab-item:focus a {
-	color: #45bbe6;
+	color: #2ea2cc;
 }
 
 #wpadminbar .quicklinks a span#ab-updates {
@@ -477,7 +482,7 @@ html:lang(he-il) .rtl #wpadminbar *  {
 }
 
 #wpadminbar .quicklinks li a:hover .blavatar {
-	color: #45bbe6;
+	color: #2ea2cc;
 }
 
 #wpadminbar .quicklinks li .blavatar:before {
@@ -504,10 +509,6 @@ html:lang(he-il) .rtl #wpadminbar *  {
 }
 
 #wpadminbar #wp-admin-bar-site-name > .ab-item:before {
-	content: "\f226";
-}
-
-.wp-admin #wpadminbar #wp-admin-bar-site-name > .ab-item:before {
 	content: "\f102";
 }
 

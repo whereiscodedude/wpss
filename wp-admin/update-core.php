@@ -174,14 +174,12 @@ function core_upgrade_preamble() {
 	if ( isset( $updates[0] ) && $updates[0]->response == 'development' ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		$upgrader = new WP_Automatic_Updater;
-		if ( wp_http_supports( 'ssl' ) && $upgrader->should_update( 'core', $updates[0], ABSPATH ) ) {
-			echo '<div class="updated inline"><p>';
-			echo '<strong>' . __( 'BETA TESTERS:' ) . '</strong> ' . __( 'This site is set up to install updates of future beta versions automatically.' );
-			echo '</p></div>';
-		}
+		if ( wp_http_supports( 'ssl' ) && $upgrader->should_update( 'core', $updates[0], ABSPATH ) )
+			echo '<div class="updated inline"><p><strong>BETA TESTERS:</strong> This site is set up to install updates of future beta versions automatically.</p></div>';
 	}
 
 	echo '<ul class="core-updates">';
+	$alternate = true;
 	foreach( (array) $updates as $update ) {
 		echo '<li>';
 		list_core_update( $update );
@@ -241,10 +239,6 @@ function list_plugin_updates() {
 <?php
 	foreach ( (array) $plugins as $plugin_file => $plugin_data) {
 		$info = plugins_api('plugin_information', array('slug' => $plugin_data->update->slug ));
-		if ( is_wp_error( $info ) ) {
-			continue;
-		}
-
 		// Get plugin compat for running version of WordPress.
 		if ( isset($info->tested) && version_compare($info->tested, $cur_wp_version, '>=') ) {
 			$compat = '<br />' . sprintf(__('Compatibility with WordPress %1$s: 100%% (according to its author)'), $cur_wp_version);
@@ -349,9 +343,9 @@ function list_translation_updates() {
 	$form_action = 'update-core.php?action=do-translation-upgrade';
 	?>
 	<h3><?php _e( 'Translations' ); ?></h3>
-	<form method="post" action="<?php echo esc_url( $form_action ); ?>" name="upgrade-translations" class="upgrade">
+	<form method="post" action="<?php echo esc_url( $form_action ); ?>" name="upgrade-themes" class="upgrade">
 		<p><?php _e( 'Some of your translations are out of date.' ); ?></p>
-		<?php wp_nonce_field( 'upgrade-translations' ); ?>
+		<?php wp_nonce_field('upgrade-translations'); ?>
 		<p><input class="button" type="submit" value="<?php esc_attr_e( 'Update Translations' ); ?>" name="upgrade" /></p>
 	</form>
 	<?php
@@ -367,7 +361,7 @@ function list_translation_updates() {
 function do_core_upgrade( $reinstall = false ) {
 	global $wp_filesystem;
 
-	include_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+	include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 	if ( $reinstall )
 		$url = 'update-core.php?action=do-core-reinstall';
@@ -381,23 +375,19 @@ function do_core_upgrade( $reinstall = false ) {
 	if ( !$update )
 		return;
 
-	// Allow relaxed file ownership writes for User-initiated upgrades when the API specifies
-	// that it's safe to do so. This only happens when there are no new files to create.
-	$allow_relaxed_file_ownership = ! $reinstall && isset( $update->new_files ) && ! $update->new_files;
-
 ?>
 	<div class="wrap">
 	<h2><?php _e('Update WordPress'); ?></h2>
 <?php
 
-	if ( false === ( $credentials = request_filesystem_credentials( $url, '', false, ABSPATH, array(), $allow_relaxed_file_ownership ) ) ) {
+	if ( false === ( $credentials = request_filesystem_credentials( $url, '', false, ABSPATH ) ) ) {
 		echo '</div>';
 		return;
 	}
 
-	if ( ! WP_Filesystem( $credentials, ABSPATH, $allow_relaxed_file_ownership ) ) {
+	if ( ! WP_Filesystem( $credentials, ABSPATH ) ) {
 		// Failed to connect, Error and request again
-		request_filesystem_credentials( $url, '', true, ABSPATH, array(), $allow_relaxed_file_ownership );
+		request_filesystem_credentials( $url, '', true, ABSPATH );
 		echo '</div>';
 		return;
 	}
@@ -415,9 +405,7 @@ function do_core_upgrade( $reinstall = false ) {
 	add_filter( 'update_feedback', 'show_message' );
 
 	$upgrader = new Core_Upgrader();
-	$result = $upgrader->upgrade( $update, array(
-		'allow_relaxed_file_ownership' => $allow_relaxed_file_ownership
-	) );
+	$result = $upgrader->upgrade( $update );
 
 	if ( is_wp_error($result) ) {
 		show_message($result);
@@ -550,7 +538,8 @@ if ( 'upgrade-core' == $action ) {
 
 	check_admin_referer('upgrade-core');
 
-	// Do the (un)dismiss actions before headers, so that they can redirect.
+	// do the (un)dismiss actions before headers,
+	// so that they can redirect
 	if ( isset( $_POST['dismiss'] ) )
 		do_dismiss_core_update();
 	elseif ( isset( $_POST['undismiss'] ) )
@@ -591,7 +580,7 @@ if ( 'upgrade-core' == $action ) {
 	require_once(ABSPATH . 'wp-admin/admin-header.php');
 	echo '<div class="wrap">';
 	echo '<h2>' . esc_html__('Update Plugins') . '</h2>';
-	echo '<iframe src="', $url, '" style="width: 100%; height: 100%; min-height: 750px;" frameborder="0"></iframe>';
+	echo "<iframe src='$url' style='width: 100%; height: 100%; min-height: 750px;' frameborder='0'></iframe>";
 	echo '</div>';
 	include(ABSPATH . 'wp-admin/admin-footer.php');
 
@@ -617,12 +606,10 @@ if ( 'upgrade-core' == $action ) {
 	$title = __('Update Themes');
 
 	require_once(ABSPATH . 'wp-admin/admin-header.php');
-	?>
-	<div class="wrap">
-		<h2><?php echo esc_html__('Update Themes') ?></h2>
-		<iframe src="<?php echo $url ?>" style="width: 100%; height: 100%; min-height: 750px;" frameborder="0"></iframe>
-	</div>
-	<?php
+	echo '<div class="wrap">';
+	echo '<h2>' . esc_html__('Update Themes') . '</h2>';
+	echo "<iframe src='$url' style='width: 100%; height: 100%; min-height: 750px;' frameborder='0'></iframe>";
+	echo '</div>';
 	include(ABSPATH . 'wp-admin/admin-footer.php');
 
 } elseif ( 'do-translation-upgrade' == $action ) {

@@ -151,7 +151,7 @@ class IXR_Value {
     /**
      * Checks whether or not the supplied array is a struct or not
      *
-     * @param array $array
+     * @param unknown_type $array
      * @return boolean
      */
     function isStruct($array)
@@ -358,7 +358,7 @@ class IXR_Message
                     $this->_arraystructs[count($this->_arraystructs)-1][] = $value;
                 }
             } else {
-                // Just add as a parameter
+                // Just add as a paramater
                 $this->params[] = $value;
             }
         }
@@ -451,7 +451,7 @@ EOD;
 
         // Perform the callback and send the response
         if (count($args) == 1) {
-            // If only one parameter just send that instead of the whole array
+            // If only one paramater just send that instead of the whole array
             $args = $args[0];
         }
 

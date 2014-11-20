@@ -25,6 +25,7 @@
  * height as the second element.
  *
  * @since 2.5.0
+ * @uses wp_constrain_dimensions() This function passes the widths and the heights.
  *
  * @param int $width Width of the image
  * @param int $height Height of the image
@@ -683,11 +684,12 @@ function wp_get_attachment_image_src($attachment_id, $size='thumbnail', $icon = 
  * @since 2.5.0
  *
  * @see add_image_size()
+ * @uses wp_get_attachment_image_src() Gets attachment file URL and dimensions
  *
- * @param int          $attachment_id Image attachment ID.
- * @param string|array $size          Optional. Default 'thumbnail'.
- * @param bool         $icon          Optional. Whether it is an icon. Default false.
- * @param string|array $attr          Optional. Attributes for the image markup. Default empty string.
+ * @param int $attachment_id Image attachment ID.
+ * @param string $size Optional, default is 'thumbnail'.
+ * @param bool $icon Optional, default is false. Whether it is an icon.
+ * @param mixed $attr Optional, attributes for the image markup.
  * @return string HTML img element or empty string on failure.
  */
 function wp_get_attachment_image($attachment_id, $size = 'thumbnail', $icon = false, $attr = '') {
@@ -697,14 +699,12 @@ function wp_get_attachment_image($attachment_id, $size = 'thumbnail', $icon = fa
 	if ( $image ) {
 		list($src, $width, $height) = $image;
 		$hwstring = image_hwstring($width, $height);
-		$size_class = $size;
-		if ( is_array( $size_class ) ) {
-			$size_class = join( 'x', $size_class );
-		}
+		if ( is_array($size) )
+			$size = join('x', $size);
 		$attachment = get_post($attachment_id);
 		$default_attr = array(
 			'src'	=> $src,
-			'class'	=> "attachment-$size_class",
+			'class'	=> "attachment-$size",
 			'alt'	=> trim(strip_tags( get_post_meta($attachment_id, '_wp_attachment_image_alt', true) )), // Use Alt field first
 		);
 		if ( empty($default_attr['alt']) )
@@ -719,11 +719,10 @@ function wp_get_attachment_image($attachment_id, $size = 'thumbnail', $icon = fa
 		 *
 		 * @since 2.8.0
 		 *
-		 * @param array        $attr       Attributes for the image markup.
-		 * @param WP_Post      $attachment Image attachment post.
-		 * @param string|array $size       Requested size.
+		 * @param mixed $attr          Attributes for the image markup.
+		 * @param int   $attachment_id Image attachment ID.
 		 */
-		$attr = apply_filters( 'wp_get_attachment_image_attributes', $attr, $attachment, $size );
+		$attr = apply_filters( 'wp_get_attachment_image_attributes', $attr, $attachment );
 		$attr = array_map( 'esc_attr', $attr );
 		$html = rtrim("<img $hwstring");
 		foreach ( $attr as $name => $value ) {
@@ -912,9 +911,8 @@ function gallery_shortcode( $attr ) {
 
 	if ( ! empty( $attr['ids'] ) ) {
 		// 'ids' is explicitly ordered, unless you specify otherwise.
-		if ( empty( $attr['orderby'] ) ) {
+		if ( empty( $attr['orderby'] ) )
 			$attr['orderby'] = 'post__in';
-		}
 		$attr['include'] = $attr['ids'];
 	}
 
@@ -932,12 +930,18 @@ function gallery_shortcode( $attr ) {
 	 * @param array  $attr   Attributes of the gallery shortcode.
 	 */
 	$output = apply_filters( 'post_gallery', '', $attr );
-	if ( $output != '' ) {
+	if ( $output != '' )
 		return $output;
+
+	// We're trusting author input, so let's at least make sure it looks like a valid orderby statement
+	if ( isset( $attr['orderby'] ) ) {
+		$attr['orderby'] = sanitize_sql_orderby( $attr['orderby'] );
+		if ( !$attr['orderby'] )
+			unset( $attr['orderby'] );
 	}
 
 	$html5 = current_theme_supports( 'html5', 'gallery' );
-	$atts = shortcode_atts( array(
+	extract(shortcode_atts(array(
 		'order'      => 'ASC',
 		'orderby'    => 'menu_order ID',
 		'id'         => $post ? $post->ID : 0,
@@ -949,56 +953,53 @@ function gallery_shortcode( $attr ) {
 		'include'    => '',
 		'exclude'    => '',
 		'link'       => ''
-	), $attr, 'gallery' );
+	), $attr, 'gallery'));
 
-	$id = intval( $atts['id'] );
+	$id = intval($id);
+	if ( 'RAND' == $order )
+		$orderby = 'none';
 
-	if ( ! empty( $atts['include'] ) ) {
-		$_attachments = get_posts( array( 'include' => $atts['include'], 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+	if ( !empty($include) ) {
+		$_attachments = get_posts( array('include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby) );
 
 		$attachments = array();
 		foreach ( $_attachments as $key => $val ) {
 			$attachments[$val->ID] = $_attachments[$key];
 		}
-	} elseif ( ! empty( $atts['exclude'] ) ) {
-		$attachments = get_children( array( 'post_parent' => $id, 'exclude' => $atts['exclude'], 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+	} elseif ( !empty($exclude) ) {
+		$attachments = get_children( array('post_parent' => $id, 'exclude' => $exclude, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby) );
 	} else {
-		$attachments = get_children( array( 'post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+		$attachments = get_children( array('post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby) );
 	}
 
-	if ( empty( $attachments ) ) {
+	if ( empty($attachments) )
 		return '';
-	}
 
 	if ( is_feed() ) {
 		$output = "\n";
-		foreach ( $attachments as $att_id => $attachment ) {
-			$output .= wp_get_attachment_link( $att_id, $atts['size'], true ) . "\n";
-		}
+		foreach ( $attachments as $att_id => $attachment )
+			$output .= wp_get_attachment_link($att_id, $size, true) . "\n";
 		return $output;
 	}
 
-	$itemtag = tag_escape( $atts['itemtag'] );
-	$captiontag = tag_escape( $atts['captiontag'] );
-	$icontag = tag_escape( $atts['icontag'] );
+	$itemtag = tag_escape($itemtag);
+	$captiontag = tag_escape($captiontag);
+	$icontag = tag_escape($icontag);
 	$valid_tags = wp_kses_allowed_html( 'post' );
-	if ( ! isset( $valid_tags[ $itemtag ] ) ) {
+	if ( ! isset( $valid_tags[ $itemtag ] ) )
 		$itemtag = 'dl';
-	}
-	if ( ! isset( $valid_tags[ $captiontag ] ) ) {
+	if ( ! isset( $valid_tags[ $captiontag ] ) )
 		$captiontag = 'dd';
-	}
-	if ( ! isset( $valid_tags[ $icontag ] ) ) {
+	if ( ! isset( $valid_tags[ $icontag ] ) )
 		$icontag = 'dt';
-	}
 
-	$columns = intval( $atts['columns'] );
+	$columns = intval($columns);
 	$itemwidth = $columns > 0 ? floor(100/$columns) : 100;
 	$float = is_rtl() ? 'right' : 'left';
 
 	$selector = "gallery-{$instance}";
 
-	$gallery_style = '';
+	$gallery_style = $gallery_div = '';
 
 	/**
 	 * Filter whether to print default gallery styles.
@@ -1031,7 +1032,7 @@ function gallery_shortcode( $attr ) {
 		</style>\n\t\t";
 	}
 
-	$size_class = sanitize_html_class( $atts['size'] );
+	$size_class = sanitize_html_class( $size );
 	$gallery_div = "<div id='$selector' class='gallery galleryid-{$id} gallery-columns-{$columns} gallery-size-{$size_class}'>";
 
 	/**
@@ -1046,21 +1047,19 @@ function gallery_shortcode( $attr ) {
 
 	$i = 0;
 	foreach ( $attachments as $id => $attachment ) {
+		if ( ! empty( $link ) && 'file' === $link )
+			$image_output = wp_get_attachment_link( $id, $size, false, false );
+		elseif ( ! empty( $link ) && 'none' === $link )
+			$image_output = wp_get_attachment_image( $id, $size, false );
+		else
+			$image_output = wp_get_attachment_link( $id, $size, true, false );
 
-		$attr = ( trim( $attachment->post_excerpt ) ) ? array( 'aria-describedby' => "$selector-$id" ) : '';
-		if ( ! empty( $atts['link'] ) && 'file' === $atts['link'] ) {
-			$image_output = wp_get_attachment_link( $id, $atts['size'], false, false, false, $attr );
-		} elseif ( ! empty( $atts['link'] ) && 'none' === $atts['link'] ) {
-			$image_output = wp_get_attachment_image( $id, $atts['size'], false, $attr );
-		} else {
-			$image_output = wp_get_attachment_link( $id, $atts['size'], true, false, false, $attr );
-		}
 		$image_meta  = wp_get_attachment_metadata( $id );
 
 		$orientation = '';
-		if ( isset( $image_meta['height'], $image_meta['width'] ) ) {
+		if ( isset( $image_meta['height'], $image_meta['width'] ) )
 			$orientation = ( $image_meta['height'] > $image_meta['width'] ) ? 'portrait' : 'landscape';
-		}
+
 		$output .= "<{$itemtag} class='gallery-item'>";
 		$output .= "
 			<{$icontag} class='gallery-icon {$orientation}'>
@@ -1068,7 +1067,7 @@ function gallery_shortcode( $attr ) {
 			</{$icontag}>";
 		if ( $captiontag && trim($attachment->post_excerpt) ) {
 			$output .= "
-				<{$captiontag} class='wp-caption-text gallery-caption' id='$selector-$id'>
+				<{$captiontag} class='wp-caption-text gallery-caption'>
 				" . wptexturize($attachment->post_excerpt) . "
 				</{$captiontag}>";
 		}
@@ -1153,30 +1152,7 @@ add_action( 'wp_playlist_scripts', 'wp_playlist_scripts' );
  *
  * @since 3.9.0
  *
- * @param array $attr {
- *     Array of default playlist attributes.
- *
- *     @type string  $type         Type of playlist to display. Accepts 'audio' or 'video'. Default 'audio'.
- *     @type string  $order        Designates ascending or descending order of items in the playlist.
- *                                 Accepts 'ASC', 'DESC'. Default 'ASC'.
- *     @type string  $orderby      Any column, or columns, to sort the playlist. If $ids are
- *                                 passed, this defaults to the order of the $ids array ('post__in').
- *                                 Otherwise default is 'menu_order ID'.
- *     @type int     $id           If an explicit $ids array is not present, this parameter
- *                                 will determine which attachments are used for the playlist.
- *                                 Default is the current post ID.
- *     @type array   $ids          Create a playlist out of these explicit attachment IDs. If empty,
- *                                 a playlist will be created from all $type attachments of $id.
- *                                 Default empty.
- *     @type array   $exclude      List of specific attachment IDs to exclude from the playlist. Default empty.
- *     @type string  $style        Playlist style to use. Accepts 'light' or 'dark'. Default 'light'.
- *     @type bool    $tracklist    Whether to show or hide the playlist. Default true.
- *     @type bool    $tracknumbers Whether to show or hide the numbers next to entries in the playlist. Default true.
- *     @type bool    $images       Show or hide the video or audio thumbnail (Featured Image/post
- *                                 thumbnail). Default true.
- *     @type bool    $artists      Whether to show or hide artist name in the playlist. Default true.
- * }
- *
+ * @param array $attr Playlist shortcode attributes.
  * @return string Playlist output. Empty string if the passed type is unsupported.
  */
 function wp_playlist_shortcode( $attr ) {
@@ -1210,7 +1186,17 @@ function wp_playlist_shortcode( $attr ) {
 		return $output;
 	}
 
-	$atts = shortcode_atts( array(
+	/*
+	 * We're trusting author input, so let's at least make sure it looks
+	 * like a valid orderby statement.
+	 */
+	if ( isset( $attr['orderby'] ) ) {
+		$attr['orderby'] = sanitize_sql_orderby( $attr['orderby'] );
+		if ( ! $attr['orderby'] )
+			unset( $attr['orderby'] );
+	}
+
+	extract( shortcode_atts( array(
 		'type'		=> 'audio',
 		'order'		=> 'ASC',
 		'orderby'	=> 'menu_order ID',
@@ -1222,9 +1208,12 @@ function wp_playlist_shortcode( $attr ) {
 		'tracknumbers' => true,
 		'images'	=> true,
 		'artists'	=> true
-	), $attr, 'playlist' );
+	), $attr, 'playlist' ) );
 
-	$id = intval( $atts['id'] );
+	$id = intval( $id );
+	if ( 'RAND' == $order ) {
+		$orderby = 'none';
+	}
 
 	if ( $atts['type'] !== 'audio' ) {
 		$atts['type'] = 'video';
@@ -1233,22 +1222,22 @@ function wp_playlist_shortcode( $attr ) {
 	$args = array(
 		'post_status' => 'inherit',
 		'post_type' => 'attachment',
-		'post_mime_type' => $atts['type'],
-		'order' => $atts['order'],
-		'orderby' => $atts['orderby']
+		'post_mime_type' => $type,
+		'order' => $order,
+		'orderby' => $orderby
 	);
 
-	if ( ! empty( $atts['include'] ) ) {
-		$args['include'] = $atts['include'];
+	if ( ! empty( $include ) ) {
+		$args['include'] = $include;
 		$_attachments = get_posts( $args );
 
 		$attachments = array();
 		foreach ( $_attachments as $key => $val ) {
 			$attachments[$val->ID] = $_attachments[$key];
 		}
-	} elseif ( ! empty( $atts['exclude'] ) ) {
+	} elseif ( ! empty( $exclude ) ) {
 		$args['post_parent'] = $id;
-		$args['exclude'] = $atts['exclude'];
+		$args['exclude'] = $exclude;
 		$attachments = get_children( $args );
 	} else {
 		$args['post_parent'] = $id;
@@ -1275,14 +1264,12 @@ function wp_playlist_shortcode( $attr ) {
 	$theme_width = empty( $content_width ) ? $default_width : ( $content_width - $outer );
 	$theme_height = empty( $content_width ) ? $default_height : round( ( $default_height * $theme_width ) / $default_width );
 
-	$data = array(
-		'type' => $atts['type'],
-		// don't pass strings to JSON, will be truthy in JS
-		'tracklist' => wp_validate_boolean( $atts['tracklist'] ),
-		'tracknumbers' => wp_validate_boolean( $atts['tracknumbers'] ),
-		'images' => wp_validate_boolean( $atts['images'] ),
-		'artists' => wp_validate_boolean( $atts['artists'] ),
-	);
+	$data = compact( 'type' );
+
+	// don't pass strings to JSON, will be truthy in JS
+	foreach ( array( 'tracklist', 'tracknumbers', 'images', 'artists' ) as $key ) {
+		$data[$key] = filter_var( $$key, FILTER_VALIDATE_BOOLEAN );
+	}
 
 	$tracks = array();
 	foreach ( $attachments as $attachment ) {
@@ -1306,7 +1293,7 @@ function wp_playlist_shortcode( $attr ) {
 				}
 			}
 
-			if ( 'video' === $atts['type'] ) {
+			if ( 'video' === $type ) {
 				if ( ! empty( $meta['width'] ) && ! empty( $meta['height'] ) ) {
 					$width = $meta['width'];
 					$height = $meta['height'];
@@ -1326,12 +1313,12 @@ function wp_playlist_shortcode( $attr ) {
 			}
 		}
 
-		if ( $atts['images'] ) {
-			$thumb_id = get_post_thumbnail_id( $attachment->ID );
-			if ( ! empty( $thumb_id ) ) {
-				list( $src, $width, $height ) = wp_get_attachment_image_src( $thumb_id, 'full' );
+		if ( $images ) {
+			$id = get_post_thumbnail_id( $attachment->ID );
+			if ( ! empty( $id ) ) {
+				list( $src, $width, $height ) = wp_get_attachment_image_src( $id, 'full' );
 				$track['image'] = compact( 'src', 'width', 'height' );
-				list( $src, $width, $height ) = wp_get_attachment_image_src( $thumb_id, 'thumbnail' );
+				list( $src, $width, $height ) = wp_get_attachment_image_src( $id, 'thumbnail' );
 				$track['thumb'] = compact( 'src', 'width', 'height' );
 			} else {
 				$src = wp_mime_type_icon( $attachment->ID );
@@ -1346,8 +1333,8 @@ function wp_playlist_shortcode( $attr ) {
 	}
 	$data['tracks'] = $tracks;
 
-	$safe_type = esc_attr( $atts['type'] );
-	$safe_style = esc_attr( $atts['style'] );
+	$safe_type = esc_attr( $type );
+	$safe_style = esc_attr( $style );
 
 	ob_start();
 
@@ -1360,10 +1347,10 @@ function wp_playlist_shortcode( $attr ) {
 		 * @param string $type  Type of playlist. Possible values are 'audio' or 'video'.
 		 * @param string $style The 'theme' for the playlist. Core provides 'light' and 'dark'.
 		 */
-		do_action( 'wp_playlist_scripts', $atts['type'], $atts['style'] );
+		do_action( 'wp_playlist_scripts', $type, $style );
 	} ?>
 <div class="wp-playlist wp-<?php echo $safe_type ?>-playlist wp-playlist-<?php echo $safe_style ?>">
-	<?php if ( 'audio' === $atts['type'] ): ?>
+	<?php if ( 'audio' === $type ): ?>
 	<div class="wp-playlist-current-item"></div>
 	<?php endif ?>
 	<<?php echo $safe_type ?> controls="controls" preload="none" width="<?php
@@ -1382,7 +1369,7 @@ function wp_playlist_shortcode( $attr ) {
 	}
 	?></ol>
 	</noscript>
-	<script type="application/json" class="wp-playlist-script"><?php echo wp_json_encode( $data ) ?></script>
+	<script type="application/json"><?php echo json_encode( $data ) ?></script>
 </div>
 	<?php
 	return ob_get_clean();
@@ -1446,9 +1433,6 @@ function wp_get_attachment_id3_keys( $attachment, $context = 'display' ) {
 		$fields['genre']            = __( 'Genre' );
 		$fields['year']             = __( 'Year' );
 		$fields['length_formatted'] = _x( 'Length', 'video or audio' );
-	} elseif ( 'js' === $context ) {
-		$fields['bitrate']          = __( 'Bitrate' );
-		$fields['bitrate_mode']     = __( 'Bitrate Mode' );
 	}
 
 	/**
@@ -1502,10 +1486,9 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 	 * @param string $content   Shortcode content.
 	 * @param int    $instances Unique numeric ID of this audio shortcode instance.
 	 */
-	$override = apply_filters( 'wp_audio_shortcode_override', '', $attr, $content, $instances );
-	if ( '' !== $override ) {
-		return $override;
-	}
+	$html = apply_filters( 'wp_audio_shortcode_override', '', $attr, $content, $instances );
+	if ( '' !== $html )
+		return $html;
 
 	$audio = null;
 
@@ -1516,42 +1499,38 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 		'autoplay' => '',
 		'preload'  => 'none'
 	);
-	foreach ( $default_types as $type ) {
+	foreach ( $default_types as $type )
 		$defaults_atts[$type] = '';
-	}
 
 	$atts = shortcode_atts( $defaults_atts, $attr, 'audio' );
+	extract( $atts );
 
 	$primary = false;
-	if ( ! empty( $atts['src'] ) ) {
-		$type = wp_check_filetype( $atts['src'], wp_get_mime_types() );
-		if ( ! in_array( strtolower( $type['ext'] ), $default_types ) ) {
-			return sprintf( '<a class="wp-embedded-audio" href="%s">%s</a>', esc_url( $atts['src'] ), esc_html( $atts['src'] ) );
-		}
+	if ( ! empty( $src ) ) {
+		$type = wp_check_filetype( $src, wp_get_mime_types() );
+		if ( ! in_array( strtolower( $type['ext'] ), $default_types ) )
+			return sprintf( '<a class="wp-embedded-audio" href="%s">%s</a>', esc_url( $src ), esc_html( $src ) );
 		$primary = true;
 		array_unshift( $default_types, 'src' );
 	} else {
 		foreach ( $default_types as $ext ) {
-			if ( ! empty( $atts[ $ext ] ) ) {
-				$type = wp_check_filetype( $atts[ $ext ], wp_get_mime_types() );
-				if ( strtolower( $type['ext'] ) === $ext ) {
+			if ( ! empty( $$ext ) ) {
+				$type = wp_check_filetype( $$ext, wp_get_mime_types() );
+				if ( strtolower( $type['ext'] ) === $ext )
 					$primary = true;
-				}
 			}
 		}
 	}
 
 	if ( ! $primary ) {
 		$audios = get_attached_media( 'audio', $post_id );
-		if ( empty( $audios ) ) {
+		if ( empty( $audios ) )
 			return;
-		}
 
 		$audio = reset( $audios );
-		$atts['src'] = wp_get_attachment_url( $audio->ID );
-		if ( empty( $atts['src'] ) ) {
+		$src = wp_get_attachment_url( $audio->ID );
+		if ( empty( $src ) )
 			return;
-		}
 
 		array_unshift( $default_types, 'src' );
 	}
@@ -1576,49 +1555,45 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 	 *
 	 * @param string $class CSS class or list of space-separated classes.
 	 */
-	$html_atts = array(
+	$atts = array(
 		'class'    => apply_filters( 'wp_audio_shortcode_class', 'wp-audio-shortcode' ),
 		'id'       => sprintf( 'audio-%d-%d', $post_id, $instances ),
-		'loop'     => wp_validate_boolean( $atts['loop'] ),
-		'autoplay' => wp_validate_boolean( $atts['autoplay'] ),
-		'preload'  => $atts['preload'],
+		'loop'     => $loop,
+		'autoplay' => $autoplay,
+		'preload'  => $preload,
 		'style'    => 'width: 100%; visibility: hidden;',
 	);
 
 	// These ones should just be omitted altogether if they are blank
 	foreach ( array( 'loop', 'autoplay', 'preload' ) as $a ) {
-		if ( empty( $html_atts[$a] ) ) {
-			unset( $html_atts[$a] );
-		}
+		if ( empty( $atts[$a] ) )
+			unset( $atts[$a] );
 	}
 
 	$attr_strings = array();
-	foreach ( $html_atts as $k => $v ) {
+	foreach ( $atts as $k => $v ) {
 		$attr_strings[] = $k . '="' . esc_attr( $v ) . '"';
 	}
 
 	$html = '';
-	if ( 'mediaelement' === $library && 1 === $instances ) {
+	if ( 'mediaelement' === $library && 1 === $instances )
 		$html .= "<!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->\n";
-	}
 	$html .= sprintf( '<audio %s controls="controls">', join( ' ', $attr_strings ) );
 
 	$fileurl = '';
 	$source = '<source type="%s" src="%s" />';
 	foreach ( $default_types as $fallback ) {
-		if ( ! empty( $atts[ $fallback ] ) ) {
-			if ( empty( $fileurl ) ) {
-				$fileurl = $atts[ $fallback ];
-			}
-			$type = wp_check_filetype( $atts[ $fallback ], wp_get_mime_types() );
-			$url = add_query_arg( '_', $instances, $atts[ $fallback ] );
+		if ( ! empty( $$fallback ) ) {
+			if ( empty( $fileurl ) )
+				$fileurl = $$fallback;
+			$type = wp_check_filetype( $$fallback, wp_get_mime_types() );
+			$url = add_query_arg( '_', $instances, $$fallback );
 			$html .= sprintf( $source, $type['type'], esc_url( $url ) );
 		}
 	}
 
-	if ( 'mediaelement' === $library ) {
+	if ( 'mediaelement' === $library )
 		$html .= wp_mediaelement_fallback( $fileurl );
-	}
 	$html .= '</audio>';
 
 	/**
@@ -1703,10 +1678,9 @@ function wp_video_shortcode( $attr, $content = '' ) {
 	 * @param string $content   Video shortcode content.
 	 * @param int    $instances Unique numeric ID of this video shortcode instance.
 	 */
-	$override = apply_filters( 'wp_video_shortcode_override', '', $attr, $content, $instances );
-	if ( '' !== $override ) {
-		return $override;
-	}
+	$html = apply_filters( 'wp_video_shortcode_override', '', $attr, $content, $instances );
+	if ( '' !== $html )
+		return $html;
 
 	$video = null;
 
@@ -1721,60 +1695,57 @@ function wp_video_shortcode( $attr, $content = '' ) {
 		'height'   => 360,
 	);
 
-	foreach ( $default_types as $type ) {
+	foreach ( $default_types as $type )
 		$defaults_atts[$type] = '';
-	}
 
 	$atts = shortcode_atts( $defaults_atts, $attr, 'video' );
+	extract( $atts );
 
 	if ( is_admin() ) {
 		// shrink the video so it isn't huge in the admin
-		if ( $atts['width'] > $defaults_atts['width'] ) {
-			$atts['height'] = round( ( $atts['height'] * $defaults_atts['width'] ) / $atts['width'] );
-			$atts['width'] = $defaults_atts['width'];
+		if ( $width > $defaults_atts['width'] ) {
+			$height = round( ( $height * $defaults_atts['width'] ) / $width );
+			$width = $defaults_atts['width'];
 		}
 	} else {
 		// if the video is bigger than the theme
-		if ( ! empty( $content_width ) && $atts['width'] > $content_width ) {
-			$atts['height'] = round( ( $atts['height'] * $content_width ) / $atts['width'] );
-			$atts['width'] = $content_width;
+		if ( ! empty( $content_width ) && $width > $content_width ) {
+			$height = round( ( $height * $content_width ) / $width );
+			$width = $content_width;
 		}
 	}
 
-	$yt_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
+	$yt_pattern = '#^https?://(:?www\.)?(:?youtube\.com/watch|youtu\.be/)#';
 
 	$primary = false;
-	if ( ! empty( $atts['src'] ) ) {
-		if ( ! preg_match( $yt_pattern, $atts['src'] ) ) {
-			$type = wp_check_filetype( $atts['src'], wp_get_mime_types() );
+	if ( ! empty( $src ) ) {
+		if ( ! preg_match( $yt_pattern, $src ) ) {
+			$type = wp_check_filetype( $src, wp_get_mime_types() );
 			if ( ! in_array( strtolower( $type['ext'] ), $default_types ) ) {
-				return sprintf( '<a class="wp-embedded-video" href="%s">%s</a>', esc_url( $atts['src'] ), esc_html( $atts['src'] ) );
+				return sprintf( '<a class="wp-embedded-video" href="%s">%s</a>', esc_url( $src ), esc_html( $src ) );
 			}
 		}
 		$primary = true;
 		array_unshift( $default_types, 'src' );
 	} else {
 		foreach ( $default_types as $ext ) {
-			if ( ! empty( $atts[ $ext ] ) ) {
-				$type = wp_check_filetype( $atts[ $ext ], wp_get_mime_types() );
-				if ( strtolower( $type['ext'] ) === $ext ) {
+			if ( ! empty( $$ext ) ) {
+				$type = wp_check_filetype( $$ext, wp_get_mime_types() );
+				if ( strtolower( $type['ext'] ) === $ext )
 					$primary = true;
-				}
 			}
 		}
 	}
 
 	if ( ! $primary ) {
 		$videos = get_attached_media( 'video', $post_id );
-		if ( empty( $videos ) ) {
+		if ( empty( $videos ) )
 			return;
-		}
 
 		$video = reset( $videos );
-		$atts['src'] = wp_get_attachment_url( $video->ID );
-		if ( empty( $atts['src'] ) ) {
+		$src = wp_get_attachment_url( $video->ID );
+		if ( empty( $src ) )
 			return;
-		}
 
 		array_unshift( $default_types, 'src' );
 	}
@@ -1799,82 +1770,75 @@ function wp_video_shortcode( $attr, $content = '' ) {
 	 *
 	 * @param string $class CSS class or list of space-separated classes.
 	 */
-	$html_atts = array(
+	$atts = array(
 		'class'    => apply_filters( 'wp_video_shortcode_class', 'wp-video-shortcode' ),
 		'id'       => sprintf( 'video-%d-%d', $post_id, $instances ),
-		'width'    => absint( $atts['width'] ),
-		'height'   => absint( $atts['height'] ),
-		'poster'   => esc_url( $atts['poster'] ),
-		'loop'     => wp_validate_boolean( $atts['loop'] ),
-		'autoplay' => wp_validate_boolean( $atts['autoplay'] ),
-		'preload'  => $atts['preload'],
+		'width'    => absint( $width ),
+		'height'   => absint( $height ),
+		'poster'   => esc_url( $poster ),
+		'loop'     => $loop,
+		'autoplay' => $autoplay,
+		'preload'  => $preload,
 	);
 
 	// These ones should just be omitted altogether if they are blank
 	foreach ( array( 'poster', 'loop', 'autoplay', 'preload' ) as $a ) {
-		if ( empty( $html_atts[$a] ) ) {
-			unset( $html_atts[$a] );
-		}
+		if ( empty( $atts[$a] ) )
+			unset( $atts[$a] );
 	}
 
 	$attr_strings = array();
-	foreach ( $html_atts as $k => $v ) {
+	foreach ( $atts as $k => $v ) {
 		$attr_strings[] = $k . '="' . esc_attr( $v ) . '"';
 	}
 
 	$html = '';
-	if ( 'mediaelement' === $library && 1 === $instances ) {
+	if ( 'mediaelement' === $library && 1 === $instances )
 		$html .= "<!--[if lt IE 9]><script>document.createElement('video');</script><![endif]-->\n";
-	}
 	$html .= sprintf( '<video %s controls="controls">', join( ' ', $attr_strings ) );
 
 	$fileurl = '';
 	$source = '<source type="%s" src="%s" />';
 	foreach ( $default_types as $fallback ) {
-		if ( ! empty( $atts[ $fallback ] ) ) {
-			if ( empty( $fileurl ) ) {
-				$fileurl = $atts[ $fallback ];
-			}
-			if ( 'src' === $fallback && preg_match( $yt_pattern, $atts['src'] ) ) {
+		if ( ! empty( $$fallback ) ) {
+			if ( empty( $fileurl ) )
+				$fileurl = $$fallback;
+
+			if ( 'src' === $fallback && preg_match( $yt_pattern, $src ) ) {
 				$type = array( 'type' => 'video/youtube' );
 			} else {
-				$type = wp_check_filetype( $atts[ $fallback ], wp_get_mime_types() );
+				$type = wp_check_filetype( $$fallback, wp_get_mime_types() );
 			}
-			$url = add_query_arg( '_', $instances, $atts[ $fallback ] );
+			$url = add_query_arg( '_', $instances, $$fallback );
 			$html .= sprintf( $source, $type['type'], esc_url( $url ) );
 		}
 	}
 
 	if ( ! empty( $content ) ) {
-		if ( false !== strpos( $content, "\n" ) ) {
+		if ( false !== strpos( $content, "\n" ) )
 			$content = str_replace( array( "\r\n", "\n", "\t" ), '', $content );
-		}
+
 		$html .= trim( $content );
 	}
 
-	if ( 'mediaelement' === $library ) {
+	if ( 'mediaelement' === $library )
 		$html .= wp_mediaelement_fallback( $fileurl );
-	}
 	$html .= '</video>';
 
-	$width_rule = '';
-	if ( ! empty( $atts['width'] ) ) {
-		$width_rule = sprintf( 'width: %dpx; ', $atts['width'] );
-	}
-	$output = sprintf( '<div style="%s" class="wp-video">%s</div>', $width_rule, $html );
+	$html = sprintf( '<div style="width: %dpx; max-width: 100%%;" class="wp-video">%s</div>', $width, $html );
 
 	/**
 	 * Filter the output of the video shortcode.
 	 *
 	 * @since 3.6.0
 	 *
-	 * @param string $output  Video shortcode HTML output.
+	 * @param string $html    Video shortcode HTML output.
 	 * @param array  $atts    Array of video shortcode attributes.
 	 * @param string $video   Video file.
 	 * @param int    $post_id Post ID.
 	 * @param string $library Media library used for the video shortcode.
 	 */
-	return apply_filters( 'wp_video_shortcode', $output, $atts, $video, $post_id, $library );
+	return apply_filters( 'wp_video_shortcode', $html, $atts, $video, $post_id, $library );
 }
 add_shortcode( 'video', 'wp_video_shortcode' );
 
@@ -1915,22 +1879,16 @@ function adjacent_image_link($prev = true, $size = 'thumbnail', $text = false) {
 	$post = get_post();
 	$attachments = array_values( get_children( array( 'post_parent' => $post->post_parent, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => 'ASC', 'orderby' => 'menu_order ID' ) ) );
 
-	foreach ( $attachments as $k => $attachment ) {
-		if ( $attachment->ID == $post->ID ) {
+	foreach ( $attachments as $k => $attachment )
+		if ( $attachment->ID == $post->ID )
 			break;
-		}
-	}
 
-	$output = '';
-	$attachment_id = 0;
+	$k = $prev ? $k - 1 : $k + 1;
 
-	if ( $attachments ) {
-		$k = $prev ? $k - 1 : $k + 1;
-
-		if ( isset( $attachments[ $k ] ) ) {
-			$attachment_id = $attachments[ $k ]->ID;
-			$output = wp_get_attachment_link( $attachment_id, $size, true, false, $text );
-		}
+	$output = $attachment_id = null;
+	if ( isset( $attachments[ $k ] ) ) {
+		$attachment_id = $attachments[ $k ]->ID;
+		$output = wp_get_attachment_link( $attachment_id, $size, true, false, $text );
 	}
 
 	$adjacent = $prev ? 'previous' : 'next';
@@ -1997,6 +1955,7 @@ function get_attachment_taxonomies($attachment) {
  *
  * @since 3.5.0
  * @see get_attachment_taxonomies()
+ * @uses get_taxonomies()
  *
  * @param string $output The type of output to return, either taxonomy 'names' or 'objects'. 'names' is the default.
  * @return array The names of all taxonomy of $object_type.
@@ -2071,11 +2030,9 @@ function wp_embed_unregister_handler( $id, $priority = 10 ) {
  *
  * @since 2.9.0
  *
- * @param string $url Optional. The URL that should be embedded. Default empty.
- *
  * @return array Default embed parameters.
  */
-function wp_embed_defaults( $url = '' ) {
+function wp_embed_defaults() {
 	if ( ! empty( $GLOBALS['content_width'] ) )
 		$width = (int) $GLOBALS['content_width'];
 
@@ -2089,17 +2046,17 @@ function wp_embed_defaults( $url = '' ) {
 	 *
 	 * @since 2.9.0
 	 *
-	 * @param int    $width  Width of the embed in pixels.
-	 * @param int    $height Height of the embed in pixels.
-	 * @param string $url    The URL that should be embedded.
+	 * @param int $width  Width of the embed in pixels.
+	 * @param int $height Height of the embed in pixels.
 	 */
-	return apply_filters( 'embed_defaults', compact( 'width', 'height' ), $url );
+	return apply_filters( 'embed_defaults', compact( 'width', 'height' ) );
 }
 
 /**
  * Based on a supplied width/height example, return the biggest possible dimensions based on the max width/height.
  *
  * @since 2.9.0
+ * @uses wp_constrain_dimensions() This function passes the widths and the heights.
  *
  * @param int $example_width The width of an example embed.
  * @param int $example_height The height of an example embed.
@@ -2122,6 +2079,9 @@ function wp_expand_dimensions( $example_width, $example_height, $max_width, $max
  * @since 2.9.0
  * @see WP_oEmbed
  *
+ * @uses _wp_oembed_get_object()
+ * @uses WP_oEmbed::get_html()
+ *
  * @param string $url The URL that should be embedded.
  * @param array $args Additional arguments and parameters.
  * @return bool|string False on failure or the embed HTML on success.
@@ -2138,19 +2098,16 @@ function wp_oembed_get( $url, $args = '' ) {
  * @since 2.9.0
  * @see WP_oEmbed
  *
+ * @uses _wp_oembed_get_object()
+ *
  * @param string $format The format of URL that this provider can handle. You can use asterisks as wildcards.
  * @param string $provider The URL to the oEmbed provider.
  * @param boolean $regex Whether the $format parameter is in a regex format.
  */
 function wp_oembed_add_provider( $format, $provider, $regex = false ) {
 	require_once( ABSPATH . WPINC . '/class-oembed.php' );
-
-	if ( did_action( 'plugins_loaded' ) ) {
-		$oembed = _wp_oembed_get_object();
-		$oembed->providers[$format] = array( $provider, $regex );
-	} else {
-		WP_oEmbed::_add_provider_early( $format, $provider, $regex );
-	}
+	$oembed = _wp_oembed_get_object();
+	$oembed->providers[$format] = array( $provider, $regex );
 }
 
 /**
@@ -2159,20 +2116,18 @@ function wp_oembed_add_provider( $format, $provider, $regex = false ) {
  * @since 3.5.0
  * @see WP_oEmbed
  *
+ * @uses _wp_oembed_get_object()
+ *
  * @param string $format The URL format for the oEmbed provider to remove.
  */
 function wp_oembed_remove_provider( $format ) {
 	require_once( ABSPATH . WPINC . '/class-oembed.php' );
 
-	if ( did_action( 'plugins_loaded' ) ) {
-		$oembed = _wp_oembed_get_object();
+	$oembed = _wp_oembed_get_object();
 
-		if ( isset( $oembed->providers[ $format ] ) ) {
-			unset( $oembed->providers[ $format ] );
-			return true;
-		}
-	} else {
-		WP_oEmbed::_remove_provider_early( $format );
+	if ( isset( $oembed->providers[ $format ] ) ) {
+		unset( $oembed->providers[ $format ] );
+		return true;
 	}
 
 	return false;
@@ -2199,8 +2154,6 @@ function wp_maybe_load_embeds() {
 	if ( ! apply_filters( 'load_default_embeds', true ) ) {
 		return;
 	}
-
-	wp_embed_register_handler( 'youtube_embed_url', '#https?://(www.)?youtube\.com/embed/([^/]+)#i', 'wp_embed_handler_youtube' );
 
 	wp_embed_register_handler( 'googlevideo', '#http://video\.google\.([A-Za-z.]{2,5})/videoplay\?docid=([\d-]+)(.*?)#i', 'wp_embed_handler_googlevideo' );
 
@@ -2256,38 +2209,6 @@ function wp_embed_handler_googlevideo( $matches, $attr, $url, $rawattr ) {
 	 * @param array  $rawattr The original unmodified attributes.
 	 */
 	return apply_filters( 'embed_googlevideo', '<embed type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docid=' . esc_attr($matches[2]) . '&amp;hl=en&amp;fs=true" style="width:' . esc_attr($width) . 'px;height:' . esc_attr($height) . 'px" allowFullScreen="true" allowScriptAccess="always" />', $matches, $attr, $url, $rawattr );
-}
-
-/**
- * YouTube embed handler callback.
- *
- * Catches URLs that can be parsed but aren't supported by oEmbed.
- *
- * @since 4.0.0
- *
- * @param array  $matches The regex matches from the provided regex when calling
- *                        {@see wp_embed_register_handler()}.
- * @param array  $attr    Embed attributes.
- * @param string $url     The original URL that was matched by the regex.
- * @param array  $rawattr The original unmodified attributes.
- * @return string The embed HTML.
- */
-function wp_embed_handler_youtube( $matches, $attr, $url, $rawattr ) {
-	global $wp_embed;
-	$embed = $wp_embed->autoembed( "https://youtube.com/watch?v={$matches[2]}" );
-	/**
-	 * Filter the YoutTube embed output.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @see wp_embed_handler_youtube()
-	 *
-	 * @param string $embed   YouTube embed output.
-	 * @param array  $attr    An array of embed attributes.
-	 * @param string $url     The original URL that was matched by the regex.
-	 * @param array  $rawattr The original unmodified attributes.
-	 */
-	return apply_filters( 'wp_embed_handler_youtube', $embed, $attr, $url, $rawattr );
 }
 
 /**
@@ -2513,13 +2434,10 @@ function wp_plupload_default_settings() {
 		),
 	);
 
-	// Currently only iOS Safari supports multiple files uploading but iOS 7.x has a bug that prevents uploading of videos
-	// when enabled. See #29602.
-	if ( wp_is_mobile() && strpos( $_SERVER['HTTP_USER_AGENT'], 'OS 7_' ) !== false &&
-		strpos( $_SERVER['HTTP_USER_AGENT'], 'like Mac OS X' ) !== false ) {
-
+	// Multi-file uploading doesn't currently work in iOS Safari,
+	// single-file allows the built-in camera to be used as source for images
+	if ( wp_is_mobile() )
 		$defaults['multi_selection'] = false;
-	}
 
 	/**
 	 * Filter the Plupload default settings.
@@ -2554,7 +2472,7 @@ function wp_plupload_default_settings() {
 		'limitExceeded' => is_multisite() && ! is_upload_space_available()
 	);
 
-	$script = 'var _wpPluploadSettings = ' . wp_json_encode( $settings ) . ';';
+	$script = 'var _wpPluploadSettings = ' . json_encode( $settings ) . ';';
 
 	if ( $data )
 		$script = "$data\n$script";
@@ -2614,32 +2532,7 @@ function wp_prepare_attachment_for_js( $attachment ) {
 			'edit'   => false
 		),
 		'editLink'   => false,
-		'meta'       => false,
 	);
-
-	$author = new WP_User( $attachment->post_author );
-	$response['authorName'] = $author->display_name;
-
-	if ( $attachment->post_parent ) {
-		$post_parent = get_post( $attachment->post_parent );
-	} else {
-		$post_parent = false;
-	}
-
-	if ( $post_parent ) {
-		$parent_type = get_post_type_object( $post_parent->post_type );
-		if ( $parent_type && $parent_type->show_ui && current_user_can( 'edit_post', $attachment->post_parent ) ) {
-			$response['uploadedToLink'] = get_edit_post_link( $attachment->post_parent, 'raw' );
-		}
-		$response['uploadedToTitle'] = $post_parent->post_title ? $post_parent->post_title : __( '(no title)' );
-	}
-
-	$attached_file = get_attached_file( $attachment->ID );
-	if ( file_exists( $attached_file ) ) {
-		$bytes = filesize( $attached_file );
-		$response['filesizeInBytes'] = $bytes;
-		$response['filesizeHumanReadable'] = size_format( $bytes );
-	}
 
 	if ( current_user_can( 'edit_post', $attachment->ID ) ) {
 		$response['nonces']['update'] = wp_create_nonce( 'update-post_' . $attachment->ID );
@@ -2719,9 +2612,7 @@ function wp_prepare_attachment_for_js( $attachment ) {
 			$response['fileLength'] = $meta['length_formatted'];
 
 		$response['meta'] = array();
-		foreach ( wp_get_attachment_id3_keys( $attachment, 'js' ) as $key => $label ) {
-			$response['meta'][ $key ] = false;
-
+		foreach ( wp_get_attachment_id3_keys( $attachment ) as $key => $label ) {
 			if ( ! empty( $meta[ $key ] ) ) {
 				$response['meta'][ $key ] = $meta[ $key ];
 			}
@@ -2769,7 +2660,7 @@ function wp_enqueue_media( $args = array() ) {
 	if ( did_action( 'wp_enqueue_media' ) )
 		return;
 
-	global $content_width, $wpdb, $wp_locale;
+	global $content_width, $wpdb;
 
 	$defaults = array(
 		'post' => null,
@@ -2822,15 +2713,6 @@ function wp_enqueue_media( $args = array() ) {
 		AND post_mime_type LIKE 'video%'
 		LIMIT 1
 	" );
-	$months = $wpdb->get_results( $wpdb->prepare( "
-		SELECT DISTINCT YEAR( post_date ) AS year, MONTH( post_date ) AS month
-		FROM $wpdb->posts
-		WHERE post_type = %s
-		ORDER BY post_date DESC
-	", 'attachment' ) );
-	foreach ( $months as $month_year ) {
-		$month_year->text = sprintf( __( '%1$s %2$d' ), $wp_locale->get_month( $month_year->month ), $month_year->year );
-	}
 
 	$settings = array(
 		'tabs'      => $tabs,
@@ -2846,14 +2728,12 @@ function wp_enqueue_media( $args = array() ) {
 		),
 		'defaultProps' => $props,
 		'attachmentCounts' => array(
-			'audio' => ( $has_audio ) ? 1 : 0,
-			'video' => ( $has_video ) ? 1 : 0
+			'audio' => (int) $has_audio,
+			'video' => (int) $has_video,
 		),
 		'embedExts'    => $exts,
 		'embedMimes'   => $ext_mimes,
 		'contentWidth' => $content_width,
-		'months'       => $months,
-		'mediaTrash'   => MEDIA_TRASH ? 1 : 0
 	);
 
 	$post = null;
@@ -2904,36 +2784,17 @@ function wp_enqueue_media( $args = array() ) {
 		'uploadImagesTitle' => __( 'Upload Images' ),
 
 		// Library
-		'mediaLibraryTitle'      => __( 'Media Library' ),
-		'insertMediaTitle'       => __( 'Insert Media' ),
-		'createNewGallery'       => __( 'Create a new gallery' ),
-		'createNewPlaylist'      => __( 'Create a new playlist' ),
-		'createNewVideoPlaylist' => __( 'Create a new video playlist' ),
-		'returnToLibrary'        => __( '&#8592; Return to library' ),
-		'allMediaItems'          => __( 'All media items' ),
-		'allDates'               => __( 'All dates' ),
-		'noItemsFound'           => __( 'No items found.' ),
-		'insertIntoPost'         => $hier ? __( 'Insert into page' ) : __( 'Insert into post' ),
-		'unattached'             => __( 'Unattached' ),
-		'trash'                  => _x( 'Trash', 'noun' ),
-		'uploadedToThisPost'     => $hier ? __( 'Uploaded to this page' ) : __( 'Uploaded to this post' ),
-		'warnDelete'             => __( "You are about to permanently delete this item.\n  'Cancel' to stop, 'OK' to delete." ),
-		'warnBulkDelete'         => __( "You are about to permanently delete these items.\n  'Cancel' to stop, 'OK' to delete." ),
-		'warnBulkTrash'          => __( "You are about to trash these items.\n  'Cancel' to stop, 'OK' to delete." ),
-		'bulkSelect'             => __( 'Bulk Select' ),
-		'cancelSelection'        => __( 'Cancel Selection' ),
-		'trashSelected'          => __( 'Trash Selected' ),
-		'untrashSelected'        => __( 'Untrash Selected' ),
-		'deleteSelected'         => __( 'Delete Selected' ),
-		'deletePermanently'      => __( 'Delete Permanently' ),
-		'apply'                  => __( 'Apply' ),
-		'filterByDate'           => __( 'Filter by date' ),
-		'filterByType'           => __( 'Filter by type' ),
-		'searchMediaLabel'       => __( 'Search Media' ),
-		'noMedia'                => __( 'No media attachments found.' ),
-
-		// Library Details
-		'attachmentDetails'  => __( 'Attachment Details' ),
+		'mediaLibraryTitle'  => __( 'Media Library' ),
+		'insertMediaTitle'   => __( 'Insert Media' ),
+		'createNewGallery'   => __( 'Create a new gallery' ),
+		'createNewPlaylist'   => __( 'Create a new playlist' ),
+		'createNewVideoPlaylist'   => __( 'Create a new video playlist' ),
+		'returnToLibrary'    => __( '&#8592; Return to library' ),
+		'allMediaItems'      => __( 'All media items' ),
+		'noItemsFound'       => __( 'No items found.' ),
+		'insertIntoPost'     => $hier ? __( 'Insert into page' ) : __( 'Insert into post' ),
+		'uploadedToThisPost' => $hier ? __( 'Uploaded to this page' ) : __( 'Uploaded to this post' ),
+		'warnDelete' =>      __( "You are about to permanently delete this item.\n  'Cancel' to stop, 'OK' to delete." ),
 
 		// From URL
 		'insertFromUrlTitle' => __( 'Insert from URL' ),
@@ -3025,11 +2886,9 @@ function wp_enqueue_media( $args = array() ) {
 
 	$strings['settings'] = $settings;
 
-	// Ensure we enqueue media-editor first, that way media-views is
-	// registered internally before we try to localize it. see #24724.
-	wp_enqueue_script( 'media-editor' );
 	wp_localize_script( 'media-views', '_wpMediaViewsL10n', $strings );
 
+	wp_enqueue_script( 'media-editor' );
 	wp_enqueue_script( 'media-audiovideo' );
 	wp_enqueue_style( 'media-views' );
 	if ( is_admin() ) {
@@ -3057,9 +2916,9 @@ function wp_enqueue_media( $args = array() ) {
  *
  * @since 3.6.0
  *
- * @param string      $type Mime type.
- * @param int|WP_Post $post Optional. Post ID or WP_Post object. Default is global $post.
- * @return array Found attachments.
+ * @param string $type (Mime) type of media desired
+ * @param mixed $post Post ID or object
+ * @return array Found attachments
  */
 function get_attached_media( $type, $post = 0 ) {
 	if ( ! $post = get_post( $post ) )
@@ -3088,7 +2947,7 @@ function get_attached_media( $type, $post = 0 ) {
 	$children = get_children( $args );
 
 	/**
-	 * Filter the list of media attached to the given post.
+	 * Filter the
 	 *
 	 * @since 3.6.0
 	 *
@@ -3148,6 +3007,7 @@ function get_post_galleries( $post, $html = true ) {
 		foreach ( $matches as $shortcode ) {
 			if ( 'gallery' === $shortcode[2] ) {
 				$srcs = array();
+				$count = 1;
 
 				$gallery = do_shortcode_tag( $shortcode );
 				if ( $html ) {
@@ -3183,7 +3043,7 @@ function get_post_galleries( $post, $html = true ) {
  *
  * @since 3.6.0
  *
- * @param int|WP_Post $post Optional. Post ID or WP_Post object. Default is global $post.
+ * @param int|WP_Post $post Optional. Post ID or object.
  * @param bool        $html Whether to return HTML or data.
  * @return string|array Gallery data and srcs parsed from the expanded shortcode.
  */
@@ -3208,8 +3068,8 @@ function get_post_gallery( $post = 0, $html = true ) {
  *
  * @since 3.6.0
  *
- * @param int|WP_Post $post Optional. Post ID or WP_Post object. Default is global $post.
- * @return array A list of lists, each containing image srcs parsed.
+ * @param mixed $post Optional. Post ID or object.
+ * @return array A list of lists, each containing image srcs parsed
  *		from an expanded shortcode
  */
 function get_post_galleries_images( $post = 0 ) {
@@ -3222,8 +3082,8 @@ function get_post_galleries_images( $post = 0 ) {
  *
  * @since 3.6.0
  *
- * @param int|WP_Post $post Optional. Post ID or WP_Post object. Default is global $post.
- * @return array A list of a gallery's image srcs in order.
+ * @param mixed $post Optional. Post ID or object.
+ * @return array A list of a gallery's image srcs in order
  */
 function get_post_gallery_images( $post = 0 ) {
 	$gallery = get_post_gallery( $post, false );
@@ -3253,47 +3113,4 @@ function wp_maybe_generate_attachment_metadata( $attachment ) {
 			delete_transient( $regeneration_lock );
 		}
 	}
-}
-
-/**
- * Try to convert an attachment URL into a post ID.
- *
- * @since 4.0.0
- *
- * @global wpdb $wpdb WordPress database abstraction object.
- *
- * @param string $url The URL to resolve.
- * @return int The found post ID.
- */
-function attachment_url_to_postid( $url ) {
-	global $wpdb;
-
-	$dir = wp_upload_dir();
-	$path = ltrim( $url, $dir['baseurl'] . '/' );
-
-	$sql = $wpdb->prepare(
-		"SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = %s",
-		$path
-	);
-	$post_id = $wpdb->get_var( $sql );
-	if ( ! empty( $post_id ) ) {
-		return (int) $post_id;
-	}
-}
-
-/**
- * Return the URls for CSS files used in an <iframe>-sandbox'd TinyMCE media view
- *
- * @since 4.0.0
- *
- * @global $wp_version
- *
- * @return array The relevant CSS file URLs.
- */
-function wpview_media_sandbox_styles() {
- 	$version = 'ver=' . $GLOBALS['wp_version'];
- 	$mediaelement = includes_url( "js/mediaelement/mediaelementplayer.min.css?$version" );
- 	$wpmediaelement = includes_url( "js/mediaelement/wp-mediaelement.css?$version" );
-
-	return array( $mediaelement, $wpmediaelement );
 }

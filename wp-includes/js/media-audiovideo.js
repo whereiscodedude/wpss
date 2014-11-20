@@ -6,7 +6,7 @@
 		l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
 	if ( ! _.isUndefined( window._wpmejsSettings ) ) {
-		baseSettings = _wpmejsSettings;
+		baseSettings.pluginPath = _wpmejsSettings.pluginPath;
 	}
 
 	/**
@@ -14,16 +14,113 @@
 	 */
 	wp.media.mixin = {
 		mejsSettings: baseSettings,
-
-		removeAllPlayers: function() {
+		/**
+		 * Pauses every instance of MediaElementPlayer
+		 */
+		pauseAllPlayers: function() {
 			var p;
-
 			if ( window.mejs && window.mejs.players ) {
 				for ( p in window.mejs.players ) {
 					window.mejs.players[p].pause();
-					this.removePlayer( window.mejs.players[p] );
 				}
 			}
+		},
+
+		/**
+		 * Utility to identify the user's browser
+		 */
+		ua: {
+			is : function( browser ) {
+				var passes = false, ua = window.navigator.userAgent;
+
+				switch ( browser ) {
+					case 'oldie':
+						passes = ua.match(/MSIE [6-8]/gi) !== null;
+					break;
+					case 'ie':
+						passes = ua.match(/MSIE/gi) !== null;
+					break;
+					case 'ff':
+						passes = ua.match(/firefox/gi) !== null;
+					break;
+					case 'opera':
+						passes = ua.match(/OPR/) !== null;
+					break;
+					case 'safari':
+						passes = ua.match(/safari/gi) !== null && ua.match(/chrome/gi) === null;
+					break;
+					case 'chrome':
+						passes = ua.match(/safari/gi) !== null && ua.match(/chrome/gi) !== null;
+					break;
+				}
+
+				return passes;
+			}
+		},
+
+		/**
+		 * Specify compatibility for native playback by browser
+		 */
+		compat :{
+			'opera' : {
+				audio: ['ogg', 'wav'],
+				video: ['ogg', 'webm']
+			},
+			'chrome' : {
+				audio: ['ogg', 'mpeg'],
+				video: ['ogg', 'webm', 'mp4', 'm4v', 'mpeg']
+			},
+			'ff' : {
+				audio: ['ogg', 'mpeg'],
+				video: ['ogg', 'webm']
+			},
+			'safari' : {
+				audio: ['mpeg', 'wav'],
+				video: ['mp4', 'm4v', 'mpeg', 'x-ms-wmv', 'quicktime']
+			},
+			'ie' : {
+				audio: ['mpeg'],
+				video: ['mp4', 'm4v', 'mpeg']
+			}
+		},
+
+		/**
+		 * Determine if the passed media contains a <source> that provides
+		 *  native playback in the user's browser
+		 *
+		 * @param {jQuery} media
+		 * @returns {Boolean}
+		 */
+		isCompatible: function( media ) {
+			if ( ! media.find( 'source' ).length ) {
+				return false;
+			}
+
+			var ua = this.ua, test = false, found = false, sources;
+
+			if ( ua.is( 'oldIE' ) ) {
+				return false;
+			}
+
+			sources = media.find( 'source' );
+
+			_.find( this.compat, function( supports, browser ) {
+				if ( ua.is( browser ) ) {
+					found = true;
+					_.each( sources, function( elem ) {
+						var audio = new RegExp( 'audio\/(' + supports.audio.join('|') + ')', 'gi' ),
+							video = new RegExp( 'video\/(' + supports.video.join('|') + ')', 'gi' );
+
+						if ( elem.type.match( video ) !== null || elem.type.match( audio ) !== null ) {
+							test = true;
+						}
+					} );
+				}
+
+				return test || found;
+			} );
+
+			return test;
 		},
 
 		/**
@@ -33,10 +130,6 @@
 		 */
 		removePlayer: function(t) {
 			var featureIndex, feature;
-
-			if ( ! t.options ) {
-				return;
-			}
 
 			// invoke features cleanup
 			for ( featureIndex in t.options.features ) {
@@ -71,8 +164,8 @@
 		 */
 		unsetPlayers : function() {
 			if ( this.players && this.players.length ) {
+				wp.media.mixin.pauseAllPlayers();
 				_.each( this.players, function (player) {
-					player.pause();
 					wp.media.mixin.removePlayer( player );
 				} );
 				this.players = [];
@@ -575,23 +668,10 @@
 
 		renderSelectPosterImageToolbar: function() {
 			this.setPrimaryButton( l10n.videoSelectPosterImageTitle, function( controller, state ) {
-				var urls = [], attachment = state.get( 'selection' ).single();
+				var attachment = state.get( 'selection' ).single();
 
 				controller.media.set( 'poster', attachment.get( 'url' ) );
 				state.trigger( 'set-poster-image', controller.media.toJSON() );
-
-				_.each( wp.media.view.settings.embedExts, function (ext) {
-					if ( controller.media.get( ext ) ) {
-						urls.push( controller.media.get( ext ) );
-					}
-				} );
-
-				wp.ajax.send( 'set-attachment-thumbnail', {
-					data : {
-						urls: urls,
-						thumbnail_id: attachment.get( 'id' )
-					}
-				} );
 			} );
 		},
 
@@ -617,7 +697,7 @@
 	/**
 	 * wp.media.view.MediaDetails
 	 *
-	 * @constructor
+	 * @contructor
 	 * @augments wp.media.view.Settings.AttachmentDisplay
 	 * @augments wp.media.view.Settings
 	 * @augments wp.media.View
@@ -636,8 +716,7 @@
 			this.events = _.extend( this.events, {
 				'click .remove-setting' : 'removeSetting',
 				'change .content-track' : 'setTracks',
-				'click .remove-track' : 'setTracks',
-				'click .add-media-source' : 'addSource'
+				'click .remove-track' : 'setTracks'
 			} );
 
 			media.view.Settings.AttachmentDisplay.prototype.initialize.apply( this, arguments );
@@ -681,11 +760,6 @@
 
 			this.model.set( 'content', tracks );
 			this.trigger( 'media:setting:remove', this );
-		},
-
-		addSource : function( e ) {
-			this.controller.lastMime = $( e.currentTarget ).data( 'mime' );
-			this.controller.setState( 'add-' + this.controller.defaults.id + '-source' );
 		},
 
 		/**
@@ -762,7 +836,7 @@
 	/**
 	 * wp.media.view.AudioDetails
 	 *
-	 * @constructor
+	 * @contructor
 	 * @augments wp.media.view.MediaDetails
 	 * @augments wp.media.view.Settings.AttachmentDisplay
 	 * @augments wp.media.view.Settings
@@ -794,7 +868,7 @@
 	/**
 	 * wp.media.view.VideoDetails
 	 *
-	 * @constructor
+	 * @contructor
 	 * @augments wp.media.view.MediaDetails
 	 * @augments wp.media.view.Settings.AttachmentDisplay
 	 * @augments wp.media.view.Settings
@@ -827,5 +901,19 @@
 			return this;
 		}
 	});
+
+	/**
+	 * Event binding
+	 */
+	function init() {
+		$(document.body)
+			.on( 'click', '.wp-switch-editor', wp.media.mixin.pauseAllPlayers )
+			.on( 'click', '.add-media-source', function( e ) {
+				media.frame.lastMime = $( e.currentTarget ).data( 'mime' );
+				media.frame.setState( 'add-' + media.frame.defaults.id + '-source' );
+			} );
+	}
+
+	$( init );
 
 }(jQuery, _, Backbone));

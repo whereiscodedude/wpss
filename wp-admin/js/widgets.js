@@ -50,12 +50,10 @@ wpWidgets = {
 						css[ margin ] = widgetWidth - ( targetWidth + 30 ) + 'px';
 						widget.css( css );
 					}
-					widget.addClass( 'open' );
 					inside.slideDown('fast');
 				} else {
 					inside.slideUp('fast', function() {
 						widget.attr( 'style', '' );
-						widget.removeClass( 'open' );
 					});
 				}
 				e.preventDefault();
@@ -66,9 +64,7 @@ wpWidgets = {
 				wpWidgets.save( target.closest('div.widget'), 1, 1, 0 );
 				e.preventDefault();
 			} else if ( target.hasClass('widget-control-close') ) {
-				widget = target.closest('div.widget');
-				widget.removeClass( 'open' );
-				wpWidgets.close( widget );
+				wpWidgets.close( target.closest('div.widget') );
 				e.preventDefault();
 			}
 		});

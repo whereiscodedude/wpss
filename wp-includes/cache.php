@@ -268,7 +268,7 @@ class WP_Object_Cache {
 	 * @access private
 	 * @since 2.0.0
 	 */
-	private $cache = array();
+	var $cache = array ();
 
 	/**
 	 * The amount of times the cache data was already stored in the cache.
@@ -277,7 +277,7 @@ class WP_Object_Cache {
 	 * @access private
 	 * @var int
 	 */
-	private $cache_hits = 0;
+	var $cache_hits = 0;
 
 	/**
 	 * Amount of times the cache did not have the request in cache
@@ -286,7 +286,7 @@ class WP_Object_Cache {
 	 * @access public
 	 * @since 2.0.0
 	 */
-	public $cache_misses = 0;
+	var $cache_misses = 0;
 
 	/**
 	 * List of global groups
@@ -295,7 +295,7 @@ class WP_Object_Cache {
 	 * @access protected
 	 * @since 3.0.0
 	 */
-	protected $global_groups = array();
+	var $global_groups = array();
 
 	/**
 	 * The blog prefix to prepend to keys in non-global groups.
@@ -304,59 +304,7 @@ class WP_Object_Cache {
 	 * @access private
 	 * @since 3.5.0
 	 */
-	private $blog_prefix;
-
-	/**
-	 * Make private properties readable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property to get.
-	 * @return mixed Property.
-	 */
-	public function __get( $name ) {
-		return $this->$name;
-	}
-
-	/**
-	 * Make private properties settable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name  Property to set.
-	 * @param mixed  $value Property value.
-	 * @return mixed Newly-set property.
-	 */
-	public function __set( $name, $value ) {
-		return $this->$name = $value;
-	}
-
-	/**
-	 * Make private properties checkable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property to check if set.
-	 * @return bool Whether the property is set.
-	 */
-	public function __isset( $name ) {
-		return isset( $this->$name );
-	}
-
-	/**
-	 * Make private properties un-settable for backwards compatibility.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @param string $name Property to unset.
-	 */
-	public function __unset( $name ) {
-		unset( $this->$name );
-	}
+	var $blog_prefix;
 
 	/**
 	 * Adds data to the cache if it doesn't already exist.
@@ -373,7 +321,7 @@ class WP_Object_Cache {
 	 * @param int $expire When to expire the cache contents
 	 * @return bool False if cache key and group already exist, true on success
 	 */
-	public function add( $key, $data, $group = 'default', $expire = 0 ) {
+	function add( $key, $data, $group = 'default', $expire = 0 ) {
 		if ( wp_suspend_cache_addition() )
 			return false;
 
@@ -397,7 +345,7 @@ class WP_Object_Cache {
 	 *
 	 * @param array $groups List of groups that are global.
 	 */
-	public function add_global_groups( $groups ) {
+	function add_global_groups( $groups ) {
 		$groups = (array) $groups;
 
 		$groups = array_fill_keys( $groups, true );
@@ -414,7 +362,7 @@ class WP_Object_Cache {
 	 * @param string $group The group the key is in.
 	 * @return false|int False on failure, the item's new value on success.
 	 */
-	public function decr( $key, $offset = 1, $group = 'default' ) {
+	function decr( $key, $offset = 1, $group = 'default' ) {
 		if ( empty( $group ) )
 			$group = 'default';
 
@@ -450,7 +398,7 @@ class WP_Object_Cache {
 	 *
 	 * @return bool False if the contents weren't deleted and true on success
 	 */
-	public function delete( $key, $group = 'default', $deprecated = false ) {
+	function delete( $key, $group = 'default', $deprecated = false ) {
 		if ( empty( $group ) )
 			$group = 'default';
 
@@ -471,7 +419,7 @@ class WP_Object_Cache {
 	 *
 	 * @return bool Always returns true
 	 */
-	public function flush() {
+	function flush() {
 		$this->cache = array ();
 
 		return true;
@@ -494,7 +442,7 @@ class WP_Object_Cache {
 	 * @return bool|mixed False on failure to retrieve contents or the cache
 	 *		contents on success
 	 */
-	public function get( $key, $group = 'default', $force = false, &$found = null ) {
+	function get( $key, $group = 'default', $force = false, &$found = null ) {
 		if ( empty( $group ) )
 			$group = 'default';
 
@@ -525,7 +473,7 @@ class WP_Object_Cache {
 	 * @param string $group The group the key is in.
 	 * @return false|int False on failure, the item's new value on success.
 	 */
-	public function incr( $key, $offset = 1, $group = 'default' ) {
+	function incr( $key, $offset = 1, $group = 'default' ) {
 		if ( empty( $group ) )
 			$group = 'default';
 
@@ -560,7 +508,7 @@ class WP_Object_Cache {
 	 * @param int $expire When to expire the cache contents
 	 * @return bool False if not exists, true if contents were replaced
 	 */
-	public function replace( $key, $data, $group = 'default', $expire = 0 ) {
+	function replace( $key, $data, $group = 'default', $expire = 0 ) {
 		if ( empty( $group ) )
 			$group = 'default';
 
@@ -580,7 +528,7 @@ class WP_Object_Cache {
 	 * @since 3.0.0
 	 * @deprecated 3.5.0
 	 */
-	public function reset() {
+	function reset() {
 		_deprecated_function( __FUNCTION__, '3.5', 'switch_to_blog()' );
 
 		// Clear out non-global caches since the blog ID has changed.
@@ -610,7 +558,7 @@ class WP_Object_Cache {
 	 * @param int $expire Not Used
 	 * @return bool Always returns true
 	 */
-	public function set( $key, $data, $group = 'default', $expire = 0 ) {
+	function set( $key, $data, $group = 'default', $expire = 0 ) {
 		if ( empty( $group ) )
 			$group = 'default';
 
@@ -632,7 +580,7 @@ class WP_Object_Cache {
 	 *
 	 * @since 2.0.0
 	 */
-	public function stats() {
+	function stats() {
 		echo "<p>";
 		echo "<strong>Cache Hits:</strong> {$this->cache_hits}<br />";
 		echo "<strong>Cache Misses:</strong> {$this->cache_misses}<br />";
@@ -653,7 +601,7 @@ class WP_Object_Cache {
 	 *
 	 * @param int $blog_id Blog ID
 	 */
-	public function switch_to_blog( $blog_id ) {
+	function switch_to_blog( $blog_id ) {
 		$blog_id = (int) $blog_id;
 		$this->blog_prefix = $this->multisite ? $blog_id . ':' : '';
 	}
@@ -675,7 +623,7 @@ class WP_Object_Cache {
 	 * @since 2.0.8
 	 * @return null|WP_Object_Cache If cache is disabled, returns null.
 	 */
-	public function __construct() {
+	function __construct() {
 		global $blog_id;
 
 		$this->multisite = is_multisite();
@@ -698,7 +646,7 @@ class WP_Object_Cache {
 	 *
 	 * @return bool True value. Won't be used by PHP
 	 */
-	public function __destruct() {
+	function __destruct() {
 		return true;
 	}
 }

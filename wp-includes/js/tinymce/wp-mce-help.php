@@ -95,8 +95,10 @@ header('Content-Type: text/html; charset=' . get_bloginfo('charset'));
 </head>
 <body class="windows wp-core-ui">
 <script type="text/javascript">
-if ( navigator.userAgent.indexOf( 'Mac OS' ) > -1 ) {
-	document.body.className = document.body.className.replace( /windows/, 'macos' );
+var win = window.dialogArguments || opener || parent || top;
+
+if ( win && win.tinymce && win.tinymce.isMac ) {
+	document.body.className = document.body.className.replace(/windows/, 'macos');
 }
 </script>
 

@@ -11,22 +11,6 @@ if ( !defined('ABSPATH') )
 	die('-1');
 
 wp_enqueue_script('post');
-$_wp_editor_expand = false;
-
-/**
- * Filter whether to enable the 'expand' functionality in the post editor.
- *
- * @since 4.0.0
- *
- * @param bool $expand Whether to enable the 'expand' functionality. Default true.
- */
-if ( post_type_supports( $post_type, 'editor' ) && ! wp_is_mobile() &&
-	 ! ( $is_IE && preg_match( '/MSIE [5678]/', $_SERVER['HTTP_USER_AGENT'] ) ) &&
-	 apply_filters( 'wp_editor_expand', true ) ) {
-
-	wp_enqueue_script('editor-expand');
-	$_wp_editor_expand = ( get_user_setting( 'editor_expand', 'on' ) === 'on' );
-}
 
 if ( wp_is_mobile() )
 	wp_enqueue_script( 'jquery-touch-punch' );
@@ -192,7 +176,7 @@ foreach ( get_object_taxonomies( $post ) as $tax_name ) {
 if ( post_type_supports($post_type, 'page-attributes') )
 	add_meta_box('pageparentdiv', 'page' == $post_type ? __('Page Attributes') : __('Attributes'), 'page_attributes_meta_box', null, 'side', 'core');
 
-if ( $thumbnail_support && current_user_can( 'upload_files' ) )
+if ( $thumbnail_support )
 	add_meta_box('postimagediv', __('Featured Image'), 'post_thumbnail_meta_box', null, 'side', 'low');
 
 if ( post_type_supports($post_type, 'excerpt') )
@@ -459,18 +443,8 @@ do_action( 'edit_form_top', $post ); ?>
 	 */
 	?>
 	<label class="screen-reader-text" id="title-prompt-text" for="title"><?php echo apply_filters( 'enter_title_here', __( 'Enter title here' ), $post ); ?></label>
-	<input type="text" name="post_title" size="30" value="<?php echo esc_attr( htmlspecialchars( $post->post_title ) ); ?>" id="title" spellcheck="true" autocomplete="off" />
+	<input type="text" name="post_title" size="30" value="<?php echo esc_attr( htmlspecialchars( $post->post_title ) ); ?>" id="title" autocomplete="off" />
 </div>
-<?php
-/**
- * Fires before the permalink field.
- *
- * @since 4.1.0
- *
- * @param WP_Post $post Post object.
- */
-do_action( 'edit_form_before_permalink', $post );
-?>
 <div class="inside">
 <?php
 $sample_permalink_html = $post_type_object->public ? get_sample_permalink_html($post->ID) : '';
@@ -509,15 +483,15 @@ do_action( 'edit_form_after_title', $post );
 
 if ( post_type_supports($post_type, 'editor') ) {
 ?>
-<div id="postdivrich" class="postarea<?php if ( $_wp_editor_expand ) { echo ' wp-editor-expand'; } ?>">
+<div id="postdivrich" class="postarea edit-form-section">
 
 <?php wp_editor( $post->post_content, 'content', array(
+	'dfw' => true,
 	'drag_drop_upload' => true,
-	'tabfocus_elements' => 'content-html,save-post',
-	'editor_height' => 300,
+	'tabfocus_elements' => 'insert-media-button,save-post',
+	'editor_height' => 360,
 	'tinymce' => array(
 		'resize' => false,
-		'wp_autoresize_on' => $_wp_editor_expand,
 		'add_unload_trigger' => false,
 	),
 ) ); ?>

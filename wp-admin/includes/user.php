@@ -28,7 +28,7 @@ function add_user() {
  * @return int user id of the updated user
  */
 function edit_user( $user_id = 0 ) {
-	global $wp_roles;
+	global $wp_roles, $wpdb;
 	$user = new stdClass;
 	if ( $user_id ) {
 		$update = true;
@@ -63,7 +63,7 @@ function edit_user( $user_id = 0 ) {
 	}
 
 	if ( isset( $_POST['email'] ))
-		$user->user_email = sanitize_text_field( wp_unslash( $_POST['email'] ) );
+		$user->user_email = sanitize_text_field( $_POST['email'] );
 	if ( isset( $_POST['url'] ) ) {
 		if ( empty ( $_POST['url'] ) || $_POST['url'] == 'http://' ) {
 			$user->user_url = '';
@@ -195,7 +195,7 @@ function edit_user( $user_id = 0 ) {
  *
  * @since 2.8.0
  *
- * @return array
+ * @return unknown
  */
 function get_editable_roles() {
 	global $wp_roles;
@@ -390,11 +390,10 @@ add_action('admin_init', 'default_password_nag_handler');
  */
 function default_password_nag_handler($errors = false) {
 	global $user_ID;
-	// Short-circuit it.
-	if ( ! get_user_option('default_password_nag') )
+	if ( ! get_user_option('default_password_nag') ) //Short circuit it.
 		return;
 
-	// get_user_setting = JS saved UI setting. else no-js-fallback code.
+	//get_user_setting = JS saved UI setting. else no-js-fallback code.
 	if ( 'hide' == get_user_setting('default_password_nag') || isset($_GET['default_password_nag']) && '0' == $_GET['default_password_nag'] ) {
 		delete_user_setting('default_password_nag');
 		update_user_option($user_ID, 'default_password_nag', false, true);
@@ -402,33 +401,28 @@ function default_password_nag_handler($errors = false) {
 }
 
 add_action('profile_update', 'default_password_nag_edit_user', 10, 2);
-
 /**
  * @since 2.8.0
  */
 function default_password_nag_edit_user($user_ID, $old_data) {
-	// Short-circuit it.
-	if ( ! get_user_option('default_password_nag', $user_ID) )
+	if ( ! get_user_option('default_password_nag', $user_ID) ) //Short circuit it.
 		return;
 
 	$new_data = get_userdata($user_ID);
 
-	// Remove the nag if the password has been changed.
-	if ( $new_data->user_pass != $old_data->user_pass ) {
+	if ( $new_data->user_pass != $old_data->user_pass ) { //Remove the nag if the password has been changed.
 		delete_user_setting('default_password_nag');
 		update_user_option($user_ID, 'default_password_nag', false, true);
 	}
 }
 
 add_action('admin_notices', 'default_password_nag');
-
 /**
  * @since 2.8.0
  */
 function default_password_nag() {
 	global $pagenow;
-	// Short-circuit it.
-	if ( 'profile.php' == $pagenow || ! get_user_option('default_password_nag') )
+	if ( 'profile.php' == $pagenow || ! get_user_option('default_password_nag') ) //Short circuit it.
 		return;
 
 	echo '<div class="error default-password-nag">';

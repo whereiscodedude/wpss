@@ -18,7 +18,7 @@ if ( ! $tax )
 	wp_die( __( 'Invalid taxonomy' ) );
 
 if ( ! current_user_can( $tax->cap->manage_terms ) )
-	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
+	wp_die( __( 'Cheatin&#8217; uh?' ) );
 
 $wp_list_table = _get_list_table('WP_Terms_List_Table');
 $pagenum = $wp_list_table->get_pagenum();
@@ -38,8 +38,6 @@ if ( 'post' != $post_type ) {
 
 add_screen_option( 'per_page', array( 'label' => $title, 'default' => 20, 'option' => 'edit_' . $tax->name . '_per_page' ) );
 
-$location = false;
-
 switch ( $wp_list_table->current_action() ) {
 
 case 'add-tag':
@@ -47,7 +45,7 @@ case 'add-tag':
 	check_admin_referer( 'add-tag', '_wpnonce_add-tag' );
 
 	if ( !current_user_can( $tax->cap->edit_terms ) )
-		wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
+		wp_die( __( 'Cheatin&#8217; uh?' ) );
 
 	$ret = wp_insert_term( $_POST['tag-name'], $taxonomy, $_POST );
 	$location = 'edit-tags.php?taxonomy=' . $taxonomy;
@@ -63,8 +61,9 @@ case 'add-tag':
 		$location = add_query_arg( 'message', 1, $location );
 	else
 		$location = add_query_arg( 'message', 4, $location );
-
-	break;
+	wp_redirect( $location );
+	exit;
+break;
 
 case 'delete':
 	$location = 'edit-tags.php?taxonomy=' . $taxonomy;
@@ -75,27 +74,30 @@ case 'delete':
 			$location = $referer;
 	}
 
-	if ( ! isset( $_REQUEST['tag_ID'] ) ) {
-		break;
+	if ( !isset( $_REQUEST['tag_ID'] ) ) {
+		wp_redirect( $location );
+		exit;
 	}
 
 	$tag_ID = (int) $_REQUEST['tag_ID'];
 	check_admin_referer( 'delete-tag_' . $tag_ID );
 
 	if ( !current_user_can( $tax->cap->delete_terms ) )
-		wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
+		wp_die( __( 'Cheatin&#8217; uh?' ) );
 
 	wp_delete_term( $tag_ID, $taxonomy );
 
 	$location = add_query_arg( 'message', 2, $location );
+	wp_redirect( $location );
+	exit;
 
-	break;
+break;
 
 case 'bulk-delete':
 	check_admin_referer( 'bulk-tags' );
 
 	if ( !current_user_can( $tax->cap->delete_terms ) )
-		wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
+		wp_die( __( 'Cheatin&#8217; uh?' ) );
 
 	$tags = (array) $_REQUEST['delete_tags'];
 	foreach ( $tags as $tag_ID ) {
@@ -111,8 +113,10 @@ case 'bulk-delete':
 	}
 
 	$location = add_query_arg( 'message', 6, $location );
+	wp_redirect( $location );
+	exit;
 
-	break;
+break;
 
 case 'edit':
 	$title = $tax->labels->edit_item;
@@ -124,16 +128,15 @@ case 'edit':
 		wp_die( __( 'You attempted to edit an item that doesn&#8217;t exist. Perhaps it was deleted?' ) );
 	require_once( ABSPATH . 'wp-admin/admin-header.php' );
 	include( ABSPATH . 'wp-admin/edit-tag-form.php' );
-	include( ABSPATH . 'wp-admin/admin-footer.php' );
 
-	exit;
+break;
 
 case 'editedtag':
 	$tag_ID = (int) $_POST['tag_ID'];
 	check_admin_referer( 'update-tag_' . $tag_ID );
 
 	if ( !current_user_can( $tax->cap->edit_terms ) )
-		wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
+		wp_die( __( 'Cheatin&#8217; uh?' ) );
 
 	$tag = get_term( $tag_ID, $taxonomy );
 	if ( ! $tag )
@@ -154,17 +157,18 @@ case 'editedtag':
 		$location = add_query_arg( 'message', 3, $location );
 	else
 		$location = add_query_arg( 'message', 5, $location );
-	break;
-}
 
-if ( ! $location && ! empty( $_REQUEST['_wp_http_referer'] ) ) {
+	wp_redirect( $location );
+	exit;
+break;
+
+default:
+if ( ! empty($_REQUEST['_wp_http_referer']) ) {
 	$location = remove_query_arg( array('_wp_http_referer', '_wpnonce'), wp_unslash($_SERVER['REQUEST_URI']) );
-}
 
-if ( $location ) {
-	if ( ! empty( $_REQUEST['paged'] ) ) {
-		$location = add_query_arg( 'paged', (int) $_REQUEST['paged'], $location );
-	}
+	if ( ! empty( $_REQUEST['paged'] ) )
+		$location = add_query_arg( 'paged', (int) $_REQUEST['paged'] );
+
 	wp_redirect( $location );
 	exit;
 }
@@ -332,12 +336,8 @@ endif; ?>
 
 <?php if ( 'category' == $taxonomy ) : ?>
 <div class="form-wrap">
-<p>
-	<?php
-	/** This filter is documented in wp-includes/category-template.php */
-	printf( __( '<strong>Note:</strong><br />Deleting a category does not delete the posts in that category. Instead, posts that were only assigned to the deleted category are set to the category <strong>%s</strong>.' ), apply_filters( 'the_category', get_cat_name( get_option( 'default_category') ) ) );
-	?>
-</p>
+<?php /** This filter is documented in wp-includes/category-template.php */ ?>
+<p><?php printf(__('<strong>Note:</strong><br />Deleting a category does not delete the posts in that category. Instead, posts that were only assigned to the deleted category are set to the category <strong>%s</strong>.'), apply_filters('the_category', get_cat_name(get_option('default_category')))) ?></p>
 <?php if ( current_user_can( 'import' ) ) : ?>
 <p><?php printf(__('Categories can be selectively converted to tags using the <a href="%s">category to tag converter</a>.'), 'import.php') ?></p>
 <?php endif; ?>
@@ -447,21 +447,21 @@ if ( current_user_can($tax->cap->edit_terms) ) {
 <input type="hidden" name="post_type" value="<?php echo esc_attr($post_type); ?>" />
 <?php wp_nonce_field('add-tag', '_wpnonce_add-tag'); ?>
 
-<div class="form-field form-required term-name-wrap">
-	<label for="tag-name"><?php _ex( 'Name', 'term name' ); ?></label>
+<div class="form-field form-required">
+	<label for="tag-name"><?php _ex('Name', 'Taxonomy Name'); ?></label>
 	<input name="tag-name" id="tag-name" type="text" value="" size="40" aria-required="true" />
 	<p><?php _e('The name is how it appears on your site.'); ?></p>
 </div>
 <?php if ( ! global_terms_enabled() ) : ?>
-<div class="form-field term-slug-wrap">
-	<label for="tag-slug"><?php _e( 'Slug' ); ?></label>
+<div class="form-field">
+	<label for="tag-slug"><?php _ex('Slug', 'Taxonomy Slug'); ?></label>
 	<input name="slug" id="tag-slug" type="text" value="" size="40" />
 	<p><?php _e('The &#8220;slug&#8221; is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.'); ?></p>
 </div>
 <?php endif; // global_terms_enabled() ?>
 <?php if ( is_taxonomy_hierarchical($taxonomy) ) : ?>
-<div class="form-field term-parent-wrap">
-	<label for="parent"><?php _ex( 'Parent', 'term parent' ); ?></label>
+<div class="form-field">
+	<label for="parent"><?php _ex('Parent', 'Taxonomy Parent'); ?></label>
 	<?php
 	$dropdown_args = array(
 		'hide_empty'       => 0,
@@ -500,8 +500,8 @@ if ( current_user_can($tax->cap->edit_terms) ) {
 	<?php endif; ?>
 </div>
 <?php endif; // is_taxonomy_hierarchical() ?>
-<div class="form-field term-description-wrap">
-	<label for="tag-description"><?php _e( 'Description' ); ?></label>
+<div class="form-field">
+	<label for="tag-description"><?php _ex('Description', 'Taxonomy Description'); ?></label>
 	<textarea name="description" id="tag-description" rows="5" cols="40"></textarea>
 	<p><?php _e('The description is not prominent by default; however, some themes may show it.'); ?></p>
 </div>
@@ -585,7 +585,10 @@ do_action( "{$taxonomy}_add_form", $taxonomy );
 <script type="text/javascript">
 try{document.forms.addtag['tag-name'].focus();}catch(e){}
 </script>
+<?php $wp_list_table->inline_edit(); ?>
+
 <?php
-$wp_list_table->inline_edit();
+break;
+}
 
 include( ABSPATH . 'wp-admin/admin-footer.php' );

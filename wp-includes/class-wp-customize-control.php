@@ -7,27 +7,6 @@
  * @since 3.4.0
  */
 class WP_Customize_Control {
-
-	/**
-	 * Incremented with each new class instantiation, then stored in $instance_number.
-	 *
-	 * Used when sorting two instances whose priorities are equal.
-	 *
-	 * @since 4.1.0
-	 * @access protected
-	 * @var int
-	 */
-	protected static $instance_count = 0;
-
-	/**
-	 * Order in which this instance was created in relation to other instances.
-	 *
-	 * @since 4.1.0
-	 * @access public
-	 * @var int
-	 */
-	public $instance_number;
-
 	/**
 	 * @access public
 	 * @var WP_Customize_Manager
@@ -75,12 +54,6 @@ class WP_Customize_Control {
 	public $label = '';
 
 	/**
-	 * @access public
-	 * @var string
-	 */
-	public $description = '';
-
-	/**
 	 * @todo: Remove choices
 	 *
 	 * @access public
@@ -92,13 +65,6 @@ class WP_Customize_Control {
 	 * @access public
 	 * @var array
 	 */
-	public $input_attrs = array();
-
-	/**
-	 * @deprecated It is better to just call the json() method
-	 * @access public
-	 * @var array
-	 */
 	public $json = array();
 
 	/**
@@ -107,20 +73,6 @@ class WP_Customize_Control {
 	 */
 	public $type = 'text';
 
-	/**
-	 * Callback.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @see WP_Customize_Control::active()
-	 *
-	 * @var callable Callback is called with one argument, the instance of
-	 *               WP_Customize_Control, and returns bool to indicate whether
-	 *               the control is active (such as it relates to the URL
-	 *               currently being previewed).
-	 */
-	public $active_callback = '';
 
 	/**
 	 * Constructor.
@@ -135,26 +87,19 @@ class WP_Customize_Control {
 	 * @param string $id
 	 * @param array $args
 	 */
-	public function __construct( $manager, $id, $args = array() ) {
+	function __construct( $manager, $id, $args = array() ) {
 		$keys = array_keys( get_object_vars( $this ) );
 		foreach ( $keys as $key ) {
-			if ( isset( $args[ $key ] ) ) {
+			if ( isset( $args[ $key ] ) )
 				$this->$key = $args[ $key ];
-			}
 		}
 
 		$this->manager = $manager;
 		$this->id = $id;
-		if ( empty( $this->active_callback ) ) {
-			$this->active_callback = array( $this, 'active_callback' );
-		}
-		self::$instance_count += 1;
-		$this->instance_number = self::$instance_count;
 
 		// Process settings.
-		if ( empty( $this->settings ) ) {
+		if ( empty( $this->settings ) )
 			$this->settings = $id;
-		}
 
 		$settings = array();
 		if ( is_array( $this->settings ) ) {
@@ -175,45 +120,6 @@ class WP_Customize_Control {
 	 */
 	public function enqueue() {}
 
-	/**
-	 * Check whether control is active to current Customizer preview.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @return bool Whether the control is active to the current preview.
-	 */
-	public final function active() {
-		$control = $this;
-		$active = call_user_func( $this->active_callback, $this );
-
-		/**
-		 * Filter response of WP_Customize_Control::active().
-		 *
-		 * @since 4.0.0
-		 *
-		 * @param bool                 $active  Whether the Customizer control is active.
-		 * @param WP_Customize_Control $control WP_Customize_Control instance.
-		 */
-		$active = apply_filters( 'customize_control_active', $active, $control );
-
-		return $active;
-	}
-
-	/**
-	 * Default callback used when invoking WP_Customize_Control::active().
-	 *
-	 * Subclasses can override this with their specific logic, or they may
-	 * provide an 'active_callback' argument to the constructor.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @return bool Always true.
-	 */
-	public function active_callback() {
-		return true;
-	}
 
 	/**
 	 * Fetch a setting's value.
@@ -225,9 +131,8 @@ class WP_Customize_Control {
 	 * @return mixed The requested setting's value, if the setting exists.
 	 */
 	public final function value( $setting_key = 'default' ) {
-		if ( isset( $this->settings[ $setting_key ] ) ) {
+		if ( isset( $this->settings[ $setting_key ] ) )
 			return $this->settings[ $setting_key ]->value();
-		}
 	}
 
 	/**
@@ -242,25 +147,6 @@ class WP_Customize_Control {
 		}
 
 		$this->json['type'] = $this->type;
-		$this->json['priority'] = $this->priority;
-		$this->json['active'] = $this->active();
-		$this->json['section'] = $this->section;
-		$this->json['content'] = $this->get_content();
-		$this->json['label'] = $this->label;
-		$this->json['description'] = $this->description;
-		$this->json['instanceNumber'] = $this->instance_number;
-	}
-
-	/**
-	 * Get the data to export to the client via JSON.
-	 *
-	 * @since 4.1.0
-	 *
-	 * @return array
-	 */
-	public function json() {
-		$this->to_json();
-		return $this->json;
 	}
 
 	/**
@@ -281,21 +167,6 @@ class WP_Customize_Control {
 			return false;
 
 		return true;
-	}
-
-	/**
-	 * Get the control's content for insertion into the Customizer pane.
-	 *
-	 * @since 4.1.0
-	 *
-	 * @return string
-	 */
-	public final function get_content() {
-		ob_start();
-		$this->maybe_render();
-		$template = trim( ob_get_contents() );
-		ob_end_clean();
-		return $template;
 	}
 
 	/**
@@ -374,39 +245,29 @@ class WP_Customize_Control {
 	}
 
 	/**
-	 * Render the custom attributes for the control's input element.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 */
-	public function input_attrs() {
-		foreach( $this->input_attrs as $attr => $value ) {
-			echo $attr . '="' . esc_attr( $value ) . '" ';
-		}
-	}
-
-	/**
 	 * Render the control's content.
 	 *
 	 * Allows the content to be overriden without having to rewrite the wrapper in $this->render().
 	 *
-	 * Supports basic input types `text`, `checkbox`, `textarea`, `radio`, `select` and `dropdown-pages`.
-	 * Additional input types such as `email`, `url`, `number`, `hidden` and `date` are supported implicitly.
-	 *
-	 * Control content can alternately be rendered in JS. See {@see WP_Customize_Control::print_template()}.
+	 * Supports basic input types `text`, `checkbox`, `radio`, `select` and `dropdown-pages`.
 	 *
 	 * @since 3.4.0
 	 */
 	protected function render_content() {
 		switch( $this->type ) {
+			case 'text':
+				?>
+				<label>
+					<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
+					<input type="text" value="<?php echo esc_attr( $this->value() ); ?>" <?php $this->link(); ?> />
+				</label>
+				<?php
+				break;
 			case 'checkbox':
 				?>
 				<label>
 					<input type="checkbox" value="<?php echo esc_attr( $this->value() ); ?>" <?php $this->link(); checked( $this->value() ); ?> />
 					<?php echo esc_html( $this->label ); ?>
-					<?php if ( ! empty( $this->description ) ) : ?>
-						<span class="description customize-control-description"><?php echo $this->description; ?></span>
-					<?php endif; ?>
 				</label>
 				<?php
 				break;
@@ -416,13 +277,9 @@ class WP_Customize_Control {
 
 				$name = '_customize-radio-' . $this->id;
 
-				if ( ! empty( $this->label ) ) : ?>
-					<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
-				<?php endif;
-				if ( ! empty( $this->description ) ) : ?>
-					<span class="description customize-control-description"><?php echo $this->description ; ?></span>
-				<?php endif;
-
+				?>
+				<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
+				<?php
 				foreach ( $this->choices as $value => $label ) :
 					?>
 					<label>
@@ -438,32 +295,13 @@ class WP_Customize_Control {
 
 				?>
 				<label>
-					<?php if ( ! empty( $this->label ) ) : ?>
-						<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
-					<?php endif;
-					if ( ! empty( $this->description ) ) : ?>
-						<span class="description customize-control-description"><?php echo $this->description; ?></span>
-					<?php endif; ?>
-
+					<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
 					<select <?php $this->link(); ?>>
 						<?php
 						foreach ( $this->choices as $value => $label )
 							echo '<option value="' . esc_attr( $value ) . '"' . selected( $this->value(), $value, false ) . '>' . $label . '</option>';
 						?>
 					</select>
-				</label>
-				<?php
-				break;
-			case 'textarea':
-				?>
-				<label>
-					<?php if ( ! empty( $this->label ) ) : ?>
-						<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
-					<?php endif;
-					if ( ! empty( $this->description ) ) : ?>
-						<span class="description customize-control-description"><?php echo $this->description; ?></span>
-					<?php endif; ?>
-					<textarea rows="5" <?php $this->link(); ?>><?php echo esc_textarea( $this->value() ); ?></textarea>
 				</label>
 				<?php
 				break;
@@ -487,51 +325,8 @@ class WP_Customize_Control {
 					$dropdown
 				);
 				break;
-			default:
-				?>
-				<label>
-					<?php if ( ! empty( $this->label ) ) : ?>
-						<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
-					<?php endif;
-					if ( ! empty( $this->description ) ) : ?>
-						<span class="description customize-control-description"><?php echo $this->description; ?></span>
-					<?php endif; ?>
-					<input type="<?php echo esc_attr( $this->type ); ?>" <?php $this->input_attrs(); ?> value="<?php echo esc_attr( $this->value() ); ?>" <?php $this->link(); ?> />
-				</label>
-				<?php
-				break;
 		}
 	}
-
-	/**
-	 * Render the control's JS template.
-	 *
-	 * This function is only run for control types that have been registered with {@see WP_Customize_Manager::register_control_type()}.
-	 *
-	 * In the future, this will also print the template for the control's container element and be overridable.
-	 *
-	 * @since 4.1.0
-	 */
-	final public function print_template() {
-	        ?>
-	        <script type="text/html" id="tmpl-customize-control-<?php echo $this->type; ?>-content">
-	                <?php $this->content_template(); ?>
-	        </script>
-	        <?php
-	}
-
-	/**
-	 * An Underscore (JS) template for this control's content (but not its container).
-	 *
-	 * Class variables for this control class are available in the `data` JS object;
-	 * export custom variables by overriding {@see WP_Customize_Control::to_json()}.
-	 *
-	 * @see WP_Customize_Control::print_template()
-	 *
-	 * @since 4.1.0
-	 */
-	protected function content_template() {}
-
 }
 
 /**
@@ -588,41 +383,27 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	public function to_json() {
 		parent::to_json();
 		$this->json['statuses'] = $this->statuses;
-		$this->json['defaultValue'] = $this->setting->default;
 	}
 
 	/**
-	 * Don't render the control content from PHP, as it's rendered via JS on load.
+	 * Render the control's content.
 	 *
 	 * @since 3.4.0
 	 */
-	public function render_content() {}
-
-	/**
-	 * Render a JS template for the content of the color picker control.
-	 *
-	 * @since 4.1.0
-	 */
-	public function content_template() {
+	public function render_content() {
+		$this_default = $this->setting->default;
+		$default_attr = '';
+		if ( $this_default ) {
+			if ( false === strpos( $this_default, '#' ) )
+				$this_default = '#' . $this_default;
+			$default_attr = ' data-default-color="' . esc_attr( $this_default ) . '"';
+		}
+		// The input's value gets set by JS. Don't fill it.
 		?>
-		<# var defaultValue = '';
-		if ( data.defaultValue ) {
-			if ( '#' !== data.defaultValue.substring( 0, 1 ) ) {
-				defaultValue = '#' + data.defaultValue;
-			} else {
-				defaultValue = data.defaultValue;
-			}
-			defaultValue = ' data-default-color=' + defaultValue; // Quotes added automatically.
-		} #>
 		<label>
-			<# if ( data.label ) { #>
-				<span class="customize-control-title">{{{ data.label }}}</span>
-			<# } #>
-			<# if ( data.description ) { #>
-				<span class="description customize-control-description">{{{ data.description }}}</span>
-			<# } #>
+			<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
 			<div class="customize-control-content">
-				<input class="color-picker-hex" type="text" maxlength="7" placeholder="<?php esc_attr_e( 'Hex Value' ); ?>" {{ defaultValue }} />
+				<input class="color-picker-hex" type="text" maxlength="7" placeholder="<?php esc_attr_e( 'Hex Value' ); ?>"<?php echo $default_attr; ?> />
 			</div>
 		</label>
 		<?php
@@ -637,34 +418,10 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
  * @since 3.4.0
  */
 class WP_Customize_Upload_Control extends WP_Customize_Control {
-	public $type          = 'upload';
-	public $mime_type     = '';
-	public $button_labels = array();
-	public $removed = ''; // unused
-	public $context; // unused
-	public $extensions = array(); // unused
-
-	/**
-	 * Constructor.
-	 *
-	 * @since 4.1.0
-	 * @uses WP_Customize_Control::__construct()
-	 *
-	 * @param WP_Customize_Manager $manager
-	 */
-	public function __construct( $manager, $id, $args = array() ) {
-		parent::__construct( $manager, $id, $args );
-
-		$this->button_labels = array(
-			'select'       => __( 'Select File' ),
-			'change'       => __( 'Change File' ),
-			'default'      => __( 'Default' ),
-			'remove'       => __( 'Remove' ),
-			'placeholder'  => __( 'No file selected' ),
-			'frame_title'  => __( 'Select File' ),
-			'frame_button' => __( 'Choose File' ),
-		);
-	}
+	public $type    = 'upload';
+	public $removed = '';
+	public $context;
+	public $extensions = array();
 
 	/**
 	 * Enqueue control related scripts/styles.
@@ -672,7 +429,7 @@ class WP_Customize_Upload_Control extends WP_Customize_Control {
 	 * @since 3.4.0
 	 */
 	public function enqueue() {
-		wp_enqueue_media();
+		wp_enqueue_script( 'wp-plupload' );
 	}
 
 	/**
@@ -683,122 +440,30 @@ class WP_Customize_Upload_Control extends WP_Customize_Control {
 	 */
 	public function to_json() {
 		parent::to_json();
-		$this->json['mime_type'] = $this->mime_type;
-		$this->json['button_labels'] = $this->button_labels;
 
-		if ( is_object( $this->setting ) ) {
-			if ( $this->setting->default ) {
-				// Fake an attachment model - needs all fields used by template.
-				$type = in_array( substr( $this->setting->default, -3 ), array( 'jpg', 'png', 'gif', 'bmp' ) ) ? 'image' : 'document';
-				$default_attachment = array(
-					'id' => 1,
-					'url' => $this->setting->default,
-					'type' => $type,
-					'sizes' => array(
-						'full' => array( 'url' => $this->setting->default ),
-					),
-					'icon' => wp_mime_type_icon( $type ),
-					'title' => basename( $this->setting->default ),
-				);
-				$this->json['defaultAttachment'] = $default_attachment;
-			}
+		$this->json['removed'] = $this->removed;
 
-			// Get the attachment model for the existing file.
-			if ( $this->value() ) {
-				$attachment_id = attachment_url_to_postid( $this->value() );
-				if ( $attachment_id ) {
-					$this->json['attachment'] = wp_prepare_attachment_for_js( $attachment_id);
-				}
-			} else if ( $this->setting->default ) {
-				// Set the default as the attachment.
-				$this->json['attachment'] = $default_attachment;
-			}
-		}
+		if ( $this->context )
+			$this->json['context'] = $this->context;
+
+		if ( $this->extensions )
+			$this->json['extensions'] = implode( ',', $this->extensions );
 	}
 
 	/**
-	 * Don't render any content for this control from PHP.
+	 * Render the control's content.
 	 *
-	 * @see WP_Customize_Upload_Control::content_template()
 	 * @since 3.4.0
 	 */
-	public function render_content() {}
-
-	/**
-	 * Render a JS template for the content of the upload control.
-	 *
-	 * @since 4.1.0
-	 */
-	public function content_template() {
+	public function render_content() {
 		?>
-		<label for="{{ data.settings.default }}-button">
-			<# if ( data.label ) { #>
-				<span class="customize-control-title">{{ data.label }}</span>
-			<# } #>
-			<# if ( data.description ) { #>
-				<span class="description customize-control-description">{{ data.description }}</span>
-			<# } #>
-		</label>
-
-		<# // Ensure that the default attachment is used if it exists.
-		if ( _.isEmpty( data.attachment ) && data.defaultAttachment ) {
-			data.attachment = data.defaultAttachment;
-		}
-
-		if ( data.attachment && data.attachment.id ) { #>
-			<div class="attachment-media-view {{ data.attachment.orientation }}">
-				<div class="thumbnail thumbnail-{{ data.attachment.type }}">
-					<# if ( 'image' === data.attachment.type && data.attachment.sizes && data.attachment.sizes.medium ) { #>
-						<img class="attachment-thumb" src="{{ data.attachment.sizes.medium.url }}" draggable="false" />
-					<# } else if ( 'image' === data.attachment.type && data.attachment.sizes && data.attachment.sizes.full ) { #>
-						<img class="attachment-thumb" src="{{ data.attachment.sizes.full.url }}" draggable="false" />
-					<# } else if ( -1 === jQuery.inArray( data.attachment.type, [ 'audio', 'video' ] ) ) { #>
-						<img class="attachment-thumb type-icon" src="{{ data.attachment.icon }}" class="icon" draggable="false" />
-						<p class="attachment-title">{{ data.attachment.title }}</p>
-					<# } #>
-
-					<# if ( 'audio' === data.attachment.type ) { #>
-					<div class="wp-media-wrapper">
-						<p class="attachment-title">{{ data.attachment.title }}</p>
-						<audio style="visibility: hidden" controls class="wp-audio-shortcode" width="100%" preload="none">
-							<source type="{{ data.attachment.mime }}" src="{{ data.attachment.url }}"/>
-						</audio>
-					</div>
-					<# } else if ( 'video' === data.attachment.type ) {
-						var w_rule = h_rule = '';
-						if ( data.attachment.width ) {
-							w_rule = 'width: ' + data.attachment.width + 'px;';
-						} else if ( wp.media.view.settings.contentWidth ) {
-							w_rule = 'width: ' + wp.media.view.settings.contentWidth + 'px;';
-						}
-						if ( data.attachment.height ) {
-							h_rule = 'height: ' + data.attachment.height + 'px;';
-						}
-						#>
-						<div style="{{ w_rule }}{{ h_rule }}" class="wp-media-wrapper wp-video">
-							<video controls="controls" class="wp-video-shortcode" preload="metadata"
-								<# if ( data.attachment.width ) { #>width="{{ data.attachment.width }}"<# } #>
-								<# if ( data.attachment.height ) { #>height="{{ data.attachment.height }}"<# } #>
-								<# if ( data.attachment.image && data.attachment.image.src !== data.attachment.icon ) { #>poster="{{ data.attachment.image.src }}"<# } #>>
-								<source type="{{ data.attachment.mime }}" src="{{ data.attachment.url }}"/>
-							</video>
-						</div>
-					<# } #>
-				</div>
+		<label>
+			<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
+			<div>
+				<a href="#" class="button-secondary upload"><?php _e( 'Upload' ); ?></a>
+				<a href="#" class="remove"><?php _e( 'Remove' ); ?></a>
 			</div>
-			<a class="button upload-button" id="{{ data.settings.default }}-button" href="#"><?php echo $this->button_labels['change']; ?></a>
-			<# if ( data.defaultAttachment && data.defaultAttachment.id !== data.attachment.id ) { #>
-				<a class="default-button remove-button" href="#"><?php echo $this->button_labels['default']; ?></a>
-			<# } else { #>
-				<a class="remove-button" href="#"><?php echo $this->button_labels['remove']; ?></a>
-			<# } #>
-		<# } else { #>
-			<p class="placeholder-text"><?php echo $this->button_labels['placeholder']; ?></p>
-			<a class="button upload-button" id="{{ data.settings.default }}-button" href="#"><?php echo $this->button_labels['select']; ?></a>
-			<# if ( ! data.defaultAttachment ) { #>
-				<a class="default-button remove-button" href="#"><?php echo $this->button_labels['default']; ?></a>
-			<# } #>
-		<# } #>
+		</label>
 		<?php
 	}
 }
@@ -812,7 +477,11 @@ class WP_Customize_Upload_Control extends WP_Customize_Control {
  */
 class WP_Customize_Image_Control extends WP_Customize_Upload_Control {
 	public $type = 'image';
-	public $mime_type = 'image';
+	public $get_url;
+	public $statuses;
+	public $extensions = array( 'jpg', 'jpeg', 'gif', 'png' );
+
+	protected $tabs = array();
 
 	/**
 	 * Constructor.
@@ -821,53 +490,163 @@ class WP_Customize_Image_Control extends WP_Customize_Upload_Control {
 	 * @uses WP_Customize_Upload_Control::__construct()
 	 *
 	 * @param WP_Customize_Manager $manager
+	 * @param string $id
+	 * @param array $args
 	 */
-	public function __construct( $manager, $id, $args = array() ) {
+	public function __construct( $manager, $id, $args ) {
+		$this->statuses = array( '' => __('No Image') );
+
 		parent::__construct( $manager, $id, $args );
 
-		$this->button_labels = array(
-			'select'       => __( 'Select Image' ),
-			'change'       => __( 'Change Image' ),
-			'remove'       => __( 'Remove' ),
-			'default'      => __( 'Default' ),
-			'placeholder'  => __( 'No image selected' ),
-			'frame_title'  => __( 'Select Image' ),
-			'frame_button' => __( 'Choose Image' ),
-		);
+		$this->add_tab( 'upload-new', __('Upload New'), array( $this, 'tab_upload_new' ) );
+		$this->add_tab( 'uploaded',   __('Uploaded'),   array( $this, 'tab_uploaded' ) );
+
+		// Early priority to occur before $this->manager->prepare_controls();
+		add_action( 'customize_controls_init', array( $this, 'prepare_control' ), 5 );
 	}
 
 	/**
+	 * Prepares the control.
+	 *
+	 * If no tabs exist, removes the control from the manager.
+	 *
 	 * @since 3.4.2
-	 * @deprecated 4.1.0
 	 */
-	public function prepare_control() {}
+	public function prepare_control() {
+		if ( ! $this->tabs )
+			$this->manager->remove_control( $this->id );
+	}
 
 	/**
+	 * Refresh the parameters passed to the JavaScript via JSON.
+	 *
 	 * @since 3.4.0
-	 * @deprecated 4.1.0
+	 * @uses WP_Customize_Upload_Control::to_json()
+	 */
+	public function to_json() {
+		parent::to_json();
+		$this->json['statuses'] = $this->statuses;
+	}
+
+	/**
+	 * Render the control's content.
+	 *
+	 * @since 3.4.0
+	 */
+	public function render_content() {
+		$src = $this->value();
+		if ( isset( $this->get_url ) )
+			$src = call_user_func( $this->get_url, $src );
+
+		?>
+		<div class="customize-image-picker">
+			<span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
+
+			<div class="customize-control-content">
+				<div class="dropdown preview-thumbnail" tabindex="0">
+					<div class="dropdown-content">
+						<?php if ( empty( $src ) ): ?>
+							<img style="display:none;" />
+						<?php else: ?>
+							<img src="<?php echo esc_url( set_url_scheme( $src ) ); ?>" />
+						<?php endif; ?>
+						<div class="dropdown-status"></div>
+					</div>
+					<div class="dropdown-arrow"></div>
+				</div>
+			</div>
+
+			<div class="library">
+				<ul>
+					<?php foreach ( $this->tabs as $id => $tab ): ?>
+						<li data-customize-tab='<?php echo esc_attr( $id ); ?>' tabindex='0'>
+							<?php echo esc_html( $tab['label'] ); ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+				<?php foreach ( $this->tabs as $id => $tab ): ?>
+					<div class="library-content" data-customize-tab='<?php echo esc_attr( $id ); ?>'>
+						<?php call_user_func( $tab['callback'] ); ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="actions">
+				<a href="#" class="remove"><?php _e( 'Remove Image' ); ?></a>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Add a tab to the control.
+	 *
+	 * @since 3.4.0
 	 *
 	 * @param string $id
 	 * @param string $label
 	 * @param mixed $callback
 	 */
-	public function add_tab( $id, $label, $callback ) {}
+	public function add_tab( $id, $label, $callback ) {
+		$this->tabs[ $id ] = array(
+			'label'    => $label,
+			'callback' => $callback,
+		);
+	}
 
 	/**
+	 * Remove a tab from the control.
+	 *
 	 * @since 3.4.0
-	 * @deprecated 4.1.0
 	 *
 	 * @param string $id
 	 */
-	public function remove_tab( $id ) {}
+	public function remove_tab( $id ) {
+		unset( $this->tabs[ $id ] );
+	}
 
 	/**
 	 * @since 3.4.0
-	 * @deprecated 4.1.0
+	 */
+	public function tab_upload_new() {
+		if ( ! _device_can_upload() ) {
+			echo '<p>' . sprintf( __('The web browser on your device cannot be used to upload files. You may be able to use the <a href="%s">native app for your device</a> instead.'), 'https://wordpress.org/mobile/' ) . '</p>';
+		} else {
+			?>
+			<div class="upload-dropzone">
+				<?php _e('Drop a file here or <a href="#" class="upload">select a file</a>.'); ?>
+			</div>
+			<div class="upload-fallback">
+				<span class="button-secondary"><?php _e('Select File'); ?></span>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * @since 3.4.0
+	 */
+	public function tab_uploaded() {
+		?>
+		<div class="uploaded-target"></div>
+		<?php
+	}
+
+	/**
+	 * @since 3.4.0
 	 *
 	 * @param string $url
 	 * @param string $thumbnail_url
 	 */
-	public function print_tab_image( $url, $thumbnail_url = null ) {}
+	public function print_tab_image( $url, $thumbnail_url = null ) {
+		$url = set_url_scheme( $url );
+		$thumbnail_url = ( $thumbnail_url ) ? set_url_scheme( $thumbnail_url ) : $url;
+		?>
+		<a href="#" class="thumbnail" data-customize-image-value="<?php echo esc_url( $url ); ?>">
+			<img src="<?php echo esc_url( $thumbnail_url ); ?>" />
+		</a>
+		<?php
+	}
 }
 
 /**
@@ -891,14 +670,46 @@ class WP_Customize_Background_Image_Control extends WP_Customize_Image_Control {
 		parent::__construct( $manager, 'background_image', array(
 			'label'    => __( 'Background Image' ),
 			'section'  => 'background_image',
+			'context'  => 'custom-background',
+			'get_url'  => 'get_background_image',
 		) );
+
+		if ( $this->setting->default )
+			$this->add_tab( 'default',  __('Default'),  array( $this, 'tab_default_background' ) );
+	}
+
+	/**
+	 * @since 3.4.0
+	 */
+	public function tab_uploaded() {
+		$backgrounds = get_posts( array(
+			'post_type'  => 'attachment',
+			'meta_key'   => '_wp_attachment_is_custom_background',
+			'meta_value' => $this->manager->get_stylesheet(),
+			'orderby'    => 'none',
+			'nopaging'   => true,
+		) );
+
+		?><div class="uploaded-target"></div><?php
+
+		if ( empty( $backgrounds ) )
+			return;
+
+		foreach ( (array) $backgrounds as $background )
+			$this->print_tab_image( esc_url_raw( $background->guid ) );
+	}
+
+	/**
+	 * @since 3.4.0
+	 * @uses WP_Customize_Image_Control::print_tab_image()
+	 */
+	public function tab_default_background() {
+		$this->print_tab_image( $this->setting->default );
 	}
 }
 
 class WP_Customize_Header_Image_Control extends WP_Customize_Image_Control {
 	public $type = 'header';
-	public $uploaded_headers;
-	public $default_headers;
 
 	public function __construct( $manager ) {
 		parent::__construct( $manager, 'header_image', array(
@@ -1042,11 +853,11 @@ class WP_Customize_Header_Image_Control extends WP_Customize_Image_Control {
 			<p class="customizer-section-intro">
 				<?php
 				if ( $width && $height ) {
-					printf( __( 'While you can crop images to your liking after clicking <strong>Add new image</strong>, your theme recommends a header size of <strong>%s &times; %s</strong> pixels.' ), $width, $height );
+					printf( __( 'While you can crop images to your liking after clicking <strong>Add new</strong>, your theme recommends a header size of <strong>%s &times; %s</strong> pixels.' ), $width, $height );
 				} elseif ( $width ) {
-					printf( __( 'While you can crop images to your liking after clicking <strong>Add new image</strong>, your theme recommends a header width of <strong>%s</strong> pixels.' ), $width );
+					printf( __( 'While you can crop images to your liking after clicking <strong>Add new</strong>, your theme recommends a header width of <strong>%s</strong> pixels.' ), $width );
 				} else {
-					printf( __( 'While you can crop images to your liking after clicking <strong>Add new image</strong>, your theme recommends a header height of <strong>%s</strong> pixels.' ), $height );
+					printf( __( 'While you can crop images to your liking after clicking <strong>Add new</strong>, your theme recommends a header height of <strong>%s</strong> pixels.' ), $height );
 				}
 				?>
 			</p>
@@ -1088,7 +899,6 @@ class WP_Customize_Header_Image_Control extends WP_Customize_Image_Control {
 /**
  * Widget Area Customize Control Class
  *
- * @since 3.9.0
  */
 class WP_Widget_Area_Customize_Control extends WP_Customize_Control {
 	public $type = 'sidebar_widgets';
@@ -1114,13 +924,10 @@ class WP_Widget_Area_Customize_Control extends WP_Customize_Control {
 		</span>
 		<?php
 	}
-
 }
 
 /**
  * Widget Form Customize Control Class
- *
- * @since 3.9.0
  */
 class WP_Widget_Form_Customize_Control extends WP_Customize_Control {
 	public $type = 'widget_form';
@@ -1156,18 +963,6 @@ class WP_Widget_Form_Customize_Control extends WP_Customize_Control {
 
 		$args = wp_list_widget_controls_dynamic_sidebar( array( 0 => $args, 1 => $widget['params'][0] ) );
 		echo $this->manager->widgets->get_widget_control( $args );
-	}
-
-	/**
-	 * Whether the current widget is rendered on the page.
-	 *
-	 * @since 4.0.0
-	 * @access public
-	 *
-	 * @return bool Whether the widget is rendered.
-	 */
-	function active_callback() {
-		return $this->manager->widgets->is_widget_rendered( $this->widget_id );
 	}
 }
 

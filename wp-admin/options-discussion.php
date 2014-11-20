@@ -215,7 +215,7 @@ endforeach;
 
 <?php
 $avatar_defaults = array(
-	'mystery' => __('Mystery Person'),
+	'mystery' => __('Mystery Man'),
 	'blank' => __('Blank'),
 	'gravatar_default' => __('Gravatar Logo'),
 	'identicon' => __('Identicon (Generated)'),
