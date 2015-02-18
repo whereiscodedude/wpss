@@ -55,6 +55,14 @@ class WP_Customize_Setting {
 	protected $id_data = array();
 
 	/**
+	 * Cached and sanitized $_POST value for the setting.
+	 *
+	 * @access private
+	 * @var mixed
+	 */
+	private $_post_value;
+
+	/**
 	 * Constructor.
 	 *
 	 * Any supplied $args override class property defaults.
@@ -65,6 +73,7 @@ class WP_Customize_Setting {
 	 * @param string               $id      An specific ID of the setting. Can be a
 	 *                                      theme mod or option name.
 	 * @param array                $args    Setting arguments.
+	 * @return WP_Customize_Setting $setting
 	 */
 	public function __construct( $manager, $id, $args = array() ) {
 		$keys = array_keys( get_object_vars( $this ) );
@@ -90,6 +99,8 @@ class WP_Customize_Setting {
 
 		if ( $this->sanitize_js_callback )
 			add_filter( "customize_sanitize_js_{$this->id}", $this->sanitize_js_callback, 10, 2 );
+
+		return $this;
 	}
 
 	protected $_original_value;
@@ -155,7 +166,7 @@ class WP_Customize_Setting {
 	 */
 	public function _preview_filter( $original ) {
 		$undefined = new stdClass(); // symbol hack
-		$post_value = $this->post_value( $undefined );
+		$post_value = $this->manager->post_value( $this, $undefined );
 		if ( $undefined === $post_value ) {
 			$value = $this->_original_value;
 		} else {
@@ -173,7 +184,7 @@ class WP_Customize_Setting {
 	 *
 	 * @return false|null False if cap check fails or value isn't set.
 	 */
-	final public function save() {
+	public final function save() {
 		$value = $this->post_value();
 
 		if ( ! $this->check_capabilities() || ! isset( $value ) )
@@ -202,8 +213,18 @@ class WP_Customize_Setting {
 	 * @param mixed $default A default value which is used as a fallback. Default is null.
 	 * @return mixed The default value on failure, otherwise the sanitized value.
 	 */
-	final public function post_value( $default = null ) {
-		return $this->manager->post_value( $this, $default );
+	public final function post_value( $default = null ) {
+		// Check for a cached value
+		if ( isset( $this->_post_value ) )
+			return $this->_post_value;
+
+		// Call the manager for the post value
+		$result = $this->manager->post_value( $this );
+
+		if ( isset( $result ) )
+			return $this->_post_value = $result;
+		else
+			return $default;
 	}
 
 	/**
@@ -378,7 +399,7 @@ class WP_Customize_Setting {
 	 *
 	 * @return bool False if theme doesn't support the setting or user can't change setting, otherwise true.
 	 */
-	final public function check_capabilities() {
+	public final function check_capabilities() {
 		if ( $this->capability && ! call_user_func_array( 'current_user_can', (array) $this->capability ) )
 			return false;
 

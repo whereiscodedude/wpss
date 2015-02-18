@@ -207,18 +207,8 @@ window.wp = window.wp || {};
 						iframeDoc.close();
 
 						resize = function() {
-							var $iframe, iframeDocHeight;
-
 							// Make sure the iframe still exists.
-							if ( iframe.contentWindow ) {
-								$iframe = $( iframe );
-								iframeDocHeight = $( iframeDoc.body ).height();
-
-								if ( $iframe.height() !== iframeDocHeight ) {
-									$iframe.height( iframeDocHeight );
-									editor.nodeChanged();
-								}
-							}
+							iframe.contentWindow && $( iframe ).height( $( iframeDoc.body ).height() );
 						};
 
 						if ( MutationObserver ) {
@@ -568,9 +558,10 @@ window.wp = window.wp || {};
 			frame = gallery.edit( data );
 
 			frame.state('gallery-edit').on( 'update', function( selection ) {
-				var shortcode = gallery.shortcode( selection ).string();
+				var shortcode = gallery.shortcode( selection ).string(), force;
 				$( node ).attr( 'data-wpview-text', window.encodeURIComponent( shortcode ) );
-				wp.mce.views.refreshView( self, shortcode, true );
+				force = ( data !== shortcode );
+				wp.mce.views.refreshView( self, shortcode, force );
 			});
 
 			frame.on( 'close', function() {
