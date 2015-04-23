@@ -10,10 +10,9 @@
  * Retrieve Bookmark data
  *
  * @since 2.1.0
+ * @uses $wpdb Database Object
  *
- * @global wpdb $wpdb WordPress database abstraction object.
- *
- * @param int|stdClass $bookmark
+ * @param mixed $bookmark
  * @param string $output Optional. Either OBJECT, ARRAY_N, or ARRAY_A constant
  * @param string $filter Optional, default is 'raw'.
  * @return array|object Type returned depends on $output value.
@@ -61,6 +60,8 @@ function get_bookmark($bookmark, $output = OBJECT, $filter = 'raw') {
  * Retrieve single bookmark data item or field.
  *
  * @since 2.3.0
+ * @uses get_bookmark() Gets bookmark object using $bookmark as ID
+ * @uses sanitize_bookmark_field() Sanitizes Bookmark field based on $context.
  *
  * @param string $field The name of the data field to return
  * @param int $bookmark The bookmark ID to get field
@@ -92,7 +93,7 @@ function get_bookmark_field( $field, $bookmark, $context = 'display' ) {
  *
  * @since 2.1.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb WordPress database access abstraction object.
  *
  * @param string|array $args {
  *     Optional. String or array of arguments to retrieve bookmarks.
@@ -249,7 +250,7 @@ function get_bookmarks( $args = '' ) {
 			break;
 		default:
 			$orderparams = array();
-			$keys = array( 'link_id', 'link_name', 'link_url', 'link_visible', 'link_rating', 'link_owner', 'link_updated', 'link_notes', 'link_description' );
+			$keys = array( 'link_id', 'link_name', 'link_url', 'link_visible', 'link_rating', 'link_owner', 'link_updated', 'link_notes' );
 			foreach ( explode( ',', $orderby ) as $ordparam ) {
 				$ordparam = trim( $ordparam );
 
@@ -386,18 +387,17 @@ function sanitize_bookmark_field($field, $value, $bookmark_id, $context) {
 		} else {
 			$value = esc_attr($value);
 		}
-	} elseif ( 'db' == $context ) {
+	} else if ( 'db' == $context ) {
 		/** This filter is documented in wp-includes/post.php */
 		$value = apply_filters( "pre_$field", $value );
 	} else {
 		/** This filter is documented in wp-includes/post.php */
 		$value = apply_filters( $field, $value, $bookmark_id, $context );
 
-		if ( 'attribute' == $context ) {
-			$value = esc_attr( $value );
-		} elseif ( 'js' == $context ) {
-			$value = esc_js( $value );
-		}
+		if ( 'attribute' == $context )
+			$value = esc_attr($value);
+		else if ( 'js' == $context )
+			$value = esc_js($value);
 	}
 
 	return $value;
@@ -407,6 +407,7 @@ function sanitize_bookmark_field($field, $value, $bookmark_id, $context) {
  * Deletes bookmark cache
  *
  * @since 2.7.0
+ * @uses wp_cache_delete() Deletes the contents of 'get_bookmarks'
  */
 function clean_bookmark_cache( $bookmark_id ) {
 	wp_cache_delete( $bookmark_id, 'bookmark' );
