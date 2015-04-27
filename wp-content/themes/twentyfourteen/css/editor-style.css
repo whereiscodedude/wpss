@@ -17,7 +17,6 @@ Description: Used to style the TinyMCE editor.
  * 8.0 - Galleries
  * 9.0 - Audio/Video
  * 10.0 - RTL
- * 11.0 - Media Queries
  * ----------------------------------------------------------------------------
  */
 
@@ -337,8 +336,7 @@ blockquote.alignright p {
  * ----------------------------------------------------------------------------
  */
 
-.mceItemTable,
-.mce-item-table {
+.mceItemTable {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-width: 1px 0 0 1px;
 	border-collapse: separate;
@@ -350,9 +348,7 @@ blockquote.alignright p {
 }
 
 .mceItemTable th,
-.mceItemTable caption,
-.mce-item-table th,
-.mce-item-table caption {
+.mceItemTable caption {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-width: 0 1px 1px 0;
 	font-weight: 700;
@@ -362,8 +358,7 @@ blockquote.alignright p {
 	vertical-align: baseline;
 }
 
-.mceItemTable td,
-.mce-item-table td {
+.mceItemTable td {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-width: 0 1px 1px 0;
 	font-family: Lato, sans-serif;
@@ -719,19 +714,4 @@ html .mceContentBody.rtl {
 
 .rtl td {
 	text-align: right;
-}
-
-
-/**
- * 11.0 Media Queries
- */
-
-@media screen and (max-width: 494px) {
-	body, img, .wp-caption {
-		max-width: 100%;
-	}
-
-	img, .wp-caption {
-		width: auto !important;
-	}
 }
