@@ -527,8 +527,8 @@ function upgrade_all() {
 	if ( $wp_current_db_version < 31351 )
 		upgrade_420();
 
-	if ( $wp_current_db_version < 32308 )
-		upgrade_430();
+	if ( $wp_current_db_version < 31533 )
+		upgrade_421();
 
 	maybe_disable_link_manager();
 
@@ -1439,14 +1439,14 @@ function upgrade_420() {
 }
 
 /**
- * Execute changes made in WordPress 4.3.0.
+ * Execute changes made in WordPress 4.2.1.
  *
- * @since 4.3.0
+ * @since 4.2.1
  */
-function upgrade_430() {
+function upgrade_421() {
 	global $wp_current_db_version, $wpdb;
 
-	if ( $wp_current_db_version < 32308 ) {
+	if ( $wp_current_db_version < 31533 ) {
 		$content_length = $wpdb->get_col_length( $wpdb->comments, 'comment_content' );
 		if ( ! $content_length ) {
 			$content_length = 65535;
