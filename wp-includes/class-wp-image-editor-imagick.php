@@ -15,10 +15,8 @@
  * @uses WP_Image_Editor Extends class
  */
 class WP_Image_Editor_Imagick extends WP_Image_Editor {
-	/**
-	 * @var Imagick
-	 */
-	protected $image; // Imagick Object
+
+	protected $image = null; // Imagick Object
 
 	public function __destruct() {
 		if ( $this->image instanceof Imagick ) {
@@ -142,11 +140,10 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 		}
 
 		$updated_size = $this->update_size();
-		if ( is_wp_error( $updated_size ) ) {
-			return $updated_size;
-		}
+		if ( is_wp_error( $updated_size ) )
+				return $updated_size;
 
-		return $this->set_quality();
+		return true;
 	}
 
 	/**
@@ -190,8 +187,6 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 	 *
 	 * @param int $width
 	 * @param int $height
-	 *
-	 * @return true|WP_Error
 	 */
 	protected function update_size( $width = null, $height = null ) {
 		$size = null;
@@ -301,9 +296,8 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 			}
 
 			$resize_result = $this->resize( $size_data['width'], $size_data['height'], $size_data['crop'] );
-			$duplicate = ( ( $orig_size['width'] == $size_data['width'] ) && ( $orig_size['height'] == $size_data['height'] ) );
 
-			if ( ! is_wp_error( $resize_result ) && ! $duplicate ) {
+			if( ! is_wp_error( $resize_result ) ) {
 				$resized = $this->_save( $this->image );
 
 				$this->image->clear();
@@ -330,6 +324,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 	 * @since 3.5.0
 	 * @access public
 	 *
+	 * @param string|int $src The source file or Attachment ID.
 	 * @param int $src_x The start x position to crop from.
 	 * @param int $src_y The start y position to crop from.
 	 * @param int $src_w The width to crop.

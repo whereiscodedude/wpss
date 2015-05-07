@@ -9,15 +9,13 @@
 /** Load WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
-global $post_type, $post_type_object, $post;
-
-if ( ! isset( $_GET['post_type'] ) ) {
+if ( !isset($_GET['post_type']) )
 	$post_type = 'post';
-} elseif ( in_array( $_GET['post_type'], get_post_types( array('show_ui' => true ) ) ) ) {
+elseif ( in_array( $_GET['post_type'], get_post_types( array('show_ui' => true ) ) ) )
 	$post_type = $_GET['post_type'];
-} else {
+else
 	wp_die( __('Invalid post type') );
-}
+
 $post_type_object = get_post_type_object( $post_type );
 
 if ( 'post' == $post_type ) {
@@ -50,7 +48,7 @@ $title = $post_type_object->labels->add_new_item;
 $editing = true;
 
 if ( ! current_user_can( $post_type_object->cap->edit_posts ) || ! current_user_can( $post_type_object->cap->create_posts ) )
-	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
+	wp_die( __( 'Cheatin&#8217; uh?' ) );
 
 // Schedule auto-draft cleanup
 if ( ! wp_next_scheduled( 'wp_scheduled_auto_draft_delete' ) )

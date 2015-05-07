@@ -1,4 +1,4 @@
-// Utility functions for parsing and handling shortcodes in JavaScript.
+// Utility functions for parsing and handling shortcodes in Javascript.
 
 // Ensure the global `wp` object exists.
 window.wp = window.wp || {};

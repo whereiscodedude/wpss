@@ -44,7 +44,6 @@ final class WP_Theme implements ArrayAccess {
 		'twentytwelve'   => 'Twenty Twelve',
 		'twentythirteen' => 'Twenty Thirteen',
 		'twentyfourteen' => 'Twenty Fourteen',
-		'twentyfifteen'  => 'Twenty Fifteen',
 	);
 
 	/**
@@ -274,7 +273,7 @@ final class WP_Theme implements ArrayAccess {
 		// Set the parent, if we're a child theme.
 		if ( $this->template != $this->stylesheet ) {
 			// If we are a parent, then there is a problem. Only two generations allowed! Cancel things out.
-			if ( $_child instanceof WP_Theme && $_child->template == $this->stylesheet ) {
+			if ( is_a( $_child, 'WP_Theme' ) && $_child->template == $this->stylesheet ) {
 				$_child->parent = null;
 				$_child->errors = new WP_Error( 'theme_parent_invalid', sprintf( __( 'The "%s" theme is not a valid parent theme.' ), $_child->template ) );
 				$_child->cache_add( 'theme', array( 'headers' => $_child->headers, 'errors' => $_child->errors, 'stylesheet' => $_child->stylesheet, 'template' => $_child->template ) );
@@ -636,9 +635,6 @@ final class WP_Theme implements ArrayAccess {
 			case 'Tags' :
 				$value = array_filter( array_map( 'trim', explode( ',', strip_tags( $value ) ) ) );
 				break;
-			case 'Version' :
-				$value = strip_tags( $value );
-				break;
 		}
 
 		return $value;
@@ -858,6 +854,8 @@ final class WP_Theme implements ArrayAccess {
 	 * for all other URLs returned by WP_Theme, so we pass it to the public function
 	 * get_theme_root_uri() and allow it to run the theme_root_uri filter.
 	 *
+	 * @uses get_theme_root_uri()
+	 *
 	 * @since 3.4.0
 	 * @access public
 	 *
@@ -987,19 +985,13 @@ final class WP_Theme implements ArrayAccess {
 	 * Scans a directory for files of a certain extension.
 	 *
 	 * @since 3.4.0
-	 * @static
 	 * @access private
 	 *
-	 * @param string            $path          Absolute path to search.
-	 * @param array|string|null $extensions    Optional. Array of extensions to find, string of a single extension,
-	 *                                         or null for all extensions. Default null.
-	 * @param int               $depth         Optional. How many levels deep to search for files. Accepts 0, 1+, or
-	 *                                         -1 (infinite depth). Default 0.
-	 * @param string            $relative_path Optional. The basename of the absolute path. Used to control the
-	 *                                         returned path for the found files, particularly when this function
-	 *                                         recurses to lower depths. Default empty.
-	 * @return array|false Array of files, keyed by the path to the file relative to the `$path` directory prepended
-	 *                     with `$relative_path`, with the values being absolute paths. False otherwise.
+	 * @param string $path Absolute path to search.
+	 * @param mixed  Array of extensions to find, string of a single extension, or null for all extensions.
+	 * @param int $depth How deep to search for files. Optional, defaults to a flat scan (0 depth). -1 depth is infinite.
+	 * @param string $relative_path The basename of the absolute path. Used to control the returned path
+	 * 	for the found files, particularly when this function recurses to lower depths.
 	 */
 	private static function scandir( $path, $extensions = null, $depth = 0, $relative_path = '' ) {
 		if ( ! is_dir( $path ) )
@@ -1042,8 +1034,8 @@ final class WP_Theme implements ArrayAccess {
 	 * @since 3.4.0
 	 * @access public
 	 *
-	 * @return bool True if the textdomain was successfully loaded or has already been loaded.
-	 * 	False if no textdomain was specified in the file headers, or if the domain could not be loaded.
+	 * @return True if the textdomain was successfully loaded or has already been loaded. False if
+	 * 	no textdomain was specified in the file headers, or if the domain could not be loaded.
 	 */
 	public function load_textdomain() {
 		if ( isset( $this->textdomain_loaded ) )

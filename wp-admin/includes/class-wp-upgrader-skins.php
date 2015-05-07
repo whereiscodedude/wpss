@@ -20,16 +20,12 @@ class WP_Upgrader_Skin {
 	public $done_header = false;
 	public $done_footer = false;
 	public $result = false;
-	public $options = array();
 
 	public function __construct($args = array()) {
 		$defaults = array( 'url' => '', 'nonce' => '', 'title' => '', 'context' => false );
 		$this->options = wp_parse_args($args, $defaults);
 	}
 
-	/**
-	 * @param WP_Upgrader $upgrader
-	 */
 	public function set_upgrader(&$upgrader) {
 		if ( is_object($upgrader) )
 			$this->upgrader =& $upgrader;
@@ -43,18 +39,12 @@ class WP_Upgrader_Skin {
 		$this->result = $result;
 	}
 
-	public function request_filesystem_credentials( $error = false, $context = false, $allow_relaxed_file_ownership = false ) {
+	public function request_filesystem_credentials($error = false) {
 		$url = $this->options['url'];
-		if ( ! $context ) {
-			$context = $this->options['context'];
-		}
-		if ( !empty($this->options['nonce']) ) {
+		$context = $this->options['context'];
+		if ( !empty($this->options['nonce']) )
 			$url = wp_nonce_url($url, $this->options['nonce']);
-		}
-
-		$extra_fields = array();
-
-		return request_filesystem_credentials( $url, '', $error, $context, $extra_fields, $allow_relaxed_file_ownership );
+		return request_filesystem_credentials($url, '', $error, $context); //Possible to bring inline, Leaving as is for now.
 	}
 
 	public function header() {
@@ -137,9 +127,6 @@ class WP_Upgrader_Skin {
 				</script>';
 		}
 	}
-
-	public function bulk_header() {}
-	public function bulk_footer() {}
 }
 
 /**
@@ -205,9 +192,6 @@ class Plugin_Upgrader_Skin extends WP_Upgrader_Skin {
  */
 class Bulk_Upgrader_Skin extends WP_Upgrader_Skin {
 	public $in_loop = false;
-	/**
-	 * @var string|false
-	 */
 	public $error = false;
 
 	public function __construct($args = array()) {
@@ -221,13 +205,10 @@ class Bulk_Upgrader_Skin extends WP_Upgrader_Skin {
 		$this->upgrader->strings['skin_upgrade_start'] = __('The update process is starting. This process may take a while on some hosts, so please be patient.');
 		$this->upgrader->strings['skin_update_failed_error'] = __('An error occurred while updating %1$s: <strong>%2$s</strong>');
 		$this->upgrader->strings['skin_update_failed'] = __('The update of %1$s failed.');
-		$this->upgrader->strings['skin_update_successful'] = __( '%1$s updated successfully.' ) . ' <a onclick="%2$s" href="#" class="hide-if-no-js"><span>' . __( 'Show Details' ) . '</span><span class="hidden">' . __( 'Hide Details' ) . '</span></a>';
+		$this->upgrader->strings['skin_update_successful'] = __('%1$s updated successfully.').' <a onclick="%2$s" href="#" class="hide-if-no-js"><span>'.__('Show Details').'</span><span class="hidden">'.__('Hide Details').'</span>.</a>';
 		$this->upgrader->strings['skin_upgrade_end'] = __('All updates have been completed.');
 	}
 
-	/**
-	 * @param string $string
-	 */
 	public function feedback($string) {
 		if ( isset( $this->upgrader->strings[$string] ) )
 			$string = $this->upgrader->strings[$string];
@@ -323,6 +304,10 @@ class Bulk_Upgrader_Skin extends WP_Upgrader_Skin {
 class Bulk_Plugin_Upgrader_Skin extends Bulk_Upgrader_Skin {
 	public $plugin_info = array(); // Plugin_Upgrader::bulk() will fill this in.
 
+	public function __construct($args = array()) {
+		parent::__construct($args);
+	}
+
 	public function add_strings() {
 		parent::add_strings();
 		$this->upgrader->strings['skin_before_update_header'] = __('Updating Plugin %1$s (%2$d/%3$d)');
@@ -362,6 +347,10 @@ class Bulk_Plugin_Upgrader_Skin extends Bulk_Upgrader_Skin {
 
 class Bulk_Theme_Upgrader_Skin extends Bulk_Upgrader_Skin {
 	public $theme_info = array(); // Theme_Upgrader::bulk() will fill this in.
+
+	public function __construct($args = array()) {
+		parent::__construct($args);
+	}
 
 	public function add_strings() {
 		parent::add_strings();
@@ -445,13 +434,12 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 			unset( $install_actions['activate_plugin'] );
 		}
 
-		if ( 'import' == $from ) {
+		if ( 'import' == $from )
 			$install_actions['importers_page'] = '<a href="' . admin_url('import.php') . '" title="' . esc_attr__('Return to Importers') . '" target="_parent">' . __('Return to Importers') . '</a>';
-		} elseif ( $this->type == 'web' ) {
+		else if ( $this->type == 'web' )
 			$install_actions['plugins_page'] = '<a href="' . self_admin_url('plugin-install.php') . '" title="' . esc_attr__('Return to Plugin Installer') . '" target="_parent">' . __('Return to Plugin Installer') . '</a>';
-		} else {
+		else
 			$install_actions['plugins_page'] = '<a href="' . self_admin_url('plugins.php') . '" title="' . esc_attr__('Return to Plugins page') . '" target="_parent">' . __('Return to Plugins page') . '</a>';
-		}
 
 		if ( ! $this->result || is_wp_error($this->result) ) {
 			unset( $install_actions['activate_plugin'], $install_actions['network_activate'] );
@@ -710,14 +698,13 @@ class Language_Pack_Upgrader_Skin extends WP_Upgrader_Skin {
 class Automatic_Upgrader_Skin extends WP_Upgrader_Skin {
 	protected $messages = array();
 
-	public function request_filesystem_credentials( $error = false, $context = '', $allow_relaxed_file_ownership = false ) {
-		if ( $context ) {
+	public function request_filesystem_credentials( $error = false, $context = '' ) {
+		if ( $context )
 			$this->options['context'] = $context;
-		}
 		// TODO: fix up request_filesystem_credentials(), or split it, to allow us to request a no-output version
 		// This will output a credentials form in event of failure, We don't want that, so just hide with a buffer
 		ob_start();
-		$result = parent::request_filesystem_credentials( $error, $context, $allow_relaxed_file_ownership );
+		$result = parent::request_filesystem_credentials( $error );
 		ob_end_clean();
 		return $result;
 	}
@@ -726,17 +713,14 @@ class Automatic_Upgrader_Skin extends WP_Upgrader_Skin {
 		return $this->messages;
 	}
 
-	/**
-	 * @param string|array|WP_Error $data
-	 */
 	public function feedback( $data ) {
-		if ( is_wp_error( $data ) ) {
+		if ( is_wp_error( $data ) )
 			$string = $data->get_error_message();
-		} elseif ( is_array( $data ) ) {
+		else if ( is_array( $data ) )
 			return;
-		} else {
+		else
 			$string = $data;
-		}
+
 		if ( ! empty( $this->upgrader->strings[ $string ] ) )
 			$string = $this->upgrader->strings[ $string ];
 
