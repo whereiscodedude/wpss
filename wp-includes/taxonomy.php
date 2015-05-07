@@ -2,10 +2,9 @@
 /**
  * Taxonomy API
  *
- * @since 2.3.0
- *
  * @package WordPress
  * @subpackage Taxonomy
+ * @since 2.3.0
  */
 
 //
@@ -16,12 +15,8 @@
  * Creates the initial taxonomies.
  *
  * This function fires twice: in wp-settings.php before plugins are loaded (for
- * backwards compatibility reasons), and again on the {@see 'init'} action. We must
- * avoid registering rewrite rules before the {@see 'init'} action.
- *
- * @since 2.8.0
- *
- * @global WP_Rewrite $wp_rewrite The WordPress rewrite class.
+ * backwards compatibility reasons), and again on the 'init' action. We must avoid
+ * registering rewrite rules before the 'init' action.
  */
 function create_initial_taxonomies() {
 	global $wp_rewrite;
@@ -134,20 +129,16 @@ function create_initial_taxonomies() {
 }
 
 /**
- * Retrieves a list of registered taxonomy names or objects.
+ * Get a list of registered taxonomy objects.
  *
  * @since 3.0.0
+ * @uses $wp_taxonomies
  *
- * @global array $wp_taxonomies The registered taxonomies.
- *
- * @param array  $args     Optional. An array of `key => value` arguments to match against the taxonomy objects.
- *                         Default empty array.
- * @param string $output   Optional. The type of output to return in the array. Accepts either taxonomy 'names'
- *                         or 'objects'. Default 'names'.
- * @param string $operator Optional. The logical operation to perform. Accepts 'and' or 'or'. 'or' means only
- *                         one element from the array needs to match; 'and' means all elements must match.
- *                         Default 'and'.
- * @return array A list of taxonomy names or objects.
+ * @param array $args An array of key => value arguments to match against the taxonomy objects.
+ * @param string $output The type of output to return, either taxonomy 'names' or 'objects'. 'names' is the default.
+ * @param string $operator The logical operation to perform. 'or' means only one element
+ *  from the array needs to match; 'and' means all elements must match. The default is 'and'.
+ * @return array A list of taxonomy names or objects
  */
 function get_taxonomies( $args = array(), $output = 'names', $operator = 'and' ) {
 	global $wp_taxonomies;
@@ -168,7 +159,7 @@ function get_taxonomies( $args = array(), $output = 'names', $operator = 'and' )
  *
  * @since 2.3.0
  *
- * @global array $wp_taxonomies The registered taxonomies.
+ * @uses $wp_taxonomies
  *
  * @param array|string|object $object Name of the type of taxonomy object, or an object (row from posts)
  * @param string $output The type of output to return, either taxonomy 'names' or 'objects'. 'names' is the default.
@@ -206,7 +197,7 @@ function get_object_taxonomies($object, $output = 'names') {
  *
  * @since 2.3.0
  *
- * @global array $wp_taxonomies The registered taxonomies.
+ * @uses $wp_taxonomies
  *
  * @param string $taxonomy Name of taxonomy object to return
  * @return object|bool The Taxonomy Object or false if $taxonomy doesn't exist
@@ -227,7 +218,7 @@ function get_taxonomy( $taxonomy ) {
  *
  * @since 3.0.0
  *
- * @global array $wp_taxonomies The registered taxonomies.
+ * @uses $wp_taxonomies
  *
  * @param string $taxonomy Name of taxonomy object
  * @return bool Whether the taxonomy exists.
@@ -473,7 +464,6 @@ function register_taxonomy( $taxonomy, $object_type, $args = array() ) {
  * Above, the first default value is for non-hierarchical taxonomies (like tags) and the second one is for hierarchical taxonomies (like categories).
  *
  * @since 3.0.0
- *
  * @param object $tax Taxonomy object
  * @return object object with all the labels as member variables
  */
@@ -514,8 +504,7 @@ function get_taxonomy_labels( $tax ) {
  * Add an already registered taxonomy to an object type.
  *
  * @since 3.0.0
- *
- * @global array $wp_taxonomies The registered taxonomies.
+ * @uses $wp_taxonomies Modifies taxonomy object
  *
  * @param string $taxonomy Name of taxonomy object
  * @param string $object_type Name of the object type
@@ -540,8 +529,6 @@ function register_taxonomy_for_object_type( $taxonomy, $object_type) {
  * Remove an already registered taxonomy from an object type.
  *
  * @since 3.7.0
- *
- * @global array $wp_taxonomies The registered taxonomies.
  *
  * @param string $taxonomy    Name of taxonomy object.
  * @param string $object_type Name of the object type.
@@ -1014,8 +1001,6 @@ class WP_Tax_Query {
 	 * @since 4.1.0
 	 * @access public
 	 *
-	 * @global wpdb $wpdb The WordPress database abstraction object.
-	 *
 	 * @param array $clause       Query clause, passed by reference
 	 * @param array $parent_query Parent query array.
 	 * @return array {
@@ -1223,8 +1208,6 @@ class WP_Tax_Query {
 	 * Transforms a single query, from one field to another.
 	 *
 	 * @since 3.2.0
-	 *
-	 * @global wpdb $wpdb The WordPress database abstraction object.
 	 *
 	 * @param array  &$query          The single query.
 	 * @param string $resulting_field The resulting field. Accepts 'slug', 'name', 'term_taxonomy_id',
@@ -1477,6 +1460,8 @@ function get_term_by($field, $value, $taxonomy, $output = OBJECT, $filter = 'raw
  * Will return an empty array if $term does not exist in $taxonomy.
  *
  * @since 2.3.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
  *
  * @param string $term_id ID of Term to get children
  * @param string $taxonomy Taxonomy Name
@@ -1857,12 +1842,13 @@ function get_terms( $taxonomies, $args = '' ) {
 	}
 
 	if ( ! empty( $args['name'] ) ) {
-		$names = (array) $args['name'];
-		foreach ( $names as &$_name ) {
-			$_name = sanitize_term_field( 'name', $_name, 0, reset( $taxonomies ), 'db' );
+		if ( is_array( $args['name'] ) ) {
+			$name = array_map( 'sanitize_text_field', $args['name'] );
+			$where .= " AND t.name IN ('" . implode( "', '", array_map( 'esc_sql', $name ) ) . "')";
+		} else {
+			$name = sanitize_text_field( $args['name'] );
+			$where .= $wpdb->prepare( " AND t.name = %s", $name );
 		}
-
-		$where .= " AND t.name IN ('" . implode( "', '", array_map( 'esc_sql', $names ) ) . "')";
 	}
 
 	if ( ! empty( $args['slug'] ) ) {
@@ -2942,10 +2928,10 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 				}
 
 				if ( $existing_term ) {
-					return new WP_Error( 'term_exists', __( 'A term with the name provided already exists with this parent.' ), $existing_term->term_id );
+					return new WP_Error( 'term_exists', __( 'A term with the name already exists with this parent.' ), $existing_term->term_id );
 				}
 			} else {
-				return new WP_Error( 'term_exists', __( 'A term with the name provided already exists in this taxonomy.' ), $name_match->term_id );
+				return new WP_Error( 'term_exists', __( 'A term with the name already exists in this taxonomy.' ), $name_match->term_id );
 			}
 		}
 	}
@@ -3065,8 +3051,6 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
  * exists under.
  *
  * @since 2.3.0
- *
- * @global wpdb $wpdb The WordPress database abstraction object.
  *
  * @param int              $object_id The object to relate to.
  * @param array|int|string $terms     A single term slug, single term id, or array of either term slugs or ids.
@@ -4671,7 +4655,7 @@ function get_ancestors( $object_id = 0, $object_type = '', $resource_type = '' )
 	 * Filter a given object's ancestors.
 	 *
 	 * @since 3.1.0
-	 * @since 4.1.1 Introduced the `$resource_type` parameter.
+	 * @since 4.1.0 Introduced the `$resource_type` parameter.
 	 *
 	 * @param array  $ancestors     An array of object ancestors.
 	 * @param int    $object_id     Object ID.
