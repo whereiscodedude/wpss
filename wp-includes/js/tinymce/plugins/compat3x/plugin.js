@@ -22,8 +22,7 @@
 (function(tinymce) {
 	var reported;
 
-	function noop() {
-	}
+	function noop() {}
 
 	function log(apiCall) {
 		if (!reported && window && window.console) {
@@ -171,9 +170,7 @@
 			onAdd: new Dispatcher(),
 			onPostRender: new Dispatcher(),
 
-			add: function(obj) {
-				return obj;
-			},
+			add: function(obj) { return obj; },
 			createButton: cmNoop,
 			createColorSplitButton: cmNoop,
 			createControl: cmNoop,
