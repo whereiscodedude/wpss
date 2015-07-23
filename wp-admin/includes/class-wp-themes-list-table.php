@@ -29,18 +29,11 @@ class WP_Themes_List_Table extends WP_List_Table {
 		) );
 	}
 
-	/**
-	 *
-	 * @return bool
-	 */
 	public function ajax_user_can() {
 		// Do not check edit_theme_options here. AJAX calls for available themes require switch_themes.
 		return current_user_can( 'switch_themes' );
 	}
 
-	/**
-	 * @access public
-	 */
 	public function prepare_items() {
 		$themes = wp_get_themes( array( 'allowed' => true ) );
 
@@ -74,9 +67,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 		) );
 	}
 
-	/**
-	 * @access public
-	 */
 	public function no_items() {
 		if ( $this->search_terms || $this->features ) {
 			_e( 'No items found.' );
@@ -105,9 +95,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 		printf( __( 'Only the current theme is available to you. Contact the %s administrator for information about accessing additional themes.' ), get_site_option( 'site_name' ) );
 	}
 
-	/**
-	 * @param string $which
-	 */
 	public function tablenav( $which = 'top' ) {
 		if ( $this->get_pagination_arg( 'total_pages' ) <= 1 )
 			return;
@@ -120,9 +107,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 		<?php
 	}
 
-	/**
-	 * @access public
-	 */
 	public function display() {
 		wp_nonce_field( "fetch-list-" . get_class( $this ), '_ajax_fetch_list_nonce' );
 ?>
@@ -136,17 +120,10 @@ class WP_Themes_List_Table extends WP_List_Table {
 <?php
 	}
 
-	/**
-	 *
-	 * @return array
-	 */
 	public function get_columns() {
 		return array();
 	}
 
-	/**
-	 * @access public
-	 */
 	public function display_rows_or_placeholder() {
 		if ( $this->has_items() ) {
 			$this->display_rows();
@@ -157,9 +134,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 		}
 	}
 
-	/**
-	 * @access public
-	 */
 	public function display_rows() {
 		$themes = $this->items;
 
@@ -231,11 +205,11 @@ class WP_Themes_List_Table extends WP_List_Table {
 			</div>
 
 			<div class="themedetaildiv hide-if-js">
-				<p><strong><?php _e('Version:'); ?></strong> <?php echo $version; ?></p>
+				<p><strong><?php _e('Version: '); ?></strong><?php echo $version; ?></p>
 				<p><?php echo $theme->display('Description'); ?></p>
 				<?php if ( $theme->parent() ) {
 					printf( ' <p class="howto">' . __( 'This <a href="%1$s">child theme</a> requires its parent theme, %2$s.' ) . '</p>',
-						__( 'https://codex.wordpress.org/Child_Themes' ),
+						__( 'http://codex.wordpress.org/Child_Themes' ),
 						$theme->parent()->display( 'Name' ) );
 				} ?>
 			</div>
@@ -245,10 +219,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 		endforeach;
 	}
 
-	/**
-	 * @param WP_Theme $theme
-	 * @return bool
-	 */
 	public function search_theme( $theme ) {
 		// Search the features
 		foreach ( $this->features as $word ) {
@@ -286,7 +256,9 @@ class WP_Themes_List_Table extends WP_List_Table {
 	 * @since 3.4.0
 	 * @access public
 	 *
-	 * @param array $extra_args
+	 * @uses $this->features Array of all feature search terms.
+	 * @uses get_pagenum()
+	 * @uses _pagination_args['total_pages']
 	 */
 	public function _js_vars( $extra_args = array() ) {
 		$search_string = isset( $_REQUEST['s'] ) ? esc_attr( wp_unslash( $_REQUEST['s'] ) ) : '';
@@ -301,7 +273,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 		if ( is_array( $extra_args ) )
 			$args = array_merge( $args, $extra_args );
 
-		printf( "<script type='text/javascript'>var theme_list_args = %s;</script>\n", wp_json_encode( $args ) );
+		printf( "<script type='text/javascript'>var theme_list_args = %s;</script>\n", json_encode( $args ) );
 		parent::_js_vars();
 	}
 }
