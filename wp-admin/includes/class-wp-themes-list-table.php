@@ -29,18 +29,11 @@ class WP_Themes_List_Table extends WP_List_Table {
 		) );
 	}
 
-	/**
-	 *
-	 * @return bool
-	 */
 	public function ajax_user_can() {
 		// Do not check edit_theme_options here. AJAX calls for available themes require switch_themes.
 		return current_user_can( 'switch_themes' );
 	}
 
-	/**
-	 * @access public
-	 */
 	public function prepare_items() {
 		$themes = wp_get_themes( array( 'allowed' => true ) );
 
@@ -74,9 +67,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 		) );
 	}
 
-	/**
-	 * @access public
-	 */
 	public function no_items() {
 		if ( $this->search_terms || $this->features ) {
 			_e( 'No items found.' );
@@ -107,6 +97,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 
 	/**
 	 * @param string $which
+	 * @return null
 	 */
 	public function tablenav( $which = 'top' ) {
 		if ( $this->get_pagination_arg( 'total_pages' ) <= 1 )
@@ -120,9 +111,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 		<?php
 	}
 
-	/**
-	 * @access public
-	 */
 	public function display() {
 		wp_nonce_field( "fetch-list-" . get_class( $this ), '_ajax_fetch_list_nonce' );
 ?>
@@ -136,17 +124,10 @@ class WP_Themes_List_Table extends WP_List_Table {
 <?php
 	}
 
-	/**
-	 *
-	 * @return array
-	 */
 	public function get_columns() {
 		return array();
 	}
 
-	/**
-	 * @access public
-	 */
 	public function display_rows_or_placeholder() {
 		if ( $this->has_items() ) {
 			$this->display_rows();
@@ -157,9 +138,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 		}
 	}
 
-	/**
-	 * @access public
-	 */
 	public function display_rows() {
 		$themes = $this->items;
 
@@ -235,7 +213,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 				<p><?php echo $theme->display('Description'); ?></p>
 				<?php if ( $theme->parent() ) {
 					printf( ' <p class="howto">' . __( 'This <a href="%1$s">child theme</a> requires its parent theme, %2$s.' ) . '</p>',
-						__( 'https://codex.wordpress.org/Child_Themes' ),
+						__( 'http://codex.wordpress.org/Child_Themes' ),
 						$theme->parent()->display( 'Name' ) );
 				} ?>
 			</div>
