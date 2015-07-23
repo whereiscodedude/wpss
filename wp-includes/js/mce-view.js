@@ -145,26 +145,22 @@ window.wp = window.wp || {};
 		/**
 		 * Create a view instance.
 		 *
-		 * @param {String}  type    The view type.
-		 * @param {String}  text    The textual representation of the view.
-		 * @param {Object}  options Options.
-		 * @param {Boolean} force   Recreate the instance. Optional.
+		 * @param {String} type    The view type.
+		 * @param {String} text    The textual representation of the view.
+		 * @param {Object} options Options.
 		 *
 		 * @return {wp.mce.View} The view instance.
 		 */
-		createInstance: function( type, text, options, force ) {
+		createInstance: function( type, text, options ) {
 			var View = this.get( type ),
 				encodedText,
 				instance;
 
 			text = tinymce.DOM.decode( text );
+			instance = this.getInstance( text );
 
-			if ( ! force ) {
-				instance = this.getInstance( text );
-
-				if ( instance ) {
-					return instance;
-				}
+			if ( instance ) {
+				return instance;
 			}
 
 			encodedText = encodeURIComponent( text );
@@ -220,13 +216,12 @@ window.wp = window.wp || {};
 		 * @param {String}         text   The new text.
 		 * @param {tinymce.Editor} editor The TinyMCE editor instance the view node is in.
 		 * @param {HTMLElement}    node   The view node to update.
-		 * @param {Boolean}        force  Recreate the instance. Optional.
 		 */
-		update: function( text, editor, node, force ) {
+		update: function( text, editor, node ) {
 			var instance = this.getInstance( node );
 
 			if ( instance ) {
-				instance.update( text, editor, node, force );
+				instance.update( text, editor, node );
 			}
 		},
 
@@ -240,8 +235,8 @@ window.wp = window.wp || {};
 			var instance = this.getInstance( node );
 
 			if ( instance && instance.edit ) {
-				instance.edit( instance.text, function( text, force ) {
-					instance.update( text, editor, node, force );
+				instance.edit( instance.text, function( text ) {
+					instance.update( text, editor, node );
 				} );
 			}
 		},
@@ -307,8 +302,8 @@ window.wp = window.wp || {};
 		/**
 		 * Renders all view nodes tied to this view instance that are not yet rendered.
 		 *
-		 * @param {String}  content The content to render. Optional.
-		 * @param {Boolean} force   Rerender all view nodes tied to this view instance. Optional.
+		 * @param {String} content The content to render. Optional.
+		 * @param {Boolean} force Rerender all view nodes tied to this view instance.
 		 */
 		render: function( content, force ) {
 			if ( content != null ) {
@@ -506,17 +501,10 @@ window.wp = window.wp || {};
 					}
 				} );
 
-				if ( self.iframeHeight ) {
-					dom.add( contentNode, 'div', { style: {
-						width: '100%',
-						height: self.iframeHeight
-					} } );
-				}
-
 				// Seems the browsers need a bit of time to insert/set the view nodes,
 				// or the iframe will fail especially when switching Text => Visual.
 				setTimeout( function() {
-					var iframe, iframeDoc, observer, i, block;
+					var iframe, iframeDoc, observer, i;
 
 					contentNode.innerHTML = '';
 
@@ -530,8 +518,7 @@ window.wp = window.wp || {};
 						style: {
 							width: '100%',
 							display: 'block'
-						},
-						height: self.iframeHeight
+						}
 					} );
 
 					dom.add( contentNode, 'div', { 'class': 'wpview-overlay' } );
@@ -574,31 +561,18 @@ window.wp = window.wp || {};
 					iframeDoc.close();
 
 					function resize() {
-						var $iframe;
-
-						if ( block ) {
-							return;
-						}
+						var $iframe, iframeDocHeight;
 
 						// Make sure the iframe still exists.
 						if ( iframe.contentWindow ) {
 							$iframe = $( iframe );
-							self.iframeHeight = $( iframeDoc.body ).height();
+							iframeDocHeight = $( iframeDoc.body ).height();
 
-							if ( $iframe.height() !== self.iframeHeight ) {
-								$iframe.height( self.iframeHeight );
+							if ( $iframe.height() !== iframeDocHeight ) {
+								$iframe.height( iframeDocHeight );
 								editor.nodeChanged();
 							}
 						}
-					}
-
-					if ( self.iframeHeight ) {
-						block = true;
-
-						setTimeout( function() {
-							block = false;
-							resize();
-						}, 3000 );
 					}
 
 					$( iframe.contentWindow ).on( 'load', resize );
@@ -652,7 +626,7 @@ window.wp = window.wp || {};
 		 * Sets an error for all view nodes tied to this view instance.
 		 *
 		 * @param {String} message  The error message to set.
-		 * @param {String} dashicon A dashicon ID. Optional. {@link https://developer.wordpress.org/resource/dashicons/}
+		 * @param {String} dashicon A dashicon ID (optional). {@link https://developer.wordpress.org/resource/dashicons/}
 		 */
 		setError: function( message, dashicon ) {
 			this.setContent(
@@ -690,16 +664,15 @@ window.wp = window.wp || {};
 		 * @param {String}         text   The new text.
 		 * @param {tinymce.Editor} editor The TinyMCE editor instance the view node is in.
 		 * @param {HTMLElement}    node   The view node to update.
-		 * @param {Boolean}        force  Recreate the instance. Optional.
 		 */
-		update: function( text, editor, node, force ) {
+		update: function( text, editor, node ) {
 			_.find( views, function( view, type ) {
 				var match = view.prototype.match( text );
 
 				if ( match ) {
 					$( node ).data( 'rendered', false );
 					editor.dom.setAttrib( node, 'data-wpview-text', encodeURIComponent( text ) );
-					wp.mce.views.createInstance( type, text, match.options, force ).render();
+					wp.mce.views.createInstance( type, text, match.options ).render();
 					editor.focus();
 
 					return true;
@@ -735,15 +708,14 @@ window.wp = window.wp || {};
 		state: [],
 
 		edit: function( text, update ) {
-			var type = this.type,
-				media = wp.media[ type ],
+			var media = wp.media[ this.type ],
 				frame = media.edit( text );
 
 			this.pausePlayers && this.pausePlayers();
 
 			_.each( this.state, function( state ) {
 				frame.state( state ).on( 'update', function( selection ) {
-					update( media.shortcode( selection ).string(), type === 'gallery' );
+					update( media.shortcode( selection ).string() );
 				} );
 			} );
 

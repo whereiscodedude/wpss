@@ -49,10 +49,6 @@ if ( ! $id )
 	wp_die( __('Invalid site ID.') );
 
 $details = get_blog_details( $id );
-if ( ! $details ) {
-	wp_die( __( 'The requested site does not exist.' ) );
-}
-
 if ( ! can_edit_network( $details->site_id ) )
 	wp_die( __( 'You do not have permission to access this page.' ), 403 );
 
@@ -74,7 +70,7 @@ if ( $action ) {
 				$password = wp_generate_password( 12, false);
 				$user_id = wpmu_create_user( esc_html( strtolower( $user['username'] ) ), $password, esc_html( $user['email'] ) );
 
-				if ( false === $user_id ) {
+				if ( false == $user_id ) {
 		 			$update = 'err_new_dup';
 				} else {
 					wp_new_user_notification( $user_id, $password );
@@ -161,7 +157,9 @@ if ( isset( $_GET['action'] ) && 'update-site' == $_GET['action'] ) {
 
 add_screen_option( 'per_page' );
 
-$title = sprintf( __( 'Edit Site: %s' ), esc_html( $details->blogname ) );
+$site_url_no_http = preg_replace( '#^http(s)?://#', '', get_blogaddress_by_id( $id ) );
+$title_site_url_linked = sprintf( __( 'Edit Site: %s' ), '<a href="' . get_blogaddress_by_id( $id ) . '">' . $site_url_no_http . '</a>' );
+$title = sprintf( __( 'Edit Site: %s' ), $site_url_no_http );
 
 $parent_file = 'sites.php';
 $submenu_file = 'sites.php';
@@ -184,8 +182,7 @@ var current_site_id = <?php echo $id; ?>;
 
 
 <div class="wrap">
-<h1 id="edit-site"><?php echo $title; ?></h1>
-<p class="edit-site-actions"><a href="<?php echo esc_url( get_home_url( $id ) ); ?>">Visit</a> | <a href="<?php echo esc_url( get_admin_url( $id ) ); ?>">Dashboard</a></p>
+<h2 id="edit-site"><?php echo $title_site_url_linked ?></h2>
 <h3 class="nav-tab-wrapper">
 <?php
 $tabs = array(

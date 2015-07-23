@@ -202,17 +202,17 @@ include(ABSPATH . 'wp-admin/admin-header.php');
 <?php endif; ?>
 
 <div class="wrap" id="profile-page">
-<h1>
+<h2>
 <?php
 echo esc_html( $title );
 if ( ! IS_PROFILE_PAGE ) {
 	if ( current_user_can( 'create_users' ) ) { ?>
-		<a href="user-new.php" class="page-title-action"><?php echo esc_html_x( 'Add New', 'user' ); ?></a>
+		<a href="user-new.php" class="add-new-h2"><?php echo esc_html_x( 'Add New', 'user' ); ?></a>
 	<?php } elseif ( is_multisite() && current_user_can( 'promote_users' ) ) { ?>
-		<a href="user-new.php" class="page-title-action"><?php echo esc_html_x( 'Add Existing', 'user' ); ?></a>
+		<a href="user-new.php" class="add-new-h2"><?php echo esc_html_x( 'Add Existing', 'user' ); ?></a>
 	<?php }
 } ?>
-</h1>
+</h2>
 <form id="your-profile" action="<?php echo esc_url( self_admin_url( IS_PROFILE_PAGE ? 'profile.php' : 'user-edit.php' ) ); ?>" method="post" novalidate="novalidate"<?php
 	/**
 	 * Fires inside the your-profile form tag on the user editing screen.
@@ -402,12 +402,7 @@ if ( is_multisite() && is_network_admin() && ! IS_PROFILE_PAGE && current_user_c
 	$new_email = get_option( $current_user->ID . '_new_email' );
 	if ( $new_email && $new_email['newemail'] != $current_user->user_email && $profileuser->ID == $current_user->ID ) : ?>
 	<div class="updated inline">
-	<p><?php
-		printf(
-			__( 'There is a pending change of your e-mail to %1$s. <a href="%2$s">Cancel</a>' ),
-			'<code>' . $new_email['newemail'] . '</code>',
-			esc_url( self_admin_url( 'profile.php?dismiss=' . $current_user->ID . '_new_email' ) )
-	); ?></p>
+	<p><?php printf( __('There is a pending change of your e-mail to <code>%1$s</code>. <a href="%2$s">Cancel</a>'), $new_email['newemail'], esc_url( self_admin_url( 'profile.php?dismiss=' . $current_user->ID . '_new_email' ) ) ); ?></p>
 	</div>
 	<?php endif; ?>
 	</td>
@@ -458,42 +453,22 @@ if ( is_multisite() && is_network_admin() && ! IS_PROFILE_PAGE && current_user_c
 $show_password_fields = apply_filters( 'show_password_fields', true, $profileuser );
 if ( $show_password_fields ) :
 ?>
-</table>
-
-<h3><?php _e('Account Management'); ?></h3>
-<table class="form-table">
 <tr id="password" class="user-pass1-wrap">
 	<th><label for="pass1"><?php _e( 'New Password' ); ?></label></th>
 	<td>
 		<input class="hidden" value=" " /><!-- #24364 workaround -->
-		<button type="button" class="button button-secondary wp-generate-pw hide-if-no-js"><?php _e( 'Generate Password' ); ?></button>
-		<div class="wp-pwd hide-if-js">
-			<input type="password" name="pass1" id="pass1" class="regular-text" value="" autocomplete="off" data-pw="<?php echo esc_attr( wp_generate_password( 24 ) ); ?>" aria-describedby="pass-strength-result" />
-			<button type="button" class="button button-secondary wp-hide-pw hide-if-no-js" data-toggle="0" aria-label="<?php esc_attr_e( 'Hide password' ); ?>">
-				<span class="dashicons dashicons-visibility"></span>
-				<span class="text"><?php _e( 'Hide' ); ?></span>
-			</button>
-			<button type="button" class="button button-secondary wp-cancel-pw hide-if-no-js" data-toggle="0" aria-label="<?php esc_attr_e( 'Cancel password change' ); ?>">
-				<span class="text"><?php _e( 'Cancel' ); ?></span>
-			</button>
-			<div style="display:none" id="pass-strength-result" aria-live="polite"></div>
-		</div>
+		<input type="password" name="pass1" id="pass1" class="regular-text" size="16" value="" autocomplete="off" />
+		<p class="description"><?php _e( 'If you would like to change the password type a new one. Otherwise leave this blank.' ); ?></p>
 	</td>
 </tr>
-<tr class="user-pass2-wrap hide-if-js">
+<tr class="user-pass2-wrap">
 	<th scope="row"><label for="pass2"><?php _e( 'Repeat New Password' ); ?></label></th>
 	<td>
-	<input name="pass2" type="password" id="pass2" class="regular-text" value="" autocomplete="off" />
+	<input name="pass2" type="password" id="pass2" class="regular-text" size="16" value="" autocomplete="off" />
 	<p class="description"><?php _e( 'Type your new password again.' ); ?></p>
-	</td>
-</tr>
-<tr class="pw-weak">
-	<th><?php _e( 'Confirm Password' ); ?></th>
-	<td>
-		<label>
-			<input type="checkbox" name="pw_weak" class="pw-checkbox" id="pw-weak" />
-			<?php _e( 'Confirm use of weak password' ); ?>
-		</label>
+	<br />
+	<div id="pass-strength-result"><?php _e( 'Strength indicator' ); ?></div>
+	<p class="description indicator-hint"><?php echo wp_get_password_hint(); ?></p>
 	</td>
 </tr>
 <?php endif; ?>
@@ -501,9 +476,9 @@ if ( $show_password_fields ) :
 <?php
 if ( IS_PROFILE_PAGE && count( $sessions->get_all() ) === 1 ) : ?>
 	<tr class="user-sessions-wrap hide-if-no-js">
-		<th><?php _e( 'Sessions' ); ?></th>
+		<th>&nbsp;</th>
 		<td aria-live="assertive">
-			<div class="destroy-sessions"><button type="button" disabled class="button button-secondary"><?php _e( 'Log Out Everywhere Else' ); ?></button></div>
+			<div class="destroy-sessions"><button type="button" disabled class="button button-secondary"><?php _e( 'Log Out of All Other Sessions' ); ?></button></div>
 			<p class="description">
 				<?php _e( 'You are only logged in at this location.' ); ?>
 			</p>
@@ -511,23 +486,23 @@ if ( IS_PROFILE_PAGE && count( $sessions->get_all() ) === 1 ) : ?>
 	</tr>
 <?php elseif ( IS_PROFILE_PAGE && count( $sessions->get_all() ) > 1 ) : ?>
 	<tr class="user-sessions-wrap hide-if-no-js">
-		<th><?php _e( 'Sessions' ); ?></th>
+		<th>&nbsp;</th>
 		<td aria-live="assertive">
-			<div class="destroy-sessions"><button type="button" class="button button-secondary" id="destroy-sessions"><?php _e( 'Log Out Everywhere Else' ); ?></button></div>
+			<div class="destroy-sessions"><button type="button" class="button button-secondary" id="destroy-sessions"><?php _e( 'Log Out of All Other Sessions' ); ?></button></div>
 			<p class="description">
-				<?php _e( 'Did you lose your phone or leave your account logged in at a public computer? You can log out everywhere else, and stay logged in here.' ); ?>
+				<?php _e( 'Left your account logged in at a public computer? Lost your phone? This will log you out everywhere except your current browser.' ); ?>
 			</p>
 		</td>
 	</tr>
 <?php elseif ( ! IS_PROFILE_PAGE && $sessions->get_all() ) : ?>
 	<tr class="user-sessions-wrap hide-if-no-js">
-		<th><?php _e( 'Sessions' ); ?></th>
+		<th>&nbsp;</th>
 		<td>
-			<p><button type="button" class="button button-secondary" id="destroy-sessions"><?php _e( 'Log Out Everywhere' ); ?></button></p>
+			<p><button type="button" class="button button-secondary" id="destroy-sessions"><?php _e( 'Log Out of All Sessions' ); ?></button></p>
 			<p class="description">
 				<?php
 				/* translators: 1: User's display name. */
-				printf( __( 'Log %s out of all locations.' ), $profileuser->display_name );
+				printf( __( 'Log %s out of all sessions' ), $profileuser->display_name );
 				?>
 			</p>
 		</td>
