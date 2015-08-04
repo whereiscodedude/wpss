@@ -55,10 +55,7 @@ class MagpieRSS {
 
 	var $_CONTENT_CONSTRUCTS = array('content', 'summary', 'info', 'title', 'tagline', 'copyright');
 
-	/**
-	 * PHP5 constructor.
-	 */
-	function __construct( $source ) {
+	function MagpieRSS ($source) {
 
 		# if PHP xml isn't compiled in, die
 		#
@@ -98,13 +95,6 @@ class MagpieRSS {
 		xml_parser_free( $this->parser );
 
 		$this->normalize();
-	}
-
-	/**
-	 * PHP4 constructor.
-	 */
-	public function MagpieRSS( $source ) {
-		self::__construct( $source );
 	}
 
 	function feed_start_element($p, $element, &$attrs) {
@@ -257,7 +247,7 @@ class MagpieRSS {
 		}
 		elseif ($this->feed_type == ATOM and $this->incontent  ) {
 			// balance tags properly
-			// note: This may not actually be necessary
+			// note:  i don't think this is actually neccessary
 			if ( $this->stack[0] == $el )
 			{
 				$this->append_content("</$el>");
@@ -589,8 +579,8 @@ function _fetch_remote_file($url, $headers = "" ) {
  * @package External
  * @subpackage MagpieRSS
  *
- * @param array $resp
- * @return MagpieRSS|bool
+ * @param unknown_type $resp
+ * @return unknown
  */
 function _response_to_rss ($resp) {
 	$rss = new MagpieRSS( $resp->results );
@@ -719,10 +709,7 @@ class RSSCache {
 	var $MAX_AGE	= 43200;  		// when are files stale, default twelve hours
 	var $ERROR 		= '';			// accumulate error messages
 
-	/**
-	 * PHP5 constructor.
-	 */
-	function __construct( $base = '', $age = '' ) {
+	function RSSCache ($base='', $age='') {
 		$this->BASE_CACHE = WP_CONTENT_DIR . '/cache';
 		if ( $base ) {
 			$this->BASE_CACHE = $base;
@@ -733,18 +720,11 @@ class RSSCache {
 
 	}
 
-	/**
-	 * PHP4 constructor.
-	 */
-	public function RSSCache( $base = '', $age = '' ) {
-		self::__construct( $base, $age );
-	}
-
 /*=======================================================================*\
 	Function:	set
 	Purpose:	add an item to the cache, keyed on url
 	Input:		url from wich the rss file was fetched
-	Output:		true on success
+	Output:		true on sucess
 \*=======================================================================*/
 	function set ($url, $rss) {
 		$cache_option = 'rss_' . $this->file_name( $url );
