@@ -9,7 +9,7 @@
 /** WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 if ( !current_user_can('edit_posts') )
-	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
+	wp_die(__('Cheatin&#8217; uh?'));
 
 $wp_list_table = _get_list_table('WP_Comments_List_Table');
 $pagenum = $wp_list_table->get_pagenum();
@@ -109,7 +109,7 @@ if ( $post_id )
 else
 	$title = __('Comments');
 
-add_screen_option( 'per_page' );
+add_screen_option( 'per_page', array('label' => _x( 'Comments', 'comments per page (screen options)' )) );
 
 get_current_screen()->add_help_tab( array(
 'id'		=> 'overview',
@@ -130,9 +130,9 @@ get_current_screen()->add_help_tab( array(
 
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
-	'<p>' . __( '<a href="https://codex.wordpress.org/Administration_Screens#Comments" target="_blank">Documentation on Comments</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://codex.wordpress.org/Comment_Spam" target="_blank">Documentation on Comment Spam</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://codex.wordpress.org/Keyboard_Shortcuts" target="_blank">Documentation on Keyboard Shortcuts</a>' ) . '</p>' .
+	'<p>' . __( '<a href="http://codex.wordpress.org/Administration_Screens#Comments" target="_blank">Documentation on Comments</a>' ) . '</p>' .
+	'<p>' . __( '<a href="http://codex.wordpress.org/Comment_Spam" target="_blank">Documentation on Comment Spam</a>' ) . '</p>' .
+	'<p>' . __( '<a href="http://codex.wordpress.org/Keyboard_Shortcuts" target="_blank">Documentation on Keyboard Shortcuts</a>' ) . '</p>' .
 	'<p>' . __( '<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>' ) . '</p>'
 );
 
@@ -140,7 +140,7 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
 
 <div class="wrap">
-<h1><?php
+<h2><?php
 if ( $post_id )
 	echo sprintf( __( 'Comments on &#8220;%s&#8221;' ),
 		sprintf( '<a href="%s">%s</a>',
@@ -149,11 +149,11 @@ if ( $post_id )
 		)
 	);
 else
-	_e( 'Comments' );
+	echo __('Comments');
 
 if ( isset($_REQUEST['s']) && $_REQUEST['s'] )
 	echo '<span class="subtitle">' . sprintf( __( 'Search results for &#8220;%s&#8221;' ), wp_html_excerpt( esc_html( wp_unslash( $_REQUEST['s'] ) ), 50, '&hellip;' ) ) . '</span>'; ?>
-</h1>
+</h2>
 
 <?php
 if ( isset( $_REQUEST['error'] ) ) {
@@ -161,7 +161,7 @@ if ( isset( $_REQUEST['error'] ) ) {
 	$error_msg = '';
 	switch ( $error ) {
 		case 1 :
-			$error_msg = __( 'Invalid comment ID.' );
+			$error_msg = __( 'Oops, no comment with this ID.' );
 			break;
 		case 2 :
 			$error_msg = __( 'You are not allowed to edit comments on this post.' );
@@ -217,14 +217,14 @@ if ( isset($_REQUEST['approved']) || isset($_REQUEST['deleted']) || isset($_REQU
 			}
 		}
 
-		echo '<div id="moderated" class="updated notice is-dismissible"><p>' . implode( "<br/>\n", $messages ) . '</p></div>';
+		echo '<div id="moderated" class="updated"><p>' . implode( "<br/>\n", $messages ) . '</p></div>';
 	}
 }
 ?>
 
 <?php $wp_list_table->views(); ?>
 
-<form id="comments-form" method="get">
+<form id="comments-form" action="" method="get">
 
 <?php $wp_list_table->search_box( __( 'Search Comments' ), 'comment' ); ?>
 
