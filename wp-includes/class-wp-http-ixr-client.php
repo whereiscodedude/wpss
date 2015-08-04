@@ -7,18 +7,7 @@
  *
  */
 class WP_HTTP_IXR_Client extends IXR_Client {
-	public $scheme;
-	/**
-	 * @var IXR_Error
-	 */
-	public $error;
 
-	/**
-	 * @param string $server
-	 * @param string|bool $path
-	 * @param int|bool $port
-	 * @param int $timeout
-	 */
 	public function __construct($server, $path = false, $port = false, $timeout = 15) {
 		if ( ! $path ) {
 			// Assume we have been given a URL instead
@@ -46,9 +35,6 @@ class WP_HTTP_IXR_Client extends IXR_Client {
 		$this->timeout = $timeout;
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function query() {
 		$args = func_get_args();
 		$method = array_shift($args);

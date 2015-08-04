@@ -23,12 +23,7 @@ elseif ( isset( $_POST['post_ID'] ) )
 else
  	$post_id = $post_ID = 0;
 
-/**
- * @global string  $post_type
- * @global object  $post_type_object
- * @global WP_Post $post
- */
-global $post_type, $post_type_object, $post;
+$post = $post_type = $post_type_object = null;
 
 if ( $post_id )
 	$post = get_post( $post_id );
@@ -59,7 +54,7 @@ function redirect_post($post_id = '') {
 					$message = 6;
 			}
 		} else {
-			$message = 'draft' == $status ? 10 : 1;
+				$message = 'draft' == $status ? 10 : 1;
 		}
 
 		$location = add_query_arg( 'message', $message, get_edit_post_link( $post_id, 'url' ) );
@@ -100,9 +95,7 @@ if ( ! $sendback ||
 		$sendback = admin_url( 'upload.php' );
 	} else {
 		$sendback = admin_url( 'edit.php' );
-		if ( ! empty( $post_type ) ) {
-			$sendback = add_query_arg( 'post_type', $post_type, $sendback );
-		}
+		$sendback .= ( ! empty( $post_type ) ) ? '?post_type=' . $post_type : '';
 	}
 } else {
 	$sendback = remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), $sendback );
@@ -130,8 +123,8 @@ case 'post-quickdraft-save':
 	$post = get_post( $_REQUEST['post_ID'] );
 	check_admin_referer( 'add-' . $post->post_type );
 
-	$_POST['comment_status'] = get_default_comment_status( $post->post_type );
-	$_POST['ping_status']    = get_default_comment_status( $post->post_type, 'pingback' );
+	$_POST['comment_status'] = get_option( 'default_comment_status' );
+	$_POST['ping_status'] = get_option( 'default_ping_status' );
 
 	edit_post();
 	wp_dashboard_quick_press();
@@ -279,7 +272,7 @@ case 'untrash':
 		wp_die( __( 'Unknown post type.' ) );
 
 	if ( ! current_user_can( 'delete_post', $post_id ) )
-		wp_die( __( 'You are not allowed to restore this item from the Trash.' ) );
+		wp_die( __( 'You are not allowed to move this item out of the Trash.' ) );
 
 	if ( ! wp_untrash_post( $post_id ) )
 		wp_die( __( 'Error in restoring from Trash.' ) );
