@@ -652,10 +652,7 @@ function wp_print_media_templates() {
 					</option>
 					<option value="file">
 				<# } else { #>
-					<option value="none" selected>
-						<?php esc_attr_e('None'); ?>
-					</option>
-					<option value="file">
+					<option value="file" selected>
 				<# } #>
 					<# if ( data.model.canEmbed ) { #>
 						<?php esc_attr_e('Link to Media File'); ?>
@@ -673,6 +670,9 @@ function wp_print_media_templates() {
 				<# if ( 'image' === data.type ) { #>
 					<option value="custom">
 						<?php esc_attr_e('Custom URL'); ?>
+					</option>
+					<option value="none">
+						<?php esc_attr_e('None'); ?>
 					</option>
 				<# } #>
 				</select>

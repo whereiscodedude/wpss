@@ -13,11 +13,7 @@ define( 'IFRAME_REQUEST', true );
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
 if ( ! current_user_can( 'customize' ) ) {
-	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'You are not allowed to customize the appearance of this site.' ) . '</p>',
-		403
-	);
+	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 }
 
 wp_reset_vars( array( 'url', 'return' ) );
@@ -25,7 +21,6 @@ $url = wp_unslash( $url );
 $url = wp_validate_redirect( $url, home_url( '/' ) );
 if ( $return ) {
 	$return = wp_unslash( $return );
-	$return = remove_query_arg( wp_removable_query_args(), $return );
 	$return = wp_validate_redirect( $return );
 }
 if ( ! $return ) {

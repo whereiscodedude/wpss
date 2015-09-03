@@ -117,11 +117,6 @@
 	text-align: center;
 }
 
-.column-response .post-com-count-no-pending,
-.column-comments .post-com-count-no-pending {
-	display: none;
-}
-
 /* comments */
 
 .commentlist li {

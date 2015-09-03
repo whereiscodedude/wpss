@@ -17,13 +17,8 @@ $tax = get_taxonomy( $taxnow );
 if ( ! $tax )
 	wp_die( __( 'Invalid taxonomy' ) );
 
-if ( ! current_user_can( $tax->cap->manage_terms ) ) {
-	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'You are not allowed to manage these items.' ) . '</p>',
-		403
-	);
-}
+if ( ! current_user_can( $tax->cap->manage_terms ) )
+	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 /**
  * $post_type is set when the WP_Terms_List_Table instance is created
@@ -58,13 +53,8 @@ case 'add-tag':
 
 	check_admin_referer( 'add-tag', '_wpnonce_add-tag' );
 
-	if ( ! current_user_can( $tax->cap->edit_terms ) ) {
-		wp_die(
-			'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-			'<p>' . __( 'You are not allowed to add this item.' ) . '</p>',
-			403
-		);
-	}
+	if ( !current_user_can( $tax->cap->edit_terms ) )
+		wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 	$ret = wp_insert_term( $_POST['tag-name'], $taxonomy, $_POST );
 	$location = 'edit-tags.php?taxonomy=' . $taxonomy;
@@ -99,13 +89,8 @@ case 'delete':
 	$tag_ID = (int) $_REQUEST['tag_ID'];
 	check_admin_referer( 'delete-tag_' . $tag_ID );
 
-	if ( ! current_user_can( $tax->cap->delete_terms ) ) {
-		wp_die(
-			'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-			'<p>' . __( 'You are not allowed to delete this item.' ) . '</p>',
-			403
-		);
-	}
+	if ( !current_user_can( $tax->cap->delete_terms ) )
+		wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 	wp_delete_term( $tag_ID, $taxonomy );
 
@@ -116,13 +101,8 @@ case 'delete':
 case 'bulk-delete':
 	check_admin_referer( 'bulk-tags' );
 
-	if ( ! current_user_can( $tax->cap->delete_terms ) ) {
-		wp_die(
-			'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-			'<p>' . __( 'You are not allowed to delete these items.' ) . '</p>',
-			403
-		);
-	}
+	if ( !current_user_can( $tax->cap->delete_terms ) )
+		wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 	$tags = (array) $_REQUEST['delete_tags'];
 	foreach ( $tags as $tag_ID ) {
@@ -159,13 +139,8 @@ case 'editedtag':
 	$tag_ID = (int) $_POST['tag_ID'];
 	check_admin_referer( 'update-tag_' . $tag_ID );
 
-	if ( ! current_user_can( $tax->cap->edit_terms ) ) {
-		wp_die(
-			'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-			'<p>' . __( 'You are not allowed to edit this item.' ) . '</p>',
-			403
-		);
-	}
+	if ( !current_user_can( $tax->cap->edit_terms ) )
+		wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 	$tag = get_term( $tag_ID, $taxonomy );
 	if ( ! $tag )
@@ -240,15 +215,15 @@ if ( 'category' == $taxonomy || 'link_category' == $taxonomy || 'post_tag' == $t
 			$help = '<p>' . __( 'When adding a new tag on this screen, you&#8217;ll fill in the following fields:' ) . '</p>';
 
 		$help .= '<ul>' .
-		'<li>' . __( '<strong>Name</strong> &mdash; The name is how it appears on your site.' ) . '</li>';
+		'<li>' . __( '<strong>Name</strong> - The name is how it appears on your site.' ) . '</li>';
 
 		if ( ! global_terms_enabled() )
-			$help .= '<li>' . __( '<strong>Slug</strong> &mdash; The &#8220;slug&#8221; is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ) . '</li>';
+			$help .= '<li>' . __( '<strong>Slug</strong> - The &#8220;slug&#8221; is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ) . '</li>';
 
 		if ( 'category' == $taxonomy )
-			$help .= '<li>' . __( '<strong>Parent</strong> &mdash; Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have child categories for Bebop and Big Band. Totally optional. To create a subcategory, just choose another category from the Parent dropdown.' ) . '</li>';
+			$help .= '<li>' . __( '<strong>Parent</strong> - Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have child categories for Bebop and Big Band. Totally optional. To create a subcategory, just choose another category from the Parent dropdown.' ) . '</li>';
 
-		$help .= '<li>' . __( '<strong>Description</strong> &mdash; The description is not prominent by default; however, some themes may display it.' ) . '</li>' .
+		$help .= '<li>' . __( '<strong>Description</strong> - The description is not prominent by default; however, some themes may display it.' ) . '</li>' .
 		'</ul>' .
 		'<p>' . __( 'You can change the display of this screen using the Screen Options tab to set how many items are displayed per screen and to display/hide columns in the table.' ) . '</p>';
 
@@ -277,13 +252,8 @@ if ( 'category' == $taxonomy || 'link_category' == $taxonomy || 'post_tag' == $t
 
 require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
-if ( ! current_user_can( $tax->cap->edit_terms ) ) {
-	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'You are not allowed to edit this item.' ) . '</p>',
-		403
-	);
-}
+if ( !current_user_can($tax->cap->edit_terms) )
+	wp_die( __('You are not allowed to edit this item.') );
 
 $messages = array();
 $messages['_item'] = array(

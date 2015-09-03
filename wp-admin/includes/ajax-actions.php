@@ -347,22 +347,8 @@ function _wp_ajax_delete_comment_response( $comment_id, $delta = -1 ) {
 	$url      = isset( $_POST['_url'] )      ? esc_url_raw( $_POST['_url'] ) : '';
 
 	// JS didn't send us everything we need to know. Just die with success message
-	if ( ! $total || ! $per_page || ! $page || ! $url ) {
-		$time = time();
-		$comment = get_comment( $comment_id );
-
-		$x = new WP_Ajax_Response( array(
-			'what' => 'comment',
-			// Here for completeness - not used.
-			'id' => $comment_id,
-			'supplemental' => array(
-				'status' => $comment ? $comment->comment_approved : '',
-				'postId' => $comment ? $comment->comment_post_ID : '',
-				'time' => $time
-			)
-		) );
-		$x->send();
-	}
+	if ( !$total || !$per_page || !$page || !$url )
+		wp_die( time() );
 
 	$total += $delta;
 	if ( $total < 0 )
@@ -391,15 +377,12 @@ function _wp_ajax_delete_comment_response( $comment_id, $delta = -1 ) {
 
 	// The time since the last comment count.
 	$time = time();
-	$comment = get_comment( $comment_id );
 
 	$x = new WP_Ajax_Response( array(
 		'what' => 'comment',
 		// Here for completeness - not used.
 		'id' => $comment_id,
 		'supplemental' => array(
-			'status' => $comment ? $comment->comment_approved : '',
-			'postId' => $comment ? $comment->comment_post_ID : '',
 			'total_items_i18n' => sprintf( _n( '%s item', '%s items', $total ), number_format_i18n( $total ) ),
 			'total_pages' => ceil( $total / $per_page ),
 			'total_pages_i18n' => number_format_i18n( ceil( $total / $per_page ) ),
@@ -1044,7 +1027,7 @@ function wp_ajax_replyto_comment( $action ) {
 	);
 
 	if ( $comment_auto_approved )
-		$response['supplemental'] = array( 'parent_approved' => $parent->comment_ID, 'parent_post_id' => $parent->comment_post_ID );
+		$response['supplemental'] = array( 'parent_approved' => $parent->comment_ID );
 
 	$x = new WP_Ajax_Response();
 	$x->add( $response );
@@ -1194,16 +1177,16 @@ function wp_ajax_add_meta() {
 
 		// If the post is an autodraft, save the post as a draft and then attempt to save the meta.
 		if ( $post->post_status == 'auto-draft' ) {
-			$post_data = array();
-			$post_data['action'] = 'draft'; // Warning fix
-			$post_data['post_ID'] = $pid;
-			$post_data['post_type'] = $post->post_type;
-			$post_data['post_status'] = 'draft';
+			$save_POST = $_POST; // Backup $_POST
+			$_POST = array(); // Make it empty for edit_post()
+			$_POST['action'] = 'draft'; // Warning fix
+			$_POST['post_ID'] = $pid;
+			$_POST['post_type'] = $post->post_type;
+			$_POST['post_status'] = 'draft';
 			$now = current_time('timestamp', 1);
-			$post_data['post_title'] = sprintf( __( 'Draft created on %1$s at %2$s' ), date( get_option( 'date_format' ), $now ), date( get_option( 'time_format' ), $now ) );
+			$_POST['post_title'] = sprintf( __( 'Draft created on %1$s at %2$s' ), date( get_option( 'date_format' ), $now ), date( get_option( 'time_format' ), $now ) );
 
-			$pid = edit_post( $post_data );
-			if ( $pid ) {
+			if ( $pid = edit_post() ) {
 				if ( is_wp_error( $pid ) ) {
 					$x = new WP_Ajax_Response( array(
 						'what' => 'meta',
@@ -1211,7 +1194,7 @@ function wp_ajax_add_meta() {
 					) );
 					$x->send();
 				}
-
+				$_POST = $save_POST; // Now we can restore original $_POST again
 				if ( !$mid = add_meta( $pid ) )
 					wp_die( __( 'Please provide a custom field value.' ) );
 			} else {

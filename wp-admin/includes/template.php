@@ -256,7 +256,7 @@ function wp_terms_checklist( $post_id = 0, $args = array() ) {
 		$checked_categories = array();
 		$keys = array_keys( $categories );
 
-		foreach ( $keys as $k ) {
+		foreach( $keys as $k ) {
 			if ( in_array( $categories[$k]->term_id, $args['selected_cats'] ) ) {
 				$checked_categories[] = $categories[$k];
 				unset( $categories[$k] );
@@ -491,7 +491,7 @@ function wp_comment_reply( $position = 1, $checkbox = false, $mode = 'single', $
 		</div>
 
 		<div class="inside">
-		<label for="author-email"><?php _e('Email') ?></label>
+		<label for="author-email"><?php _e('E-mail') ?></label>
 		<input type="text" name="newcomment_author_email" size="50" value="" id="author-email" />
 		</div>
 
@@ -1083,11 +1083,8 @@ function do_meta_boxes( $screen, $context, $object ) {
 					$i++;
 					$hidden_class = in_array($box['id'], $hidden) ? ' hide-if-js' : '';
 					echo '<div id="' . $box['id'] . '" class="postbox ' . postbox_classes($box['id'], $page) . $hidden_class . '" ' . '>' . "\n";
-					if ( 'dashboard_browser_nag' != $box['id'] ) {
-						echo '<button class="handlediv button-link" title="' . esc_attr__( 'Click to toggle' ) . '" aria-expanded="true">';
-						echo '<span class="screen-reader-text">' . sprintf( __( 'Click to toggle %s panel' ), $box['title'] ) . '</span><br />';
-						echo '</button>';
-					}
+					if ( 'dashboard_browser_nag' != $box['id'] )
+						echo '<div class="handlediv" title="' . esc_attr__('Click to toggle') . '"><br /></div>';
 					echo "<h3 class='hndle'><span>{$box['title']}</span></h3>\n";
 					echo '<div class="inside">' . "\n";
 					call_user_func($box['callback'], $object, $box);

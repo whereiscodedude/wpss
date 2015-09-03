@@ -290,7 +290,7 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 	 * @return bool
 	 */
 	public function exists( $file ) {
-		$list = $this->ftp->rawlist( $file, '-a' );
+		$list = $this->ftp->nlist( $file );
 
 		if ( empty( $list ) && $this->is_dir( $file ) ) {
 			return true; // File is an empty directory.
@@ -395,7 +395,7 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 	}
 
 	/**
-	 * @param string $path
+	 * @param sting $path
 	 * @param bool $recursive
 	 */
 	public function rmdir($path, $recursive = false ) {

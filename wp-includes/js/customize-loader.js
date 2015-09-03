@@ -1,8 +1,4 @@
 /* global _wpCustomizeLoaderSettings, confirm */
-/*
- * Expose a public API that allows the customizer to be
- * loaded on any page.
- */
 window.wp = window.wp || {};
 
 (function( exports, $ ){

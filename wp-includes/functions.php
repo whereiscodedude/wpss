@@ -132,7 +132,7 @@ function date_i18n( $dateformatstring, $unixtimestamp = false, $gmt = false ) {
 		if ( $timezone_string ) {
 			$timezone_object = timezone_open( $timezone_string );
 			$date_object = date_create( null, $timezone_object );
-			foreach ( $timezone_formats as $timezone_format ) {
+			foreach( $timezone_formats as $timezone_format ) {
 				if ( false !== strpos( $dateformatstring, $timezone_format ) ) {
 					$formatted = date_format( $date_object, $timezone_format );
 					$dateformatstring = ' '.$dateformatstring;
@@ -825,47 +825,6 @@ function remove_query_arg( $key, $query = false ) {
 }
 
 /**
- * Returns an array of single-use query variable names that can be removed from a URL.
- *
- * @since 4.4.0
- *
- * @return array An array of parameters to remove from the URL.
- */
-function wp_removable_query_args() {
-	$removable_query_args = array(
-		'activate',
-		'activated',
-		'approved',
-		'deactivate',
-		'deleted',
-		'disabled',
-		'enabled',
-		'error',
-		'locked',
-		'message',
-		'same',
-		'saved',
-		'settings-updated',
-		'skipped',
-		'spammed',
-		'trashed',
-		'unspammed',
-		'untrashed',
-		'update',
-		'updated',
-	);
-
-	/**
-	 * Filter the list of query variables to remove.
-	 *
-	 * @since 4.2.0
-	 *
-	 * @param array $removable_query_args An array of query variables to remove from a URL.
-	 */
-	return apply_filters( 'removable_query_args', $removable_query_args );
-}
-
-/**
  * Walks the array while sanitizing the contents.
  *
  * @since 0.71
@@ -1121,7 +1080,7 @@ function nocache_headers() {
 		}
 	}
 
-	foreach ( $headers as $name => $field_value )
+	foreach( $headers as $name => $field_value )
 		@header("{$name}: {$field_value}");
 }
 
@@ -2718,7 +2677,7 @@ function wp_json_encode( $data, $options = 0, $depth = 512 ) {
 		$args = array( $data );
 	}
 
-	$json = @call_user_func_array( 'json_encode', $args );
+	$json = call_user_func_array( 'json_encode', $args );
 
 	// If json_encode() was successful, no need to do more sanity checking.
 	// ... unless we're in an old version of PHP, and json_encode() returned

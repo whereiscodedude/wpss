@@ -1036,15 +1036,7 @@ function wp_dashboard_primary() {
 			 * @param string $title Title attribute for the widget's secondary link.
 			 */
 			'title'        => apply_filters( 'dashboard_secondary_title', __( 'Other WordPress News' ) ),
-
-			/**
-			 * Filter the number of secondary link items for the 'WordPress News' dashboard widget.
-			 *
-			 * @since 4.4.0
-			 *
-			 * @param string $items How many items to show in the secondary feed.
-			 */
-			'items'        => apply_filters( 'dashboard_secondary_items', 3 ),
+			'items'        => 3,
 			'show_summary' => 0,
 			'show_author'  => 0,
 			'show_date'    => 0,
@@ -1077,7 +1069,7 @@ function wp_dashboard_primary() {
  * @param array  $feeds     Array of RSS feeds.
  */
 function wp_dashboard_primary_output( $widget_id, $feeds ) {
-	foreach ( $feeds as $type => $args ) {
+	foreach( $feeds as $type => $args ) {
 		$args['type'] = $type;
 		echo '<div class="rss-widget">';
 		if ( $type === 'plugins' ) {

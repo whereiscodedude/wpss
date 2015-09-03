@@ -371,7 +371,7 @@ function edit_post( $post_data = null ) {
 	if ( ! $success && is_callable( array( $wpdb, 'strip_invalid_text_for_column' ) ) ) {
 		$fields = array( 'post_title', 'post_content', 'post_excerpt' );
 
-		foreach ( $fields as $field ) {
+		foreach( $fields as $field ) {
 			if ( isset( $post_data[ $field ] ) ) {
 				$post_data[ $field ] = $wpdb->strip_invalid_text_for_column( $wpdb->posts, $field, $post_data[ $field ] );
 			}
@@ -1123,7 +1123,7 @@ function wp_edit_attachments_query_vars( $q = false ) {
 		unset($q['post_mime_type']);
 	}
 
-	foreach ( array_keys( $post_mime_types ) as $type ) {
+	foreach( array_keys( $post_mime_types ) as $type ) {
 		if ( isset( $q['attachment-filter'] ) && "post_mime_type:$type" == $q['attachment-filter'] ) {
 			$q['post_mime_type'] = $type;
 			break;
@@ -1308,6 +1308,7 @@ function get_sample_permalink_html( $id, $new_title = null, $new_slug = null ) {
 
 		$post_name_html = '<span id="editable-post-name" title="' . $title . '">' . $post_name_abridged . '</span>';
 		$display_link = str_replace( array( '%pagename%', '%postname%' ), $post_name_html, urldecode( $permalink ) );
+		$pretty_permalink = str_replace( array( '%pagename%', '%postname%' ), $post_name, urldecode( $permalink ) );
 
 		$return =  '<strong>' . __( 'Permalink:' ) . "</strong>\n";
 		$return .= '<span id="sample-permalink" tabindex="-1">' . $display_link . "</span>\n";
@@ -1323,12 +1324,8 @@ function get_sample_permalink_html( $id, $new_title = null, $new_slug = null ) {
 			$preview_link = apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', $preview_link ), $post );
 			$return .= "<span id='view-post-btn'><a href='" . esc_url( $preview_link ) . "' class='button button-small' target='wp-preview-{$post->ID}'>$view_post</a></span>\n";
 		} else {
-			if ( 'publish' === $post->post_status ) {
-				// View Post button should always go to the saved permalink.
-				$pretty_permalink = get_permalink( $post );
-			} else {
-				// Allow non-published (private, future) to be viewed at a pretty permalink.
-				$pretty_permalink = str_replace( array( '%pagename%', '%postname%' ), $post->post_name, urldecode( $permalink ) );
+			if ( empty( $pretty_permalink ) ) {
+				$pretty_permalink = $permalink;
 			}
 
 			$return .= "<span id='view-post-btn'><a href='" . $pretty_permalink . "' class='button button-small'>$view_post</a></span>\n";

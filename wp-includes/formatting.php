@@ -340,7 +340,7 @@ function wptexturize_primes( $haystack, $needle, $prime, $open_quote, $close_quo
 
 	$sentences = explode( $open_quote, $haystack );
 
-	foreach ( $sentences as $key => &$sentence ) {
+	foreach( $sentences as $key => &$sentence ) {
 		if ( false === strpos( $sentence, $needle ) ) {
 			continue;
 		} elseif ( 0 !== $key && 0 === substr_count( $sentence, $close_quote ) ) {
@@ -814,14 +814,10 @@ function seems_utf8( $str ) {
  *
  * @staticvar string $_charset
  *
- * @param string     $string         The text which is to be encoded.
- * @param int|string $quote_style    Optional. Converts double quotes if set to ENT_COMPAT,
- *                                   both single and double if set to ENT_QUOTES or none if set to ENT_NOQUOTES.
- *                                   Also compatible with old values; converting single quotes if set to 'single',
- *                                   double if set to 'double' or both if otherwise set.
- *                                   Default is ENT_NOQUOTES.
- * @param string     $charset        Optional. The character encoding of the string. Default is false.
- * @param bool       $double_encode  Optional. Whether to encode existing html entities. Default is false.
+ * @param string $string         The text which is to be encoded.
+ * @param int    $quote_style    Optional. Converts double quotes if set to ENT_COMPAT, both single and double if set to ENT_QUOTES or none if set to ENT_NOQUOTES. Also compatible with old values; converting single quotes if set to 'single', double if set to 'double' or both if otherwise set. Default is ENT_NOQUOTES.
+ * @param string $charset        Optional. The character encoding of the string. Default is false.
+ * @param bool   $double_encode  Optional. Whether to encode existing html entities. Default is false.
  * @return string The encoded text with HTML entities.
  */
 function _wp_specialchars( $string, $quote_style = ENT_NOQUOTES, $charset = false, $double_encode = false ) {
@@ -3274,14 +3270,11 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 
 	if ( '' == $url )
 		return $url;
-
-	$url = str_replace( ' ', '%20', $url );
 	$url = preg_replace('|[^a-z0-9-~+_.?#=!&;,/:%@$\|*\'()\\x80-\\xff]|i', '', $url);
 	if ( 0 !== stripos( $url, 'mailto:' ) ) {
 		$strip = array('%0d', '%0a', '%0D', '%0A');
 		$url = _deep_replace($strip, $url);
 	}
-
 	$url = str_replace(';//', '://', $url);
 	/* If the URL doesn't appear to contain a scheme, we
 	 * presume it needs http:// appended (unless a relative
@@ -4445,7 +4438,7 @@ function wp_encode_emoji( $content ) {
 		$matches = array();
 		if ( preg_match_all( $regex, $content, $matches ) ) {
 			if ( ! empty( $matches[1] ) ) {
-				foreach ( $matches[1] as $emoji ) {
+				foreach( $matches[1] as $emoji ) {
 					/*
 					 * UTF-32's hex encoding is the same as HTML's hex encoding.
 					 * So, by converting the emoji from UTF-8 to UTF-32, we magically

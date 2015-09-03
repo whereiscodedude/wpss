@@ -460,46 +460,32 @@ function wp_dropdown_categories( $args = '' ) {
 /**
  * Display or retrieve the HTML list of categories.
  *
+ * The list of arguments is below:
+ *     'show_option_all' (string) - Text to display for showing all categories.
+ *     'orderby' (string) default is 'ID' - What column to use for ordering the
+ * categories.
+ *     'order' (string) default is 'ASC' - What direction to order categories.
+ *     'show_count' (bool|int) default is 0 - Whether to show how many posts are
+ * in the category.
+ *     'hide_empty' (bool|int) default is 1 - Whether to hide categories that
+ * don't have any posts attached to them.
+ *     'use_desc_for_title' (bool|int) default is 1 - Whether to use the
+ * category description as the title attribute.
+ *     'feed' - See {@link get_categories()}.
+ *     'feed_type' - See {@link get_categories()}.
+ *     'feed_image' - See {@link get_categories()}.
+ *     'child_of' (int) default is 0 - See {@link get_categories()}.
+ *     'exclude' (string) - See {@link get_categories()}.
+ *     'exclude_tree' (string) - See {@link get_categories()}.
+ *     'echo' (bool|int) default is 1 - Whether to display or retrieve content.
+ *     'current_category' (int) - See {@link get_categories()}.
+ *     'hierarchical' (bool) - See {@link get_categories()}.
+ *     'title_li' (string) - See {@link get_categories()}.
+ *     'depth' (int) - The max depth.
+ *
  * @since 2.1.0
- * @since 4.4.0 Introduced the `hide_title_if_empty` argument. The `current_category` argument was modified to
- *              optionally accept an array of values.
  *
- * @param string|array $args {
- *     Array of optional arguments.
- *
- *     @type string       $show_option_all       Text to display for showing all categories. Default empty string.
- *     @type string       $show_option_none      Text to display for the 'no categories' option.
- *                                               Default 'No categories'.
- *     @type string       $orderby               The column to use for ordering categories. Default 'ID'.
- *     @type string       $order                 Which direction to order categories. Accepts 'ASC' or 'DESC'.
- *                                               Default 'ASC'.
- *     @type bool|int     $show_count            Whether to show how many posts are in the category. Default 0.
- *     @type bool|int     $hide_empty            Whether to hide categories that don't have any posts attached to them.
- *                                               Default 1.
- *     @type bool|int     $use_desc_for_title    Whether to use the category description as the title attribute.
- *                                               Default 1.
- *     @type string       $feed                  Text to use for the feed link. Default 'Feed for all posts filed
- *                                               under [cat name]'.
- *     @type string       $feed_type             Feed type. Used to build feed link. See {@link get_term_feed_link()}.
- *                                               Default empty string (default feed).
- *     @type string       $feed_image            URL of an image to use for the feed link. Default empty string.
- *     @type int          $child_of              Term ID to retrieve child terms of. See {@link get_terms()}. Default 0.
- *     @type array|string $exclude               Array or comma/space-separated string of term IDs to exclude.
- *                                               See {@link get_terms()}. Default empty string.
- *     @type array|string $exclude_tree          Array or comma/space-separated string of term IDs to exclude, along
- *                                               with their descendants. See {@link get_terms()}. Default empty string.
- *     @type bool|int     $echo                  True to echo markup, false to return it. Default 1.
- *     @type int|array    $current_category      ID of category, or array of IDs of categories, that should get the
- *                                               'current-cat' class. Default 0.
- *     @type bool         $hierarchical          Whether to include terms that have non-empty descendants.
- *                                               See {@link get_terms()}. Default true.
- *     @type string       $title_li              Text to use for the list title `<li>` element. Pass an empty string
- *                                               to disable. Default 'Categories'.
- *     @type bool         $hide_title_if_empty   Whether to hide the `$title_li` element if there are no terms in
- *                                               the list. Default false (title will always be shown).
- *     @type int          $depth                 Category depth. Used for tab indentation. Default 0.
- *     @type string       $taxonomy              Taxonomy name. Default 'category'.
- * }
+ * @param string|array $args Optional. Override default arguments.
  * @return false|string HTML content only if 'echo' argument is 0.
  */
 function wp_list_categories( $args = '' ) {
@@ -513,7 +499,6 @@ function wp_list_categories( $args = '' ) {
 		'feed_image' => '', 'exclude' => '',
 		'exclude_tree' => '', 'current_category' => 0,
 		'hierarchical' => true, 'title_li' => __( 'Categories' ),
-		'hide_title_if_empty' => false,
 		'echo' => 1, 'depth' => 0,
 		'taxonomy' => 'category'
 	);
@@ -541,7 +526,7 @@ function wp_list_categories( $args = '' ) {
 	$categories = get_categories( $r );
 
 	$output = '';
-	if ( $r['title_li'] && 'list' == $r['style'] && ( ! empty( $categories ) || ! $r['hide_title_if_empty'] ) ) {
+	if ( $r['title_li'] && 'list' == $r['style'] ) {
 		$output = '<li class="' . esc_attr( $r['class'] ) . '">' . $r['title_li'] . '<ul>';
 	}
 	if ( empty( $categories ) ) {
@@ -1123,18 +1108,11 @@ class Walker_Category extends Walker {
 			);
 
 			if ( ! empty( $args['current_category'] ) ) {
-				// 'current_category' can be an array, so we use `get_terms()`.
-				$_current_terms = get_terms( $category->taxonomy, array(
-					'include' => $args['current_category'],
-					'hide_empty' => false,
-				) );
-
-				foreach ( $_current_terms as $_current_term ) {
-					if ( $category->term_id == $_current_term->term_id ) {
-						$css_classes[] = 'current-cat';
-					} elseif ( $category->term_id == $_current_term->parent ) {
-						$css_classes[] = 'current-cat-parent';
-					}
+				$_current_category = get_term( $args['current_category'], $category->taxonomy );
+				if ( $category->term_id == $args['current_category'] ) {
+					$css_classes[] = 'current-cat';
+				} elseif ( $category->term_id == $_current_category->parent ) {
+					$css_classes[] = 'current-cat-parent';
 				}
 			}
 
@@ -1229,8 +1207,7 @@ class Walker_CategoryDropdown extends Walker {
 
 		$output .= "\t<option class=\"level-$depth\" value=\"" . esc_attr( $category->{$value_field} ) . "\"";
 
-		// Type-juggling causes false matches, so we force everything to a string.
-		if ( (string) $category->{$value_field} === (string) $args['selected'] )
+		if ( $category->{$value_field} == $args['selected'] )
 			$output .= ' selected="selected"';
 		$output .= '>';
 		$output .= $pad.$cat_name;

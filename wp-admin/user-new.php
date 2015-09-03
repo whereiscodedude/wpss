@@ -79,18 +79,6 @@ if ( isset($_REQUEST['action']) && 'adduser' == $_REQUEST['action'] ) {
 
 			$roles = get_editable_roles();
 			$role = $roles[ $_REQUEST['role'] ];
-
-			/**
-			 * Fires immediately after a user is invited to join a site, but before the notification is sent.
-			 *
-			 * @since 4.4.0
-			 *
-			 * @param int    $user_id     The invited user's ID.
-			 * @param array  $role        The role of invited user.
-			 * @param string $newuser_key The key of the invitation.
-			 */
-			do_action( 'invite_user', $user_id, $role, $newuser_key );
-
 			/* translators: 1: Site name, 2: site URL, 3: role, 4: activation URL */
 			$message = __( 'Hi,
 
@@ -289,11 +277,11 @@ if ( is_multisite() ) {
 		echo '<h3 id="add-existing-user">' . __('Add Existing User') . '</h3>';
 	if ( !is_super_admin() ) {
 		echo '<p>' . __( 'Enter the email address of an existing user on this network to invite them to this site. That person will be sent an email asking them to confirm the invite.' ) . '</p>';
-		$label = __('Email');
+		$label = __('E-mail');
 		$type  = 'email';
 	} else {
 		echo '<p>' . __( 'Enter the email address or username of an existing user on this network to invite them to this site. That person will be sent an email asking them to confirm the invite.' ) . '</p>';
-		$label = __('Email or Username');
+		$label = __('E-mail or Username');
 		$type  = 'text';
 	}
 ?>
@@ -377,7 +365,7 @@ $new_user_ignore_pass = $creating && isset( $_POST['noconfirmation'] ) ? wp_unsl
 		<td><input name="user_login" type="text" id="user_login" value="<?php echo esc_attr( $new_user_login ); ?>" aria-required="true" autocapitalize="none" autocorrect="off" /></td>
 	</tr>
 	<tr class="form-field form-required">
-		<th scope="row"><label for="email"><?php _e('Email'); ?> <span class="description"><?php _e('(required)'); ?></span></label></th>
+		<th scope="row"><label for="email"><?php _e('E-mail'); ?> <span class="description"><?php _e('(required)'); ?></span></label></th>
 		<td><input name="email" type="email" id="email" value="<?php echo esc_attr( $new_user_email ); ?>" /></td>
 	</tr>
 <?php if ( !is_multisite() ) { ?>

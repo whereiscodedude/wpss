@@ -10,8 +10,6 @@
  */
 
 /**
- * Outputs the WPMU menu.
- *
  * @deprecated 3.0.0
  */
 function wpmu_menu() {
@@ -20,10 +18,10 @@ function wpmu_menu() {
 }
 
 /**
- * Determines if the available space defined by the admin has been exceeded by the user.
- *
- * @deprecated 3.0.0 Use is_upload_space_available()
- * @see is_upload_space_available()
+  * Determines if the available space defined by the admin has been exceeded by the user.
+  *
+  * @deprecated 3.0.0
+  * @see is_upload_space_available()
  */
 function wpmu_checkAvailableSpace() {
 	_deprecated_function(__FUNCTION__, '3.0', 'is_upload_space_available()' );
@@ -33,8 +31,6 @@ function wpmu_checkAvailableSpace() {
 }
 
 /**
- * WPMU options.
- *
  * @deprecated 3.0.0
  */
 function mu_options( $options ) {
@@ -43,9 +39,7 @@ function mu_options( $options ) {
 }
 
 /**
- * Deprecated functionality for activating a network-only plugin.
- *
- * @deprecated 3.0.0 Use activate_plugin()
+ * @deprecated 3.0.0
  * @see activate_plugin()
  */
 function activate_sitewide_plugin() {
@@ -54,9 +48,7 @@ function activate_sitewide_plugin() {
 }
 
 /**
- * Deprecated functionality for deactivating a network-only plugin.
- *
- * @deprecated 3.0.0 Use deactivate_sitewide_plugin()
+ * @deprecated 3.0.0
  * @see deactivate_sitewide_plugin()
  */
 function deactivate_sitewide_plugin( $plugin = false ) {
@@ -64,9 +56,7 @@ function deactivate_sitewide_plugin( $plugin = false ) {
 }
 
 /**
- * Deprecated functionality for determining if the current plugin is network-only.
- *
- * @deprecated 3.0.0 Use is_network_only_plugin()
+ * @deprecated 3.0.0
  * @see is_network_only_plugin()
  */
 function is_wpmu_sitewide_plugin( $file ) {
@@ -75,9 +65,7 @@ function is_wpmu_sitewide_plugin( $file ) {
 }
 
 /**
- * Deprecated functionality for getting themes network-enabled themes.
- *
- * @deprecated 3.4.0 Use WP_Theme::get_allowed_on_network()
+ * @deprecated 3.4.0
  * @see WP_Theme::get_allowed_on_network()
  */
 function get_site_allowed_themes() {
@@ -86,9 +74,7 @@ function get_site_allowed_themes() {
 }
 
 /**
- * Deprecated functionality for getting themes allowed on a specific site.
- *
- * @deprecated 3.4.0 Use WP_Theme::get_allowed_on_site()
+ * @deprecated 3.4.0
  * @see WP_Theme::get_allowed_on_site()
  */
 function wpmu_get_blog_allowedthemes( $blog_id = 0 ) {
@@ -97,8 +83,6 @@ function wpmu_get_blog_allowedthemes( $blog_id = 0 ) {
 }
 
 /**
- * Deprecated functionality for determining whether a file is deprecated.
- *
- * @deprecated 3.5.0
+ * @deprecated
  */
 function ms_deprecated_blogs_file() {}

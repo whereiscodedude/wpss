@@ -149,9 +149,9 @@ function edit_user( $user_id = 0 ) {
 	if ( !$update && username_exists( $user->user_login ) )
 		$errors->add( 'user_login', __( '<strong>ERROR</strong>: This username is already registered. Please choose another one.' ));
 
-	/* checking email address */
+	/* checking e-mail address */
 	if ( empty( $user->user_email ) ) {
-		$errors->add( 'empty_email', __( '<strong>ERROR</strong>: Please enter an email address.' ), array( 'form-field' => 'email' ) );
+		$errors->add( 'empty_email', __( '<strong>ERROR</strong>: Please enter an e-mail address.' ), array( 'form-field' => 'email' ) );
 	} elseif ( !is_email( $user->user_email ) ) {
 		$errors->add( 'invalid_email', __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.' ), array( 'form-field' => 'email' ) );
 	} elseif ( ( $owner_id = email_exists($user->user_email) ) && ( !$update || ( $owner_id != $user->ID ) ) ) {
@@ -163,9 +163,9 @@ function edit_user( $user_id = 0 ) {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param WP_Error &$errors WP_Error object, passed by reference.
-	 * @param bool     $update  Whether this is a user update.
-	 * @param WP_User  &$user   WP_User object, passed by reference.
+	 * @param array   &$errors An array of user profile update errors, passed by reference.
+	 * @param bool    $update  Whether this is a user update.
+	 * @param WP_User &$user   WP_User object, passed by reference.
 	 */
 	do_action_ref_array( 'user_profile_update_errors', array( &$errors, $update, &$user ) );
 

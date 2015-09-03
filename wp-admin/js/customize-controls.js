@@ -284,15 +284,8 @@
 		 * @param {Object}  args.duration
 		 * @param {Object}  args.completeCallback
 		 */
-		onChangeActive: function( active, args ) {
+		onChangeActive: function ( active, args ) {
 			var duration, construct = this;
-			if ( args.unchanged ) {
-				if ( args.completeCallback ) {
-					args.completeCallback();
-				}
-				return;
-			}
-
 			duration = ( 'resolved' === api.previewer.deferred.active.state() ? args.duration : 0 );
 			if ( ! $.contains( document, construct.container[0] ) ) {
 				// jQuery.fn.slideUp is not hiding an element if it is not in the DOM
@@ -655,9 +648,6 @@
 						completeCallback: expand
 					});
 				} else {
-					api.panel.each( function( panel ) {
-						panel.collapse();
-					});
 					expand();
 				}
 
@@ -1267,7 +1257,7 @@
 
 				// Collapse any sibling sections/panels
 				api.section.each( function ( section ) {
-					if ( panel.id !== section.panel() ) {
+					if ( ! section.panel() ) {
 						section.collapse( { duration: 0 } );
 					}
 				});
@@ -1507,13 +1497,6 @@
 		 * @param {Callback} args.completeCallback
 		 */
 		onChangeActive: function ( active, args ) {
-			if ( args.unchanged ) {
-				if ( args.completeCallback ) {
-					args.completeCallback();
-				}
-				return;
-			}
-
 			if ( ! $.contains( document, this.container ) ) {
 				// jQuery.fn.slideUp is not hiding an element if it is not in the DOM
 				this.container.toggle( active );

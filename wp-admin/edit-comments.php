@@ -8,13 +8,8 @@
 
 /** WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
-if ( ! current_user_can( 'edit_posts' ) ) {
-	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'You are not allowed to edit comments.' ) . '</p>',
-		403
-	);
-}
+if ( !current_user_can('edit_posts') )
+	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 $wp_list_table = _get_list_table('WP_Comments_List_Table');
 $pagenum = $wp_list_table->get_pagenum();
@@ -109,29 +104,10 @@ $wp_list_table->prepare_items();
 wp_enqueue_script('admin-comments');
 enqueue_comment_hotkeys_js();
 
-if ( $post_id ) {
-	$comments_count = wp_count_comments( $post_id );
-	$draft_or_post_title = wp_html_excerpt( _draft_or_post_title( $post_id ), 50, '&hellip;' );
-	if ( $comments_count->moderated > 0 ) {
-		$title = sprintf(
-			__( 'Comments (%s) on &#8220;%s&#8221;' ),
-			number_format_i18n( $comments_count->moderated ),
-			$draft_or_post_title
-		);
-	} else {
-		$title = sprintf( __( 'Comments on &#8220;%s&#8221;' ), $draft_or_post_title );
-	}
-} else {
-	$comments_count = wp_count_comments();
-	if ( $comments_count->moderated > 0 ) {
-		$title = sprintf(
-			__( 'Comments (%s)' ),
-			number_format_i18n( $comments_count->moderated )
-		);
-	} else {
-		$title = __( 'Comments' );
-	}
-}
+if ( $post_id )
+	$title = sprintf( __( 'Comments on &#8220;%s&#8221;' ), wp_html_excerpt( _draft_or_post_title( $post_id ), 50, '&hellip;' ) );
+else
+	$title = __('Comments');
 
 add_screen_option( 'per_page' );
 

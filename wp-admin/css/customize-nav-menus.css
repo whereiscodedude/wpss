@@ -91,13 +91,13 @@
 }
 
 /* Menu-item reordering nav. */
-.reordering .customize-control-nav_menu .reorder,
+.customize-control-nav_menu .reordering .reorder,
 .customize-control-nav_menu .reorder-done {
 	display: none;
 }
 
 .customize-control-nav_menu .reorder,
-.reordering .customize-control-nav_menu .reorder-done {
+.customize-control-nav_menu .reordering .reorder-done {
 	display: inline-block;
 	padding: 5px 8px;
 }

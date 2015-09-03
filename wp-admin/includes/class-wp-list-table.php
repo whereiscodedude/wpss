@@ -648,11 +648,6 @@ class WP_List_Table {
 				$pending_comments_number,
 				$pending_phrase
 			);
-		} else {
-			printf( '<span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>',
-				$pending_comments_number,
-				$approved_comments ? __( 'No pending comments' ) : __( 'No comments' )
-			);
 		}
 	}
 
@@ -868,7 +863,7 @@ class WP_List_Table {
 
 		// We need a primary defined so responsive views show something,
 		// so let's fall back to the first non-checkbox column.
-		foreach ( $columns as $col => $column_name ) {
+		foreach( $columns as $col => $column_name ) {
 			if ( 'cb' === $col ) {
 				continue;
 			}
@@ -1260,7 +1255,7 @@ class WP_List_Table {
 	 * @param object $item        The item being acted upon.
 	 * @param string $column_name Current column name.
 	 * @param string $primary     Primary column name.
-	 * @return string The row actions HTML, or an empty string if the current column is the primary column.
+	 * @return string The row actions output. In this case, an empty string.
 	 */
 	protected function handle_row_actions( $item, $column_name, $primary ) {
 		return $column_name == $primary ? '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details' ) . '</span></button>' : '';

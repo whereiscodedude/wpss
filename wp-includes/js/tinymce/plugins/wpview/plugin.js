@@ -713,12 +713,10 @@ tinymce.PluginManager.add( 'wpview', function( editor ) {
 	} );
 
 	editor.once( 'preinit', function() {
-		if ( editor.wp && editor.wp._createToolbar ) {
-			toolbar = editor.wp._createToolbar( [
-				'wp_view_edit',
-				'wp_view_remove'
-			] );
-		}
+		toolbar = editor.wp._createToolbar( [
+			'wp_view_edit',
+			'wp_view_remove'
+		] );
 	} );
 
 	editor.on( 'wptoolbar', function( event ) {

@@ -467,7 +467,7 @@ function populate_options() {
 	// 2.7
 	'large_size_w' => 1024,
 	'large_size_h' => 1024,
-	'image_default_link_type' => 'none',
+	'image_default_link_type' => 'file',
 	'image_default_size' => '',
 	'image_default_align' => '',
 	'close_comments_for_old_posts' => 0,
@@ -895,7 +895,7 @@ function populate_network( $network_id = 1, $domain = '', $email = '', $site_nam
 
 	$site_user = get_user_by( 'email', $email );
 	if ( ! is_email( $email ) )
-		$errors->add( 'invalid_email', __( 'You must provide a valid email address.' ) );
+		$errors->add( 'invalid_email', __( 'You must provide a valid e-mail address.' ) );
 
 	if ( $errors->get_error_code() )
 		return $errors;

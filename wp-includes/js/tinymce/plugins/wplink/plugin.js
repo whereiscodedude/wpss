@@ -136,13 +136,11 @@
 		} );
 
 		editor.on( 'preinit', function() {
-			if ( editor.wp && editor.wp._createToolbar ) {
-				toolbar = editor.wp._createToolbar( [
-					'wp_link_preview',
-					'wp_link_edit',
-					'wp_link_remove'
-				], true );
-			}
+			toolbar = editor.wp._createToolbar( [
+				'wp_link_preview',
+				'wp_link_edit',
+				'wp_link_remove'
+			], true );
 		} );
 	} );
 } )( window.tinymce );

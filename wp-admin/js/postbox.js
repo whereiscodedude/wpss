@@ -11,16 +11,13 @@ var postboxes;
 
 			self.init(page, args);
 
-			$('.postbox .hndle, .postbox .handlediv').bind('click.postboxes', function( e ) {
+			$('.postbox .hndle, .postbox .handlediv').bind('click.postboxes', function() {
 				var p = $(this).parent('.postbox'), id = p.attr('id');
 
 				if ( 'dashboard_browser_nag' == id )
 					return;
 
-				e.preventDefault();
-
-				p.toggleClass( 'closed' );
-				$(this).attr( 'aria-expanded', ! p.hasClass( 'closed' ) );
+				p.toggleClass('closed');
 
 				if ( page != 'press-this' )
 					self.save_state(page);
