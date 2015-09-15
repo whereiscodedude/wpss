@@ -8,7 +8,7 @@ window.wp = window.wp || {};
 	/**
 	 * wp.template( id )
 	 *
-	 * Fetch a JavaScript template for an id, and return a templating function for it.
+	 * Fetches a template by id.
 	 *
 	 * @param  {string} id   A string that corresponds to a DOM element with an id prefixed with "tmpl-".
 	 *                       For example, "attachment" maps to "tmpl-attachment".
@@ -16,12 +16,6 @@ window.wp = window.wp || {};
 	 */
 	wp.template = _.memoize(function ( id ) {
 		var compiled,
-			/*
-			 * Underscore's default ERB-style templates are incompatible with PHP
-			 * when asp_tags is enabled, so WordPress uses Mustache-inspired templating syntax.
-			 *
-			 * @see trac ticket #22344.
-			 */
 			options = {
 				evaluate:    /<#([\s\S]+?)#>/g,
 				interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
@@ -50,8 +44,7 @@ window.wp = window.wp || {};
 		 *
 		 * @param  {string} action The slug of the action to fire in WordPress.
 		 * @param  {object} data   The data to populate $_POST with.
-		 * @return {$.promise}     A jQuery promise that represents the request,
-		 *                         decorated with an abort() method.
+		 * @return {$.promise}     A jQuery promise that represents the request.
 		 */
 		post: function( action, data ) {
 			return wp.ajax.send({
@@ -66,11 +59,9 @@ window.wp = window.wp || {};
 		 *
 		 * @param  {string} action  The slug of the action to fire in WordPress.
 		 * @param  {object} options The options passed to jQuery.ajax.
-		 * @return {$.promise}      A jQuery promise that represents the request,
-		 *                          decorated with an abort() method.
+		 * @return {$.promise}      A jQuery promise that represents the request.
 		 */
 		send: function( action, options ) {
-			var promise, deferred;
 			if ( _.isObject( action ) ) {
 				options = action;
 			} else {
@@ -84,7 +75,7 @@ window.wp = window.wp || {};
 				context: this
 			});
 
-			deferred = $.Deferred( function( deferred ) {
+			return $.Deferred( function( deferred ) {
 				// Transfer success/error callbacks.
 				if ( options.success )
 					deferred.done( options.success );
@@ -95,7 +86,7 @@ window.wp = window.wp || {};
 				delete options.error;
 
 				// Use with PHP's wp_send_json_success() and wp_send_json_error()
-				deferred.jqXHR = $.ajax( options ).done( function( response ) {
+				$.ajax( options ).done( function( response ) {
 					// Treat a response of `1` as successful for backwards
 					// compatibility with existing handlers.
 					if ( response === '1' || response === 1 )
@@ -108,15 +99,7 @@ window.wp = window.wp || {};
 				}).fail( function() {
 					deferred.rejectWith( this, arguments );
 				});
-			});
-
-			promise = deferred.promise();
-			promise.abort = function() {
-				deferred.jqXHR.abort();
-				return this;
-			};
-
-			return promise;
+			}).promise();
 		}
 	};
 

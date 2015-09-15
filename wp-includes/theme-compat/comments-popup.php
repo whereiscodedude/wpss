@@ -41,6 +41,7 @@ while( have_posts()) : the_post();
 <?php
 // this line is WordPress' motor, do not delete it.
 $commenter = wp_get_current_commenter();
+extract($commenter);
 $comments = get_approved_comments($id);
 $post = get_post($id);
 if ( post_password_required($post) ) {  // and it doesn't match the cookie
@@ -52,7 +53,7 @@ if ( post_password_required($post) ) {  // and it doesn't match the cookie
 <?php foreach ($comments as $comment) { ?>
 	<li id="comment-<?php comment_ID() ?>">
 	<?php comment_text() ?>
-	<p><cite><?php comment_type(); ?> <?php printf(__('by %1$s &#8212; %2$s @ <a href="#comment-%3$s">%4$s</a>'), get_comment_author_link( $comment ), get_comment_date( '', $comment ), get_comment_ID(), get_comment_time()); ?></cite></p>
+	<p><cite><?php comment_type(); ?> <?php printf(__('by %1$s &#8212; %2$s @ <a href="#comment-%3$s">%4$s</a>'), get_comment_author_link(), get_comment_date(), get_comment_ID(), get_comment_time()); ?></cite></p>
 	</li>
 
 <?php } // end for each comment ?>
@@ -63,24 +64,24 @@ if ( post_password_required($post) ) {  // and it doesn't match the cookie
 
 <?php if ( comments_open() ) { ?>
 <h2><?php _e('Leave a comment'); ?></h2>
-<p><?php printf(__('Line and paragraph breaks automatic, email address never displayed, <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>'), allowed_tags()); ?></p>
+<p><?php printf(__('Line and paragraph breaks automatic, e-mail address never displayed, <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>'), allowed_tags()); ?></p>
 
 <form action="<?php echo site_url(); ?>/wp-comments-post.php" method="post" id="commentform">
 <?php if ( $user_ID ) : ?>
 	<p><?php printf(__('Logged in as <a href="%1$s">%2$s</a>. <a href="%3$s" title="Log out of this account">Log out &raquo;</a>'), get_edit_user_link(), $user_identity, wp_logout_url(get_permalink())); ?></p>
 <?php else : ?>
 	<p>
-	  <input type="text" name="author" id="author" class="textarea" value="<?php echo esc_attr( $commenter['comment_author'] ); ?>" size="28" tabindex="1" />
+	  <input type="text" name="author" id="author" class="textarea" value="<?php echo esc_attr($comment_author); ?>" size="28" tabindex="1" />
 	   <label for="author"><?php _e('Name'); ?></label>
 	</p>
 
 	<p>
-	  <input type="text" name="email" id="email" value="<?php echo esc_attr( $commenter['comment_author_email'] ); ?>" size="28" tabindex="2" />
-	   <label for="email"><?php _e('Email'); ?></label>
+	  <input type="text" name="email" id="email" value="<?php echo esc_attr($comment_author_email); ?>" size="28" tabindex="2" />
+	   <label for="email"><?php _e('E-mail'); ?></label>
 	</p>
 
 	<p>
-	  <input type="text" name="url" id="url" value="<?php echo esc_attr( $commenter['comment_author_url'] ); ?>" size="28" tabindex="3" />
+	  <input type="text" name="url" id="url" value="<?php echo esc_attr($comment_author_url); ?>" size="28" tabindex="3" />
 	   <label for="url"><?php _e('<abbr title="Universal Resource Locator">URL</abbr>'); ?></label>
 	</p>
 <?php endif; ?>
@@ -96,10 +97,7 @@ if ( post_password_required($post) ) {  // and it doesn't match the cookie
 	  <input type="hidden" name="redirect_to" value="<?php echo esc_attr($_SERVER["REQUEST_URI"]); ?>" />
 	  <input name="submit" type="submit" tabindex="5" value="<?php esc_attr_e('Say It!' ); ?>" />
 	</p>
-	<?php
-	/** This filter is documented in wp-includes/comment-template.php */
-	do_action( 'comment_form', $post->ID );
-	?>
+	<?php do_action('comment_form', $post->ID); ?>
 </form>
 <?php } else { // comments are closed ?>
 <p><?php _e('Sorry, the comment form is closed at this time.'); ?></p>

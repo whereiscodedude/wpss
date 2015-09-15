@@ -74,6 +74,20 @@
 	min-height: 100px;
 }
 
+h3.dashboard-widget-title,
+h3.dashboard-widget-title span,
+h3.dashboard-widget-title small {
+	color: #333;
+}
+
+h3.dashboard-widget-title small a {
+	color: #d7d7d7;
+}
+
+h3.dashboard-widget-title small a:hover {
+	color: #fff;
+}
+
 /* @todo: this was originally in this section, but likely belongs elsewhere */
 #the-comment-list td.comment p.comment-author {
 	margin-top: 0;
@@ -146,28 +160,24 @@
 
 .welcome-panel .welcome-panel-close {
 	position: absolute;
-	top: 10px;
+	top: 5px;
 	left: 10px;
-	padding: 10px 21px 10px 15px;
+	padding: 20px 3px 0 15px;
 	font-size: 13px;
-	line-height: 1.23076923; /* Chrome rounding, needs to be 16px equivalent */
 	text-decoration: none;
+	line-height: 1;
 }
 
-.welcome-panel .welcome-panel-close:before {
+#welcome-panel.welcome-panel .welcome-panel-close::before {
 	position: absolute;
-	top: 8px;
-	right: 0;
+	right: -18px;
+	margin-top: -2px;
 	-webkit-transition: all .1s ease-in-out;
 	transition: all .1s ease-in-out;
 }
 
 .wp-core-ui .welcome-panel .button.button-hero {
-	margin: 15px 0 3px 13px;
-	padding: 12px 36px;
-	height: auto;
-	line-height: 1.4285714;
-	white-space: normal;
+	margin: 15px 0 3px;
 }
 
 .welcome-panel-content {
@@ -177,6 +187,7 @@
 
 .welcome-panel .welcome-panel-column-container {
 	clear: both;
+	overflow: hidden;
 	position: relative;
 }
 
@@ -204,12 +215,14 @@
 }
 
 .welcome-panel .welcome-icon {
+	display: block;
+	padding: 0 0 8px;
 	background: transparent !important;
 }
 
 .welcome-panel .welcome-icon:before {
-	color: #82878c;
-	font: normal 20px/1 dashicons;
+	color: #888;
+	font: normal 20px/1 'dashicons';
 	speak: none;
 	display: inline-block;
 	padding: 0 0 0 10px;
@@ -223,31 +236,31 @@
 
 .welcome-panel .welcome-write-blog:before,
 .welcome-panel .welcome-edit-page:before {
-	content: "\f119";
+	content:'\f119';
 	top: -3px;
 }
 
 .welcome-panel .welcome-add-page:before {
-	content: "\f132";
+	content:'\f132';
 }
 
 .welcome-panel .welcome-view-site:before {
-	content: "\f115";
+	content:'\f115';
 	top: -2px;
 }
 
 .welcome-panel .welcome-widgets-menus:before {
-	content: "\f116";
+	content:'\f116';
 	top: -2px;
 }
 
 .welcome-panel .welcome-comments:before {
-	content: "\f117";
+	content:'\f117';
 	top: -1px;
 }
 
 .welcome-panel .welcome-learn-more:before {
-	content: "\f118";
+	content:'\f118';
 	top: -1px;
 }
 
@@ -262,7 +275,6 @@
 .welcome-panel .welcome-panel-column li {
 	line-height: 16px;
 	list-style-type: none;
-	padding: 0 0 8px;
 }
 
 /* Dashboard WordPress news */
@@ -287,6 +299,15 @@ body #dashboard-widgets .postbox form .submit {
 
 .dashboard-widget-control-form p {
 	margin-top: 0;
+}
+
+/* @todo: are these actually used anywhere? no non-CSS results in plugin search */
+div.dashboard-widget-error {
+	background-color: #c43;
+}
+
+div.dashboard-widget-notice {
+	background-color: #cfe1ef;
 }
 
 .rssSummary {
@@ -326,9 +347,7 @@ body #dashboard-widgets .postbox form .submit {
 
 #dashboard_right_now ul {
 	margin: 0;
-	/* contain floats but don't use overflow: hidden */
-	display: inline-block;
-	width: 100%;
+	overflow: hidden;
 }
 
 #dashboard_right_now li {
@@ -338,10 +357,12 @@ body #dashboard-widgets .postbox form .submit {
 }
 
 #dashboard_right_now .inside {
+	overflow: hidden;
 	padding: 0;
 }
 
 #dashboard_right_now .main {
+	overflow: hidden;
 	padding: 0 12px 11px;
 }
 
@@ -350,10 +371,10 @@ body #dashboard-widgets .postbox form .submit {
 }
 
 #dashboard_right_now #wp-version-message .button {
+	clear: left;
 	float: left;
 	position: relative;
 	top: -5px;
-	margin-right: 5px;
 }
 
 .mu-storage {
@@ -368,7 +389,7 @@ body #dashboard-widgets .postbox form .submit {
 
 #dashboard_right_now li a:before,
 #dashboard_right_now li span:before {
-	color: #82878c;
+	color: #888;
 }
 
 #dashboard_right_now .sub {
@@ -394,8 +415,8 @@ body #dashboard-widgets .postbox form .submit {
 /* Dashboard right now - Icons */
 #dashboard_right_now li a:before,
 #dashboard_right_now li span:before {
-	content: "\f159";
-	font: normal 20px/1 dashicons;
+	content: '\f159';
+	font: normal 20px/1 'dashicons';
 	speak: none;
 	display: block;
 	float: right;
@@ -410,28 +431,28 @@ body #dashboard-widgets .postbox form .submit {
 
 #dashboard_right_now .page-count a:before,
 #dashboard_right_now .page-count span:before {
-	content: "\f105";
+	content: '\f105';
 }
 
 #dashboard_right_now .post-count a:before,
 #dashboard_right_now .post-count span:before {
-	content: "\f109";
+	content: '\f109';
 }
 
 #dashboard_right_now .comment-count a:before {
-	content: "\f101";
+	content: '\f101';
 }
 
 #dashboard_right_now .comment-mod-count a:before {
-	content: "\f125";
+	content: '\f125';
 }
 
 #dashboard_right_now .storage-count a:before {
-	content: "\f104";
+	content: '\f104';
 }
 
 #dashboard_right_now .storage-count.warning a:before {
-	content: "\f153";
+	content: '\f153';
 }
 
 /* Dashboard Quick Draft */
@@ -448,6 +469,7 @@ body #dashboard-widgets .postbox form .submit {
 }
 
 #dashboard_quick_press form {
+	overflow: hidden;
 	margin: 12px;
 }
 
@@ -568,11 +590,12 @@ form.initial-form.quickpress-open input#title {
 }
 
 #dashboard_quick_press .draft-title {
-	word-wrap: break-word;
+	overflow: hidden;
 }
 
 #dashboard_quick_press .draft-title a,
 #dashboard_quick_press .draft-title time {
+	float: right;
 	margin: 0 0 0 5px;
 }
 
@@ -596,8 +619,8 @@ form.initial-form.quickpress-open input#title {
 }
 
 #dashboard_activity .comment-meta span.approve:before {
-	content: "\f227";
-	font: 20px/.5 dashicons;
+	content: '\f227';
+	font: 20px/.5 "dashicons";
 	margin-right: 12px;
 	vertical-align: middle;
 	position: relative;
@@ -626,8 +649,8 @@ form.initial-form.quickpress-open input#title {
 }
 
 #dashboard_activity .no-activity .smiley:before {
-	content: "\f328";
-	font: normal 120px/1 dashicons;
+	content: '\f328';
+	font: normal 120px/1 'dashicons';
 	speak: none;
 	display: block;
 	margin: 0 0 0 5px;
@@ -654,15 +677,16 @@ form.initial-form.quickpress-open input#title {
 
 #future-posts li,
 #published-posts li {
+	overflow: hidden;
 	margin-bottom: 8px;
 }
 
 #future-posts ul span,
 #published-posts ul span {
-	display: inline-block;
-	margin-left: 5px;
-	min-width: 150px;
 	color: #777;
+	float: right;
+	margin-left: 8px;
+	min-width: 150px;
 }
 
 .activity-block {
@@ -686,7 +710,11 @@ form.initial-form.quickpress-open input#title {
 #activity-widget #the-comment-list div.undo {
 	background: none;
 	padding: 6px 0;
-	margin-right: 12px;
+}
+
+#activity-widget #the-comment-list .alternate,
+#activity-widget #the-comment-list .alt {
+	background: none;
 }
 
 #activity-widget #the-comment-list .comment-item {
@@ -695,8 +723,9 @@ form.initial-form.quickpress-open input#title {
 	position: relative;
 }
 
-#activity-widget #the-comment-list .avatar {
+#activity-widget #the-comment-list img {
 	position: absolute;
+	right: 13px;
 	top: 13px;
 }
 
@@ -738,6 +767,7 @@ form.initial-form.quickpress-open input#title {
 
 #activity-widget #the-comment-list .spam-undo-inside .avatar,
 #activity-widget #the-comment-list .trash-undo-inside .avatar {
+	margin-left: 20px;
 	position: relative;
 	top: 0;
 }
@@ -795,7 +825,7 @@ h3:hover .edit-box {
 }
 
 #dashboard-widgets h4 {
-	color: #23282d;
+	color: #222;
 	font-weight: normal;
 	font-size: 14px;
 	margin: 0 0 .2em;
@@ -812,8 +842,7 @@ h3:hover .edit-box {
 	position: relative;
 }
 
-#activity-widget #the-comment-list .comment,
-#activity-widget #the-comment-list .pingback {
+#activity-widget #the-comment-list .comment {
 	-webkit-box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.06);
 	box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.06);
 }
@@ -860,14 +889,14 @@ h3:hover .edit-box {
 
 /* QuickDraft */
 
-#title-wrap label,
-#description-wrap label {
+#title-wrap label {
 	cursor: text;
 }
 
 #title-wrap #title {
 	padding: 2px 6px;
 	font-size: 1.3em;
+	line-height: 100%;
 	outline: none;
 }
 
@@ -908,10 +937,11 @@ a.rsswidget {
 }
 
 .rss-widget cite:before {
-	content: "\2014";
+	content: '\2014';
 }
 
 .dashboard-comment-wrap {
+	overflow: hidden;
 	word-wrap: break-word;
 }
 
@@ -1089,19 +1119,17 @@ a.rsswidget {
 	/* Keep the close icon from overlapping the Welcome text. */
 	.welcome-panel .welcome-panel-close {
 		overflow: hidden;
-		text-indent: 40px;
+		text-indent: 100%;
 		white-space: nowrap;
 		width: 20px;
 		height: 20px;
+		left: 0;
 		padding: 5px;
-		top: 5px;
-		left: 5px;
 	}
 
 	/* Make the close icon larger for tappability. */
-	.welcome-panel .welcome-panel-close:before {
+	#welcome-panel.welcome-panel .welcome-panel-close::before {
 		font-size: 20px;
-		top: 5px;
-		right: -35px;
+		margin: 0;
 	}
 }
