@@ -42,12 +42,8 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			'fields' => 'all_with_meta'
 		);
 
-		if ( wp_is_large_network( 'users' ) ) {
+		if ( wp_is_large_network( 'users' ) )
 			$args['search'] = ltrim( $args['search'], '*' );
-		} else if ( '' !== $args['search'] ) {
-			$args['search'] = trim( $args['search'], '*' );
-			$args['search'] = '*' . $args['search'] . '*';
-		}
 
 		if ( $role == 'super' ) {
 			$logins = implode( "', '", get_super_admins() );
@@ -150,7 +146,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			'cb'         => '<input type="checkbox" />',
 			'username'   => __( 'Username' ),
 			'name'       => __( 'Name' ),
-			'email'      => __( 'Email' ),
+			'email'      => __( 'E-mail' ),
 			'registered' => _x( 'Registered', 'user' ),
 			'blogs'      => __( 'Sites' )
 		);
@@ -187,9 +183,6 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * @param WP_User $user The current WP_User object.
 	 */
 	public function column_cb( $user ) {
-		if ( is_super_admin( $user->ID ) ) {
-			return;
-		}
 		?>
 		<label class="screen-reader-text" for="blog_<?php echo $user->ID; ?>"><?php echo sprintf( __( 'Select %s' ), $user->user_login ); ?></label>
 		<input type="checkbox" id="blog_<?php echo $user->ID ?>" name="allusers[]" value="<?php echo esc_attr( $user->ID ) ?>" />

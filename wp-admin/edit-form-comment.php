@@ -22,17 +22,6 @@ if ( !defined('ABSPATH') )
 
 <div id="post-body" class="metabox-holder columns-2">
 <div id="post-body-content" class="edit-form-section edit-comment-section">
-<?php
-if ( $comment->comment_post_ID > 0 ):
-	$comment_link = get_comment_link( $comment );
-?>
-<div class="inside">
-	<div id="comment-link-box">
-		<strong><?php _ex( 'Permalink:', 'comment' ); ?></strong>
-		<span id="sample-permalink"><a href="<?php echo $comment_link; ?>"><?php echo $comment_link; ?></a></span>
-	</div>
-</div>
-<?php endif; ?>
 <div id="namediv" class="stuffbox">
 <div class="inside">
 <fieldset>
@@ -44,7 +33,7 @@ if ( $comment->comment_post_ID > 0 ):
 	<td><input type="text" name="newcomment_author" size="30" value="<?php echo esc_attr( $comment->comment_author ); ?>" id="name" /></td>
 </tr>
 <tr>
-	<td class="first"><label for="email"><?php _e( 'Email:' ); ?></label></td>
+	<td class="first"><label for="email"><?php _e( 'E-mail:' ); ?></label></td>
 	<td>
 		<input type="text" name="newcomment_author_email" size="30" value="<?php echo $comment->comment_author_email; ?>" id="email" />
 	</td>
@@ -77,6 +66,13 @@ if ( $comment->comment_post_ID > 0 ):
 <div class="inside">
 <div class="submitbox" id="submitcomment">
 <div id="minor-publishing">
+
+<div id="minor-publishing-actions">
+<div id="preview-action">
+<a class="preview button" href="<?php echo get_comment_link(); ?>" target="_blank"><?php _e('View Comment'); ?></a>
+</div>
+<div class="clear"></div>
+</div>
 
 <div id="misc-publishing-actions">
 
@@ -123,19 +119,17 @@ if ( current_user_can( 'edit_post', $post_id ) ) {
 <?php
 if ( $comment->comment_parent ) :
 	$parent      = get_comment( $comment->comment_parent );
-	if ( $parent ) :
-		$parent_link = esc_url( get_comment_link( $parent ) );
-		$name        = get_comment_author( $parent );
-	?>
-	<div class="misc-pub-section misc-pub-reply-to">
-		<?php printf(
-			/* translators: comment link */
-			__( 'In reply to: %s' ),
-			'<b><a href="' . $parent_link . '">' . $name . '</a></b>'
-		); ?>
-	</div>
-<?php endif;
-endif; ?>
+	$parent_link = esc_url( get_comment_link( $comment->comment_parent ) );
+	$name        = get_comment_author( $parent->comment_ID );
+?>
+<div class="misc-pub-section misc-pub-reply-to">
+	<?php printf(
+		/* translators: comment link */
+		__( 'In reply to: %s' ),
+		'<b><a href="' . $parent_link . '">' . $name . '</a></b>'
+	); ?>
+</div>
+<?php endif; ?>
 
 <?php
 	/**
@@ -177,7 +171,7 @@ do_action( 'add_meta_boxes', 'comment', $comment );
  *
  * @since 3.0.0
  *
- * @param WP_Comment $comment Comment object.
+ * @param object $comment Comment object.
  */
 do_action( 'add_meta_boxes_comment', $comment );
 

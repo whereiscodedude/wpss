@@ -13,11 +13,7 @@ define( 'IFRAME_REQUEST', true );
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
 if ( ! current_user_can( 'customize' ) ) {
-	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'You are not allowed to customize the appearance of this site.' ) . '</p>',
-		403
-	);
+	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 }
 
 wp_reset_vars( array( 'url', 'return' ) );
@@ -25,7 +21,6 @@ $url = wp_unslash( $url );
 $url = wp_validate_redirect( $url, home_url( '/' ) );
 if ( $return ) {
 	$return = wp_unslash( $return );
-	$return = remove_query_arg( wp_removable_query_args(), $return );
 	$return = wp_validate_redirect( $return );
 }
 if ( ! $return ) {
@@ -145,7 +140,7 @@ do_action( 'customize_controls_print_scripts' );
 		<div id="widgets-right"><!-- For Widget Customizer, many widgets try to look for instances under div#widgets-right, so we have to add that ID to a container div in the Customizer for compat -->
 		<div class="wp-full-overlay-sidebar-content" tabindex="-1">
 			<div id="customize-info" class="accordion-section customize-info">
-				<div class="accordion-section-title">
+				<div class="accordion-section-title" aria-label="<?php esc_attr_e( 'Customizer Options' ); ?>">
 					<span class="preview-notice"><?php
 						echo sprintf( __( 'You are customizing %s' ), '<strong class="panel-title site-title">' . get_bloginfo( 'name' ) . '</strong>' );
 					?></span>

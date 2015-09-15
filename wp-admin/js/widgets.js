@@ -178,7 +178,6 @@ wpWidgets = {
 					inside = ui.item.children('.widget-inside');
 
 				if ( inside.css('display') === 'block' ) {
-					ui.item.removeClass('open');
 					inside.hide();
 					$(this).sortable('refreshPositions');
 				}

@@ -724,7 +724,7 @@ function media_upload_form_handler() {
 }
 
 /**
- * Handles the process of uploading media.
+ * {@internal Missing Short Description}}
  *
  * @since 2.5.0
  *
@@ -805,9 +805,7 @@ function wp_media_upload_handler() {
 
 	if ( isset( $_POST['save'] ) ) {
 		$errors['upload_notice'] = __('Saved.');
-		wp_enqueue_script( 'admin-gallery' );
- 		return wp_iframe( 'media_upload_gallery_form', $errors );
-
+		return media_upload_gallery();
 	} elseif ( ! empty( $_POST ) ) {
 		$return = media_upload_form_handler();
 
@@ -1241,7 +1239,7 @@ function get_attachment_fields_to_edit($post, $errors = null) {
 	}
 
 	// Merge default fields with their errors, so any key passed with the error (e.g. 'error', 'helps', 'value') will replace the default
-	// The recursive merge is easily traversed with array casting: foreach ( (array) $things as $thing )
+	// The recursive merge is easily traversed with array casting: foreach( (array) $things as $thing )
 	$form_fields = array_merge_recursive($form_fields, (array) $errors);
 
 	// This was formerly in image_attachment_fields_to_edit().
@@ -1368,8 +1366,7 @@ function get_media_item( $attachment_id, $args = null ) {
 	$toggle_on  = __( 'Show' );
 	$toggle_off = __( 'Hide' );
 
-	$file = get_attached_file( $post->ID );
-	$filename = esc_html( wp_basename( $file ) );
+	$filename = esc_html( wp_basename( $post->guid ) );
 	$title = esc_attr( $post->post_title );
 
 	$post_mime_types = get_post_mime_types();
@@ -1630,7 +1627,7 @@ function get_compat_media_markup( $attachment_id, $args = null ) {
 	}
 
 	// Merge default fields with their errors, so any key passed with the error (e.g. 'error', 'helps', 'value') will replace the default
-	// The recursive merge is easily traversed with array casting: foreach ( (array) $things as $thing )
+	// The recursive merge is easily traversed with array casting: foreach( (array) $things as $thing )
 	$form_fields = array_merge_recursive($form_fields, (array) $args['errors'] );
 
 	/** This filter is documented in wp-admin/includes/media.php */
@@ -2787,8 +2784,7 @@ function edit_form_image_editor( $post ) {
 function attachment_submitbox_metadata() {
 	$post = get_post();
 
-	$file = get_attached_file( $post->ID );
-	$filename = esc_html( wp_basename( $file ) );
+	$filename = esc_html( wp_basename( $post->guid ) );
 
 	$media_dims = '';
 	$meta = wp_get_attachment_metadata( $post->ID );
@@ -2823,6 +2819,7 @@ function attachment_submitbox_metadata() {
 	</div>
 
 	<?php
+		$file  = get_attached_file( $post->ID );
 		$file_size = false;
 
 		if ( isset( $meta['filesize'] ) )

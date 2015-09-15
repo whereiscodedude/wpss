@@ -528,18 +528,10 @@ class WP_List_Table {
 			return;
 		}
 
-		$extra_checks = "AND post_status != 'auto-draft'";
-		if ( ! isset( $_GET['post_status'] ) || 'trash' !== $_GET['post_status'] ) {
-			$extra_checks .= " AND post_status != 'trash'";
-		} elseif ( isset( $_GET['post_status'] ) ) {
-			$extra_checks = $wpdb->prepare( ' AND post_status = %s', $_GET['post_status'] );
-		}
-
 		$months = $wpdb->get_results( $wpdb->prepare( "
 			SELECT DISTINCT YEAR( post_date ) AS year, MONTH( post_date ) AS month
 			FROM $wpdb->posts
 			WHERE post_type = %s
-			$extra_checks
 			ORDER BY post_date DESC
 		", $post_type ) );
 
@@ -655,11 +647,6 @@ class WP_List_Table {
 				esc_url( add_query_arg( array( 'p' => $post_id, 'comment_status' => 'moderated' ), admin_url( 'edit-comments.php' ) ) ),
 				$pending_comments_number,
 				$pending_phrase
-			);
-		} else {
-			printf( '<span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>',
-				$pending_comments_number,
-				$approved_comments ? __( 'No pending comments' ) : __( 'No comments' )
 			);
 		}
 	}
@@ -876,7 +863,7 @@ class WP_List_Table {
 
 		// We need a primary defined so responsive views show something,
 		// so let's fall back to the first non-checkbox column.
-		foreach ( $columns as $col => $column_name ) {
+		foreach( $columns as $col => $column_name ) {
 			if ( 'cb' === $col ) {
 				continue;
 			}
@@ -886,18 +873,6 @@ class WP_List_Table {
 		}
 
 		return $column;
-	}
-
-	/**
-	 * Public wrapper for `->get_default_primary_column_name()`
-	 *
-	 * @since 4.4.0
-	 * @access public
-	 *
-	 * @return string Name of the default primary column.
-	 */
-	public function get_primary_column() {
-		return $this->get_primary_column_name();
 	}
 
 	/**
@@ -1138,8 +1113,7 @@ class WP_List_Table {
 	protected function display_tablenav( $which ) {
 		if ( 'top' == $which )
 			wp_nonce_field( 'bulk-' . $this->_args['plural'] );
-
-		if ( $this->has_items() ) : ?>
+?>
 	<div class="tablenav <?php echo esc_attr( $which ); ?>">
 
 		<div class="alignleft actions bulkactions">
@@ -1153,7 +1127,6 @@ class WP_List_Table {
 		<br class="clear" />
 	</div>
 <?php
-		endif;
 	}
 
 	/**
@@ -1282,7 +1255,7 @@ class WP_List_Table {
 	 * @param object $item        The item being acted upon.
 	 * @param string $column_name Current column name.
 	 * @param string $primary     Primary column name.
-	 * @return string The row actions HTML, or an empty string if the current column is the primary column.
+	 * @return string The row actions output. In this case, an empty string.
 	 */
 	protected function handle_row_actions( $item, $column_name, $primary ) {
 		return $column_name == $primary ? '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details' ) . '</span></button>' : '';

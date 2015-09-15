@@ -268,7 +268,6 @@ inlineEditPost = {
 		$.post( ajaxurl, params,
 			function(r) {
 				$( 'table.widefat .spinner' ).removeClass( 'is-active' );
-				$( '.ac_results' ).hide();
 
 				if (r) {
 					if ( -1 !== r.indexOf( '<tr' ) ) {
@@ -288,15 +287,13 @@ inlineEditPost = {
 	},
 
 	revert : function(){
-		var $tableWideFat = $( '.widefat' ),
-			id = $( '.inline-editor', $tableWideFat ).attr( 'id' );
+		var id = $('table.widefat tr.inline-editor').attr('id');
 
 		if ( id ) {
-			$( '.spinner', $tableWideFat ).removeClass( 'is-active' );
-			$( '.ac_results' ).hide();
+			$( 'table.widefat .spinner' ).removeClass( 'is-active' );
 
 			if ( 'bulk-edit' === id ) {
-				$( '#bulk-edit', $tableWideFat ).removeClass( 'inline-editor' ).hide().siblings( '.hidden' ).remove();
+				$('table.widefat #bulk-edit').removeClass('inline-editor').hide().siblings('tr.hidden').remove();
 				$('#bulk-titles').empty();
 				$('#inlineedit').append( $('#bulk-edit') );
 			} else {

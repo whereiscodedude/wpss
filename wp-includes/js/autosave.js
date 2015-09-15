@@ -286,8 +286,7 @@ window.autosave = function() {
 						});
 					}
 
-					var secure = ( 'https:' === window.location.protocol );
-					wpCookies.set( 'wp-saving-post', post_id + '-check', 24 * 60 * 60, false, false, secure );
+					wpCookies.set( 'wp-saving-post', post_id + '-check', 24 * 60 * 60 );
 				});
 			}
 

@@ -164,7 +164,6 @@ function wp_category_checklist( $post_id = 0, $descendants_and_self = 0, $select
  * Taxonomy-independent version of wp_category_checklist().
  *
  * @since 3.0.0
- * @since 4.4.0 Introduced the `$echo` argument.
  *
  * @param int          $post_id Optional. Post ID. Default 0.
  * @param array|string $args {
@@ -180,8 +179,6 @@ function wp_category_checklist( $post_id = 0, $descendants_and_self = 0, $select
  *     @type string $taxonomy             Taxonomy to generate the checklist for. Default 'category'.
  *     @type bool   $checked_ontop        Whether to move checked items out of the hierarchy and to
  *                                        the top of the list. Default true.
- *     @type bool   $echo                 Whether to echo the generated markup. False to return the markup instead
- *                                        of echoing it. Default true.
  * }
  */
 function wp_terms_checklist( $post_id = 0, $args = array() ) {
@@ -191,8 +188,7 @@ function wp_terms_checklist( $post_id = 0, $args = array() ) {
 		'popular_cats' => false,
 		'walker' => null,
 		'taxonomy' => 'category',
-		'checked_ontop' => true,
-		'echo' => true,
+		'checked_ontop' => true
 	);
 
 	/**
@@ -255,14 +251,12 @@ function wp_terms_checklist( $post_id = 0, $args = array() ) {
 		$categories = (array) get_terms( $taxonomy, array( 'get' => 'all' ) );
 	}
 
-	$output = '';
-
 	if ( $r['checked_ontop'] ) {
 		// Post process $categories rather than adding an exclude to the get_terms() query to keep the query the same across all posts (for any query cache)
 		$checked_categories = array();
 		$keys = array_keys( $categories );
 
-		foreach ( $keys as $k ) {
+		foreach( $keys as $k ) {
 			if ( in_array( $categories[$k]->term_id, $args['selected_cats'] ) ) {
 				$checked_categories[] = $categories[$k];
 				unset( $categories[$k] );
@@ -270,16 +264,10 @@ function wp_terms_checklist( $post_id = 0, $args = array() ) {
 		}
 
 		// Put checked cats on top
-		$output .= call_user_func_array( array( $walker, 'walk' ), array( $checked_categories, 0, $args ) );
+		echo call_user_func_array( array( $walker, 'walk' ), array( $checked_categories, 0, $args ) );
 	}
 	// Then the rest of them
-	$output .= call_user_func_array( array( $walker, 'walk' ), array( $categories, 0, $args ) );
-
-	if ( $r['echo'] ) {
-		echo $output;
-	}
-
-	return $output;
+	echo call_user_func_array( array( $walker, 'walk' ), array( $categories, 0, $args ) );
 }
 
 /**
@@ -498,12 +486,12 @@ function wp_comment_reply( $position = 1, $checkbox = false, $mode = 'single', $
 	<div id="addhead" style="display:none;"><h5><?php _e('Add new Comment'); ?></h5></div>
 	<div id="edithead" style="display:none;">
 		<div class="inside">
-		<label for="author-name"><?php _e( 'Name' ) ?></label>
-		<input type="text" name="newcomment_author" size="50" value="" id="author-name" />
+		<label for="author"><?php _e('Name') ?></label>
+		<input type="text" name="newcomment_author" size="50" value="" id="author" />
 		</div>
 
 		<div class="inside">
-		<label for="author-email"><?php _e('Email') ?></label>
+		<label for="author-email"><?php _e('E-mail') ?></label>
 		<input type="text" name="newcomment_author_email" size="50" value="" id="author-email" />
 		</div>
 
@@ -754,9 +742,9 @@ function meta_form( $post = null ) {
  * Print out HTML form date elements for editing post or comment publish date.
  *
  * @since 0.71
- * @since 4.4.0 Converted to use get_comment() instead of the global `$comment`.
  *
- * @global WP_Locale  $wp_locale
+ * @global WP_Locale $wp_locale
+ * @global object    $comment
  *
  * @param int|bool $edit      Accepts 1|true for editing the date, 0|false for adding the date.
  * @param int|bool $for_post  Accepts 1|true for applying the date to a post, 0|false for a comment.
@@ -765,7 +753,7 @@ function meta_form( $post = null ) {
  *                            Default 0|false.
  */
 function touch_time( $edit = 1, $for_post = 1, $tab_index = 0, $multi = 0 ) {
-	global $wp_locale;
+	global $wp_locale, $comment;
 	$post = get_post();
 
 	if ( $for_post )
@@ -779,7 +767,7 @@ function touch_time( $edit = 1, $for_post = 1, $tab_index = 0, $multi = 0 ) {
 	// echo '<label for="timestamp" style="display: block;"><input type="checkbox" class="checkbox" name="edit_date" value="1" id="timestamp"'.$tab_index_attribute.' /> '.__( 'Edit timestamp' ).'</label><br />';
 
 	$time_adj = current_time('timestamp');
-	$post_date = ($for_post) ? $post->post_date : get_comment()->comment_date;
+	$post_date = ($for_post) ? $post->post_date : $comment->comment_date;
 	$jj = ($edit) ? mysql2date( 'd', $post_date, false ) : gmdate( 'd', $time_adj );
 	$mm = ($edit) ? mysql2date( 'm', $post_date, false ) : gmdate( 'm', $time_adj );
 	$aa = ($edit) ? mysql2date( 'Y', $post_date, false ) : gmdate( 'Y', $time_adj );
@@ -860,20 +848,18 @@ function page_template_dropdown( $default = '' ) {
  * Print out option HTML elements for the page parents drop-down.
  *
  * @since 1.5.0
- * @since 4.4.0 `$post` argument was added.
  *
  * @global wpdb $wpdb
  *
- * @param int         $default Optional. The default page ID to be pre-selected. Default 0.
- * @param int         $parent  Optional. The parent page ID. Default 0.
- * @param int         $level   Optional. Page depth level. Default 0.
- * @param int|WP_Post $post    Post ID or WP_Post object.
+ * @param int $default Optional. The default page ID to be pre-selected. Default 0.
+ * @param int $parent  Optional. The parent page ID. Default 0.
+ * @param int $level   Optional. Page depth level. Default 0.
  *
  * @return null|false Boolean False if page has no children, otherwise print out html elements
  */
-function parent_dropdown( $default = 0, $parent = 0, $level = 0, $post = null ) {
+function parent_dropdown( $default = 0, $parent = 0, $level = 0 ) {
 	global $wpdb;
-	$post = get_post( $post );
+	$post = get_post();
 	$items = $wpdb->get_results( $wpdb->prepare("SELECT ID, post_parent, post_title FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'page' ORDER BY menu_order", $parent) );
 
 	if ( $items ) {
@@ -1097,11 +1083,8 @@ function do_meta_boxes( $screen, $context, $object ) {
 					$i++;
 					$hidden_class = in_array($box['id'], $hidden) ? ' hide-if-js' : '';
 					echo '<div id="' . $box['id'] . '" class="postbox ' . postbox_classes($box['id'], $page) . $hidden_class . '" ' . '>' . "\n";
-					if ( 'dashboard_browser_nag' != $box['id'] ) {
-						echo '<button class="handlediv button-link" title="' . esc_attr__( 'Click to toggle' ) . '" aria-expanded="true">';
-						echo '<span class="screen-reader-text">' . sprintf( __( 'Click to toggle %s panel' ), $box['title'] ) . '</span><br />';
-						echo '</button>';
-					}
+					if ( 'dashboard_browser_nag' != $box['id'] )
+						echo '<div class="handlediv" title="' . esc_attr__('Click to toggle') . '"><br /></div>';
 					echo "<h3 class='hndle'><span>{$box['title']}</span></h3>\n";
 					echo '<div class="inside">' . "\n";
 					call_user_func($box['callback'], $object, $box);

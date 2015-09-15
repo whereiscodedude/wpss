@@ -42,9 +42,8 @@ class WP_Comments_List_Table extends WP_List_Table {
 
 		$post_id = isset( $_REQUEST['p'] ) ? absint( $_REQUEST['p'] ) : 0;
 
-		if ( get_option( 'show_avatars' ) ) {
-			add_filter( 'comment_author', array( $this, 'floated_admin_avatar' ), 10, 2 );
-		}
+		if ( get_option('show_avatars') )
+			add_filter( 'comment_author', 'floated_admin_avatar' );
 
 		parent::__construct( array(
 			'plural' => 'comments',
@@ -52,12 +51,6 @@ class WP_Comments_List_Table extends WP_List_Table {
 			'ajax' => true,
 			'screen' => isset( $args['screen'] ) ? $args['screen'] : null,
 		) );
-	}
-
-	public function floated_admin_avatar( $name, $comment_ID ) {
-		$comment = get_comment( $comment_ID );
-		$avatar = get_avatar( $comment, 32, 'mystery' );
-		return "$avatar $name";
 	}
 
 	/**
@@ -205,7 +198,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		$stati = array(
 				'all' => _nx_noop('All', 'All', 'comments'), // singular not used
 				'moderated' => _n_noop('Pending <span class="count">(<span class="pending-count">%s</span>)</span>', 'Pending <span class="count">(<span class="pending-count">%s</span>)</span>'),
-				'approved' => _n_noop('Approved <span class="count">(<span class="approved-count">%s</span>)</span>', 'Approved <span class="count">(<span class="approved-count">%s</span>)</span>'),
+				'approved' => _n_noop('Approved', 'Approved'), // singular not used
 				'spam' => _n_noop('Spam <span class="count">(<span class="spam-count">%s</span>)</span>', 'Spam <span class="count">(<span class="spam-count">%s</span>)</span>'),
 				'trash' => _n_noop('Trash <span class="count">(<span class="trash-count">%s</span>)</span>', 'Trash <span class="count">(<span class="trash-count">%s</span>)</span>')
 			);
@@ -416,10 +409,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 	</tbody>
 
 	<tbody id="the-extra-comment-list" data-wp-lists="list:comment" style="display: none;">
-		<?php
-			$this->items = $this->extra_items;
-			$this->display_rows_or_placeholder();
-		?>
+		<?php $this->items = $this->extra_items; $this->display_rows(); ?>
 	</tbody>
 
 	<tfoot>
@@ -435,29 +425,29 @@ class WP_Comments_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * @global WP_Post $post
 	 *
-	 * @param object $comment
+	 * @global WP_Post $post
+	 * @global object  $comment
+	 *
+	 * @param object $a_comment
 	 */
-	public function single_row( $comment ) {
-		global $post;
+	public function single_row( $a_comment ) {
+		global $post, $comment;
 
-		$the_comment_class = wp_get_comment_status( $comment );
+		$comment = $a_comment;
+		$the_comment_class = wp_get_comment_status( $comment->comment_ID );
 		if ( ! $the_comment_class ) {
 			$the_comment_class = '';
 		}
-		$the_comment_class = join( ' ', get_comment_class( $the_comment_class, $comment, $comment->comment_post_ID ) );
+		$the_comment_class = join( ' ', get_comment_class( $the_comment_class, $comment->comment_ID, $comment->comment_post_ID ) );
 
-		if ( $comment->comment_post_ID > 0 ) {
-			$post = get_post( $comment->comment_post_ID );
-		}
+		$post = get_post( $comment->comment_post_ID );
+
 		$this->user_can = current_user_can( 'edit_comment', $comment->comment_ID );
 
 		echo "<tr id='comment-$comment->comment_ID' class='$the_comment_class'>";
 		$this->single_row_columns( $comment );
 		echo "</tr>\n";
-
-		$post = null;
 	}
 
  	/**
@@ -482,7 +472,7 @@ class WP_Comments_List_Table extends WP_List_Table {
  			return;
 		}
 
-		$the_comment_status = wp_get_comment_status( $comment );
+		$the_comment_status = wp_get_comment_status( $comment->comment_ID );
 
 		$out = '';
 
@@ -591,7 +581,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 	 * @param object $comment
 	 */
 	public function column_comment( $comment ) {
-		$comment_url = esc_url( get_comment_link( $comment ) );
+		$comment_url = esc_url( get_comment_link( $comment->comment_ID ) );
 
 		echo '<div class="comment-author">';
 			$this->column_author( $comment );
@@ -601,21 +591,19 @@ class WP_Comments_List_Table extends WP_List_Table {
 		/* translators: 2: comment date, 3: comment time */
 		printf( __( 'Submitted on <a href="%1$s">%2$s at %3$s</a>' ), $comment_url,
 			/* translators: comment date format. See http://php.net/date */
-			get_comment_date( __( 'Y/m/d' ), $comment ),
-			get_comment_date( get_option( 'time_format' ), $comment )
+			get_comment_date( __( 'Y/m/d' ) ),
+			get_comment_date( get_option( 'time_format' ) )
 		);
 
 		if ( $comment->comment_parent ) {
 			$parent = get_comment( $comment->comment_parent );
-			if ( $parent ) {
-				$parent_link = esc_url( get_comment_link( $parent ) );
-				$name = get_comment_author( $parent );
-				printf( ' | '.__( 'In reply to <a href="%1$s">%2$s</a>.' ), $parent_link, $name );
-			}
+			$parent_link = esc_url( get_comment_link( $comment->comment_parent ) );
+			$name = get_comment_author( $parent->comment_ID );
+			printf( ' | '.__( 'In reply to <a href="%1$s">%2$s</a>.' ), $parent_link, $name );
 		}
 
 		echo '</div>';
-		comment_text( $comment );
+		comment_text();
 		if ( $this->user_can ) { ?>
 		<div id="inline-<?php echo $comment->comment_ID; ?>" class="hidden">
 		<textarea class="comment" rows="1" cols="1"><?php
@@ -640,29 +628,24 @@ class WP_Comments_List_Table extends WP_List_Table {
 	public function column_author( $comment ) {
 		global $comment_status;
 
-		$author_url = get_comment_author_url( $comment );
+		$author_url = get_comment_author_url();
+		if ( 'http://' == $author_url )
+			$author_url = '';
+		$author_url_display = preg_replace( '|http://(www\.)?|i', '', $author_url );
+		if ( strlen( $author_url_display ) > 50 )
+			$author_url_display = substr( $author_url_display, 0, 49 ) . '&hellip;';
 
-		$author_url_display = untrailingslashit( preg_replace( '|^http(s)?://(www\.)?|i', '', $author_url ) );
-		if ( strlen( $author_url_display ) > 50 ) {
-			$author_url_display = wp_html_excerpt( $author_url_display, 49, '&hellip;' );
-		}
-
-		echo "<strong>"; comment_author( $comment ); echo '</strong><br />';
-		if ( ! empty( $author_url_display ) ) {
-			printf( '<a href="%s">%s</a><br />', esc_url( $author_url ), esc_html( $author_url_display ) );
-		}
+		echo "<strong>"; comment_author(); echo '</strong><br />';
+		if ( !empty( $author_url ) )
+			echo "<a title='$author_url' href='$author_url'>$author_url_display</a><br />";
 
 		if ( $this->user_can ) {
-			if ( ! empty( $comment->comment_author_email ) ) {
-				/* This filter is documented in wp-includes/comment-template.php */
-				$email = apply_filters( 'comment_email', $comment->comment_author_email, $comment );
-
-				if ( ! empty( $email ) && '@' !== $email ) {
-					printf( '<a href=\'mailto:%1$s\'>%1$s</a><br />', $email );
-				}
+			if ( !empty( $comment->comment_author_email ) ) {
+				comment_author_email_link();
+				echo '<br />';
 			}
 
-			$author_ip = get_comment_author_IP( $comment );
+			$author_ip = get_comment_author_IP();
 			if ( $author_ip ) {
 				$author_ip_url = add_query_arg( array( 's' => $author_ip, 'mode' => 'detail' ), 'edit-comments.php' );
 				if ( 'spam' == $comment_status ) {
@@ -677,8 +660,8 @@ class WP_Comments_List_Table extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	public function column_date( $comment ) {
-		return get_comment_date( __( 'Y/m/d \a\t g:i a' ), $comment );
+	public function column_date() {
+		return get_comment_date( __( 'Y/m/d \a\t g:i a' ) );
 	}
 
 	/**
@@ -712,7 +695,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		echo $post_link;
 		$post_type_object = get_post_type_object( $post->post_type );
 		echo "<a href='" . get_permalink( $post->ID ) . "' class='comments-view-item-link'>" . $post_type_object->labels->view_item . '</a>';
-		echo '<span class="post-com-count-wrapper post-com-count-', $post->ID, '">';
+		echo '<span class="post-com-count-wrapper">';
 		$this->comments_bubble( $post->ID, $pending_comments );
 		echo '</span> ';
 		echo '</div>';

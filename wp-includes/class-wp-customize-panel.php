@@ -416,7 +416,7 @@ class WP_Customize_Nav_Menus_Panel extends WP_Customize_Panel {
 
 		// Display screen options.
 		$screen = WP_Screen::get( 'nav-menus.php' );
-		$screen->render_screen_options( array( 'wrap' => false ) );
+		$screen->render_screen_options();
 	}
 
 	/**
@@ -475,9 +475,7 @@ class WP_Customize_Nav_Menus_Panel extends WP_Customize_Panel {
 			<# if ( data.description ) { #>
 			<div class="description customize-panel-description">{{{ data.description }}}</div>
 			<# } #>
-			<div id="screen-options-wrap">
-				<?php $this->render_screen_options(); ?>
-			</div>
+			<?php $this->render_screen_options(); ?>
 		</li>
 	<?php
 	}

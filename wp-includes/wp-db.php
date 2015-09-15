@@ -840,7 +840,7 @@ class wpdb {
 		 */
 		$incompatible_modes = (array) apply_filters( 'incompatible_sql_modes', $this->incompatible_modes );
 
-		foreach ( $modes as $i => $mode ) {
+		foreach( $modes as $i => $mode ) {
 			if ( in_array( $mode, $incompatible_modes ) ) {
 				unset( $modes[ $i ] );
 			}
@@ -1061,7 +1061,7 @@ class wpdb {
 	 * Use esc_sql() or wpdb::prepare() instead.
 	 *
 	 * @since 2.8.0
-	 * @deprecated 3.6.0 Use wpdb::prepare()
+	 * @deprecated 3.6.0
 	 * @see wpdb::prepare
 	 * @see esc_sql()
 	 * @access private
@@ -1135,7 +1135,7 @@ class wpdb {
 	 * Use esc_sql() or wpdb::prepare() instead.
 	 *
 	 * @since 0.71
-	 * @deprecated 3.6.0 Use wpdb::prepare()
+	 * @deprecated 3.6.0
 	 * @see wpdb::prepare()
 	 * @see esc_sql()
 	 *
@@ -2249,7 +2249,7 @@ class wpdb {
 		} elseif ( $output == ARRAY_A || $output == ARRAY_N ) {
 			// Return an integer-keyed array of...
 			if ( $this->last_result ) {
-				foreach ( (array) $this->last_result as $row ) {
+				foreach( (array) $this->last_result as $row ) {
 					if ( $output == ARRAY_N ) {
 						// ...integer-keyed row arrays
 						$new_array[] = array_values( get_object_vars( $row ) );
@@ -2482,45 +2482,47 @@ class wpdb {
 					'type'   => 'char',
 					'length' => (int) $length,
 				);
-
+				break;
 			case 'binary':
 			case 'varbinary':
 				return array(
 					'type'   => 'byte',
 					'length' => (int) $length,
 				);
-
+				break;
 			case 'tinyblob':
 			case 'tinytext':
 				return array(
 					'type'   => 'byte',
 					'length' => 255,        // 2^8 - 1
 				);
-
+				break;
 			case 'blob':
 			case 'text':
 				return array(
 					'type'   => 'byte',
 					'length' => 65535,      // 2^16 - 1
 				);
-
+				break;
 			case 'mediumblob':
 			case 'mediumtext':
 				return array(
 					'type'   => 'byte',
 					'length' => 16777215,   // 2^24 - 1
 				);
-
+				break;
 			case 'longblob':
 			case 'longtext':
 				return array(
 					'type'   => 'byte',
 					'length' => 4294967295, // 2^32 - 1
 				);
-
+				break;
 			default:
 				return false;
 		}
+
+		return false;
 	}
 
 	/**
@@ -2592,7 +2594,7 @@ class wpdb {
 		}
 
 		// If any of the columns don't have one of these collations, it needs more sanity checking.
-		foreach ( $this->col_meta[ $table ] as $col ) {
+		foreach( $this->col_meta[ $table ] as $col ) {
 			if ( empty( $col->Collation ) ) {
 				continue;
 			}
@@ -2942,7 +2944,7 @@ class wpdb {
 			if ( $col_offset == -1 ) {
 				$i = 0;
 				$new_array = array();
-				foreach ( (array) $this->col_info as $col ) {
+				foreach( (array) $this->col_info as $col ) {
 					$new_array[$i] = $col->{$info_type};
 					$i++;
 				}
@@ -3020,10 +3022,9 @@ class wpdb {
 	 *
 	 * Called when WordPress is generating the table scheme.
 	 *
-	 * Use `wpdb::has_cap( 'collation' )`.
-	 *
 	 * @since 2.5.0
-	 * @deprecated 3.5.0 Use wpdb::has_cap()
+	 * @deprecated 3.5.0
+	 * @deprecated Use wpdb::has_cap( 'collation' )
 	 *
 	 * @return bool True if collation is supported, false if version does not
 	 */

@@ -24,8 +24,6 @@ class WP_Customize_Setting {
 	public $manager;
 
 	/**
-	 * Unique string identifier for the setting.
-	 *
 	 * @access public
 	 * @var string
 	 */
@@ -76,9 +74,6 @@ class WP_Customize_Setting {
 	 */
 	public $dirty = false;
 
-	/**
-	 * @var array
-	 */
 	protected $id_data = array();
 
 	/**
@@ -153,8 +148,7 @@ class WP_Customize_Setting {
 	protected $_original_value;
 
 	/**
-	 * Set up filters for the setting so that the preview request
-	 * will render the drafted changes.
+	 * Handle previewing the setting.
 	 *
 	 * @since 3.4.0
 	 */

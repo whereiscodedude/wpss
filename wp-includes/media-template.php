@@ -50,7 +50,7 @@ function wp_underscore_audio_template() {
 function wp_underscore_video_template() {
 	$video_types = wp_get_video_extensions();
 ?>
-<#  var w_rule = '', classes = [],
+<#  var w_rule = h_rule = '', classes = [],
 		w, h, settings = wp.media.view.settings,
 		isYouTube = isVimeo = false;
 
@@ -69,10 +69,13 @@ function wp_underscore_video_template() {
 		h = Math.ceil( ( data.model.height * w ) / data.model.width );
 	} else {
 		h = data.model.height;
- 	}
+	}
 
 	if ( w ) {
 		w_rule = 'width: ' + w + 'px; ';
+	}
+	if ( h ) {
+		h_rule = 'height: ' + h + 'px;';
 	}
 
 	if ( isYouTube ) {
@@ -84,7 +87,7 @@ function wp_underscore_video_template() {
 	}
 
 #>
-<div style="{{ w_rule }}" class="wp-video">
+<div style="{{ w_rule }}{{ h_rule }}" class="wp-video">
 <video controls
 	class="wp-video-shortcode {{ classes.join( ' ' ) }}"
 	<# if ( w ) { #>width="{{ w }}"<# } #>
@@ -305,14 +308,17 @@ function wp_print_media_templates() {
 					</audio>
 				</div>
 				<# } else if ( 'video' === data.type ) {
-					var w_rule = '';
+					var w_rule = h_rule = '';
 					if ( data.width ) {
 						w_rule = 'width: ' + data.width + 'px;';
 					} else if ( wp.media.view.settings.contentWidth ) {
 						w_rule = 'width: ' + wp.media.view.settings.contentWidth + 'px;';
 					}
+					if ( data.height ) {
+						h_rule = 'height: ' + data.height + 'px;';
+					}
 				#>
-				<div style="{{ w_rule }}" class="wp-media-wrapper wp-video">
+				<div style="{{ w_rule }}{{ h_rule }}" class="wp-media-wrapper wp-video">
 					<video controls="controls" class="wp-video-shortcode" preload="metadata"
 						<# if ( data.width ) { #>width="{{ data.width }}"<# } #>
 						<# if ( data.height ) { #>height="{{ data.height }}"<# } #>
@@ -646,10 +652,7 @@ function wp_print_media_templates() {
 					</option>
 					<option value="file">
 				<# } else { #>
-					<option value="none" selected>
-						<?php esc_attr_e('None'); ?>
-					</option>
-					<option value="file">
+					<option value="file" selected>
 				<# } #>
 					<# if ( data.model.canEmbed ) { #>
 						<?php esc_attr_e('Link to Media File'); ?>
@@ -667,6 +670,9 @@ function wp_print_media_templates() {
 				<# if ( 'image' === data.type ) { #>
 					<option value="custom">
 						<?php esc_attr_e('Custom URL'); ?>
+					</option>
+					<option value="none">
+						<?php esc_attr_e('None'); ?>
 					</option>
 				<# } #>
 				</select>
@@ -999,7 +1005,7 @@ function wp_print_media_templates() {
 							</div>
 							<div class="advanced-link">
 								<div class="setting link-target">
-									<label><input type="checkbox" data-setting="linkTargetBlank" value="_blank" <# if ( data.model.linkTargetBlank ) { #>checked="checked"<# } #>><?php _e( 'Open link in a new tab' ); ?></label>
+									<label><input type="checkbox" data-setting="linkTargetBlank" value="_blank" <# if ( data.model.linkTargetBlank ) { #>checked="checked"<# } #>><?php _e( 'Open link in a new window/tab' ); ?></label>
 								</div>
 								<label class="setting link-rel">
 									<span><?php _e('Link Rel'); ?></span>

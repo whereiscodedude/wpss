@@ -74,12 +74,12 @@ function edit_comment() {
 }
 
 /**
- * Returns a WP_Comment object based on comment ID.
+ * Returns a comment object based on comment ID.
  *
  * @since 2.0.0
  *
  * @param int $id ID of comment to retrieve.
- * @return WP_Comment|false Comment if found. False on failure.
+ * @return object|false Comment if found. False on failure.
  */
 function get_comment_to_edit( $id ) {
 	if ( !$comment = get_comment($id) )
@@ -156,11 +156,14 @@ function get_pending_comments_num( $post_id ) {
  *
  * @since 2.5.0
  *
+ * @global object $comment
+ *
  * @param string $name User name.
  * @return string Avatar with Admin name.
  */
 function floated_admin_avatar( $name ) {
-	$avatar = get_avatar( get_comment(), 32, 'mystery' );
+	global $comment;
+	$avatar = get_avatar( $comment, 32, 'mystery' );
 	return "$avatar $name";
 }
 
@@ -170,15 +173,4 @@ function floated_admin_avatar( $name ) {
 function enqueue_comment_hotkeys_js() {
 	if ( 'true' == get_user_option( 'comment_shortcuts' ) )
 		wp_enqueue_script( 'jquery-table-hotkeys' );
-}
-
-/**
- * Display error message at bottom of comments.
- *
- * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
- */
-function comment_footer_die( $msg ) {
-	echo "<div class='wrap'><p>$msg</p></div>";
-	include( ABSPATH . 'wp-admin/admin-footer.php' );
-	die;
 }
