@@ -1,14 +1,12 @@
 /**
  * mctabs.js
  *
+ * Copyright 2009, Moxiecode Systems AB
  * Released under LGPL License.
- * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
  *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * License: http://tinymce.moxiecode.com/license
+ * Contributing: http://tinymce.moxiecode.com/contributing
  */
-
-/*jshint globals: tinyMCEPopup */
 
 function MCTabs() {
 	this.settings = [];
@@ -48,14 +46,14 @@ MCTabs.prototype.hideTab =function(tab){
 };
 
 MCTabs.prototype.showPanel = function(panel) {
-	panel.className = 'current';
+	panel.className = 'current'; 
 	panel.setAttribute("aria-hidden", false);
 };
 
 MCTabs.prototype.hidePanel = function(panel) {
 	panel.className = 'panel';
 	panel.setAttribute("aria-hidden", true);
-};
+}; 
 
 MCTabs.prototype.getPanelForTab = function(tabElm) {
 	return tinyMCEPopup.dom.getAttrib(tabElm, "aria-controls");
@@ -98,7 +96,7 @@ MCTabs.prototype.displayTab = function(tab_id, panel_id, avoid_focus) {
 				t.hidePanel(nodes[i]);
 		}
 
-		if (!avoid_focus) {
+		if (!avoid_focus) { 
 			tabElm.focus();
 		}
 
@@ -124,9 +122,9 @@ tinyMCEPopup.onInit.add(function() {
 	var tinymce = tinyMCEPopup.getWin().tinymce, dom = tinyMCEPopup.dom, each = tinymce.each;
 
 	each(dom.select('div.tabs'), function(tabContainerElm) {
-		//var keyNav;
+		var keyNav;
 
-		dom.setAttrib(tabContainerElm, "role", "tablist");
+		dom.setAttrib(tabContainerElm, "role", "tablist"); 
 
 		var items = tinyMCEPopup.dom.select('li', tabContainerElm);
 		var action = function(id) {
@@ -143,7 +141,7 @@ tinyMCEPopup.onInit.add(function() {
 
 		dom.bind(dom.getRoot(), 'keydown', function(evt) {
 			if (evt.keyCode === 9 && evt.ctrlKey && !evt.altKey) { // Tab
-				//keyNav.moveFocus(evt.shiftKey ? -1 : 1);
+				keyNav.moveFocus(evt.shiftKey ? -1 : 1);
 				tinymce.dom.Event.cancel(evt);
 			}
 		});
@@ -152,13 +150,13 @@ tinyMCEPopup.onInit.add(function() {
 			dom.setAttrib(a, 'tabindex', '-1');
 		});
 
-		/*keyNav = tinyMCEPopup.editor.windowManager.createInstance('tinymce.ui.KeyboardNavigation', {
+		keyNav = tinyMCEPopup.editor.windowManager.createInstance('tinymce.ui.KeyboardNavigation', {
 			root: tabContainerElm,
 			items: items,
 			onAction: action,
 			actOnFocus: true,
 			enableLeftRight: true,
 			enableUpDown: true
-		}, tinyMCEPopup.dom);*/
+		}, tinyMCEPopup.dom);
 	});
 });
