@@ -1,6 +1,3 @@
-/*
- * Script run inside a Customizer preview frame.
- */
 (function( exports, $ ){
 	var api = wp.customize,
 		debounce;
@@ -33,7 +30,8 @@
 	 */
 	api.Preview = api.Messenger.extend({
 		/**
-		 * @param {string} url The URL of preview frame
+		 * Requires params:
+		 *  - url    - the URL of preview frame
 		 */
 		initialize: function( params, options ) {
 			var self = this;
@@ -111,25 +109,11 @@
 			api.preview.send( 'documentTitle', document.title );
 		});
 
-		/*
-		 * Send a message to the parent customize frame with a list of which
-		 * containers and controls are active.
-		 */
 		api.preview.send( 'ready', {
 			activePanels: api.settings.activePanels,
 			activeSections: api.settings.activeSections,
 			activeControls: api.settings.activeControls
 		} );
-
-		// Display a loading indicator when preview is reloading, and remove on failure.
-		api.preview.bind( 'loading-initiated', function () {
-			$( 'body' ).addClass( 'wp-customizer-unloading' );
-			$( 'html' ).prop( 'title', api.settings.l10n.loading );
-		});
-		api.preview.bind( 'loading-failed', function () {
-			$( 'body' ).removeClass( 'wp-customizer-unloading' );
-			$( 'html' ).prop( 'title', '' );
-		});
 
 		/* Custom Backgrounds */
 		bg = $.map(['color', 'image', 'position_x', 'repeat', 'attachment'], function( prop ) {
