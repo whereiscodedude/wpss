@@ -71,6 +71,7 @@ function bloginfo_rss($show = '') {
  * 'default_feed' filter.
  *
  * @since 2.5.0
+ * @uses apply_filters() Calls 'default_feed' hook on the default feed string.
  *
  * @return string Default feed, or for example 'rss2', 'atom', etc.
  */
@@ -164,6 +165,7 @@ function get_the_title_rss() {
  * Display the post title in the feed.
  *
  * @since 0.71
+ * @uses get_the_title_rss() Used to retrieve current post title.
  */
 function the_title_rss() {
 	echo get_the_title_rss();
@@ -201,6 +203,8 @@ function get_the_content_feed($feed_type = null) {
  * Display the post content for feeds.
  *
  * @since 2.9.0
+ * @uses apply_filters() Calls 'the_content_feed' on the content before processing.
+ * @see get_the_content()
  *
  * @param string $feed_type The type of feed. rss2 | atom | rss | rdf
  */
@@ -264,7 +268,7 @@ function comments_link_feed() {
  *
  * @since 2.5.0
  *
- * @param int|WP_Comment $comment_id Optional comment object or id. Defaults to global comment object.
+ * @param int|object $comment_id Optional comment object or id. Defaults to global comment object.
  */
 function comment_guid($comment_id = null) {
 	echo esc_url( get_comment_guid($comment_id) );
@@ -275,8 +279,8 @@ function comment_guid($comment_id = null) {
  *
  * @since 2.5.0
  *
- * @param int|WP_Comment $comment_id Optional comment object or id. Defaults to global comment object.
- * @return false|string false on failure or guid for comment on success.
+ * @param int|object $comment_id Optional comment object or id. Defaults to global comment object.
+ * @return bool|string false on failure or guid for comment on success.
  */
 function get_comment_guid($comment_id = null) {
 	$comment = get_comment($comment_id);
@@ -291,11 +295,8 @@ function get_comment_guid($comment_id = null) {
  * Display the link to the comments.
  *
  * @since 1.5.0
- * @since 4.4.0 Introduced the `$comment` argument.
- *
- * @param int|WP_Comment $comment Optional comment object or id. Defaults to global comment object.
  */
-function comment_link( $comment = null ) {
+function comment_link() {
 	/**
 	 * Filter the current comment's permalink.
 	 *
@@ -305,13 +306,14 @@ function comment_link( $comment = null ) {
 	 *
 	 * @param string $comment_permalink The current comment permalink.
 	 */
-	echo esc_url( apply_filters( 'comment_link', get_comment_link( $comment ) ) );
+	echo esc_url( apply_filters( 'comment_link', get_comment_link() ) );
 }
 
 /**
  * Retrieve the current comment author for use in the feeds.
  *
  * @since 2.0.0
+ * @uses get_comment_author()
  *
  * @return string Comment Author
  */
@@ -341,6 +343,7 @@ function comment_author_rss() {
  * Display the current comment content for use in the feeds.
  *
  * @since 1.0.0
+ * @uses get_comment_text()
  */
 function comment_text_rss() {
 	$comment_text = get_comment_text();
@@ -451,6 +454,7 @@ function html_type_rss() {
  * attributes.
  *
  * @since 1.5.0
+ * @uses get_post_custom() To get the current post enclosure metadata.
  */
 function rss_enclosure() {
 	if ( post_password_required() )
@@ -490,6 +494,7 @@ function rss_enclosure() {
  * enclosure(s) consist of link HTML tag(s) with a URI and other attributes.
  *
  * @since 2.2.0
+ * @uses get_post_custom() To get the current post enclosure metadata.
  */
 function atom_enclosure() {
 	if ( post_password_required() )
@@ -548,48 +553,10 @@ function prep_atom_text_construct($data) {
 		}
 	}
 
-	if (strpos($data, ']]>') === false) {
+	if (strpos($data, ']]>') == false) {
 		return array('html', "<![CDATA[$data]]>");
 	} else {
 		return array('html', htmlspecialchars($data));
-	}
-}
-
-/**
- * Displays Site Icon in atom feeds.
- *
- * @since 4.3.0
- *
- * @see get_site_icon_url()
- */
-function atom_site_icon() {
-	$url = get_site_icon_url( 32 );
-	if ( $url ) {
-		echo "<icon>$url</icon>\n";
-	}
-}
-
-/**
- * Displays Site Icon in RSS2.
- *
- * @since 4.3.0
- */
-function rss2_site_icon() {
-	$rss_title = get_wp_title_rss();
-	if ( empty( $rss_title ) ) {
-		$rss_title = get_bloginfo_rss( 'name' );
-	}
-
-	$url = get_site_icon_url( 32 );
-	if ( $url ) {
-		echo '
-<image>
-	<url>' . convert_chars( $url ) . '</url>
-	<title>' . $rss_title . '</title>
-	<link>' . get_bloginfo_rss( 'url' ) . '</link>
-	<width>32</width>
-	<height>32</height>
-</image> ' . "\n";
 	}
 }
 
@@ -683,7 +650,6 @@ function fetch_feed( $url ) {
 	 */
 	do_action_ref_array( 'wp_feed_options', array( &$feed, $url ) );
 	$feed->init();
-	$feed->set_output_encoding( get_option( 'blog_charset' ) );
 	$feed->handle_content_type();
 
 	if ( $feed->error() )

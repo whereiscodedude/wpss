@@ -29,7 +29,7 @@ require( ABSPATH . WPINC . '/default-constants.php' );
 global $wp_version, $wp_db_version, $tinymce_version, $required_php_version, $required_mysql_version;
 require( ABSPATH . WPINC . '/version.php' );
 
-// Set initial default constants including WP_MEMORY_LIMIT, WP_MAX_MEMORY_LIMIT, WP_DEBUG, SCRIPT_DEBUG, WP_CONTENT_DIR and WP_CACHE.
+// Set initial default constants including WP_MEMORY_LIMIT, WP_MAX_MEMORY_LIMIT, WP_DEBUG, WP_CONTENT_DIR and WP_CACHE.
 wp_initial_constants();
 
 // Check for the required PHP version and for the MySQL extension or a database drop-in.
@@ -148,6 +148,7 @@ require( ABSPATH . WPINC . '/shortcodes.php' );
 require( ABSPATH . WPINC . '/class-wp-embed.php' );
 require( ABSPATH . WPINC . '/media.php' );
 require( ABSPATH . WPINC . '/http.php' );
+require( ABSPATH . WPINC . '/class-http.php' );
 require( ABSPATH . WPINC . '/widgets.php' );
 require( ABSPATH . WPINC . '/nav-menu.php' );
 require( ABSPATH . WPINC . '/nav-menu-template.php' );
@@ -174,7 +175,7 @@ unset( $mu_plugin );
 
 // Load network activated plugins.
 if ( is_multisite() ) {
-	foreach ( wp_get_active_network_plugins() as $network_plugin ) {
+	foreach( wp_get_active_network_plugins() as $network_plugin ) {
 		wp_register_plugin_realpath( $network_plugin );
 		include_once( $network_plugin );
 	}
@@ -191,7 +192,7 @@ do_action( 'muplugins_loaded' );
 if ( is_multisite() )
 	ms_cookie_constants(  );
 
-// Define constants after multisite is loaded.
+// Define constants after multisite is loaded. Cookie-related constants may be overridden in ms_network_cookies().
 wp_cookie_constants();
 
 // Define and enforce our SSL constants
@@ -366,7 +367,7 @@ if ( is_multisite() ) {
  * AJAX requests should use wp-admin/admin-ajax.php. admin-ajax.php can handle requests for
  * users not logged in.
  *
- * @link https://codex.wordpress.org/AJAX_in_Plugins
+ * @link http://codex.wordpress.org/AJAX_in_Plugins
  *
  * @since 3.0.0
  */

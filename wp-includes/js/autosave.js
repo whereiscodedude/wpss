@@ -286,8 +286,7 @@ window.autosave = function() {
 						});
 					}
 
-					var secure = ( 'https:' === window.location.protocol );
-					wpCookies.set( 'wp-saving-post', post_id + '-check', 24 * 60 * 60, false, false, secure );
+					wpCookies.set( 'wp-saving-post', post_id + '-check', 24 * 60 * 60 );
 				});
 			}
 
@@ -346,7 +345,7 @@ window.autosave = function() {
 				};
 
 				$notice = $( '#local-storage-notice' );
-				$('.wrap h2').first().after( $notice.addClass( 'notice-warning' ).show() );
+				$('.wrap h2').first().after( $notice.addClass( 'updated' ).show() );
 
 				$notice.on( 'click.autosave-local', function( event ) {
 					var $target = $( event.target );
@@ -355,12 +354,10 @@ window.autosave = function() {
 						restorePost( restorePostData );
 						$target.parent().hide();
 						$(this).find( 'p.undo-restore' ).show();
-						$notice.removeClass( 'notice-warning' ).addClass( 'notice-success' );
 					} else if ( $target.hasClass( 'undo-restore-backup' ) ) {
 						restorePost( undoPostData );
 						$target.parent().hide();
 						$(this).find( 'p.local-restore' ).show();
-						$notice.removeClass( 'notice-success' ).addClass( 'notice-warning' );
 					}
 
 					event.preventDefault();
