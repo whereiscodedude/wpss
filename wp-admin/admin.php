@@ -94,21 +94,11 @@ $time_format = get_option('time_format');
 
 wp_enqueue_script( 'common' );
 
-
-
-
-/**
- * $pagenow is set in vars.php
- * $wp_importers is sometimes set in wp-admin/includes/import.php
- * The remaining variables are imported as globals elsewhere, declared as globals here
- *
- * @global string $pagenow
- * @global array  $wp_importers
- * @global string $hook_suffix
- * @global string $plugin_page
- * @global string $typenow
- * @global string $taxnow
- */
+// $pagenow is set in vars.php
+// $wp_importers is sometimes set in wp-admin/includes/import.php
+//
+// The remaining variables are imported as globals elsewhere,
+//     declared as globals here
 global $pagenow, $wp_importers, $hook_suffix, $plugin_page, $typenow, $taxnow;
 
 $page_hook = null;
@@ -358,16 +348,14 @@ if ( isset($plugin_page) ) {
 	}
 }
 
-$_action = wp_validate_action();
-if ( ! empty( $_action ) ) {
+if ( ! empty( $_REQUEST['action'] ) ) {
 	/**
 	 * Fires when an 'action' request variable is sent.
 	 *
-	 * The dynamic portion of the hook name, `$_action`,
+	 * The dynamic portion of the hook name, `$_REQUEST['action']`,
 	 * refers to the action derived from the `GET` or `POST` request.
 	 *
 	 * @since 2.6.0
 	 */
-	do_action( 'admin_action_' . $_action );
+	do_action( 'admin_action_' . $_REQUEST['action'] );
 }
-unset( $_action );

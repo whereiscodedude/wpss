@@ -10,9 +10,6 @@
 /** Load WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
-/** WordPress Translation Install API */
-require_once( ABSPATH . 'wp-admin/includes/translation-install.php' );
-
 if ( ! is_multisite() )
 	wp_die( __( 'Multisite support is not enabled.' ) );
 
@@ -33,7 +30,7 @@ get_current_screen()->set_help_sidebar(
 	'<p>' . __('<a href="https://wordpress.org/support/forum/multisite/" target="_blank">Support Forums</a>') . '</p>'
 );
 
-if ( wp_validate_action( 'add-site' ) ) {
+if ( isset($_REQUEST['action']) && 'add-site' == $_REQUEST['action'] ) {
 	check_admin_referer( 'add-blog', '_wpnonce_add-blog' );
 
 	if ( ! is_array( $_POST['blog'] ) )
@@ -47,24 +44,12 @@ if ( wp_validate_action( 'add-site' ) ) {
 	// If not a subdomain install, make sure the domain isn't a reserved word
 	if ( ! is_subdomain_install() ) {
 		/** This filter is documented in wp-includes/ms-functions.php */
-		$subdirectory_reserved_names = apply_filters( 'subdirectory_reserved_names', array( 'page', 'comments', 'blog', 'files', 'feed', 'wp-admin', 'wp-content', 'wp-includes' ) );
+		$subdirectory_reserved_names = apply_filters( 'subdirectory_reserved_names', array( 'page', 'comments', 'blog', 'files', 'feed' ) );
 		if ( in_array( $domain, $subdirectory_reserved_names ) )
 			wp_die( sprintf( __('The following words are reserved for use by WordPress functions and cannot be used as blog names: <code>%s</code>' ), implode( '</code>, <code>', $subdirectory_reserved_names ) ) );
 	}
 
 	$title = $blog['title'];
-
-	$meta = array(
-		'public' => 1
-	);
-
-	// Handle translation install for the new site.
-	if ( ! empty( $_POST['WPLANG'] ) && wp_can_install_language_pack() ) {
-		$language = wp_download_language_pack( wp_unslash( $_POST['WPLANG'] ) );
-		if ( $language ) {
-			$meta['WPLANG'] = $language;
-		}
-	}
 
 	if ( empty( $domain ) )
 		wp_die( __( 'Missing or invalid site address.' ) );
@@ -91,14 +76,14 @@ if ( wp_validate_action( 'add-site' ) ) {
 	if ( !$user_id ) { // Create a new user with a random password
 		$password = wp_generate_password( 12, false );
 		$user_id = wpmu_create_user( $domain, $password, $email );
-		if ( false === $user_id )
+		if ( false == $user_id )
 			wp_die( __( 'There was an error creating the user.' ) );
 		else
-			wp_new_user_notification( $user_id, null, 'both' );
+			wp_new_user_notification( $user_id, $password );
 	}
 
 	$wpdb->hide_errors();
-	$id = wpmu_create_blog( $newdomain, $path, $title, $user_id, $meta, $current_site->id );
+	$id = wpmu_create_blog( $newdomain, $path, $title, $user_id , array( 'public' => 1 ), $current_site->id );
 	$wpdb->show_errors();
 	if ( ! is_wp_error( $id ) ) {
 		if ( ! is_super_admin( $user_id ) && !get_user_option( 'primary_blog', $user_id ) ) {
@@ -145,7 +130,7 @@ require( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
 
 <div class="wrap">
-<h1 id="add-new-site"><?php _e( 'Add New Site' ); ?></h1>
+<h2 id="add-new-site"><?php _e('Add New Site') ?></h2>
 <?php
 if ( ! empty( $messages ) ) {
 	foreach ( $messages as $msg )
@@ -158,9 +143,9 @@ if ( ! empty( $messages ) ) {
 			<th scope="row"><label for="site-address"><?php _e( 'Site Address' ) ?></label></th>
 			<td>
 			<?php if ( is_subdomain_install() ) { ?>
-				<input name="blog[domain]" type="text" class="regular-text" id="site-address" aria-describedby="site-address-desc" autocapitalize="none" autocorrect="off"/><span class="no-break">.<?php echo preg_replace( '|^www\.|', '', $current_site->domain ); ?></span>
+				<input name="blog[domain]" type="text" class="regular-text" id="site-address" aria-describedby="site-address-desc" /><span class="no-break">.<?php echo preg_replace( '|^www\.|', '', $current_site->domain ); ?></span>
 			<?php } else {
-				echo $current_site->domain . $current_site->path ?><input name="blog[domain]" type="text" class="regular-text" id="site-address" aria-describedby="site-address-desc"  autocapitalize="none" autocorrect="off" />
+				echo $current_site->domain . $current_site->path ?><input name="blog[domain]" type="text" class="regular-text" id="site-address" aria-describedby="site-address-desc" />
 			<?php }
 			echo '<p id="site-address-desc">' . __( 'Only lowercase letters (a-z) and numbers are allowed.' ) . '</p>';
 			?>
@@ -170,37 +155,8 @@ if ( ! empty( $messages ) ) {
 			<th scope="row"><label for="site-title"><?php _e( 'Site Title' ) ?></label></th>
 			<td><input name="blog[title]" type="text" class="regular-text" id="site-title" /></td>
 		</tr>
-		<?php
-		$languages    = get_available_languages();
-		$translations = wp_get_available_translations();
-		if ( ! empty( $languages ) || ! empty( $translations ) ) :
-			?>
-			<tr class="form-field form-required">
-				<th scope="row"><label for="site-language"><?php _e( 'Site Language' ); ?></label></th>
-				<td>
-					<?php
-					// Network default.
-					$lang = get_site_option( 'WPLANG' );
-
-					// Use English if the default isn't available.
-					if ( ! in_array( $lang, $languages ) ) {
-						$lang = '';
-					}
-
-					wp_dropdown_languages( array(
-						'name'                        => 'WPLANG',
-						'id'                          => 'site-language',
-						'selected'                    => $lang,
-						'languages'                   => $languages,
-						'translations'                => $translations,
-						'show_available_translations' => wp_can_install_language_pack(),
-					) );
-					?>
-				</td>
-			</tr>
-		<?php endif; // Languages. ?>
 		<tr class="form-field form-required">
-			<th scope="row"><label for="admin-email"><?php _e( 'Admin Email' ) ?></label></th>
+			<th scope="row"><label for="admin-email"><?php _e( 'Admin Email' ) ?></label></td>
 			<td><input name="blog[email]" type="email" class="regular-text wp-suggest-user" id="admin-email" data-autocomplete-type="search" data-autocomplete-field="user_email" /></td>
 		</tr>
 		<tr class="form-field">

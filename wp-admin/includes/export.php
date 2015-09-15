@@ -20,9 +20,6 @@ define( 'WXR_VERSION', '1.2' );
  *
  * @since 2.1.0
  *
- * @global wpdb    $wpdb
- * @global WP_Post $post
- *
  * @param array $args Filters defining what should be included in the export.
  */
 function export_wp( $args = array() ) {
@@ -133,9 +130,9 @@ function export_wp( $args = array() ) {
 	 * @return string
 	 */
 	function wxr_cdata( $str ) {
-		if ( ! seems_utf8( $str ) ) {
+		if ( seems_utf8( $str ) == false )
 			$str = utf8_encode( $str );
-		}
+
 		// $str = ent2ncr(esc_html($str));
 		$str = '<![CDATA[' . str_replace( ']]>', ']]]]><![CDATA[>', $str ) . ']]>';
 
@@ -247,8 +244,6 @@ function export_wp( $args = array() ) {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @global wpdb $wpdb
-	 *
 	 * @param array $post_ids Array of post IDs to filter the query by. Optional.
 	 */
 	function wxr_authors_list( array $post_ids = null ) {
@@ -274,8 +269,8 @@ function export_wp( $args = array() ) {
 			echo '<wp:author_login>' . $author->user_login . '</wp:author_login>';
 			echo '<wp:author_email>' . $author->user_email . '</wp:author_email>';
 			echo '<wp:author_display_name>' . wxr_cdata( $author->display_name ) . '</wp:author_display_name>';
-			echo '<wp:author_first_name>' . wxr_cdata( $author->first_name ) . '</wp:author_first_name>';
-			echo '<wp:author_last_name>' . wxr_cdata( $author->last_name ) . '</wp:author_last_name>';
+			echo '<wp:author_first_name>' . wxr_cdata( $author->user_firstname ) . '</wp:author_first_name>';
+			echo '<wp:author_last_name>' . wxr_cdata( $author->user_lastname ) . '</wp:author_last_name>';
 			echo "</wp:author>\n";
 		}
 	}
@@ -315,12 +310,6 @@ function export_wp( $args = array() ) {
 		}
 	}
 
-	/**
-	 *
-	 * @param bool   $return_me
-	 * @param string $meta_key
-	 * @return bool
-	 */
 	function wxr_filter_postmeta( $return_me, $meta_key ) {
 		if ( '_edit_lock' == $meta_key )
 			$return_me = true;
@@ -386,9 +375,6 @@ function export_wp( $args = array() ) {
 	?>
 
 <?php if ( $post_ids ) {
-	/**
-	 * @global WP_Query $wp_query
-	 */
 	global $wp_query;
 
 	// Fake being in the loop.
@@ -473,8 +459,7 @@ function export_wp( $args = array() ) {
 		</wp:postmeta>
 <?php	endforeach;
 
-		$_comments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND comment_approved <> 'spam'", $post->ID ) );
-		$comments = array_map( 'get_comment', $_comments );
+		$comments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND comment_approved <> 'spam'", $post->ID ) );
 		foreach ( $comments as $c ) : ?>
 		<wp:comment>
 			<wp:comment_id><?php echo $c->comment_ID; ?></wp:comment_id>

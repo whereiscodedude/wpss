@@ -9,13 +9,8 @@
 /** WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
-if ( ! current_user_can( 'list_users' ) ) {
-	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'You are not allowed to browse users.' ) . '</p>',
-		403
-	);
-}
+if ( ! current_user_can( 'list_users' ) )
+	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 $wp_list_table = _get_list_table('WP_Users_List_Table');
 $pagenum = $wp_list_table->get_pagenum();
@@ -80,6 +75,25 @@ if ( empty($_REQUEST) ) {
 
 $update = '';
 
+/**
+ * @since 3.5.0
+ * @access private
+ */
+function delete_users_add_js() { ?>
+<script>
+jQuery(document).ready( function($) {
+	var submit = $('#submit').prop('disabled', true);
+	$('input[name=delete_option]').one('change', function() {
+		submit.prop('disabled', false);
+	});
+	$('#reassign_user').focus( function() {
+		$('#delete_option1').prop('checked', true).trigger('change');
+	});
+});
+</script>
+<?php
+}
+
 switch ( $wp_list_table->current_action() ) {
 
 /* Bulk Dropdown menu Role changes */
@@ -113,13 +127,8 @@ case 'promote':
 		}
 
 		// If the user doesn't already belong to the blog, bail.
-		if ( is_multisite() && !is_user_member_of_blog( $id ) ) {
-			wp_die(
-				'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-				'<p>' . __( 'One of the selected users is not a member of this site.' ) . '</p>',
-				403
-			);
-		}
+		if ( is_multisite() && !is_user_member_of_blog( $id ) )
+			wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 		$user = get_userdata( $id );
 		$user->set_role($_REQUEST['new_role']);
@@ -196,15 +205,7 @@ case 'delete':
 	else
 		$userids = array_map( 'intval', (array) $_REQUEST['users'] );
 
-	$users_posts = new WP_Query( array(
-		'post_type' => 'any',
-		'author' => implode( ',', $userids ),
-		'posts_per_page' => 1
-	) );
-
-	if ( $users_posts->have_posts() ) {
-		add_action( 'admin_head', 'delete_users_add_js' );
-	}
+	add_action( 'admin_head', 'delete_users_add_js' );
 
 	include( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
@@ -213,7 +214,7 @@ case 'delete':
 <?php echo $referer; ?>
 
 <div class="wrap">
-<h1><?php _e( 'Delete Users' ); ?></h1>
+<h2><?php _e('Delete Users'); ?></h2>
 <?php if ( isset( $_REQUEST['error'] ) ) : ?>
 	<div class="error">
 		<p><strong><?php _e( 'ERROR:' ); ?></strong> <?php _e( 'Please select an option.' ); ?></p>
@@ -240,24 +241,20 @@ case 'delete':
 	}
 	?>
 	</ul>
-<?php if ( $go_delete ) :
-
-	if ( ! $users_posts->have_posts() ) : ?>
-		<input type="hidden" name="delete_option" value="delete" />
-	<?php else: ?>
-		<?php if ( 1 == $go_delete ) : ?>
-			<fieldset><p><legend><?php _e( 'What should be done with content owned by this user?' ); ?></legend></p>
-		<?php else : ?>
-			<fieldset><p><legend><?php _e( 'What should be done with content owned by these users?' ); ?></legend></p>
-		<?php endif; ?>
-		<ul style="list-style:none;">
-			<li><label><input type="radio" id="delete_option0" name="delete_option" value="delete" />
-			<?php _e('Delete all content.'); ?></label></li>
-			<li><input type="radio" id="delete_option1" name="delete_option" value="reassign" />
-			<?php echo '<label for="delete_option1">' . __( 'Attribute all content to:' ) . '</label> ';
-			wp_dropdown_users( array( 'name' => 'reassign_user', 'exclude' => array_diff( $userids, array($current_user->ID) ) ) ); ?></li>
-		</ul></fieldset>
-	<?php endif;
+<?php if ( $go_delete ) : ?>
+	<?php if ( 1 == $go_delete ) : ?>
+		<fieldset><p><legend><?php _e( 'What should be done with content owned by this user?' ); ?></legend></p>
+	<?php else : ?>
+		<fieldset><p><legend><?php _e( 'What should be done with content owned by these users?' ); ?></legend></p>
+	<?php endif; ?>
+	<ul style="list-style:none;">
+		<li><label><input type="radio" id="delete_option0" name="delete_option" value="delete" />
+		<?php _e('Delete all content.'); ?></label></li>
+		<li><input type="radio" id="delete_option1" name="delete_option" value="reassign" />
+		<?php echo '<label for="delete_option1">' . __( 'Attribute all content to:' ) . '</label> ';
+		wp_dropdown_users( array( 'name' => 'reassign_user', 'exclude' => array_diff( $userids, array($current_user->ID) ) ) ); ?></li>
+	</ul></fieldset>
+	<?php
 	/**
 	 * Fires at the end of the delete users form prior to the confirm button.
 	 *
@@ -339,14 +336,8 @@ case 'remove':
 <?php echo $referer; ?>
 
 <div class="wrap">
-<h1><?php _e( 'Remove Users from Site' ); ?></h1>
-
-<?php if ( 1 == count( $userids ) ) : ?>
-	<p><?php _e( 'You have specified this user for removal:' ); ?></p>
-<?php else : ?>
-	<p><?php _e( 'You have specified these users for removal:' ); ?></p>
-<?php endif; ?>
-
+<h2><?php _e('Remove Users from Site'); ?></h2>
+<p><?php _e('You have specified these users for removal:'); ?></p>
 <ul>
 <?php
 	$go_remove = false;
@@ -452,18 +443,18 @@ if ( ! empty($messages) ) {
 } ?>
 
 <div class="wrap">
-<h1>
+<h2>
 <?php
 echo esc_html( $title );
 if ( current_user_can( 'create_users' ) ) { ?>
-	<a href="user-new.php" class="page-title-action"><?php echo esc_html_x( 'Add New', 'user' ); ?></a>
+	<a href="user-new.php" class="add-new-h2"><?php echo esc_html_x( 'Add New', 'user' ); ?></a>
 <?php } elseif ( is_multisite() && current_user_can( 'promote_users' ) ) { ?>
-	<a href="user-new.php" class="page-title-action"><?php echo esc_html_x( 'Add Existing', 'user' ); ?></a>
+	<a href="user-new.php" class="add-new-h2"><?php echo esc_html_x( 'Add Existing', 'user' ); ?></a>
 <?php }
 
 if ( $usersearch )
 	printf( '<span class="subtitle">' . __('Search results for &#8220;%s&#8221;') . '</span>', esc_html( $usersearch ) ); ?>
-</h1>
+</h2>
 
 <?php $wp_list_table->views(); ?>
 

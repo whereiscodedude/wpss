@@ -67,8 +67,6 @@ function wp_crop_image( $src, $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $s
  *
  * @since 2.1.0
  *
- * @global array $_wp_additional_image_sizes
- *
  * @param int $attachment_id Attachment Id to process.
  * @param string $file Filepath of the Attached image.
  * @return mixed Metadata for attachment.
@@ -110,12 +108,10 @@ function wp_generate_attachment_metadata( $attachment_id, $file ) {
 		 * Filter the image sizes automatically generated when uploading an image.
 		 *
 		 * @since 2.9.0
-		 * @since 4.4.0 The `$metadata` argument was addeed
 		 *
-		 * @param array $sizes    An associative array of image sizes.
-		 * @param array $metadata An associative array of image metadata: width, height, file.
+		 * @param array $sizes An associative array of image sizes.
 		 */
-		$sizes = apply_filters( 'intermediate_image_sizes_advanced', $sizes, $metadata );
+		$sizes = apply_filters( 'intermediate_image_sizes_advanced', $sizes );
 
 		if ( $sizes ) {
 			$editor = wp_get_image_editor( $file );
@@ -194,7 +190,8 @@ function wp_generate_attachment_metadata( $attachment_id, $file ) {
 	}
 
 	// Remove the blob of binary data from the array.
-	unset( $metadata['image']['data'] );
+	if ( isset( $metadata['image']['data'] ) )
+		unset( $metadata['image']['data'] );
 
 	/**
 	 * Filter the generated attachment meta data.

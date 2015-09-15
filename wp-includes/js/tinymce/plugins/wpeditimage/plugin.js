@@ -2,7 +2,6 @@
 tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	var toolbar, serializer,
 		each = tinymce.each,
-		trim = tinymce.trim,
 		iOS = tinymce.Env.iOS;
 
 	function isPlaceholder( node ) {
@@ -61,16 +60,14 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	} );
 
 	editor.once( 'preinit', function() {
-		if ( editor.wp && editor.wp._createToolbar ) {
-			toolbar = editor.wp._createToolbar( [
-				'wp_img_alignleft',
-				'wp_img_aligncenter',
-				'wp_img_alignright',
-				'wp_img_alignnone',
-				'wp_img_edit',
-				'wp_img_remove'
-			] );
-		}
+		toolbar = editor.wp._createToolbar( [
+			'wp_img_alignleft',
+			'wp_img_aligncenter',
+			'wp_img_alignright',
+			'wp_img_alignnone',
+			'wp_img_edit',
+			'wp_img_remove'
+		] );
 	} );
 
 	editor.on( 'wptoolbar', function( event ) {
@@ -90,7 +87,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 					editor.selection.select( node );
 					editor.nodeChanged();
 				}, 200 );
-			} else if ( toolbar ) {
+			} else {
 				toolbar.hide();
 			}
 		} );
@@ -98,7 +95,8 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 
 	function parseShortcode( content ) {
 		return content.replace( /(?:<p>)?\[(?:wp_)?caption([^\]]+)\]([\s\S]+?)\[\/(?:wp_)?caption\](?:<\/p>)?/g, function( a, b, c ) {
-			var id, align, classes, caption, img, width;
+			var id, align, classes, caption, img, width,
+				trim = tinymce.trim;
 
 			id = b.match( /id=['"]([^'"]*)['"] ?/ );
 			if ( id ) {
@@ -159,13 +157,13 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	}
 
 	function getShortcode( content ) {
-		return content.replace( /(?:<div [^>]+mceTemp[^>]+>)?\s*(<dl [^>]+wp-caption[^>]+>[\s\S]+?<\/dl>)\s*(?:<\/div>)?/g, function( all, dl ) {
+		return content.replace( /<div (?:id="attachment_|class="mceTemp)[^>]*>([\s\S]+?)<\/div>/g, function( a, b ) {
 			var out = '';
 
-			if ( dl.indexOf('<img ') === -1 ) {
+			if ( b.indexOf('<img ') === -1 ) {
 				// Broken caption. The user managed to drag the image out?
 				// Try to return the caption text as a paragraph.
-				out = dl.match( /<dd [^>]+>([\s\S]+?)<\/dd>/i );
+				out = b.match( /<dd [^>]+>([\s\S]+?)<\/dd>/i );
 
 				if ( out && out[1] ) {
 					return '<p>' + out[1] + '</p>';
@@ -174,7 +172,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 				return '';
 			}
 
-			out = dl.replace( /\s*<dl ([^>]+)>\s*<dt [^>]+>([\s\S]+?)<\/dt>\s*<dd [^>]+>([\s\S]*?)<\/dd>\s*<\/dl>\s*/gi, function( a, b, c, caption ) {
+			out = b.replace( /\s*<dl ([^>]+)>\s*<dt [^>]+>([\s\S]+?)<\/dt>\s*<dd [^>]+>([\s\S]*?)<\/dd>\s*<\/dl>\s*/gi, function( a, b, c, caption ) {
 				var id, classes, align, width;
 
 				width = c.match( /width="([0-9]*)"/ );
@@ -214,7 +212,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			if ( out.indexOf('[caption') === -1 ) {
 				// the caption html seems broken, try to find the image that may be wrapped in a link
 				// and may be followed by <p> with the caption text.
-				out = dl.replace( /[\s\S]*?((?:<a [^>]+>)?<img [^>]+>(?:<\/a>)?)(<p>[\s\S]*<\/p>)?[\s\S]*/gi, '<p>$1</p>$2' );
+				out = b.replace( /[\s\S]*?((?:<a [^>]+>)?<img [^>]+>(?:<\/a>)?)(<p>[\s\S]*<\/p>)?[\s\S]*/gi, '<p>$1</p>$2' );
 			}
 
 			return out;
@@ -527,10 +525,12 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	}
 
 	function removeImage( node ) {
-		var wrap = editor.dom.getParent( node, 'div.mceTemp' );
+		var wrap;
 
-		if ( ! wrap && node.nodeName === 'IMG' ) {
-			wrap = editor.dom.getParent( node, 'a' );
+		if ( node.nodeName === 'DIV' && editor.dom.hasClass( node, 'mceTemp' ) ) {
+			wrap = node;
+		} else if ( node.nodeName === 'IMG' || node.nodeName === 'DT' || node.nodeName === 'A' ) {
+			wrap = editor.dom.getParent( node, 'div.mceTemp' );
 		}
 
 		if ( wrap ) {
@@ -865,7 +865,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 				replacement = ' ' + align;
 			}
 
-			node.className = trim( node.className.replace( / ?align(left|center|right|none)/g, '' ) + replacement );
+			node.className = node.className.replace( / ?align(left|center|right|none)/g, '' ) + replacement;
 
 			editor.nodeChanged();
 			event.preventDefault();

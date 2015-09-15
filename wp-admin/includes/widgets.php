@@ -10,9 +10,6 @@
  * Display list of the available widgets.
  *
  * @since 2.5.0
- *
- * @global array $wp_registered_widgets
- * @global array $wp_registered_widget_controls
  */
 function wp_list_widgets() {
 	global $wp_registered_widgets, $wp_registered_widget_controls;
@@ -54,8 +51,6 @@ function wp_list_widgets() {
  *
  * @since 3.1.0
  * @access private
- *
- * @return int
  */
 function _sort_name_callback( $a, $b ) {
 	return strnatcasecmp( $a['name'], $b['name'] );
@@ -67,8 +62,8 @@ function _sort_name_callback( $a, $b ) {
  *
  * @since 2.5.0
  *
- * @param string $sidebar      Sidebar ID.
- * @param string $sidebar_name Optional. Sidebar name. Default empty.
+ * @param string $sidebar id slug of the sidebar
+ * @param string optional $sidebar_name Include the HTML for the sidebar name
  */
 function wp_list_widget_controls( $sidebar, $sidebar_name = '' ) {
 	add_filter( 'dynamic_sidebar_params', 'wp_list_widget_controls_dynamic_sidebar' );
@@ -86,13 +81,13 @@ function wp_list_widget_controls( $sidebar, $sidebar_name = '' ) {
 		<?php
 	}
 
+	echo '<div class="sidebar-description">';
+
 	if ( ! empty( $description ) ) {
-		?>
-		<div class="sidebar-description">
-			<p class="description"><?php echo $description; ?></p>
-		</div>
-		<?php
+		echo '<p class="description">' . $description . '</p>';
 	}
+
+	echo '</div>';
 
 	dynamic_sidebar( $sidebar );
 
@@ -103,10 +98,6 @@ function wp_list_widget_controls( $sidebar, $sidebar_name = '' ) {
  * {@internal Missing Short Description}}
  *
  * @since 2.5.0
- *
- * @global array $wp_registered_widgets
- *
- * @staticvar int $i
  *
  * @param array $params
  * @return array
@@ -132,14 +123,7 @@ function wp_list_widget_controls_dynamic_sidebar( $params ) {
 	return $params;
 }
 
-/**
- *
- * @global array $wp_registered_widgets
- *
- * @param string $id_base
- * @return int
- */
-function next_widget_id_number( $id_base ) {
+function next_widget_id_number($id_base) {
 	global $wp_registered_widgets;
 	$number = 1;
 
@@ -158,10 +142,6 @@ function next_widget_id_number( $id_base ) {
  * Called from dynamic_sidebar().
  *
  * @since 2.5.0
- *
- * @global array $wp_registered_widgets
- * @global array $wp_registered_widget_controls
- * @global array $sidebars_widgets
  *
  * @param array $sidebar_args
  * @return array
@@ -262,13 +242,4 @@ function wp_widget_control( $sidebar_args ) {
 	echo $sidebar_args['after_widget'];
 
 	return $sidebar_args;
-}
-
-/**
- *
- * @param string $classes
- * @return string
- */
-function wp_widgets_access_body_class($classes) {
-	return "$classes widgets_access ";
 }

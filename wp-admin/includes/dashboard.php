@@ -12,10 +12,6 @@
  * Handles POST data, sets up filters.
  *
  * @since 2.5.0
- *
- * @global array $wp_registered_widgets
- * @global array $wp_registered_widget_controls
- * @global array $wp_dashboard_control_callbacks
  */
 function wp_dashboard_setup() {
 	global $wp_registered_widgets, $wp_registered_widget_controls, $wp_dashboard_control_callbacks;
@@ -129,16 +125,6 @@ function wp_dashboard_setup() {
 	do_action( 'do_meta_boxes', $screen->id, 'side', '' );
 }
 
-/**
- *
- * @global array   $wp_dashboard_control_callbacks
- *
- * @param string   $widget_id
- * @param string   $widget_name
- * @param callback $callback
- * @param callback $control_callback
- * @param array    $callback_args
- */
 function wp_add_dashboard_widget( $widget_id, $widget_name, $callback, $control_callback = null, $callback_args = null ) {
 	$screen = get_current_screen();
 	global $wp_dashboard_control_callbacks;
@@ -168,11 +154,6 @@ function wp_add_dashboard_widget( $widget_id, $widget_name, $callback, $control_
 	add_meta_box( $widget_id, $widget_name, $callback, $screen, $location, $priority, $callback_args );
 }
 
-/**
- *
- * @param type $dashboard
- * @param type $meta_box
- */
 function _wp_dashboard_control_callback( $dashboard, $meta_box ) {
 	echo '<form method="post" class="dashboard-widget-control-form">';
 	wp_dashboard_trigger_widget_control( $meta_box['id'] );
@@ -355,9 +336,6 @@ function wp_dashboard_right_now() {
 	<?php endif;
 }
 
-/**
- * @since 3.1.0
- */
 function wp_network_dashboard_right_now() {
 	$actions = array();
 	if ( current_user_can('create_sites') )
@@ -435,8 +413,6 @@ function wp_network_dashboard_right_now() {
  *
  * @since 3.8.0
  *
- * @global int $post_ID
- *
  * @param string $error_msg Optional. Error message. Default false.
  */
 function wp_dashboard_quick_press( $error_msg = false ) {
@@ -507,8 +483,6 @@ function wp_dashboard_quick_press( $error_msg = false ) {
  * Show recent drafts of the user on the dashboard.
  *
  * @since 2.7.0
- *
- * @param array $drafts
  */
 function wp_dashboard_recent_drafts( $drafts = false ) {
 	if ( ! $drafts ) {
@@ -547,22 +521,19 @@ function wp_dashboard_recent_drafts( $drafts = false ) {
 	echo "</ul>\n</div>";
 }
 
-/**
- * @global WP_Comment $comment
- *
- * @param WP_Comment $comment
- * @param bool       $show_date
- */
 function _wp_dashboard_recent_comments_row( &$comment, $show_date = true ) {
 	$GLOBALS['comment'] =& $comment;
 
-	if ( $comment->comment_post_ID > 0 && current_user_can( 'edit_post', $comment->comment_post_ID ) ) {
-		$comment_post_title = _draft_or_post_title( $comment->comment_post_ID );
+	$comment_post_title = _draft_or_post_title( $comment->comment_post_ID );
+
+	if ( current_user_can( 'edit_post', $comment->comment_post_ID ) ) {
 		$comment_post_url = get_edit_post_link( $comment->comment_post_ID );
 		$comment_post_link = "<a href='$comment_post_url'>$comment_post_title</a>";
 	} else {
-		$comment_post_link = '';
+		$comment_post_link = $comment_post_title;
 	}
+
+	$comment_link = '<a class="comment-link" href="' . esc_url(get_comment_link()) . '">#</a>';
 
 	$actions_string = '';
 	if ( current_user_can( 'edit_comment', $comment->comment_ID ) ) {
@@ -572,8 +543,7 @@ function _wp_dashboard_recent_comments_row( &$comment, $show_date = true ) {
 			'reply' => '',
 			'edit' => '',
 			'spam' => '',
-			'trash' => '', 'delete' => '',
-			'view' => '',
+			'trash' => '', 'delete' => ''
 		);
 
 		$del_nonce = esc_html( '_wpnonce=' . wp_create_nonce( "delete-comment_$comment->comment_ID" ) );
@@ -590,16 +560,10 @@ function _wp_dashboard_recent_comments_row( &$comment, $show_date = true ) {
 		$actions['edit'] = "<a href='comment.php?action=editcomment&amp;c={$comment->comment_ID}' title='" . esc_attr__('Edit comment') . "'>". __('Edit') . '</a>';
 		$actions['reply'] = '<a onclick="window.commentReply && commentReply.open(\''.$comment->comment_ID.'\',\''.$comment->comment_post_ID.'\');return false;" class="vim-r hide-if-no-js" title="'.esc_attr__('Reply to this comment').'" href="#">' . __('Reply') . '</a>';
 		$actions['spam'] = "<a href='$spam_url' data-wp-lists='delete:the-comment-list:comment-$comment->comment_ID::spam=1' class='vim-s vim-destructive' title='" . esc_attr__( 'Mark this comment as spam' ) . "'>" . /* translators: mark as spam link */ _x( 'Spam', 'verb' ) . '</a>';
-
-		if ( ! EMPTY_TRASH_DAYS ) {
+		if ( !EMPTY_TRASH_DAYS )
 			$actions['delete'] = "<a href='$delete_url' data-wp-lists='delete:the-comment-list:comment-$comment->comment_ID::trash=1' class='delete vim-d vim-destructive'>" . __('Delete Permanently') . '</a>';
-		} else {
+		else
 			$actions['trash'] = "<a href='$trash_url' data-wp-lists='delete:the-comment-list:comment-$comment->comment_ID::trash=1' class='delete vim-d vim-destructive' title='" . esc_attr__( 'Move this comment to the trash' ) . "'>" . _x('Trash', 'verb') . '</a>';
-		}
-
-		if ( '1' === $comment->comment_approved ) {
-			$actions['view'] = '<a class="comment-link" href="' . esc_url( get_comment_link( $comment ) ) . '">' . _x( 'View', 'verb' ) . '</a>';
-		}
 
 		/**
 		 * Filter the action links displayed for each comment in the 'Recent Comments'
@@ -607,10 +571,10 @@ function _wp_dashboard_recent_comments_row( &$comment, $show_date = true ) {
 		 *
 		 * @since 2.6.0
 		 *
-		 * @param array      $actions An array of comment actions. Default actions include:
-		 *                            'Approve', 'Unapprove', 'Edit', 'Reply', 'Spam',
-		 *                            'Delete', and 'Trash'.
-		 * @param WP_Comment $comment The comment object.
+		 * @param array  $actions An array of comment actions. Default actions include:
+		 *                        'Approve', 'Unapprove', 'Edit', 'Reply', 'Spam',
+		 *                        'Delete', and 'Trash'.
+		 * @param object $comment The comment object.
 		 */
 		$actions = apply_filters( 'comment_row_actions', array_filter($actions), $comment );
 
@@ -629,32 +593,16 @@ function _wp_dashboard_recent_comments_row( &$comment, $show_date = true ) {
 
 ?>
 
-		<div id="comment-<?php echo $comment->comment_ID; ?>" <?php comment_class( array( 'comment-item', wp_get_comment_status( $comment ) ), $comment ); ?>>
+		<div id="comment-<?php echo $comment->comment_ID; ?>" <?php comment_class( array( 'comment-item', wp_get_comment_status($comment->comment_ID) ) ); ?>>
 
 			<?php echo get_avatar( $comment, 50, 'mystery' ); ?>
 
 			<?php if ( !$comment->comment_type || 'comment' == $comment->comment_type ) : ?>
 
-			<div class="dashboard-comment-wrap has-row-actions">
+			<div class="dashboard-comment-wrap">
 			<h4 class="comment-meta">
-				<?php
-				if ( $comment_post_link ) {
-					printf(
-						/* translators: 1: comment author, 2: post link, 3: notification if the comment is pending */
-						__( 'From %1$s on %2$s%3$s' ),
-						'<cite class="comment-author">' . get_comment_author_link( $comment ) . '</cite>',
-						$comment_post_link,
-						' <span class="approve">' . __( '[Pending]' ) . '</span>'
-					);
-				} else {
-					printf(
-						/* translators: 1: comment author, 2: notification if the comment is pending */
-						__( 'From %1$s %2$s' ),
-						'<cite class="comment-author">' . get_comment_author_link( $comment ) . '</cite>',
-						' <span class="approve">' . __( '[Pending]' ) . '</span>'
-					);
-				}
-				?>
+				<?php printf( /* translators: 1: comment author, 2: post link, 3: notification if the comment is pending */__( 'From %1$s on %2$s%3$s' ),
+					'<cite class="comment-author">' . get_comment_author_link() . '</cite>', $comment_post_link.' '.$comment_link, ' <span class="approve">' . __( '[Pending]' ) . '</span>' ); ?>
 			</h4>
 
 			<?php
@@ -671,18 +619,17 @@ function _wp_dashboard_recent_comments_row( &$comment, $show_date = true ) {
 				}
 				$type = esc_html( $type );
 			?>
-			<div class="dashboard-comment-wrap has-row-actions">
+			<div class="dashboard-comment-wrap">
 			<?php /* translators: %1$s is type of comment, %2$s is link to the post */ ?>
-			<h4 class="comment-meta"><?php printf( _x( '%1$s on %2$s', 'dashboard' ), "<strong>$type</strong>", $comment_post_link ); ?></h4>
-			<p class="comment-author"><?php comment_author_link( $comment ); ?></p>
+			<h4 class="comment-meta"><?php printf( _x( '%1$s on %2$s', 'dashboard' ), "<strong>$type</strong>", $comment_post_link." ".$comment_link ); ?></h4>
+			<p class="comment-author"><?php comment_author_link(); ?></p>
 
 			<?php endif; // comment_type ?>
-			<blockquote><p><?php comment_excerpt( $comment ); ?></p></blockquote>
+			<blockquote><p><?php comment_excerpt(); ?></p></blockquote>
 			<p class="row-actions"><?php echo $actions_string; ?></p>
 			</div>
 		</div>
 <?php
-	$GLOBALS['comment'] = null;
 }
 
 /**
@@ -823,9 +770,6 @@ function wp_dashboard_recent_comments( $total_items = 5 ) {
 		$comments_query['status'] = 'approve';
 
 	while ( count( $comments ) < $total_items && $possible = get_comments( $comments_query ) ) {
-		if ( ! is_array( $possible ) ) {
-			break;
-		}
 		foreach ( $possible as $comment ) {
 			if ( ! current_user_can( 'read_post', $comment->comment_post_ID ) )
 				continue;
@@ -901,8 +845,7 @@ function wp_dashboard_cached_rss_widget( $widget_id, $callback, $check_urls = ar
 		$check_urls = array( $widgets[$widget_id]['url'] );
 	}
 
-	$locale = get_locale();
-	$cache_key = 'dash_' . md5( $widget_id . '_' . $locale );
+	$cache_key = 'dash_' . md5( $widget_id );
 	if ( false !== ( $output = get_transient( $cache_key ) ) ) {
 		echo $output;
 		return true;
@@ -931,8 +874,6 @@ function wp_dashboard_cached_rss_widget( $widget_id, $callback, $check_urls = ar
  * Calls widget control callback.
  *
  * @since 2.5.0
- *
- * @global array $wp_dashboard_control_callbacks
  *
  * @param int $widget_control_id Registered Widget ID.
  */
@@ -1057,15 +998,7 @@ function wp_dashboard_primary() {
 			 * @param string $title Title attribute for the widget's secondary link.
 			 */
 			'title'        => apply_filters( 'dashboard_secondary_title', __( 'Other WordPress News' ) ),
-
-			/**
-			 * Filter the number of secondary link items for the 'WordPress News' dashboard widget.
-			 *
-			 * @since 4.4.0
-			 *
-			 * @param string $items How many items to show in the secondary feed.
-			 */
-			'items'        => apply_filters( 'dashboard_secondary_items', 3 ),
+			'items'        => 3,
 			'show_summary' => 0,
 			'show_author'  => 0,
 			'show_date'    => 0,
@@ -1098,7 +1031,7 @@ function wp_dashboard_primary() {
  * @param array  $feeds     Array of RSS feeds.
  */
 function wp_dashboard_primary_output( $widget_id, $feeds ) {
-	foreach ( $feeds as $type => $args ) {
+	foreach( $feeds as $type => $args ) {
 		$args['type'] = $type;
 		echo '<div class="rss-widget">';
 		if ( $type === 'plugins' ) {
@@ -1241,6 +1174,7 @@ function wp_dashboard_quota() {
 	</div>
 	<?php
 }
+add_action( 'activity_box_end', 'wp_dashboard_quota' );
 
 // Display Browser Nag Meta Box
 function wp_dashboard_browser_nag() {
@@ -1284,12 +1218,6 @@ function wp_dashboard_browser_nag() {
 	echo apply_filters( 'browse-happy-notice', $notice, $response );
 }
 
-/**
- * @since 3.2.0
- *
- * @param array $classes
- * @return array
- */
 function dashboard_browser_nag_class( $classes ) {
 	$response = wp_check_browser_version();
 
@@ -1303,8 +1231,6 @@ function dashboard_browser_nag_class( $classes ) {
  * Check if the user needs a browser update
  *
  * @since 3.2.0
- *
- * @global string $wp_version
  *
  * @return array|bool False on failure, array of browser data on success.
  */
@@ -1330,8 +1256,8 @@ function wp_check_browser_version() {
 		/**
 		 * Response should be an array with:
 		 *  'name' - string - A user friendly browser name
-		 *  'version' - string - The version of the browser the user is using
-		 *  'current_version' - string - The most recent version of the browser
+		 *  'version' - string - The most recent version of the browser
+		 *  'current_version' - string - The version of the browser the user is using
 		 *  'upgrade' - boolean - Whether the browser needs an upgrade
 		 *  'insecure' - boolean - Whether the browser is deemed insecure
 		 *  'upgrade_url' - string - The url to visit to upgrade
