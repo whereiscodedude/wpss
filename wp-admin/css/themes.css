@@ -45,6 +45,10 @@
 	clear: both;
 }
 
+.themes-php div.updated a {
+	text-decoration: underline;
+}
+
 /**
  * Main theme element
  * (has flexible margins)
