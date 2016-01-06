@@ -56,7 +56,7 @@ var imageEdit = window.imageEdit = {
 		var wait = $('#imgedit-wait-' + postid);
 
 		if ( toggle ) {
-			wait.fadeIn( 'fast' );
+			wait.height( $('#imgedit-panel-' + postid).height() ).fadeIn('fast');
 		} else {
 			wait.fadeOut('fast');
 		}
@@ -165,7 +165,7 @@ var imageEdit = window.imageEdit = {
 			'rand': t.intval(Math.random() * 1000000)
 		};
 
-		img = $( '<img id="image-preview-' + postid + '" alt="" />' )
+		img = $('<img id="image-preview-' + postid + '" />')
 			.on('load', function() {
 				var max1, max2, parent = $('#imgedit-crop-' + postid), t = imageEdit;
 
