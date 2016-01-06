@@ -834,7 +834,7 @@ class WP_Http {
 	 * This does not verify if the IP is a valid IP, only that it appears to be
 	 * an IP address.
 	 *
-	 * @link http://home.deds.nl/~aeron/regex/ for IPv6 regex
+	 * @see http://home.deds.nl/~aeron/regex/ for IPv6 regex
 	 *
 	 * @since 3.7.0
 	 * @static

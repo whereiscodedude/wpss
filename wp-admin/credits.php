@@ -24,7 +24,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 
 <div class="wp-badge"><?php printf( __( 'Version %s' ), $display_version ); ?></div>
 
-<h2 class="nav-tab-wrapper wp-clearfix">
+<h2 class="nav-tab-wrapper">
 	<a href="about.php" class="nav-tab"><?php _e( 'What&#8217;s New' ); ?></a>
 	<a href="credits.php" class="nav-tab nav-tab-active"><?php _e( 'Credits' ); ?></a>
 	<a href="freedoms.php" class="nav-tab"><?php _e( 'Freedoms' ); ?></a>
@@ -35,13 +35,10 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 $credits = wp_credits();
 
 if ( ! $credits ) {
-	echo '<p class="about-description">';
-	/* translators: 1: https://wordpress.org/about/, 2: https://make.wordpress.org/ */
-	printf( __( 'WordPress is created by a <a href="%1$s">worldwide team</a> of passionate individuals. <a href="%2$s">Get involved in WordPress</a>.' ),
+	echo '<p class="about-description">' . sprintf( __( 'WordPress is created by a <a href="%1$s">worldwide team</a> of passionate individuals. <a href="%2$s">Get involved in WordPress</a>.' ),
 		'https://wordpress.org/about/',
-		__( 'https://make.wordpress.org/' )
-	);
-	echo '</p>';
+		/* translators: Url to the codex documentation on contributing to WordPress used on the credits page */
+		__( 'https://codex.wordpress.org/Contributing_to_WordPress' ) ) . '</p>';
 	include( ABSPATH . 'wp-admin/admin-footer.php' );
 	exit;
 }
@@ -97,12 +94,9 @@ foreach ( $credits['groups'] as $group_slug => $group_data ) {
 }
 
 ?>
-<p class="clear"><?php
-	/* translators: %s: https://make.wordpress.org/ */
-	printf( __( 'Want to see your name in lights on this page? <a href="%s">Get involved in WordPress</a>.' ),
-		__( 'https://make.wordpress.org/' )
-	);
-?></p>
+<p class="clear"><?php printf( __( 'Want to see your name in lights on this page? <a href="%s">Get involved in WordPress</a>.' ),
+	/* translators: URL to the Make WordPress 'Get Involved' landing page used on the credits page */
+	__( 'https://make.wordpress.org/' ) ); ?></p>
 
 </div>
 <?php

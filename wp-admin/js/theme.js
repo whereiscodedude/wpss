@@ -846,7 +846,7 @@ themes.view.Themes = wp.Backbone.View.extend({
 	index: 0,
 
 	// The theme count element
-	count: $( '.wrap .theme-count' ),
+	count: $( '.wp-core-ui .theme-count' ),
 
 	// The live themes count
 	liveThemeCount: 0,

@@ -1552,9 +1552,7 @@ class WP_Rewrite {
 	 * @since 2.8.0
 	 * @access public
 	 *
-	 * @param bool $add_parent_tags Optional. Whether to add parent tags to the rewrite rule sets.
-	 *                              Default false.
-	 * @return string IIS7 URL rewrite rule sets.
+	 * @return string
 	 */
 	public function iis7_url_rewrite_rules( $add_parent_tags = false ) {
 		if ( ! $this->using_permalinks() )
@@ -1742,18 +1740,6 @@ class WP_Rewrite {
 		$args['struct'] = $struct;
 
 		$this->extra_permastructs[ $name ] = $args;
-	}
-
-	/**
-	 * Removes a permalink structure.
-	 *
-	 * @since 4.5.0
-	 * @access public
-	 *
-	 * @param string $name Name for permalink structure.
-	 */
-	public function remove_permastruct( $name ) {
-		unset( $this->extra_permastructs[ $name ] );
 	}
 
 	/**

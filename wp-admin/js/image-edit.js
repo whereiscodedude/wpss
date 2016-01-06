@@ -56,7 +56,7 @@ var imageEdit = window.imageEdit = {
 		var wait = $('#imgedit-wait-' + postid);
 
 		if ( toggle ) {
-			wait.fadeIn( 'fast' );
+			wait.height( $('#imgedit-panel-' + postid).height() ).fadeIn('fast');
 		} else {
 			wait.fadeOut('fast');
 		}

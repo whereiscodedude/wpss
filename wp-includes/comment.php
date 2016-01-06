@@ -231,10 +231,13 @@ function get_comments( $args = '' ) {
  */
 function get_comment_statuses() {
 	$status = array(
-		'hold'		=> __( 'Unapproved' ),
-		'approve'	=> _x( 'Approved', 'comment status' ),
-		'spam'		=> _x( 'Spam', 'comment status' ),
-		'trash'		=> _x( 'Trash', 'comment status' ),
+		'hold'		=> __('Unapproved'),
+		/* translators: comment status  */
+		'approve'	=> _x('Approved', 'adjective'),
+		/* translators: comment status */
+		'spam'		=> _x('Spam', 'adjective'),
+		/* translators: comment status */
+		'trash'		=> _x('Trash', 'adjective'),
 	);
 
 	return $status;
@@ -1473,7 +1476,7 @@ function wp_get_current_commenter() {
  *     @type int        $comment_karma        The karma of the comment. Default 0.
  *     @type int        $comment_parent       ID of this comment's parent, if any. Default 0.
  *     @type int        $comment_post_ID      ID of the post that relates to the comment, if any.
- *                                            Default 0.
+ *                                            Default empty.
  *     @type string     $comment_type         Comment type. Default empty.
  *     @type array      $comment_meta         Optional. Array of key/value pairs to be stored in commentmeta for the
  *                                            new comment.
@@ -1493,7 +1496,7 @@ function wp_insert_comment( $commentdata ) {
 	$comment_date     = ! isset( $data['comment_date'] )     ? current_time( 'mysql' )            : $data['comment_date'];
 	$comment_date_gmt = ! isset( $data['comment_date_gmt'] ) ? get_gmt_from_date( $comment_date ) : $data['comment_date_gmt'];
 
-	$comment_post_ID  = ! isset( $data['comment_post_ID'] )  ? 0  : $data['comment_post_ID'];
+	$comment_post_ID  = ! isset( $data['comment_post_ID'] )  ? '' : $data['comment_post_ID'];
 	$comment_content  = ! isset( $data['comment_content'] )  ? '' : $data['comment_content'];
 	$comment_karma    = ! isset( $data['comment_karma'] )    ? 0  : $data['comment_karma'];
 	$comment_approved = ! isset( $data['comment_approved'] ) ? 1  : $data['comment_approved'];
@@ -1901,7 +1904,7 @@ function wp_update_comment($commentarr) {
 	}
 
 	// Make sure that the comment post ID is valid (if specified).
-	if ( ! empty( $commentarr['comment_post_ID'] ) && ! get_post( $commentarr['comment_post_ID'] ) ) {
+	if ( isset( $commentarr['comment_post_ID'] ) && ! get_post( $commentarr['comment_post_ID'] ) ) {
 		return 0;
 	}
 
@@ -2003,18 +2006,12 @@ function wp_defer_comment_counting($defer=null) {
  *
  * @staticvar array $_deferred
  *
- * @param int|null $post_id     Post ID.
- * @param bool     $do_deferred Optional. Whether to process previously deferred
- *                              post comment counts. Default false.
- * @return bool|void True on success, false on failure or if post with ID does
- *                   not exist.
+ * @param int $post_id Post ID
+ * @param bool $do_deferred Whether to process previously deferred post comment counts
+ * @return bool|void True on success, false on failure
  */
 function wp_update_comment_count($post_id, $do_deferred=false) {
 	static $_deferred = array();
-
-	if ( empty( $post_id ) && ! $do_deferred ) {
-		return false;
-	}
 
 	if ( $do_deferred ) {
 		$_deferred = array_unique($_deferred);

@@ -1237,8 +1237,7 @@ if ( !function_exists('wp_sanitize_redirect') ) :
  *
  * @since 2.3.0
  *
- * @param string $location The path to redirect to.
- * @return string Redirect-sanitized URL.
+ * @return string redirect-sanitized URL
  **/
 function wp_sanitize_redirect($location) {
 	$regex = '/
@@ -1270,9 +1269,6 @@ function wp_sanitize_redirect($location) {
  * @access private
  *
  * @see wp_sanitize_redirect()
- *
- * @param array $matches RegEx matches against the redirect location.
- * @return string URL-encoded version of the first RegEx match.
  */
 function _wp_sanitize_utf8_in_redirect( $matches ) {
 	return urlencode( $matches[0] );
@@ -1292,9 +1288,6 @@ if ( !function_exists('wp_safe_redirect') ) :
  * but only used in a few places.
  *
  * @since 2.3.0
- *
- * @param string $location The path to redirect to.
- * @param int    $status   Status code to use.
  */
 function wp_safe_redirect($location, $status = 302) {
 
@@ -1355,7 +1348,6 @@ function wp_validate_redirect($location, $default = '') {
 		return $default;
 
 	$wpp = parse_url(home_url());
-	$site = parse_url( site_url() );
 
 	/**
 	 * Filter the whitelist of hosts to redirect to.
@@ -1365,9 +1357,9 @@ function wp_validate_redirect($location, $default = '') {
 	 * @param array       $hosts An array of allowed hosts.
 	 * @param bool|string $host  The parsed host; empty if not isset.
 	 */
-	$allowed_hosts = (array) apply_filters( 'allowed_redirect_hosts', array( $wpp['host'], $site['host'] ), isset( $lp['host'] ) ? $lp['host'] : '' );
+	$allowed_hosts = (array) apply_filters( 'allowed_redirect_hosts', array($wpp['host']), isset($lp['host']) ? $lp['host'] : '' );
 
-	if ( isset($lp['host']) && ( ! in_array( $lp['host'], $allowed_hosts ) && ( $lp['host'] != strtolower( $wpp['host'] ) || $lp['host'] != strtolower( $site['host'] ) ) ) )
+	if ( isset($lp['host']) && ( !in_array($lp['host'], $allowed_hosts) && $lp['host'] != strtolower($wpp['host'])) )
 		$location = $default;
 
 	return $location;
@@ -2024,8 +2016,7 @@ if ( !function_exists('wp_hash') ) :
  *
  * @since 2.0.3
  *
- * @param string $data   Plain text to hash
- * @param string $scheme Authentication scheme (auth, secure_auth, logged_in, nonce)
+ * @param string $data Plain text to hash
  * @return string Hash of $data
  */
 function wp_hash($data, $scheme = 'auth') {
@@ -2080,9 +2071,8 @@ if ( !function_exists('wp_check_password') ) :
  *	against the $hash + $password
  * @uses PasswordHash::CheckPassword
  *
- * @param string     $password Plaintext user's password
- * @param string     $hash     Hash of the user's password to check against.
- * @param string|int $user_id  Optional. User ID.
+ * @param string $password Plaintext user's password
+ * @param string $hash     Hash of the user's password to check against.
  * @return bool False, if the $password does not match the hashed password
  */
 function wp_check_password($password, $hash, $user_id = '') {
@@ -2102,10 +2092,10 @@ function wp_check_password($password, $hash, $user_id = '') {
 		 *
 		 * @since 2.5.0
 		 *
-		 * @param bool       $check    Whether the passwords match.
-		 * @param string     $password The plaintext password.
-		 * @param string     $hash     The hashed password.
-		 * @param string|int $user_id  User ID. Can be empty.
+		 * @param bool   $check    Whether the passwords match.
+		 * @param string $password The plaintext password.
+		 * @param string $hash     The hashed password.
+		 * @param int    $user_id  User ID.
 		 */
 		return apply_filters( 'check_password', $check, $password, $hash, $user_id );
 	}
@@ -2191,7 +2181,7 @@ function wp_rand( $min = 0, $max = 0 ) {
 	if ( $use_random_int_functionality ) {
 		try {
 			$_max = ( 0 != $max ) ? $max : $max_random_number;
-			// wp_rand() can accept arguments in either order, PHP cannot.
+			// wp_rand() can accept arguements in either order, PHP cannot.
 			$_max = max( $min, $_max );
 			$_min = min( $min, $_max );
 			$val = random_int( $_min, $_max );
@@ -2490,3 +2480,4 @@ function wp_text_diff( $left_string, $right_string, $args = null ) {
 	return $r;
 }
 endif;
+

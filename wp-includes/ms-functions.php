@@ -2154,7 +2154,7 @@ function force_ssl_content( $force = '' ) {
  *
  * @since 2.8.5
  *
- * @param string $url URL
+ * @param string URL
  * @return string URL with https as the scheme
  */
 function filter_SSL( $url ) {

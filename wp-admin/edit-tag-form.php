@@ -11,10 +11,7 @@ if ( !defined('ABSPATH') )
 	die('-1');
 
 if ( empty($tag_ID) ) { ?>
-<div class="wrap">
-	<h1><?php echo $tax->labels->edit_item; ?></h1>
-	<div id="message" class="notice notice-warning"><p><strong><?php _e( 'You did not select an item for editing.' ); ?></strong></p></div>
-</div>
+	<div id="message" class="updated notice is-dismissible"><p><strong><?php _e( 'You did not select an item for editing.' ); ?></strong></p></div>
 <?php
 	return;
 }

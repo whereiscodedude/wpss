@@ -114,13 +114,6 @@
 	clear: both;
 }
 
-/* modern clearfix */
-.wp-clearfix:after {
-	content: "";
-	display: table;
-	clear: both;
-}
-
 /* Hide visually but not from screen readers */
 .screen-reader-text,
 .screen-reader-text span,
@@ -600,10 +593,9 @@ code {
 	top: -3px;
 	text-decoration: none;
 	border: none;
-	border: 1px solid #ccc;
 	-webkit-border-radius: 2px;
 	border-radius: 2px;
-	background: #f7f7f7;
+	background: #e0e0e0;
 	text-shadow: none;
 	font-weight: 600;
 	font-size: 13px;
@@ -611,15 +603,8 @@ code {
 
 .wrap .add-new-h2:hover, /* deprecated */
 .wrap .page-title-action:hover {
-	border-color: #008EC2;
 	background: #00a0d2;
 	color: #fff;
-}
-
-.wrap .page-title-action:focus {
-	border-color: #5b9dd9;
-	-webkit-box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
-	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
 }
 
 .wrap h1.long-header {
@@ -892,10 +877,6 @@ abbr.required,
 
 .misc-pub-section {
 	padding: 6px 10px 8px;
-}
-
-.misc-pub-revisions .howto {
-	padding-left: 25px;
 }
 
 .misc-pub-filename {
@@ -1347,6 +1328,7 @@ div.error p,
 
 .updated a {
 	padding-bottom: 2px;
+	text-decoration: none;
 }
 
 .notice-alt {
@@ -2067,22 +2049,15 @@ h1.nav-tab-wrapper, /* Back-compat for pre-4.4 */
 h3.nav-tab-wrapper {
 	border-bottom: 1px solid #ccc;
 	margin: 0;
-	padding-top: 9px;
+	padding: 9px 15px 0 0;
 	line-height: inherit;
 }
 
-/* Back-compat for plugins. Deprecated. Use .wp-clearfix instead. */
-.nav-tab-wrapper:not(.wp-clearfix):after {
- 	content: "";
- 	display: table;
- 	clear: both;
- }
-
-.ie8 .nav-tab-wrapper {
-	/* contain floats establishing a new block formatting context */
-	display: inline-block;
-	width: 100%;
-	vertical-align: top;
+/* contain floats */
+.nav-tab-wrapper:after {
+	content: "";
+	display: table;
+	clear: both;
 }
 
 /*------------------------------------------------------------------------------
@@ -3649,13 +3624,15 @@ img {
 	h1.nav-tab-wrapper,
 	.wrap h2.nav-tab-wrapper,
 	h3.nav-tab-wrapper {
+		padding-left: 0;
 		border-bottom: 0;
 	}
 
 	h1 .nav-tab,
 	h2 .nav-tab,
 	h3 .nav-tab {
-		margin: 10px 10px 0 0;
+		margin-top: 10px;
+		margin-right: 10px;
 		border-bottom: 1px solid #ccc;
 	}
 }

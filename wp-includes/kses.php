@@ -398,7 +398,6 @@ if ( ! CUSTOM_TAGS ) {
 		'ol' => array(
 			'start' => true,
 			'type' => true,
-			'reversed' => true,
 		),
 		'var' => array(),
 		'video' => array(

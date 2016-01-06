@@ -69,7 +69,6 @@ input[type="url"] {
 
 /* Vertically align the number selector with the input. */
 input[type="number"] {
-	height: 28px;
 	line-height: inherit;
 }
 
@@ -1049,10 +1048,6 @@ table.form-table td .updated p {
 	input[type="number"] {
 		-webkit-appearance: none;
 		padding: 6px 10px;
-	}
-
-	input[type="number"] {
-		height: 40px;
 	}
 
 	input.code {

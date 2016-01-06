@@ -2199,9 +2199,9 @@ function make_clickable( $text ) {
 	$nested_code_pre = 0; // Keep track of how many levels link is nested inside <pre> or <code>
 	foreach ( $textarr as $piece ) {
 
-		if ( preg_match( '|^<code[\s>]|i', $piece ) || preg_match( '|^<pre[\s>]|i', $piece ) || preg_match( '|^<script[\s>]|i', $piece ) || preg_match( '|^<style[\s>]|i', $piece ) )
+		if ( preg_match( '|^<code[\s>]|i', $piece ) || preg_match( '|^<pre[\s>]|i', $piece ) )
 			$nested_code_pre++;
-		elseif ( $nested_code_pre && ( '</code>' === strtolower( $piece ) || '</pre>' === strtolower( $piece ) || '</script>' === strtolower( $piece ) || '</style>' === strtolower( $piece ) ) )
+		elseif ( ( '</code>' === strtolower( $piece ) || '</pre>' === strtolower( $piece ) ) && $nested_code_pre )
 			$nested_code_pre--;
 
 		if ( $nested_code_pre || empty( $piece ) || ( $piece[0] === '<' && ! preg_match( '|^<\s*[\w]{1,20}+://|', $piece ) ) ) {
@@ -2336,14 +2336,7 @@ function wp_rel_nofollow( $text ) {
 function wp_rel_nofollow_callback( $matches ) {
 	$text = $matches[1];
 	$atts = shortcode_parse_atts( $matches[1] );
-	$rel  = 'nofollow';
-
-	if ( preg_match( '%href=["\'](' . preg_quote( set_url_scheme( home_url(), 'http' ) ) . ')%i', $text ) ||
-	     preg_match( '%href=["\'](' . preg_quote( set_url_scheme( home_url(), 'https' ) ) . ')%i', $text )
-	) {
-		return "<a $text>";
-	}
-
+	$rel = 'nofollow';
 	if ( ! empty( $atts['rel'] ) ) {
 		$parts = array_map( 'trim', explode( ' ', $atts['rel'] ) );
 		if ( false === array_search( 'nofollow', $parts ) ) {
@@ -2700,6 +2693,23 @@ function iso8601_to_datetime( $date_string, $timezone = 'user' ) {
 	} elseif ($timezone == 'user') {
 		return preg_replace('#([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(Z|[\+|\-][0-9]{2,4}){0,1}#', '$1-$2-$3 $4:$5:$6', $date_string);
 	}
+}
+
+/**
+ * Adds a element attributes to open links in new windows.
+ *
+ * Comment text in popup windows should be filtered through this. Right now it's
+ * a moderately dumb function, ideally it would detect whether a target or rel
+ * attribute was already there and adjust its actions accordingly.
+ *
+ * @since 0.71
+ *
+ * @param string $text Content to replace links to open in a new window.
+ * @return string Content that has filtered links.
+ */
+function popuplinks( $text ) {
+	$text = preg_replace('/<a (.+?)>/i', "<a $1 target='_blank' rel='external'>", $text);
+	return $text;
 }
 
 /**
@@ -3279,11 +3289,7 @@ function ent2ncr( $text ) {
  *
  * @since 4.3.0
  *
- * @see _WP_Editors::editor()
- *
- * @param string $text           The text to be formatted.
- * @param string $default_editor The default editor for the current user.
- *                               It is usually either 'html' or 'tinymce'.
+ * @param string $text The text to be formatted.
  * @return string The formatted text after filter is applied.
  */
 function format_for_editor( $text, $default_editor = null ) {
@@ -3296,9 +3302,7 @@ function format_for_editor( $text, $default_editor = null ) {
 	 *
 	 * @since 4.3.0
 	 *
-	 * @param string $text           The formatted text.
-	 * @param string $default_editor The default editor for the current user.
-	 *                               It is usually either 'html' or 'tinymce'.
+	 * @param string $text The formatted text.
 	 */
 	return apply_filters( 'format_for_editor', $text, $default_editor );
 }
@@ -3706,6 +3710,7 @@ function sanitize_option( $option, $value ) {
 			if ( is_wp_error( $value ) ) {
 				$error = $value->get_error_message();
 			} else {
+				$value = wp_kses_post( $value );
 				$value = esc_html( $value );
 			}
 			break;
@@ -4308,9 +4313,6 @@ function wp_basename( $path, $suffix = '' ) {
  * @since 3.0.0
  *
  * @staticvar string|false $dblq
- *
- * @param string $text The text to be modified.
- * @return string The modified text.
  */
 function capital_P_dangit( $text ) {
 	// Simple replacement for titles
@@ -4800,3 +4802,19 @@ function url_shorten( $url, $length = 35 ) {
 	}
 	return $short_url;
 }
+
+/**
+ * 4.4.x hotfix for hidden configure links on admin dashboard.
+ *
+ * @ignore
+ */
+function _wp_441_dashboard_display_configure_links_css() { 
+	echo '<style type="text/css">
+		.postbox .button-link .edit-box { display: none; }
+		.wp-admin .edit-box { display: block; opacity: 0; }
+		.hndle:hover .edit-box, .edit-box:focus { opacity: 1; }
+		#dashboard-widgets h2 a { text-decoration: underline; }
+		#dashboard-widgets .hndle .postbox-title-action { float: right; line-height: 1.2; }
+	</style>';
+}
+add_action( 'admin_print_styles-index.php', '_wp_441_dashboard_display_configure_links_css' );
