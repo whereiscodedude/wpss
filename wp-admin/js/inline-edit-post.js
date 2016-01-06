@@ -22,10 +22,10 @@ inlineEditPost = {
 			}
 		});
 
-		$( '.cancel', qeRow ).click( function() {
+		$('a.cancel', qeRow).click(function(){
 			return inlineEditPost.revert();
 		});
-		$( '.save', qeRow ).click( function() {
+		$('a.save', qeRow).click(function(){
 			return inlineEditPost.save(this);
 		});
 		$('td', qeRow).keydown(function(e){
@@ -34,7 +34,7 @@ inlineEditPost = {
 			}
 		});
 
-		$( '.cancel', bulkRow ).click( function() {
+		$('a.cancel', bulkRow).click(function(){
 			return inlineEditPost.revert();
 		});
 
@@ -48,9 +48,9 @@ inlineEditPost = {
 		});
 
 		// add events
-		$('#the-list').on( 'click', 'a.editinline', function( e ) {
-			e.preventDefault();
+		$('#the-list').on('click', 'a.editinline', function(){
 			inlineEditPost.edit(this);
+			return false;
 		});
 
 		$('#bulk-edit').find('fieldset:first').after(
@@ -81,7 +81,7 @@ inlineEditPost = {
 		var te = '', type = this.type, tax, c = true;
 		this.revert();
 
-		$( '#bulk-edit td' ).attr( 'colspan', $( 'th:visible, td:visible', '.widefat:first thead' ).length );
+		$('#bulk-edit td').attr('colspan', $('.widefat:first thead th:visible').length);
 		// Insert the editor at the top of the table with an empty row above to maintain zebra striping.
 		$('table.widefat tbody').prepend( $('#bulk-edit') ).prepend('<tr class="hidden"></tr>');
 		$('#bulk-edit').addClass('inline-editor').show();
@@ -117,7 +117,7 @@ inlineEditPost = {
 	},
 
 	edit : function(id) {
-		var t = this, fields, editRow, rowData, status, pageOpt, pageLevel, nextPage, pageLoop = true, nextLevel, cur_format, f, val, pw;
+		var t = this, fields, editRow, rowData, status, pageOpt, pageLevel, nextPage, pageLoop = true, nextLevel, cur_format, f, val;
 		t.revert();
 
 		if ( typeof(id) === 'object' ) {
@@ -131,9 +131,9 @@ inlineEditPost = {
 
 		// add the new edit row with an extra blank row underneath to maintain zebra striping.
 		editRow = $('#inline-edit').clone(true);
-		$( 'td', editRow ).attr( 'colspan', $( 'th:visible, td:visible', '.widefat:first thead' ).length );
+		$('td', editRow).attr('colspan', $('.widefat:first thead th:visible').length);
 
-		$(t.what+id).removeClass('is-expanded').hide().after(editRow).after('<tr class="hidden"></tr>');
+		$(t.what+id).hide().after(editRow).after('<tr class="hidden"></tr>');
 
 		// populate the data
 		rowData = $('#inline_'+id);
@@ -209,10 +209,9 @@ inlineEditPost = {
 			$('select[name="_status"] option[value="future"]', editRow).remove();
 		}
 
-		pw = $( '.inline-edit-password-input' ).prop( 'disabled', false );
 		if ( 'private' === status ) {
 			$('input[name="keep_private"]', editRow).prop('checked', true);
-			pw.val( '' ).prop( 'disabled', true );
+			$('input.inline-edit-password-input').val('').prop('disabled', true);
 		}
 
 		// remove the current page and children from the parent dropdown
@@ -268,7 +267,6 @@ inlineEditPost = {
 		$.post( ajaxurl, params,
 			function(r) {
 				$( 'table.widefat .spinner' ).removeClass( 'is-active' );
-				$( '.ac_results' ).hide();
 
 				if (r) {
 					if ( -1 !== r.indexOf( '<tr' ) ) {
@@ -288,15 +286,13 @@ inlineEditPost = {
 	},
 
 	revert : function(){
-		var $tableWideFat = $( '.widefat' ),
-			id = $( '.inline-editor', $tableWideFat ).attr( 'id' );
+		var id = $('table.widefat tr.inline-editor').attr('id');
 
 		if ( id ) {
-			$( '.spinner', $tableWideFat ).removeClass( 'is-active' );
-			$( '.ac_results' ).hide();
+			$( 'table.widefat .spinner' ).removeClass( 'is-active' );
 
 			if ( 'bulk-edit' === id ) {
-				$( '#bulk-edit', $tableWideFat ).removeClass( 'inline-editor' ).hide().siblings( '.hidden' ).remove();
+				$('table.widefat #bulk-edit').removeClass('inline-editor').hide().siblings('tr.hidden').remove();
 				$('#bulk-titles').empty();
 				$('#inlineedit').append( $('#bulk-edit') );
 			} else {
@@ -332,7 +328,7 @@ $( document ).on( 'heartbeat-tick.wp-check-locked-posts', function( e, data ) {
 				row.find('.check-column checkbox').prop('checked', false);
 
 				if ( lock_data.avatar_src ) {
-					avatar = $( '<img class="avatar avatar-18 photo" width="18" height="18" alt="" />' ).attr( 'src', lock_data.avatar_src.replace( /&amp;/g, '&' ) );
+					avatar = $('<img class="avatar avatar-18 photo" width="18" height="18" />').attr( 'src', lock_data.avatar_src.replace(/&amp;/g, '&') );
 					row.find('.column-title .locked-avatar').empty().append( avatar );
 				}
 				row.addClass('wp-locked');

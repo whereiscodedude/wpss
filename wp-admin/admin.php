@@ -59,7 +59,7 @@ if ( get_option('db_upgraded') ) {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param bool $do_mu_upgrade Whether to perform the Multisite upgrade routine. Default true.
+	 * @param bool true Whether to perform the Multisite upgrade routine. Default true.
 	 */
 	} elseif ( apply_filters( 'do_mu_upgrade', true ) ) {
 		$c = get_blog_count();
@@ -84,31 +84,21 @@ require_once(ABSPATH . 'wp-admin/includes/admin.php');
 auth_redirect();
 
 // Schedule trash collection
-if ( ! wp_next_scheduled( 'wp_scheduled_delete' ) && ! wp_installing() )
+if ( !wp_next_scheduled('wp_scheduled_delete') && !defined('WP_INSTALLING') )
 	wp_schedule_event(time(), 'daily', 'wp_scheduled_delete');
 
 set_screen_options();
 
-$date_format = __( 'F j, Y' );
-$time_format = __( 'g:i a' );
+$date_format = get_option('date_format');
+$time_format = get_option('time_format');
 
 wp_enqueue_script( 'common' );
 
-
-
-
-/**
- * $pagenow is set in vars.php
- * $wp_importers is sometimes set in wp-admin/includes/import.php
- * The remaining variables are imported as globals elsewhere, declared as globals here
- *
- * @global string $pagenow
- * @global array  $wp_importers
- * @global string $hook_suffix
- * @global string $plugin_page
- * @global string $typenow
- * @global string $taxnow
- */
+// $pagenow is set in vars.php
+// $wp_importers is sometimes set in wp-admin/includes/import.php
+//
+// The remaining variables are imported as globals elsewhere,
+//     declared as globals here
 global $pagenow, $wp_importers, $hook_suffix, $plugin_page, $typenow, $taxnow;
 
 $page_hook = null;
@@ -312,7 +302,7 @@ if ( isset($plugin_page) ) {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param bool $force Whether to force data to be filtered through kses. Default false.
+	 * @param bool false Whether to force data to be filtered through kses. Default false.
 	 */
 	if ( apply_filters( 'force_filtered_html_on_import', false ) ) {
 		kses_init_filters();  // Always filter imported data with kses on multisite.
