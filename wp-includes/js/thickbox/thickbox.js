@@ -18,16 +18,9 @@ jQuery(document).ready(function(){
 	imgLoader.src = tb_pathToImage;
 });
 
-/*
- * Add thickbox to href & area elements that have a class of .thickbox.
- * Remove the loading indicator when content in an iframe has loaded.
- */
+//add thickbox to href & area elements that have a class of .thickbox
 function tb_init(domChunk){
-	jQuery( 'body' )
-		.on( 'click', domChunk, tb_click )
-		.on( 'thickbox:iframe:loaded', function() {
-			jQuery( '#TB_window' ).removeClass( 'thickbox-loading' );
-		});
+	jQuery('body').on('click', domChunk, tb_click);
 }
 
 function tb_click(){
@@ -46,14 +39,13 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			jQuery("body","html").css({height: "100%", width: "100%"});
 			jQuery("html").css("overflow","hidden");
 			if (document.getElementById("TB_HideSelect") === null) {//iframe to hide select elements in ie6
-				jQuery("body").append("<iframe id='TB_HideSelect'>"+thickboxL10n.noiframes+"</iframe><div id='TB_overlay'></div><div id='TB_window' class='thickbox-loading'></div>");
+				jQuery("body").append("<iframe id='TB_HideSelect'>"+thickboxL10n.noiframes+"</iframe><div id='TB_overlay'></div><div id='TB_window'></div>");
 				jQuery("#TB_overlay").click(tb_remove);
 			}
 		}else{//all others
 			if(document.getElementById("TB_overlay") === null){
-				jQuery("body").append("<div id='TB_overlay'></div><div id='TB_window' class='thickbox-loading'></div>");
+				jQuery("body").append("<div id='TB_overlay'></div><div id='TB_window'></div>");
 				jQuery("#TB_overlay").click(tb_remove);
-				jQuery( 'body' ).addClass( 'modal-open' );
 			}
 		}
 
@@ -112,7 +104,7 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			imgPreloader.onload = function(){
 			imgPreloader.onload = null;
 
-			// Resizing large images - original by Christian Montoya edited by me.
+			// Resizing large images - orginal by Christian Montoya edited by me.
 			var pagesize = tb_getPageSize();
 			var x = pagesize[0] - 150;
 			var y = pagesize[1] - 150;
@@ -137,7 +129,7 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 
 			TB_WIDTH = imageWidth + 30;
 			TB_HEIGHT = imageHeight + 60;
-			jQuery("#TB_window").append("<a href='' id='TB_ImageOff'><span class='screen-reader-text'>"+thickboxL10n.close+"</span><img id='TB_Image' src='"+url+"' width='"+imageWidth+"' height='"+imageHeight+"' alt='"+caption+"'/></a>" + "<div id='TB_caption'>"+caption+"<div id='TB_secondLine'>" + TB_imageCount + TB_PrevHTML + TB_NextHTML + "</div></div><div id='TB_closeWindow'><a href='#' id='TB_closeWindowButton'><span class='screen-reader-text'>"+thickboxL10n.close+"</span><div class='tb-close-icon'></div></a></div>");
+			jQuery("#TB_window").append("<a href='' id='TB_ImageOff' title='"+thickboxL10n.close+"'><img id='TB_Image' src='"+url+"' width='"+imageWidth+"' height='"+imageHeight+"' alt='"+caption+"'/></a>" + "<div id='TB_caption'>"+caption+"<div id='TB_secondLine'>" + TB_imageCount + TB_PrevHTML + TB_NextHTML + "</div></div><div id='TB_closeWindow'><a href='#' id='TB_closeWindowButton' title='"+thickboxL10n.close+"'><div class='tb-close-icon'></div></a></div>");
 
 			jQuery("#TB_closeWindowButton").click(tb_remove);
 
@@ -164,8 +156,11 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			}
 
 			jQuery(document).bind('keydown.thickbox', function(e){
+				e.stopImmediatePropagation();
+
 				if ( e.which == 27 ){ // close
-					tb_remove();
+					if ( ! jQuery(document).triggerHandler( 'wp_CloseOnEscape', [{ event: e, what: 'thickbox', cb: tb_remove }] ) )
+						tb_remove();
 
 				} else if ( e.which == 190 ){ // display previous image
 					if(!(TB_NextHTML == "")){
@@ -193,8 +188,8 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			var queryString = url.replace(/^[^\?]+\??/,'');
 			var params = tb_parseQuery( queryString );
 
-			TB_WIDTH = (params['width']*1) + 30 || 630; //defaults to 630 if no parameters were added to URL
-			TB_HEIGHT = (params['height']*1) + 40 || 440; //defaults to 440 if no parameters were added to URL
+			TB_WIDTH = (params['width']*1) + 30 || 630; //defaults to 630 if no paramaters were added to URL
+			TB_HEIGHT = (params['height']*1) + 40 || 440; //defaults to 440 if no paramaters were added to URL
 			ajaxContentW = TB_WIDTH - 30;
 			ajaxContentH = TB_HEIGHT - 45;
 
@@ -202,10 +197,10 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 					urlNoQuery = url.split('TB_');
 					jQuery("#TB_iframeContent").remove();
 					if(params['modal'] != "true"){//iframe no modal
-						jQuery("#TB_window").append("<div id='TB_title'><div id='TB_ajaxWindowTitle'>"+caption+"</div><div id='TB_closeAjaxWindow'><a href='#' id='TB_closeWindowButton'><span class='screen-reader-text'>"+thickboxL10n.close+"</span><div class='tb-close-icon'></div></a></div></div><iframe frameborder='0' hspace='0' allowTransparency='true' src='"+urlNoQuery[0]+"' id='TB_iframeContent' name='TB_iframeContent"+Math.round(Math.random()*1000)+"' onload='tb_showIframe()' style='width:"+(ajaxContentW + 29)+"px;height:"+(ajaxContentH + 17)+"px;' >"+thickboxL10n.noiframes+"</iframe>");
+						jQuery("#TB_window").append("<div id='TB_title'><div id='TB_ajaxWindowTitle'>"+caption+"</div><div id='TB_closeAjaxWindow'><a href='#' id='TB_closeWindowButton' title='"+thickboxL10n.close+"'><div class='tb-close-icon'></div></a></div></div><iframe frameborder='0' hspace='0' src='"+urlNoQuery[0]+"' id='TB_iframeContent' name='TB_iframeContent"+Math.round(Math.random()*1000)+"' onload='tb_showIframe()' style='width:"+(ajaxContentW + 29)+"px;height:"+(ajaxContentH + 17)+"px;' >"+thickboxL10n.noiframes+"</iframe>");
 					}else{//iframe modal
 					jQuery("#TB_overlay").unbind();
-						jQuery("#TB_window").append("<iframe frameborder='0' hspace='0' allowTransparency='true' src='"+urlNoQuery[0]+"' id='TB_iframeContent' name='TB_iframeContent"+Math.round(Math.random()*1000)+"' onload='tb_showIframe()' style='width:"+(ajaxContentW + 29)+"px;height:"+(ajaxContentH + 17)+"px;'>"+thickboxL10n.noiframes+"</iframe>");
+						jQuery("#TB_window").append("<iframe frameborder='0' hspace='0' src='"+urlNoQuery[0]+"' id='TB_iframeContent' name='TB_iframeContent"+Math.round(Math.random()*1000)+"' onload='tb_showIframe()' style='width:"+(ajaxContentW + 29)+"px;height:"+(ajaxContentH + 17)+"px;'>"+thickboxL10n.noiframes+"</iframe>");
 					}
 			}else{// not an iframe, ajax
 					if(jQuery("#TB_window").css("visibility") != "visible"){
@@ -238,9 +233,7 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 					jQuery("#TB_load").remove();
 					jQuery("#TB_window").css({'visibility':'visible'});
 				}else{
-					var load_url = url;
-					load_url += -1 === url.indexOf('?') ? '?' : '&';
-					jQuery("#TB_ajaxContent").load(load_url += "random=" + (new Date().getTime()),function(){//to do a post change this load method
+					jQuery("#TB_ajaxContent").load(url += "&random=" + (new Date().getTime()),function(){//to do a post change this load method
 						tb_position();
 						jQuery("#TB_load").remove();
 						tb_init("#TB_ajaxContent a.thickbox");
@@ -251,9 +244,13 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 		}
 
 		if(!params['modal']){
-			jQuery(document).bind('keydown.thickbox', function(e){
+			jQuery(document).bind('keyup.thickbox', function(e){
+
 				if ( e.which == 27 ){ // close
-					tb_remove();
+					e.stopImmediatePropagation();
+					if ( ! jQuery(document).triggerHandler( 'wp_CloseOnEscape', [{ event: e, what: 'thickbox', cb: tb_remove }] ) )
+						tb_remove();
+
 					return false;
 				}
 			});
@@ -267,14 +264,13 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 //helper functions below
 function tb_showIframe(){
 	jQuery("#TB_load").remove();
-	jQuery("#TB_window").css({'visibility':'visible'}).trigger( 'thickbox:iframe:loaded' );
+	jQuery("#TB_window").css({'visibility':'visible'});
 }
 
 function tb_remove() {
  	jQuery("#TB_imageOff").unbind("click");
 	jQuery("#TB_closeWindowButton").unbind("click");
 	jQuery("#TB_window").fadeOut("fast",function(){jQuery('#TB_window,#TB_overlay,#TB_HideSelect').trigger("tb_unload").unbind().remove();});
-	jQuery( 'body' ).removeClass( 'modal-open' );
 	jQuery("#TB_load").remove();
 	if (typeof document.body.style.maxHeight == "undefined") {//if IE 6
 		jQuery("body","html").css({height: "auto", width: "auto"});
