@@ -336,8 +336,7 @@ blockquote.alignright p {
  * ----------------------------------------------------------------------------
  */
 
-.mceItemTable,
-.mce-item-table {
+.mceItemTable {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-width: 1px 0 0 1px;
 	border-collapse: separate;
@@ -349,9 +348,7 @@ blockquote.alignright p {
 }
 
 .mceItemTable th,
-.mceItemTable caption,
-.mce-item-table th,
-.mce-item-table caption {
+.mceItemTable caption {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-width: 0 1px 1px 0;
 	font-weight: 700;
@@ -361,8 +358,7 @@ blockquote.alignright p {
 	vertical-align: baseline;
 }
 
-.mceItemTable td,
-.mce-item-table td {
+.mceItemTable td {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-width: 0 1px 1px 0;
 	font-family: Lato, sans-serif;
@@ -379,7 +375,7 @@ blockquote.alignright p {
 
 img {
 	height: auto;
-	max-width: 100%;
+	max-width: 474px;
 	vertical-align: middle;
 }
 
@@ -388,7 +384,7 @@ img {
 	border: none;
 	color: #767676;
 	margin: 0 0 24px 0;
-	max-width: 100%;
+	max-width: 474px;
 	padding: 0;
 	text-align: left;
 }

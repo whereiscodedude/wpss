@@ -18,45 +18,96 @@ class Custom_Background {
 	/**
 	 * Callback for administration header.
 	 *
-	 * @var callable
+	 * @var callback
 	 * @since 3.0.0
+	 * @access private
 	 */
-	public $admin_header_callback;
+	private $admin_header_callback;
 
 	/**
 	 * Callback for header div.
 	 *
-	 * @var callable
-	 * @since 3.0.0
-	 */
-	public $admin_image_div_callback;
-
-	/**
-	 * Used to trigger a success message when settings updated and set to true.
-	 *
+	 * @var callback
 	 * @since 3.0.0
 	 * @access private
-	 * @var bool
 	 */
-	private $updated;
+	private $admin_image_div_callback;
+
+	/**
+	 * Holds the page menu hook.
+	 *
+	 * @var string
+	 * @since 3.0.0
+	 * @access private
+	 */
+	private $page = '';
 
 	/**
 	 * Constructor - Register administration header callback.
 	 *
 	 * @since 3.0.0
-	 * @param callable $admin_header_callback
-	 * @param callable $admin_image_div_callback Optional custom image div output callback.
+	 * @param callback $admin_header_callback
+	 * @param callback $admin_image_div_callback Optional custom image div output callback.
+	 * @return Custom_Background
 	 */
 	public function __construct($admin_header_callback = '', $admin_image_div_callback = '') {
 		$this->admin_header_callback = $admin_header_callback;
 		$this->admin_image_div_callback = $admin_image_div_callback;
 
 		add_action( 'admin_menu', array( $this, 'init' ) );
-
-		add_action( 'wp_ajax_custom-background-add', array( $this, 'ajax_background_add' ) );
-
-		// Unused since 3.5.0.
 		add_action( 'wp_ajax_set-background-image', array( $this, 'wp_set_background_image' ) );
+	}
+
+	/**
+	 * Make private properties readable for backwards compatibility.
+	 *
+	 * @since 4.0.0
+	 * @access public
+	 *
+	 * @param string $name Property name.
+	 * @return mixed Property.
+	 */
+	public function __get( $name ) {
+		return $this->$name;
+	}
+
+	/**
+	 * Make private properties settable for backwards compatibility.
+	 *
+	 * @since 4.0.0
+	 * @access public
+	 *
+	 * @param string $name  Property to set.
+	 * @param mixed  $value Property value.
+	 * @return mixed Newly-set property.
+	 */
+	public function __set( $name, $value ) {
+		return $this->$name = $value;
+	}
+
+	/**
+	 * Make private properties checkable for backwards compatibility.
+	 *
+	 * @since 4.0.0
+	 * @access public
+	 *
+	 * @param string $name Property to check if set.
+	 * @return bool Whether the property is set.
+	 */
+	public function __isset( $name ) {
+		return isset( $this->$name );
+	}
+
+	/**
+	 * Make private properties un-settable for backwards compatibility.
+	 *
+	 * @since 4.0.0
+	 * @access public
+	 *
+	 * @param string $name Property to unset.
+	 */
+	public function __unset( $name ) {
+		unset( $this->$name );
 	}
 
 	/**
@@ -65,18 +116,17 @@ class Custom_Background {
 	 * @since 3.0.0
 	 */
 	public function init() {
-		$page = add_theme_page( __( 'Background' ), __( 'Background' ), 'edit_theme_options', 'custom-background', array( $this, 'admin_page' ) );
-		if ( ! $page ) {
+		if ( ! current_user_can('edit_theme_options') )
 			return;
-		}
 
-		add_action( "load-$page", array( $this, 'admin_load' ) );
-		add_action( "load-$page", array( $this, 'take_action' ), 49 );
-		add_action( "load-$page", array( $this, 'handle_upload' ), 49 );
+		$this->page = $page = add_theme_page(__('Background'), __('Background'), 'edit_theme_options', 'custom-background', array($this, 'admin_page'));
 
-		if ( $this->admin_header_callback ) {
-			add_action( "admin_head-$page", $this->admin_header_callback, 51 );
-		}
+		add_action("load-$page", array($this, 'admin_load'));
+		add_action("load-$page", array($this, 'take_action'), 49);
+		add_action("load-$page", array($this, 'handle_upload'), 49);
+
+		if ( $this->admin_header_callback )
+			add_action("admin_head-$page", $this->admin_header_callback, 51);
 	}
 
 	/**
@@ -97,7 +147,7 @@ class Custom_Background {
 
 		get_current_screen()->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
-			'<p>' . __( '<a href="https://codex.wordpress.org/Appearance_Background_Screen" target="_blank">Documentation on Custom Background</a>' ) . '</p>' .
+			'<p>' . __( '<a href="http://codex.wordpress.org/Appearance_Background_Screen" target="_blank">Documentation on Custom Background</a>' ) . '</p>' .
 			'<p>' . __( '<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>' ) . '</p>'
 		);
 
@@ -112,6 +162,7 @@ class Custom_Background {
 	 * @since 3.0.0
 	 */
 	public function take_action() {
+
 		if ( empty($_POST) )
 			return;
 
@@ -180,20 +231,7 @@ class Custom_Background {
 	public function admin_page() {
 ?>
 <div class="wrap" id="custom-background">
-<h1><?php _e( 'Custom Background' ); ?></h1>
-
-<?php if ( current_user_can( 'customize' ) ) { ?>
-<div class="notice notice-info hide-if-no-customize">
-	<p>
-		<?php
-		printf(
-			__( 'You can now manage and live-preview Custom Backgrounds in the <a href="%1$s">Customizer</a>.' ),
-			admin_url( 'customize.php?autofocus[control]=background_image' )
-		);
-		?>
-	</p>
-</div>
-<?php } ?>
+<h2><?php _e( 'Custom Background' ); ?></h2>
 
 <?php if ( ! empty( $this->updated ) ) { ?>
 <div id="message" class="updated">
@@ -216,9 +254,8 @@ class Custom_Background {
 		if ( $bgcolor = get_background_color() )
 			$background_styles .= 'background-color: #' . $bgcolor . ';';
 
-		$background_image_thumb = get_background_image();
-		if ( $background_image_thumb ) {
-			$background_image_thumb = esc_url( set_url_scheme( get_theme_mod( 'background_image_thumb', str_replace( '%', '%%', $background_image_thumb ) ) ) );
+		if ( get_background_image() ) {
+			$background_image_thumb = esc_url( set_url_scheme( get_theme_mod( 'background_image_thumb', str_replace( '%', '%%', get_background_image() ) ) ) );
 
 			// Background-image URL must be single quote, see below.
 			$background_styles .= ' background-image: url(\'' . $background_image_thumb . '\');'
@@ -227,7 +264,7 @@ class Custom_Background {
 		}
 	?>
 	<div id="custom-background-image" style="<?php echo $background_styles; ?>"><?php // must be double quote, see above ?>
-		<?php if ( $background_image_thumb ) { ?>
+		<?php if ( get_background_image() ) { ?>
 		<img class="custom-background-image" src="<?php echo $background_image_thumb; ?>" style="visibility:hidden;" alt="" /><br />
 		<img class="custom-background-image" src="<?php echo $background_image_thumb; ?>" style="visibility:hidden;" alt="" />
 		<?php } ?>
@@ -240,7 +277,7 @@ class Custom_Background {
 <tr>
 <th scope="row"><?php _e('Remove Image'); ?></th>
 <td>
-<form method="post">
+<form method="post" action="">
 <?php wp_nonce_field('custom-background-remove', '_wpnonce-custom-background-remove'); ?>
 <?php submit_button( __( 'Remove Background Image' ), 'button', 'remove-background', false ); ?><br/>
 <?php _e('This will remove the background image. You will not be able to restore any customizations.') ?>
@@ -254,7 +291,7 @@ class Custom_Background {
 <tr>
 <th scope="row"><?php _e('Restore Original Image'); ?></th>
 <td>
-<form method="post">
+<form method="post" action="">
 <?php wp_nonce_field('custom-background-reset', '_wpnonce-custom-background-reset'); ?>
 <?php submit_button( __( 'Restore Original Image' ), 'button', 'reset-background', false ); ?><br/>
 <?php _e('This will restore the original background image. You will not be able to restore any customizations.') ?>
@@ -263,10 +300,9 @@ class Custom_Background {
 </tr>
 <?php endif; ?>
 
-<?php if ( current_user_can( 'upload_files' ) ): ?>
 <tr>
 <th scope="row"><?php _e('Select Image'); ?></th>
-<td><form enctype="multipart/form-data" id="upload-form" class="wp-upload-form" method="post">
+<td><form enctype="multipart/form-data" id="upload-form" class="wp-upload-form" method="post" action="">
 	<p>
 		<label for="upload"><?php _e( 'Choose an image from your computer:' ); ?></label><br />
 		<input type="file" id="upload" name="import" />
@@ -276,19 +312,18 @@ class Custom_Background {
 	</p>
 	<p>
 		<label for="choose-from-library-link"><?php _e( 'Or choose an image from your media library:' ); ?></label><br />
-		<button id="choose-from-library-link" class="button"
+		<a id="choose-from-library-link" class="button"
 			data-choose="<?php esc_attr_e( 'Choose a Background Image' ); ?>"
-			data-update="<?php esc_attr_e( 'Set as background' ); ?>"><?php _e( 'Choose Image' ); ?></button>
+			data-update="<?php esc_attr_e( 'Set as background' ); ?>"><?php _e( 'Choose Image' ); ?></a>
 	</p>
 	</form>
 </td>
 </tr>
-<?php endif; ?>
 </tbody>
 </table>
 
 <h3><?php _e('Display Options') ?></h3>
-<form method="post">
+<form method="post" action="">
 <table class="form-table">
 <tbody>
 <?php if ( get_background_image() ) : ?>
@@ -362,6 +397,7 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 	 * @since 3.0.0
 	 */
 	public function handle_upload() {
+
 		if ( empty($_FILES) )
 			return;
 
@@ -369,7 +405,7 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 		$overrides = array('test_form' => false);
 
 		$uploaded_file = $_FILES['import'];
-		$wp_filetype = wp_check_filetype_and_ext( $uploaded_file['tmp_name'], $uploaded_file['name'] );
+		$wp_filetype = wp_check_filetype_and_ext( $uploaded_file['tmp_name'], $uploaded_file['name'], false );
 		if ( ! wp_match_mime_types( 'image', $wp_filetype['type'] ) )
 			wp_die( __( 'The uploaded file is not a valid image. Please try again.' ) );
 
@@ -410,59 +446,23 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 	}
 
 	/**
-	 * AJAX handler for adding custom background context to an attachment.
-	 *
-	 * Triggered when the user adds a new background image from the
-	 * Media Manager.
-	 *
-	 * @since 4.1.0
-	 */
-	public function ajax_background_add() {
-		check_ajax_referer( 'background-add', 'nonce' );
-
-		if ( ! current_user_can( 'edit_theme_options' ) ) {
-			wp_send_json_error();
-		}
-
-		$attachment_id = absint( $_POST['attachment_id'] );
-		if ( $attachment_id < 1 ) {
-			wp_send_json_error();
-		}
-
-		update_post_meta( $attachment_id, '_wp_attachment_is_custom_background', get_stylesheet() );
-
-		wp_send_json_success();
-	}
-
-	/**
+	 * Unused since 3.5.0.
 	 *
 	 * @since 3.4.0
-	 * @deprecated 3.5.0
-	 *
-	 * @param array $form_fields
-	 * @return array $form_fields
 	 */
 	public function attachment_fields_to_edit( $form_fields ) {
 		return $form_fields;
 	}
 
 	/**
+	 * Unused since 3.5.0.
 	 *
 	 * @since 3.4.0
-	 * @deprecated 3.5.0
-	 *
-	 * @param array $tabs
-	 * @return array $tabs
 	 */
 	public function filter_upload_tabs( $tabs ) {
 		return $tabs;
 	}
 
-	/**
-	 *
-	 * @since 3.4.0
-	 * @deprecated 3.5.0
-	 */
 	public function wp_set_background_image() {
 		if ( ! current_user_can('edit_theme_options') || ! isset( $_POST['attachment_id'] ) ) exit;
 		$attachment_id = absint($_POST['attachment_id']);
