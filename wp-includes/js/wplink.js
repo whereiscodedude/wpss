@@ -68,7 +68,7 @@ var wpLink;
 				inputs.queryNoticeTextHint.addClass( 'screen-reader-text' ).hide();
 			} );
 
-			inputs.search.on( 'keyup input', function() {
+			inputs.search.keyup( function() {
 				var self = this;
 
 				window.clearTimeout( searchTimer );
@@ -77,28 +77,26 @@ var wpLink;
 				}, 500 );
 			});
 
+			function correctURL() {
+				var url = $.trim( inputs.url.val() );
+
+				if ( url && correctedURL !== url && ! /^(?:[a-z]+:|#|\?|\.|\/)/.test( url ) ) {
+					inputs.url.val( 'http://' + url );
+					correctedURL = url;
+				}
+			}
+
 			inputs.url.on( 'paste', function() {
-				setTimeout( wpLink.correctURL, 0 );
+				setTimeout( correctURL, 0 );
 			} );
 
-			inputs.url.on( 'blur', wpLink.correctURL );
-		},
-
-		// If URL wasn't corrected last time and doesn't start with http:, https:, ? # or /, prepend http://
-		correctURL: function () {
-			var url = $.trim( inputs.url.val() );
-
-			if ( url && correctedURL !== url && ! /^(?:[a-z]+:|#|\?|\.|\/)/.test( url ) ) {
-				inputs.url.val( 'http://' + url );
-				correctedURL = url;
-			}
+			inputs.url.on( 'blur', correctURL );
 		},
 
 		open: function( editorId ) {
-			var ed,
-				$body = $( document.body );
+			var ed;
 
-			$body.addClass( 'modal-open' );
+			$( document.body ).addClass( 'modal-open' );
 
 			wpLink.range = null;
 
@@ -113,10 +111,6 @@ var wpLink;
 			this.textarea = $( '#' + window.wpActiveEditor ).get( 0 );
 
 			if ( typeof tinymce !== 'undefined' ) {
-				// Make sure the link wrapper is the last element in the body,
-				// or the inline editor toolbar may show above the backdrop.
-				$body.append( inputs.backdrop, inputs.wrap );
-
 				ed = tinymce.get( wpActiveEditor );
 
 				if ( ed && ! ed.isHidden() ) {
@@ -266,22 +260,10 @@ var wpLink;
 		},
 
 		getAttrs: function() {
-			wpLink.correctURL();
-
 			return {
 				href: $.trim( inputs.url.val() ),
 				target: inputs.openInNewTab.prop( 'checked' ) ? '_blank' : ''
 			};
-		},
-
-		buildHtml: function(attrs) {
-			var html = '<a href="' + attrs.href + '"';
-
-			if ( attrs.target ) {
-				html += ' target="' + attrs.target + '"';
-			}
-
-			return html + '>';
 		},
 
 		update: function() {
@@ -308,7 +290,14 @@ var wpLink;
 				return;
 			}
 
-			html = wpLink.buildHtml(attrs);
+			// Build HTML
+			html = '<a href="' + attrs.href + '"';
+
+			if ( attrs.target ) {
+				html += ' target="' + attrs.target + '"';
+			}
+
+			html += '>';
 
 			// Insert HTML
 			if ( document.selection && wpLink.range ) {
@@ -365,10 +354,7 @@ var wpLink;
 			}
 
 			link = getLink();
-
-			if ( inputs.wrap.hasClass( 'has-text-field' ) ) {
-				text = inputs.text.val() || attrs.href;
-			}
+			text = inputs.text.val();
 
 			if ( link ) {
 				if ( text ) {
@@ -382,13 +368,11 @@ var wpLink;
 				editor.dom.setAttribs( link, attrs );
 			} else {
 				if ( text ) {
-					editor.selection.setNode( editor.dom.create( 'a', attrs, editor.dom.encode( text ) ) );
+					editor.selection.setNode( editor.dom.create( 'a', attrs, text ) );
 				} else {
 					editor.execCommand( 'mceInsertLink', false, attrs );
 				}
 			}
-
-			editor.nodeChanged();
 		},
 
 		updateFields: function( e, li ) {
@@ -459,14 +443,13 @@ var wpLink;
 		},
 
 		keydown: function( event ) {
-			var fn, id;
+			var fn, id,
+				key = $.ui.keyCode;
 
-			// Escape key.
-			if ( 27 === event.keyCode ) {
+			if ( key.ESCAPE === event.keyCode ) {
 				wpLink.close();
 				event.stopImmediatePropagation();
-			// Tab key.
-			} else if ( 9 === event.keyCode ) {
+			} else if ( key.TAB === event.keyCode ) {
 				id = event.target.id;
 
 				// wp-link-submit must always be the last focusable element in the dialog.
@@ -480,8 +463,7 @@ var wpLink;
 				}
 			}
 
-			// Up Arrow and Down Arrow keys.
-			if ( 38 !== event.keyCode && 40 !== event.keyCode ) {
+			if ( event.keyCode !== key.UP && event.keyCode !== key.DOWN ) {
 				return;
 			}
 
@@ -490,8 +472,7 @@ var wpLink;
 				return;
 			}
 
-			// Up Arrow key.
-			fn = 38 === event.keyCode ? 'prev' : 'next';
+			fn = event.keyCode === key.UP ? 'prev' : 'next';
 			clearInterval( wpLink.keyInterval );
 			wpLink[ fn ]();
 			wpLink.keyInterval = setInterval( wpLink[ fn ], wpLink.keySensitivity );
@@ -499,8 +480,9 @@ var wpLink;
 		},
 
 		keyup: function( event ) {
-			// Up Arrow and Down Arrow keys.
-			if ( 38 === event.keyCode || 40 === event.keyCode ) {
+			var key = $.ui.keyCode;
+
+			if ( event.which === key.UP || event.which === key.DOWN ) {
 				clearInterval( wpLink.keyInterval );
 				event.preventDefault();
 			}

@@ -146,7 +146,7 @@ function twentythirteen_fonts_url() {
 			'family' => urlencode( implode( '|', $font_families ) ),
 			'subset' => urlencode( 'latin,latin-ext' ),
 		);
-		$fonts_url = add_query_arg( $query_args, 'https://fonts.googleapis.com/css' );
+		$fonts_url = add_query_arg( $query_args, '//fonts.googleapis.com/css' );
 	}
 
 	return $fonts_url;
@@ -283,9 +283,9 @@ endif;
 if ( ! function_exists( 'twentythirteen_post_nav' ) ) :
 /**
  * Display navigation to next/previous post when applicable.
- *
- * @since Twenty Thirteen 1.0
- */
+*
+* @since Twenty Thirteen 1.0
+*/
 function twentythirteen_post_nav() {
 	global $post;
 
