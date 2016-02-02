@@ -17,6 +17,7 @@
 
 	// Link settings.
 	api.Menus.data = {
+		nonce: '',
 		itemTypes: [],
 		l10n: {},
 		menuItemTransport: 'postMessage',
@@ -247,7 +248,7 @@
 			$section.addClass( 'loading' );
 			self.loading = true;
 			params = {
-				'customize-menus-nonce': api.settings.nonce['customize-menus'],
+				'customize-menus-nonce': api.Menus.data.nonce,
 				'wp_customize': 'on',
 				'search': self.searchTerm,
 				'page': page
@@ -322,7 +323,7 @@
 			availableMenuItemContainer.find( '.accordion-section-title' ).addClass( 'loading' );
 			self.loading = true;
 			params = {
-				'customize-menus-nonce': api.settings.nonce['customize-menus'],
+				'customize-menus-nonce': api.Menus.data.nonce,
 				'wp_customize': 'on',
 				'type': type,
 				'object': object,
@@ -1011,7 +1012,7 @@
 				return;
 			}
 			section = api.section( sectionId );
-			if ( ( section && section.expanded() ) || api.settings.autofocus.control === control.id ) {
+			if ( section && section.expanded() ) {
 				control.actuallyEmbed();
 			}
 		},
@@ -1249,21 +1250,16 @@
 					return;
 				}
 
-				var titleEl = control.container.find( '.menu-item-title' ),
-				    titleText = item.title || api.Menus.data.l10n.untitled;
-
-				if ( item._invalid ) {
-					titleText = api.Menus.data.l10n.invalidTitleTpl.replace( '%s', titleText );
-				}
+				var titleEl = control.container.find( '.menu-item-title' );
 
 				// Don't update to an empty title.
 				if ( item.title ) {
 					titleEl
-						.text( titleText )
+						.text( item.title )
 						.removeClass( 'no-title' );
 				} else {
 					titleEl
-						.text( titleText )
+						.text( api.Menus.data.l10n.untitled )
 						.addClass( 'no-title' );
 				}
 			} );
@@ -1307,9 +1303,9 @@
 				'menu-item-edit-inactive'
 			];
 
-			if ( settingValue._invalid ) {
-				containerClasses.push( 'menu-item-invalid' );
-				control.params.title = api.Menus.data.l10n.invalidTitleTpl.replace( '%s', control.params.title );
+			if ( settingValue.invalid ) {
+				containerClasses.push( 'invalid' );
+				control.params.title = api.Menus.data.invalidTitleTpl.replace( '%s', control.params.title );
 			} else if ( 'draft' === settingValue.status ) {
 				containerClasses.push( 'pending' );
 				control.params.title = api.Menus.data.pendingTitleTpl.replace( '%s', control.params.title );
@@ -1362,38 +1358,24 @@
 
 		/**
 		 * Expand the menu item form control.
-		 *
-		 * @since 4.5.0 Added params.completeCallback.
-		 *
-		 * @param {Object}   [params] - Optional params.
-		 * @param {Function} [params.completeCallback] - Function to call when the form toggle has finished animating.
 		 */
-		expandForm: function( params ) {
-			this.toggleForm( true, params );
+		expandForm: function() {
+			this.toggleForm( true );
 		},
 
 		/**
 		 * Collapse the menu item form control.
-		 *
-		 * @since 4.5.0 Added params.completeCallback.
-		 *
-		 * @param {Object}   [params] - Optional params.
-		 * @param {Function} [params.completeCallback] - Function to call when the form toggle has finished animating.
 		 */
-		collapseForm: function( params ) {
-			this.toggleForm( false, params );
+		collapseForm: function() {
+			this.toggleForm( false );
 		},
 
 		/**
 		 * Expand or collapse the menu item control.
 		 *
-		 * @since 4.5.0 Added params.completeCallback.
-		 *
-		 * @param {boolean}  [showOrHide] - If not supplied, will be inverse of current visibility
-		 * @param {Object}   [params] - Optional params.
-		 * @param {Function} [params.completeCallback] - Function to call when the form toggle has finished animating.
+		 * @param {boolean|undefined} [showOrHide] If not supplied, will be inverse of current visibility
 		 */
-		toggleForm: function( showOrHide, params ) {
+		toggleForm: function( showOrHide ) {
 			var self = this, $menuitem, $inside, complete;
 
 			$menuitem = this.container;
@@ -1404,9 +1386,6 @@
 
 			// Already expanded or collapsed.
 			if ( $inside.is( ':visible' ) === showOrHide ) {
-				if ( params && params.completeCallback ) {
-					params.completeCallback();
-				}
 				return;
 			}
 
@@ -1423,10 +1402,6 @@
 						.removeClass( 'menu-item-edit-inactive' )
 						.addClass( 'menu-item-edit-active' );
 					self.container.trigger( 'expanded' );
-
-					if ( params && params.completeCallback ) {
-						params.completeCallback();
-					}
 				};
 
 				$menuitem.find( '.item-edit' ).attr( 'aria-expanded', 'true' );
@@ -1439,10 +1414,6 @@
 						.addClass( 'menu-item-edit-inactive' )
 						.removeClass( 'menu-item-edit-active' );
 					self.container.trigger( 'collapsed' );
-
-					if ( params && params.completeCallback ) {
-						params.completeCallback();
-					}
 				};
 
 				self.container.trigger( 'collapse' );
@@ -1455,31 +1426,11 @@
 		/**
 		 * Expand the containing menu section, expand the form, and focus on
 		 * the first input in the control.
-		 *
-		 * @since 4.5.0 Added params.completeCallback.
-		 *
-		 * @param {Object}   [params] - Params object.
-		 * @param {Function} [params.completeCallback] - Optional callback function when focus has completed.
 		 */
-		focus: function( params ) {
-			params = params || {};
-			var control = this, originalCompleteCallback = params.completeCallback;
-
-			control.expandControlSection();
-
-			params.completeCallback = function() {
-				var focusable;
-
-				// Note that we can't use :focusable due to a jQuery UI issue. See: https://github.com/jquery/jquery-ui/pull/1583
-				focusable = control.container.find( '.menu-item-settings' ).find( 'input, select, textarea, button, object, a[href], [tabindex]' ).filter( ':visible' );
-				focusable.first().focus();
-
-				if ( originalCompleteCallback ) {
-					originalCompleteCallback();
-				}
-			};
-
-			control.expandForm( params );
+		focus: function() {
+			this.expandControlSection();
+			this.expandForm();
+			this.container.find( '.menu-item-settings :focusable:first' ).focus();
 		},
 
 		/**
@@ -2486,9 +2437,6 @@
 		api.previewer.bind( 'refresh', function() {
 			api.previewer.refresh();
 		});
-
-		// Open and focus menu control.
-		api.previewer.bind( 'focus-nav-menu-item-control', api.Menus.focusMenuItemControl );
 	} );
 
 	/**
@@ -2501,7 +2449,7 @@
 	 */
 	api.Menus.applySavedData = function( data ) {
 
-		var insertedMenuIdMapping = {}, insertedMenuItemIdMapping = {};
+		var insertedMenuIdMapping = {};
 
 		_( data.nav_menu_updates ).each(function( update ) {
 			var oldCustomizeId, newCustomizeId, customizeId, oldSetting, newSetting, setting, settingValue, oldSection, newSection, wasSaved, widgetTemplate, navMenuCount;
@@ -2632,13 +2580,6 @@
 			}
 		} );
 
-		// Build up mapping of nav_menu_item placeholder IDs to inserted IDs.
-		_( data.nav_menu_item_updates ).each(function( update ) {
-			if ( update.previous_post_id ) {
-				insertedMenuItemIdMapping[ update.previous_post_id ] = update.post_id;
-			}
-		});
-
 		_( data.nav_menu_item_updates ).each(function( update ) {
 			var oldCustomizeId, newCustomizeId, oldSetting, newSetting, settingValue, oldControl, newControl;
 			if ( 'inserted' === update.status ) {
@@ -2663,14 +2604,6 @@
 					throw new Error( 'Did not expect setting to be empty (deleted).' );
 				}
 				settingValue = _.clone( settingValue );
-
-				// If the parent menu item was also inserted, update the menu_item_parent to the new ID.
-				if ( settingValue.menu_item_parent < 0 ) {
-					if ( ! insertedMenuItemIdMapping[ settingValue.menu_item_parent ] ) {
-						throw new Error( 'inserted ID for menu_item_parent not available' );
-					}
-					settingValue.menu_item_parent = insertedMenuItemIdMapping[ settingValue.menu_item_parent ];
-				}
 
 				// If the menu was also inserted, then make sure it uses the new menu ID for nav_menu_term_id.
 				if ( insertedMenuIdMapping[ settingValue.nav_menu_term_id ] ) {
