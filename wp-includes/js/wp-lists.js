@@ -1,4 +1,3 @@
-/* global ajaxurl, wpAjax */
 (function($) {
 var fs = {add:'ajaxAdd',del:'ajaxDel',dim:'ajaxDim',process:'process',recolor:'recolor'}, wpList;
 
@@ -22,13 +21,6 @@ wpList = {
 		return s.nonce || url._ajax_nonce || $('#' + s.element + ' input[name="_ajax_nonce"]').val() || url._wpnonce || $('#' + s.element + ' input[name="_wpnonce"]').val() || 0;
 	},
 
-	/**
-	 * Extract list item data from a DOM element.
-	 *
-	 * @param  {HTMLElement} e The DOM element.
-	 * @param  {string}      t
-	 * @return {array}
-	 */
 	parseData: function(e,t) {
 		var d = [], wpListsData;
 
@@ -152,13 +144,6 @@ wpList = {
 		return false;
 	},
 
-	/**
-	 * Delete an item in the list via AJAX.
-	 *
-	 * @param  {HTMLElement} e A DOM element containing item data.
-	 * @param  {Object}      s
-	 * @return {boolean}
-	 */
 	ajaxDel: function( e, s ) {
 		e = $(e);
 		s = s || {};
@@ -323,11 +308,7 @@ wpList = {
 	},
 
 	add: function( e, s ) {
-		if ( 'string' == typeof e ) {
-			e = $( $.trim( e ) ); // Trim leading whitespaces
-		} else {
-			e = $( e );
-		}
+		e = $( $.trim(e) ); // Trim leading whitespaces
 
 		var list = $(this), old = false, _s = { pos: 0, id: 0, oldId: null }, ba, ref, color;
 
@@ -336,16 +317,16 @@ wpList = {
 
 		s = $.extend(_s, this.wpList.settings, s);
 
-		if ( !e.length || !s.what )
+		if ( !e.size() || !s.what )
 			return false;
 
 		if ( s.oldId )
 			old = $('#' + s.what + '-' + s.oldId);
 
-		if ( s.id && ( s.id != s.oldId || !old || !old.length ) )
+		if ( s.id && ( s.id != s.oldId || !old || !old.size() ) )
 			$('#' + s.what + '-' + s.id).remove();
 
-		if ( old && old.length ) {
+		if ( old && old.size() ) {
 			old.before(e);
 			old.remove();
 		} else if ( isNaN(s.pos) ) {
@@ -358,7 +339,7 @@ wpList = {
 
 			ref = list.find( '#' + s.pos );
 
-			if ( 1 === ref.length )
+			if ( 1 === ref.size() )
 				ref[ba](e);
 			else
 				list.append(e);
@@ -389,11 +370,11 @@ wpList = {
 
 		e = $(e);
 
-		if ( list.wpList && e.parents( '#' + list.id ).length )
+		if ( list.wpList && e.parents( '#' + list.id ).size() )
 			return;
 
 		e.find(':input').each( function() {
-			if ( $(this).parents('.form-no-clear').length )
+			if ( $(this).parents('.form-no-clear').size() )
 				return;
 
 			t = this.type.toLowerCase();
@@ -437,7 +418,7 @@ wpList = {
 
 		items = $('.list-item:visible', list);
 
-		if ( !items.length )
+		if ( !items.size() )
 			items = $(list).children(':visible');
 
 		eo = [':even',':odd'];
