@@ -7,25 +7,12 @@
 
 header('Content-Type: ' . feed_content_type('atom') . '; charset=' . get_option('blog_charset'), true);
 echo '<?xml version="1.0" encoding="' . get_option('blog_charset') . '" ?' . '>';
-
-/** This action is documented in wp-includes/feed-rss2.php */
-do_action( 'rss_tag_pre', 'atom-comments' );
 ?>
 <feed
 	xmlns="http://www.w3.org/2005/Atom"
 	xml:lang="<?php bloginfo_rss( 'language' ); ?>"
 	xmlns:thr="http://purl.org/syndication/thread/1.0"
-	<?php
-		/** This action is documented in wp-includes/feed-atom.php */
-		do_action( 'atom_ns' );
-
-		/**
-		 * Fires inside the feed tag in the Atom comment feed.
-		 *
-		 * @since 2.8.0
-		 */
-		do_action( 'atom_comments_ns' );
-	?>
+	<?php do_action('atom_ns'); do_action('atom_comments_ns'); ?>
 >
 	<title type="text"><?php
 		if ( is_singular() )
@@ -33,7 +20,7 @@ do_action( 'rss_tag_pre', 'atom-comments' );
 		elseif ( is_search() )
 			printf( ent2ncr( __( 'Comments for %1$s searching on %2$s' ) ), get_bloginfo_rss( 'name' ), get_search_query() );
 		else
-			printf( ent2ncr( __( 'Comments for %s' ) ), get_wp_title_rss() );
+			printf( ent2ncr( __( 'Comments for %s' ) ), get_bloginfo_rss( 'name' ) . get_wp_title_rss() );
 	?></title>
 	<subtitle type="text"><?php bloginfo_rss('description'); ?></subtitle>
 
@@ -43,7 +30,7 @@ do_action( 'rss_tag_pre', 'atom-comments' );
 	<link rel="alternate" type="<?php bloginfo_rss('html_type'); ?>" href="<?php comments_link_feed(); ?>" />
 	<link rel="self" type="application/atom+xml" href="<?php echo esc_url( get_post_comments_feed_link('', 'atom') ); ?>" />
 	<id><?php echo esc_url( get_post_comments_feed_link('', 'atom') ); ?></id>
-<?php } elseif (is_search()) { ?>
+<?php } elseif(is_search()) { ?>
 	<link rel="alternate" type="<?php bloginfo_rss('html_type'); ?>" href="<?php echo home_url() . '?s=' . get_search_query(); ?>" />
 	<link rel="self" type="application/atom+xml" href="<?php echo get_search_comments_feed_link('', 'atom'); ?>" />
 	<id><?php echo get_search_comments_feed_link('', 'atom'); ?></id>
@@ -52,14 +39,7 @@ do_action( 'rss_tag_pre', 'atom-comments' );
 	<link rel="self" type="application/atom+xml" href="<?php bloginfo_rss('comments_atom_url'); ?>" />
 	<id><?php bloginfo_rss('comments_atom_url'); ?></id>
 <?php } ?>
-<?php
-	/**
-	 * Fires at the end of the Atom comment feed header.
-	 *
-	 * @since 2.8.0
-	 */
-	do_action( 'comments_atom_head' );
-?>
+<?php do_action('comments_atom_head'); ?>
 <?php
 if ( have_comments() ) : while ( have_comments() ) : the_comment();
 	$comment_post = $GLOBALS['post'] = get_post( $comment->comment_post_ID );
@@ -100,15 +80,7 @@ if ( have_comments() ) : while ( have_comments() ) : the_comment();
 ?>
 		<thr:in-reply-to ref="<?php comment_guid($parent_comment) ?>" href="<?php echo get_comment_link($parent_comment) ?>" type="<?php bloginfo_rss('html_type'); ?>" />
 <?php endif;
-	/**
-	 * Fires at the end of each Atom comment feed item.
-	 *
-	 * @since 2.2.0
-	 *
-	 * @param int $comment_id      ID of the current comment.
-	 * @param int $comment_post_id ID of the post the current comment is connected to.
-	 */
-	do_action( 'comment_atom_entry', $comment->comment_ID, $comment_post->ID );
+	do_action('comment_atom_entry', $comment->comment_ID, $comment_post->ID);
 ?>
 	</entry>
 <?php endwhile; endif; ?>
