@@ -343,7 +343,7 @@ final class WP_Customize_Widgets {
 
 		/*
 		 * Add a setting which will be supplied for the theme's sidebars_widgets
-		 * theme_mod when the theme is switched.
+		 * theme_mod when the the theme is switched.
 		 */
 		if ( ! $this->manager->is_theme_active() ) {
 			$setting_id = 'old_sidebars_widgets_data';
@@ -661,6 +661,7 @@ final class WP_Customize_Widgets {
 		);
 
 		$settings = array(
+			'nonce'                => wp_create_nonce( 'update-widget' ),
 			'registeredSidebars'   => array_values( $wp_registered_sidebars ),
 			'registeredWidgets'    => $wp_registered_widgets,
 			'availableWidgets'     => $available_widgets, // @todo Merge this with registered_widgets

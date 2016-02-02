@@ -959,7 +959,7 @@
 		 * comparing the loaded form with the sanitized form, whose fields will
 		 * be aligned to copy the sanitized over. The elements returned by this
 		 * are passed into this._getInputsSignature(), and they are iterated
-		 * over when copying sanitized values over to the form loaded.
+		 * over when copying sanitized values over to the the form loaded.
 		 *
 		 * @param {jQuery} container element in which to look for inputs
 		 * @returns {jQuery} inputs
@@ -1107,7 +1107,7 @@
 			params = {};
 			params.action = 'update-widget';
 			params.wp_customize = 'on';
-			params.nonce = api.settings.nonce['update-widget'];
+			params.nonce = api.Widgets.data.nonce;
 			params.theme = api.settings.theme.stylesheet;
 			params.customized = wp.customize.previewer.query().customized;
 
@@ -2056,6 +2056,11 @@
 	$.extend( api.controlConstructor, {
 		widget_form: api.Widgets.WidgetControl,
 		sidebar_widgets: api.Widgets.SidebarControl
+	});
+
+	// Refresh the nonce if login sends updated nonces over.
+	api.bind( 'nonce-refresh', function( nonces ) {
+		api.Widgets.data.nonce = nonces['update-widget'];
 	});
 
 	/**

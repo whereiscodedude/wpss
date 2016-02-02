@@ -498,11 +498,7 @@ tinymce.PluginManager.add('lists', function(editor) {
 		}
 
 		function applyList(listName) {
-			var rng = selection.getRng(true), bookmark, listItemName = 'LI';
-
-			if (dom.getContentEditable(selection.getNode()) === "false") {
-				return;
-			}
+			var rng = selection.getRng(true), bookmark = createBookmark(rng), listItemName = 'LI';
 
 			listName = listName.toUpperCase();
 
@@ -586,8 +582,6 @@ tinymce.PluginManager.add('lists', function(editor) {
 
 				return textBlocks;
 			}
-
-			bookmark = createBookmark(rng);
 
 			tinymce.each(getSelectedTextBlocks(), function(block) {
 				var listBlock, sibling;

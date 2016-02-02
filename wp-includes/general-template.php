@@ -226,7 +226,7 @@ function get_search_form( $echo = true ) {
 			$form = '<form role="search" method="get" class="search-form" action="' . esc_url( home_url( '/' ) ) . '">
 				<label>
 					<span class="screen-reader-text">' . _x( 'Search for:', 'label' ) . '</span>
-					<input type="search" class="search-field" placeholder="' . esc_attr_x( 'Search &hellip;', 'placeholder' ) . '" value="' . get_search_query() . '" name="s" />
+					<input type="search" class="search-field" placeholder="' . esc_attr_x( 'Search &hellip;', 'placeholder' ) . '" value="' . get_search_query() . '" name="s" title="' . esc_attr_x( 'Search for:', 'label' ) . '" />
 				</label>
 				<input type="submit" class="search-submit" value="'. esc_attr_x( 'Search', 'submit button' ) .'" />
 			</form>';
@@ -587,63 +587,42 @@ function wp_meta() {
 }
 
 /**
- * Displays information about the current site.
+ * Display information about the blog.
  *
+ * @see get_bloginfo() For possible values for the parameter.
  * @since 0.71
  *
- * @see get_bloginfo() For possible `$show` values
- *
- * @param string $show Optional. Site information to display. Default empty.
+ * @param string $show What to display.
  */
-function bloginfo( $show = '' ) {
+function bloginfo( $show='' ) {
 	echo get_bloginfo( $show, 'display' );
 }
 
 /**
- * Retrieves information about the current site.
+ * Retrieve information about the blog.
  *
- * Possible values for `$show` include:
+ * Some show parameter values are deprecated and will be removed in future
+ * versions. These options will trigger the {@see _deprecated_argument()}
+ * function. The deprecated blog info options are listed in the function
+ * contents.
  *
- * - 'name' - Site title (set in Settings > General)
- * - 'description' - Site tagline (set in Settings > General)
- * - 'wpurl' - The WordPress address (URL) (set in Settings > General)
- * - 'url' - The Site address (URL) (set in Settings > General)
- * - 'admin_email' - Admin email (set in Settings > General)
- * - 'charset' - The "Encoding for pages and feeds"  (set in Settings > Reading)
- * - 'version' - The current WordPress version
- * - 'html_type' - The content-type (default: "text/html"). Themes and plugins
- *   can override the default value using the {@see 'pre_option_html_type'} filter
- * - 'text_direction' - The text direction determined by the site's language. is_rtl()
- *   should be used instead
- * - 'language' - Language code for the current site
- * - 'stylesheet_url' - URL to the stylesheet for the active theme. An active child theme
- *   will take precedence over this value
- * - 'stylesheet_directory' - Directory path for the active theme.  An active child theme
- *   will take precedence over this value
- * - 'template_url' / 'template_directory' - URL of the active theme's directory. An active
- *   child theme will NOT take precedence over this value
- * - 'pingback_url' - The pingback XML-RPC file URL (xmlrpc.php)
- * - 'atom_url' - The Atom feed URL (/feed/atom)
- * - 'rdf_url' - The RDF/RSS 1.0 feed URL (/feed/rfd)
- * - 'rss_url' - The RSS 0.92 feed URL (/feed/rss)
- * - 'rss2_url' - The RSS 2.0 feed URL (/feed)
- * - 'comments_atom_url' - The comments Atom feed URL (/comments/feed)
- * - 'comments_rss2_url' - The comments RSS 2.0 feed URL (/comments/feed)
+ * The possible values for the 'show' parameter are listed below.
  *
- * Some `$show` values are deprecated and will be removed in future versions.
- * These options will trigger the _deprecated_argument() function.
+ * 1. url - Blog URI to homepage.
+ * 2. wpurl - Blog URI path to WordPress.
+ * 3. description - Secondary title
  *
- * Deprecated arguments include:
- *
- * - 'siteurl' - Use 'url' instead
- * - 'home' - Use 'url' instead
+ * The feed URL options can be retrieved from 'rdf_url' (RSS 0.91),
+ * 'rss_url' (RSS 1.0), 'rss2_url' (RSS 2.0), or 'atom_url' (Atom feed). The
+ * comment feeds can be retrieved from the 'comments_atom_url' (Atom comment
+ * feed) or 'comments_rss2_url' (RSS 2.0 comment feed).
  *
  * @since 0.71
  *
  * @global string $wp_version
  *
- * @param string $show   Optional. Site info to retrieve. Default empty (site name).
- * @param string $filter Optional. How to filter what is retrieved. Default 'raw'.
+ * @param string $show   Blog info to retrieve.
+ * @param string $filter How to filter what is retrieved.
  * @return string Mostly string values, might be empty.
  */
 function get_bloginfo( $show = '', $filter = 'raw' ) {
@@ -1479,11 +1458,13 @@ function get_the_archive_description() {
  *
  * @since 1.0.0
  *
+ * @todo Properly document optional arguments as such
+ *
  * @param string $url    URL to archive.
  * @param string $text   Archive text description.
  * @param string $format Optional, default is 'html'. Can be 'link', 'option', 'html', or custom.
- * @param string $before Optional. Content to prepend to the description. Default empty.
- * @param string $after  Optional. Content to append to the description. Default empty.
+ * @param string $before Optional.
+ * @param string $after  Optional.
  * @return string HTML link content for archive.
  */
 function get_archives_link($url, $text, $format = 'html', $before = '', $after = '') {
@@ -1503,16 +1484,10 @@ function get_archives_link($url, $text, $format = 'html', $before = '', $after =
 	 * Filter the archive link content.
 	 *
 	 * @since 2.6.0
-	 * @since 4.5.0 Added `$url`, `$text`, `$format`, `$before`, and `$after` params.
 	 *
 	 * @param string $link_html The archive HTML link content.
-	 * @param string $url       URL to archive.
-	 * @param string $text      Archive text description.
-	 * @param string $format    Link format. Can be 'link', 'option', 'html', or custom.
-	 * @param string $before    Content to prepend to the description.
-	 * @param string $after     Content to append to the description.
 	 */
-	return apply_filters( 'get_archives_link', $link_html, $url, $text, $format, $before, $after );
+	return apply_filters( 'get_archives_link', $link_html );
 }
 
 /**
@@ -2759,7 +2734,7 @@ function wp_default_editor() {
  * containing TinyMCE: 'edit_page_form', 'edit_form_advanced' and 'dbx_post_sidebar'.
  * See https://core.trac.wordpress.org/ticket/19173 for more information.
  *
- * @see _WP_Editors::editor()
+ * @see wp-includes/class-wp-editor.php
  * @since 3.3.0
  *
  * @param string $content   Initial content for the editor.
@@ -3101,20 +3076,15 @@ function paginate_links( $args = '' ) {
  *
  * @since 2.5.0
  *
+ * @todo Properly document optional arguments as such
+ *
  * @global array $_wp_admin_css_colors
  *
  * @param string $key    The unique key for this theme.
  * @param string $name   The name of the theme.
- * @param string $url    The URL of the CSS file containing the color scheme.
- * @param array  $colors Optional. An array of CSS color definition strings which are used
- *                       to give the user a feel for the theme.
- * @param array  $icons {
- *     Optional. CSS color definitions used to color any SVG icons.
- *
- *     @type string $base    SVG icon base color.
- *     @type string $focus   SVG icon color on focus.
- *     @type string $current SVG icon color of current admin menu link.
- * }
+ * @param string $url    The url of the css file containing the colour scheme.
+ * @param array  $colors Optional An array of CSS color definitions which are used to give the user a feel for the theme.
+ * @param array  $icons  Optional An array of CSS color definitions used to color any SVG icons
  */
 function wp_admin_css_color( $key, $name, $url, $colors = array(), $icons = array() ) {
 	global $_wp_admin_css_colors;

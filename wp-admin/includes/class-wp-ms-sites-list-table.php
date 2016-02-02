@@ -84,7 +84,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 
 		/*
 		 * If the network is large and a search is not being performed, show only
-		 * the latest sites with no paging in order to avoid expensive count queries.
+		 * the latest blogs with no paging in order to avoid expensive count queries.
 		 */
 		if ( !$s && wp_is_large_network() ) {
 			if ( !isset($_REQUEST['orderby']) )
@@ -272,14 +272,14 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Handles the site name column output.
+	 * Handles the blogname column output.
 	 *
 	 * @since 4.3.0
 	 * @access public
 	 *
 	 * @global string $mode
 	 *
-	 * @param array $blog Current site.
+	 * @param array $blog Current blog.
 	 */
 	public function column_blogname( $blog ) {
 		global $mode;
@@ -469,7 +469,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 	 * @since 4.3.0
 	 * @access protected
 	 *
-	 * @param object $blog        Site being acted upon.
+	 * @param object $blog        Blog being acted upon.
 	 * @param string $column_name Current column name.
 	 * @param string $primary     Primary column name.
 	 * @return string Row actions output.

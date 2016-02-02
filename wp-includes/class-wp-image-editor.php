@@ -21,8 +21,6 @@ abstract class WP_Image_Editor {
 
 	/**
 	 * Each instance handles a single file.
-	 *
-	 * @param string $file Path to the file to load.
 	 */
 	public function __construct( $file ) {
 		$this->file = $file;

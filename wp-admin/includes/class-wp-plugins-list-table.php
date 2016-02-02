@@ -75,7 +75,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 	public function prepare_items() {
 		global $status, $plugins, $totals, $page, $orderby, $order, $s;
 
-		wp_reset_vars( array( 'orderby', 'order' ) );
+		wp_reset_vars( array( 'orderby', 'order', 's' ) );
 
 		/**
 		 * Filter the full array of plugins to list in the Plugins list table.
@@ -224,7 +224,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 			}
 		}
 
-		if ( strlen( $s ) ) {
+		if ( $s ) {
 			$status = 'search';
 			$plugins['search'] = array_filter( $plugins['all'], array( $this, '_search_callback' ) );
 		}
@@ -268,16 +268,17 @@ class WP_Plugins_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * @global string $s
-	 *
+	 * @staticvar string $term
 	 * @param array $plugin
 	 * @return bool
 	 */
 	public function _search_callback( $plugin ) {
-		global $s;
+		static $term = null;
+		if ( is_null( $term ) )
+			$term = wp_unslash( $_REQUEST['s'] );
 
 		foreach ( $plugin as $value ) {
-			if ( is_string( $value ) && false !== stripos( strip_tags( $value ), $s ) ) {
+			if ( false !== stripos( strip_tags( $value ), $term ) ) {
 				return true;
 			}
 		}
@@ -315,16 +316,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 	public function no_items() {
 		global $plugins;
 
-		if ( ! empty( $_REQUEST['s'] ) ) {
-			$s = esc_html( $_REQUEST['s'] );
-
-			printf( __( 'No plugins found for &#8220;%s&#8221;.' ), $s );
-
-			// We assume that somebody who can install plugins in multisite is experienced enough to not need this helper link.
-			if ( ! is_multisite() && current_user_can( 'install_plugins' ) ) {
-				echo ' <a href="' . esc_url( admin_url( 'plugin-install.php?tab=search&s=' . urlencode( $s ) ) ) . '">' . __( 'Search for plugins in the WordPress Plugin Directory.' ) . '</a>';
-			}
-		} elseif ( ! empty( $plugins['all'] ) )
+		if ( !empty( $plugins['all'] ) )
 			_e( 'No plugins found.' );
 		else
 			_e( 'You do not appear to have any plugins available at this time.' );
@@ -694,14 +686,15 @@ class WP_Plugins_List_Table extends WP_List_Table {
 			$plugin_name = $plugin_data['Name'];
 		}
 
+		$id = sanitize_title( $plugin_name );
 		if ( ! empty( $totals['upgrade'] ) && ! empty( $plugin_data['update'] ) )
 			$class .= ' update';
 
-		$plugin_slug = isset( $plugin_data['slug'] ) ? $plugin_data['slug'] : sanitize_title( $plugin_name );
-		printf( '<tr class="%s" data-slug="%s" data-plugin="%s">',
-			esc_attr( $class ),
-			esc_attr( $plugin_slug ),
-			esc_attr( $plugin_file )
+		$plugin_slug = ( isset( $plugin_data['slug'] ) ) ? $plugin_data['slug'] : '';
+		printf( "<tr id='%s' class='%s' data-slug='%s'>",
+			$id,
+			$class,
+			$plugin_slug
 		);
 
 		list( $columns, $hidden, $sortable, $primary ) = $this->get_column_info();

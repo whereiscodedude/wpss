@@ -1048,6 +1048,9 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 	$image_baseurl = _wp_upload_dir_baseurl();
 	$image_baseurl = trailingslashit( $image_baseurl ) . $dirname;
 
+	// Calculate the image aspect ratio.
+	$image_ratio = $image_height / $image_width;
+
 	/*
 	 * Images that have been edited in WordPress after being uploaded will
 	 * contain a unique hash. Look for that hash and use it later to filter
@@ -1101,21 +1104,15 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 			continue;
 		}
 
-		/**
-		 * To check for varying crops, we calculate the expected size of the smaller
-		 * image if the larger were constrained by the width of the smaller and then
-		 * see if it matches what we're expecting.
-		 */
-		if ( $image_width > $image['width'] ) {
-			$constrained_size = wp_constrain_dimensions( $image_width, $image_height, $image['width'] );
-			$expected_size = array( $image['width'], $image['height'] );
+		// Calculate the new image ratio.
+		if ( $image['width'] ) {
+			$image_ratio_compare = $image['height'] / $image['width'];
 		} else {
-			$constrained_size = wp_constrain_dimensions( $image['width'], $image['height'], $image_width );
-			$expected_size = array( $image_width, $image_height );
+			$image_ratio_compare = 0;
 		}
 
-		// If the image dimensions are within 1px of the expected size, use it.
-		if ( abs( $constrained_size[0] - $expected_size[0] ) <= 1 && abs( $constrained_size[1] - $expected_size[1] ) <= 1 ) {
+		// If the new ratio differs by less than 0.002, use it.
+		if ( abs( $image_ratio - $image_ratio_compare ) < 0.002 ) {
 			// Add the URL, descriptor, and value to the sources array to be returned.
 			$sources[ $image['width'] ] = array(
 				'url'        => $image_baseurl . $image['file'],
@@ -2163,9 +2160,9 @@ function wp_get_attachment_id3_keys( $attachment, $context = 'display' ) {
  *     @type string $src      URL to the source of the audio file. Default empty.
  *     @type string $loop     The 'loop' attribute for the `<audio>` element. Default empty.
  *     @type string $autoplay The 'autoplay' attribute for the `<audio>` element. Default empty.
- *     @type string $preload  The 'preload' attribute for the `<audio>` element. Default 'none'.
+ *     @type string $preload  The 'preload' attribute for the `<audio>` element. Default empty.
  *     @type string $class    The 'class' attribute for the `<audio>` element. Default 'wp-audio-shortcode'.
- *     @type string $style    The 'style' attribute for the `<audio>` element. Default 'width: 100%; visibility: hidden;'.
+ *     @type string $style    The 'style' attribute for the `<audio>` element. Default 'width: 100%'.
  * }
  * @param string $content Shortcode content.
  * @return string|void HTML content to display audio.
@@ -2200,9 +2197,7 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 		'src'      => '',
 		'loop'     => '',
 		'autoplay' => '',
-		'preload'  => 'none',
-		'class'    => 'wp-audio-shortcode',
-		'style'    => 'width: 100%; visibility: hidden;'
+		'preload'  => 'none'
 	);
 	foreach ( $default_types as $type ) {
 		$defaults_atts[$type] = '';
@@ -2264,15 +2259,13 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 	 *
 	 * @param string $class CSS class or list of space-separated classes.
 	 */
-	$atts['class'] = apply_filters( 'wp_audio_shortcode_class', $atts['class'] );
-
 	$html_atts = array(
-		'class'    => $atts['class'],
+		'class'    => apply_filters( 'wp_audio_shortcode_class', 'wp-audio-shortcode' ),
 		'id'       => sprintf( 'audio-%d-%d', $post_id, $instance ),
 		'loop'     => wp_validate_boolean( $atts['loop'] ),
 		'autoplay' => wp_validate_boolean( $atts['autoplay'] ),
 		'preload'  => $atts['preload'],
-		'style'    => $atts['style'],
+		'style'    => 'width: 100%; visibility: hidden;',
 	);
 
 	// These ones should just be omitted altogether if they are blank
@@ -2411,7 +2404,6 @@ function wp_video_shortcode( $attr, $content = '' ) {
 		'preload'  => 'metadata',
 		'width'    => 640,
 		'height'   => 360,
-		'class'    => 'wp-video-shortcode',
 	);
 
 	foreach ( $default_types as $type ) {
@@ -2501,10 +2493,8 @@ function wp_video_shortcode( $attr, $content = '' ) {
 	 *
 	 * @param string $class CSS class or list of space-separated classes.
 	 */
-	$atts['class'] = apply_filters( 'wp_video_shortcode_class', $atts['class'] );
-
 	$html_atts = array(
-		'class'    => $atts['class'],
+		'class'    => apply_filters( 'wp_video_shortcode_class', 'wp-video-shortcode' ),
 		'id'       => sprintf( 'video-%d-%d', $post_id, $instance ),
 		'width'    => absint( $atts['width'] ),
 		'height'   => absint( $atts['height'] ),
@@ -3039,7 +3029,7 @@ function wp_prepare_attachment_for_js( $attachment ) {
 		'type'        => $type,
 		'subtype'     => $subtype,
 		'icon'        => wp_mime_type_icon( $attachment->ID ),
-		'dateFormatted' => mysql2date( __( 'F j, Y' ), $attachment->post_date ),
+		'dateFormatted' => mysql2date( get_option('date_format'), $attachment->post_date ),
 		'nonces'      => array(
 			'update' => false,
 			'delete' => false,

@@ -128,7 +128,7 @@
 .about-wrap .about-text {
 	margin: 1em 0 1em 200px;
 	min-height: 60px;
-	color: #555d66;
+	color: #777;
 }
 
 /* 1.2 - Structure */
@@ -145,7 +145,6 @@
 	display: inline-block;
 	float: none;
 	margin-left: 4.799999999%;
-	width: -webkit-calc( 47.6% - 4px );
 	width: calc( 47.6% - 4px );
 	vertical-align: middle;
 }
@@ -332,21 +331,21 @@
 
 .about-wrap h3.wp-people-group {
 	margin: 2.6em 0 1.33em;
-	padding: 0;
 	font-size: 16px;
 	line-height: inherit;
 }
 
-.about-wrap .wp-people-group {
+.about-wrap ul.wp-people-group {
+	overflow: hidden;
 	padding: 0 5px;
 	margin: 0 -5px 0 -15px;
 }
 
-.about-wrap .compact {
+.about-wrap ul.compact {
 	margin-bottom: 0
 }
 
-.about-wrap .wp-person {
+.about-wrap li.wp-person {
 	display: inline-block;
 	vertical-align: top;
 	margin-left: 10px;
@@ -355,36 +354,33 @@
 	width: 280px;
 }
 
-.about-wrap .compact .wp-person {
+.about-wrap ul.compact li.wp-person {
 	height: auto;
 	width: 180px;
 	padding-bottom: 0;
 	margin-bottom: 0;
 }
 
-.about-wrap .wp-person .gravatar {
+.about-wrap li.wp-person img.gravatar {
 	float: right;
 	margin: 0 0 10px 10px;
-	padding: 1px;
+	padding: 2px;
 	width: 60px;
 	height: 60px;
 }
 
-.about-wrap .compact .wp-person .gravatar {
+.about-wrap ul.compact li.wp-person img.gravatar {
 	width: 30px;
 	height: 30px;
 }
 
-.about-wrap .wp-person .web {
+.about-wrap li.wp-person a.web {
+	display: block;
 	margin: 6px 0 2px;
 	font-size: 16px;
 	font-weight: normal;
-	line-height: 2em;
+	line-height: 1.6em;
 	text-decoration: none;
-}
-
-.about-wrap .wp-person .title {
-	display: block;
 }
 
 .about-wrap #wp-people-group-validators + p.wp-credits-list {

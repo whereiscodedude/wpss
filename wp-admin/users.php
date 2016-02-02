@@ -271,11 +271,7 @@ case 'delete':
 			<?php _e('Delete all content.'); ?></label></li>
 			<li><input type="radio" id="delete_option1" name="delete_option" value="reassign" />
 			<?php echo '<label for="delete_option1">' . __( 'Attribute all content to:' ) . '</label> ';
-			wp_dropdown_users( array(
-				'name' => 'reassign_user',
-				'exclude' => array_diff( $userids, array( $current_user->ID ) ),
-				'show' => 'display_name_with_login',
-			) ); ?></li>
+			wp_dropdown_users( array( 'name' => 'reassign_user', 'exclude' => array_diff( $userids, array($current_user->ID) ) ) ); ?></li>
 		</ul></fieldset>
 	<?php endif;
 	/**
@@ -481,11 +477,8 @@ if ( current_user_can( 'create_users' ) ) { ?>
 	<a href="user-new.php" class="page-title-action"><?php echo esc_html_x( 'Add Existing', 'user' ); ?></a>
 <?php }
 
-if ( strlen( $usersearch ) ) {
-	/* translators: %s: search keywords */
-	printf( '<span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', esc_html( $usersearch ) );
-}
-?>
+if ( $usersearch )
+	printf( '<span class="subtitle">' . __('Search results for &#8220;%s&#8221;') . '</span>', esc_html( $usersearch ) ); ?>
 </h1>
 
 <?php $wp_list_table->views(); ?>

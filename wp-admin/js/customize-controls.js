@@ -74,7 +74,7 @@
 	 * @since 4.1.0
 	 *
 	 * @param {Object}   [params]
-	 * @param {Function} [params.completeCallback]
+	 * @param {Callback} [params.completeCallback]
 	 */
 	focus = function ( params ) {
 		var construct, completeCallback, focus;
@@ -2870,7 +2870,7 @@
 
 				iframe = $( '<iframe />', { 'src': self.previewUrl(), 'title': api.l10n.previewIframeTitle } ).hide();
 				iframe.appendTo( self.container );
-				iframe.on( 'load', function() {
+				iframe.load( function() {
 					self.triedLogin = true;
 
 					iframe.remove();
@@ -3345,8 +3345,6 @@
 							value._dirty = false;
 						} );
 
-						api.previewer.send( 'saved', response );
-
 						api.trigger( 'saved', response );
 					} );
 				};
@@ -3375,7 +3373,6 @@
 		api.bind( 'nonce-refresh', function( nonce ) {
 			$.extend( api.settings.nonce, nonce );
 			$.extend( api.previewer.nonce, nonce );
-			api.previewer.send( 'nonce-refresh', nonce );
 		});
 
 		// Create Settings
@@ -3607,12 +3604,8 @@
 
 		// Bind site title display to the corresponding field.
 		if ( title.length ) {
-			api( 'blogname', function( setting ) {
-				var updateTitle = function() {
-					title.text( $.trim( setting() ) || api.l10n.untitledBlogName );
-				};
-				setting.bind( updateTitle );
-				updateTitle();
+			$( '#customize-control-blogname input' ).on( 'input', function() {
+				title.text( this.value );
 			} );
 		}
 

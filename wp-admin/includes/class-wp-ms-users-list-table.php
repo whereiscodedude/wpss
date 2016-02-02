@@ -304,7 +304,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Handles the sites column output.
+	 * Handles the blogs/sites column output.
 	 *
 	 * @since 4.3.0
 	 * @access public

@@ -94,15 +94,6 @@ final class WP_Customize_Manager {
 	protected $panels = array();
 
 	/**
-	 * List of core components.
-	 *
-	 * @since 4.5.0
-	 * @access protected
-	 * @var array
-	 */
-	protected $components = array( 'widgets', 'nav_menus' );
-
-	/**
 	 * Registered instances of WP_Customize_Section.
 	 *
 	 * @since 3.4.0
@@ -247,7 +238,7 @@ final class WP_Customize_Manager {
 		 * @param array                $components List of core components to load.
 		 * @param WP_Customize_Manager $this       WP_Customize_Manager instance.
 		 */
-		$components = apply_filters( 'customize_loaded_components', $this->components, $this );
+		$components = apply_filters( 'customize_loaded_components', array( 'widgets', 'nav_menus' ), $this );
 
 		if ( in_array( 'widgets', $components ) ) {
 			require_once( ABSPATH . WPINC . '/class-wp-customize-widgets.php' );
@@ -801,20 +792,18 @@ final class WP_Customize_Manager {
 	 */
 	public function customize_preview_settings() {
 		$settings = array(
-			'theme' => array(
-				'stylesheet' => $this->get_stylesheet(),
-				'active'     => $this->is_theme_active(),
-			),
-			'url' => array(
-				'self' => empty( $_SERVER['REQUEST_URI'] ) ? home_url( '/' ) : esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ),
-			),
 			'channel' => wp_unslash( $_POST['customize_messenger_channel'] ),
 			'activePanels' => array(),
 			'activeSections' => array(),
 			'activeControls' => array(),
-			'nonce' => $this->get_nonces(),
-			'_dirty' => array_keys( $this->unsanitized_post_values() ),
 		);
+
+		if ( 2 == $this->nonce_tick ) {
+			$settings['nonce'] = array(
+				'save' => wp_create_nonce( 'save-customize_' . $this->get_stylesheet() ),
+				'preview' => wp_create_nonce( 'preview-customize_' . $this->get_stylesheet() )
+			);
+		}
 
 		foreach ( $this->panels as $panel_id => $panel ) {
 			if ( $panel->check_capabilities() ) {
@@ -1026,38 +1015,40 @@ final class WP_Customize_Manager {
 			wp_send_json_error( 'not_preview' );
 		}
 
-		wp_send_json_success( $this->get_nonces() );
+		$nonces = array(
+			'save'    => wp_create_nonce( 'save-customize_' . $this->get_stylesheet() ),
+			'preview' => wp_create_nonce( 'preview-customize_' . $this->get_stylesheet() ),
+		);
+
+		/**
+		 * Filter nonces for a customize_refresh_nonces AJAX request.
+		 *
+		 * @since 4.2.0
+		 *
+		 * @param array                $nonces Array of refreshed nonces for save and
+		 *                                     preview actions.
+		 * @param WP_Customize_Manager $this   WP_Customize_Manager instance.
+		 */
+		$nonces = apply_filters( 'customize_refresh_nonces', $nonces, $this );
+		wp_send_json_success( $nonces );
 	}
 
 	/**
 	 * Add a customize setting.
 	 *
 	 * @since 3.4.0
-	 * @since 4.5.0 Return added WP_Customize_Setting instance.
-	 * @access public
 	 *
-	 * @param WP_Customize_Setting|string $id   Customize Setting object, or ID.
-	 * @param array                       $args Setting arguments; passed to WP_Customize_Setting
-	 *                                          constructor.
-	 * @return WP_Customize_Setting             The instance of the setting that was added.
+	 * @param WP_Customize_Setting|string $id Customize Setting object, or ID.
+	 * @param array $args                     Setting arguments; passed to WP_Customize_Setting
+	 *                                        constructor.
 	 */
 	public function add_setting( $id, $args = array() ) {
 		if ( $id instanceof WP_Customize_Setting ) {
 			$setting = $id;
 		} else {
-			$class = 'WP_Customize_Setting';
-
-			/** This filter is documented in wp-includes/class-wp-customize-manager.php */
-			$args = apply_filters( 'customize_dynamic_setting_args', $args, $id );
-
-			/** This filter is documented in wp-includes/class-wp-customize-manager.php */
-			$class = apply_filters( 'customize_dynamic_setting_class', $class, $id, $args );
-
-			$setting = new $class( $this, $id, $args );
+			$setting = new WP_Customize_Setting( $this, $id, $args );
 		}
-
 		$this->settings[ $setting->id ] = $setting;
-		return $setting;
 	}
 
 	/**
@@ -1070,7 +1061,6 @@ final class WP_Customize_Manager {
 	 * even though they are not directly created statically with code.
 	 *
 	 * @since 4.2.0
-	 * @access public
 	 *
 	 * @param array $setting_ids The setting IDs to add.
 	 * @return array The WP_Customize_Setting objects added.
@@ -1151,13 +1141,10 @@ final class WP_Customize_Manager {
 	 * Add a customize panel.
 	 *
 	 * @since 4.0.0
-	 * @since 4.5.0 Return added WP_Customize_Panel instance.
 	 * @access public
 	 *
 	 * @param WP_Customize_Panel|string $id   Customize Panel object, or Panel ID.
 	 * @param array                     $args Optional. Panel arguments. Default empty array.
-	 *
-	 * @return WP_Customize_Panel             The instance of the panel that was added.
 	 */
 	public function add_panel( $id, $args = array() ) {
 		if ( $id instanceof WP_Customize_Panel ) {
@@ -1167,7 +1154,6 @@ final class WP_Customize_Manager {
 		}
 
 		$this->panels[ $panel->id ] = $panel;
-		return $panel;
 	}
 
 	/**
@@ -1194,17 +1180,6 @@ final class WP_Customize_Manager {
 	 * @param string $id Panel ID to remove.
 	 */
 	public function remove_panel( $id ) {
-		// Removing core components this way is _doing_it_wrong().
-		if ( in_array( $id, $this->components, true ) ) {
-			/* translators: 1: panel id, 2: filter reference URL, 3: filter name */
-			$message = sprintf( __( 'Removing %1$s manually will cause PHP warnings. Use the <a href="%2$s">%3$s</a> filter instead.' ),
-				$id,
-				esc_url( 'https://developer.wordpress.org/reference/hooks/customize_loaded_components/' ),
-				'<code>customize_loaded_components</code>'
-			);
-
-			_doing_it_wrong( __METHOD__, $message, '4.5' );
-		}
 		unset( $this->panels[ $id ] );
 	}
 
@@ -1241,13 +1216,9 @@ final class WP_Customize_Manager {
 	 * Add a customize section.
 	 *
 	 * @since 3.4.0
-	 * @since 4.5.0 Return added WP_Customize_Section instance.
-	 * @access public
 	 *
 	 * @param WP_Customize_Section|string $id   Customize Section object, or Section ID.
 	 * @param array                       $args Section arguments.
-	 *
-	 * @return WP_Customize_Section             The instance of the section that was added.
 	 */
 	public function add_section( $id, $args = array() ) {
 		if ( $id instanceof WP_Customize_Section ) {
@@ -1255,9 +1226,7 @@ final class WP_Customize_Manager {
 		} else {
 			$section = new WP_Customize_Section( $this, $id, $args );
 		}
-
 		$this->sections[ $section->id ] = $section;
-		return $section;
 	}
 
 	/**
@@ -1317,13 +1286,10 @@ final class WP_Customize_Manager {
 	 * Add a customize control.
 	 *
 	 * @since 3.4.0
-	 * @since 4.5.0 Return added WP_Customize_Control instance.
-	 * @access public
 	 *
 	 * @param WP_Customize_Control|string $id   Customize Control object, or ID.
 	 * @param array                       $args Control arguments; passed to WP_Customize_Control
 	 *                                          constructor.
-	 * @return WP_Customize_Control             The instance of the control that was added.
 	 */
 	public function add_control( $id, $args = array() ) {
 		if ( $id instanceof WP_Customize_Control ) {
@@ -1331,9 +1297,7 @@ final class WP_Customize_Manager {
 		} else {
 			$control = new WP_Customize_Control( $this, $id, $args );
 		}
-
 		$this->controls[ $control->id ] = $control;
-		return $control;
 	}
 
 	/**
@@ -1622,32 +1586,6 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Get nonces for the Customizer.
-	 *
-	 * @since 4.5.0
-	 * @return array Nonces.
-	 */
-	public function get_nonces() {
-		$nonces = array(
-			'save' => wp_create_nonce( 'save-customize_' . $this->get_stylesheet() ),
-			'preview' => wp_create_nonce( 'preview-customize_' . $this->get_stylesheet() ),
-		);
-
-		/**
-		 * Filter nonces for Customizer.
-		 *
-		 * @since 4.2.0
-		 *
-		 * @param array                $nonces Array of refreshed nonces for save and
-		 *                                     preview actions.
-		 * @param WP_Customize_Manager $this   WP_Customize_Manager instance.
-		 */
-		$nonces = apply_filters( 'customize_refresh_nonces', $nonces, $this );
-
-		return $nonces;
-	}
-
-	/**
 	 * Print JavaScript settings for parent window.
 	 *
 	 * @since 4.4.0
@@ -1707,7 +1645,10 @@ final class WP_Customize_Manager {
 			),
 			'panels'   => array(),
 			'sections' => array(),
-			'nonce'    => $this->get_nonces(),
+			'nonce'    => array(
+				'save'    => wp_create_nonce( 'save-customize_' . $this->get_stylesheet() ),
+				'preview' => wp_create_nonce( 'preview-customize_' . $this->get_stylesheet() ),
+			),
 			'autofocus' => array(),
 			'documentTitleTmpl' => $this->get_document_title_template(),
 		);
@@ -1887,11 +1828,7 @@ final class WP_Customize_Manager {
 
 		$this->add_control( new WP_Customize_Site_Icon_Control( $this, 'site_icon', array(
 			'label'       => __( 'Site Icon' ),
-			'description' => sprintf(
-				/* translators: %s: site icon size in pixels */
-				__( 'The Site Icon is used as a browser and app icon for your site. Icons must be square, and at least %s pixels wide and tall.' ),
-				'<strong>512</strong>'
-			),
+			'description' => __( 'The Site Icon is used as a browser and app icon for your site. Icons must be square, and at least 512px wide and tall.' ),
 			'section'     => 'title_tagline',
 			'priority'    => 60,
 			'height'      => 512,
@@ -1917,7 +1854,7 @@ final class WP_Customize_Manager {
 		// With custom value
 		$this->add_control( 'display_header_text', array(
 			'settings' => 'header_textcolor',
-			'label'    => __( 'Display Site Title and Tagline' ),
+			'label'    => __( 'Display Header Text' ),
 			'section'  => 'title_tagline',
 			'type'     => 'checkbox',
 			'priority' => 40,

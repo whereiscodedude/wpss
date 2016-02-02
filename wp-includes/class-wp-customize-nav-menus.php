@@ -48,7 +48,6 @@ final class WP_Customize_Nav_Menus {
 		$this->previewed_menus = array();
 		$this->manager         = $manager;
 
-		add_filter( 'customize_refresh_nonces', array( $this, 'filter_nonces' ) );
 		add_action( 'wp_ajax_load-available-menu-items-customizer', array( $this, 'ajax_load_available_items' ) );
 		add_action( 'wp_ajax_search-available-menu-items-customizer', array( $this, 'ajax_search_available_items' ) );
 		add_action( 'customize_controls_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -61,20 +60,6 @@ final class WP_Customize_Nav_Menus {
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'print_templates' ) );
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'available_items_template' ) );
 		add_action( 'customize_preview_init', array( $this, 'customize_preview_init' ) );
-	}
-
-	/**
-	 * Add nonce for customizing menus.
-	 *
-	 * @since 4.5.0
-	 * @access public
-	 *
-	 * @param  array $nonces Array of nonces.
-	 * @return array $nonces Array of nonces.
-	 */
-	public function filter_nonces( $nonces ) {
-		$nonces['customize-menus'] = wp_create_nonce( 'customize-menus' );
-		return $nonces;
 	}
 
 	/**
@@ -344,6 +329,7 @@ final class WP_Customize_Nav_Menus {
 
 		// Pass data to JS.
 		$settings = array(
+			'nonce'                => wp_create_nonce( 'customize-menus' ),
 			'allMenus'             => wp_get_nav_menus(),
 			'itemTypes'            => $this->available_item_types(),
 			'l10n'                 => array(
@@ -757,15 +743,19 @@ final class WP_Customize_Nav_Menus {
 						<span class="toggle-indicator" aria-hidden="true"></span>
 					</button>
 				</h4>
-				<div class="accordion-section-content customlinkdiv">
+				<div class="accordion-section-content">
 					<input type="hidden" value="custom" id="custom-menu-item-type" name="menu-item[-1][menu-item-type]" />
-					<p id="menu-item-url-wrap" class="wp-clearfix">
-						<label class="howto" for="custom-menu-item-url"><?php _e( 'URL' ); ?></label>
-						<input id="custom-menu-item-url" name="menu-item[-1][menu-item-url]" type="text" class="code menu-item-textbox" value="http://">
+					<p id="menu-item-url-wrap">
+						<label class="howto" for="custom-menu-item-url">
+							<span><?php _e( 'URL' ); ?></span>
+							<input id="custom-menu-item-url" name="menu-item[-1][menu-item-url]" type="text" class="code menu-item-textbox" value="http://">
+						</label>
 					</p>
-					<p id="menu-item-name-wrap" class="wp-clearfix">
-						<label class="howto" for="custom-menu-item-name"><?php _e( 'Link Text' ); ?></label>
-						<input id="custom-menu-item-name" name="menu-item[-1][menu-item-title]" type="text" class="regular-text menu-item-textbox">
+					<p id="menu-item-name-wrap">
+						<label class="howto" for="custom-menu-item-name">
+							<span><?php _e( 'Link Text' ); ?></span>
+							<input id="custom-menu-item-name" name="menu-item[-1][menu-item-title]" type="text" class="regular-text menu-item-textbox">
+						</label>
 					</p>
 					<p class="button-controls">
 						<span class="add-to-menu">
@@ -953,10 +943,13 @@ final class WP_Customize_Nav_Menus {
 			'renderQueryVar'        => self::RENDER_QUERY_VAR,
 			'renderNonceValue'      => wp_create_nonce( self::RENDER_AJAX_ACTION ),
 			'renderNoncePostKey'    => self::RENDER_NONCE_POST_KEY,
-			'navMenuInstanceArgs'   => $this->preview_nav_menu_instance_args,
-			'l10n'                  => array(
-				'editNavMenuItemTooltip' => __( 'Shift-click to edit this menu item.' ),
+			'requestUri'            => empty( $_SERVER['REQUEST_URI'] ) ? home_url( '/' ) : esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ),
+			'theme'                 => array(
+				'stylesheet' => $this->manager->get_stylesheet(),
+				'active'     => $this->manager->is_theme_active(),
 			),
+			'previewCustomizeNonce' => wp_create_nonce( 'preview-customize_' . $this->manager->get_stylesheet() ),
+			'navMenuInstanceArgs'   => $this->preview_nav_menu_instance_args,
 		);
 
 		printf( '<script>var _wpCustomizePreviewNavMenusExports = %s;</script>', wp_json_encode( $exports ) );

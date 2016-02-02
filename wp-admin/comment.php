@@ -199,7 +199,7 @@ if ( $comment->comment_approved != '0' ) { // if not unapproved
 			printf( __( '%1$s at %2$s' ),
 				/* translators: comment date format. See http://php.net/date */
 				get_comment_date( __( 'Y/m/d' ), $comment ),
-				get_comment_date( __( 'g:i a' ), $comment )
+				get_comment_date( get_option( 'time_format' ), $comment )
 			);
 		?></a>
 	</td>
@@ -214,7 +214,7 @@ if ( $comment->comment_approved != '0' ) { // if not unapproved
 
 <p>
 	<?php submit_button( $button, 'primary', 'submit', false ); ?>
-	<a href="<?php echo admin_url('edit-comments.php'); ?>" class="button-cancel"><?php esc_attr_e( 'Cancel' ); ?></a>
+	<a href="<?php echo admin_url('edit-comments.php'); ?>" class="button-cancel"><?php esc_attr_e( 'Cancel' ); ?></a></td>
 </p>
 
 <?php wp_nonce_field( $nonce_action ); ?>

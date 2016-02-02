@@ -13,9 +13,13 @@
 			renderQueryVar: null,
 			renderNonceValue: null,
 			renderNoncePostKey: null,
+			previewCustomizeNonce: null,
 			requestUri: '/',
-			navMenuInstanceArgs: {},
-			l10n: {}
+			theme: {
+				active: false,
+				stylesheet: ''
+			},
+			navMenuInstanceArgs: {}
 		};
 
 	api.MenusCustomizerPreview = {
@@ -59,8 +63,6 @@
 					}
 				}
 			} );
-
-			self.highlightControls();
 		},
 
 		/**
@@ -195,11 +197,11 @@
 			menuId = parseInt( menuId, 10 );
 
 			data = {
-				nonce: wp.customize.settings.nonce.preview,
+				nonce: settings.previewCustomizeNonce, // for Customize Preview
 				wp_customize: 'on'
 			};
-			if ( ! wp.customize.settings.theme.active ) {
-				data.theme = wp.customize.settings.theme.stylesheet;
+			if ( ! settings.theme.active ) {
+				data.theme = settings.theme.stylesheet;
 			}
 			data[ settings.renderQueryVar ] = '1';
 
@@ -234,7 +236,7 @@
 
 			request = wp.ajax.send( null, {
 				data: data,
-				url: api.settings.url.self
+				url: settings.requestUri
 			} );
 			request.done( function( data ) {
 				// If the menu is now not visible, refresh since the page layout may have changed.
@@ -258,9 +260,6 @@
 				container.removeClass( 'customize-partial-refreshing' );
 				$( document ).trigger( 'customize-preview-menu-refreshed', [ eventParam ] );
 			} );
-			request.fail( function() {
-				api.preview.send( 'refresh' );
-			} );
 		},
 
 		refreshMenuInstanceDebounced : function( instanceNumber ) {
@@ -273,36 +272,6 @@
 				}, this ),
 				refreshDebounceDelay
 			);
-		},
-
-		/**
-		 * Connect nav menu items with their corresponding controls in the pane.
-		 */
-		highlightControls: function() {
-			var selector = '.menu-item[id^=menu-item-]',
-				addTooltips;
-
-			// Open expand the menu item control when shift+clicking the menu item
-			$( document ).on( 'click', selector, function( e ) {
-				var navMenuItemParts;
-				if ( ! e.shiftKey ) {
-					return;
-				}
-
-				navMenuItemParts = $( this ).attr( 'id' ).match( /^menu-item-(\d+)$/ );
-				if ( navMenuItemParts ) {
-					e.preventDefault();
-					e.stopPropagation(); // Make sure a sub-nav menu item will get focused instead of parent items.
-					api.preview.send( 'focus-nav-menu-item-control', parseInt( navMenuItemParts[1], 10 ) );
-				}
-			});
-
-			addTooltips = function( e, params ) {
-				params.newContainer.find( selector ).attr( 'title', settings.l10n.editNavMenuItemTooltip );
-			};
-
-			addTooltips( null, { newContainer: $( document.body ) } );
-			$( document ).on( 'customize-preview-menu-refreshed', addTooltips );
 		}
 	};
 

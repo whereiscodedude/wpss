@@ -9,6 +9,7 @@
 
 .theme-browser .themes {
 	clear: both;
+	padding: 0 0 100px;
 }
 
 .themes-php .wrap h1 {
@@ -42,6 +43,10 @@
 .themes-php div.notice {
 	margin: 0 0 20px 0;
 	clear: both;
+}
+
+.themes-php div.updated a {
+	text-decoration: underline;
 }
 
 /**
@@ -437,7 +442,7 @@
 
 .theme-overlay .theme-header .close:before {
 	font: normal 22px/50px dashicons !important;
-	color: #72777c;
+	color: #777;
 	display: inline-block;
 	content: "\f335";
 	font-weight: 300;
@@ -447,7 +452,7 @@
 .theme-overlay .theme-header .right,
 .theme-overlay .theme-header .left {
 	cursor: pointer;
-	color: #72777c;
+	color: #777;
 	background-color: transparent;
 	height: 48px;
 	width: 54px;
@@ -524,6 +529,14 @@
 	-webkit-overflow-scrolling: touch;
 }
 
+.theme-overlay .theme-wrap:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
 body.folded .theme-overlay .theme-wrap {
 	left: 70px;
 }
@@ -536,6 +549,13 @@ body.folded .theme-overlay .theme-wrap {
 	right: 0;
 	overflow: auto;
 	padding: 2% 4%;
+}
+.theme-overlay .theme-about:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
 }
 
 .theme-overlay .theme-actions {
@@ -1108,15 +1128,13 @@ p.no-themes {
 	font-size: 18px;
 	font-style: normal;
 	margin: 0;
-	padding: 100px 0;
+	padding: 0;
 	text-align: center;
 	display: none;
 }
-
 body.no-results p.no-themes {
 	display: block;
 }
-
 body.show-upload-theme p.no-themes {
 	display: none !important;
 }
@@ -1592,7 +1610,7 @@ body.full-overlay-active {
 
 .theme-details .theme-description {
 	float: left;
-	color: #72777c;
+	color: #777;
 	line-height: 20px;
 	max-width: 100%;
 }

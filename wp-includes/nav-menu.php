@@ -77,7 +77,7 @@ function is_nav_menu( $menu ) {
 }
 
 /**
- * Register navigation menu locations for a theme.
+ * Register navigation menus for a theme.
  *
  * @since 3.0.0
  *
@@ -94,7 +94,7 @@ function register_nav_menus( $locations = array() ) {
 }
 
 /**
- * Unregisters a navigation menu location for a theme.
+ * Unregisters a navigation menu for a theme.
  *
  * @global array $_wp_registered_nav_menus
  *
@@ -115,7 +115,7 @@ function unregister_nav_menu( $location ) {
 }
 
 /**
- * Register a navigation menu location for a theme.
+ * Register a navigation menu for a theme.
  *
  * @since 3.0.0
  *
@@ -126,7 +126,7 @@ function register_nav_menu( $location, $description ) {
 	register_nav_menus( array( $location => $description ) );
 }
 /**
- * Returns all registered navigation menu locations in a theme.
+ * Returns an array of all registered navigation menus in a theme
  *
  * @since 3.0.0
  *
@@ -417,9 +417,7 @@ function wp_update_nav_menu_item( $menu_id = 0, $menu_item_db_id = 0, $menu_item
 			$original_title = $original_object->post_title;
 		} elseif ( 'post_type_archive' == $args['menu-item-type'] ) {
 			$original_object = get_post_type_object( $args['menu-item-object'] );
-			if ( $original_object ) {
-				$original_title = $original_object->labels->archives;
-			}
+			$original_title = $original_object->labels->archives;
 		}
 
 		if ( $args['menu-item-title'] == $original_title )
@@ -739,8 +737,7 @@ function wp_setup_nav_menu_item( $menu_item ) {
 				$menu_item->url = get_permalink( $menu_item->object_id );
 
 				$original_object = get_post( $menu_item->object_id );
-				/** This filter is documented in wp-includes/post-template.php */
-				$original_title = apply_filters( 'the_title', $original_object->post_title, $original_object->ID );
+				$original_title = $original_object->post_title;
 
 				if ( '' === $original_title ) {
 					/* translators: %d: ID of a post */
@@ -931,14 +928,13 @@ function _wp_delete_post_menu_item( $object_id = 0 ) {
 }
 
 /**
- * Serves as a callback for handling a menu item when its original object is deleted.
+ * Callback for handling a menu item when its original object is deleted.
  *
  * @since 3.0.0
  * @access private
  *
- * @param int    $object_id Optional. The ID of the original object being trashed. Default 0.
- * @param int    $tt_id     Term taxonomy ID. Unused.
- * @param string $taxonomy  Taxonomy slug.
+ * @param int $object_id The ID of the original object being trashed.
+ *
  */
 function _wp_delete_tax_menu_item( $object_id = 0, $tt_id, $taxonomy ) {
 	$object_id = (int) $object_id;
