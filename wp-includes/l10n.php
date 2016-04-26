@@ -519,11 +519,11 @@ function load_textdomain( $domain, $mofile ) {
 	global $l10n;
 
 	/**
-	 * Filter whether to override the .mo file loading.
+	 * Filter text domain and/or MO file path for loading translations.
 	 *
 	 * @since 2.9.0
 	 *
-	 * @param bool   $override Whether to override the .mo file loading. Default false.
+	 * @param bool   $override Whether to override the text domain. Default false.
 	 * @param string $domain   Text domain. Unique identifier for retrieving translated strings.
 	 * @param string $mofile   Path to the MO file.
 	 */
@@ -580,11 +580,11 @@ function unload_textdomain( $domain ) {
 	global $l10n;
 
 	/**
-	 * Filter whether to override the text domain unloading.
+	 * Filter the text domain for loading translation.
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param bool   $override Whether to override the text domain unloading. Default false.
+	 * @param bool   $override Whether to override unloading the text domain. Default false.
 	 * @param string $domain   Text domain. Unique identifier for retrieving translated strings.
 	 */
 	$plugin_override = apply_filters( 'override_unload_textdomain', false, $domain );

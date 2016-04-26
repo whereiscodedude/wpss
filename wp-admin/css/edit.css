@@ -1131,11 +1131,6 @@ p.popular-tags a {
 	padding: 10px 15px;
 }
 
-.comment-ays .comment-content ul {
-	list-style: initial;
-	margin-left: 2em;
-}
-
 .comment-ays .comment-content a[href]:after {
 	content: '(' attr( href ) ')';
 	display: inline-block;

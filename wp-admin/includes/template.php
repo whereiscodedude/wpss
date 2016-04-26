@@ -1486,7 +1486,7 @@ function find_posts_div($found_action = '') {
 	<div id="find-posts" class="find-box" style="display: none;">
 		<div id="find-posts-head" class="find-box-head">
 			<?php _e( 'Attach to existing content' ); ?>
-			<button type="button" id="find-posts-close"><span class="screen-reader-text"><?php _e( 'Close media attachment panel' ); ?></button>
+			<div id="find-posts-close"></div>
 		</div>
 		<div class="find-box-inside">
 			<div class="find-box-search">
@@ -1651,19 +1651,11 @@ function iframe_footer() {
 	 * but run the hooks anyway since they output JavaScript
 	 * or other needed content.
 	 */
-
-	/**
-	 * @global string $hook_suffix
-	 */
-	global $hook_suffix;
-	?>
+	 ?>
 	<div class="hidden">
 <?php
 	/** This action is documented in wp-admin/admin-footer.php */
-	do_action( 'admin_footer', $hook_suffix );
-
-	/** This action is documented in wp-admin/admin-footer.php */
-	do_action( "admin_print_footer_scripts-$hook_suffix" );
+	do_action( 'admin_footer', '' );
 
 	/** This action is documented in wp-admin/admin-footer.php */
 	do_action( 'admin_print_footer_scripts' );

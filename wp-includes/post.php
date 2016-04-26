@@ -2139,13 +2139,12 @@ function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
 		} else {
 			$value = apply_filters( "post_{$field}", $value, $post_id, $context );
 		}
-
-		if ( 'attribute' == $context ) {
-			$value = esc_attr( $value );
-		} elseif ( 'js' == $context ) {
-			$value = esc_js( $value );
-		}
 	}
+
+	if ( 'attribute' == $context )
+		$value = esc_attr($value);
+	elseif ( 'js' == $context )
+		$value = esc_js($value);
 
 	return $value;
 }
@@ -3005,8 +3004,6 @@ function wp_get_recent_posts( $args = array(), $output = ARRAY_A ) {
  *     @type int    $menu_order            The order the post should be displayed in. Default 0.
  *     @type string $post_mime_type        The mime type of the post. Default empty.
  *     @type string $guid                  Global Unique ID for referencing the post. Default empty.
- *     @type array  $post_category         Array of category names, slugs, or IDs.
- *                                         Defaults to value of the 'default_category' option.
  *     @type array  $tax_input             Array of taxonomy terms keyed by their taxonomy name. Default empty.
  *     @type array  $meta_input            Array of post meta values keyed by their post meta key. Default empty.
  * }

@@ -1,8 +1,6 @@
 /* global plugininstallL10n, tb_click, tb_remove */
 
-/**
- * Functionality for the plugin install screens.
- */
+/* Plugin Browser Thickbox related JS*/
 var tb_position;
 jQuery( document ).ready( function( $ ) {
 
@@ -176,23 +174,4 @@ jQuery( document ).ready( function( $ ) {
 		$( '#section-holder div.section' ).hide(); // Hide 'em all.
 		$( '#section-' + tab ).show();
 	});
-
-	/*
-	 * When a user presses the "Upload Plugin" button, show the upload form in place
-	 * rather than sending them to the devoted upload plugin page.
-	 * @todo consider to abstract this in a generic, reusable, utility, see theme.js
-	 */
-	var uploadViewToggle = $( '.upload-view-toggle' ),
-		$body = $( document.body );
-
-	uploadViewToggle
-		.attr({
-			role: 'button',
-			'aria-expanded': 'false'
-		})
-		.on( 'click', function( event ) {
-			event.preventDefault();
-			$body.toggleClass( 'show-upload-view' );
-			uploadViewToggle.attr( 'aria-expanded', $body.hasClass( 'show-upload-view' ) );
-		});
 });
