@@ -11,31 +11,13 @@
  *
  * @since 2.0.0
  *
- * @global array $wp_importers
  * @return array
  */
 function get_importers() {
 	global $wp_importers;
-	if ( is_array( $wp_importers ) ) {
-		uasort( $wp_importers, '_usort_by_first_member' );
-	}
+	if ( is_array($wp_importers) )
+		uasort($wp_importers, create_function('$a, $b', 'return strcmp($a[0], $b[0]);'));
 	return $wp_importers;
-}
-
-/**
- * Sorts a multidimensional array by first member of each top level member
- *
- * Used by uasort() as a callback, should not be used directly.
- *
- * @since 2.9.0
- * @access private
- *
- * @param array $a
- * @param array $b
- * @return int
- */
-function _usort_by_first_member( $a, $b ) {
-	return strnatcasecmp( $a[0], $b[0] );
 }
 
 /**
@@ -43,12 +25,10 @@ function _usort_by_first_member( $a, $b ) {
  *
  * @since 2.0.0
  *
- * @global array $wp_importers
- *
- * @param string   $id          Importer tag. Used to uniquely identify importer.
- * @param string   $name        Importer name and title.
- * @param string   $description Importer description.
- * @param callable $callback    Callback to run.
+ * @param string $id Importer tag. Used to uniquely identify importer.
+ * @param string $name Importer name and title.
+ * @param string $description Importer description.
+ * @param callback $callback Callback to run.
  * @return WP_Error Returns WP_Error when $callback is WP_Error.
  */
 function register_importer( $id, $name, $description, $callback ) {
@@ -79,40 +59,39 @@ function wp_import_cleanup( $id ) {
  * @return array Uploaded file's details on success, error message on failure
  */
 function wp_import_handle_upload() {
-	if ( ! isset( $_FILES['import'] ) ) {
-		return array(
-			'error' => __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.' )
-		);
+	if ( !isset($_FILES['import']) ) {
+		$file['error'] = __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.' );
+		return $file;
 	}
 
 	$overrides = array( 'test_form' => false, 'test_type' => false );
 	$_FILES['import']['name'] .= '.txt';
-	$upload = wp_handle_upload( $_FILES['import'], $overrides );
+	$file = wp_handle_upload( $_FILES['import'], $overrides );
 
-	if ( isset( $upload['error'] ) ) {
-		return $upload;
-	}
+	if ( isset( $file['error'] ) )
+		return $file;
+
+	$url = $file['url'];
+	$type = $file['type'];
+	$file = $file['file'];
+	$filename = basename( $file );
 
 	// Construct the object array
-	$object = array(
-		'post_title' => basename( $upload['file'] ),
-		'post_content' => $upload['url'],
-		'post_mime_type' => $upload['type'],
-		'guid' => $upload['url'],
+	$object = array( 'post_title' => $filename,
+		'post_content' => $url,
+		'post_mime_type' => $type,
+		'guid' => $url,
 		'context' => 'import',
 		'post_status' => 'private'
 	);
 
 	// Save the data
-	$id = wp_insert_attachment( $object, $upload['file'] );
+	$id = wp_insert_attachment( $object, $file );
 
-	/*
-	 * Schedule a cleanup for one day from now in case of failed
-	 * import or missing wp_import_cleanup() call.
-	 */
+	// schedule a cleanup for one day from now in case of failed import or missing wp_import_cleanup() call
 	wp_schedule_single_event( time() + DAY_IN_SECONDS, 'importer_scheduled_cleanup', array( $id ) );
 
-	return array( 'file' => $upload['file'], 'id' => $id );
+	return array( 'file' => $file, 'id' => $id );
 }
 
 /**
@@ -123,7 +102,7 @@ function wp_import_handle_upload() {
  * @return array Importers with metadata for each.
  */
 function wp_get_popular_importers() {
-	include( ABSPATH . WPINC . '/version.php' ); // include an unmodified $wp_version
+	include ABSPATH . WPINC . '/version.php'; // include an unmodified $wp_version
 
 	$locale = get_locale();
 	$popular_importers = get_site_transient( 'popular_importers_' . $locale );
