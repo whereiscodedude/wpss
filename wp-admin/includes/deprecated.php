@@ -14,7 +14,8 @@
 
 /**
  * @since 2.1.0
- * @deprecated 2.1.0 Use wp_editor()
+ * @deprecated 2.1.0
+ * @deprecated Use wp_editor().
  * @see wp_editor()
  */
 function tinymce_include() {
@@ -32,13 +33,15 @@ function tinymce_include() {
  */
 function documentation_link() {
 	_deprecated_function( __FUNCTION__, '2.5' );
+	return;
 }
 
 /**
  * Calculates the new dimensions for a downsampled image.
  *
  * @since 2.0.0
- * @deprecated 3.0.0 Use wp_constrain_dimensions()
+ * @deprecated 3.0.0
+ * @deprecated Use wp_constrain_dimensions()
  * @see wp_constrain_dimensions()
  *
  * @param int $width Current width of the image
@@ -56,7 +59,8 @@ function wp_shrink_dimensions( $width, $height, $wmax = 128, $hmax = 96 ) {
  * Calculated the new dimensions for a downsampled image.
  *
  * @since 2.0.0
- * @deprecated 3.5.0 Use wp_constrain_dimensions()
+ * @deprecated 3.5.0
+ * @deprecated Use wp_constrain_dimensions()
  * @see wp_constrain_dimensions()
  *
  * @param int $width Current width of the image
@@ -69,15 +73,16 @@ function get_udims( $width, $height ) {
 }
 
 /**
- * Legacy function used to generate the categories checklist control.
+ * {@internal Missing Short Description}}
  *
  * @since 0.71
- * @deprecated 2.6.0 Use wp_category_checklist()
+ * @deprecated 2.6.0
+ * @deprecated Use wp_category_checklist()
  * @see wp_category_checklist()
  *
- * @param int $default       Unused.
- * @param int $parent        Unused.
- * @param array $popular_ids Unused.
+ * @param unknown_type $default
+ * @param unknown_type $parent
+ * @param unknown_type $popular_ids
  */
 function dropdown_categories( $default = 0, $parent = 0, $popular_ids = array() ) {
 	_deprecated_function( __FUNCTION__, '2.6', 'wp_category_checklist()' );
@@ -86,13 +91,14 @@ function dropdown_categories( $default = 0, $parent = 0, $popular_ids = array() 
 }
 
 /**
- * Legacy function used to generate a link categories checklist control.
+ * {@internal Missing Short Description}}
  *
  * @since 2.1.0
- * @deprecated 2.6.0 Use wp_link_category_checklist()
+ * @deprecated 2.6.0
+ * @deprecated Use wp_link_category_checklist()
  * @see wp_link_category_checklist()
  *
- * @param int $default Unused.
+ * @param unknown_type $default
  */
 function dropdown_link_categories( $default = 0 ) {
 	_deprecated_function( __FUNCTION__, '2.6', 'wp_link_category_checklist()' );
@@ -117,18 +123,19 @@ function get_real_file_to_edit( $file ) {
 }
 
 /**
- * Legacy function used for generating a categories drop-down control.
+ * {@internal Missing Short Description}}
  *
  * @since 1.2.0
- * @deprecated 3.0.0 Use wp_dropdown_categories()
+ * @deprecated 3.0.0
+ * @deprecated Use wp_dropdown_categories()
  * @see wp_dropdown_categories()
  *
- * @param int $currentcat    Optional. ID of the current category. Default 0.
- * @param int $currentparent Optional. Current parent category ID. Default 0.
- * @param int $parent        Optional. Parent ID to retrieve categories for. Default 0.
- * @param int $level         Optional. Number of levels deep to display. Default 0.
- * @param array $categories  Optional. Categories to include in the control. Default 0.
- * @return bool|null False if no categories were found.
+ * @param unknown_type $currentcat
+ * @param unknown_type $currentparent
+ * @param unknown_type $parent
+ * @param unknown_type $level
+ * @param unknown_type $categories
+ * @return unknown
  */
 function wp_dropdown_cats( $currentcat = 0, $currentparent = 0, $parent = 0, $level = 0, $categories = 0 ) {
 	_deprecated_function( __FUNCTION__, '3.0', 'wp_dropdown_categories()' );
@@ -156,33 +163,37 @@ function wp_dropdown_cats( $currentcat = 0, $currentparent = 0, $parent = 0, $le
  * Register a setting and its sanitization callback
  *
  * @since 2.7.0
- * @deprecated 3.0.0 Use register_setting()
+ * @deprecated 3.0.0
+ * @deprecated Use register_setting()
  * @see register_setting()
  *
  * @param string $option_group A settings group name. Should correspond to a whitelisted option key name.
  * 	Default whitelisted option key names include "general," "discussion," and "reading," among others.
  * @param string $option_name The name of an option to sanitize and save.
- * @param callable $sanitize_callback A callback function that sanitizes the option's value.
+ * @param unknown_type $sanitize_callback A callback function that sanitizes the option's value.
+ * @return unknown
  */
 function add_option_update_handler( $option_group, $option_name, $sanitize_callback = '' ) {
 	_deprecated_function( __FUNCTION__, '3.0', 'register_setting()' );
-	register_setting( $option_group, $option_name, $sanitize_callback );
+	return register_setting( $option_group, $option_name, $sanitize_callback );
 }
 
 /**
  * Unregister a setting
  *
  * @since 2.7.0
- * @deprecated 3.0.0 Use unregister_setting()
+ * @deprecated 3.0.0
+ * @deprecated Use unregister_setting()
  * @see unregister_setting()
  *
- * @param string $option_group
- * @param string $option_name
- * @param callable $sanitize_callback
+ * @param unknown_type $option_group
+ * @param unknown_type $option_name
+ * @param unknown_type $sanitize_callback
+ * @return unknown
  */
 function remove_option_update_handler( $option_group, $option_name, $sanitize_callback = '' ) {
 	_deprecated_function( __FUNCTION__, '3.0', 'unregister_setting()' );
-	unregister_setting( $option_group, $option_name, $sanitize_callback );
+	return unregister_setting( $option_group, $option_name, $sanitize_callback );
 }
 
 /**
@@ -195,16 +206,18 @@ function remove_option_update_handler( $option_group, $option_name, $sanitize_ca
 **/
 function codepress_get_lang( $filename ) {
 	_deprecated_function( __FUNCTION__, '3.0' );
+	return;
 }
 
 /**
- * Adds JavaScript required to make CodePress work on the theme/plugin editors.
+ * Adds Javascript required to make CodePress work on the theme/plugin editors.
  *
  * @since 2.8.0
  * @deprecated 3.0.0
 **/
 function codepress_footer_js() {
 	_deprecated_function( __FUNCTION__, '3.0' );
+	return;
 }
 
 /**
@@ -215,12 +228,11 @@ function codepress_footer_js() {
 **/
 function use_codepress() {
 	_deprecated_function( __FUNCTION__, '3.0' );
+	return;
 }
 
 /**
- * Get all user IDs.
- *
- * @deprecated 3.1.0 Use get_users()
+ * @deprecated 3.1.0
  *
  * @return array List of user IDs.
  */
@@ -237,9 +249,7 @@ function get_author_user_ids() {
 }
 
 /**
- * Gets author users who can edit posts.
- *
- * @deprecated 3.1.0 Use get_users()
+ * @deprecated 3.1.0
  *
  * @param int $user_id User ID.
  * @return array|bool List of editable authors. False if no editable users.
@@ -262,13 +272,11 @@ function get_editable_authors( $user_id ) {
 }
 
 /**
- * Gets the IDs of any users who can edit posts.
+ * @deprecated 3.1.0
  *
- * @deprecated 3.1.0 Use get_users()
- *
- * @param int  $user_id       User ID.
- * @param bool $exclude_zeros Optional. Whether to exclude zeroes. Default true.
- * @return array Array of editable user IDs, empty array otherwise.
+ * @param int $user_id User ID.
+ * @param bool $exclude_zeros Optional, default is true. Whether to exclude zeros.
+ * @return unknown
  */
 function get_editable_user_ids( $user_id, $exclude_zeros = true, $post_type = 'post' ) {
 	_deprecated_function( __FUNCTION__, '3.1', 'get_users()' );
@@ -299,9 +307,7 @@ function get_editable_user_ids( $user_id, $exclude_zeros = true, $post_type = 'p
 }
 
 /**
- * Gets all users who are not authors.
- *
- * @deprecated 3.1.0 Use get_users()
+ * @deprecated 3.1.0
  */
 function get_nonauthor_user_ids() {
 	_deprecated_function( __FUNCTION__, '3.1', 'get_users()' );
@@ -316,12 +322,12 @@ function get_nonauthor_user_ids() {
 	return $wpdb->get_col( $wpdb->prepare("SELECT user_id FROM $wpdb->usermeta WHERE meta_key = %s AND meta_value = '0'", $level_key) );
 }
 
-if ( ! class_exists( 'WP_User_Search', false ) ) :
+if ( !class_exists('WP_User_Search') ) :
 /**
  * WordPress User Search class.
  *
  * @since 2.1.0
- * @deprecated 3.1.0 Use WP_User_Query
+ * @deprecated 3.1.0
  */
 class WP_User_Search {
 
@@ -330,7 +336,7 @@ class WP_User_Search {
 	 *
 	 * @since 2.1.0
 	 * @access private
-	 * @var mixed
+	 * @var unknown_type
 	 */
 	var $results;
 
@@ -339,7 +345,7 @@ class WP_User_Search {
 	 *
 	 * @since 2.1.0
 	 * @access private
-	 * @var string
+	 * @var unknown_type
 	 */
 	var $search_term;
 
@@ -384,7 +390,7 @@ class WP_User_Search {
 	 *
 	 * @since 2.1.0
 	 * @access private
-	 * @var int
+	 * @var unknown_type
 	 */
 	var $first_user;
 
@@ -456,7 +462,7 @@ class WP_User_Search {
 	 *
 	 * @since 2.1.0
 	 * @access private
-	 * @var WP_Error
+	 * @var unknown_type
 	 */
 	var $search_errors;
 
@@ -465,12 +471,12 @@ class WP_User_Search {
 	 *
 	 * @since 2.7.0
 	 * @access private
-	 * @var string
+	 * @var unknown_type
 	 */
 	var $paging_text;
 
 	/**
-	 * PHP5 Constructor - Sets up the object properties.
+	 * PHP4 Constructor - Sets up the object properties.
 	 *
 	 * @since 2.1.0
 	 *
@@ -479,7 +485,7 @@ class WP_User_Search {
 	 * @param string $role Role name.
 	 * @return WP_User_Search
 	 */
-	function __construct( $search_term = '', $page = '', $role = '' ) {
+	function WP_User_Search ($search_term = '', $page = '', $role = '') {
 		_deprecated_function( __FUNCTION__, '3.1', 'WP_User_Query' );
 
 		$this->search_term = wp_unslash( $search_term );
@@ -493,26 +499,14 @@ class WP_User_Search {
 	}
 
 	/**
-	 * PHP4 Constructor - Sets up the object properties.
+	 * {@internal Missing Short Description}}
 	 *
-	 * @since 2.1.0
-	 *
-	 * @param string $search_term Search terms string.
-	 * @param int $page Optional. Page ID.
-	 * @param string $role Role name.
-	 * @return WP_User_Search
-	 */
-	public function WP_User_Search( $search_term = '', $page = '', $role = '' ) {
-		self::__construct( $search_term, $page, $role );
-	}
-
-	/**
-	 * Prepares the user search query (legacy).
+	 * {@internal Missing Long Description}}
 	 *
 	 * @since 2.1.0
 	 * @access public
 	 */
-	public function prepare_query() {
+	function prepare_query() {
 		global $wpdb;
 		$this->first_user = ($this->page - 1) * $this->users_per_page;
 
@@ -545,12 +539,14 @@ class WP_User_Search {
 	}
 
 	/**
-	 * Executes the user search query.
+	 * {@internal Missing Short Description}}
+	 *
+	 * {@internal Missing Long Description}}
 	 *
 	 * @since 2.1.0
 	 * @access public
 	 */
-	public function query() {
+	function query() {
 		global $wpdb;
 
 		$this->results = $wpdb->get_col("SELECT DISTINCT($wpdb->users.ID)" . $this->query_from . $this->query_where . $this->query_orderby . $this->query_limit);
@@ -558,11 +554,13 @@ class WP_User_Search {
 		if ( $this->results )
 			$this->total_users_for_query = $wpdb->get_var("SELECT COUNT(DISTINCT($wpdb->users.ID))" . $this->query_from . $this->query_where); // no limit
 		else
-			$this->search_errors = new WP_Error('no_matching_users_found', __('No users found.'));
+			$this->search_errors = new WP_Error('no_matching_users_found', __('No matching users were found!'));
 	}
 
 	/**
-	 * Prepares variables for use in templates.
+	 * {@internal Missing Short Description}}
+	 *
+	 * {@internal Missing Long Description}}
 	 *
 	 * @since 2.1.0
 	 * @access public
@@ -570,17 +568,19 @@ class WP_User_Search {
 	function prepare_vars_for_template_usage() {}
 
 	/**
-	 * Handles paging for the user search query.
+	 * {@internal Missing Short Description}}
+	 *
+	 * {@internal Missing Long Description}}
 	 *
 	 * @since 2.1.0
 	 * @access public
 	 */
-	public function do_paging() {
+	function do_paging() {
 		if ( $this->total_users_for_query > $this->users_per_page ) { // have to page the results
 			$args = array();
-			if ( ! empty($this->search_term) )
+			if( ! empty($this->search_term) )
 				$args['usersearch'] = urlencode($this->search_term);
-			if ( ! empty($this->role) )
+			if( ! empty($this->role) )
 				$args['role'] = urlencode($this->role);
 
 			$this->paging_text = paginate_links( array(
@@ -602,14 +602,16 @@ class WP_User_Search {
 	}
 
 	/**
-	 * Retrieves the user search query results.
+	 * {@internal Missing Short Description}}
+	 *
+	 * {@internal Missing Long Description}}
 	 *
 	 * @since 2.1.0
 	 * @access public
 	 *
-	 * @return array
+	 * @return unknown
 	 */
-	public function get_results() {
+	function get_results() {
 		return (array) $this->results;
 	}
 
@@ -658,18 +660,15 @@ class WP_User_Search {
 endif;
 
 /**
- * Retrieves editable posts from other users.
+ * Retrieve editable posts from other users.
  *
- * @since 2.3.0
- * @deprecated 3.1.0 Use get_posts()
- * @see get_posts()
+ * @deprecated 3.1.0
  *
- * @param int    $user_id User ID to not retrieve posts from.
- * @param string $type    Optional. Post type to retrieve. Accepts 'draft', 'pending' or 'any' (all).
- *                        Default 'any'.
+ * @param int $user_id User ID to not retrieve posts from.
+ * @param string $type Optional, defaults to 'any'. Post type to retrieve, can be 'draft' or 'pending'.
  * @return array List of posts from others.
  */
-function get_others_unpublished_posts( $user_id, $type = 'any' ) {
+function get_others_unpublished_posts($user_id, $type='any') {
 	_deprecated_function( __FUNCTION__, '3.1' );
 
 	global $wpdb;
@@ -696,8 +695,7 @@ function get_others_unpublished_posts( $user_id, $type = 'any' ) {
 /**
  * Retrieve drafts from other users.
  *
- * @deprecated 3.1.0 Use get_posts()
- * @see get_posts()
+ * @deprecated 3.1.0
  *
  * @param int $user_id User ID.
  * @return array List of drafts from other users.
@@ -711,8 +709,7 @@ function get_others_drafts($user_id) {
 /**
  * Retrieve pending review posts from other users.
  *
- * @deprecated 3.1.0 Use get_posts()
- * @see get_posts()
+ * @deprecated 3.1.0
  *
  * @param int $user_id User ID.
  * @return array List of posts with pending review post type from other users.
@@ -727,7 +724,8 @@ function get_others_pending($user_id) {
  * Output the QuickPress dashboard widget.
  *
  * @since 3.0.0
- * @deprecated 3.2.0 Use wp_dashboard_quick_press()
+ * @deprecated 3.2.0
+ * @deprecated Use wp_dashboard_quick_press()
  * @see wp_dashboard_quick_press()
  */
 function wp_dashboard_quick_press_output() {
@@ -736,20 +734,17 @@ function wp_dashboard_quick_press_output() {
 }
 
 /**
- * Outputs the TinyMCE editor.
- *
  * @since 2.7.0
- * @deprecated 3.3.0 Use wp_editor()
+ * @deprecated 3.3.0
+ * @deprecated Use wp_editor()
  * @see wp_editor()
- *
- * @staticvar int $num
  */
 function wp_tiny_mce( $teeny = false, $settings = false ) {
 	_deprecated_function( __FUNCTION__, '3.3', 'wp_editor()' );
 
 	static $num = 1;
 
-	if ( ! class_exists( '_WP_Editors', false ) )
+	if ( ! class_exists('_WP_Editors' ) )
 		require_once( ABSPATH . WPINC . '/class-wp-editor.php' );
 
 	$editor_id = 'content' . $num++;
@@ -765,9 +760,8 @@ function wp_tiny_mce( $teeny = false, $settings = false ) {
 }
 
 /**
- * Preloads TinyMCE dialogs.
- *
- * @deprecated 3.3.0 Use wp_editor()
+ * @deprecated 3.3.0
+ * @deprecated Use wp_editor()
  * @see wp_editor()
  */
 function wp_preload_dialogs() {
@@ -775,9 +769,8 @@ function wp_preload_dialogs() {
 }
 
 /**
- * Prints TinyMCE editor JS.
- *
- * @deprecated 3.3.0 Use wp_editor()
+ * @deprecated 3.3.0
+ * @deprecated Use wp_editor()
  * @see wp_editor()
  */
 function wp_print_editor_js() {
@@ -785,9 +778,8 @@ function wp_print_editor_js() {
 }
 
 /**
- * Handles quicktags.
- *
- * @deprecated 3.3.0 Use wp_editor()
+ * @deprecated 3.3.0
+ * @deprecated Use wp_editor()
  * @see wp_editor()
  */
 function wp_quicktags() {
@@ -798,7 +790,8 @@ function wp_quicktags() {
  * Returns the screen layout options.
  *
  * @since 2.8.0
- * @deprecated 3.3.0 WP_Screen::render_screen_layout()
+ * @deprecated 3.3.0
+ * @deprecated Use $current_screen->render_screen_layout()
  * @see WP_Screen::render_screen_layout()
  */
 function screen_layout( $screen ) {
@@ -818,7 +811,8 @@ function screen_layout( $screen ) {
  * Returns the screen's per-page options.
  *
  * @since 2.8.0
- * @deprecated 3.3.0 Use WP_Screen::render_per_page_options()
+ * @deprecated 3.3.0
+ * @deprecated Use $current_screen->render_per_page_options()
  * @see WP_Screen::render_per_page_options()
  */
 function screen_options( $screen ) {
@@ -838,7 +832,8 @@ function screen_options( $screen ) {
  * Renders the screen's help.
  *
  * @since 2.7.0
- * @deprecated 3.3.0 Use WP_Screen::render_screen_meta()
+ * @deprecated 3.3.0
+ * @deprecated Use $current_screen->render_screen_meta()
  * @see WP_Screen::render_screen_meta()
  */
 function screen_meta( $screen ) {
@@ -850,112 +845,47 @@ function screen_meta( $screen ) {
  * Favorite actions were deprecated in version 3.2. Use the admin bar instead.
  *
  * @since 2.7.0
- * @deprecated 3.2.0 Use WP_Admin_Bar
- * @see WP_Admin_Bar
+ * @deprecated 3.2.0
  */
 function favorite_actions() {
 	_deprecated_function( __FUNCTION__, '3.2', 'WP_Admin_Bar' );
 }
 
-/**
- * Handles uploading an image.
- *
- * @deprecated 3.3.0 Use wp_media_upload_handler()
- * @see wp_media_upload_handler()
- *
- * @return null|string
- */
 function media_upload_image() {
 	_deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
 	return wp_media_upload_handler();
 }
 
-/**
- * Handles uploading an audio file.
- *
- * @deprecated 3.3.0 Use wp_media_upload_handler()
- * @see wp_media_upload_handler()
- *
- * @return null|string
- */
 function media_upload_audio() {
 	_deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
 	return wp_media_upload_handler();
 }
 
-/**
- * Handles uploading a video file.
- *
- * @deprecated 3.3.0 Use wp_media_upload_handler()
- * @see wp_media_upload_handler()
- *
- * @return null|string
- */
 function media_upload_video() {
 	_deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
 	return wp_media_upload_handler();
 }
 
-/**
- * Handles uploading a generic file.
- *
- * @deprecated 3.3.0 Use wp_media_upload_handler()
- * @see wp_media_upload_handler()
- *
- * @return null|string
- */
 function media_upload_file() {
 	_deprecated_function( __FUNCTION__, '3.3', 'wp_media_upload_handler()' );
 	return wp_media_upload_handler();
 }
 
-/**
- * Handles retrieving the insert-from-URL form for an image.
- *
- * @deprecated 3.3.0 Use wp_media_insert_url_form()
- * @see wp_media_insert_url_form()
- *
- * @return string
- */
 function type_url_form_image() {
 	_deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('image')" );
 	return wp_media_insert_url_form( 'image' );
 }
 
-/**
- * Handles retrieving the insert-from-URL form for an audio file.
- *
- * @deprecated 3.3.0 Use wp_media_insert_url_form()
- * @see wp_media_insert_url_form()
- *
- * @return string
- */
 function type_url_form_audio() {
 	_deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('audio')" );
 	return wp_media_insert_url_form( 'audio' );
 }
 
-/**
- * Handles retrieving the insert-from-URL form for a video file.
- *
- * @deprecated 3.3.0 Use wp_media_insert_url_form()
- * @see wp_media_insert_url_form()
- *
- * @return string
- */
 function type_url_form_video() {
 	_deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('video')" );
 	return wp_media_insert_url_form( 'video' );
 }
 
-/**
- * Handles retrieving the insert-from-URL form for a generic file.
- *
- * @deprecated 3.3.0 Use wp_media_insert_url_form()
- * @see wp_media_insert_url_form()
- *
- * @return string
- */
 function type_url_form_file() {
 	_deprecated_function( __FUNCTION__, '3.3', "wp_media_insert_url_form('file')" );
 	return wp_media_insert_url_form( 'file' );
@@ -967,8 +897,9 @@ function type_url_form_file() {
  * Creates an 'Overview' help tab.
  *
  * @since 2.7.0
- * @deprecated 3.3.0 Use WP_Screen::add_help_tab()
- * @see WP_Screen::add_help_tab()
+ * @deprecated 3.3.0
+ * @deprecated Use get_current_screen()->add_help_tab()
+ * @see WP_Screen
  *
  * @param string    $screen The handle for the screen to add help to. This is usually the hook name returned by the add_*_page() functions.
  * @param string    $help   The content of an 'Overview' help tab.
@@ -983,10 +914,11 @@ function add_contextual_help( $screen, $help ) {
 }
 
 /**
- * Get the allowed themes for the current site.
+ * Get the allowed themes for the current blog.
  *
  * @since 3.0.0
- * @deprecated 3.4.0 Use wp_get_themes()
+ * @deprecated 3.4.0
+ * @deprecated Use wp_get_themes()
  * @see wp_get_themes()
  *
  * @return array $themes Array of allowed themes.
@@ -1005,13 +937,12 @@ function get_allowed_themes() {
 }
 
 /**
- * Retrieves a list of broken themes.
+ * {@internal Missing Short Description}}
  *
  * @since 1.5.0
- * @deprecated 3.4.0 Use wp_get_themes()
- * @see wp_get_themes()
+ * @deprecated 3.4.0
  *
- * @return array
+ * @return unknown
  */
 function get_broken_themes() {
 	_deprecated_function( __FUNCTION__, '3.4', "wp_get_themes( array( 'errors' => true )" );
@@ -1030,13 +961,12 @@ function get_broken_themes() {
 }
 
 /**
- * Retrieves information on the current active theme.
+ * {@internal Missing Short Description}}
  *
  * @since 2.0.0
- * @deprecated 3.4.0 Use wp_get_theme()
- * @see wp_get_theme()
+ * @deprecated 3.4.0
  *
- * @return WP_Theme
+ * @return unknown
  */
 function current_theme_info() {
 	_deprecated_function( __FUNCTION__, '3.4', 'wp_get_theme()' );
@@ -1045,9 +975,7 @@ function current_theme_info() {
 }
 
 /**
- * This was once used to display an 'Insert into Post' button.
- *
- * Now it is deprecated and stubbed.
+ * This was once used to display an 'Insert into Post' button. Now it is deprecated and stubbed.
  *
  * @deprecated 3.5.0
  */
@@ -1056,9 +984,7 @@ function _insert_into_post_button( $type ) {
 }
 
 /**
- * This was once used to display a media button.
- *
- * Now it is deprecated and stubbed.
+ * This was once used to display a media button. Now it is deprecated and stubbed.
  *
  * @deprecated 3.5.0
  */
@@ -1067,11 +993,10 @@ function _media_button($title, $icon, $type, $id) {
 }
 
 /**
- * Gets an existing post and format it for editing.
+ * Get an existing post and format it for editing.
  *
  * @since 2.0.0
- * @deprecated 3.5.0 Use get_post()
- * @see get_post()
+ * @deprecated 3.5.0
  *
  * @param int $id
  * @return object
@@ -1083,11 +1008,11 @@ function get_post_to_edit( $id ) {
 }
 
 /**
- * Gets the default page information to use.
+ * Get the default page information to use.
  *
  * @since 2.5.0
- * @deprecated 3.5.0 Use get_default_post_to_edit()
- * @see get_default_post_to_edit()
+ * @deprecated 3.5.0
+ * @deprecated Use get_default_post_to_edit()
  *
  * @return WP_Post Post object containing all the default post data as attributes
  */
@@ -1103,7 +1028,8 @@ function get_default_page_to_edit() {
  * This was once used to create a thumbnail from an Image given a maximum side size.
  *
  * @since 1.2.0
- * @deprecated 3.5.0 Use image_resize()
+ * @deprecated 3.5.0
+ * @deprecated Use image_resize()
  * @see image_resize()
  *
  * @param mixed $file Filename of the original image, Or attachment id.
@@ -1135,7 +1061,7 @@ function wp_nav_menu_locations_meta_box() {
  * and calling the 'upgrade' method.
  *
  * @since 2.7.0
- * @deprecated 3.7.0 Use Core_Upgrader
+ * @deprecated 3.7.0
  * @see Core_Upgrader
  */
 function wp_update_core($current, $feedback = '') {
@@ -1158,7 +1084,7 @@ function wp_update_core($current, $feedback = '') {
  * Unused since 2.8.0.
  *
  * @since 2.5.0
- * @deprecated 3.7.0 Use Plugin_Upgrader
+ * @deprecated 3.7.0
  * @see Plugin_Upgrader
  */
 function wp_update_plugin($plugin, $feedback = '') {
@@ -1175,12 +1101,12 @@ function wp_update_plugin($plugin, $feedback = '') {
 /**
  * This was once used to kick-off the Theme Updater.
  *
- * Deprecated in favor of instantiating a Theme_Upgrader instance directly,
+ * Deprecated in favor of instantating a Theme_Upgrader instance directly,
  * and calling the 'upgrade' method.
  * Unused since 2.8.0.
  *
  * @since 2.7.0
- * @deprecated 3.7.0 Use Theme_Upgrader
+ * @deprecated 3.7.0
  * @see Theme_Upgrader
  */
 function wp_update_theme($theme, $feedback = '') {
@@ -1197,102 +1123,57 @@ function wp_update_theme($theme, $feedback = '') {
 /**
  * This was once used to display attachment links. Now it is deprecated and stubbed.
  *
+ * {@internal Missing Short Description}}
+ *
  * @since 2.0.0
  * @deprecated 3.7.0
  *
- * @param int|bool $id
+ * @param unknown_type $id
+ * @return unknown
  */
 function the_attachment_links( $id = false ) {
 	_deprecated_function( __FUNCTION__, '3.7' );
 }
 
-/**
+/**#@+
  * Displays a screen icon.
  *
  * @since 2.7.0
  * @since 3.8.0 Screen icons are no longer used in WordPress. This function no longer produces output.
- * @deprecated 3.8.0 Use get_screen_icon()
- * @see get_screen_icon()
+ * @deprecated 3.8.0
  */
 function screen_icon() {
 	echo get_screen_icon();
 }
-
-/**
- * Retrieves the screen icon (no longer used in 3.8+).
- *
- * @deprecated 3.8.0
- *
- * @return string
- */
 function get_screen_icon() {
 	return '<!-- Screen icons are no longer used as of WordPress 3.8. -->';
 }
+/**#@-*/
 
-/**
+/**#@+
  * Deprecated dashboard widget controls.
  *
  * @since 2.5.0
  * @deprecated 3.8.0
  */
 function wp_dashboard_incoming_links_output() {}
-
-/**
- * Deprecated dashboard secondary output.
- *
- * @deprecated 3.8.0
- */
 function wp_dashboard_secondary_output() {}
+/**#@-*/
 
-/**
+/**#@+
  * Deprecated dashboard widget controls.
  *
  * @since 2.7.0
  * @deprecated 3.8.0
  */
 function wp_dashboard_incoming_links() {}
-
-/**
- * Deprecated dashboard incoming links control.
- *
- * @deprecated 3.8.0
- */
 function wp_dashboard_incoming_links_control() {}
-
-/**
- * Deprecated dashboard plugins control.
- *
- * @deprecated 3.8.0
- */
 function wp_dashboard_plugins() {}
-
-/**
- * Deprecated dashboard primary control.
- *
- * @deprecated 3.8.0
- */
 function wp_dashboard_primary_control() {}
-
-/**
- * Deprecated dashboard recent comments control.
- *
- * @deprecated 3.8.0
- */
 function wp_dashboard_recent_comments_control() {}
-
-/**
- * Deprecated dashboard secondary section.
- *
- * @deprecated 3.8.0
- */
 function wp_dashboard_secondary() {}
-
-/**
- * Deprecated dashboard secondary control.
- *
- * @deprecated 3.8.0
- */
 function wp_dashboard_secondary_control() {}
+/**#@-*/
 
 /**
  * This was once used to move child posts to a new parent.
@@ -1306,70 +1187,4 @@ function wp_dashboard_secondary_control() {}
  */
 function _relocate_children( $old_ID, $new_ID ) {
 	_deprecated_function( __FUNCTION__, '3.9' );
-}
-
-/**
- * Add a top-level menu page in the 'objects' section.
- *
- * This function takes a capability which will be used to determine whether
- * or not a page is included in the menu.
- *
- * The function which is hooked in to handle the output of the page must check
- * that the user has the required capability as well.
- *
- * @since 2.7.0
- *
- * @deprecated 4.5.0 Use add_menu_page()
- * @see add_menu_page()
- * @global int $_wp_last_object_menu
- *
- * @param string   $page_title The text to be displayed in the title tags of the page when the menu is selected.
- * @param string   $menu_title The text to be used for the menu.
- * @param string   $capability The capability required for this menu to be displayed to the user.
- * @param string   $menu_slug  The slug name to refer to this menu by (should be unique for this menu).
- * @param callable $function   The function to be called to output the content for this page.
- * @param string   $icon_url   The url to the icon to be used for this menu.
- * @return string The resulting page's hook_suffix.
- */
-function add_object_page( $page_title, $menu_title, $capability, $menu_slug, $function = '', $icon_url = '') {
-	_deprecated_function( __FUNCTION__, '4.5', 'add_menu_page()' );
-
-	global $_wp_last_object_menu;
-
-	$_wp_last_object_menu++;
-
-	return add_menu_page($page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $_wp_last_object_menu);
-}
-
-/**
- * Add a top-level menu page in the 'utility' section.
- *
- * This function takes a capability which will be used to determine whether
- * or not a page is included in the menu.
- *
- * The function which is hooked in to handle the output of the page must check
- * that the user has the required capability as well.
- *
- * @since 2.7.0
- *
- * @deprecated 4.5.0 Use add_menu_page()
- * @see add_menu_page()
- * @global int $_wp_last_utility_menu
- *
- * @param string   $page_title The text to be displayed in the title tags of the page when the menu is selected.
- * @param string   $menu_title The text to be used for the menu.
- * @param string   $capability The capability required for this menu to be displayed to the user.
- * @param string   $menu_slug  The slug name to refer to this menu by (should be unique for this menu).
- * @param callable $function   The function to be called to output the content for this page.
- * @param string   $icon_url   The url to the icon to be used for this menu.
- * @return string The resulting page's hook_suffix.
- */
-function add_utility_page( $page_title, $menu_title, $capability, $menu_slug, $function = '', $icon_url = '') {
-	_deprecated_function( __FUNCTION__, '4.5', 'add_menu_page()' );
-
-	global $_wp_last_utility_menu;
-
-	$_wp_last_utility_menu++;
-
-	return add_menu_page($page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $_wp_last_utility_menu);
 }
