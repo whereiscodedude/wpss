@@ -125,7 +125,7 @@ class WP_List_Table {
 	 *                            Default empty
 	 *     @type bool   $ajax     Whether the list table supports AJAX. This includes loading
 	 *                            and sorting data, for example. If true, the class will call
-	 *                            the _js_vars() method in the footer to provide variables
+	 *                            the {@see _js_vars()} method in the footer to provide variables
 	 *                            to any scripts handling AJAX events. Default false.
 	 *     @type string $screen   String containing the hook name used to determine the current
 	 *                            screen. If left null, the current screen will be automatically set.
@@ -1153,7 +1153,7 @@ class WP_List_Table {
 	}
 
 	/**
-	 * Get a list of CSS classes for the WP_List_Table table tag.
+	 * Get a list of CSS classes for the list table table tag.
 	 *
 	 * @since 3.1.0
 	 * @access protected
