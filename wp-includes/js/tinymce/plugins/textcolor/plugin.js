@@ -1,8 +1,8 @@
 /**
  * plugin.js
  *
+ * Copyright, Moxiecode Systems AB
  * Released under LGPL License.
- * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
  *
  * License: http://www.tinymce.com/license
  * Contributing: http://www.tinymce.com/contributing
@@ -12,35 +12,10 @@
 /*eslint consistent-this:0 */
 
 tinymce.PluginManager.add('textcolor', function(editor) {
-	var cols, rows;
-
-	rows = {
-		forecolor: editor.settings.forecolor_rows || editor.settings.textcolor_rows || 5,
-		backcolor: editor.settings.backcolor_rows || editor.settings.textcolor_rows || 5
-	};
-	cols = {
-		forecolor: editor.settings.forecolor_cols || editor.settings.textcolor_cols || 8,
-		backcolor: editor.settings.backcolor_cols || editor.settings.textcolor_cols || 8
-	};
-
-	function getCurrentColor(format) {
-		var color;
-
-		editor.dom.getParents(editor.selection.getStart(), function(elm) {
-			var value;
-
-			if ((value = elm.style[format == 'forecolor' ? 'color' : 'background-color'])) {
-				color = value;
-			}
-		});
-
-		return color;
-	}
-
-	function mapColors(type) {
+	function mapColors() {
 		var i, colors = [], colorMap;
 
-		colorMap = [
+		colorMap = editor.settings.textcolor_map || [
 			"000000", "Black",
 			"993300", "Burnt orange",
 			"333300", "Dark olive",
@@ -71,24 +46,22 @@ tinymce.PluginManager.add('textcolor', function(editor) {
 			"00FF00", "Lime",
 			"00FFFF", "Aqua",
 			"00CCFF", "Sky blue",
-			"993366", "Red violet",
-			"FFFFFF", "White",
+			"993366", "Brown",
+			"C0C0C0", "Silver",
 			"FF99CC", "Pink",
 			"FFCC99", "Peach",
 			"FFFF99", "Light yellow",
 			"CCFFCC", "Pale green",
 			"CCFFFF", "Pale cyan",
 			"99CCFF", "Light sky blue",
-			"CC99FF", "Plum"
+			"CC99FF", "Plum",
+			"FFFFFF", "White"
 		];
-
-		colorMap = editor.settings.textcolor_map || colorMap;
-		colorMap = editor.settings[type + '_map'] || colorMap;
 
 		for (i = 0; i < colorMap.length; i += 2) {
 			colors.push({
 				text: colorMap[i + 1],
-				color: '#' + colorMap[i]
+				color: colorMap[i]
 			});
 		}
 
@@ -96,69 +69,37 @@ tinymce.PluginManager.add('textcolor', function(editor) {
 	}
 
 	function renderColorPicker() {
-		var ctrl = this, colors, color, html, last, x, y, i, id = ctrl._id, count = 0, type;
+		var ctrl = this, colors, color, html, last, rows, cols, x, y, i;
 
-		type = ctrl.settings.origin;
-
-		function getColorCellHtml(color, title) {
-			var isNoColor = color == 'transparent';
-
-			return (
-				'<td class="mce-grid-cell' + (isNoColor ? ' mce-colorbtn-trans' : '') + '">' +
-					'<div id="' + id + '-' + (count++) + '"' +
-						' data-mce-color="' + (color ? color : '') + '"' +
-						' role="option"' +
-						' tabIndex="-1"' +
-						' style="' + (color ? 'background-color: ' + color : '') + '"' +
-						' title="' + tinymce.translate(title) + '">' +
-						(isNoColor ? '&#215;' : '') +
-					'</div>' +
-				'</td>'
-			);
-		}
-
-		colors = mapColors(type);
-		colors.push({
-			text: tinymce.translate("No color"),
-			color: "transparent"
-		});
+		colors = mapColors();
 
 		html = '<table class="mce-grid mce-grid-border mce-colorbutton-grid" role="list" cellspacing="0"><tbody>';
 		last = colors.length - 1;
+		rows = editor.settings.textcolor_rows || 5;
+		cols = editor.settings.textcolor_cols || 8;
 
-		for (y = 0; y < rows[type]; y++) {
+		for (y = 0; y < rows; y++) {
 			html += '<tr>';
 
-			for (x = 0; x < cols[type]; x++) {
-				i = y * cols[type] + x;
+			for (x = 0; x < cols; x++) {
+				i = y * cols + x;
 
 				if (i > last) {
 					html += '<td></td>';
 				} else {
 					color = colors[i];
-					html += getColorCellHtml(color.color, color.text);
+					html += (
+						'<td>' +
+							'<div id="' + ctrl._id + '-' + i + '"' +
+								' data-mce-color="' + color.color + '"' +
+								' role="option"' +
+								' tabIndex="-1"' +
+								' style="' + (color ? 'background-color: #' + color.color : '') + '"' +
+								' title="' + color.text + '">' +
+							'</div>' +
+						'</td>'
+					);
 				}
-			}
-
-			html += '</tr>';
-		}
-
-		if (editor.settings.color_picker_callback) {
-			html += (
-				'<tr>' +
-					'<td colspan="' + cols[type] + '" class="mce-custom-color-btn">' +
-						'<div id="' + id + '-c" class="mce-widget mce-btn mce-btn-small mce-btn-flat" ' +
-							'role="button" tabindex="-1" aria-labelledby="' + id + '-c" style="width: 100%">' +
-							'<button type="button" role="presentation" tabindex="-1">' + tinymce.translate('Custom...') + '</button>' +
-						'</div>' +
-					'</td>' +
-				'</tr>'
-			);
-
-			html += '<tr>';
-
-			for (x = 0; x < cols[type]; x++) {
-				html += getColorCellHtml('', 'Custom color');
 			}
 
 			html += '</tr>';
@@ -169,77 +110,10 @@ tinymce.PluginManager.add('textcolor', function(editor) {
 		return html;
 	}
 
-	function applyFormat(format, value) {
-		editor.undoManager.transact(function() {
-			editor.focus();
-			editor.formatter.apply(format, {value: value});
-			editor.nodeChanged();
-		});
-	}
-
-	function removeFormat(format) {
-		editor.undoManager.transact(function() {
-			editor.focus();
-			editor.formatter.remove(format, {value: null}, null, true);
-			editor.nodeChanged();
-		});
-	}
-
 	function onPanelClick(e) {
-		var buttonCtrl = this.parent(), value, type;
+		var buttonCtrl = this.parent(), value;
 
-		type = buttonCtrl.settings.origin;
-
-		function selectColor(value) {
-			buttonCtrl.hidePanel();
-			buttonCtrl.color(value);
-			applyFormat(buttonCtrl.settings.format, value);
-		}
-
-		function resetColor() {
-			buttonCtrl.hidePanel();
-			buttonCtrl.resetColor();
-			removeFormat(buttonCtrl.settings.format);
-		}
-
-		function setDivColor(div, value) {
-			div.style.background = value;
-			div.setAttribute('data-mce-color', value);
-		}
-
-		if (tinymce.DOM.getParent(e.target, '.mce-custom-color-btn')) {
-			buttonCtrl.hidePanel();
-
-			editor.settings.color_picker_callback.call(editor, function(value) {
-				var tableElm = buttonCtrl.panel.getEl().getElementsByTagName('table')[0];
-				var customColorCells, div, i;
-
-				customColorCells = tinymce.map(tableElm.rows[tableElm.rows.length - 1].childNodes, function(elm) {
-					return elm.firstChild;
-				});
-
-				for (i = 0; i < customColorCells.length; i++) {
-					div = customColorCells[i];
-					if (!div.getAttribute('data-mce-color')) {
-						break;
-					}
-				}
-
-				// Shift colors to the right
-				// TODO: Might need to be the left on RTL
-				if (i == cols[type]) {
-					for (i = 0; i < cols[type] - 1; i++) {
-						setDivColor(customColorCells[i], customColorCells[i + 1].getAttribute('data-mce-color'));
-					}
-				}
-
-				setDivColor(div, value);
-				selectColor(value);
-			}, getCurrentColor(buttonCtrl.settings.format));
-		}
-
-		value = e.target.getAttribute('data-mce-color');
-		if (value) {
+		if ((value = e.target.getAttribute('data-mce-color'))) {
 			if (this.lastId) {
 				document.getElementById(this.lastId).setAttribute('aria-selected', false);
 			}
@@ -247,13 +121,10 @@ tinymce.PluginManager.add('textcolor', function(editor) {
 			e.target.setAttribute('aria-selected', true);
 			this.lastId = e.target.id;
 
-			if (value == 'transparent') {
-				resetColor();
-			} else {
-				selectColor(value);
-			}
-		} else if (value !== null) {
 			buttonCtrl.hidePanel();
+			value = '#' + value;
+			buttonCtrl.color(value);
+			editor.execCommand(buttonCtrl.settings.selectcmd, false, value);
 		}
 	}
 
@@ -261,18 +132,15 @@ tinymce.PluginManager.add('textcolor', function(editor) {
 		var self = this;
 
 		if (self._color) {
-			applyFormat(self.settings.format, self._color);
-		} else {
-			removeFormat(self.settings.format);
+			editor.execCommand(self.settings.selectcmd, false, self._color);
 		}
 	}
 
 	editor.addButton('forecolor', {
 		type: 'colorbutton',
 		tooltip: 'Text color',
-		format: 'forecolor',
+		selectcmd: 'ForeColor',
 		panel: {
-			origin: 'forecolor',
 			role: 'application',
 			ariaRemember: true,
 			html: renderColorPicker,
@@ -284,9 +152,8 @@ tinymce.PluginManager.add('textcolor', function(editor) {
 	editor.addButton('backcolor', {
 		type: 'colorbutton',
 		tooltip: 'Background color',
-		format: 'hilitecolor',
+		selectcmd: 'HiliteColor',
 		panel: {
-			origin: 'backcolor',
 			role: 'application',
 			ariaRemember: true,
 			html: renderColorPicker,
