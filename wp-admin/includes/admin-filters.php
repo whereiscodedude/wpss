@@ -1,9 +1,10 @@
 <?php
 /**
- * Administration API: Default admin hooks
+ * Administration hooks
  *
  * @package WordPress
- * @subpackage Administration
+ * @subpackage Hooks
+ *
  * @since 4.3.0
  */
 
@@ -64,6 +65,7 @@ add_filter( 'whitelist_options', 'option_update_filter' );
 
 // Plugin Install hooks.
 add_action( 'install_plugins_featured',               'install_dashboard' );
+add_action( 'install_plugins_upload',                 'install_plugins_upload' );
 add_action( 'install_plugins_search',                 'display_plugins_table' );
 add_action( 'install_plugins_popular',                'display_plugins_table' );
 add_action( 'install_plugins_recommended',            'display_plugins_table' );

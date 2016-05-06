@@ -4,20 +4,9 @@
  *
  * @package WordPress
  * @subpackage Theme
- * @since 3.4.0
  */
-final class WP_Theme implements ArrayAccess {
 
-	/**
-	 * Whether the theme has been marked as updateable.
-	 *
-	 * @since 4.4.0
-	 * @access public
-	 * @var bool
-	 *
-	 * @see WP_MS_Themes_List_Table
-	 */
-	public $update = false;
+final class WP_Theme implements ArrayAccess {
 
 	/**
 	 * Headers for style.css files.
@@ -56,7 +45,6 @@ final class WP_Theme implements ArrayAccess {
 		'twentythirteen' => 'Twenty Thirteen',
 		'twentyfourteen' => 'Twenty Fourteen',
 		'twentyfifteen'  => 'Twenty Fifteen',
-		'twentysixteen'  => 'Twenty Sixteen',
 	);
 
 	/**
@@ -268,14 +256,7 @@ final class WP_Theme implements ArrayAccess {
 		if ( ! $this->template && ! ( $this->template = $this->headers['Template'] ) ) {
 			$this->template = $this->stylesheet;
 			if ( ! file_exists( $this->theme_root . '/' . $this->stylesheet . '/index.php' ) ) {
-				$error_message = sprintf(
-					/* translators: 1: index.php, 2: Codex URL, 3: style.css */
-					__( 'Template is missing. Standalone themes need to have a %1$s template file. <a href="%2$s">Child themes</a> need to have a Template header in the %3$s stylesheet.' ),
-					'<code>index.php</code>',
-					__( 'https://codex.wordpress.org/Child_Themes' ),
-					'<code>style.css</code>'
-				);
-				$this->errors = new WP_Error( 'theme_no_index', $error_message );
+				$this->errors = new WP_Error( 'theme_no_index', __( 'Template is missing.' ) );
 				$this->cache_add( 'theme', array( 'headers' => $this->headers, 'errors' => $this->errors, 'stylesheet' => $this->stylesheet, 'template' => $this->template ) );
 				return;
 			}
@@ -343,8 +324,7 @@ final class WP_Theme implements ArrayAccess {
 	 *
 	 * @staticvar array $properties
 	 *
-	 * @param string $offset Property to check if set.
-	 * @return bool Whether the given property is set.
+	 * @return bool
 	 */
 	public function __isset( $offset ) {
 		static $properties = array(
@@ -358,8 +338,7 @@ final class WP_Theme implements ArrayAccess {
 	/**
 	 * __get() magic method for properties formerly returned by current_theme_info()
 	 *
-	 * @param string $offset Property to get.
-	 * @return mixed Property value.
+	 * @return mixed
 	 */
 	public function __get( $offset ) {
 		switch ( $offset ) {
@@ -437,7 +416,7 @@ final class WP_Theme implements ArrayAccess {
 	 * translated data. We are doing so now as it is safe to do. However, as
 	 * Name and Title could have been used as the key for get_themes(), both remain
 	 * untranslated for back compatibility. This means that ['Name'] is not ideal,
-	 * and care should be taken to use `$theme::display( 'Name' )` to get a properly
+	 * and care should be taken to use $theme->display('Name') to get a properly
 	 * translated header.
 	 *
 	 * @param mixed $offset
@@ -1031,15 +1010,18 @@ final class WP_Theme implements ArrayAccess {
 		/**
 		 * Filter list of page templates for a theme.
 		 *
+		 * This filter does not currently allow for page templates to be added.
+		 *
 		 * @since 3.9.0
-		 * @since 4.4.0 Converted to allow complete control over the `$page_templates` array.
 		 *
 		 * @param array        $page_templates Array of page templates. Keys are filenames,
 		 *                                     values are translated names.
 		 * @param WP_Theme     $this           The theme object.
 		 * @param WP_Post|null $post           The post being edited, provided for context, or null.
 		 */
-		return (array) apply_filters( 'theme_page_templates', $page_templates, $this, $post );
+		$return = apply_filters( 'theme_page_templates', $page_templates, $this, $post );
+
+		return array_intersect_assoc( $return, $page_templates );
 	}
 
 	/**
@@ -1138,7 +1120,7 @@ final class WP_Theme implements ArrayAccess {
 	 *
 	 * @param string $check Optional. Whether to check only the 'network'-wide settings, the 'site'
 	 * 	settings, or 'both'. Defaults to 'both'.
-	 * @param int $blog_id Optional. Ignored if only network-wide settings are checked. Defaults to current site.
+	 * @param int $blog_id Optional. Ignored if only network-wide settings are checked. Defaults to current blog.
 	 * @return bool Whether the theme is allowed for the network. Returns true in single-site.
 	 */
 	public function is_allowed( $check = 'both', $blog_id = null ) {
@@ -1161,23 +1143,6 @@ final class WP_Theme implements ArrayAccess {
 	}
 
 	/**
-	 * Determines the latest WordPress default theme that is installed.
-	 *
-	 * This hits the filesystem.
-	 *
-	 * @return WP_Theme|false Object, or false if no theme is installed, which would be bad.
-	 */
-	public static function get_core_default_theme() {
-		foreach ( array_reverse( self::$default_themes ) as $slug => $name ) {
-			$theme = wp_get_theme( $slug );
-			if ( $theme->exists() ) {
-				return $theme;
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Returns array of stylesheet names of themes allowed on the site or network.
 	 *
 	 * @since 3.4.0
@@ -1185,22 +1150,18 @@ final class WP_Theme implements ArrayAccess {
 	 * @static
 	 * @access public
 	 *
-	 * @param int $blog_id Optional. ID of the site. Defaults to the current site.
+	 * @param int $blog_id Optional. Defaults to current blog.
 	 * @return array Array of stylesheet names.
 	 */
 	public static function get_allowed( $blog_id = null ) {
 		/**
-		 * Filter the array of themes allowed on the network.
+		 * Filter the array of themes allowed on the site or network.
 		 *
-		 * Site is provided as context so that a list of network allowed themes can
-		 * be filtered further.
-		 *
-		 * @since 4.5.0
+		 * @since MU
 		 *
 		 * @param array $allowed_themes An array of theme stylesheet names.
-		 * @param int   $blog_id        ID of the site.
 		 */
-		$network = (array) apply_filters( 'network_allowed_themes', self::get_allowed_on_network(), $blog_id );
+		$network = (array) apply_filters( 'allowed_themes', self::get_allowed_on_network() );
 		return $network + self::get_allowed_on_site( $blog_id );
 	}
 
@@ -1218,19 +1179,8 @@ final class WP_Theme implements ArrayAccess {
 	 */
 	public static function get_allowed_on_network() {
 		static $allowed_themes;
-		if ( ! isset( $allowed_themes ) ) {
+		if ( ! isset( $allowed_themes ) )
 			$allowed_themes = (array) get_site_option( 'allowedthemes' );
-		}
-
-		/**
-		 * Filter the array of themes allowed on the network.
-		 *
-		 * @since MU
-		 *
-		 * @param array $allowed_themes An array of theme stylesheet names.
-		 */
-		$allowed_themes = apply_filters( 'allowed_themes', $allowed_themes );
-
 		return $allowed_themes;
 	}
 
@@ -1244,7 +1194,7 @@ final class WP_Theme implements ArrayAccess {
 	 *
 	 * @staticvar array $allowed_themes
 	 *
-	 * @param int $blog_id Optional. ID of the site. Defaults to the current site.
+	 * @param int $blog_id Optional. Defaults to current blog.
 	 * @return array Array of stylesheet names.
 	 */
 	public static function get_allowed_on_site( $blog_id = null ) {
@@ -1253,17 +1203,8 @@ final class WP_Theme implements ArrayAccess {
 		if ( ! $blog_id || ! is_multisite() )
 			$blog_id = get_current_blog_id();
 
-		if ( isset( $allowed_themes[ $blog_id ] ) ) {
-			/**
-			 * Filter the array of themes allowed on the site.
-			 *
-			 * @since 4.5.0
-			 *
-			 * @param array $allowed_themes An array of theme stylesheet names.
-			 * @param int   $blog_id        ID of the site. Defaults to current site.
-			 */
-			return (array) apply_filters( 'site_allowed_themes', $allowed_themes[ $blog_id ], $blog_id );
-		}
+		if ( isset( $allowed_themes[ $blog_id ] ) )
+			return $allowed_themes[ $blog_id ];
 
 		$current = $blog_id == get_current_blog_id();
 
@@ -1311,75 +1252,16 @@ final class WP_Theme implements ArrayAccess {
 			}
 		}
 
-		/** This filter is documented in wp-includes/class-wp-theme.php */
-		return (array) apply_filters( 'site_allowed_themes', $allowed_themes[ $blog_id ], $blog_id );
+		return (array) $allowed_themes[ $blog_id ];
 	}
 
 	/**
-	 * Enable a theme for all sites on the current network.
-	 *
-	 * @since 4.6.0
-	 *
-	 * @static
-	 * @access public
-	 *
-	 * @param string|array $stylesheets Stylesheet name or array of stylesheet names.
-	 */
-	public static function network_enable_theme( $stylesheets ) {
-		if ( ! is_multisite() ) {
-			return;
-		}
-
-		if ( ! is_array( $stylesheets ) ) {
-			$stylesheets = array( $stylesheets );
-		}
-
-		$allowed_themes = get_site_option( 'allowedthemes' );
-		foreach ( $stylesheets as $stylesheet ) {
-			$allowed_themes[ $stylesheet ] = true;
-		}
-
-		update_site_option( 'allowedthemes', $allowed_themes );
-	}
-
-	/**
-	 * Disable a theme for all sites on the current network.
-	 *
-	 * @since 4.6.0
-	 *
-	 * @static
-	 * @access public
-	 *
-	 * @param string|array $stylesheets Stylesheet name or array of stylesheet names.
-	 */
-	public static function network_disable_theme( $stylesheets ) {
-		if ( ! is_multisite() ) {
-			return;
-		}
-
-		if ( ! is_array( $stylesheets ) ) {
-			$stylesheets = array( $stylesheets );
-		}
-
-		$allowed_themes = get_site_option( 'allowedthemes' );
-		foreach ( $stylesheets as $stylesheet ) {
-			if ( isset( $allowed_themes[ $stylesheet ] ) ) {
-				unset( $allowed_themes[ $stylesheet ] );
-			}
-		}
-
-		update_site_option( 'allowedthemes', $allowed_themes );
-	}
-
-	/**
-	 * Sorts themes by name.
+	 * Sort themes by name.
 	 *
 	 * @since 3.4.0
 	 *
 	 * @static
 	 * @access public
-	 *
-	 * @param array $themes Array of themes to sort, passed by reference.
 	 */
 	public static function sort_by_name( &$themes ) {
 		if ( 0 === strpos( get_locale(), 'en_' ) ) {
@@ -1400,10 +1282,7 @@ final class WP_Theme implements ArrayAccess {
 	 * @static
 	 * @access private
 	 *
-	 * @param string $a First name.
-	 * @param string $b Second name.
-	 * @return int Negative if `$a` falls lower in the natural order than `$b`. Zero if they fall equally.
-	 *             Greater than 0 if `$a` falls higher in the natural order than `$b`. Used with usort().
+	 * @return int
 	 */
 	private static function _name_sort( $a, $b ) {
 		return strnatcasecmp( $a->headers['Name'], $b->headers['Name'] );
@@ -1417,10 +1296,7 @@ final class WP_Theme implements ArrayAccess {
 	 * @static
 	 * @access private
 	 *
-	 * @param string $a First name.
-	 * @param string $b Second name.
-	 * @return int Negative if `$a` falls lower in the natural order than `$b`. Zero if they fall equally.
-	 *             Greater than 0 if `$a` falls higher in the natural order than `$b`. Used with usort().
+	 * @return int
 	 */
 	private static function _name_sort_i18n( $a, $b ) {
 		// Don't mark up; Do translate.

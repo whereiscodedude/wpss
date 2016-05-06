@@ -1,9 +1,8 @@
 <?php
 /**
- * Taxonomy API: Core category-specific functionality
+ * WordPress Category API
  *
  * @package WordPress
- * @subpackage Taxonomy
  */
 
 /**
@@ -15,12 +14,9 @@
  *
  * @since 2.1.0
  * @see get_terms() Type of arguments that can be changed.
+ * @link https://codex.wordpress.org/Function_Reference/get_categories
  *
- * @param string|array $args {
- *     Optional. Arguments to retrieve categories. See get_terms() for additional options.
- *
- *     @type string $taxonomy Taxonomy to retrieve terms for. In this case, default 'category'.
- * }
+ * @param string|array $args Optional. Change the defaults retrieving categories.
  * @return array List of categories.
  */
 function get_categories( $args = '' ) {
@@ -30,37 +26,25 @@ function get_categories( $args = '' ) {
 	$taxonomy = $args['taxonomy'];
 
 	/**
-	 * Filter the taxonomy used to retrieve terms when calling get_categories().
+	 * Filter the taxonomy used to retrieve terms when calling {@see get_categories()}.
 	 *
 	 * @since 2.7.0
 	 *
 	 * @param string $taxonomy Taxonomy to retrieve terms from.
-	 * @param array  $args     An array of arguments. See get_terms().
+	 * @param array  $args     An array of arguments. See {@see get_terms()}.
 	 */
 	$taxonomy = apply_filters( 'get_categories_taxonomy', $taxonomy, $args );
 
 	// Back compat
 	if ( isset($args['type']) && 'link' == $args['type'] ) {
-		/* translators: 1: "type => link", 2: "taxonomy => link_category" alternative */
-		_deprecated_argument( __FUNCTION__, '3.0',
-			sprintf( __( '%1$s is deprecated. Use %2$s instead.' ),
-				'<code>type => link</code>',
-				'<code>taxonomy => link_category</code>'
-			)
-		);
+		_deprecated_argument( __FUNCTION__, '3.0', '' );
 		$taxonomy = $args['taxonomy'] = 'link_category';
 	}
 
-	$categories = get_terms( $taxonomy, $args );
+	$categories = (array) get_terms( $taxonomy, $args );
 
-	if ( is_wp_error( $categories ) ) {
-		$categories = array();
-	} else {
-		$categories = (array) $categories;
-		foreach ( array_keys( $categories ) as $k ) {
-			_make_cat_compat( $categories[ $k ] );
-		}
-	}
+	foreach ( array_keys( $categories ) as $k )
+		_make_cat_compat( $categories[$k] );
 
 	return $categories;
 }
@@ -333,19 +317,18 @@ function clean_category_cache( $id ) {
  * pass to it. This is one of the features with using pass by reference in PHP.
  *
  * @since 2.3.0
- * @since 4.4.0 The `$category` parameter now also accepts a WP_Term object.
  * @access private
  *
- * @param array|object|WP_Term $category Category Row object or array
+ * @param array|object $category Category Row object or array
  */
 function _make_cat_compat( &$category ) {
 	if ( is_object( $category ) && ! is_wp_error( $category ) ) {
-		$category->cat_ID = $category->term_id;
-		$category->category_count = $category->count;
-		$category->category_description = $category->description;
-		$category->cat_name = $category->name;
-		$category->category_nicename = $category->slug;
-		$category->category_parent = $category->parent;
+		$category->cat_ID = &$category->term_id;
+		$category->category_count = &$category->count;
+		$category->category_description = &$category->description;
+		$category->cat_name = &$category->name;
+		$category->category_nicename = &$category->slug;
+		$category->category_parent = &$category->parent;
 	} elseif ( is_array( $category ) && isset( $category['term_id'] ) ) {
 		$category['cat_ID'] = &$category['term_id'];
 		$category['category_count'] = &$category['count'];
