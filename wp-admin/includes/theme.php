@@ -83,11 +83,6 @@ function delete_theme($stylesheet, $redirect = '') {
 		}
 	}
 
-	// Remove the theme from allowed themes on the network.
-	if ( is_multisite() ) {
-		WP_Theme::network_disable_theme( $stylesheet );
-	}
-
 	// Force refresh of theme update information.
 	delete_site_transient( 'update_themes' );
 
@@ -218,9 +213,28 @@ function get_theme_update_available( $theme ) {
 function get_theme_feature_list( $api = true ) {
 	// Hard-coded list is used if api not accessible.
 	$features = array(
+			__( 'Colors' ) => array(
+				'black'   => __( 'Black' ),
+				'blue'    => __( 'Blue' ),
+				'brown'   => __( 'Brown' ),
+				'gray'    => __( 'Gray' ),
+				'green'   => __( 'Green' ),
+				'orange'  => __( 'Orange' ),
+				'pink'    => __( 'Pink' ),
+				'purple'  => __( 'Purple' ),
+				'red'     => __( 'Red' ),
+				'silver'  => __( 'Silver' ),
+				'tan'     => __( 'Tan' ),
+				'white'   => __( 'White' ),
+				'yellow'  => __( 'Yellow' ),
+				'dark'    => __( 'Dark' ),
+				'light'   => __( 'Light' ),
+			),
 
 		__( 'Layout' ) => array(
-			'grid-layout'   => __( 'Grid Layout' ),
+			'fixed-layout'      => __( 'Fixed Layout' ),
+			'fluid-layout'      => __( 'Fluid Layout' ),
+			'responsive-layout' => __( 'Responsive Layout' ),
 			'one-column'    => __( 'One Column' ),
 			'two-columns'   => __( 'Two Columns' ),
 			'three-columns' => __( 'Three Columns' ),
@@ -231,6 +245,7 @@ function get_theme_feature_list( $api = true ) {
 
 		__( 'Features' ) => array(
 			'accessibility-ready'   => __( 'Accessibility Ready' ),
+			'blavatar'              => __( 'Blavatar' ),
 			'buddypress'            => __( 'BuddyPress' ),
 			'custom-background'     => __( 'Custom Background' ),
 			'custom-colors'         => __( 'Custom Colors' ),
@@ -240,7 +255,6 @@ function get_theme_feature_list( $api = true ) {
 			'featured-image-header' => __( 'Featured Image Header' ),
 			'featured-images'       => __( 'Featured Images' ),
 			'flexible-header'       => __( 'Flexible Header' ),
-			'footer-widgets'        => __( 'Footer Widgets' ),
 			'front-page-post-form'  => __( 'Front Page Posting' ),
 			'full-width-template'   => __( 'Full Width Template' ),
 			'microformats'          => __( 'Microformats' ),
@@ -253,15 +267,9 @@ function get_theme_feature_list( $api = true ) {
 		),
 
 		__( 'Subject' )  => array(
-			'blog'           => __( 'Blog' ),
-			'e-commerce'     => __( 'E-Commerce' ),
-			'education'      => __( 'Education' ),
-			'entertainment'  => __( 'Entertainment' ),
-			'food-and-drink' => __( 'Food & Drink' ),
-			'holiday'        => __( 'Holiday' ),
-			'news'           => __( 'News' ),
-			'photography'    => __( 'Photography' ),
-			'portfolio'      => __( 'Portfolio' ),
+			'holiday'       => __( 'Holiday' ),
+			'photoblogging' => __( 'Photoblogging' ),
+			'seasonal'      => __( 'Seasonal' ),
 		)
 	);
 
@@ -466,10 +474,10 @@ function themes_api( $action, $args = array() ) {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array|object|WP_Error $res    WordPress.org Themes API response.
-	 * @param string                $action Requested action. Likely values are 'theme_information',
-	 *                                      'feature_list', or 'query_themes'.
-	 * @param object                $args   Arguments used to query for installer pages from the WordPress.org Themes API.
+	 * @param array|object $res    WordPress.org Themes API response.
+	 * @param string       $action Requested action. Likely values are 'theme_information',
+	 *                             'feature_list', or 'query_themes'.
+	 * @param object       $args   Arguments used to query for installer pages from the WordPress.org Themes API.
 	 */
 	return apply_filters( 'themes_api_result', $res, $action, $args );
 }

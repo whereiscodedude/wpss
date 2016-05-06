@@ -800,9 +800,6 @@ final class WP_Customize_Widgets {
 	 */
 	public function print_footer_scripts() {
 		/** This action is documented in wp-admin/admin-footer.php */
-		do_action( 'admin_print_footer_scripts-widgets.php' );
-
-		/** This action is documented in wp-admin/admin-footer.php */
 		do_action( 'admin_print_footer_scripts' );
 
 		/** This action is documented in wp-admin/admin-footer.php */
@@ -1064,7 +1061,7 @@ final class WP_Customize_Widgets {
 	 * @return array
 	 */
 	public function preview_sidebars_widgets( $sidebars_widgets ) {
-		$sidebars_widgets = get_option( 'sidebars_widgets', array() );
+		$sidebars_widgets = get_option( 'sidebars_widgets' );
 
 		unset( $sidebars_widgets['array_version'] );
 		return $sidebars_widgets;

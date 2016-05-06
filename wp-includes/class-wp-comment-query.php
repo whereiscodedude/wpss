@@ -311,7 +311,7 @@ class WP_Comment_Query {
 	/**
 	 * Parse arguments passed to the comment query with default query parameters.
 	 *
-	 * @since 4.2.0 Extracted from WP_Comment_Query::query().
+	 * @since  4.2.0 Extracted from WP_Comment_Query::query().
 	 *
 	 * @access public
 	 *
@@ -323,14 +323,6 @@ class WP_Comment_Query {
 		}
 
 		$this->query_vars = wp_parse_args( $query, $this->query_var_defaults );
-
-		/**
-		 * Fires after the comment query vars have been parsed.
-		 *
-		 * @since 4.2.0
-		 *
-		 * @param WP_Comment_Query &$this The WP_Comment_Query instance (passed by reference).
-		 */
 		do_action_ref_array( 'parse_comment_query', array( &$this ) );
 	}
 
@@ -841,9 +833,10 @@ class WP_Comment_Query {
 			}
 		}
 
-		if ( ! empty( $this->query_vars['date_query'] ) && is_array( $this->query_vars['date_query'] ) ) {
-			$this->date_query = new WP_Date_Query( $this->query_vars['date_query'], 'comment_date' );
-			$this->sql_clauses['where']['date_query'] = preg_replace( '/^\s*AND\s*/', '', $this->date_query->get_sql() );
+		$date_query = $this->query_vars['date_query'];
+		if ( ! empty( $date_query ) && is_array( $date_query ) ) {
+			$date_query_object = new WP_Date_Query( $date_query, 'comment_date' );
+			$this->sql_clauses['where']['date_query'] = preg_replace( '/^\s*AND\s*/', '', $date_query_object->get_sql() );
 		}
 
 		$where = implode( ' AND ', $this->sql_clauses['where'] );

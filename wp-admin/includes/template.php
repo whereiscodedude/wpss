@@ -1428,16 +1428,16 @@ function get_settings_errors( $setting = '', $sanitize = false ) {
 }
 
 /**
- * Display settings errors registered by add_settings_error().
+ * Display settings errors registered by {@see add_settings_error()}.
  *
  * Part of the Settings API. Outputs a div for each error retrieved by
- * get_settings_errors().
+ * {@see get_settings_errors()}.
  *
  * This is called automatically after a settings page based on the
  * Settings API is submitted. Errors should be added during the validation
- * callback function for a setting defined in register_setting().
+ * callback function for a setting defined in {@see register_setting()}
  *
- * The $sanitize option is passed into get_settings_errors() and will
+ * The $sanitize option is passed into {@see get_settings_errors()} and will
  * re-run the setting sanitization
  * on its current value.
  *
@@ -1451,8 +1451,7 @@ function get_settings_errors( $setting = '', $sanitize = false ) {
  *
  * @param string $setting        Optional slug title of a specific setting who's errors you want.
  * @param bool   $sanitize       Whether to re-sanitize the setting value before returning errors.
- * @param bool   $hide_on_update If set to true errors will not be shown if the settings page has
- *                               already been submitted.
+ * @param bool   $hide_on_update If set to true errors will not be shown if the settings page has already been submitted.
  */
 function settings_errors( $setting = '', $sanitize = false, $hide_on_update = false ) {
 
@@ -1487,7 +1486,7 @@ function find_posts_div($found_action = '') {
 	<div id="find-posts" class="find-box" style="display: none;">
 		<div id="find-posts-head" class="find-box-head">
 			<?php _e( 'Attach to existing content' ); ?>
-			<button type="button" id="find-posts-close"><span class="screen-reader-text"><?php _e( 'Close media attachment panel' ); ?></button>
+			<div id="find-posts-close"></div>
 		</div>
 		<div class="find-box-inside">
 			<div class="find-box-search">
@@ -1652,19 +1651,11 @@ function iframe_footer() {
 	 * but run the hooks anyway since they output JavaScript
 	 * or other needed content.
 	 */
-
-	/**
-	 * @global string $hook_suffix
-	 */
-	global $hook_suffix;
-	?>
+	 ?>
 	<div class="hidden">
 <?php
 	/** This action is documented in wp-admin/admin-footer.php */
-	do_action( 'admin_footer', $hook_suffix );
-
-	/** This action is documented in wp-admin/admin-footer.php */
-	do_action( "admin_print_footer_scripts-$hook_suffix" );
+	do_action( 'admin_footer', '' );
 
 	/** This action is documented in wp-admin/admin-footer.php */
 	do_action( 'admin_print_footer_scripts' );
@@ -2072,9 +2063,9 @@ function wp_star_rating( $args = array() ) {
 
 	$output = '<div class="star-rating">';
 	$output .= '<span class="screen-reader-text">' . $title . '</span>';
-	$output .= str_repeat( '<div class="star star-full" aria-hidden="true"></div>', $full_stars );
-	$output .= str_repeat( '<div class="star star-half" aria-hidden="true"></div>', $half_stars );
-	$output .= str_repeat( '<div class="star star-empty" aria-hidden="true"></div>', $empty_stars );
+	$output .= str_repeat( '<div class="star star-full"></div>', $full_stars );
+	$output .= str_repeat( '<div class="star star-half"></div>', $half_stars );
+	$output .= str_repeat( '<div class="star star-empty"></div>', $empty_stars );
 	$output .= '</div>';
 
 	if ( $r['echo'] ) {
