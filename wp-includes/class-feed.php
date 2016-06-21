@@ -38,7 +38,7 @@ class WP_Feed_Cache_Transient {
 
 		$lifetime = $this->lifetime;
 		/**
-		 * Filters the transient lifetime of the feed cache.
+		 * Filter the transient lifetime of the feed cache.
 		 *
 		 * @since 2.8.0
 		 *

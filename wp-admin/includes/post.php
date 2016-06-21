@@ -629,7 +629,7 @@ function get_default_post_to_edit( $post_type = 'post', $create_in_db = false ) 
 	}
 
 	/**
-	 * Filters the default post content initially used in the "Write Post" form.
+	 * Filter the default post content initially used in the "Write Post" form.
 	 *
 	 * @since 1.5.0
 	 *
@@ -639,7 +639,7 @@ function get_default_post_to_edit( $post_type = 'post', $create_in_db = false ) 
 	$post->post_content = apply_filters( 'default_content', $post_content, $post );
 
 	/**
-	 * Filters the default post title initially used in the "Write Post" form.
+	 * Filter the default post title initially used in the "Write Post" form.
 	 *
 	 * @since 1.5.0
 	 *
@@ -649,7 +649,7 @@ function get_default_post_to_edit( $post_type = 'post', $create_in_db = false ) 
 	$post->post_title = apply_filters( 'default_title', $post_title, $post );
 
 	/**
-	 * Filters the default post excerpt initially used in the "Write Post" form.
+	 * Filter the default post excerpt initially used in the "Write Post" form.
 	 *
 	 * @since 1.5.0
 	 *
@@ -1029,7 +1029,7 @@ function wp_edit_posts_query( $q = false ) {
 		$posts_per_page = 20;
 
 	/**
-	 * Filters the number of items per page to show for a specific 'per_page' type.
+	 * Filter the number of items per page to show for a specific 'per_page' type.
 	 *
 	 * The dynamic portion of the hook name, `$post_type`, refers to the post type.
 	 *
@@ -1044,7 +1044,7 @@ function wp_edit_posts_query( $q = false ) {
 	$posts_per_page = apply_filters( "edit_{$post_type}_per_page", $posts_per_page );
 
 	/**
-	 * Filters the number of posts displayed per page when specifically listing "posts".
+	 * Filter the number of posts displayed per page when specifically listing "posts".
 	 *
 	 * @since 2.8.0
 	 *
@@ -1120,7 +1120,7 @@ function wp_edit_attachments_query_vars( $q = false ) {
 	}
 
 	/**
-	 * Filters the number of items to list per page when listing media items.
+	 * Filter the number of items to list per page when listing media items.
 	 *
 	 * @since 2.9.0
 	 *
@@ -1188,7 +1188,7 @@ function postbox_classes( $id, $page ) {
 	}
 
 	/**
-	 * Filters the postbox classes for a specific screen and screen ID combo.
+	 * Filter the postbox classes for a specific screen and screen ID combo.
 	 *
 	 * The dynamic portions of the hook name, `$page` and `$id`, refer to
 	 * the screen and screen ID, respectively.
@@ -1266,7 +1266,7 @@ function get_sample_permalink($id, $title = null, $name = null) {
 	unset($post->filter);
 
 	/**
-	 * Filters the sample permalink.
+	 * Filter the sample permalink.
 	 *
 	 * @since 4.4.0
 	 *
@@ -1354,7 +1354,7 @@ function get_sample_permalink_html( $id, $new_title = null, $new_slug = null ) {
 	}
 
 	/**
-	 * Filters the sample permalink HTML markup.
+	 * Filter the sample permalink HTML markup.
 	 *
 	 * @since 2.9.0
 	 * @since 4.4.0 Added `$post` parameter.
@@ -1400,7 +1400,7 @@ function _wp_post_thumbnail_html( $thumbnail_id = null, $post = null ) {
 		$size = isset( $_wp_additional_image_sizes['post-thumbnail'] ) ? 'post-thumbnail' : array( 266, 266 );
 
 		/**
-		 * Filters the size used to display the post thumbnail image in the 'Featured Image' meta box.
+		 * Filter the size used to display the post thumbnail image in the 'Featured Image' meta box.
 		 *
 		 * Note: When a theme adds 'post-thumbnail' support, a special 'post-thumbnail'
 		 * image size is registered, which differs from the 'thumbnail' image size
@@ -1433,17 +1433,14 @@ function _wp_post_thumbnail_html( $thumbnail_id = null, $post = null ) {
 	}
 
 	/**
-	 * Filters the admin post thumbnail HTML markup to return.
+	 * Filter the admin post thumbnail HTML markup to return.
 	 *
 	 * @since 2.9.0
-	 * @since 3.5.0 Added $post->ID
-	 * @since 4.6.0 Added $thumbnail_id
 	 *
-	 * @param string $content      Admin post thumbnail HTML markup.
-	 * @param int    $post_id      Post ID.
-	 * @param int    $thumbnail_id Thumbnail ID.
+	 * @param string $content Admin post thumbnail HTML markup.
+	 * @param int    $post_id Post ID.
 	 */
-	return apply_filters( 'admin_post_thumbnail_html', $content, $post->ID, $thumbnail_id );
+	return apply_filters( 'admin_post_thumbnail_html', $content, $post->ID );
 }
 
 /**
@@ -1512,7 +1509,7 @@ function _admin_notice_post_locked() {
 	if ( $user ) {
 
 		/**
-		 * Filters whether to show the post locked dialog.
+		 * Filter whether to show the post locked dialog.
 		 *
 		 * Returning a falsey value to the filter will short-circuit displaying the dialog.
 		 *
@@ -1564,7 +1561,7 @@ function _admin_notice_post_locked() {
 		$preview_link = get_preview_post_link( $post->ID, $query_args );
 
 		/**
-		 * Filters whether to allow the post lock to be overridden.
+		 * Filter whether to allow the post lock to be overridden.
 		 *
 		 * Returning a falsey value to the filter will disable the ability
 		 * to override the post lock.
@@ -1842,7 +1839,7 @@ function redirect_post($post_id = '') {
 	}
 
 	/**
-	 * Filters the post redirect destination URL.
+	 * Filter the post redirect destination URL.
 	 *
 	 * @since 2.9.0
 	 *

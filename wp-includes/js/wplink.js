@@ -19,7 +19,6 @@ var wpLink;
 		keySensitivity: 100,
 		lastSearch: '',
 		textarea: '',
-		modalOpen: false,
 
 		init: function() {
 			inputs.wrap = $('#wp-link-wrap');
@@ -98,7 +97,6 @@ var wpLink;
 				$body = $( document.body );
 
 			$body.addClass( 'modal-open' );
-			wpLink.modalOpen = true;
 			linkNode = node;
 
 			wpLink.range = null;
@@ -230,7 +228,7 @@ var wpLink;
 				onlyText = this.hasSelectedText( linkNode );
 
 			if ( linkNode ) {
-				linkText = linkNode.textContent || linkNode.innerText;
+				linkText = linkNode.innerText || linkNode.textContent;
 				href = editor.dom.getAttrib( linkNode, 'href' );
 
 				if ( ! $.trim( linkText ) ) {
@@ -276,7 +274,6 @@ var wpLink;
 
 		close: function( reset ) {
 			$( document.body ).removeClass( 'modal-open' );
-			wpLink.modalOpen = false;
 
 			if ( reset !== 'noReset' ) {
 				if ( ! wpLink.isMCE() ) {
@@ -433,10 +430,6 @@ var wpLink;
 			wpLink.close( 'noReset' );
 			editor.focus();
 			editor.nodeChanged();
-
-			if ( link && editor.plugins.wplink ) {
-				editor.plugins.wplink.checkLink( link );
-			}
 
 			// Audible confirmation message when a link has been inserted in the Editor.
 			wp.a11y.speak( wpLinkL10n.linkInserted );

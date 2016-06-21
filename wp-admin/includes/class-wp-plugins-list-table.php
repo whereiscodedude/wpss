@@ -78,7 +78,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 		wp_reset_vars( array( 'orderby', 'order' ) );
 
 		/**
-		 * Filterss the full array of plugins to list in the Plugins list table.
+		 * Filters the full array of plugins to list in the Plugins list table.
 		 *
 		 * @since 3.0.0
 		 *
@@ -104,7 +104,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 		if ( ! is_multisite() || ( $screen->in_admin( 'network' ) && current_user_can( 'manage_network_plugins' ) ) ) {
 
 			/**
-			 * Filters whether to display the advanced plugins list table.
+			 * Filter whether to display the advanced plugins list table.
 			 *
 			 * There are two types of advanced plugins - must-use and drop-ins -
 			 * which can be used in a single site or Multisite network.
@@ -140,7 +140,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 		if ( ! $screen->in_admin( 'network' ) ) {
 			$show = current_user_can( 'manage_network_plugins' );
 			/**
-			 * Filters whether to display network-active plugins alongside plugins active for the current site.
+			 * Filter whether to display network-active plugins alongside plugins active for the current site.
 			 *
 			 * This also controls the display of inactive network-only plugins (plugins with
 			 * "Network: true" in the plugin header).
@@ -245,15 +245,6 @@ class WP_Plugins_List_Table extends WP_List_Table {
 		}
 
 		$total_this_page = $totals[ $status ];
-
-		$js_plugins = array();
-		foreach ( $plugins as $key => $list ) {
-			$js_plugins[ $key ] = array_keys( (array) $list );
-		}
-
-		wp_localize_script( 'updates', '_wpUpdatesItemCounts', array(
-			'plugins' => $js_plugins,
-		) );
 
 		if ( ! $orderby ) {
 			$orderby = 'Name';
@@ -616,7 +607,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 		if ( $screen->in_admin( 'network' ) ) {
 
 			/**
-			 * Filters the action links displayed for each plugin in the Network Admin Plugins list table.
+			 * Filter the action links displayed for each plugin in the Network Admin Plugins list table.
 			 *
 			 * The default action links for the Network plugins list table include
 			 * 'Network Activate', 'Network Deactivate', 'Edit', and 'Delete'.
@@ -634,7 +625,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 			$actions = apply_filters( 'network_admin_plugin_action_links', $actions, $plugin_file, $plugin_data, $context );
 
 			/**
-			 * Filters the list of action links displayed for a specific plugin in the Network Admin Plugins list table.
+			 * Filter the list of action links displayed for a specific plugin in the Network Admin Plugins list table.
 			 *
 			 * The dynamic portion of the hook name, $plugin_file, refers to the path
 			 * to the plugin file, relative to the plugins directory.
@@ -654,7 +645,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 		} else {
 
 			/**
-			 * Filters the action links displayed for each plugin in the Plugins list table.
+			 * Filter the action links displayed for each plugin in the Plugins list table.
 			 *
 			 * The default action links for the site plugins list table include
 			 * 'Activate', 'Deactivate', and 'Edit', for a network site, and
@@ -673,7 +664,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 			$actions = apply_filters( 'plugin_action_links', $actions, $plugin_file, $plugin_data, $context );
 
 			/**
-			 * Filters the list of action links displayed for a specific plugin in the Plugins list table.
+			 * Filter the list of action links displayed for a specific plugin in the Plugins list table.
 			 *
 			 * The dynamic portion of the hook name, $plugin_file, refers to the path
 			 * to the plugin file, relative to the plugins directory.
@@ -766,7 +757,7 @@ class WP_Plugins_List_Table extends WP_List_Table {
 					}
 
 					/**
-					 * Filters the array of row meta for each plugin in the Plugins list table.
+					 * Filter the array of row meta for each plugin in the Plugins list table.
 					 *
 					 * @since 2.8.0
 					 *

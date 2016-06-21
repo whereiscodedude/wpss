@@ -17,8 +17,6 @@
  * ability to interact with any network of sites is required.
  *
  * @since 4.4.0
- *
- * @property int $site_id
  */
 class WP_Network {
 
@@ -60,10 +58,10 @@ class WP_Network {
 	 * A numeric string, for compatibility reasons.
 	 *
 	 * @since 4.4.0
-	 * @access private
+	 * @access public
 	 * @var string
 	 */
-	private $blog_id = 0;
+	public $blog_id = 0;
 
 	/**
 	 * Domain used to set cookies for this network.
@@ -137,71 +135,6 @@ class WP_Network {
 
 		$this->_set_site_name();
 		$this->_set_cookie_domain();
-	}
-
-	/**
-	 * Getter.
-	 *
-	 * Allows current multisite naming conventions when getting properties.
-	 *
-	 * @since 4.6.0
-	 * @access public
-	 *
-	 * @param string $key Property to get.
-	 * @return mixed Value of the property. Null if not available.
-	 */
-	public function __get( $key ) {
-		switch ( $key ) {
-			case 'blog_id':
-				return $this->blog_id;
-			case 'site_id':
-				return (int) $this->blog_id;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Isset-er.
-	 *
-	 * Allows current multisite naming conventions when checking for properties.
-	 *
-	 * @since 4.6.0
-	 * @access public
-	 *
-	 * @param string $key Property to check if set.
-	 * @return bool Whether the property is set.
-	 */
-	public function __isset( $key ) {
-		switch ( $key ) {
-			case 'blog_id':
-			case 'site_id':
-				return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Setter.
-	 *
-	 * Allows current multisite naming conventions while setting properties.
-	 *
-	 * @since 4.6.0
-	 * @access public
-	 *
-	 * @param string $key   Property to set.
-	 * @param mixed  $value Value to assign to the property.
-	 */
-	public function __set( $key, $value ) {
-		switch ( $key ) {
-			case 'blog_id':
-			case 'site_id':
-				$this->blog_id = (string) $value;
-				break;
-			default:
-				$this->$key = $value;
-		}
 	}
 
 	/**
@@ -297,7 +230,7 @@ class WP_Network {
 			$path_segments = array_filter( explode( '/', trim( $path, '/' ) ) );
 
 			/**
-			 * Filters the number of path segments to consider when searching for a site.
+			 * Filter the number of path segments to consider when searching for a site.
 			 *
 			 * @since 3.9.0
 			 *

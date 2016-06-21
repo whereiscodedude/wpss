@@ -29,10 +29,12 @@ $_SERVER['REQUEST_URI'] = remove_query_arg( $temp_args, $_SERVER['REQUEST_URI'] 
 $referer = remove_query_arg( $temp_args, wp_get_referer() );
 
 if ( $action ) {
+	$allowed_themes = get_site_option( 'allowedthemes' );
 	switch ( $action ) {
 		case 'enable':
 			check_admin_referer('enable-theme_' . $_GET['theme']);
-			WP_Theme::network_enable_theme( $_GET['theme'] );
+			$allowed_themes[ $_GET['theme'] ] = true;
+			update_site_option( 'allowedthemes', $allowed_themes );
 			if ( false === strpos( $referer, '/network/themes.php' ) )
 				wp_redirect( network_admin_url( 'themes.php?enabled=1' ) );
 			else
@@ -40,7 +42,8 @@ if ( $action ) {
 			exit;
 		case 'disable':
 			check_admin_referer('disable-theme_' . $_GET['theme']);
-			WP_Theme::network_disable_theme( $_GET['theme'] );
+			unset( $allowed_themes[ $_GET['theme'] ] );
+			update_site_option( 'allowedthemes', $allowed_themes );
 			wp_safe_redirect( add_query_arg( 'disabled', '1', $referer ) );
 			exit;
 		case 'enable-selected':
@@ -50,7 +53,9 @@ if ( $action ) {
 				wp_safe_redirect( add_query_arg( 'error', 'none', $referer ) );
 				exit;
 			}
-			WP_Theme::network_enable_theme( (array) $themes );
+			foreach ( (array) $themes as $theme )
+				$allowed_themes[ $theme ] = true;
+			update_site_option( 'allowedthemes', $allowed_themes );
 			wp_safe_redirect( add_query_arg( 'enabled', count( $themes ), $referer ) );
 			exit;
 		case 'disable-selected':
@@ -60,7 +65,9 @@ if ( $action ) {
 				wp_safe_redirect( add_query_arg( 'error', 'none', $referer ) );
 				exit;
 			}
-			WP_Theme::network_disable_theme( (array) $themes );
+			foreach ( (array) $themes as $theme )
+				unset( $allowed_themes[ $theme ] );
+			update_site_option( 'allowedthemes', $allowed_themes );
 			wp_safe_redirect( add_query_arg( 'disabled', count( $themes ), $referer ) );
 			exit;
 		case 'update-selected' :
@@ -228,7 +235,6 @@ get_current_screen()->set_screen_reader_content( array(
 $title = __('Themes');
 $parent_file = 'themes.php';
 
-wp_enqueue_script( 'updates' );
 wp_enqueue_script( 'theme-preview' );
 
 require_once(ABSPATH . 'wp-admin/admin-header.php');
@@ -288,7 +294,7 @@ if ( 'broken' == $status )
 	echo '<p class="clear">' . __( 'The following themes are installed but incomplete.' ) . '</p>';
 ?>
 
-<form id="bulk-action-form" method="post">
+<form method="post">
 <input type="hidden" name="theme_status" value="<?php echo esc_attr($status) ?>" />
 <input type="hidden" name="paged" value="<?php echo esc_attr($page) ?>" />
 
@@ -298,8 +304,4 @@ if ( 'broken' == $status )
 </div>
 
 <?php
-wp_print_request_filesystem_credentials_modal();
-wp_print_admin_notice_templates();
-wp_print_update_row_templates();
-
 include(ABSPATH . 'wp-admin/admin-footer.php');

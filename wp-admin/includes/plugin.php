@@ -92,14 +92,6 @@ function get_plugin_data( $plugin_file, $markup = true, $translate = true ) {
 	$plugin_data['Network'] = ( 'true' == strtolower( $plugin_data['Network'] ) );
 	unset( $plugin_data['_sitewide'] );
 
-	// If no text domain is defined fall back to the plugin slug.
-	if ( ! $plugin_data['TextDomain'] ) {
-		$plugin_slug = dirname( plugin_basename( $plugin_file ) );
-		if ( '.' !== $plugin_slug && false === strpos( $plugin_slug, '/' ) ) {
-			$plugin_data['TextDomain'] = $plugin_slug;
-		}
-	}
-
 	if ( $markup || $translate ) {
 		$plugin_data = _get_plugin_data_markup_translate( $plugin_file, $plugin_data, $markup, $translate );
 	} else {
@@ -495,7 +487,7 @@ function is_plugin_active_for_network( $plugin ) {
  * be activated only as a network wide plugin. The plugin would also work
  * when Multisite is not enabled.
  *
- * Checks for "Site Wide Only: true" for backward compatibility.
+ * Checks for "Site Wide Only: true" for backwards compatibility.
  *
  * @since 3.0.0
  *
@@ -578,10 +570,12 @@ function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silen
 			/**
 			 * Fires as a specific plugin is being activated.
 			 *
-			 * This hook is the "activation" hook used internally by register_activation_hook().
-			 * The dynamic portion of the hook name, `$plugin`, refers to the plugin basename.
+			 * This hook is the "activation" hook used internally by
+			 * {@see register_activation_hook()}. The dynamic portion of the
+			 * hook name, `$plugin`, refers to the plugin basename.
 			 *
-			 * If a plugin is silently activated (such as during an update), this hook does not fire.
+			 * If a plugin is silently activated (such as during an update),
+			 * this hook does not fire.
 			 *
 			 * @since 2.0.0
 			 *
@@ -691,10 +685,12 @@ function deactivate_plugins( $plugins, $silent = false, $network_wide = null ) {
 			/**
 			 * Fires as a specific plugin is being deactivated.
 			 *
-			 * This hook is the "deactivation" hook used internally by register_deactivation_hook().
-			 * The dynamic portion of the hook name, `$plugin`, refers to the plugin basename.
+			 * This hook is the "deactivation" hook used internally by
+			 * {@see register_deactivation_hook()}. The dynamic portion of the
+			 * hook name, `$plugin`, refers to the plugin basename.
 			 *
-			 * If a plugin is silently deactivated (such as during an update), this hook does not fire.
+			 * If a plugin is silently deactivated (such as during an update),
+			 * this hook does not fire.
 			 *
 			 * @since 2.0.0
 			 *
@@ -937,11 +933,11 @@ function validate_active_plugins() {
 /**
  * Validate the plugin path.
  *
- * Checks that the file exists and is a valid file. See validate_file().
+ * Checks that the file exists and {@link validate_file() is valid file}.
  *
  * @since 2.5.0
  *
- * @param string $plugin Plugin Path.
+ * @param string $plugin Plugin Path
  * @return WP_Error|int 0 on success, WP_Error on failure.
  */
 function validate_plugin($plugin) {
@@ -1007,7 +1003,7 @@ function uninstall_plugin($plugin) {
 		unset($uninstallable_plugins);
 
 		define('WP_UNINSTALL_PLUGIN', $file);
-		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $file );
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . dirname( $file ) );
 		include( WP_PLUGIN_DIR . '/' . dirname($file) . '/uninstall.php' );
 
 		return true;
@@ -1028,7 +1024,7 @@ function uninstall_plugin($plugin) {
 		 * Fires in uninstall_plugin() once the plugin has been uninstalled.
 		 *
 		 * The action concatenates the 'uninstall_' prefix with the basename of the
-		 * plugin passed to uninstall_plugin() to create a dynamically-named action.
+		 * plugin passed to {@see uninstall_plugin()} to create a dynamically-named action.
 		 *
 		 * @since 2.7.0
 		 */
@@ -1823,9 +1819,7 @@ function unregister_setting( $option_group, $option_name, $sanitize_callback = '
 }
 
 /**
- * Refreshes the value of the options whitelist available via the 'whitelist_options' hook.
- *
- * See the {@see 'whitelist_options'} filter.
+ * Refreshes the value of the options whitelist available via the 'whitelist_options' filter.
  *
  * @since 2.7.0
  *

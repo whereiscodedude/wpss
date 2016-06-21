@@ -286,7 +286,7 @@ class WP_Scripts extends WP_Dependencies {
 
 		if ( $this->do_concat ) {
 			/**
-			 * Filters the script loader source.
+			 * Filter the script loader source.
 			 *
 			 * @since 2.2.0
 			 *
@@ -345,7 +345,7 @@ class WP_Scripts extends WP_Dependencies {
 		$tag = "{$cond_before}{$before_handle}<script type='text/javascript' src='$src'></script>\n{$after_handle}{$cond_after}";
 
 		/**
-		 * Filters the HTML script tag of an enqueued script.
+		 * Filter the HTML script tag of an enqueued script.
 		 *
 		 * @since 4.1.0
 		 *
@@ -502,7 +502,7 @@ class WP_Scripts extends WP_Dependencies {
 		$r = parent::all_deps( $handles, $recursion, $group );
 		if ( ! $recursion ) {
 			/**
-			 * Filters the list of script dependencies left to print.
+			 * Filter the list of script dependencies left to print.
 			 *
 			 * @since 2.3.0
 			 *
