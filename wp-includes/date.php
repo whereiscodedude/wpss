@@ -2,13 +2,13 @@
 /**
  * Class for generating SQL clauses that filter a primary query according to date.
  *
- * WP_Date_Query is a helper that allows primary query classes, such as WP_Query, to filter
- * their results by date columns, by generating `WHERE` subclauses to be attached to the
- * primary SQL query string.
+ * `WP_Date_Query` is a helper that allows primary query classes, such as {@see WP_Query},
+ * to filter their results by date columns, by generating `WHERE` subclauses to be attached
+ * to the primary SQL query string.
  *
  * Attempting to filter by an invalid date value (eg month=13) will generate SQL that will
  * return no results. In these cases, a _doing_it_wrong() error notice is also thrown.
- * See WP_Date_Query::validate_date_values().
+ * See {@link WP_Date_Query::validate_date_values()}.
  *
  * @link https://codex.wordpress.org/Function_Reference/WP_Query Codex page.
  *
@@ -18,7 +18,7 @@ class WP_Date_Query {
 	/**
 	 * Array of date queries.
 	 *
-	 * See WP_Date_Query::__construct() for information on date query arguments.
+	 * See {@see WP_Date_Query::__construct()} for information on date query arguments.
 	 *
 	 * @since 3.7.0
 	 * @access public
@@ -355,11 +355,10 @@ class WP_Date_Query {
 
 		// Weeks per year.
 		if ( isset( $_year ) ) {
-			/*
-			 * If we have a specific year, use it to calculate number of weeks.
-			 * Note: the number of weeks in a year is the date in which Dec 28 appears.
-			 */
-			$week_count = date( 'W', mktime( 0, 0, 0, 12, 28, $_year ) );
+			// If we have a specific year, use it to calculate number of weeks.
+			$date = new DateTime();
+			$date->setISODate( $_year, 53 );
+			$week_count = $date->format( "W" ) === "53" ? 53 : 52;
 
 		} else {
 			// Otherwise set the week-count to a maximum of 53.
@@ -491,13 +490,13 @@ class WP_Date_Query {
 		$valid_columns = array(
 			'post_date', 'post_date_gmt', 'post_modified',
 			'post_modified_gmt', 'comment_date', 'comment_date_gmt',
-			'user_registered', 'registered', 'last_updated',
+			'user_registered',
 		);
 
 		// Attempt to detect a table prefix.
 		if ( false === strpos( $column, '.' ) ) {
 			/**
-			 * Filters the list of valid date query columns.
+			 * Filter the list of valid date query columns.
 			 *
 			 * @since 3.7.0
 			 * @since 4.1.0 Added 'user_registered' to the default recognized columns.
@@ -524,10 +523,6 @@ class WP_Date_Query {
 				),
 				$wpdb->users => array(
 					'user_registered',
-				),
-				$wpdb->blogs => array(
-					'registered',
-					'last_updated',
 				),
 			);
 
@@ -559,7 +554,7 @@ class WP_Date_Query {
 		$where = $sql['where'];
 
 		/**
-		 * Filters the date query WHERE clause.
+		 * Filter the date query WHERE clause.
 		 *
 		 * @since 3.7.0
 		 *
@@ -572,8 +567,8 @@ class WP_Date_Query {
 	/**
 	 * Generate SQL clauses to be appended to a main query.
 	 *
-	 * Called by the public WP_Date_Query::get_sql(), this method is abstracted
-	 * out to maintain parity with the other Query classes.
+	 * Called by the public {@see WP_Date_Query::get_sql()}, this method
+	 * is abstracted out to maintain parity with the other Query classes.
 	 *
 	 * @since 4.1.0
 	 * @access protected
@@ -857,7 +852,7 @@ class WP_Date_Query {
 	 *
 	 * You can pass an array of values (year, month, etc.) with missing parameter values being defaulted to
 	 * either the maximum or minimum values (controlled by the $default_to parameter). Alternatively you can
-	 * pass a string that will be run through strtotime().
+	 * pass a string that that will be run through strtotime().
 	 *
 	 * @since 3.7.0
 	 * @access public
@@ -996,7 +991,7 @@ class WP_Date_Query {
 		$format = $time = '';
 
 		// Hour
-		if ( null !== $hour ) {
+		if ( $hour ) {
 			$format .= '%H.';
 			$time   .= sprintf( '%02d', $hour ) . '.';
 		} else {

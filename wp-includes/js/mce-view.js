@@ -1,5 +1,7 @@
 /* global tinymce */
 
+window.wp = window.wp || {};
+
 /*
  * The TinyMCE view API.
  *
@@ -22,7 +24,7 @@
  * |- registered view
  * |  |- ...
  */
-( function( window, wp, shortcode, $ ) {
+( function( window, wp, $ ) {
 	'use strict';
 
 	var views = {},
@@ -120,7 +122,7 @@
 
 						// Add the processed piece for the match.
 						pieces.push( {
-							content: instance.ignore ? text : '<p data-wpview-marker="' + instance.encodedText + '">' + text + '</p>',
+							content: '<p data-wpview-marker="' + instance.encodedText + '">' + text + '</p>',
 							processed: true
 						} );
 
@@ -143,26 +145,22 @@
 		/**
 		 * Create a view instance.
 		 *
-		 * @param {String}  type    The view type.
-		 * @param {String}  text    The textual representation of the view.
-		 * @param {Object}  options Options.
-		 * @param {Boolean} force   Recreate the instance. Optional.
+		 * @param {String} type    The view type.
+		 * @param {String} text    The textual representation of the view.
+		 * @param {Object} options Options.
 		 *
 		 * @return {wp.mce.View} The view instance.
 		 */
-		createInstance: function( type, text, options, force ) {
+		createInstance: function( type, text, options ) {
 			var View = this.get( type ),
 				encodedText,
 				instance;
 
 			text = tinymce.DOM.decode( text );
+			instance = this.getInstance( text );
 
-			if ( ! force ) {
-				instance = this.getInstance( text );
-
-				if ( instance ) {
-					return instance;
-				}
+			if ( instance ) {
+				return instance;
 			}
 
 			encodedText = encodeURIComponent( text );
@@ -218,13 +216,12 @@
 		 * @param {String}         text   The new text.
 		 * @param {tinymce.Editor} editor The TinyMCE editor instance the view node is in.
 		 * @param {HTMLElement}    node   The view node to update.
-		 * @param {Boolean}        force  Recreate the instance. Optional.
 		 */
-		update: function( text, editor, node, force ) {
+		update: function( text, editor, node ) {
 			var instance = this.getInstance( node );
 
 			if ( instance ) {
-				instance.update( text, editor, node, force );
+				instance.update( text, editor, node );
 			}
 		},
 
@@ -238,8 +235,8 @@
 			var instance = this.getInstance( node );
 
 			if ( instance && instance.edit ) {
-				instance.edit( instance.text, function( text, force ) {
-					instance.update( text, editor, node, force );
+				instance.edit( instance.text, function( text ) {
+					instance.update( text, editor, node );
 				} );
 			}
 		},
@@ -305,8 +302,8 @@
 		/**
 		 * Renders all view nodes tied to this view instance that are not yet rendered.
 		 *
-		 * @param {String}  content The content to render. Optional.
-		 * @param {Boolean} force   Rerender all view nodes tied to this view instance. Optional.
+		 * @param {String} content The content to render. Optional.
+		 * @param {Boolean} force Rerender all view nodes tied to this view instance.
 		 */
 		render: function( content, force ) {
 			if ( content != null ) {
@@ -327,9 +324,9 @@
 			this.replaceMarkers();
 
 			if ( content ) {
-				this.setContent( content, function( editor, node ) {
+				this.setContent( content, function( editor, node, contentNode ) {
 					$( node ).data( 'rendered', true );
-					this.bindNode.call( this, editor, node );
+					this.bindNode.call( this, editor, node, contentNode );
 				}, force ? null : false );
 			} else {
 				this.setLoader();
@@ -351,8 +348,8 @@
 		 * Runs before their content is removed from the DOM.
 		 */
 		unbind: function() {
-			this.getNodes( function( editor, node ) {
-				this.unbindNode.call( this, editor, node );
+			this.getNodes( function( editor, node, contentNode ) {
+				this.unbindNode.call( this, editor, node, contentNode );
 				$( node ).trigger( 'wp-mce-view-unbind' );
 			}, true );
 		},
@@ -394,7 +391,7 @@
 						return rendered ? data : ! data;
 					} )
 					.each( function() {
-						callback.call( self, editor, this );
+						callback.call( self, editor, this, $( this ).find( '.wpview-content' ).get( 0 ) );
 					} );
 			} );
 		},
@@ -421,18 +418,23 @@
 		 */
 		replaceMarkers: function() {
 			this.getMarkers( function( editor, node ) {
-				var $viewNode;
-
 				if ( ! this.loader && $( node ).text() !== this.text ) {
 					editor.dom.setAttrib( node, 'data-wpview-marker', null );
 					return;
 				}
 
-				$viewNode = editor.$(
-					'<div class="wpview" data-wpview-text="' + this.encodedText + '" data-wpview-type="' + this.type + '" contenteditable="false"></div>'
+				editor.dom.replace(
+					editor.dom.createFragment(
+						'<div class="wpview-wrap" data-wpview-text="' + this.encodedText + '" data-wpview-type="' + this.type + '">' +
+							'<p class="wpview-selection-before">\u00a0</p>' +
+							'<div class="wpview-body" contenteditable="false">' +
+								'<div class="wpview-content wpview-type-' + this.type + '"></div>' +
+							'</div>' +
+							'<p class="wpview-selection-after">\u00a0</p>' +
+						'</div>'
+					),
+					node
 				);
-
-				editor.$( node ).replaceWith( $viewNode );
 			} );
 		},
 
@@ -458,20 +460,17 @@
 			} else if ( _.isString( content ) && content.indexOf( '<script' ) !== -1 ) {
 				this.setIframes( '', content, callback, rendered );
 			} else {
-				this.getNodes( function( editor, node ) {
+				this.getNodes( function( editor, node, contentNode ) {
 					content = content.body || content;
 
 					if ( content.indexOf( '<iframe' ) !== -1 ) {
-						content += '<span class="mce-shim"></span>';
+						content += '<div class="wpview-overlay"></div>';
 					}
 
-					editor.undoManager.transact( function() {
-						node.innerHTML = '';
-						node.appendChild( _.isString( content ) ? editor.dom.createFragment( content ) : content );
-						editor.dom.add( node, 'span', { 'class': 'wpview-end' } );
-					} );
+					contentNode.innerHTML = '';
+					contentNode.appendChild( _.isString( content ) ? editor.dom.createFragment( content ) : content );
 
-					callback && callback.call( this, editor, node );
+					callback && callback.call( this, editor, node, contentNode );
 				}, rendered );
 			}
 		},
@@ -488,7 +487,7 @@
 			var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
 				self = this;
 
-			this.getNodes( function( editor, node ) {
+			this.getNodes( function( editor, node, contentNode ) {
 				var dom = editor.dom,
 					styles = '',
 					bodyClasses = editor.getBody().className || '',
@@ -502,42 +501,27 @@
 					}
 				} );
 
-				if ( self.iframeHeight ) {
-					dom.add( node, 'span', {
-						'data-mce-bogus': 1,
-						style: {
-							display: 'block',
-							width: '100%',
-							height: self.iframeHeight
-						}
-					}, '\u200B' );
-				}
-
 				// Seems the browsers need a bit of time to insert/set the view nodes,
 				// or the iframe will fail especially when switching Text => Visual.
 				setTimeout( function() {
-					var iframe, iframeDoc, observer, i, block;
+					var iframe, iframeDoc, observer, i;
 
-					editor.undoManager.transact( function() {
-						node.innerHTML = '';
+					contentNode.innerHTML = '';
 
-						iframe = dom.add( node, 'iframe', {
-							/* jshint scripturl: true */
-							src: tinymce.Env.ie ? 'javascript:""' : '',
-							frameBorder: '0',
-							allowTransparency: 'true',
-							scrolling: 'no',
-							'class': 'wpview-sandbox',
-							style: {
-								width: '100%',
-								display: 'block'
-							},
-							height: self.iframeHeight
-						} );
-
-						dom.add( node, 'span', { 'class': 'mce-shim' } );
-						dom.add( node, 'span', { 'class': 'wpview-end' } );
+					iframe = dom.add( contentNode, 'iframe', {
+						/* jshint scripturl: true */
+						src: tinymce.Env.ie ? 'javascript:""' : '',
+						frameBorder: '0',
+						allowTransparency: 'true',
+						scrolling: 'no',
+						'class': 'wpview-sandbox',
+						style: {
+							width: '100%',
+							display: 'block'
+						}
 					} );
+
+					dom.add( contentNode, 'div', { 'class': 'wpview-overlay' } );
 
 					iframeDoc = iframe.contentWindow.document;
 
@@ -577,31 +561,18 @@
 					iframeDoc.close();
 
 					function resize() {
-						var $iframe;
-
-						if ( block ) {
-							return;
-						}
+						var $iframe, iframeDocHeight;
 
 						// Make sure the iframe still exists.
 						if ( iframe.contentWindow ) {
 							$iframe = $( iframe );
-							self.iframeHeight = $( iframeDoc.body ).height();
+							iframeDocHeight = $( iframeDoc.body ).height();
 
-							if ( $iframe.height() !== self.iframeHeight ) {
-								$iframe.height( self.iframeHeight );
+							if ( $iframe.height() !== iframeDocHeight ) {
+								$iframe.height( iframeDocHeight );
 								editor.nodeChanged();
 							}
 						}
-					}
-
-					if ( self.iframeHeight ) {
-						block = true;
-
-						setTimeout( function() {
-							block = false;
-							resize();
-						}, 3000 );
 					}
 
 					$( iframe.contentWindow ).on( 'load', resize );
@@ -634,7 +605,7 @@
 						editor.off( 'wp-body-class-change', classChange );
 					} );
 
-					callback && callback.call( self, editor, node );
+					callback && callback.call( self, editor, node, contentNode );
 				}, 50 );
 			}, rendered );
 		},
@@ -655,7 +626,7 @@
 		 * Sets an error for all view nodes tied to this view instance.
 		 *
 		 * @param {String} message  The error message to set.
-		 * @param {String} dashicon A dashicon ID. Optional. {@link https://developer.wordpress.org/resource/dashicons/}
+		 * @param {String} dashicon A dashicon ID (optional). {@link https://developer.wordpress.org/resource/dashicons/}
 		 */
 		setError: function( message, dashicon ) {
 			this.setContent(
@@ -674,7 +645,7 @@
 		 * @return {Object}
 		 */
 		match: function( content ) {
-			var match = shortcode.next( this.type, content );
+			var match = wp.shortcode.next( this.type, content );
 
 			if ( match ) {
 				return {
@@ -693,16 +664,15 @@
 		 * @param {String}         text   The new text.
 		 * @param {tinymce.Editor} editor The TinyMCE editor instance the view node is in.
 		 * @param {HTMLElement}    node   The view node to update.
-		 * @param {Boolean}        force  Recreate the instance. Optional.
 		 */
-		update: function( text, editor, node, force ) {
+		update: function( text, editor, node ) {
 			_.find( views, function( view, type ) {
 				var match = view.prototype.match( text );
 
 				if ( match ) {
 					$( node ).data( 'rendered', false );
 					editor.dom.setAttrib( node, 'data-wpview-text', encodeURIComponent( text ) );
-					wp.mce.views.createInstance( type, text, match.options, force ).render();
+					wp.mce.views.createInstance( type, text, match.options ).render();
 					editor.focus();
 
 					return true;
@@ -717,53 +687,35 @@
 		 * @param {HTMLElement}    node   The view node to remove.
 		 */
 		remove: function( editor, node ) {
-			this.unbindNode.call( this, editor, node );
+			this.unbindNode.call( this, editor, node, $( node ).find( '.wpview-content' ).get( 0 ) );
 			$( node ).trigger( 'wp-mce-view-unbind' );
 			editor.dom.remove( node );
 			editor.focus();
 		}
 	} );
-} )( window, window.wp, window.wp.shortcode, window.jQuery );
+} )( window, window.wp, window.jQuery );
 
 /*
  * The WordPress core TinyMCE views.
  * Views for the gallery, audio, video, playlist and embed shortcodes,
  * and a view for embeddable URLs.
  */
-( function( window, views, media, $ ) {
-	var base, gallery, av, embed,
-		schema, parser, serializer;
+( function( window, views, $ ) {
+	var postID = $( '#post_ID' ).val() || 0,
+		media, gallery, av, embed;
 
-	function verifyHTML( string ) {
-		var settings = {};
-
-		if ( ! window.tinymce ) {
-			return string.replace( /<[^>]+>/g, '' );
-		}
-
-		if ( ! string || ( string.indexOf( '<' ) === -1 && string.indexOf( '>' ) === -1 ) ) {
-			return string;
-		}
-
-		schema = schema || new window.tinymce.html.Schema( settings );
-		parser = parser || new window.tinymce.html.DomParser( settings, schema );
-		serializer = serializer || new window.tinymce.html.Serializer( settings, schema );
-
-		return serializer.serialize( parser.parse( string, { forced_root_block: false } ) );
-	}
-
-	base = {
+	media = {
 		state: [],
 
 		edit: function( text, update ) {
-			var type = this.type,
-				frame = media[ type ].edit( text );
+			var media = wp.media[ this.type ],
+				frame = media.edit( text );
 
 			this.pausePlayers && this.pausePlayers();
 
 			_.each( this.state, function( state ) {
 				frame.state( state ).on( 'update', function( selection ) {
-					update( media[ type ].shortcode( selection ).string(), type === 'gallery' );
+					update( media.shortcode( selection ).string() );
 				} );
 			} );
 
@@ -775,12 +727,12 @@
 		}
 	};
 
-	gallery = _.extend( {}, base, {
+	gallery = _.extend( {}, media, {
 		state: [ 'gallery-edit' ],
-		template: media.template( 'editor-gallery' ),
+		template: wp.media.template( 'editor-gallery' ),
 
 		initialize: function() {
-			var attachments = media.gallery.attachments( this.shortcode, media.view.settings.post.id ),
+			var attachments = wp.media.gallery.attachments( this.shortcode, postID ),
 				attrs = this.shortcode.attrs.named,
 				self = this;
 
@@ -801,9 +753,8 @@
 				} );
 
 				self.render( self.template( {
-					verifyHTML: verifyHTML,
 					attachments: attachments,
-					columns: attrs.columns ? parseInt( attrs.columns, 10 ) : media.galleryDefaults.columns
+					columns: attrs.columns ? parseInt( attrs.columns, 10 ) : wp.media.galleryDefaults.columns
 				} ) );
 			} )
 			.fail( function( jqXHR, textStatus ) {
@@ -812,7 +763,7 @@
 		}
 	} );
 
-	av = _.extend( {}, base, {
+	av = _.extend( {}, media, {
 		action: 'parse-media-shortcode',
 
 		initialize: function() {
@@ -820,13 +771,13 @@
 
 			if ( this.url ) {
 				this.loader = false;
-				this.shortcode = media.embed.shortcode( {
+				this.shortcode = wp.media.embed.shortcode( {
 					url: this.text
 				} );
 			}
 
 			wp.ajax.post( this.action, {
-				post_ID: media.view.settings.post.id,
+				post_ID: postID,
 				type: this.shortcode.tag,
 				shortcode: this.shortcode.string()
 			} )
@@ -835,7 +786,6 @@
 			} )
 			.fail( function( response ) {
 				if ( self.url ) {
-					self.ignore = true;
 					self.removeMarkers();
 				} else {
 					self.setError( response.message || response.statusText, 'admin-media' );
@@ -868,7 +818,8 @@
 		action: 'parse-embed',
 
 		edit: function( text, update ) {
-			var frame = media.embed.edit( text, this.url ),
+			var media = wp.media.embed,
+				frame = media.edit( text, this.url ),
 				self = this;
 
 			this.pausePlayers();
@@ -885,7 +836,7 @@
 				if ( self.url ) {
 					update( data.url );
 				} else {
-					update( media.embed.shortcode( data ).string() );
+					update( media.shortcode( data ).string() );
 				}
 			} );
 
@@ -929,4 +880,4 @@
 			}
 		}
 	} ) );
-} )( window, window.wp.mce.views, window.wp.media, window.jQuery );
+} )( window, window.wp.mce.views, window.jQuery );
