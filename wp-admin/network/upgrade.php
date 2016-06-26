@@ -69,11 +69,7 @@ switch ( $action ) {
 
 			echo "<li>$siteurl</li>";
 
-			$response = wp_remote_get( $upgrade_url, array(
-				'timeout'     => 120,
-				'httpversion' => '1.1',
-				'sslverify'   => false,
-			) );
+			$response = wp_remote_get( $upgrade_url, array( 'timeout' => 120, 'httpversion' => '1.1' ) );
 			if ( is_wp_error( $response ) ) {
 				wp_die( sprintf(
 					/* translators: 1: site url, 2: server error message */
@@ -96,7 +92,7 @@ switch ( $action ) {
 			 *
 			 * @since MU
 			 *
-			 * @param int $blog_id The Site ID.
+			 * @param int $blog_id The id of the blog.
 			 */
 			do_action( 'wpmu_upgrade_site', $details[ 'blog_id' ] );
 		}

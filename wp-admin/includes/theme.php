@@ -83,11 +83,6 @@ function delete_theme($stylesheet, $redirect = '') {
 		}
 	}
 
-	// Remove the theme from allowed themes on the network.
-	if ( is_multisite() ) {
-		WP_Theme::network_disable_theme( $stylesheet );
-	}
-
 	// Force refresh of theme update information.
 	delete_site_transient( 'update_themes' );
 
@@ -168,39 +163,18 @@ function get_theme_update_available( $theme ) {
 		$theme_name = $theme->display('Name');
 		$details_url = add_query_arg(array('TB_iframe' => 'true', 'width' => 1024, 'height' => 800), $update['url']); //Theme browser inside WP? replace this, Also, theme preview JS will override this on the available list.
 		$update_url = wp_nonce_url( admin_url( 'update.php?action=upgrade-theme&amp;theme=' . urlencode( $stylesheet ) ), 'upgrade-theme_' . $stylesheet );
+		$update_onclick = 'onclick="if ( confirm(\'' . esc_js( __("Updating this theme will lose any customizations you have made. 'Cancel' to stop, 'OK' to update.") ) . '\') ) {return true;}return false;"';
 
 		if ( !is_multisite() ) {
 			if ( ! current_user_can('update_themes') ) {
-				/* translators: 1: theme name, 2: theme details URL, 3: accessibility text, 4: version number */
-				$html = sprintf( '<p><strong>' . __( 'There is a new version of %1$s available. <a href="%2$s" class="thickbox open-plugin-details-modal" aria-label="%3$s">View version %4$s details</a>.' ) . '</strong></p>',
-					$theme_name,
-					esc_url( $details_url ),
-					/* translators: 1: theme name, 2: version number */
-					esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $theme_name, $update['new_version'] ) ),
-					$update['new_version']
-				);
+				$html = sprintf( '<p><strong>' . __( 'There is a new version of %1$s available. <a href="%2$s" class="thickbox" title="%3$s">View version %4$s details</a>.' ) . '</strong></p>',
+					$theme_name, esc_url( $details_url ), esc_attr( $theme['Name'] ), $update['new_version'] );
 			} elseif ( empty( $update['package'] ) ) {
-				/* translators: 1: theme name, 2: theme details URL, 3: accessibility text, 4: version number */
-				$html = sprintf( '<p><strong>' . __( 'There is a new version of %1$s available. <a href="%2$s" class="thickbox open-plugin-details-modal" aria-label="%3$s">View version %4$s details</a>. <em>Automatic update is unavailable for this theme.</em>' ) . '</strong></p>',
-					$theme_name,
-					esc_url( $details_url ),
-					/* translators: 1: theme name, 2: version number */
-					esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $theme_name, $update['new_version'] ) ),
-					$update['new_version']
-				);
+				$html = sprintf( '<p><strong>' . __( 'There is a new version of %1$s available. <a href="%2$s" class="thickbox" title="%3$s">View version %4$s details</a>. <em>Automatic update is unavailable for this theme.</em>' ) . '</strong></p>',
+					$theme_name, esc_url( $details_url ), esc_attr( $theme['Name'] ), $update['new_version'] );
 			} else {
-				/* translators: 1: theme name, 2: theme details URL, 3: accessibility text, 4: version number, 5: update URL, 6: accessibility text */
-				$html = sprintf( '<p><strong>' . __( 'There is a new version of %1$s available. <a href="%2$s" class="thickbox open-plugin-details-modal" aria-label="%3$s">View version %4$s details</a> or <a href="%5$s" aria-label="%6$s" id="update-theme" data-slug="%7$s">update now</a>.' ) . '</strong></p>',
-					$theme_name,
-					esc_url( $details_url ),
-					/* translators: 1: theme name, 2: version number */
-					esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $theme_name, $update['new_version'] ) ),
-					$update['new_version'],
-					$update_url,
-					/* translators: %s: theme name */
-					esc_attr( sprintf( __( 'Update %s now' ), $theme_name ) ),
-					$stylesheet
-				);
+				$html = sprintf( '<p><strong>' . __( 'There is a new version of %1$s available. <a href="%2$s" class="thickbox" title="%3$s">View version %4$s details</a> or <a href="%5$s">update now</a>.' ) . '</strong></p>',
+					$theme_name, esc_url( $details_url ), esc_attr( $theme['Name'] ), $update['new_version'], $update_url, $update_onclick );
 			}
 		}
 	}
@@ -219,9 +193,28 @@ function get_theme_update_available( $theme ) {
 function get_theme_feature_list( $api = true ) {
 	// Hard-coded list is used if api not accessible.
 	$features = array(
+			__( 'Colors' ) => array(
+				'black'   => __( 'Black' ),
+				'blue'    => __( 'Blue' ),
+				'brown'   => __( 'Brown' ),
+				'gray'    => __( 'Gray' ),
+				'green'   => __( 'Green' ),
+				'orange'  => __( 'Orange' ),
+				'pink'    => __( 'Pink' ),
+				'purple'  => __( 'Purple' ),
+				'red'     => __( 'Red' ),
+				'silver'  => __( 'Silver' ),
+				'tan'     => __( 'Tan' ),
+				'white'   => __( 'White' ),
+				'yellow'  => __( 'Yellow' ),
+				'dark'    => __( 'Dark' ),
+				'light'   => __( 'Light' ),
+			),
 
 		__( 'Layout' ) => array(
-			'grid-layout'   => __( 'Grid Layout' ),
+			'fixed-layout'      => __( 'Fixed Layout' ),
+			'fluid-layout'      => __( 'Fluid Layout' ),
+			'responsive-layout' => __( 'Responsive Layout' ),
 			'one-column'    => __( 'One Column' ),
 			'two-columns'   => __( 'Two Columns' ),
 			'three-columns' => __( 'Three Columns' ),
@@ -232,6 +225,7 @@ function get_theme_feature_list( $api = true ) {
 
 		__( 'Features' ) => array(
 			'accessibility-ready'   => __( 'Accessibility Ready' ),
+			'blavatar'              => __( 'Blavatar' ),
 			'buddypress'            => __( 'BuddyPress' ),
 			'custom-background'     => __( 'Custom Background' ),
 			'custom-colors'         => __( 'Custom Colors' ),
@@ -241,7 +235,6 @@ function get_theme_feature_list( $api = true ) {
 			'featured-image-header' => __( 'Featured Image Header' ),
 			'featured-images'       => __( 'Featured Images' ),
 			'flexible-header'       => __( 'Flexible Header' ),
-			'footer-widgets'        => __( 'Footer Widgets' ),
 			'front-page-post-form'  => __( 'Front Page Posting' ),
 			'full-width-template'   => __( 'Full Width Template' ),
 			'microformats'          => __( 'Microformats' ),
@@ -254,15 +247,9 @@ function get_theme_feature_list( $api = true ) {
 		),
 
 		__( 'Subject' )  => array(
-			'blog'           => __( 'Blog' ),
-			'e-commerce'     => __( 'E-Commerce' ),
-			'education'      => __( 'Education' ),
-			'entertainment'  => __( 'Entertainment' ),
-			'food-and-drink' => __( 'Food & Drink' ),
-			'holiday'        => __( 'Holiday' ),
-			'news'           => __( 'News' ),
-			'photography'    => __( 'Photography' ),
-			'portfolio'      => __( 'Portfolio' ),
+			'holiday'       => __( 'Holiday' ),
+			'photoblogging' => __( 'Photoblogging' ),
+			'seasonal'      => __( 'Seasonal' ),
 		)
 	);
 
@@ -312,7 +299,7 @@ function get_theme_feature_list( $api = true ) {
  * Retrieves theme installer pages from the WordPress.org Themes API.
  *
  * It is possible for a theme to override the Themes API result with three
- * Filterss. Assume this is for themes, which can extend on the Theme Info to
+ * filters. Assume this is for themes, which can extend on the Theme Info to
  * offer more choices. This is very powerful and must be used with care, when
  * overriding the filters.
  *
@@ -404,7 +391,7 @@ function themes_api( $action, $args = array() ) {
 	}
 
 	/**
-	 * Filters arguments used to query for installer pages from the WordPress.org Themes API.
+	 * Filter arguments used to query for installer pages from the WordPress.org Themes API.
 	 *
 	 * Important: An object MUST be returned to this filter.
 	 *
@@ -417,7 +404,7 @@ function themes_api( $action, $args = array() ) {
 	$args = apply_filters( 'themes_api_args', $args, $action );
 
 	/**
-	 * Filters whether to override the WordPress.org Themes API.
+	 * Filter whether to override the WordPress.org Themes API.
 	 *
 	 * Passing a non-false value will effectively short-circuit the WordPress.org API request.
 	 *
@@ -463,14 +450,14 @@ function themes_api( $action, $args = array() ) {
 	}
 
 	/**
-	 * Filters the returned WordPress.org Themes API response.
+	 * Filter the returned WordPress.org Themes API response.
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array|object|WP_Error $res    WordPress.org Themes API response.
-	 * @param string                $action Requested action. Likely values are 'theme_information',
-	 *                                      'feature_list', or 'query_themes'.
-	 * @param object                $args   Arguments used to query for installer pages from the WordPress.org Themes API.
+	 * @param array|object $res    WordPress.org Themes API response.
+	 * @param string       $action Requested action. Likely values are 'theme_information',
+	 *                             'feature_list', or 'query_themes'.
+	 * @param object       $args   Arguments used to query for installer pages from the WordPress.org Themes API.
 	 */
 	return apply_filters( 'themes_api_result', $res, $action, $args );
 }
@@ -489,7 +476,7 @@ function wp_prepare_themes_for_js( $themes = null ) {
 	$current_theme = get_stylesheet();
 
 	/**
-	 * Filters theme data before it is prepared for JavaScript.
+	 * Filter theme data before it is prepared for JavaScript.
 	 *
 	 * Passing a non-empty array will result in wp_prepare_themes_for_js() returning
 	 * early with that value instead.
@@ -575,7 +562,7 @@ function wp_prepare_themes_for_js( $themes = null ) {
 	}
 
 	/**
-	 * Filters the themes prepared for JavaScript, for themes.php.
+	 * Filter the themes prepared for JavaScript, for themes.php.
 	 *
 	 * Could be useful for changing the order, which is by name by default.
 	 *
@@ -599,13 +586,13 @@ function customize_themes_print_templates() {
 	?>
 	<script type="text/html" id="tmpl-customize-themes-details-view">
 		<div class="theme-backdrop"></div>
-		<div class="theme-wrap wp-clearfix">
+		<div class="theme-wrap">
 			<div class="theme-header">
 				<button type="button" class="left dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Show previous theme' ); ?></span></button>
 				<button type="button" class="right dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Show next theme' ); ?></span></button>
 				<button type="button" class="close dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Close details dialog' ); ?></span></button>
 			</div>
-			<div class="theme-about wp-clearfix">
+			<div class="theme-about">
 				<div class="theme-screenshots">
 				<# if ( data.screenshot[0] ) { #>
 					<div class="screenshot"><img src="{{ data.screenshot[0] }}" alt="" /></div>

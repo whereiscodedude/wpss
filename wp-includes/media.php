@@ -95,7 +95,7 @@ function image_constrain_size_for_editor( $width, $height, $size = 'medium', $co
 	}
 
 	/**
-	 * Filters the maximum image size dimensions for the editor.
+	 * Filter the maximum image size dimensions for the editor.
 	 *
 	 * @since 2.5.0
 	 *
@@ -148,7 +148,7 @@ function image_hwstring( $width, $height ) {
  * function won't create a new resized copy, it will just return an already
  * resized one if it exists.
  *
- * A plugin may use the {@see 'image_downsize'} filter to hook into and offer image
+ * A plugin may use the 'image_downsize' filter to hook into and offer image
  * resizing services for images. The hook must return an array with the same
  * elements that are returned in the function. The first element being the URL
  * to the new image that was resized.
@@ -168,7 +168,7 @@ function image_downsize( $id, $size = 'medium' ) {
 		return false;
 
 	/**
-	 * Filters whether to preempt the output of image_downsize().
+	 * Filter whether to preempt the output of image_downsize().
 	 *
 	 * Passing a truthy value to the filter will effectively short-circuit
 	 * down-sizing the image, returning that value as output instead.
@@ -309,12 +309,12 @@ function set_post_thumbnail_size( $width = 0, $height = 0, $crop = false ) {
 /**
  * Gets an img tag for an image attachment, scaling it down if requested.
  *
- * The {@see 'get_image_tag_class'} filter allows for changing the class name for the
+ * The filter 'get_image_tag_class' allows for changing the class name for the
  * image without having to use regular expressions on the HTML content. The
  * parameters are: what WordPress will use for the class, the Attachment ID,
  * image align value, and the size the image should be.
  *
- * The second filter, {@see 'get_image_tag'}, has the HTML content, which can then be
+ * The second filter 'get_image_tag' has the HTML content, which can then be
  * further manipulated by a plugin to change all attribute values and even HTML
  * content.
  *
@@ -339,7 +339,7 @@ function get_image_tag( $id, $alt, $title, $align, $size = 'medium' ) {
 	$class = 'align' . esc_attr($align) .' size-' . esc_attr($size) . ' wp-image-' . $id;
 
 	/**
-	 * Filters the value of the attachment's image tag class attribute.
+	 * Filter the value of the attachment's image tag class attribute.
 	 *
 	 * @since 2.6.0
 	 *
@@ -354,7 +354,7 @@ function get_image_tag( $id, $alt, $title, $align, $size = 'medium' ) {
 	$html = '<img src="' . esc_attr($img_src) . '" alt="' . esc_attr($alt) . '" ' . $title . $hwstring . 'class="' . $class . '" />';
 
 	/**
-	 * Filters the HTML content for the image tag.
+	 * Filter the HTML content for the image tag.
 	 *
 	 * @since 2.6.0
 	 *
@@ -431,7 +431,7 @@ function wp_constrain_dimensions( $current_width, $current_height, $max_width = 
 	}
 
 	/**
-	 * Filters dimensions to constrain down-sampled images to.
+	 * Filter dimensions to constrain down-sampled images to.
 	 *
 	 * @since 4.1.0
 	 *
@@ -477,7 +477,7 @@ function image_resize_dimensions( $orig_w, $orig_h, $dest_w, $dest_h, $crop = fa
 		return false;
 
 	/**
-	 * Filters whether to preempt calculating the image resize dimensions.
+	 * Filter whether to preempt calculating the image resize dimensions.
 	 *
 	 * Passing a non-null value to the filter will effectively short-circuit
 	 * image_resize_dimensions(), returning that value instead.
@@ -562,7 +562,7 @@ function image_resize_dimensions( $orig_w, $orig_h, $dest_w, $dest_h, $crop = fa
  * Resizes an image to make a thumbnail or intermediate size.
  *
  * The returned array has the file size, the image width, and image height. The
- * {@see 'image_make_intermediate_size'} filter can be used to hook in and change the
+ * filter 'image_make_intermediate_size' can be used to hook in and change the
  * values of the returned array. The only parameter is the resized file path.
  *
  * @since 2.5.0
@@ -689,7 +689,7 @@ function image_get_intermediate_size( $post_id, $size = 'thumbnail' ) {
 	}
 
 	/**
-	 * Filters the output of image_get_intermediate_size()
+	 * Filter the output of image_get_intermediate_size()
 	 *
 	 * @since 4.4.0
 	 *
@@ -720,7 +720,7 @@ function get_intermediate_image_sizes() {
 		$image_sizes = array_merge( $image_sizes, array_keys( $_wp_additional_image_sizes ) );
 
 	/**
-	 * Filters the list of intermediate image sizes.
+	 * Filter the list of intermediate image sizes.
 	 *
 	 * @since 2.5.0
 	 *
@@ -767,7 +767,7 @@ function wp_get_attachment_image_src( $attachment_id, $size = 'thumbnail', $icon
 		}
 	}
 	/**
-	 * Filters the image src result.
+	 * Filter the image src result.
 	 *
 	 * @since 4.3.0
 	 *
@@ -840,7 +840,7 @@ function wp_get_attachment_image($attachment_id, $size = 'thumbnail', $icon = fa
 		}
 
 		/**
-		 * Filters the list of attachment image attributes.
+		 * Filter the list of attachment image attributes.
 		 *
 		 * @since 2.8.0
 		 *
@@ -900,6 +900,27 @@ function _wp_get_attachment_relative_path( $file ) {
 	}
 
 	return $dirname;
+}
+
+/**
+ * Caches and returns the base URL of the uploads directory.
+ *
+ * @since 4.4.0
+ * @access private
+ *
+ * @return string The base URL, cached.
+ */
+function _wp_upload_dir_baseurl() {
+	static $baseurl = array();
+
+	$blog_id = get_current_blog_id();
+
+	if ( empty( $baseurl[$blog_id] ) ) {
+		$uploads_dir = wp_upload_dir();
+		$baseurl[$blog_id] = $uploads_dir['baseurl'];
+	}
+
+	return $baseurl[$blog_id];
 }
 
 /**
@@ -985,7 +1006,7 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 	 */
 	$image_meta = apply_filters( 'wp_calculate_image_srcset_meta', $image_meta, $size_array, $image_src, $attachment_id );
 
-	if ( empty( $image_meta['sizes'] ) || ! isset( $image_meta['file'] ) || strlen( $image_meta['file'] ) < 4 ) {
+	if ( empty( $image_meta['sizes'] ) ) {
 		return false;
 	}
 
@@ -1024,16 +1045,11 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 		$dirname = trailingslashit( $dirname );
 	}
 
-	$upload_dir = wp_get_upload_dir();
-	$image_baseurl = trailingslashit( $upload_dir['baseurl'] ) . $dirname;
+	$image_baseurl = _wp_upload_dir_baseurl();
+	$image_baseurl = trailingslashit( $image_baseurl ) . $dirname;
 
-	/*
-	 * If currently on HTTPS, prefer HTTPS URLs when we know they're supported by the domain
-	 * (which is to say, when they share the domain name of the current request).
-	 */
-	if ( is_ssl() && 'https' !== substr( $image_baseurl, 0, 5 ) && parse_url( $image_baseurl, PHP_URL_HOST ) === $_SERVER['HTTP_HOST'] ) {
-		$image_baseurl = set_url_scheme( $image_baseurl, 'https' );
-	}
+	// Calculate the image aspect ratio.
+	$image_ratio = $image_height / $image_width;
 
 	/*
 	 * Images that have been edited in WordPress after being uploaded will
@@ -1043,7 +1059,7 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 	$image_edited = preg_match( '/-e[0-9]{13}/', wp_basename( $image_src ), $image_edit_hash );
 
 	/**
-	 * Filters the maximum image width to be included in a 'srcset' attribute.
+	 * Filter the maximum image width to be included in a 'srcset' attribute.
 	 *
 	 * @since 4.4.0
 	 *
@@ -1057,7 +1073,7 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 
 	/**
 	 * To make sure the ID matches our image src, we will check to see if any sizes in our attachment
-	 * meta match our $image_src. If no matches are found we don't return a srcset to avoid serving
+	 * meta match our $image_src. If no mathces are found we don't return a srcset to avoid serving
 	 * an incorrect image. See #35045.
 	 */
 	$src_matched = false;
@@ -1067,16 +1083,10 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 	 * versions of the same edit.
 	 */
 	foreach ( $image_sizes as $image ) {
-		$is_src = false;
-
-		// Check if image meta isn't corrupted.
-		if ( ! is_array( $image ) ) {
-			continue;
-		}
 
 		// If the file name is part of the `src`, we've confirmed a match.
 		if ( ! $src_matched && false !== strpos( $image_src, $dirname . $image['file'] ) ) {
-			$src_matched = $is_src = true;
+			$src_matched = true;
 		}
 
 		// Filter out images that are from previous edits.
@@ -1085,46 +1095,35 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 		}
 
 		/*
-		 * Filters out images that are wider than '$max_srcset_image_width' unless
+		 * Filter out images that are wider than '$max_srcset_image_width' unless
 		 * that file is in the 'src' attribute.
 		 */
-		if ( $max_srcset_image_width && $image['width'] > $max_srcset_image_width && ! $is_src ) {
+		if ( $max_srcset_image_width && $image['width'] > $max_srcset_image_width &&
+			false === strpos( $image_src, $image['file'] ) ) {
+
 			continue;
 		}
 
-		/**
-		 * To check for varying crops, we calculate the expected size of the smaller
-		 * image if the larger were constrained by the width of the smaller and then
-		 * see if it matches what we're expecting.
-		 */
-		if ( $image_width > $image['width'] ) {
-			$constrained_size = wp_constrain_dimensions( $image_width, $image_height, $image['width'] );
-			$expected_size = array( $image['width'], $image['height'] );
+		// Calculate the new image ratio.
+		if ( $image['width'] ) {
+			$image_ratio_compare = $image['height'] / $image['width'];
 		} else {
-			$constrained_size = wp_constrain_dimensions( $image['width'], $image['height'], $image_width );
-			$expected_size = array( $image_width, $image_height );
+			$image_ratio_compare = 0;
 		}
 
-		// If the image dimensions are within 1px of the expected size, use it.
-		if ( abs( $constrained_size[0] - $expected_size[0] ) <= 1 && abs( $constrained_size[1] - $expected_size[1] ) <= 1 ) {
+		// If the new ratio differs by less than 0.002, use it.
+		if ( abs( $image_ratio - $image_ratio_compare ) < 0.002 ) {
 			// Add the URL, descriptor, and value to the sources array to be returned.
-			$source = array(
+			$sources[ $image['width'] ] = array(
 				'url'        => $image_baseurl . $image['file'],
 				'descriptor' => 'w',
 				'value'      => $image['width'],
 			);
-
-			// The 'src' image has to be the first in the 'srcset', because of a bug in iOS8. See #35030.
-			if ( $is_src ) {
-				$sources = array( $image['width'] => $source ) + $sources;
-			} else {
-				$sources[ $image['width'] ] = $source;
-			}
 		}
 	}
 
 	/**
-	 * Filters an image's 'srcset' sources.
+	 * Filter an image's 'srcset' sources.
 	 *
 	 * @since 4.4.0
 	 *
@@ -1232,7 +1231,7 @@ function wp_calculate_image_sizes( $size, $image_src = null, $image_meta = null,
 	$sizes = sprintf( '(max-width: %1$dpx) 100vw, %1$dpx', $width );
 
 	/**
-	 * Filters the output of 'wp_calculate_image_sizes()'.
+	 * Filter the output of 'wp_calculate_image_sizes()'.
 	 *
 	 * @since 4.4.0
 	 *
@@ -1387,8 +1386,8 @@ function wp_image_add_srcset_and_sizes( $image, $image_meta, $attachment_id ) {
 /**
  * Adds a 'wp-post-image' class to post thumbnails. Internal use only.
  *
- * Uses the {@see 'begin_fetch_post_thumbnail_html'} and {@see 'end_fetch_post_thumbnail_html'}
- * action hooks to dynamically add/remove itself so as to only filter post thumbnails.
+ * Uses the 'begin_fetch_post_thumbnail_html' and 'end_fetch_post_thumbnail_html' action hooks to
+ * dynamically add/remove itself so as to only filter post thumbnails.
  *
  * @ignore
  * @since 2.9.0
@@ -1434,7 +1433,7 @@ add_shortcode('caption', 'img_caption_shortcode');
  * Builds the Caption shortcode output.
  *
  * Allows a plugin to replace the content that would otherwise be returned. The
- * filter is {@see 'img_caption_shortcode'} and passes an empty string, the attr
+ * filter is 'img_caption_shortcode' and passes an empty string, the attr
  * parameter and the content parameter values.
  *
  * The supported attributes for the shortcode are 'id', 'align', 'width', and
@@ -1467,7 +1466,7 @@ function img_caption_shortcode( $attr, $content = null ) {
 	}
 
 	/**
-	 * Filters the default caption shortcode output.
+	 * Filter the default caption shortcode output.
 	 *
 	 * If the filtered output isn't empty, it will be used instead of generating
 	 * the default caption template.
@@ -1506,7 +1505,7 @@ function img_caption_shortcode( $attr, $content = null ) {
 	$width = $html5 ? $atts['width'] : ( 10 + $atts['width'] );
 
 	/**
-	 * Filters the width of an image's caption.
+	 * Filter the width of an image's caption.
 	 *
 	 * By default, the caption is 10 pixels greater than the width of the image,
 	 * to prevent post content from running up against a floated image.
@@ -1589,7 +1588,7 @@ function gallery_shortcode( $attr ) {
 	}
 
 	/**
-	 * Filters the default gallery shortcode output.
+	 * Filter the default gallery shortcode output.
 	 *
 	 * If the filtered output isn't empty, it will be used instead of generating
 	 * the default gallery template.
@@ -1673,7 +1672,7 @@ function gallery_shortcode( $attr ) {
 	$gallery_style = '';
 
 	/**
-	 * Filters whether to print default gallery styles.
+	 * Filter whether to print default gallery styles.
 	 *
 	 * @since 3.1.0
 	 *
@@ -1707,7 +1706,7 @@ function gallery_shortcode( $attr ) {
 	$gallery_div = "<div id='$selector' class='gallery galleryid-{$id} gallery-columns-{$columns} gallery-size-{$size_class}'>";
 
 	/**
-	 * Filters the default gallery shortcode CSS styles.
+	 * Filter the default gallery shortcode CSS styles.
 	 *
 	 * @since 2.5.0
 	 *
@@ -1875,7 +1874,7 @@ function wp_playlist_shortcode( $attr ) {
 	}
 
 	/**
-	 * Filters the playlist output.
+	 * Filter the playlist output.
 	 *
 	 * Passing a non-empty value to the filter will short-circuit generation
 	 * of the default playlist output, returning the passed value instead.
@@ -2035,7 +2034,7 @@ function wp_playlist_shortcode( $attr ) {
 
 	if ( 1 === $instance ) {
 		/**
-		 * Prints and enqueues playlist scripts, styles, and JavaScript templates.
+		 * Print and enqueue playlist scripts, styles, and JavaScript templates.
 		 *
 		 * @since 3.9.0
 		 *
@@ -2052,6 +2051,8 @@ function wp_playlist_shortcode( $attr ) {
 		echo (int) $theme_width;
 	?>"<?php if ( 'video' === $safe_type ):
 		echo ' height="', (int) $theme_height, '"';
+	else:
+		echo ' style="visibility: hidden"';
 	endif; ?>></<?php echo $safe_type ?>>
 	<div class="wp-playlist-next"></div>
 	<div class="wp-playlist-prev"></div>
@@ -2079,7 +2080,7 @@ add_shortcode( 'playlist', 'wp_playlist_shortcode' );
  */
 function wp_mediaelement_fallback( $url ) {
 	/**
-	 * Filters the Mediaelement fallback output for no-JS.
+	 * Filter the Mediaelement fallback output for no-JS.
 	 *
 	 * @since 3.6.0
 	 *
@@ -2098,7 +2099,7 @@ function wp_mediaelement_fallback( $url ) {
  */
 function wp_get_audio_extensions() {
 	/**
-	 * Filters the list of supported audio formats.
+	 * Filter the list of supported audio formats.
 	 *
 	 * @since 3.6.0
 	 *
@@ -2133,7 +2134,7 @@ function wp_get_attachment_id3_keys( $attachment, $context = 'display' ) {
 	}
 
 	/**
-	 * Filters the editable list of keys to look up data from an attachment's metadata.
+	 * Filter the editable list of keys to look up data from an attachment's metadata.
 	 *
 	 * @since 3.9.0
 	 *
@@ -2159,9 +2160,9 @@ function wp_get_attachment_id3_keys( $attachment, $context = 'display' ) {
  *     @type string $src      URL to the source of the audio file. Default empty.
  *     @type string $loop     The 'loop' attribute for the `<audio>` element. Default empty.
  *     @type string $autoplay The 'autoplay' attribute for the `<audio>` element. Default empty.
- *     @type string $preload  The 'preload' attribute for the `<audio>` element. Default 'none'.
+ *     @type string $preload  The 'preload' attribute for the `<audio>` element. Default empty.
  *     @type string $class    The 'class' attribute for the `<audio>` element. Default 'wp-audio-shortcode'.
- *     @type string $style    The 'style' attribute for the `<audio>` element. Default 'width: 100%;'.
+ *     @type string $style    The 'style' attribute for the `<audio>` element. Default 'width: 100%'.
  * }
  * @param string $content Shortcode content.
  * @return string|void HTML content to display audio.
@@ -2173,7 +2174,7 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 	$instance++;
 
 	/**
-	 * Filters the default audio shortcode output.
+	 * Filter the default audio shortcode output.
 	 *
 	 * If the filtered output isn't empty, it will be used instead of generating the default audio template.
 	 *
@@ -2196,9 +2197,7 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 		'src'      => '',
 		'loop'     => '',
 		'autoplay' => '',
-		'preload'  => 'none',
-		'class'    => 'wp-audio-shortcode',
-		'style'    => 'width: 100%;'
+		'preload'  => 'none'
 	);
 	foreach ( $default_types as $type ) {
 		$defaults_atts[$type] = '';
@@ -2241,7 +2240,7 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 	}
 
 	/**
-	 * Filters the media library used for the audio shortcode.
+	 * Filter the media library used for the audio shortcode.
 	 *
 	 * @since 3.6.0
 	 *
@@ -2254,21 +2253,19 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 	}
 
 	/**
-	 * Filters the class attribute for the audio shortcode output container.
+	 * Filter the class attribute for the audio shortcode output container.
 	 *
 	 * @since 3.6.0
 	 *
 	 * @param string $class CSS class or list of space-separated classes.
 	 */
-	$atts['class'] = apply_filters( 'wp_audio_shortcode_class', $atts['class'] );
-
 	$html_atts = array(
-		'class'    => $atts['class'],
+		'class'    => apply_filters( 'wp_audio_shortcode_class', 'wp-audio-shortcode' ),
 		'id'       => sprintf( 'audio-%d-%d', $post_id, $instance ),
 		'loop'     => wp_validate_boolean( $atts['loop'] ),
 		'autoplay' => wp_validate_boolean( $atts['autoplay'] ),
 		'preload'  => $atts['preload'],
-		'style'    => $atts['style'],
+		'style'    => 'width: 100%; visibility: hidden;',
 	);
 
 	// These ones should just be omitted altogether if they are blank
@@ -2308,7 +2305,7 @@ function wp_audio_shortcode( $attr, $content = '' ) {
 	$html .= '</audio>';
 
 	/**
-	 * Filters the audio shortcode output.
+	 * Filter the audio shortcode output.
 	 *
 	 * @since 3.6.0
 	 *
@@ -2331,7 +2328,7 @@ add_shortcode( 'audio', 'wp_audio_shortcode' );
  */
 function wp_get_video_extensions() {
 	/**
-	 * Filters the list of supported video formats.
+	 * Filter the list of supported video formats.
 	 *
 	 * @since 3.6.0
 	 *
@@ -2377,7 +2374,7 @@ function wp_video_shortcode( $attr, $content = '' ) {
 	$instance++;
 
 	/**
-	 * Filters the default video shortcode output.
+	 * Filter the default video shortcode output.
 	 *
 	 * If the filtered output isn't empty, it will be used instead of generating
 	 * the default video template.
@@ -2407,7 +2404,6 @@ function wp_video_shortcode( $attr, $content = '' ) {
 		'preload'  => 'metadata',
 		'width'    => 640,
 		'height'   => 360,
-		'class'    => 'wp-video-shortcode',
 	);
 
 	foreach ( $default_types as $type ) {
@@ -2478,7 +2474,7 @@ function wp_video_shortcode( $attr, $content = '' ) {
 	}
 
 	/**
-	 * Filters the media library used for the video shortcode.
+	 * Filter the media library used for the video shortcode.
 	 *
 	 * @since 3.6.0
 	 *
@@ -2491,16 +2487,14 @@ function wp_video_shortcode( $attr, $content = '' ) {
 	}
 
 	/**
-	 * Filters the class attribute for the video shortcode output container.
+	 * Filter the class attribute for the video shortcode output container.
 	 *
 	 * @since 3.6.0
 	 *
 	 * @param string $class CSS class or list of space-separated classes.
 	 */
-	$atts['class'] = apply_filters( 'wp_video_shortcode_class', $atts['class'] );
-
 	$html_atts = array(
-		'class'    => $atts['class'],
+		'class'    => apply_filters( 'wp_video_shortcode_class', 'wp-video-shortcode' ),
 		'id'       => sprintf( 'video-%d-%d', $post_id, $instance ),
 		'width'    => absint( $atts['width'] ),
 		'height'   => absint( $atts['height'] ),
@@ -2566,7 +2560,7 @@ function wp_video_shortcode( $attr, $content = '' ) {
 	$output = sprintf( '<div style="%s" class="wp-video">%s</div>', $width_rule, $html );
 
 	/**
-	 * Filters the output of the video shortcode.
+	 * Filter the output of the video shortcode.
 	 *
 	 * @since 3.6.0
 	 *
@@ -2649,7 +2643,7 @@ function adjacent_image_link( $prev = true, $size = 'thumbnail', $text = false )
 	$adjacent = $prev ? 'previous' : 'next';
 
 	/**
-	 * Filters the adjacent image link.
+	 * Filter the adjacent image link.
 	 *
 	 * The dynamic portion of the hook name, `$adjacent`, refers to the type of adjacency,
 	 * either 'next', or 'previous'.
@@ -2808,7 +2802,7 @@ function wp_max_upload_size() {
 	$p_bytes = wp_convert_hr_to_bytes( ini_get( 'post_max_size' ) );
 
 	/**
-	 * Filters the maximum upload size allowed in php.ini.
+	 * Filter the maximum upload size allowed in php.ini.
 	 *
 	 * @since 2.5.0
 	 *
@@ -2886,7 +2880,7 @@ function _wp_image_editor_choose( $args = array() ) {
 	require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php';
 
 	/**
-	 * Filters the list of image editing library classes.
+	 * Filter the list of image editing library classes.
 	 *
 	 * @since 3.5.0
 	 *
@@ -2918,7 +2912,7 @@ function _wp_image_editor_choose( $args = array() ) {
 }
 
 /**
- * Prints default Plupload arguments.
+ * Prints default plupload arguments.
  *
  * @since 3.4.0
  */
@@ -2930,11 +2924,6 @@ function wp_plupload_default_settings() {
 		return;
 
 	$max_upload_size = wp_max_upload_size();
-	$allowed_extensions = array_keys( get_allowed_mime_types() );
-	$extensions = array();
-	foreach ( $allowed_extensions as $extension ) {
-		$extensions = array_merge( $extensions, explode( '|', $extension ) );
-	}
 
 	$defaults = array(
 		'runtimes'            => 'html5,flash,silverlight,html4',
@@ -2944,7 +2933,6 @@ function wp_plupload_default_settings() {
 		'silverlight_xap_url' => includes_url( 'js/plupload/plupload.silverlight.xap' ),
 		'filters' => array(
 			'max_file_size'   => $max_upload_size . 'b',
-			'mime_types'      => array( array( 'extensions' => implode( ',', $extensions ) ) ),
 		),
 	);
 
@@ -2957,7 +2945,7 @@ function wp_plupload_default_settings() {
 	}
 
 	/**
-	 * Filters the Plupload default settings.
+	 * Filter the Plupload default settings.
 	 *
 	 * @since 3.4.0
 	 *
@@ -2970,7 +2958,7 @@ function wp_plupload_default_settings() {
 	);
 
 	/**
-	 * Filters the Plupload default parameters.
+	 * Filter the Plupload default parameters.
 	 *
 	 * @since 3.4.0
 	 *
@@ -3041,7 +3029,7 @@ function wp_prepare_attachment_for_js( $attachment ) {
 		'type'        => $type,
 		'subtype'     => $subtype,
 		'icon'        => wp_mime_type_icon( $attachment->ID ),
-		'dateFormatted' => mysql2date( __( 'F j, Y' ), $attachment->post_date ),
+		'dateFormatted' => mysql2date( get_option('date_format'), $attachment->post_date ),
 		'nonces'      => array(
 			'update' => false,
 			'delete' => false,
@@ -3188,7 +3176,7 @@ function wp_prepare_attachment_for_js( $attachment ) {
 		$response['compat'] = get_compat_media_markup( $attachment->ID, array( 'in_modal' => true ) );
 
 	/**
-	 * Filters the attachment data prepared for JavaScript.
+	 * Filter the attachment data prepared for JavaScript.
 	 *
 	 * @since 3.5.0
 	 *
@@ -3385,7 +3373,7 @@ function wp_enqueue_media( $args = array() ) {
 		'filterByDate'           => __( 'Filter by date' ),
 		'filterByType'           => __( 'Filter by type' ),
 		'searchMediaLabel'       => __( 'Search Media' ),
-		'noMedia'                => __( 'No media files found.' ),
+		'noMedia'                => __( 'No media attachments found.' ),
 
 		// Library Details
 		'attachmentDetails'  => __( 'Attachment Details' ),
@@ -3459,7 +3447,7 @@ function wp_enqueue_media( $args = array() ) {
 	);
 
 	/**
-	 * Filters the media view settings.
+	 * Filter the media view settings.
 	 *
 	 * @since 3.5.0
 	 *
@@ -3469,7 +3457,7 @@ function wp_enqueue_media( $args = array() ) {
 	$settings = apply_filters( 'media_view_settings', $settings, $post );
 
 	/**
-	 * Filters the media view strings.
+	 * Filter the media view strings.
 	 *
 	 * @since 3.5.0
 	 *
@@ -3530,7 +3518,7 @@ function get_attached_media( $type, $post = 0 ) {
 	);
 
 	/**
-	 * Filters arguments used to retrieve media attached to the given post.
+	 * Filter arguments used to retrieve media attached to the given post.
 	 *
 	 * @since 3.6.0
 	 *
@@ -3543,7 +3531,7 @@ function get_attached_media( $type, $post = 0 ) {
 	$children = get_children( $args );
 
 	/**
-	 * Filters the list of media attached to the given post.
+	 * Filter the list of media attached to the given post.
 	 *
 	 * @since 3.6.0
 	 *
@@ -3567,7 +3555,7 @@ function get_media_embedded_in_content( $content, $types = null ) {
 	$html = array();
 
 	/**
-	 * Filters the embedded media types that are allowed to be returned from the content blob.
+	 * Filter the embedded media types that are allowed to be returned from the content blob.
 	 *
 	 * @since 4.2.0
 	 *
@@ -3637,7 +3625,7 @@ function get_post_galleries( $post, $html = true ) {
 	}
 
 	/**
-	 * Filters the list of all found galleries in the given post.
+	 * Filter the list of all found galleries in the given post.
 	 *
 	 * @since 3.6.0
 	 *
@@ -3661,7 +3649,7 @@ function get_post_gallery( $post = 0, $html = true ) {
 	$gallery = reset( $galleries );
 
 	/**
-	 * Filters the first-found post gallery.
+	 * Filter the first-found post gallery.
 	 *
 	 * @since 3.6.0
 	 *
@@ -3741,7 +3729,7 @@ function wp_maybe_generate_attachment_metadata( $attachment ) {
 function attachment_url_to_postid( $url ) {
 	global $wpdb;
 
-	$dir = wp_get_upload_dir();
+	$dir = wp_upload_dir();
 	$path = $url;
 
 	$site_url = parse_url( $dir['url'] );
@@ -3763,7 +3751,7 @@ function attachment_url_to_postid( $url ) {
 	$post_id = $wpdb->get_var( $sql );
 
 	/**
-	 * Filters an attachment id found by URL.
+	 * Filter an attachment id found by URL.
 	 *
 	 * @since 4.2.0
 	 *

@@ -184,25 +184,15 @@ class WP_Locale {
 		$this->meridiem['PM'] = __('PM');
 
 		// Numbers formatting
-		// See https://secure.php.net/number_format
+		// See http://php.net/number_format
 
-		/* translators: $thousands_sep argument for https://secure.php.net/number_format, default is , */
-		$thousands_sep = __( 'number_format_thousands_sep' );
+		/* translators: $thousands_sep argument for http://php.net/number_format, default is , */
+		$trans = __('number_format_thousands_sep');
+		$this->number_format['thousands_sep'] = ('number_format_thousands_sep' == $trans) ? ',' : $trans;
 
-		if ( version_compare( PHP_VERSION, '5.4', '>=' ) ) {
-			// Replace space with a non-breaking space to avoid wrapping.
-			$thousands_sep = str_replace( ' ', '&nbsp;', $thousands_sep );
-		} else {
-			// PHP < 5.4.0 does not support multiple bytes in thousands separator.
-			$thousands_sep = str_replace( array( '&nbsp;', '&#160;' ), ' ', $thousands_sep );
-		}
-
-		$this->number_format['thousands_sep'] = ( 'number_format_thousands_sep' === $thousands_sep ) ? ',' : $thousands_sep;
-
-		/* translators: $dec_point argument for https://secure.php.net/number_format, default is . */
-		$decimal_point = __( 'number_format_decimal_point' );
-
-		$this->number_format['decimal_point'] = ( 'number_format_decimal_point' === $decimal_point ) ? '.' : $decimal_point;
+		/* translators: $dec_point argument for http://php.net/number_format, default is . */
+		$trans = __('number_format_decimal_point');
+		$this->number_format['decimal_point'] = ('number_format_decimal_point' == $trans) ? '.' : $trans;
 
 		// Set text direction.
 		if ( isset( $GLOBALS['text_direction'] ) )
@@ -218,10 +208,7 @@ class WP_Locale {
 	}
 
 	/**
-	 * Outputs an admin notice if the /build directory must be used for RTL.
-	 *
 	 * @since 3.8.0
-	 * @access public
 	 */
 	public function rtl_src_admin_notice() {
 		/* translators: %s: Name of the directory (build) */
@@ -332,11 +319,9 @@ class WP_Locale {
 	}
 
 	/**
-	 * Global variables are deprecated.
+	 * Global variables are deprecated. For backwards compatibility only.
 	 *
-	 * For backward compatibility only.
-	 *
-	 * @deprecated For backward compatibility only.
+	 * @deprecated For backwards compatibility only.
 	 * @access private
 	 *
 	 * @global array $weekday
@@ -385,11 +370,11 @@ class WP_Locale {
 	 * @since 3.6.0
 	 */
 	public function _strings_for_pot() {
-		/* translators: localized date format, see https://secure.php.net/date */
+		/* translators: localized date format, see http://php.net/date */
 		__( 'F j, Y' );
-		/* translators: localized time format, see https://secure.php.net/date */
+		/* translators: localized time format, see http://php.net/date */
 		__( 'g:i a' );
-		/* translators: localized date and time format, see https://secure.php.net/date */
+		/* translators: localized date and time format, see http://php.net/date */
 		__( 'F j, Y g:i a' );
 	}
 }

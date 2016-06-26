@@ -53,7 +53,7 @@ if ( isset($_GET['type']) ) {
 	$type = strval($_GET['type']);
 } else {
 	/**
-	 * Filters the default media upload type in the legacy (pre-3.5.0) media popup.
+	 * Filter the default media upload type in the legacy (pre-3.5.0) media popup.
 	 *
 	 * @since 2.5.0
 	 *
@@ -68,7 +68,7 @@ if ( isset($_GET['tab']) ) {
 	$tab = strval($_GET['tab']);
 } else {
 	/**
-	 * Filters the default tab in the legacy (pre-3.5.0) media popup.
+	 * Filter the default tab in the legacy (pre-3.5.0) media popup.
 	 *
 	 * @since 2.5.0
 	 *

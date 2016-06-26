@@ -4,7 +4,8 @@ window.wp = window.wp || {};
 	'use strict';
 
 	var $containerPolite,
-		$containerAssertive;
+		$containerAssertive,
+		role;
 
 	/**
 	 * Update the ARIA live notification area text node.
@@ -38,9 +39,11 @@ window.wp = window.wp || {};
 	 */
 	function addContainer( ariaLive ) {
 		ariaLive = ariaLive || 'polite';
+		role = 'assertive' === ariaLive ? 'alert' : 'status';
 
 		var $container = $( '<div>', {
 			'id': 'wp-a11y-speak-' + ariaLive,
+			'role': role,
 			'aria-live': ariaLive,
 			'aria-relevant': 'additions text',
 			'aria-atomic': 'true',

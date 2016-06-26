@@ -3,33 +3,20 @@
 	function wpEmoji() {
 		var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
 
-		// Compression and maintain local scope
-		document = window.document,
+		/**
+		 * Flag to determine if we should replace emoji characters with images.
+		 *
+		 * @since 4.2.0
+		 *
+		 * @var Boolean
+		 */
+		replaceEmoji = false,
 
 		// Private
 		twemoji, timer,
 		loaded = false,
 		count = 0,
 		ie11 = window.navigator.userAgent.indexOf( 'Trident/7.0' ) > 0;
-
-		/**
-		 * Detect if the browser supports SVG.
-		 *
-		 * @since 4.6.0
-		 *
-		 * @return {Boolean} True if the browser supports svg, false if not.
-		 */
-		function browserSupportsSvgAsImage() {
-			if ( !! document.implementation.hasFeature ) {
-				// Source: Modernizr
-				// https://github.com/Modernizr/Modernizr/blob/master/feature-detects/svg/asimg.js
-				return document.implementation.hasFeature( 'http://www.w3.org/TR/SVG11/feature#Image', '1.1' );
-			}
-
-			// document.implementation.hasFeature is deprecated. It can be presumed
-			// if future browsers remove it, the browser will support SVGs as images.
-			return true;
-		}
 
 		/**
 		 * Runs when the document load event is fired, so we can do our first parse of the page.
@@ -155,7 +142,7 @@
 		function parse( object, args ) {
 			var params;
 
-			if ( settings.supports.everything || ! twemoji || ! object ||
+			if ( ! replaceEmoji || ! twemoji || ! object ||
 				( 'string' !== typeof object && ( ! object.childNodes || ! object.childNodes.length ) ) ) {
 
 				return object;
@@ -163,8 +150,8 @@
 
 			args = args || {};
 			params = {
-				base: browserSupportsSvgAsImage() ? settings.svgUrl : settings.baseUrl,
-				ext:  browserSupportsSvgAsImage() ? settings.svgExt : settings.ext,
+				base: settings.baseUrl,
+				ext: settings.ext,
 				className: args.className || 'emoji',
 				callback: function( icon, options ) {
 					// Ignore some standard characters that TinyMCE recommends in its character map.
@@ -180,7 +167,8 @@
 							return false;
 					}
 
-					if ( settings.supports.everythingExceptFlag && ! /^1f1(?:e[6-9a-f]|f[0-9a-f])-1f1(?:e[6-9a-f]|f[0-9a-f])$/.test( icon ) ) {
+					if ( ! settings.supports.flag && settings.supports.simple && settings.supports.unicode8 && settings.supports.diversity &&
+						! /^1f1(?:e[6-9a-f]|f[0-9a-f])-1f1(?:e[6-9a-f]|f[0-9a-f])$/.test( icon ) ) {
 
 						return false;
 					}
@@ -208,6 +196,8 @@
 		 * Initialize our emoji support, and set up listeners.
 		 */
 		if ( settings ) {
+			replaceEmoji = ! settings.supports.simple || ! settings.supports.flag || ! settings.supports.unicode8 || ! settings.supports.diversity;
+
 			if ( settings.DOMReady ) {
 				load();
 			} else {
@@ -216,6 +206,7 @@
 		}
 
 		return {
+			replaceEmoji: replaceEmoji,
 			parse: parse,
 			test: test
 		};

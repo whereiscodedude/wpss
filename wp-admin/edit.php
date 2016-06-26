@@ -194,7 +194,7 @@ if ( 'post' == $post_type ) {
 		'<p>' . __('You can customize the display of this screen&#8217;s contents in a number of ways:') . '</p>' .
 		'<ul>' .
 			'<li>' . __('You can hide/display columns based on your needs and decide how many posts to list per screen using the Screen Options tab.') . '</li>' .
-			'<li>' . __( 'You can filter the list of posts by post status using the text links above the posts list to only show posts with that status. The default view is to show all posts.' ) . '</li>' .
+			'<li>' . __('You can filter the list of posts by post status using the text links in the upper left to show All, Published, Draft, or Trashed posts. The default view is to show all posts.') . '</li>' .
 			'<li>' . __('You can view posts in a simple title list or with an excerpt using the Screen Options tab.') . '</li>' .
 			'<li>' . __('You can refine the list to show only posts in a specific category or from a specific month by using the dropdown menus above the posts list. Click the Filter button after making your selection. You also can refine the list by clicking on the post author, category or tag in the posts list.') . '</li>' .
 		'</ul>'
@@ -283,7 +283,7 @@ $bulk_messages['page'] = array(
 );
 
 /**
- * Filters the bulk action updated messages.
+ * Filter the bulk action updated messages.
  *
  * By default, custom post types use the messages for the 'post' post type.
  *
@@ -303,11 +303,8 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 echo esc_html( $post_type_object->labels->name );
 if ( current_user_can( $post_type_object->cap->create_posts ) )
 	echo ' <a href="' . esc_url( admin_url( $post_new_file ) ) . '" class="page-title-action">' . esc_html( $post_type_object->labels->add_new ) . '</a>';
-
-if ( isset( $_REQUEST['s'] ) && strlen( $_REQUEST['s'] ) ) {
-	/* translators: %s: search keywords */
-	printf( ' <span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', get_search_query() );
-}
+if ( ! empty( $_REQUEST['s'] ) )
+	printf( ' <span class="subtitle">' . __('Search results for &#8220;%s&#8221;') . '</span>', get_search_query() );
 ?></h1>
 
 <?php
