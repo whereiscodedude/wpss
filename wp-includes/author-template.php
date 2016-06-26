@@ -27,7 +27,7 @@ function get_the_author($deprecated = '') {
 		_deprecated_argument( __FUNCTION__, '2.1' );
 
 	/**
-	 * Filters the display name of the current post's author.
+	 * Filter the display name of the current post's author.
 	 *
 	 * @since 2.9.0
 	 *
@@ -45,7 +45,7 @@ function get_the_author($deprecated = '') {
  * still use the old behavior will also pass the value from get_the_author().
  *
  * The normal, expected behavior of this function is to echo the author and not
- * return it. However, backward compatibility has to be maintained.
+ * return it. However, backwards compatibility has to be maintained.
  *
  * @since 0.71
  * @see get_the_author()
@@ -56,23 +56,12 @@ function get_the_author($deprecated = '') {
  * @return string|null The author's display name, from get_the_author().
  */
 function the_author( $deprecated = '', $deprecated_echo = true ) {
-	if ( ! empty( $deprecated ) ) {
+	if ( !empty( $deprecated ) )
 		_deprecated_argument( __FUNCTION__, '2.1' );
-	}
-
-	if ( true !== $deprecated_echo ) {
-		_deprecated_argument( __FUNCTION__, '1.5',
-			/* translators: %s: get_the_author() */
-			sprintf( __( 'Use %s instead if you do not want the value echoed.' ),
-				'<code>get_the_author()</code>'
-			)
-		);
-	}
-
-	if ( $deprecated_echo ) {
+	if ( $deprecated_echo !== true )
+		_deprecated_argument( __FUNCTION__, '1.5', __('Use <code>get_the_author()</code> instead if you do not want the value echoed.') );
+	if ( $deprecated_echo )
 		echo get_the_author();
-	}
-
 	return get_the_author();
 }
 
@@ -88,7 +77,7 @@ function get_the_modified_author() {
 		$last_user = get_userdata($last_id);
 
 		/**
-		 * Filters the display name of the author who last edited the current post.
+		 * Filter the display name of the author who last edited the current post.
 		 *
 		 * @since 2.8.0
 		 *
@@ -137,7 +126,7 @@ function get_the_author_meta( $field = '', $user_id = false ) {
 	$value = isset( $authordata->$field ) ? $authordata->$field : '';
 
 	/**
-	 * Filters the value of the requested user metadata.
+	 * Filter the value of the requested user metadata.
 	 *
 	 * The filter name is dynamic and depends on the $field parameter of the function.
 	 *
@@ -234,17 +223,23 @@ function the_author_posts() {
 }
 
 /**
- * Retrieves an HTML link to the author page of the current post's author.
+ * Display an HTML link to the author page of the author of the current post.
  *
- * Returns an HTML-formatted link using get_author_posts_url().
+ * Does just echo get_author_posts_url() function, like the others do. The
+ * reason for this, is that another function is used to help in printing the
+ * link to the author's posts.
  *
- * @since 4.4.0
+ * @link https://codex.wordpress.org/Template_Tags/the_author_posts_link
+ * @since 1.2.0
  *
  * @global object $authordata The current author's DB object.
  *
- * @return string An HTML link to the author page.
+ * @param string $deprecated Deprecated.
  */
-function get_the_author_posts_link() {
+function the_author_posts_link($deprecated = '') {
+	if ( !empty( $deprecated ) )
+		_deprecated_argument( __FUNCTION__, '2.1' );
+
 	global $authordata;
 	if ( ! is_object( $authordata ) ) {
 		return;
@@ -258,28 +253,13 @@ function get_the_author_posts_link() {
 	);
 
 	/**
-	 * Filters the link to the author page of the author of the current post.
+	 * Filter the link to the author page of the author of the current post.
 	 *
 	 * @since 2.9.0
 	 *
 	 * @param string $link HTML link.
 	 */
-	return apply_filters( 'the_author_posts_link', $link );
-}
-
-/**
- * Displays an HTML link to the author page of the current post's author.
- *
- * @since 1.2.0
- * @since 4.4.0 Converted into a wrapper for get_the_author_posts_link()
- *
- * @param string $deprecated Unused.
- */
-function the_author_posts_link( $deprecated = '' ) {
-	if ( ! empty( $deprecated ) ) {
-		_deprecated_argument( __FUNCTION__, '2.1' );
-	}
-	echo get_the_author_posts_link();
+	echo apply_filters( 'the_author_posts_link', $link );
 }
 
 /**
@@ -289,11 +269,9 @@ function the_author_posts_link( $deprecated = '' ) {
  *
  * @global WP_Rewrite $wp_rewrite
  *
- * @param int    $author_id       Author ID.
- * @param string $author_nicename Optional. The author's nicename (slug). Default empty.
  * @return string The URL to the author's page.
  */
-function get_author_posts_url( $author_id, $author_nicename = '' ) {
+function get_author_posts_url($author_id, $author_nicename = '') {
 	global $wp_rewrite;
 	$auth_ID = (int) $author_id;
 	$link = $wp_rewrite->get_author_permastruct();
@@ -312,7 +290,7 @@ function get_author_posts_url( $author_id, $author_nicename = '' ) {
 	}
 
 	/**
-	 * Filters the URL to the author's page.
+	 * Filter the URL to the author's page.
 	 *
 	 * @since 2.1.0
 	 *
@@ -326,13 +304,13 @@ function get_author_posts_url( $author_id, $author_nicename = '' ) {
 }
 
 /**
- * List all the authors of the site, with several options available.
+ * List all the authors of the blog, with several options available.
  *
  * @link https://codex.wordpress.org/Template_Tags/wp_list_authors
  *
  * @since 1.2.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb
  *
  * @param string|array $args {
  *     Optional. Array or string of default arguments.
@@ -466,7 +444,7 @@ function wp_list_authors( $args = '' ) {
  *
  * @since 3.2.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @global wpdb $wpdb
  *
  * @return bool Whether or not we have more than one author
  */
@@ -480,7 +458,7 @@ function is_multi_author() {
 	}
 
 	/**
-	 * Filters whether the site has more than one author with published posts.
+	 * Filter whether the site has more than one author with published posts.
 	 *
 	 * @since 3.2.0
 	 *

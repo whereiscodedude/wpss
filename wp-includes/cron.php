@@ -18,24 +18,19 @@
  * @param int $timestamp Timestamp for when to run the event.
  * @param string $hook Action hook to execute when cron is run.
  * @param array $args Optional. Arguments to pass to the hook's callback function.
- * @return false|void False when an event is not scheduled.
+ * @return void|false
  */
 function wp_schedule_single_event( $timestamp, $hook, $args = array()) {
-	// Make sure timestamp is a positive integer
-	if ( ! is_numeric( $timestamp ) || $timestamp <= 0 ) {
-		return false;
-	}
-
-	// Don't schedule a duplicate if there's already an identical event due within 10 minutes of it
+	// don't schedule a duplicate if there's already an identical event due within 10 minutes of it
 	$next = wp_next_scheduled($hook, $args);
 	if ( $next && abs( $next - $timestamp ) <= 10 * MINUTE_IN_SECONDS ) {
-		return false;
+		return;
 	}
 
 	$crons = _get_cron_array();
 	$event = (object) array( 'hook' => $hook, 'timestamp' => $timestamp, 'schedule' => false, 'args' => $args );
 	/**
-	 * Filters a single event before it is scheduled.
+	 * Filter a single event before it is scheduled.
 	 *
 	 * @since 3.1.0
 	 *
@@ -62,7 +57,7 @@ function wp_schedule_single_event( $timestamp, $hook, $args = array()) {
  * visits your WordPress site, if the scheduled time has passed.
  *
  * Valid values for the recurrence are hourly, daily and twicedaily. These can
- * be extended using the {@see 'cron_schedules'} filter in wp_get_schedules().
+ * be extended using the cron_schedules filter in wp_get_schedules().
  *
  * Use wp_next_scheduled() to prevent duplicates
  *
@@ -72,14 +67,9 @@ function wp_schedule_single_event( $timestamp, $hook, $args = array()) {
  * @param string $recurrence How often the event should recur.
  * @param string $hook Action hook to execute when cron is run.
  * @param array $args Optional. Arguments to pass to the hook's callback function.
- * @return false|void False when an event is not scheduled.
+ * @return false|void False when does not schedule event.
  */
 function wp_schedule_event( $timestamp, $recurrence, $hook, $args = array()) {
-	// Make sure timestamp is a positive integer
-	if ( ! is_numeric( $timestamp ) || $timestamp <= 0 ) {
-		return false;
-	}
-
 	$crons = _get_cron_array();
 	$schedules = wp_get_schedules();
 
@@ -110,14 +100,9 @@ function wp_schedule_event( $timestamp, $recurrence, $hook, $args = array()) {
  * @param string $recurrence How often the event should recur.
  * @param string $hook Action hook to execute when cron is run.
  * @param array $args Optional. Arguments to pass to the hook's callback function.
- * @return false|void False when an event is not scheduled.
+ * @return false|void False when does not schedule event.
  */
 function wp_reschedule_event( $timestamp, $recurrence, $hook, $args = array() ) {
-	// Make sure timestamp is a positive integer
-	if ( ! is_numeric( $timestamp ) || $timestamp <= 0 ) {
-		return false;
-	}
-
 	$crons = _get_cron_array();
 	$schedules = wp_get_schedules();
 	$key = md5( serialize( $args ) );
@@ -161,14 +146,8 @@ function wp_reschedule_event( $timestamp, $recurrence, $hook, $args = array() ) 
  * Although not passed to a callback function, these arguments are used
  * to uniquely identify the scheduled event, so they should be the same
  * as those used when originally scheduling the event.
- * @return false|void False when an event is not unscheduled.
  */
 function wp_unschedule_event( $timestamp, $hook, $args = array() ) {
-	// Make sure timestamp is a positive integer
-	if ( ! is_numeric( $timestamp ) || $timestamp <= 0 ) {
-		return false;
-	}
-
 	$crons = _get_cron_array();
 	$key = md5(serialize($args));
 	unset( $crons[$timestamp][$hook][$key] );
@@ -232,11 +211,9 @@ function wp_next_scheduled( $hook, $args = array() ) {
 }
 
 /**
- * Sends a request to run cron through HTTP request that doesn't halt page loading.
+ * Send request to run cron through HTTP request that doesn't halt page loading.
  *
  * @since 2.1.0
- *
- * @param int $gmt_time Optional. Unix timestamp. Default 0 (current time is used).
  */
 function spawn_cron( $gmt_time = 0 ) {
 	if ( ! $gmt_time )
@@ -271,7 +248,7 @@ function spawn_cron( $gmt_time = 0 ) {
 		return;
 
 	if ( defined( 'ALTERNATE_WP_CRON' ) && ALTERNATE_WP_CRON ) {
-		if ( 'GET' !== $_SERVER['REQUEST_METHOD'] || defined( 'DOING_AJAX' ) ||  defined( 'XMLRPC_REQUEST' ) ) {
+		if ( ! empty( $_POST ) || defined( 'DOING_AJAX' ) ||  defined( 'XMLRPC_REQUEST' ) ) {
 			return;
 		}
 
@@ -295,10 +272,9 @@ function spawn_cron( $gmt_time = 0 ) {
 	set_transient( 'doing_cron', $doing_wp_cron );
 
 	/**
-	 * Filters the cron request arguments.
+	 * Filter the cron request arguments.
 	 *
 	 * @since 3.5.0
-	 * @since 4.5.0 The `$doing_wp_cron` parameter was added.
 	 *
 	 * @param array $cron_request_array {
 	 *     An array of cron request URL arguments.
@@ -313,7 +289,6 @@ function spawn_cron( $gmt_time = 0 ) {
 	 *         @type bool $sslverify Whether SSL should be verified for the request. Default false.
 	 *     }
 	 * }
-	 * @param string $doing_wp_cron The unix timestamp of the cron lock.
 	 */
 	$cron_request = apply_filters( 'cron_request', array(
 		'url'  => add_query_arg( 'doing_wp_cron', $doing_wp_cron, site_url( 'wp-cron.php' ) ),
@@ -321,10 +296,10 @@ function spawn_cron( $gmt_time = 0 ) {
 		'args' => array(
 			'timeout'   => 0.01,
 			'blocking'  => false,
-			/** This filter is documented in wp-includes/class-wp-http-streams.php */
+			/** This filter is documented in wp-includes/class-http.php */
 			'sslverify' => apply_filters( 'https_local_ssl_verify', false )
 		)
-	), $doing_wp_cron );
+	) );
 
 	wp_remote_post( $cron_request['url'], $cron_request['args'] );
 }
@@ -363,7 +338,7 @@ function wp_cron() {
  * Retrieve supported and filtered Cron recurrences.
  *
  * The supported recurrences are 'hourly' and 'daily'. A plugin may add more by
- * hooking into the {@see 'cron_schedules'} filter. The filter accepts an array of
+ * hooking into the 'cron_schedules' filter. The filter accepts an array of
  * arrays. The outer array has a key that is the name of the schedule or for
  * example 'weekly'. The value is an array with two keys, one is 'interval' and
  * the other is 'display'.
@@ -396,7 +371,7 @@ function wp_get_schedules() {
 		'daily'      => array( 'interval' => DAY_IN_SECONDS,       'display' => __( 'Once Daily' ) ),
 	);
 	/**
-	 * Filters the non-default cron schedules.
+	 * Filter the non-default cron schedules.
 	 *
 	 * @since 2.1.0
 	 *
@@ -457,7 +432,7 @@ function _get_cron_array()  {
  * @since 2.1.0
  * @access private
  *
- * @param array $cron Cron info array from _get_cron_array().
+ * @param array $cron Cron info array from {@link _get_cron_array()}.
  */
 function _set_cron_array($cron) {
 	$cron['version'] = 2;
@@ -472,7 +447,7 @@ function _set_cron_array($cron) {
  * @since 2.1.0
  * @access private
  *
- * @param array $cron Cron info array from _get_cron_array().
+ * @param array $cron Cron info array from {@link _get_cron_array()}.
  * @return array An upgraded Cron info array.
  */
 function _upgrade_cron_array($cron) {

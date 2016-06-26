@@ -32,7 +32,7 @@ if ( empty($option_page) ) {
 } else {
 
 	/**
-	 * Filters the capability required when using the Settings API.
+	 * Filter the capability required when using the Settings API.
 	 *
 	 * By default, the options groups for all registered settings require the manage_options capability.
 	 * This filter is required to change the capability required for a certain options page.
@@ -44,13 +44,8 @@ if ( empty($option_page) ) {
 	$capability = apply_filters( "option_page_capability_{$option_page}", $capability );
 }
 
-if ( ! current_user_can( $capability ) ) {
-	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'You are not allowed to manage these items.' ) . '</p>',
-		403
-	);
-}
+if ( !current_user_can( $capability ) )
+	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 // Handle admin email change requests
 if ( is_multisite() ) {
@@ -73,13 +68,8 @@ if ( is_multisite() ) {
 	}
 }
 
-if ( is_multisite() && ! is_super_admin() && 'update' != $action ) {
-	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'You are not allowed to delete these items.' ) . '</p>',
-		403
-	);
-}
+if ( is_multisite() && !is_super_admin() && 'update' != $action )
+	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 
 $whitelist_options = array(
 	'general' => array( 'blogname', 'blogdescription', 'gmt_offset', 'date_format', 'time_format', 'start_of_week', 'timezone_string', 'WPLANG' ),
@@ -124,7 +114,7 @@ if ( !is_multisite() ) {
 	$whitelist_options['general'][] = 'new_admin_email';
 
 	/**
-	 * Filters whether the post-by-email functionality is enabled.
+	 * Filter whether the post-by-email functionality is enabled.
 	 *
 	 * @since 3.0.0
 	 *
@@ -135,7 +125,7 @@ if ( !is_multisite() ) {
 }
 
 /**
- * Filters the options white list.
+ * Filter the options white list.
  *
  * @since 2.7.0
  *
@@ -194,15 +184,8 @@ if ( 'update' == $action ) {
 
 	if ( $options ) {
 		foreach ( $options as $option ) {
-			if ( $unregistered ) {
-				_deprecated_argument( 'options.php', '2.7',
-					sprintf(
-						/* translators: %s: the option/setting */
-						__( 'The %s setting is unregistered. Unregistered settings are deprecated. See https://codex.wordpress.org/Settings_API' ),
-						'<code>' . $option . '</code>'
-					)
-				);
-			}
+			if ( $unregistered )
+				_deprecated_argument( 'options.php', '2.7', sprintf( __( 'The <code>%1$s</code> setting is unregistered. Unregistered settings are deprecated. See https://codex.wordpress.org/Settings_API' ), $option, $option_page ) );
 
 			$option = trim( $option );
 			$value = null;
