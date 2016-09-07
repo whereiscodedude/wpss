@@ -663,14 +663,7 @@ function feed_content_type( $type = '' ) {
  * @return WP_Error|SimplePie WP_Error object on failure or SimplePie object on success
  */
 function fetch_feed( $url ) {
-	if ( ! class_exists( 'SimplePie', false ) ) {
-		require_once( ABSPATH . WPINC . '/class-simplepie.php' );
-	}
-
-	require_once( ABSPATH . WPINC . '/class-wp-feed-cache.php' );
-	require_once( ABSPATH . WPINC . '/class-wp-feed-cache-transient.php' );
-	require_once( ABSPATH . WPINC . '/class-wp-simplepie-file.php' );
-	require_once( ABSPATH . WPINC . '/class-wp-simplepie-sanitize-kses.php' );
+	require_once( ABSPATH . WPINC . '/class-feed.php' );
 
 	$feed = new SimplePie();
 
@@ -683,7 +676,7 @@ function fetch_feed( $url ) {
 	$feed->set_file_class( 'WP_SimplePie_File' );
 
 	$feed->set_feed_url( $url );
-	/** This filter is documented in wp-includes/class-wp-feed-cache-transient.php */
+	/** This filter is documented in wp-includes/class-feed.php */
 	$feed->set_cache_duration( apply_filters( 'wp_feed_cache_transient_lifetime', 12 * HOUR_IN_SECONDS, $url ) );
 	/**
 	 * Fires just before processing the SimplePie feed object.

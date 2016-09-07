@@ -16,9 +16,6 @@
  * @package WordPress
  */
 
-/** WordPress Dependency Class */
-require( ABSPATH . WPINC . '/class-wp-dependency.php' );
-
 /** WordPress Dependencies Class */
 require( ABSPATH . WPINC . '/class.wp-dependencies.php' );
 
@@ -403,7 +400,7 @@ function wp_default_scripts( &$scripts ) {
 	$scripts->add( 'user-profile', "/wp-admin/js/user-profile$suffix.js", array( 'jquery', 'password-strength-meter', 'wp-util' ), false, 1 );
 	did_action( 'init' ) && $scripts->localize( 'user-profile', 'userProfileL10n', array(
 		'warn'     => __( 'Your new password has not been saved.' ),
-		'warnWeak' => __( 'Confirm use of weak password' ),
+		'warnWeak' => __( 'Confirm use of weak password.' ),
 		'show'     => __( 'Show' ),
 		'hide'     => __( 'Hide' ),
 		'cancel'   => __( 'Cancel' ),

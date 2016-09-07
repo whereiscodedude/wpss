@@ -315,7 +315,8 @@ final class WP_Customize_Manager {
 	 * @return bool True if it's an Ajax request, false otherwise.
 	 */
 	public function doing_ajax( $action = null ) {
-		if ( ! wp_doing_ajax() ) {
+		$doing_ajax = ( defined( 'DOING_AJAX' ) && DOING_AJAX );
+		if ( ! $doing_ajax ) {
 			return false;
 		}
 
@@ -990,10 +991,9 @@ final class WP_Customize_Manager {
 	/**
 	 * Validates setting values.
 	 *
+	 * Sanitization is applied to the values before being passed for validation.
 	 * Validation is skipped for unregistered settings or for values that are
-	 * already null since they will be skipped anyway. Sanitization is applied
-	 * to values that pass validation, and values that become null or `WP_Error`
-	 * after sanitizing are marked invalid.
+	 * already null since they will be skipped anyway.
 	 *
 	 * @since 4.6.0
 	 * @access public
@@ -1001,7 +1001,7 @@ final class WP_Customize_Manager {
 	 * @see WP_REST_Request::has_valid_params()
 	 * @see WP_Customize_Setting::validate()
 	 *
-	 * @param array $setting_values Mapping of setting IDs to values to validate and sanitize.
+	 * @param array $setting_values Mapping of setting IDs to values to sanitize and validate.
 	 * @return array Mapping of setting IDs to return value of validate method calls, either `true` or `WP_Error`.
 	 */
 	public function validate_setting_values( $setting_values ) {
@@ -1046,9 +1046,17 @@ final class WP_Customize_Manager {
 		if ( is_wp_error( $validity ) ) {
 			$notification = array();
 			foreach ( $validity->errors as $error_code => $error_messages ) {
+				$error_data = $validity->get_error_data( $error_code );
+				if ( is_null( $error_data ) ) {
+					$error_data = array();
+				}
+				$error_data = array_merge(
+					$error_data,
+					array( 'from_server' => true )
+				);
 				$notification[ $error_code ] = array(
 					'message' => join( ' ', $error_messages ),
-					'data' => $validity->get_error_data( $error_code ),
+					'data' => $error_data,
 				);
 			}
 			return $notification;

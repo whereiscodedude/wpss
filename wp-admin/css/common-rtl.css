@@ -680,7 +680,7 @@ ul.striped > :nth-child(odd),
 }
 
 .wp-ui-highlight {
-	color: #fff;
+	color: white;
 	background-color: #1e8cbe;
 }
 .wp-ui-text-highlight {
@@ -826,8 +826,6 @@ hr {
 	border-bottom: 1px solid #fafafa;
 }
 
-.widget-control-remove,
-.widget-control-remove:focus,
 .row-actions span.delete a,
 .row-actions span.trash a,
 .row-actions span.spam a,
@@ -844,6 +842,7 @@ hr {
 abbr.required,
 span.required,
 .file-error,
+.widget-control-remove:hover,
 .row-actions .delete a:hover,
 .row-actions .trash a:hover,
 .row-actions .spam a:hover,
@@ -857,10 +856,6 @@ span.required,
 	color: #f00;
 	text-decoration: none;
 	border: none;
-}
-
-.widget-control-remove:hover {
-	color: #f00;
 }
 
 /*------------------------------------------------------------------------------
@@ -2103,6 +2098,14 @@ html.wp-toolbar {
 	font-style: italic;
 }
 
+#wpfooter a {
+	text-decoration: none;
+}
+
+#wpfooter a:hover {
+	text-decoration: underline;
+}
+
 /*------------------------------------------------------------------------------
   25.0 - Tabbed Admin Screen Interface (Experimental)
 ------------------------------------------------------------------------------*/
@@ -2157,7 +2160,7 @@ h3 .nav-tab, /* Back-compat for pre-4.4 */
 
 h1.nav-tab-wrapper, /* Back-compat for pre-4.4 */
 .wrap h2.nav-tab-wrapper, /* higher specificity to override .wrap > h2:first-child */
-.nav-tab-wrapper {
+h3.nav-tab-wrapper {
 	border-bottom: 1px solid #ccc;
 	margin: 0;
 	padding-top: 9px;
@@ -3744,7 +3747,7 @@ img {
 
 	h1.nav-tab-wrapper,
 	.wrap h2.nav-tab-wrapper,
-	.nav-tab-wrapper {
+	h3.nav-tab-wrapper {
 		border-bottom: 0;
 	}
 

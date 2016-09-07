@@ -630,8 +630,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 				captionId = '',
 				captionAlign = '',
 				captionWidth = '',
-				imgId = null,
-				wrap, parent, node, html;
+				wrap, parent, node, html, imgId;
 
 			// Temp image id so we can find the node later
 			data.id = '__wp-temp-img-id';
@@ -797,7 +796,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			}
 
 			imgNode = dom.get('__wp-temp-img-id');
-			dom.setAttrib( imgNode, 'id', imgId || null );
+			dom.setAttrib( imgNode, 'id', imgId );
 			event.imgData.node = imgNode;
 		});
 
@@ -976,12 +975,6 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	editor.wpGetImgCaption = function( content ) {
 		return getShortcode( content );
 	};
-
-	editor.on( 'beforeGetContent', function( event ) {
-		if ( event.format !== 'raw' ) {
-			editor.$( 'img[id="__wp-temp-img-id"]' ).attr( 'id', null );
-		}	
-	});
 
 	editor.on( 'BeforeSetContent', function( event ) {
 		if ( event.format !== 'raw' ) {

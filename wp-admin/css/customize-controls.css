@@ -3,8 +3,7 @@ body {
 	-webkit-text-size-adjust: 100%;
 }
 
-.customize-controls-close,
-.widget-control-actions a {
+#customize-controls a {
 	text-decoration: none;
 }
 
@@ -1220,8 +1219,7 @@ body.cheatin p {
 }
 
 .add-new-widget:before,
-.add-new-menu-item:before,
-#available-menu-items .new-content-item .add-content:before {
+.add-new-menu-item:before {
 	content: "\f132";
 	display: inline-block;
 	position: relative;

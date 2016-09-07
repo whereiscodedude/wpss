@@ -270,9 +270,9 @@ if ( isset($_GET['update']) ) {
 <div class="wrap">
 <h1 id="add-new-user"><?php
 if ( current_user_can( 'create_users' ) ) {
-	_e( 'Add New User' );
+	echo _x( 'Add New User', 'user' );
 } elseif ( current_user_can( 'promote_users' ) ) {
-	_e( 'Add Existing User' );
+	echo _x( 'Add Existing User', 'user' );
 } ?>
 </h1>
 

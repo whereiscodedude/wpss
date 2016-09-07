@@ -1184,19 +1184,18 @@ class wpdb {
 	 *
 	 * @uses wpdb::_real_escape()
 	 * @since  2.8.0
-	 * @access public
+	 * @access private
 	 *
 	 * @param  string|array $data
 	 * @return string|array escaped
 	 */
-	public function _escape( $data ) {
+	function _escape( $data ) {
 		if ( is_array( $data ) ) {
 			foreach ( $data as $k => $v ) {
-				if ( is_array( $v ) ) {
+				if ( is_array($v) )
 					$data[$k] = $this->_escape( $v );
-				} else {
+				else
 					$data[$k] = $this->_real_escape( $v );
-				}
 			}
 		} else {
 			$data = $this->_real_escape( $data );
@@ -1269,8 +1268,8 @@ class wpdb {
 	 *
 	 * Both %d and %s should be left unquoted in the query string.
 	 *
-	 *     $wpdb->prepare( "SELECT * FROM `table` WHERE `column` = %s AND `field` = %d", 'foo', 1337 );
-	 *     $wpdb->prepare( "SELECT DATE_FORMAT(`field`, '%%c') FROM `table` WHERE `column` = %s", 'foo' );
+	 *     wpdb::prepare( "SELECT * FROM `table` WHERE `column` = %s AND `field` = %d", 'foo', 1337 )
+	 *     wpdb::prepare( "SELECT DATE_FORMAT(`field`, '%%c') FROM `table` WHERE `column` = %s", 'foo' );
 	 *
 	 * @link https://secure.php.net/sprintf Description of syntax.
 	 * @since 2.3.0
@@ -3029,7 +3028,7 @@ class wpdb {
 				. '|INSERT(?:\s+LOW_PRIORITY|\s+DELAYED|\s+HIGH_PRIORITY)?(?:\s+IGNORE)?(?:\s+INTO)?'
 				. '|REPLACE(?:\s+LOW_PRIORITY|\s+DELAYED)?(?:\s+INTO)?'
 				. '|UPDATE(?:\s+LOW_PRIORITY)?(?:\s+IGNORE)?'
-				. '|DELETE(?:\s+LOW_PRIORITY|\s+QUICK|\s+IGNORE)*(?:.+?FROM)?'
+				. '|DELETE(?:\s+LOW_PRIORITY|\s+QUICK|\s+IGNORE)*(?:\s+FROM)?'
 				. ')\s+((?:[0-9a-zA-Z$_.`-]|[\xC2-\xDF][\x80-\xBF])+)/is', $query, $maybe ) ) {
 			return str_replace( '`', '', $maybe[1] );
 		}

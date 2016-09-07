@@ -80,47 +80,6 @@
 	});
 	api.Menus.availableMenuItems = new api.Menus.AvailableItemCollection( api.Menus.data.availableMenuItems );
 
-	api.Menus.insertedAutoDrafts = [];
-
-	/**
-	 * Insert a new `auto-draft` post.
-	 *
-	 * @param {object} params - Parameters for the draft post to create.
-	 * @param {string} params.post_type - Post type to add.
-	 * @param {string} params.post_title - Post title to use.
-	 * @return {jQuery.promise} Promise resolved with the added post.
-	 */
-	api.Menus.insertAutoDraftPost = function insertAutoDraftPost( params ) {
-		var request, deferred = $.Deferred();
-
-		request = wp.ajax.post( 'customize-nav-menus-insert-auto-draft', {
-			'customize-menus-nonce': api.settings.nonce['customize-menus'],
-			'wp_customize': 'on',
-			'params': params
-		} );
-
-		request.done( function( response ) {
-			if ( response.post_id ) {
-				deferred.resolve( response );
-				api.Menus.insertedAutoDrafts.push( response.post_id );
-				api( 'nav_menus_created_posts' ).set( _.clone( api.Menus.insertedAutoDrafts ) );
-			}
-		} );
-
-		request.fail( function( response ) {
-			var error = response || '';
-
-			if ( 'undefined' !== typeof response.message ) {
-				error = response.message;
-			}
-
-			console.error( error );
-			deferred.rejectWith( error );
-		} );
-
-		return deferred.promise();
-	};
-
 	/**
 	 * wp.customize.Menus.AvailableMenuItemsPanelView
 	 *
@@ -141,8 +100,6 @@
 			'click .menu-item-tpl': '_submit',
 			'click #custom-menu-item-submit': '_submitLink',
 			'keypress #custom-menu-item-name': '_submitLink',
-			'click .new-content-item .add-content': '_submitNew',
-			'keypress .create-item-input': '_submitNew',
 			'keydown': 'keyboardAccessible'
 		},
 
@@ -158,7 +115,6 @@
 		pages: {},
 		sectionContent: '',
 		loading: false,
-		addingNew: false,
 
 		initialize: function() {
 			var self = this;
@@ -168,7 +124,7 @@
 			}
 
 			this.$search = $( '#menu-items-search' );
-			this.sectionContent = this.$el.find( '.available-menu-items-list' );
+			this.sectionContent = this.$el.find( '.accordion-section-content' );
 
 			this.debounceSearch = _.debounce( self.search, 500 );
 
@@ -204,7 +160,7 @@
 
 			// Load more items.
 			this.sectionContent.scroll( function() {
-				var totalHeight = self.$el.find( '.accordion-section.open .available-menu-items-list' ).prop( 'scrollHeight' ),
+				var totalHeight = self.$el.find( '.accordion-section.open .accordion-section-content' ).prop( 'scrollHeight' ),
 					visibleHeight = self.$el.find( '.accordion-section.open' ).height();
 
 				if ( ! self.loading && $( this ).scrollTop() > 3 / 4 * totalHeight - visibleHeight ) {
@@ -381,7 +337,7 @@
 				}
 				items = new api.Menus.AvailableItemCollection( items ); // @todo Why is this collection created and then thrown away?
 				self.collection.add( items.models );
-				typeInner = availableMenuItemContainer.find( '.available-menu-items-list' );
+				typeInner = availableMenuItemContainer.find( '.accordion-section-content' );
 				items.each(function( menuItem ) {
 					typeInner.append( itemTemplate( menuItem.attributes ) );
 				});
@@ -400,15 +356,13 @@
 
 		// Adjust the height of each section of items to fit the screen.
 		itemSectionHeight: function() {
-			var sections, lists, totalHeight, accordionHeight, diff;
+			var sections, totalHeight, accordionHeight, diff;
 			totalHeight = window.innerHeight;
 			sections = this.$el.find( '.accordion-section:not( #available-menu-items-search ) .accordion-section-content' );
-			lists = this.$el.find( '.accordion-section:not( #available-menu-items-search ) .available-menu-items-list:not(":only-child")' );
-			accordionHeight =  46 * ( 1 + sections.length ) + 14; // Magic numbers.
+			accordionHeight =  46 * ( 2 + sections.length ) - 13; // Magic numbers.
 			diff = totalHeight - accordionHeight;
 			if ( 120 < diff && 290 > diff ) {
 				sections.css( 'max-height', diff );
-				lists.css( 'max-height', ( diff - 60 ) );
 			}
 		},
 
@@ -492,7 +446,7 @@
 				'url': itemUrl.val(),
 				'type': 'custom',
 				'type_label': api.Menus.data.l10n.custom_label,
-				'object': 'custom'
+				'object': ''
 			};
 
 			this.currentMenuControl.addItemToMenu( menuItem );
@@ -500,88 +454,6 @@
 			// Reset the custom link form.
 			itemUrl.val( 'http://' );
 			itemName.val( '' );
-		},
-
-		// Submit handler for keypress (enter) on field and click on button.
-		_submitNew: function( event ) {
-			var container;
-
-			// Only proceed with keypress if it is Enter.
-			if ( 'keypress' === event.type && 13 !== event.which ) {
-				return;
-			}
-
-			if ( this.addingNew ) {
-				return;
-			}
-
-			container = $( event.target ).closest( '.accordion-section' );
-
-			this.submitNew( container );
-		},
-
-		// Creates a new object and adds an associated menu item to the menu.
-		submitNew: function( container ) {
-			var panel = this,
-				itemName = container.find( '.create-item-input' ),
-				title = itemName.val(),
-				dataContainer = container.find( '.available-menu-items-list' ),
-				itemType = dataContainer.data( 'type' ),
-				itemObject = dataContainer.data( 'object' ),
-				itemTypeLabel = dataContainer.data( 'type_label' ),
-				promise;
-
-			if ( ! this.currentMenuControl ) {
-				return;
-			}
-
-			// Only posts are supported currently.
-			if ( 'post_type' !== itemType ) {
-				return;
-			}
-
-			if ( '' === $.trim( itemName.val() ) ) {
-				itemName.addClass( 'invalid' );
-				itemName.focus();
-				return;
-			} else {
-				itemName.removeClass( 'invalid' );
-				container.find( '.accordion-section-title' ).addClass( 'loading' );
-			}
-
-			panel.addingNew = true;
-			itemName.attr( 'disabled', 'disabled' );
-			promise = api.Menus.insertAutoDraftPost( {
-				post_title: title,
-				post_type: itemObject
-			} );
-			promise.done( function( data ) {
-				var availableItem, $content, itemTemplate;
-				availableItem = new api.Menus.AvailableItemModel( {
-					'id': 'post-' + data.post_id, // Used for available menu item Backbone models.
-					'title': itemName.val(),
-					'type': itemType,
-					'type_label': itemTypeLabel,
-					'object': itemObject,
-					'object_id': data.post_id,
-					'url': data.url
-				} );
-
-				// Add new item to menu.
-				panel.currentMenuControl.addItemToMenu( availableItem.attributes );
-
-				// Add the new item to the list of available items.
-				api.Menus.availableMenuItemsPanel.collection.add( availableItem );
-				$content = container.find( '.available-menu-items-list' );
-				itemTemplate = wp.template( 'available-menu-item' );
-				$content.prepend( itemTemplate( availableItem.attributes ) );
-				$content.scrollTop();
-
-				// Reset the create content form.
-				itemName.val( '' ).removeAttr( 'disabled' );
-				panel.addingNew = false;
-				container.find( '.accordion-section-title' ).removeClass( 'loading' );
-			} );
 		},
 
 		// Opens the panel.
@@ -774,9 +646,7 @@
 	api.Menus.MenuSection = api.Section.extend({
 
 		/**
-		 * Initialize.
-		 *
-		 * @since 4.3.0
+		 * @since Menu Customizer 0.3
 		 *
 		 * @param {String} id
 		 * @param {Object} options
@@ -788,7 +658,7 @@
 		},
 
 		/**
-		 * Ready.
+		 *
 		 */
 		ready: function() {
 			var section = this;
@@ -928,7 +798,7 @@
 		},
 
 		/**
-		 * @param {Array} themeLocationSlugs Theme location slugs.
+		 * @param {array} themeLocations
 		 */
 		updateAssignedLocationsInSectionTitle: function( themeLocationSlugs ) {
 			var section = this,
@@ -991,7 +861,7 @@
 		/**
 		 * Add behaviors for the accordion section.
 		 *
-		 * @since 4.3.0
+		 * @since Menu Customizer 0.3
 		 */
 		attachEvents: function() {
 			var section = this;
@@ -1144,11 +1014,11 @@
 		},
 
 		/**
+		 * @since Menu Customizer 0.3
+		 *
 		 * Override the embed() method to do nothing,
 		 * so that the control isn't embedded on load,
 		 * unless the containing section is already expanded.
-		 *
-		 * @since 4.3.0
 		 */
 		embed: function() {
 			var control = this,
@@ -1167,7 +1037,7 @@
 		 * This function is called in Section.onChangeExpanded() so the control
 		 * will only get embedded when the Section is first expanded.
 		 *
-		 * @since 4.3.0
+		 * @since Menu Customizer 0.3
 		 */
 		actuallyEmbed: function() {
 			var control = this;
@@ -2673,9 +2543,6 @@
 			if ( data.nav_menu_updates || data.nav_menu_item_updates ) {
 				api.Menus.applySavedData( data );
 			}
-
-			// Reset list of inserted auto draft post IDs.
-			api.Menus.insertedAutoDrafts = [];
 		} );
 
 		// Open and focus menu control.

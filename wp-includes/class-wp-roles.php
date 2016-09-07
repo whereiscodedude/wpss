@@ -70,20 +70,11 @@ class WP_Roles {
 	public $use_db = true;
 
 	/**
-	 * @since 4.7.0
-	 * @access protected
-	 * @var wpdb
-	 */
-	protected $db;
-
-	/**
 	 * Constructor
 	 *
 	 * @since 2.0.0
 	 */
 	public function __construct() {
-		$this->db = $GLOBALS['wpdb'];
-
 		$this->_init();
 	}
 
@@ -114,11 +105,12 @@ class WP_Roles {
 	 * @since 2.1.0
 	 * @access protected
 	 *
+	 * @global wpdb  $wpdb          WordPress database abstraction object.
 	 * @global array $wp_user_roles Used to set the 'roles' property value.
 	 */
 	protected function _init() {
-		global $wp_user_roles;
-		$this->role_key = $this->db->get_blog_prefix() . 'user_roles';
+		global $wpdb, $wp_user_roles;
+		$this->role_key = $wpdb->get_blog_prefix() . 'user_roles';
 		if ( ! empty( $wp_user_roles ) ) {
 			$this->roles = $wp_user_roles;
 			$this->use_db = false;
@@ -145,15 +137,18 @@ class WP_Roles {
 	 *
 	 * @since 3.5.0
 	 * @access public
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	public function reinit() {
 		// There is no need to reinit if using the wp_user_roles global.
-		if ( ! $this->use_db ) {
+		if ( ! $this->use_db )
 			return;
-		}
+
+		global $wpdb;
 
 		// Duplicated from _init() to avoid an extra function call.
-		$this->role_key = $this->db->get_blog_prefix() . 'user_roles';
+		$this->role_key = $wpdb->get_blog_prefix() . 'user_roles';
 		$this->roles = get_option( $this->role_key );
 		if ( empty( $this->roles ) )
 			return;

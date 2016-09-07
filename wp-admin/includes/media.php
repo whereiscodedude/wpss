@@ -284,12 +284,13 @@ function media_handle_upload($file_id, $post_id, $post_data = array(), $override
 	if ( isset($file['error']) )
 		return new WP_Error( 'upload_error', $file['error'] );
 
-	$basename = pathinfo( $name, PATHINFO_BASENAME );
+	$name_parts = pathinfo($name);
+	$name = trim( substr( $name, 0, -(1 + strlen($name_parts['extension'])) ) );
 
 	$url = $file['url'];
 	$type = $file['type'];
 	$file = $file['file'];
-	$title = sanitize_title( $basename );
+	$title = sanitize_title( $name );
 	$content = '';
 	$excerpt = '';
 
@@ -618,7 +619,7 @@ function get_upload_iframe_src( $type = null, $post_id = null, $tab = null ) {
 	 *
 	 * @param string $upload_iframe_src The upload iframe source URL by type.
 	 */
-	$upload_iframe_src = apply_filters( "{$type}_upload_iframe_src", $upload_iframe_src );
+	$upload_iframe_src = apply_filters( $type . '_upload_iframe_src', $upload_iframe_src );
 
 	return add_query_arg('TB_iframe', true, $upload_iframe_src);
 }
@@ -786,7 +787,7 @@ function wp_media_upload_handler() {
 			 * @param string $src   Media source URL.
 			 * @param string $title Media title.
 			 */
-			$html = apply_filters( "{$type}_send_to_editor_url", $html, esc_url_raw( $src ), $title );
+			$html = apply_filters( $type . '_send_to_editor_url', $html, esc_url_raw( $src ), $title );
 		} else {
 			$align = '';
 			$alt = esc_attr( wp_unslash( $_POST['alt'] ) );

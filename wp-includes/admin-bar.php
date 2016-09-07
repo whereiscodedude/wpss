@@ -196,8 +196,7 @@ function wp_admin_bar_my_account_item( $wp_admin_bar ) {
 	}
 
 	$avatar = get_avatar( $user_id, 26 );
-	/* translators: %s: current user's display name */
-	$howdy  = sprintf( __( 'Howdy, %s' ), $current_user->display_name );
+	$howdy  = sprintf( __('Howdy, %1$s'), $current_user->display_name );
 	$class  = empty( $avatar ) ? '' : 'with-avatar';
 
 	$wp_admin_bar->add_menu( array(
@@ -294,11 +293,9 @@ function wp_admin_bar_site_menu( $wp_admin_bar ) {
 	}
 
 	if ( is_network_admin() ) {
-		/* translators: %s: site name */ 
-		$blogname = sprintf( __( 'Network Admin: %s' ), esc_html( get_current_site()->site_name ) );
+		$blogname = sprintf( __('Network Admin: %s'), esc_html( get_current_site()->site_name ) );
 	} elseif ( is_user_admin() ) {
-		/* translators: %s: site name */ 
-		$blogname = sprintf( __( 'User Dashboard: %s' ), esc_html( get_current_site()->site_name ) );
+		$blogname = sprintf( __('User Dashboard: %s'), esc_html( get_current_site()->site_name ) );
 	}
 
 	$title = wp_html_excerpt( $blogname, 40, '&hellip;' );

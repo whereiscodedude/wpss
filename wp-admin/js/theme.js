@@ -866,12 +866,8 @@ themes.view.Preview = themes.view.Details.extend({
 	html: themes.template( 'theme-preview' ),
 
 	render: function() {
-		var self = this,
-			currentPreviewDevice,
-			data = this.model.toJSON(),
-			$body = $( document.body );
-
-		$body.attr( 'aria-busy', 'true' );
+		var self = this, currentPreviewDevice,
+			data = this.model.toJSON();
 
 		this.$el.removeClass( 'iframe-ready' ).html( this.html( data ) );
 
@@ -883,7 +879,8 @@ themes.view.Preview = themes.view.Details.extend({
 		themes.router.navigate( themes.router.baseUrl( themes.router.themePath + this.model.get( 'id' ) ), { replace: true } );
 
 		this.$el.fadeIn( 200, function() {
-			$body.addClass( 'theme-installer-active full-overlay-active' );
+			$( 'body' ).addClass( 'theme-installer-active full-overlay-active' );
+			$( '.close-full-overlay' ).focus();
 		});
 
 		this.$el.find( 'iframe' ).one( 'load', function() {
@@ -893,7 +890,6 @@ themes.view.Preview = themes.view.Details.extend({
 
 	iframeLoaded: function() {
 		this.$el.addClass( 'iframe-ready' );
-		$( document.body ).attr( 'aria-busy', 'false' );
 	},
 
 	close: function() {

@@ -125,8 +125,6 @@
 		} else {
 			params.completeCallback = focus;
 		}
-
-		api.state( 'paneVisible' ).set( true );
 		if ( construct.expand ) {
 			construct.expand( params );
 		} else {
@@ -443,7 +441,6 @@
 				return false;
 			}
 
-			api.state( 'paneVisible' ).set( true );
 			params.completeCallback = function() {
 				if ( previousCompleteCallback ) {
 					previousCompleteCallback.apply( instance, arguments );
@@ -2969,24 +2966,11 @@
 				};
 				_( constructs ).each( function ( activeConstructs, type ) {
 					api[ type ].each( function ( construct, id ) {
-						var isDynamicallyCreated = _.isUndefined( api.settings[ type + 's' ][ id ] );
-
-						/*
-						 * If the construct was created statically in PHP (not dynamically in JS)
-						 * then consider a missing (undefined) value in the activeConstructs to
-						 * mean it should be deactivated (since it is gone). But if it is
-						 * dynamically created then only toggle activation if the value is defined,
-						 * as this means that the construct was also then correspondingly
-						 * created statically in PHP and the active callback is available.
-						 * Otherwise, dynamically-created constructs should normally have
-						 * their active states toggled in JS rather than from PHP.
-						 */
-						if ( ! isDynamicallyCreated || ! _.isUndefined( activeConstructs[ id ] ) ) {
-							if ( activeConstructs[ id ] ) {
-								construct.activate();
-							} else {
-								construct.deactivate();
-							}
+						var active = !! ( activeConstructs && activeConstructs[ id ] );
+						if ( active ) {
+							construct.activate();
+						} else {
+							construct.deactivate();
 						}
 					} );
 				} );
@@ -3226,14 +3210,12 @@
 			// ssl certs.
 
 			this.add( 'previewUrl', params.previewUrl ).setter( function( to ) {
-				var result, urlParser;
-				urlParser = document.createElement( 'a' );
-				urlParser.href = to;
+				var result;
 
-				// Abort if URL is for admin or (static) files in wp-includes or wp-content.
-				if ( /\/wp-(admin|includes|content)(\/|$)/.test( urlParser.pathname ) ) {
+				// Check for URLs that include "/wp-admin/" or end in "/wp-admin".
+				// Strip hashes and query strings before testing.
+				if ( /\/wp-admin(\/|$)/.test( to.replace( /[#?].*$/, '' ) ) )
 					return null;
-				}
 
 				// Attempt to match the URL to the control frame's scheme
 				// and check if it's allowed. If not, try the original URL.
@@ -3461,13 +3443,12 @@
 				// Add notifications for invalidities.
 				if ( _.isObject( validity ) ) {
 					_.each( validity, function( params, code ) {
-						var notification, existingNotification, needsReplacement = false;
-						notification = new api.Notification( code, _.extend( { fromServer: true }, params ) );
+						var notification = new api.Notification( code, params ), existingNotification, needsReplacement = false;
 
 						// Remove existing notification if already exists for code but differs in parameters.
 						existingNotification = setting.notifications( notification.code );
 						if ( existingNotification ) {
-							needsReplacement = notification.type !== existingNotification.type || notification.message !== existingNotification.message || ! _.isEqual( notification.data, existingNotification.data );
+							needsReplacement = ( notification.type !== existingNotification.type ) || ! _.isEqual( notification.data, existingNotification.data );
 						}
 						if ( needsReplacement ) {
 							setting.notifications.remove( code );
@@ -3620,7 +3601,7 @@
 			return;
 		}
 
-		var parent,
+		var parent, topFocus,
 			body = $( document.body ),
 			overlay = body.children( '.wp-full-overlay' ),
 			title = $( '#customize-info .panel-title.site-title' ),
@@ -3716,7 +3697,7 @@
 					 */
 					api.each( function( setting ) {
 						setting.notifications.each( function( notification ) {
-							if ( 'error' === notification.type && ! notification.fromServer ) {
+							if ( 'error' === notification.type && ( ! notification.data || ! notification.data.from_server ) ) {
 								invalidSettings.push( setting.id );
 							}
 						} );
@@ -3916,8 +3897,7 @@
 			var state = new api.Values(),
 				saved = state.create( 'saved' ),
 				activated = state.create( 'activated' ),
-				processing = state.create( 'processing' ),
-				paneVisible = state.create( 'paneVisible' );
+				processing = state.create( 'processing' );
 
 			state.bind( 'change', function() {
 				if ( ! activated() ) {
@@ -3938,7 +3918,6 @@
 			saved( true );
 			activated( api.settings.theme.active );
 			processing( 0 );
-			paneVisible( true );
 
 			api.bind( 'change', function() {
 				state('saved').set( false );
@@ -3980,18 +3959,13 @@
 		});
 
 		$( '.collapse-sidebar' ).on( 'click', function() {
-			api.state( 'paneVisible' ).set( ! api.state( 'paneVisible' ).get() );
-		});
-
-		api.state( 'paneVisible' ).bind( function( paneVisible ) {
-			overlay.toggleClass( 'expanded', paneVisible );
-			overlay.toggleClass( 'collapsed', ! paneVisible );
-
-			if ( ! paneVisible ) {
-				$( '.collapse-sidebar' ).attr({ 'aria-expanded': 'false', 'aria-label': api.l10n.expandSidebar });
+			if ( 'true' === $( this ).attr( 'aria-expanded' ) ) {
+				$( this ).attr({ 'aria-expanded': 'false', 'aria-label': api.l10n.expandSidebar });
 			} else {
-				$( '.collapse-sidebar' ).attr({ 'aria-expanded': 'true', 'aria-label': api.l10n.collapseSidebar });
+				$( this ).attr({ 'aria-expanded': 'true', 'aria-label': api.l10n.collapseSidebar });
 			}
+
+			overlay.toggleClass( 'collapsed' ).toggleClass( 'expanded' );
 		});
 
 		// Keyboard shortcuts - esc to exit section/panel.
@@ -4234,6 +4208,14 @@
 		});
 
 		api.trigger( 'ready' );
+
+		// Make sure left column gets focus
+		topFocus = closeBtn;
+		topFocus.focus();
+		setTimeout(function () {
+			topFocus.focus();
+		}, 200);
+
 	});
 
 })( wp, jQuery );

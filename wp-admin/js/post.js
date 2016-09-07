@@ -407,31 +407,16 @@ jQuery(document).ready( function($) {
 			return;
 		}
 
-		var data = {
-			action: 'wp-remove-post-lock',
-			_wpnonce: $('#_wpnonce').val(),
-			post_ID: $('#post_ID').val(),
-			active_post_lock: $('#active_post_lock').val()
-		};
-
-		if (window.FormData && window.navigator.sendBeacon) {
-			var formData = new window.FormData();
-
-			$.each(data, function(key, value) {
-				formData.append(key, value);
-			});
-
-			if (window.navigator.sendBeacon(ajaxurl, formData)) {
-				return;
-			}
-		}
-
-		// Fall back to a synchronous POST request.
-		// See https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
-		$.post({
+		$.ajax({
+			type: 'POST',
+			url: ajaxurl,
 			async: false,
-			data: data,
-			url: ajaxurl
+			data: {
+				action: 'wp-remove-post-lock',
+				_wpnonce: $('#_wpnonce').val(),
+				post_ID: $('#post_ID').val(),
+				active_post_lock: $('#active_post_lock').val()
+			}
 		});
 	});
 

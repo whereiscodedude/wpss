@@ -473,12 +473,10 @@ if ( is_multisite() && is_network_admin() && ! IS_PROFILE_PAGE && current_user_c
 			 * Filters the user profile picture description displayed under the Gravatar.
 			 *
 			 * @since 4.4.0
-			 * @since 4.7.0 Added the `$profileuser` parameter.
 			 *
-			 * @param string  $description The description that will be printed.
-			 * @param WP_User $profileuser The current WP_User object.
+			 * @param string $description The description that will be printed.
 			 */
-			echo apply_filters( 'user_profile_picture_description', $description, $profileuser );
+			echo apply_filters( 'user_profile_picture_description', $description );
 		?></p>
 	</td>
 </tr>
