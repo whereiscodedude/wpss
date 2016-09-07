@@ -79,27 +79,24 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 		}
 	} );
 
-	function isNonEditable( node ) {
-		var parent = editor.$( node ).parents( '[contenteditable]' );
-		return parent && parent.attr( 'contenteditable' ) === 'false';
-	}
-
 	// Safari on iOS fails to select images in contentEditoble mode on touch.
 	// Select them again.
 	if ( iOS ) {
 		editor.on( 'init', function() {
 			editor.on( 'touchstart', function( event ) {
-				if ( event.target.nodeName === 'IMG' && ! isNonEditable( event.target ) ) {
+				if ( event.target.nodeName === 'IMG' ) {
 					touchOnImage = true;
 				}
 			});
 
-			editor.dom.bind( editor.getDoc(), 'touchmove', function() {
-				touchOnImage = false;
+			editor.dom.bind( editor.getDoc(), 'touchmove', function( event ) {
+				if ( event.target.nodeName === 'IMG' ) {
+					touchOnImage = false;
+				}
 			});
 
 			editor.on( 'touchend', function( event ) {
-				if ( touchOnImage && event.target.nodeName === 'IMG' && ! isNonEditable( event.target ) ) {
+				if ( touchOnImage && event.target.nodeName === 'IMG' ) {
 					var node = event.target;
 
 					touchOnImage = false;
@@ -107,7 +104,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 					window.setTimeout( function() {
 						editor.selection.select( node );
 						editor.nodeChanged();
-					}, 100 );
+					}, 200 );
 				} else if ( toolbar ) {
 					toolbar.hide();
 				}
@@ -356,7 +353,6 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	function updateImage( imageNode, imageData ) {
 		var classes, className, node, html, parent, wrap, linkNode,
 			captionNode, dd, dl, id, attrs, linkAttrs, width, height, align,
-			$imageNode, srcset, src,
 			dom = editor.dom;
 
 		classes = tinymce.explode( imageData.extraClasses, ' ' );
@@ -492,19 +488,6 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			dom.remove( captionNode );
 		}
 
-		$imageNode = editor.$( imageNode );
-		srcset = $imageNode.attr( 'srcset' );
-		src = $imageNode.attr( 'src' );
-
-		// Remove srcset and sizes if the image file was edited or the image was replaced.
-		if ( srcset && src ) {
-			src = src.replace( /[?#].*/, '' );
-
-			if ( srcset.indexOf( src ) === -1 ) {
-				$imageNode.attr( 'srcset', null ).attr( 'sizes', null );
-			}
-		}
-
 		if ( wp.media.events ) {
 			wp.media.events.trigger( 'editor:image-update', {
 				editor: editor,
@@ -600,7 +583,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			var captionField = {
 				type: 'textbox',
 				flex: 1,
-				name: 'wpcaption',
+				name: 'caption',
 				minHeight: 60,
 				multiline: true,
 				scroll: true,
@@ -626,12 +609,11 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 		editor.on( 'wpImageFormSubmit', function( event ) {
 			var data = event.imgData.data,
 				imgNode = event.imgData.node,
-				caption = event.imgData.wpcaption,
+				caption = event.imgData.caption,
 				captionId = '',
 				captionAlign = '',
 				captionWidth = '',
-				imgId = null,
-				wrap, parent, node, html;
+				wrap, parent, node, html, imgId;
 
 			// Temp image id so we can find the node later
 			data.id = '__wp-temp-img-id';
@@ -797,7 +779,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			}
 
 			imgNode = dom.get('__wp-temp-img-id');
-			dom.setAttrib( imgNode, 'id', imgId || null );
+			dom.setAttrib( imgNode, 'id', imgId );
 			event.imgData.node = imgNode;
 		});
 
@@ -810,7 +792,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 				parent = dom.select( 'dd.wp-caption-dd', parent )[0];
 
 				if ( parent ) {
-					data.wpcaption = editor.serializer.serialize( parent )
+					data.caption = editor.serializer.serialize( parent )
 						.replace( /<br[^>]*>/g, '$&\n' ).replace( /^<p>/, '' ).replace( /<\/p>$/, '' );
 				}
 			}
@@ -977,12 +959,6 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 		return getShortcode( content );
 	};
 
-	editor.on( 'beforeGetContent', function( event ) {
-		if ( event.format !== 'raw' ) {
-			editor.$( 'img[id="__wp-temp-img-id"]' ).attr( 'id', null );
-		}	
-	});
-
 	editor.on( 'BeforeSetContent', function( event ) {
 		if ( event.format !== 'raw' ) {
 			event.content = editor.wpSetImgCaption( event.content );
@@ -1015,16 +991,13 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 				rng = tinymce.dom.RangeUtils.getCaretRangeFromPoint( event.clientX, event.clientY, editor.getDoc() );
 
 			// Don't allow anything to be dropped in a captioned image.
-			if ( rng && dom.getParent( rng.startContainer, '.mceTemp' ) ) {
+			if ( dom.getParent( rng.startContainer, '.mceTemp' ) ) {
 				event.preventDefault();
 			} else if ( wrap ) {
 				event.preventDefault();
 
 				editor.undoManager.transact( function() {
-					if ( rng ) {
-						editor.selection.setRng( rng );
-					}
-
+					editor.selection.setRng( rng );
 					editor.selection.setNode( wrap );
 					dom.remove( wrap );
 				} );

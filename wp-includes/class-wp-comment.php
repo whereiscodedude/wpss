@@ -33,7 +33,7 @@ final class WP_Comment {
 	public $comment_post_ID = 0;
 
 	/**
-	 * Comment author name.
+	 * Comment author ID.
 	 *
 	 * @since 4.4.0
 	 * @access public
@@ -191,11 +191,10 @@ final class WP_Comment {
 	public static function get_instance( $id ) {
 		global $wpdb;
 
-		if ( ! is_numeric( $id ) || $id != floor( $id ) || ! $id ) {
+		$comment_id = (int) $id;
+		if ( ! $comment_id ) {
 			return false;
 		}
-
-		$comment_id = (int) $id;
 
 		$_comment = wp_cache_get( $comment_id, 'comment' );
 
@@ -351,8 +350,6 @@ final class WP_Comment {
 	 * unneeded database queries.
 	 *
 	 * @since 4.4.0
-	 *
-	 * @param bool $set Whether the comment's children have already been populated.
 	 */
 	public function populated_children( $set ) {
 		$this->populated_children = (bool) $set;
