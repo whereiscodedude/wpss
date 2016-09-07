@@ -1,4 +1,4 @@
-/* global getUserSetting, tinymce, QTags */
+/* global getUserSetting, tinymce, QTags, wpActiveEditor */
 
 // WordPress, TinyMCE, and Media
 // -----------------------------
@@ -55,14 +55,7 @@
 			fallbacks = function( props ) {
 				// Generate alt fallbacks and strip tags.
 				if ( 'image' === props.type && ! props.alt ) {
-					if ( props.caption ) {
-						props.alt = props.caption;
-					} else if ( props.title !== props.url ) {
-						props.alt = props.title;
-					} else {
-						props.alt = '';
-					}
-
+					props.alt = props.caption || props.title || '';
 					props.alt = props.alt.replace( /<\/?[^>]+>/g, '' );
 					props.alt = props.alt.replace( /[\r\n]+/g, ' ' );
 				}
@@ -240,7 +233,6 @@
 			var img = {},
 				options, classes, shortcode, html;
 
-			props.type = 'image';
 			props = wp.media.string.props( props, attachment );
 			classes = props.classes || [];
 
@@ -306,64 +298,10 @@
 		}
 	};
 
-	wp.media.embed = {
-		coerce : wp.media.coerce,
-
-		defaults : {
-			url : '',
-			width: '',
-			height: ''
-		},
-
-		edit : function( data, isURL ) {
-			var frame, props = {}, shortcode;
-
-			if ( isURL ) {
-				props.url = data.replace(/<[^>]+>/g, '');
-			} else {
-				shortcode = wp.shortcode.next( 'embed', data ).shortcode;
-
-				props = _.defaults( shortcode.attrs.named, this.defaults );
-				if ( shortcode.content ) {
-					props.url = shortcode.content;
-				}
-			}
-
-			frame = wp.media({
-				frame: 'post',
-				state: 'embed',
-				metadata: props
-			});
-
-			return frame;
-		},
-
-		shortcode : function( model ) {
-			var self = this, content;
-
-			_.each( this.defaults, function( value, key ) {
-				model[ key ] = self.coerce( model, key );
-
-				if ( value === model[ key ] ) {
-					delete model[ key ];
-				}
-			});
-
-			content = model.url;
-			delete model.url;
-
-			return new wp.shortcode({
-				tag: 'embed',
-				attrs: model,
-				content: content
-			});
-		}
-	};
-
 	wp.media.collection = function(attributes) {
 		var collections = {};
 
-		return _.extend( {
+		return _.extend( attributes, {
 			coerce : wp.media.coerce,
 			/**
 			 * Retrieve attachments based on the properties of the passed shortcode
@@ -448,7 +386,7 @@
 			shortcode: function( attachments ) {
 				var props = attachments.props.toJSON(),
 					attrs = _.pick( props, 'orderby', 'order' ),
-					shortcode, clone;
+					shortcode, clone, self = this;
 
 				if ( attachments.type ) {
 					attrs.type = attachments.type;
@@ -486,7 +424,13 @@
 					delete attrs.orderby;
 				}
 
-				attrs = this.setDefaults( attrs );
+				// Remove default attributes from the shortcode.
+				_.each( this.defaults, function( value, key ) {
+					attrs[ key ] = self.coerce( attrs, key );
+					if ( value === attrs[ key ] ) {
+						delete attrs[ key ];
+					}
+				});
 
 				shortcode = new wp.shortcode({
 					tag:    this.tag,
@@ -575,56 +519,24 @@
 				}).open();
 
 				return this.frame;
-			},
-
-			setDefaults: function( attrs ) {
-				var self = this;
-				// Remove default attributes from the shortcode.
-				_.each( this.defaults, function( value, key ) {
-					attrs[ key ] = self.coerce( attrs, key );
-					if ( value === attrs[ key ] ) {
-						delete attrs[ key ];
-					}
-				});
-
-				return attrs;
 			}
-		}, attributes );
+		});
 	};
-
-	wp.media._galleryDefaults = {
-		itemtag: 'dl',
-		icontag: 'dt',
-		captiontag: 'dd',
-		columns: '3',
-		link: 'post',
-		size: 'thumbnail',
-		order: 'ASC',
-		id: wp.media.view.settings.post && wp.media.view.settings.post.id,
-		orderby : 'menu_order ID'
-	};
-
-	if ( wp.media.view.settings.galleryDefaults ) {
-		wp.media.galleryDefaults = _.extend( {}, wp.media._galleryDefaults, wp.media.view.settings.galleryDefaults );
-	} else {
-		wp.media.galleryDefaults = wp.media._galleryDefaults;
-	}
 
 	wp.media.gallery = new wp.media.collection({
 		tag: 'gallery',
 		type : 'image',
 		editTitle : wp.media.view.l10n.editGalleryTitle,
-		defaults : wp.media.galleryDefaults,
-
-		setDefaults: function( attrs ) {
-			var self = this, changed = ! _.isEqual( wp.media.galleryDefaults, wp.media._galleryDefaults );
-			_.each( this.defaults, function( value, key ) {
-				attrs[ key ] = self.coerce( attrs, key );
-				if ( value === attrs[ key ] && ( ! changed || value === wp.media._galleryDefaults[ key ] ) ) {
-					delete attrs[ key ];
-				}
-			} );
-			return attrs;
+		defaults : {
+			itemtag: 'dl',
+			icontag: 'dt',
+			captiontag: 'dd',
+			columns: '3',
+			link: 'post',
+			size: 'thumbnail',
+			order: 'ASC',
+			id: wp.media.view.settings.post && wp.media.view.settings.post.id,
+			orderby : 'menu_order ID'
 		}
 	});
 
@@ -657,24 +569,14 @@
 
 			settings.post.featuredImageId = id;
 
-			wp.media.post( 'get-post-thumbnail-html', {
+			wp.media.post( 'set-post-thumbnail', {
+				json:         true,
 				post_id:      settings.post.id,
 				thumbnail_id: settings.post.featuredImageId,
 				_wpnonce:     settings.post.nonce
 			}).done( function( html ) {
-				if ( html == '0' ) {
-					window.alert( window.setPostThumbnailL10n.error );
-					return;
-				}
 				$( '.inside', '#postimagediv' ).html( html );
 			});
-		},
-		/**
-		 * Remove the featured image id, save the post thumbnail data and
-		 * set the HTML in the post meta box to no featured image.
-		 */
-		remove: function() {
-			wp.media.featuredImage.set( -1 );
 		},
 		/**
 		 * The Featured Image workflow
@@ -688,7 +590,6 @@
 		 */
 		frame: function() {
 			if ( this._frame ) {
-				wp.media.frame = this._frame;
 				return this._frame;
 			}
 
@@ -753,8 +654,7 @@
 
 				wp.media.featuredImage.frame().open();
 			}).on( 'click', '#remove-post-thumbnail', function() {
-				wp.media.featuredImage.remove();
-				return false;
+				wp.media.view.settings.post.featuredImageId = -1;
 			});
 		}
 	};
@@ -777,15 +677,10 @@
 		 * @param {string} html Content to send to the editor
 		 */
 		insert: function( html ) {
-			var editor, wpActiveEditor,
+			var editor,
 				hasTinymce = ! _.isUndefined( window.tinymce ),
-				hasQuicktags = ! _.isUndefined( window.QTags );
-
-			if ( this.activeEditor ) {
-				wpActiveEditor = window.wpActiveEditor = this.activeEditor;
-			} else {
+				hasQuicktags = ! _.isUndefined( window.QTags ),
 				wpActiveEditor = window.wpActiveEditor;
-			}
 
 			// Delegate to the global `send_to_editor` if it exists.
 			// This attempts to play nice with any themes/plugins that have
@@ -900,7 +795,7 @@
 
 				if ( 'link' === type ) {
 					_.defaults( embed, {
-						linkText: embed.url,
+						title:   embed.url,
 						linkUrl: embed.url
 					});
 
@@ -946,7 +841,7 @@
 			}
 
 			// If an empty `id` is provided, default to `wpActiveEditor`.
-			id = window.wpActiveEditor;
+			id = wpActiveEditor;
 
 			// If that doesn't work, fall back to `tinymce.activeEditor.id`.
 			if ( ! id && ! _.isUndefined( window.tinymce ) && tinymce.activeEditor ) {
@@ -1054,11 +949,11 @@
 			 */
 			link: function( embed ) {
 				return wp.media.post( 'send-link-to-editor', {
-					nonce:     wp.media.view.settings.nonce.sendToEditor,
-					src:       embed.linkUrl,
-					link_text: embed.linkText,
-					html:      wp.media.string.link( embed ),
-					post_id:   wp.media.view.settings.post.id
+					nonce:   wp.media.view.settings.nonce.sendToEditor,
+					src:     embed.linkUrl,
+					title:   embed.title,
+					html:    wp.media.string.link( embed ),
+					post_id: wp.media.view.settings.post.id
 				});
 			}
 		},
@@ -1078,16 +973,23 @@
 			options = options || {};
 
 			id = this.id( id );
-			this.activeEditor = id;
+/*
+			// Save a bookmark of the caret position in IE.
+			if ( ! _.isUndefined( window.tinymce ) ) {
+				editor = tinymce.get( id );
 
+				if ( tinymce.isIE && editor && ! editor.isHidden() ) {
+					editor.focus();
+					editor.windowManager.insertimagebookmark = editor.selection.getBookmark();
+				}
+			}
+*/
 			workflow = this.get( id );
 
 			// Redo workflow if state has changed
 			if ( ! workflow || ( workflow.options && options.state !== workflow.options.state ) ) {
 				workflow = this.add( id, options );
 			}
-
-			wp.media.frame = workflow;
 
 			return workflow.open();
 		},
@@ -1099,7 +1001,7 @@
 		 */
 		init: function() {
 			$(document.body)
-				.on( 'click.add-media-button', '.insert-media', function( event ) {
+				.on( 'click', '.insert-media', function( event ) {
 					var elem = $( event.currentTarget ),
 						editor = elem.data('editor'),
 						options = {
@@ -1115,7 +1017,7 @@
 					// Prevents Opera from showing the outline of the button
 					// above the modal.
 					//
-					// See: https://core.trac.wordpress.org/ticket/22445
+					// See: http://core.trac.wordpress.org/ticket/22445
 					elem.blur();
 
 					if ( elem.hasClass( 'gallery' ) ) {
