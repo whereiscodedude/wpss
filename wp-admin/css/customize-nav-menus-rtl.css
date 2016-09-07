@@ -16,24 +16,6 @@
 	color: #555;
 }
 
-/* The `edit-menu` button uses also the `button-link` class. */
-.customize-control-nav_menu_location .edit-menu {
-	margin-right: 6px;
-	vertical-align: middle;
-	line-height: 28px;
-	color: #0073aa;
-	text-decoration: underline;
-}
-
-.customize-control-nav_menu_location .edit-menu:hover,
-.customize-control-nav_menu_location .edit-menu:active {
-	color: #00a0d2;
-}
-
-.customize-control-nav_menu_location .edit-menu:focus {
-	color: #124964;
-}
-
 .wp-customizer .menu-item-bar .menu-item-handle,
 .wp-customizer .menu-item-settings,
 .wp-customizer .menu-item-settings .description-thin {
@@ -59,10 +41,6 @@
 	padding: 1px 5px 0 21px;
 	float: left;
 	text-align: left;
-}
-
-.customize-control-nav_menu_item.has-notifications .menu-item-handle {
-	border-right: 4px solid #00a0d2;
 }
 
 .wp-customizer .menu-item-settings {
@@ -501,7 +479,7 @@
 	color: #23282d;
 }
 
-#available-menu-items .available-menu-items-list {
+#available-menu-items .accordion-section-content {
 	overflow-y: auto;
 	max-height: 200px; /* This gets set in JS to fit the screen size, and based on # of sections. */
 	background: transparent;
@@ -533,63 +511,14 @@
 #available-menu-items .cannot-expand .accordion-section-title .no-items {
 	float: left;
 	color: #555d66;
-	font-weight: 400;
+	font-weight: normal;
 	margin-right: 5px;
 }
 
 #available-menu-items .accordion-section-content {
-	max-height: 290px;
-	margin: 0;
-	padding: 0;
-	position: relative;
-	background: transparent;
-}
-
-#available-menu-items .accordion-section-content .available-menu-items-list {
-	margin: 0 0 45px 0;
 	padding: 1px 15px 15px 15px;
-}
-
-#available-menu-items .accordion-section-content .available-menu-items-list:only-child { /* Types that do not support new items for the current user */
-	margin-bottom: 0;
-}
-
-#new-custom-menu-item .accordion-section-content {
-	padding: 0 15px 15px 15px;
-}
-
-#available-menu-items .accordion-section-content .new-content-item {
-	width: calc(100% - 30px);
-	padding: 8px 15px;
-	position: absolute;
-	bottom: 0;
-	z-index: 10;
-	background: #eee;
-	display: -webkit-box;
-	display: -moz-box;
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	display: flex;
-}
-
-#available-menu-items .new-content-item .create-item-input {
-	-webkit-box-flex: 10;
-	-webkit-flex-grow: 10;
-	-moz-box-flex: 10;
-	-ms-flex-positive: 10;
-	-ms-flex: 10;
-	flex-grow: 10;
-	margin-right: 5px;
-	padding: 4.5px;
-}
-#available-menu-items .new-content-item .add-content {
-	padding-right: 6px;
-	-webkit-box-flex: 10;
-	-webkit-flex-grow: 10;
-	-moz-box-flex: 10;
-	-ms-flex-positive: 10;
-	-ms-flex: 10;
-	flex-grow: 1;
+	margin: 0;
+	max-height: 290px;
 }
 
 #available-menu-items .menu-item-tpl {
@@ -599,9 +528,7 @@
 #custom-menu-item-name.invalid,
 #custom-menu-item-url.invalid,
 .menu-name-field.invalid,
-.menu-name-field.invalid:focus,
-#available-menu-items .new-content-item .create-item-input.invalid,
-#available-menu-items .new-content-item .create-item-input.invalid:focus {
+.menu-name-field.invalid:focus {
 	border: 1px solid #f00;
 }
 
@@ -680,17 +607,13 @@
 
 #available-menu-items-search .clear-results {
 	position: absolute;
-	top: 18px; /* 12 container padding +1 input margin +1 input border +4 ( 4 is ( 28 input height - 20 button height ) / 2 ) */
+	top: 20px;
 	left: 20px;
 	width: 20px;
 	height: 20px;
-	padding: 0;
-	border: 0;
 	cursor: pointer;
-	background: none;
 	color: #a00;
 	text-decoration: none;
-	outline: 0;
 }
 
 #available-menu-items-search .clear-results,
@@ -702,14 +625,9 @@
 	display: block;
 }
 
-.ie8 #available-menu-items-search.loading .clear-results:before {
-	content: ""; /* help IE8 redraw the pseudo element */
-}
-
 #available-menu-items-search .clear-results:before {
 	content: "\f335";
 	font: normal 20px/1 dashicons;
-	vertical-align: middle;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -721,9 +639,9 @@
 
 #available-menu-items-search .spinner {
 	position: absolute;
-	top: 18px; /* 12 container padding +1 input margin +1 input border +4 ( ( 28 input height - 20 button height ) / 2 ) */
-	left: 20px;
+	top: 20px;
 	margin: 0 !important;
+	left: 20px;
 }
 
 /* search results list */
@@ -922,19 +840,10 @@ li.assigned-to-menu-location .add-new-menu-item {
 	#available-menu-items #available-menu-items-search .accordion-section-content {
 		top: 63px;
 	}
-
-	#available-menu-items-search .spinner,
-	#available-menu-items-search .clear-results {
-		top: 20px; /* 12 container padding +1 input margin +1 input border +5.5 ( 5.5 rounded to 6 is ( 31 input height - 20 button height ) / 2 ) */
-	}
 }
 
 @media screen and ( max-width: 640px ) {
 	#available-menu-items #available-menu-items-search .accordion-section-content {
 		top: 133px;
-	}
-
-	#available-menu-items-search .clear-results {
-		top: 90px; /* 70 section title height + 12 container padding +1 input margin +1 input border +5.5 ( 5.5 rounded to 6 is ( 31 input height - 20 button height ) / 2 ) */
 	}
 }

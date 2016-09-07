@@ -11,7 +11,7 @@
  * Instantiate the admin bar object and set it up as a global for access elsewhere.
  *
  * UNHOOKING THIS FUNCTION WILL NOT PROPERLY REMOVE THE ADMIN BAR.
- * For that, use show_admin_bar(false) or the {@see 'show_admin_bar'} filter.
+ * For that, use show_admin_bar(false) or the 'show_admin_bar' filter.
  *
  * @since 3.1.0
  * @access private
@@ -32,7 +32,7 @@ function _wp_admin_bar_init() {
 	/* Instantiate the admin bar */
 
 	/**
-	 * Filters the admin bar class to instantiate.
+	 * Filter the admin bar class to instantiate.
 	 *
 	 * @since 3.1.0
 	 *
@@ -51,15 +51,13 @@ function _wp_admin_bar_init() {
 }
 
 /**
- * Renders the admin bar to the page based on the $wp_admin_bar->menu member var.
+ * Render the admin bar to the page based on the $wp_admin_bar->menu member var.
+ * This is called very late on the footer actions so that it will render after anything else being
+ * added to the footer.
  *
- * This is called very late on the footer actions so that it will render after
- * anything else being added to the footer.
- *
- * It includes the {@see 'admin_bar_menu'} action which should be used to hook in and
- * add new menus to the admin bar. That way you can be sure that you are adding at most
- * optimal point, right before the admin bar is rendered. This also gives you access to
- * the `$post` global, among others.
+ * It includes the action "admin_bar_menu" which should be used to hook in and
+ * add new menus to the admin bar. That way you can be sure that you are adding at most optimal point,
+ * right before the admin bar is rendered. This also gives you access to the $post global, among others.
  *
  * @since 3.1.0
  *
@@ -196,8 +194,7 @@ function wp_admin_bar_my_account_item( $wp_admin_bar ) {
 	}
 
 	$avatar = get_avatar( $user_id, 26 );
-	/* translators: %s: current user's display name */
-	$howdy  = sprintf( __( 'Howdy, %s' ), $current_user->display_name );
+	$howdy  = sprintf( __('Howdy, %1$s'), $current_user->display_name );
 	$class  = empty( $avatar ) ? '' : 'with-avatar';
 
 	$wp_admin_bar->add_menu( array(
@@ -294,11 +291,9 @@ function wp_admin_bar_site_menu( $wp_admin_bar ) {
 	}
 
 	if ( is_network_admin() ) {
-		/* translators: %s: site name */ 
-		$blogname = sprintf( __( 'Network Admin: %s' ), esc_html( get_current_site()->site_name ) );
+		$blogname = sprintf( __('Network Admin: %s'), esc_html( get_current_site()->site_name ) );
 	} elseif ( is_user_admin() ) {
-		/* translators: %s: site name */ 
-		$blogname = sprintf( __( 'User Dashboard: %s' ), esc_html( get_current_site()->site_name ) );
+		$blogname = sprintf( __('User Dashboard: %s'), esc_html( get_current_site()->site_name ) );
 	}
 
 	$title = wp_html_excerpt( $blogname, 40, '&hellip;' );
@@ -877,10 +872,9 @@ function _admin_bar_bump_cb() { ?>
 }
 
 /**
- * Sets the display status of the admin bar.
+ * Set the display status of the admin bar.
  *
- * This can be called immediately upon plugin load. It does not need to be called
- * from a function hooked to the {@see 'init'} action.
+ * This can be called immediately upon plugin load. It does not need to be called from a function hooked to the init action.
  *
  * @since 3.1.0
  *
@@ -927,7 +921,7 @@ function is_admin_bar_showing() {
 	}
 
 	/**
-	 * Filters whether to show the admin bar.
+	 * Filter whether to show the admin bar.
 	 *
 	 * Returning false to this hook is the recommended way to hide the admin bar.
 	 * The user's display preference is used for logged in users.

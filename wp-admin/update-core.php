@@ -20,22 +20,21 @@ if ( is_multisite() && ! is_network_admin() ) {
 }
 
 if ( ! current_user_can( 'update_core' ) && ! current_user_can( 'update_themes' ) && ! current_user_can( 'update_plugins' ) )
-	wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
+	wp_die( __( 'You do not have sufficient permissions to update this site.' ) );
 
 /**
  *
  * @global string $wp_local_package
  * @global wpdb   $wpdb
+ * @global string $wp_version
  *
  * @staticvar bool $first_pass
  *
  * @param object $update
  */
 function list_core_update( $update ) {
- 	global $wp_local_package, $wpdb;
+ 	global $wp_local_package, $wpdb, $wp_version;
   	static $first_pass = true;
-
-	$wp_version = get_bloginfo( 'version' );
 
  	if ( 'en_US' == $update->locale && 'en_US' == get_locale() )
  		$version_string = $update->current;
@@ -150,13 +149,13 @@ function dismissed_updates() {
  *
  * @since 2.7.0
  *
+ * @global string $wp_version
  * @global string $required_php_version
  * @global string $required_mysql_version
  */
 function core_upgrade_preamble() {
-	global $required_php_version, $required_mysql_version;
+	global $wp_version, $required_php_version, $required_mysql_version;
 
-	$wp_version = get_bloginfo( 'version' );
 	$updates = get_core_updates();
 
 	if ( !isset($updates[0]->response) || 'latest' == $updates[0]->response ) {
@@ -214,9 +213,14 @@ function core_upgrade_preamble() {
 	dismissed_updates();
 }
 
+/**
+ *
+ * @global string $wp_version
+ */
 function list_plugin_updates() {
-	$wp_version = get_bloginfo( 'version' );
-	$cur_wp_version = preg_replace( '/-.*$/', '', $wp_version );
+	global $wp_version;
+
+	$cur_wp_version = preg_replace('/-.*$/', '', $wp_version);
 
 	require_once(ABSPATH . 'wp-admin/includes/plugin-install.php');
 	$plugins = get_plugin_updates();
@@ -619,7 +623,7 @@ if ( 'upgrade-core' == $action ) {
 } elseif ( 'do-core-upgrade' == $action || 'do-core-reinstall' == $action ) {
 
 	if ( ! current_user_can( 'update_core' ) )
-		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
+		wp_die( __( 'You do not have sufficient permissions to update this site.' ) );
 
 	check_admin_referer('upgrade-core');
 
@@ -643,7 +647,7 @@ if ( 'upgrade-core' == $action ) {
 } elseif ( 'do-plugin-upgrade' == $action ) {
 
 	if ( ! current_user_can( 'update_plugins' ) )
-		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
+		wp_die( __( 'You do not have sufficient permissions to update this site.' ) );
 
 	check_admin_referer('upgrade-core');
 
@@ -671,7 +675,7 @@ if ( 'upgrade-core' == $action ) {
 } elseif ( 'do-theme-upgrade' == $action ) {
 
 	if ( ! current_user_can( 'update_themes' ) )
-		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
+		wp_die( __( 'You do not have sufficient permissions to update this site.' ) );
 
 	check_admin_referer('upgrade-core');
 
@@ -701,7 +705,7 @@ if ( 'upgrade-core' == $action ) {
 } elseif ( 'do-translation-upgrade' == $action ) {
 
 	if ( ! current_user_can( 'update_core' ) && ! current_user_can( 'update_plugins' ) && ! current_user_can( 'update_themes' ) )
-		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
+		wp_die( __( 'You do not have sufficient permissions to update this site.' ) );
 
 	check_admin_referer( 'upgrade-translations' );
 

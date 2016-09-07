@@ -315,9 +315,11 @@ final class WP_Customize_Selective_Refresh {
 		 * WP_Customize_Manager::setup_theme() is where the previewing flag is set.
 		 */
 		if ( ! is_customize_preview() ) {
-			wp_send_json_error( 'expected_customize_preview', 403 );
+			status_header( 403 );
+			wp_send_json_error( 'expected_customize_preview' );
 		} else if ( ! isset( $_POST['partials'] ) ) {
-			wp_send_json_error( 'missing_partials', 400 );
+			status_header( 400 );
+			wp_send_json_error( 'missing_partials' );
 		}
 
 		$partials = json_decode( wp_unslash( $_POST['partials'] ), true );
@@ -399,10 +401,6 @@ final class WP_Customize_Selective_Refresh {
 		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
 			$response['errors'] = $this->triggered_errors;
 		}
-
-		$setting_validities = $this->manager->validate_setting_values( $this->manager->unsanitized_post_values() );
-		$exported_setting_validities = array_map( array( $this->manager, 'prepare_setting_validity_for_js' ), $setting_validities );
-		$response['setting_validities'] = $exported_setting_validities;
 
 		/**
 		 * Filters the response from rendering the partials.
