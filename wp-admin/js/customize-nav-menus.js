@@ -17,15 +17,15 @@
 
 	// Link settings.
 	api.Menus.data = {
+		nonce: '',
 		itemTypes: [],
 		l10n: {},
-		settingTransport: 'refresh',
+		menuItemTransport: 'postMessage',
 		phpIntMax: 0,
 		defaultSettingValues: {
 			nav_menu: {},
 			nav_menu_item: {}
-		},
-		locationSlugMappedToName: {}
+		}
 	};
 	if ( 'undefined' !== typeof _wpCustomizeNavMenusSettings ) {
 		$.extend( api.Menus.data, _wpCustomizeNavMenusSettings );
@@ -80,47 +80,6 @@
 	});
 	api.Menus.availableMenuItems = new api.Menus.AvailableItemCollection( api.Menus.data.availableMenuItems );
 
-	api.Menus.insertedAutoDrafts = [];
-
-	/**
-	 * Insert a new `auto-draft` post.
-	 *
-	 * @param {object} params - Parameters for the draft post to create.
-	 * @param {string} params.post_type - Post type to add.
-	 * @param {string} params.post_title - Post title to use.
-	 * @return {jQuery.promise} Promise resolved with the added post.
-	 */
-	api.Menus.insertAutoDraftPost = function insertAutoDraftPost( params ) {
-		var request, deferred = $.Deferred();
-
-		request = wp.ajax.post( 'customize-nav-menus-insert-auto-draft', {
-			'customize-menus-nonce': api.settings.nonce['customize-menus'],
-			'wp_customize': 'on',
-			'params': params
-		} );
-
-		request.done( function( response ) {
-			if ( response.post_id ) {
-				deferred.resolve( response );
-				api.Menus.insertedAutoDrafts.push( response.post_id );
-				api( 'nav_menus_created_posts' ).set( _.clone( api.Menus.insertedAutoDrafts ) );
-			}
-		} );
-
-		request.fail( function( response ) {
-			var error = response || '';
-
-			if ( 'undefined' !== typeof response.message ) {
-				error = response.message;
-			}
-
-			console.error( error );
-			deferred.rejectWith( error );
-		} );
-
-		return deferred.promise();
-	};
-
 	/**
 	 * wp.customize.Menus.AvailableMenuItemsPanelView
 	 *
@@ -141,8 +100,6 @@
 			'click .menu-item-tpl': '_submit',
 			'click #custom-menu-item-submit': '_submitLink',
 			'keypress #custom-menu-item-name': '_submitLink',
-			'click .new-content-item .add-content': '_submitNew',
-			'keypress .create-item-input': '_submitNew',
 			'keydown': 'keyboardAccessible'
 		},
 
@@ -158,7 +115,6 @@
 		pages: {},
 		sectionContent: '',
 		loading: false,
-		addingNew: false,
 
 		initialize: function() {
 			var self = this;
@@ -168,7 +124,7 @@
 			}
 
 			this.$search = $( '#menu-items-search' );
-			this.sectionContent = this.$el.find( '.available-menu-items-list' );
+			this.sectionContent = this.$el.find( '.accordion-section-content' );
 
 			this.debounceSearch = _.debounce( self.search, 500 );
 
@@ -186,8 +142,16 @@
 			} );
 
 			// Clear the search results.
-			$( '.clear-results' ).on( 'click', function() {
-				self.$search.val( '' ).focus().trigger( 'keyup' );
+			$( '.clear-results' ).on( 'click keydown', function( event ) {
+				if ( event.type === 'keydown' && ( 13 !== event.which && 32 !== event.which ) ) { // "return" or "space" keys only
+					return;
+				}
+
+				event.preventDefault();
+
+				$( '#menu-items-search' ).val( '' ).focus();
+				event.target.value = '';
+				self.search( event );
 			} );
 
 			this.$el.on( 'input', '#custom-menu-item-name.invalid, #custom-menu-item-url.invalid', function() {
@@ -204,7 +168,7 @@
 
 			// Load more items.
 			this.sectionContent.scroll( function() {
-				var totalHeight = self.$el.find( '.accordion-section.open .available-menu-items-list' ).prop( 'scrollHeight' ),
+				var totalHeight = self.$el.find( '.accordion-section.open .accordion-section-content' ).prop( 'scrollHeight' ),
 					visibleHeight = self.$el.find( '.accordion-section.open' ).height();
 
 				if ( ! self.loading && $( this ).scrollTop() > 3 / 4 * totalHeight - visibleHeight ) {
@@ -223,8 +187,6 @@
 
 			// Close the panel if the URL in the preview changes
 			api.previewer.bind( 'url', this.close );
-
-			self.delegateEvents();
 		},
 
 		// Search input change handler.
@@ -244,13 +206,17 @@
 				$otherSections.fadeOut( 100 );
 				$searchSection.find( '.accordion-section-content' ).slideDown( 'fast' );
 				$searchSection.addClass( 'open' );
-				$searchSection.find( '.clear-results' ).addClass( 'is-visible' );
+				$searchSection.find( '.clear-results' )
+					.prop( 'tabIndex', 0 )
+					.addClass( 'is-visible' );
 			} else if ( '' === event.target.value ) {
 				$searchSection.removeClass( 'open' );
 				$otherSections.show();
-				$searchSection.find( '.clear-results' ).removeClass( 'is-visible' );
+				$searchSection.find( '.clear-results' )
+					.prop( 'tabIndex', -1 )
+					.removeClass( 'is-visible' );
 			}
-
+			
 			this.searchTerm = event.target.value;
 			this.pages.search = 1;
 			this.doSearch( 1 );
@@ -282,7 +248,7 @@
 			$section.addClass( 'loading' );
 			self.loading = true;
 			params = {
-				'customize-menus-nonce': api.settings.nonce['customize-menus'],
+				'customize-menus-nonce': api.Menus.data.nonce,
 				'wp_customize': 'on',
 				'search': self.searchTerm,
 				'page': page
@@ -357,7 +323,7 @@
 			availableMenuItemContainer.find( '.accordion-section-title' ).addClass( 'loading' );
 			self.loading = true;
 			params = {
-				'customize-menus-nonce': api.settings.nonce['customize-menus'],
+				'customize-menus-nonce': api.Menus.data.nonce,
 				'wp_customize': 'on',
 				'type': type,
 				'object': object,
@@ -381,7 +347,7 @@
 				}
 				items = new api.Menus.AvailableItemCollection( items ); // @todo Why is this collection created and then thrown away?
 				self.collection.add( items.models );
-				typeInner = availableMenuItemContainer.find( '.available-menu-items-list' );
+				typeInner = availableMenuItemContainer.find( '.accordion-section-content' );
 				items.each(function( menuItem ) {
 					typeInner.append( itemTemplate( menuItem.attributes ) );
 				});
@@ -400,15 +366,13 @@
 
 		// Adjust the height of each section of items to fit the screen.
 		itemSectionHeight: function() {
-			var sections, lists, totalHeight, accordionHeight, diff;
+			var sections, totalHeight, accordionHeight, diff;
 			totalHeight = window.innerHeight;
 			sections = this.$el.find( '.accordion-section:not( #available-menu-items-search ) .accordion-section-content' );
-			lists = this.$el.find( '.accordion-section:not( #available-menu-items-search ) .available-menu-items-list:not(":only-child")' );
-			accordionHeight =  46 * ( 1 + sections.length ) + 14; // Magic numbers.
+			accordionHeight =  46 * ( 2 + sections.length ) - 13; // Magic numbers.
 			diff = totalHeight - accordionHeight;
 			if ( 120 < diff && 290 > diff ) {
 				sections.css( 'max-height', diff );
-				lists.css( 'max-height', ( diff - 60 ) );
 			}
 		},
 
@@ -492,7 +456,7 @@
 				'url': itemUrl.val(),
 				'type': 'custom',
 				'type_label': api.Menus.data.l10n.custom_label,
-				'object': 'custom'
+				'object': ''
 			};
 
 			this.currentMenuControl.addItemToMenu( menuItem );
@@ -500,88 +464,6 @@
 			// Reset the custom link form.
 			itemUrl.val( 'http://' );
 			itemName.val( '' );
-		},
-
-		// Submit handler for keypress (enter) on field and click on button.
-		_submitNew: function( event ) {
-			var container;
-
-			// Only proceed with keypress if it is Enter.
-			if ( 'keypress' === event.type && 13 !== event.which ) {
-				return;
-			}
-
-			if ( this.addingNew ) {
-				return;
-			}
-
-			container = $( event.target ).closest( '.accordion-section' );
-
-			this.submitNew( container );
-		},
-
-		// Creates a new object and adds an associated menu item to the menu.
-		submitNew: function( container ) {
-			var panel = this,
-				itemName = container.find( '.create-item-input' ),
-				title = itemName.val(),
-				dataContainer = container.find( '.available-menu-items-list' ),
-				itemType = dataContainer.data( 'type' ),
-				itemObject = dataContainer.data( 'object' ),
-				itemTypeLabel = dataContainer.data( 'type_label' ),
-				promise;
-
-			if ( ! this.currentMenuControl ) {
-				return;
-			}
-
-			// Only posts are supported currently.
-			if ( 'post_type' !== itemType ) {
-				return;
-			}
-
-			if ( '' === $.trim( itemName.val() ) ) {
-				itemName.addClass( 'invalid' );
-				itemName.focus();
-				return;
-			} else {
-				itemName.removeClass( 'invalid' );
-				container.find( '.accordion-section-title' ).addClass( 'loading' );
-			}
-
-			panel.addingNew = true;
-			itemName.attr( 'disabled', 'disabled' );
-			promise = api.Menus.insertAutoDraftPost( {
-				post_title: title,
-				post_type: itemObject
-			} );
-			promise.done( function( data ) {
-				var availableItem, $content, itemTemplate;
-				availableItem = new api.Menus.AvailableItemModel( {
-					'id': 'post-' + data.post_id, // Used for available menu item Backbone models.
-					'title': itemName.val(),
-					'type': itemType,
-					'type_label': itemTypeLabel,
-					'object': itemObject,
-					'object_id': data.post_id,
-					'url': data.url
-				} );
-
-				// Add new item to menu.
-				panel.currentMenuControl.addItemToMenu( availableItem.attributes );
-
-				// Add the new item to the list of available items.
-				api.Menus.availableMenuItemsPanel.collection.add( availableItem );
-				$content = container.find( '.available-menu-items-list' );
-				itemTemplate = wp.template( 'available-menu-item' );
-				$content.prepend( itemTemplate( availableItem.attributes ) );
-				$content.scrollTop();
-
-				// Reset the create content form.
-				itemName.val( '' ).removeAttr( 'disabled' );
-				panel.addingNew = false;
-				container.find( '.accordion-section-title' ).removeClass( 'loading' );
-			} );
 		},
 
 		// Opens the panel.
@@ -730,21 +612,15 @@
 			});
 		},
 
-		saveManageColumnsState: _.debounce( function() {
-			var panel = this;
-			if ( panel._updateHiddenColumnsRequest ) {
-				panel._updateHiddenColumnsRequest.abort();
-			}
-
-			panel._updateHiddenColumnsRequest = wp.ajax.post( 'hidden-columns', {
-				hidden: panel.hidden(),
+		saveManageColumnsState: function() {
+			var hidden = this.hidden();
+			$.post( wp.ajax.settings.url, {
+				action: 'hidden-columns',
+				hidden: hidden,
 				screenoptionnonce: $( '#screenoptionnonce' ).val(),
 				page: 'nav-menus'
-			} );
-			panel._updateHiddenColumnsRequest.always( function() {
-				panel._updateHiddenColumnsRequest = null;
-			} );
-		}, 2000 ),
+			});
+		},
 
 		checked: function( column ) {
 			this.container.addClass( 'field-' + column + '-active' );
@@ -755,10 +631,12 @@
 		},
 
 		hidden: function() {
-			return $( '.hide-column-tog' ).not( ':checked' ).map( function() {
-				var id = this.id;
-				return id.substring( 0, id.length - 5 );
-			}).get().join( ',' );
+			this.hidden = function() {
+				return $( '.hide-column-tog' ).not( ':checked' ).map( function() {
+					var id = this.id;
+					return id.substring( id, id.length - 5 );
+				}).get().join( ',' );
+			};
 		}
 	} );
 
@@ -774,9 +652,7 @@
 	api.Menus.MenuSection = api.Section.extend({
 
 		/**
-		 * Initialize.
-		 *
-		 * @since 4.3.0
+		 * @since Menu Customizer 0.3
 		 *
 		 * @param {String} id
 		 * @param {Object} options
@@ -788,7 +664,7 @@
 		},
 
 		/**
-		 * Ready.
+		 *
 		 */
 		ready: function() {
 			var section = this;
@@ -928,23 +804,21 @@
 		},
 
 		/**
-		 * @param {Array} themeLocationSlugs Theme location slugs.
+		 * @param {array} themeLocations
 		 */
-		updateAssignedLocationsInSectionTitle: function( themeLocationSlugs ) {
+		updateAssignedLocationsInSectionTitle: function( themeLocations ) {
 			var section = this,
 				$title;
 
 			$title = section.container.find( '.accordion-section-title:first' );
 			$title.find( '.menu-in-location' ).remove();
-			_.each( themeLocationSlugs, function( themeLocationSlug ) {
-				var $label, locationName;
-				$label = $( '<span class="menu-in-location"></span>' );
-				locationName = api.Menus.data.locationSlugMappedToName[ themeLocationSlug ];
-				$label.text( api.Menus.data.l10n.menuLocation.replace( '%s', locationName ) );
+			_.each( themeLocations, function( themeLocation ) {
+				var $label = $( '<span class="menu-in-location"></span>' );
+				$label.text( api.Menus.data.l10n.menuLocation.replace( '%s', themeLocation ) );
 				$title.append( $label );
 			});
 
-			section.container.toggleClass( 'assigned-to-menu-location', 0 !== themeLocationSlugs.length );
+			section.container.toggleClass( 'assigned-to-menu-location', 0 !== themeLocations.length );
 
 		},
 
@@ -991,7 +865,7 @@
 		/**
 		 * Add behaviors for the accordion section.
 		 *
-		 * @since 4.3.0
+		 * @since Menu Customizer 0.3
 		 */
 		attachEvents: function() {
 			var section = this;
@@ -1056,19 +930,6 @@
 				return parseInt( value, 10 );
 			};
 
-			// Edit menu button.
-			control.container.find( '.edit-menu' ).on( 'click', function() {
-				var menuId = control.setting();
-				api.section( 'nav_menu[' + menuId + ']' ).focus();
-			});
-			control.setting.bind( 'change', function() {
-				if ( 0 === control.setting() ) {
-					control.container.find( '.edit-menu' ).addClass( 'hidden' );
-				} else {
-					control.container.find( '.edit-menu' ).removeClass( 'hidden' );
-				}
-			});
-
 			// Add/remove menus from the available options when they are added and removed.
 			api.bind( 'add', function( setting ) {
 				var option, menuId, matches = setting.id.match( navMenuIdRegex );
@@ -1124,13 +985,6 @@
 		 */
 		initialize: function( id, options ) {
 			var control = this;
-			control.expanded = new api.Value( false );
-			control.expandedArgumentsQueue = [];
-			control.expanded.bind( function( expanded ) {
-				var args = control.expandedArgumentsQueue.shift();
-				args = $.extend( {}, control.defaultExpandedArguments, args );
-				control.onChangeExpanded( expanded, args );
-			});
 			api.Control.prototype.initialize.call( control, id, options );
 			control.active.validate = function() {
 				var value, section = api.section( control.section() );
@@ -1144,11 +998,11 @@
 		},
 
 		/**
+		 * @since Menu Customizer 0.3
+		 *
 		 * Override the embed() method to do nothing,
 		 * so that the control isn't embedded on load,
 		 * unless the containing section is already expanded.
-		 *
-		 * @since 4.3.0
 		 */
 		embed: function() {
 			var control = this,
@@ -1158,7 +1012,7 @@
 				return;
 			}
 			section = api.section( sectionId );
-			if ( ( section && section.expanded() ) || api.settings.autofocus.control === control.id ) {
+			if ( section && section.expanded() ) {
 				control.actuallyEmbed();
 			}
 		},
@@ -1167,7 +1021,7 @@
 		 * This function is called in Section.onChangeExpanded() so the control
 		 * will only get embedded when the Section is first expanded.
 		 *
-		 * @since 4.3.0
+		 * @since Menu Customizer 0.3
 		 */
 		actuallyEmbed: function() {
 			var control = this;
@@ -1396,21 +1250,16 @@
 					return;
 				}
 
-				var titleEl = control.container.find( '.menu-item-title' ),
-				    titleText = item.title || api.Menus.data.l10n.untitled;
-
-				if ( item._invalid ) {
-					titleText = api.Menus.data.l10n.invalidTitleTpl.replace( '%s', titleText );
-				}
+				var titleEl = control.container.find( '.menu-item-title' );
 
 				// Don't update to an empty title.
 				if ( item.title ) {
 					titleEl
-						.text( titleText )
+						.text( item.title )
 						.removeClass( 'no-title' );
 				} else {
 					titleEl
-						.text( titleText )
+						.text( api.Menus.data.l10n.untitled )
 						.addClass( 'no-title' );
 				}
 			} );
@@ -1454,9 +1303,9 @@
 				'menu-item-edit-inactive'
 			];
 
-			if ( settingValue._invalid ) {
-				containerClasses.push( 'menu-item-invalid' );
-				control.params.title = api.Menus.data.l10n.invalidTitleTpl.replace( '%s', control.params.title );
+			if ( settingValue.invalid ) {
+				containerClasses.push( 'invalid' );
+				control.params.title = api.Menus.data.invalidTitleTpl.replace( '%s', control.params.title );
 			} else if ( 'draft' === settingValue.status ) {
 				containerClasses.push( 'pending' );
 				control.params.title = api.Menus.data.pendingTitleTpl.replace( '%s', control.params.title );
@@ -1508,84 +1357,25 @@
 		},
 
 		/**
-		 * @since 4.6.0
-		 *
-		 * @param {Boolean} expanded
-		 * @param {Object} [params]
-		 * @returns {Boolean} false if state already applied
-		 */
-		_toggleExpanded: api.Section.prototype._toggleExpanded,
-
-		/**
-		 * @since 4.6.0
-		 *
-		 * @param {Object} [params]
-		 * @returns {Boolean} false if already expanded
-		 */
-		expand: api.Section.prototype.expand,
-
-		/**
 		 * Expand the menu item form control.
-		 *
-		 * @since 4.5.0 Added params.completeCallback.
-		 *
-		 * @param {Object}   [params] - Optional params.
-		 * @param {Function} [params.completeCallback] - Function to call when the form toggle has finished animating.
 		 */
-		expandForm: function( params ) {
-			this.expand( params );
+		expandForm: function() {
+			this.toggleForm( true );
 		},
-
-		/**
-		 * @since 4.6.0
-		 *
-		 * @param {Object} [params]
-		 * @returns {Boolean} false if already collapsed
-		 */
-		collapse: api.Section.prototype.collapse,
 
 		/**
 		 * Collapse the menu item form control.
-		 *
-		 * @since 4.5.0 Added params.completeCallback.
-		 *
-		 * @param {Object}   [params] - Optional params.
-		 * @param {Function} [params.completeCallback] - Function to call when the form toggle has finished animating.
 		 */
-		collapseForm: function( params ) {
-			this.collapse( params );
+		collapseForm: function() {
+			this.toggleForm( false );
 		},
 
 		/**
 		 * Expand or collapse the menu item control.
 		 *
-		 * @deprecated this is poor naming, and it is better to directly set control.expanded( showOrHide )
-		 * @since 4.5.0 Added params.completeCallback.
-		 *
-		 * @param {boolean}  [showOrHide] - If not supplied, will be inverse of current visibility
-		 * @param {Object}   [params] - Optional params.
-		 * @param {Function} [params.completeCallback] - Function to call when the form toggle has finished animating.
+		 * @param {boolean|undefined} [showOrHide] If not supplied, will be inverse of current visibility
 		 */
-		toggleForm: function( showOrHide, params ) {
-			if ( typeof showOrHide === 'undefined' ) {
-				showOrHide = ! this.expanded();
-			}
-			if ( showOrHide ) {
-				this.expand( params );
-			} else {
-				this.collapse( params );
-			}
-		},
-
-		/**
-		 * Expand or collapse the menu item control.
-		 *
-		 * @since 4.6.0
-		 * @param {boolean}  [showOrHide] - If not supplied, will be inverse of current visibility
-		 * @param {Object}   [params] - Optional params.
-		 * @param {Function} [params.completeCallback] - Function to call when the form toggle has finished animating.
-		 */
-		onChangeExpanded: function( showOrHide, params ) {
+		toggleForm: function( showOrHide ) {
 			var self = this, $menuitem, $inside, complete;
 
 			$menuitem = this.container;
@@ -1596,9 +1386,6 @@
 
 			// Already expanded or collapsed.
 			if ( $inside.is( ':visible' ) === showOrHide ) {
-				if ( params && params.completeCallback ) {
-					params.completeCallback();
-				}
 				return;
 			}
 
@@ -1615,10 +1402,6 @@
 						.removeClass( 'menu-item-edit-inactive' )
 						.addClass( 'menu-item-edit-active' );
 					self.container.trigger( 'expanded' );
-
-					if ( params && params.completeCallback ) {
-						params.completeCallback();
-					}
 				};
 
 				$menuitem.find( '.item-edit' ).attr( 'aria-expanded', 'true' );
@@ -1631,10 +1414,6 @@
 						.addClass( 'menu-item-edit-inactive' )
 						.removeClass( 'menu-item-edit-active' );
 					self.container.trigger( 'collapsed' );
-
-					if ( params && params.completeCallback ) {
-						params.completeCallback();
-					}
 				};
 
 				self.container.trigger( 'collapse' );
@@ -1647,31 +1426,11 @@
 		/**
 		 * Expand the containing menu section, expand the form, and focus on
 		 * the first input in the control.
-		 *
-		 * @since 4.5.0 Added params.completeCallback.
-		 *
-		 * @param {Object}   [params] - Params object.
-		 * @param {Function} [params.completeCallback] - Optional callback function when focus has completed.
 		 */
-		focus: function( params ) {
-			params = params || {};
-			var control = this, originalCompleteCallback = params.completeCallback;
-
-			control.expandControlSection();
-
-			params.completeCallback = function() {
-				var focusable;
-
-				// Note that we can't use :focusable due to a jQuery UI issue. See: https://github.com/jquery/jquery-ui/pull/1583
-				focusable = control.container.find( '.menu-item-settings' ).find( 'input, select, textarea, button, object, a[href], [tabindex]' ).filter( ':visible' );
-				focusable.first().focus();
-
-				if ( originalCompleteCallback ) {
-					originalCompleteCallback();
-				}
-			};
-
-			control.expandForm( params );
+		focus: function() {
+			this.expandControlSection();
+			this.expandForm();
+			this.container.find( '.menu-item-settings :focusable:first' ).focus();
 		},
 
 		/**
@@ -2499,7 +2258,7 @@
 			customizeId = 'nav_menu_item[' + String( placeholderId ) + ']';
 			settingArgs = {
 				type: 'nav_menu_item',
-				transport: api.Menus.data.settingTransport,
+				transport: 'postMessage',
 				previewer: api.previewer
 			};
 			setting = api.create( customizeId, customizeId, {}, settingArgs );
@@ -2588,7 +2347,7 @@
 			// Register the menu control setting.
 			api.create( customizeId, customizeId, {}, {
 				type: 'nav_menu',
-				transport: api.Menus.data.settingTransport,
+				transport: 'postMessage',
 				previewer: api.previewer
 			} );
 			api( customizeId ).set( $.extend(
@@ -2673,13 +2432,11 @@
 			if ( data.nav_menu_updates || data.nav_menu_item_updates ) {
 				api.Menus.applySavedData( data );
 			}
-
-			// Reset list of inserted auto draft post IDs.
-			api.Menus.insertedAutoDrafts = [];
 		} );
 
-		// Open and focus menu control.
-		api.previewer.bind( 'focus-nav-menu-item-control', api.Menus.focusMenuItemControl );
+		api.previewer.bind( 'refresh', function() {
+			api.previewer.refresh();
+		});
 	} );
 
 	/**
@@ -2692,7 +2449,7 @@
 	 */
 	api.Menus.applySavedData = function( data ) {
 
-		var insertedMenuIdMapping = {}, insertedMenuItemIdMapping = {};
+		var insertedMenuIdMapping = {};
 
 		_( data.nav_menu_updates ).each(function( update ) {
 			var oldCustomizeId, newCustomizeId, customizeId, oldSetting, newSetting, setting, settingValue, oldSection, newSection, wasSaved, widgetTemplate, navMenuCount;
@@ -2723,7 +2480,7 @@
 				newCustomizeId = 'nav_menu[' + String( update.term_id ) + ']';
 				newSetting = api.create( newCustomizeId, newCustomizeId, settingValue, {
 					type: 'nav_menu',
-					transport: api.Menus.data.settingTransport,
+					transport: 'postMessage',
 					previewer: api.previewer
 				} );
 
@@ -2823,13 +2580,6 @@
 			}
 		} );
 
-		// Build up mapping of nav_menu_item placeholder IDs to inserted IDs.
-		_( data.nav_menu_item_updates ).each(function( update ) {
-			if ( update.previous_post_id ) {
-				insertedMenuItemIdMapping[ update.previous_post_id ] = update.post_id;
-			}
-		});
-
 		_( data.nav_menu_item_updates ).each(function( update ) {
 			var oldCustomizeId, newCustomizeId, oldSetting, newSetting, settingValue, oldControl, newControl;
 			if ( 'inserted' === update.status ) {
@@ -2855,14 +2605,6 @@
 				}
 				settingValue = _.clone( settingValue );
 
-				// If the parent menu item was also inserted, update the menu_item_parent to the new ID.
-				if ( settingValue.menu_item_parent < 0 ) {
-					if ( ! insertedMenuItemIdMapping[ settingValue.menu_item_parent ] ) {
-						throw new Error( 'inserted ID for menu_item_parent not available' );
-					}
-					settingValue.menu_item_parent = insertedMenuItemIdMapping[ settingValue.menu_item_parent ];
-				}
-
 				// If the menu was also inserted, then make sure it uses the new menu ID for nav_menu_term_id.
 				if ( insertedMenuIdMapping[ settingValue.nav_menu_term_id ] ) {
 					settingValue.nav_menu_term_id = insertedMenuIdMapping[ settingValue.nav_menu_term_id ];
@@ -2871,7 +2613,7 @@
 				newCustomizeId = 'nav_menu_item[' + String( update.post_id ) + ']';
 				newSetting = api.create( newCustomizeId, newCustomizeId, settingValue, {
 					type: 'nav_menu_item',
-					transport: api.Menus.data.settingTransport,
+					transport: 'postMessage',
 					previewer: api.previewer
 				} );
 
