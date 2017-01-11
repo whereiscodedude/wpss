@@ -3,56 +3,19 @@
 div#media-upload-header {
 	margin: 0;
 	padding: 5px 5px 0;
-	font-weight: 600;
+	font-weight: bold;
 	position: relative;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #dfdfdf;
 	background: #f9f9f9;
 }
 
-#sidemenu {
-	overflow: hidden;
-	float: none;
-	position: relative;
+body#media-upload ul#sidemenu {
+	font-weight: normal;
+	margin: 0 5px;
 	left: 0;
 	bottom: -1px;
-	margin: 0 5px;
-	padding-left: 10px;
-	list-style: none;
-	font-size: 12px;
-	font-weight: 400;
-}
-
-#sidemenu a {
-	padding: 0 7px;
-	display: block;
-	float: left;
-	line-height: 28px;
-	border-top: 1px solid #f9f9f9;
-	border-bottom: 1px solid #ddd;
-	background-color: #f9f9f9;
-	text-decoration: none;
-	-webkit-transition: none;
-	transition: none;
-}
-
-#sidemenu li {
-	display: inline;
-	line-height: 200%;
-	list-style: none;
-	text-align: center;
-	white-space: nowrap;
-	margin: 0;
-	padding: 0;
-}
-
-#sidemenu a.current {
-	font-weight: 400;
-	padding-left: 6px;
-	padding-right: 6px;
-	border: 1px solid #ddd;
-	border-bottom-color: #f1f1f1;
-	background-color: #f1f1f1;
-	color: #000;
+	float: none;
+	overflow: hidden;
 }
 
 #media-upload:after { /* clearfix */
@@ -61,17 +24,17 @@ div#media-upload-header {
 	clear: both;
 }
 
+#media-upload,
+#media-upload .media-item .slidetoggle {
+	background: #fff;
+}
+
 #media-upload .slidetoggle {
-	border-top-color: #ddd;
+	border-top-color: #dfdfdf;
 }
 
 #media-upload input[type="radio"] {
 	padding: 0;
-}
-
-.media-upload-form label.form-help,
-td.help {
-	color: #72777c;
 }
 
 form {
@@ -89,7 +52,7 @@ th {
 .media-upload-form label.form-help, td.help {
 	font-family: sans-serif;
 	font-style: italic;
-	font-weight: 400;
+	font-weight: normal;
 }
 
 .media-upload-form p.help {
@@ -152,8 +115,7 @@ thead.media-item-info tr {
 	border: 8px solid #fff;
 }
 
-abbr.required,
-span.required {
+abbr.required {
 	text-decoration: none;
 	border: none;
 }
@@ -187,7 +149,7 @@ span.required {
 #media-upload label.help {
 	font-family: sans-serif;
 	font-style: italic;
-	font-weight: 400;
+	font-weight: normal;
 }
 
 #media-upload .ui-sortable .media-item {
@@ -223,7 +185,7 @@ span.required {
 .menu_order {
 	float: right;
 	font-size: 11px;
-	margin: 8px 10px 0;
+	margin: 10px 10px 0;
 }
 
 .menu_order_input {
@@ -235,7 +197,7 @@ span.required {
 
 .ui-sortable-helper {
 	background-color: #fff;
-	border: 1px solid #a0a5aa;
+	border: 1px solid #aaa;
 	opacity: 0.6;
 	filter: alpha(opacity=60);
 }
@@ -255,6 +217,7 @@ span.required {
 }
 
 #media-upload .widefat {
+	width: 626px;
 	border-style: solid solid none;
 }
 
@@ -276,7 +239,7 @@ span.required {
 	clear: both;
 	padding: 0 0 3px;
 	font-size: 1.6em;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #DADADA;
 }
 
 h3.media-title  {
@@ -284,7 +247,7 @@ h3.media-title  {
 }
 
 h4.media-sub-title  {
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #DADADA;
 	font-size: 1.3em;
 	margin: 12px;
 	padding: 0 0 3px;
@@ -294,7 +257,7 @@ h4.media-sub-title  {
 h3.media-title,
 h4.media-sub-title {
 	font-family: Georgia,"Times New Roman",Times,serif;
-	font-weight: 400;
+	font-weight: normal;
 	color: #5A5A5A;
 }
 
@@ -310,10 +273,9 @@ h4.media-sub-title {
 
 #gallery-settings .describe {
 	padding: 5px;
-	width: 100%;
+	width: 615px;
 	clear: both;
 	cursor: default;
-	background: #fff;
 }
 
 #gallery-settings .describe select {
@@ -328,7 +290,7 @@ h4.media-sub-title {
 #gallery-settings label,
 #gallery-settings legend {
 	font-size: 13px;
-	color: #444;
+	color: #464646;
 	margin-right: 15px;
 }
 
@@ -337,7 +299,7 @@ h4.media-sub-title {
 }
 
 #gallery-settings p.ml-submit {
-	border-top: 1px solid #ddd;
+	border-top: 1px solid #dfdfdf;
 }
 
 #gallery-settings select#columns {
@@ -365,12 +327,7 @@ h4.media-sub-title {
 }
 
 p.media-types {
-	margin: 0;
-	padding: 1em;
-}
-
-p.media-types-required-info {
-	padding-top: 0;
+	margin: 1em;
 }
 
 tr.not-image {
@@ -389,6 +346,7 @@ table.not-image tr.image-only {
  * HiDPI Displays
  */
 @media print,
+  (-o-min-device-pixel-ratio: 5/4),
   (-webkit-min-device-pixel-ratio: 1.25),
   (min-resolution: 120dpi) {
 
