@@ -102,7 +102,7 @@ function get_option( $option, $default = false ) {
 					wp_cache_set( 'notoptions', $notoptions, 'options' );
 
 					/** This filter is documented in wp-includes/option.php */
-					return apply_filters( "default_option_{$option}", $default, $option, $passed_default );
+					return apply_filters( 'default_option_' . $option, $default, $option, $passed_default );
 				}
 			}
 		}
@@ -114,7 +114,7 @@ function get_option( $option, $default = false ) {
 			$value = $row->option_value;
 		} else {
 			/** This filter is documented in wp-includes/option.php */
-			return apply_filters( "default_option_{$option}", $default, $option, $passed_default );
+			return apply_filters( 'default_option_' . $option, $default, $option, $passed_default );
 		}
 	}
 
@@ -295,21 +295,12 @@ function update_option( $option, $value, $autoload = null ) {
 	 */
 	$value = apply_filters( 'pre_update_option', $value, $option, $old_value );
 
-	/*
-	 * If the new and old values are the same, no need to update.
-	 *
-	 * Unserialized values will be adequate in most cases. If the unserialized
-	 * data differs, the (maybe) serialized data is checked to avoid
-	 * unnecessary database calls for otherwise identical object instances.
-	 *
-	 * See https://core.trac.wordpress.org/ticket/38903
-	 */
-	if ( $value === $old_value || maybe_serialize( $value ) === maybe_serialize( $old_value ) ) {
+	// If the new and old values are the same, no need to update.
+	if ( $value === $old_value )
 		return false;
-	}
 
 	/** This filter is documented in wp-includes/option.php */
-	if ( apply_filters( "default_option_{$option}", false, $option, false ) === $old_value ) {
+	if ( apply_filters( 'default_option_' . $option, false, $option, false ) === $old_value ) {
 		// Default setting for new options is 'yes'.
 		if ( null === $autoload ) {
 			$autoload = 'yes';
@@ -430,7 +421,7 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 	$notoptions = wp_cache_get( 'notoptions', 'options' );
 	if ( !is_array( $notoptions ) || !isset( $notoptions[$option] ) )
 		/** This filter is documented in wp-includes/option.php */
-		if ( apply_filters( "default_option_{$option}", false, $option, false ) !== get_option( $option ) )
+		if ( apply_filters( 'default_option_' . $option, false, $option, false ) !== get_option( $option ) )
 			return false;
 
 	$serialized_value = maybe_serialize( $value );

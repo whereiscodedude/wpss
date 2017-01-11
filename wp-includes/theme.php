@@ -1325,14 +1325,13 @@ function has_header_video() {
 	return (bool) get_header_video_url();
 }
 
-/**
- * Retrieve header video URL for custom header.
+/* Retrieve header video URL for custom header.
  *
- * Uses a local video if present, or falls back to an external video.
+ * Uses a local video if present, or falls back to an external video. Returns false if there is no video.
  *
  * @since 4.7.0
  *
- * @return string|false Header video URL or false if there is no video.
+ * @return string|false
  */
 function get_header_video_url() {
 	$id = absint( get_theme_mod( 'header_video' ) );
@@ -1977,7 +1976,7 @@ function get_theme_starter_content() {
 				'title' => _x( 'Home', 'Theme starter content' ),
 				'url' => home_url(),
 			),
-			'page_home' => array( // Deprecated in favor of link_home.
+			'page_home' => array( // Deprecated in favor of home_link.
 				'type' => 'post_type',
 				'object' => 'page',
 				'object_id' => '{{home}}',
