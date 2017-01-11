@@ -1,36 +1,7 @@
-/* global inlineEditL10n, ajaxurl */
-/**
- * This file is used on the term overview page to power quick-editing terms.
- */
 
-window.wp = window.wp || {};
-
-/**
- * Consists of functions relevant to the inline taxonomy editor.
- *
- * @namespace inlineEditTax
- *
- * @property {string} type The type of inline edit we are currently on.
- * @property {string} what The type property with a hash prefixed and a dash
- *                         suffixed.
- */
-var inlineEditTax;
-
-( function( $, wp ) {
-
+(function($) {
 inlineEditTax = {
 
-	/**
-	 * @summary Initializes the inline taxonomy editor.
-	 *
-	 * Adds event handlers to be able to quick edit.
-	 *
-	 * @since 2.7.0
-	 *
-	 * @this inlineEditTax
-	 * @memberof inlineEditTax
-	 * @returns {void}
-	 */
 	init : function() {
 		var t = this, row = $('#inline-edit');
 
@@ -42,105 +13,40 @@ inlineEditTax = {
 			return false;
 		});
 
-		/*
-		 * @summary Cancels inline editing when pressing escape inside the inline editor.
-		 *
-		 * @param {Object} e The keyup event that has been triggered.
-		 */
-		row.keyup( function( e ) {
-			// 27 = [escape]
-			if ( e.which === 27 ) {
-				return inlineEditTax.revert();
-			}
-		});
+		// prepare the edit row
+		row.keyup(function(e) { if(e.which == 27) return inlineEditTax.revert(); });
 
-		/**
-		 * @summary Cancels inline editing when clicking the cancel button.
-		 */
-		$( '.cancel', row ).click( function() {
-			return inlineEditTax.revert();
-		});
+		$('a.cancel', row).click(function() { return inlineEditTax.revert(); });
+		$('a.save', row).click(function() { return inlineEditTax.save(this); });
+		$('input, select', row).keydown(function(e) { if(e.which == 13) return inlineEditTax.save(this); });
 
-		/**
-		 * @summary Saves the inline edits when clicking the save button.
-		 */
-		$( '.save', row ).click( function() {
-			return inlineEditTax.save(this);
-		});
-
-		/**
-		 * @summary Saves the inline edits when pressing enter inside the inline editor.
-		 */
-		$( 'input, select', row ).keydown( function( e ) {
-			// 13 = [enter]
-			if ( e.which === 13 ) {
-				return inlineEditTax.save( this );
-			}
-		});
-
-		/**
-		 * @summary Saves the inline edits on submitting the inline edit form.
-		 */
-		$( '#posts-filter input[type="submit"]' ).mousedown( function() {
+		$('#posts-filter input[type="submit"]').mousedown(function(e){
 			t.revert();
 		});
 	},
 
-	/**
-	 * Toggles the quick edit based on if it is currently shown or hidden.
-	 *
-	 * @since 2.7.0
-	 *
-	 * @this inlineEditTax
-	 * @memberof inlineEditTax
-	 *
-	 * @param {HTMLElement} el An element within the table row or the table row
-	 *                         itself that we want to quick edit.
-	 * @returns {void}
-	 */
 	toggle : function(el) {
 		var t = this;
-
-		$(t.what+t.getId(el)).css('display') === 'none' ? t.revert() : t.edit(el);
+		$(t.what+t.getId(el)).css('display') == 'none' ? t.revert() : t.edit(el);
 	},
 
-	/**
-	 * Shows the quick editor
-	 *
-	 * @since 2.7.0
-	 *
-	 * @this inlineEditTax
-	 * @memberof inlineEditTax
-	 *
-	 * @param {string|HTMLElement} id The ID of the term we want to quick edit or an
-	 *                                element within the table row or the
-	 * table row itself.
-	 * @returns {boolean} Always returns false.
-	 */
 	edit : function(id) {
-		var editRow, rowData, val,
-			t = this;
+		var t = this, editRow;
 		t.revert();
 
-		// Makes sure we can pass an HTMLElement as the ID.
-		if ( typeof(id) === 'object' ) {
+		if ( typeof(id) == 'object' )
 			id = t.getId(id);
-		}
 
 		editRow = $('#inline-edit').clone(true), rowData = $('#inline_'+id);
-		$( 'td', editRow ).attr( 'colspan', $( 'th:visible, td:visible', '.wp-list-table.widefat:first thead' ).length );
+		$('td', editRow).attr('colspan', $('.widefat:first thead th:visible').length);
 
-		$(t.what+id).hide().after(editRow).after('<tr class="hidden"></tr>');
+		if ( $(t.what+id).hasClass('alternate') )
+			$(editRow).addClass('alternate');
 
-		val = $('.name', rowData);
-		val.find( 'img' ).replaceWith( function() { return this.alt; } );
-		val = val.text();
-		$(':input[name="name"]', editRow).val( val );
+		$(t.what+id).hide().after(editRow);
 
-		val = $('.slug', rowData);
-		val.find( 'img' ).replaceWith( function() { return this.alt; } );
-		val = val.text();
-		$(':input[name="slug"]', editRow).val( val );
+		$(':input[name="name"]', editRow).val( $('.name', rowData).text() );
+		$(':input[name="slug"]', editRow).val( $('.slug', rowData).text() );
 
 		$(editRow).attr('id', 'edit-'+id).addClass('inline-editor').show();
 		$('.ptitle', editRow).eq(0).focus();
@@ -148,31 +54,13 @@ inlineEditTax = {
 		return false;
 	},
 
-	/**
-	 * @summary Saves the quick edit data.
-	 *
-	 * Saves the quick edit data to the server and replaces the table row with the
-	 * HTML retrieved from the server.
-	 *
-	 * @since 2.7.0
-	 *
-	 * @this inlineEditTax
-	 * @memberof inlineEditTax
-	 *
-	 * @param {string|HTMLElement} id The ID of the term we want to quick edit or an
-	 *                                element within the table row or the
-	 * table row itself.
-	 * @returns {boolean} Always returns false.
-	 */
 	save : function(id) {
 		var params, fields, tax = $('input[name="taxonomy"]').val() || '';
 
-		// Makes sure we can pass an HTMLElement as the ID.
-		if( typeof(id) === 'object' ) {
+		if( typeof(id) == 'object' )
 			id = this.getId(id);
-		}
 
-		$( 'table.widefat .spinner' ).addClass( 'is-active' );
+		$('table.widefat .spinner').show();
 
 		params = {
 			action: 'inline-save-tax',
@@ -181,107 +69,53 @@ inlineEditTax = {
 			taxonomy: tax
 		};
 
-		fields = $('#edit-'+id).find(':input').serialize();
+		fields = $('#edit-'+id+' :input').serialize();
 		params = fields + '&' + $.param(params);
 
-		// Do the ajax request to save the data to the server.
+		// make ajax request
 		$.post( ajaxurl, params,
-			/**
-			 * @summary Handles the response from the server.
-			 *
-			 * Handles the response from the server, replaces the table row with the response
-			 * from the server.
-			 *
-			 * @param {string} r The string with which to replace the table row.
-			 */
 			function(r) {
-				var row, new_id, option_value,
-					$errorSpan = $( '#edit-' + id + ' .inline-edit-save .error' );
-
-				$( 'table.widefat .spinner' ).removeClass( 'is-active' );
+				var row, new_id;
+				$('table.widefat .spinner').hide();
 
 				if (r) {
-					if ( -1 !== r.indexOf( '<tr' ) ) {
-						$(inlineEditTax.what+id).siblings('tr.hidden').addBack().remove();
+					if ( -1 != r.indexOf('<tr') ) {
+						$(inlineEditTax.what+id).remove();
 						new_id = $(r).attr('id');
 
 						$('#edit-'+id).before(r).remove();
+						row = new_id ? $('#'+new_id) : $(inlineEditTax.what+id);
+						row.hide().fadeIn();
+					} else
+						$('#edit-'+id+' .inline-edit-save .error').html(r).show();
+				} else
+					$('#edit-'+id+' .inline-edit-save .error').html(inlineEditL10n.error).show();
 
-						if ( new_id ) {
-							option_value = new_id.replace( inlineEditTax.type + '-', '' );
-							row = $( '#' + new_id );
-						} else {
-							option_value = id;
-							row = $( inlineEditTax.what + id );
-						}
-
-						// Update the value in the Parent dropdown.
-						$( '#parent' ).find( 'option[value=' + option_value + ']' ).text( row.find( '.row-title' ).text() );
-
-						row.hide().fadeIn( 400, function() {
-							// Move focus back to the Quick Edit link.
-							row.find( '.editinline' ).focus();
-							wp.a11y.speak( inlineEditL10n.saved );
-						});
-
-					} else {
-						$errorSpan.html( r ).show();
-						/*
-						 * Some error strings may contain HTML entities (e.g. `&#8220`), let's use
-						 * the HTML element's text.
-						 */
-						wp.a11y.speak( $errorSpan.text() );
-					}
-				} else {
-					$errorSpan.html( inlineEditL10n.error ).show();
-					wp.a11y.speak( inlineEditL10n.error );
-				}
+				if ($(row).prev('tr').hasClass('alternate'))
+					$(row).removeClass('alternate');
 			}
 		);
-
-		// Prevent submitting the form when pressing Enter on a focused field.
 		return false;
 	},
 
-	/**
-	 * Closes the quick edit form.
-	 *
-	 * @since 2.7.0
-	 *
-	 * @this inlineEditTax
-	 * @memberof inlineEditTax
-	 * @returns {void}
-	 */
 	revert : function() {
 		var id = $('table.widefat tr.inline-editor').attr('id');
 
 		if ( id ) {
-			$( 'table.widefat .spinner' ).removeClass( 'is-active' );
-			$('#'+id).siblings('tr.hidden').addBack().remove();
+			$('table.widefat .spinner').hide();
+			$('#'+id).remove();
 			id = id.substr( id.lastIndexOf('-') + 1 );
-
-			// Show the taxonomy row and move focus back to the Quick Edit link.
-			$( this.what + id ).show().find( '.editinline' ).focus();
+			$(this.what+id).show();
 		}
+
+		return false;
 	},
 
-	/**
-	 * Retrieves the ID of the term of the element inside the table row.
-	 *
-	 * @since 2.7.0
-	 *
-	 * @memberof inlineEditTax
-	 *
-	 * @param {HTMLElement} o An element within the table row or the table row itself.
-	 * @returns {string} The ID of the term based on the element.
-	 */
 	getId : function(o) {
-		var id = o.tagName === 'TR' ? o.id : $(o).parents('tr').attr('id'), parts = id.split('-');
-
+		var id = o.tagName == 'TR' ? o.id : $(o).parents('tr').attr('id'), parts = id.split('-');
 		return parts[parts.length - 1];
 	}
 };
 
 $(document).ready(function(){inlineEditTax.init();});
-
-})( jQuery, window.wp );
+})(jQuery);
