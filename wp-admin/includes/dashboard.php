@@ -65,7 +65,7 @@ function wp_dashboard_setup() {
 		do_action( 'wp_network_dashboard_setup' );
 
 		/**
-		 * Filters the list of widgets to load for the Network Admin dashboard.
+		 * Filter the list of widgets to load for the Network Admin dashboard.
 		 *
 		 * @since 3.1.0
 		 *
@@ -82,7 +82,7 @@ function wp_dashboard_setup() {
 		do_action( 'wp_user_dashboard_setup' );
 
 		/**
-		 * Filters the list of widgets to load for the User Admin dashboard.
+		 * Filter the list of widgets to load for the User Admin dashboard.
 		 *
 		 * @since 3.1.0
 		 *
@@ -99,7 +99,7 @@ function wp_dashboard_setup() {
 		do_action( 'wp_dashboard_setup' );
 
 		/**
-		 * Filters the list of widgets to load for the admin dashboard.
+		 * Filter the list of widgets to load for the admin dashboard.
 		 *
 		 * @since 2.5.0
 		 *
@@ -147,14 +147,6 @@ function wp_dashboard_setup() {
 function wp_add_dashboard_widget( $widget_id, $widget_name, $callback, $control_callback = null, $callback_args = null ) {
 	$screen = get_current_screen();
 	global $wp_dashboard_control_callbacks;
-
-	$private_callback_args = array( '__widget_basename' => $widget_name );
-
-	if ( is_null( $callback_args ) ) {
-		$callback_args = $private_callback_args;
-	} else if ( is_array( $callback_args ) ) {
-		$callback_args = array_merge( $callback_args, $private_callback_args );
-	}
 
 	if ( $control_callback && current_user_can( 'edit_dashboard' ) && is_callable( $control_callback ) ) {
 		$wp_dashboard_control_callbacks[$widget_id] = $control_callback;
@@ -271,7 +263,7 @@ function wp_dashboard_right_now() {
 	}
 	// Comments
 	$num_comm = wp_count_comments();
-	if ( $num_comm && ( $num_comm->approved || $num_comm->moderated ) ) {
+	if ( $num_comm && $num_comm->approved ) {
 		$text = sprintf( _n( '%s Comment', '%s Comments', $num_comm->approved ), number_format_i18n( $num_comm->approved ) );
 		?>
 		<li class="comment-count"><a href="edit-comments.php"><?php echo $text; ?></a></li>
@@ -291,7 +283,7 @@ function wp_dashboard_right_now() {
 	}
 
 	/**
-	 * Filters the array of extra elements to list in the 'At a Glance'
+	 * Filter the array of extra elements to list in the 'At a Glance'
 	 * dashboard widget.
 	 *
 	 * Prior to 3.8.0, the widget was named 'Right Now'. Each element
@@ -316,7 +308,7 @@ function wp_dashboard_right_now() {
 	if ( ! is_network_admin() && ! is_user_admin() && current_user_can( 'manage_options' ) && '0' == get_option( 'blog_public' ) ) {
 
 		/**
-		 * Filters the link title attribute for the 'Search Engines Discouraged'
+		 * Filter the link title attribute for the 'Search Engines Discouraged'
 		 * message displayed in the 'At a Glance' dashboard widget.
 		 *
 		 * Prior to 3.8.0, the widget was named 'Right Now'.
@@ -329,7 +321,7 @@ function wp_dashboard_right_now() {
 		$title = apply_filters( 'privacy_on_link_title', '' );
 
 		/**
-		 * Filters the link label for the 'Search Engines Discouraged' message
+		 * Filter the link label for the 'Search Engines Discouraged' message
 		 * displayed in the 'At a Glance' dashboard widget.
 		 *
 		 * Prior to 3.8.0, the widget was named 'Right Now'.
@@ -392,12 +384,9 @@ function wp_network_dashboard_right_now() {
 	$c_users = get_user_count();
 	$c_blogs = get_blog_count();
 
-	/* translators: 1: Number of users on the network */
 	$user_text = sprintf( _n( '%s user', '%s users', $c_users ), number_format_i18n( $c_users ) );
-	/* translators: 1: Number of sites on the network */
 	$blog_text = sprintf( _n( '%s site', '%s sites', $c_blogs ), number_format_i18n( $c_blogs ) );
 
-	/* translators: 1: Text indicating the number of sites on the network, 2: Text indicating the number of users on the network */
 	$sentence = sprintf( __( 'You have %1$s and %2$s.' ), $blog_text, $user_text );
 
 	if ( $actions ) {
@@ -430,7 +419,7 @@ function wp_network_dashboard_right_now() {
 		<p>
 			<label class="screen-reader-text" for="search-users"><?php _e( 'Search Users' ); ?></label>
 			<input type="search" name="s" value="" size="30" autocomplete="off" id="search-users"/>
-			<?php submit_button( __( 'Search Users' ), '', false, false, array( 'id' => 'submit_users' ) ); ?>
+			<?php submit_button( __( 'Search Users' ), 'button', false, false, array( 'id' => 'submit_users' ) ); ?>
 		</p>
 	</form>
 
@@ -438,7 +427,7 @@ function wp_network_dashboard_right_now() {
 		<p>
 			<label class="screen-reader-text" for="search-sites"><?php _e( 'Search Sites' ); ?></label>
 			<input type="search" name="s" value="" size="30" autocomplete="off" id="search-sites"/>
-			<?php submit_button( __( 'Search Sites' ), '', false, false, array( 'id' => 'submit_sites' ) ); ?>
+			<?php submit_button( __( 'Search Sites' ), 'button', false, false, array( 'id' => 'submit_sites' ) ); ?>
 		</p>
 	</form>
 <?php
@@ -549,7 +538,7 @@ function wp_dashboard_recent_drafts( $drafts = false ) {
 		);
 
 		/**
-		 * Filters the post query arguments for the 'Recent Drafts' dashboard widget.
+		 * Filter the post query arguments for the 'Recent Drafts' dashboard widget.
 		 *
 		 * @since 4.4.0
 		 *
@@ -641,10 +630,12 @@ function _wp_dashboard_recent_comments_row( &$comment, $show_date = true ) {
 			$actions['trash'] = "<a href='$trash_url' data-wp-lists='delete:the-comment-list:comment-$comment->comment_ID::trash=1' class='delete vim-d vim-destructive' aria-label='" . esc_attr__( 'Move this comment to the Trash' ) . "'>" . _x( 'Trash', 'verb' ) . '</a>';
 		}
 
-		$actions['view'] = '<a class="comment-link" href="' . esc_url( get_comment_link( $comment ) ) . '" aria-label="' . esc_attr__( 'View this comment' ) . '">' . __( 'View' ) . '</a>';
+		if ( '1' === $comment->comment_approved ) {
+			$actions['view'] = '<a class="comment-link" href="' . esc_url( get_comment_link( $comment ) ) . '" aria-label="' . esc_attr__( 'View this comment' ) . '">' . __( 'View' ) . '</a>';
+		}
 
 		/**
-		 * Filters the action links displayed for each comment in the 'Recent Comments'
+		 * Filter the action links displayed for each comment in the 'Recent Comments'
 		 * dashboard widget.
 		 *
 		 * @since 2.6.0
@@ -662,13 +653,9 @@ function _wp_dashboard_recent_comments_row( &$comment, $show_date = true ) {
 			( ( ('approve' == $action || 'unapprove' == $action) && 2 === $i ) || 1 === $i ) ? $sep = '' : $sep = ' | ';
 
 			// Reply and quickedit need a hide-if-no-js span
-			if ( 'reply' == $action || 'quickedit' == $action ) {
+			if ( 'reply' == $action || 'quickedit' == $action )
 				$action .= ' hide-if-no-js';
-			}
 
-			if ( 'view' === $action && '1' !== $comment->comment_approved ) {
-				$action .= ' hidden';
-			}
 			$actions_string .= "<span class='$action'>$sep$link</span>";
 		}
 	}
@@ -780,7 +767,7 @@ function wp_dashboard_site_activity() {
 
 	if ( !$future_posts && !$recent_posts && !$recent_comments ) {
 		echo '<div class="no-activity">';
-		echo '<p class="smiley" aria-hidden="true"></p>';
+		echo '<p class="smiley"></p>';
 		echo '<p>' . __( 'No activity yet!' ) . '</p>';
 		echo '</div>';
 	}
@@ -817,7 +804,7 @@ function wp_dashboard_recent_posts( $args ) {
 	);
 
 	/**
-	 * Filters the query arguments used for the Recent Posts widget.
+	 * Filter the query arguments used for the Recent Posts widget.
 	 *
 	 * @since 4.2.0
 	 *
@@ -846,10 +833,10 @@ function wp_dashboard_recent_posts( $args ) {
 			} elseif ( date( 'Y-m-d', $time ) == $tomorrow ) {
 				$relative = __( 'Tomorrow' );
 			} elseif ( date( 'Y', $time ) !== date( 'Y', current_time( 'timestamp' ) ) ) {
-				/* translators: date and time format for recent posts on the dashboard, from a different calendar year, see https://secure.php.net/date */
+				/* translators: date and time format for recent posts on the dashboard, from a different calendar year, see http://php.net/date */
 				$relative = date_i18n( __( 'M jS Y' ), $time );
 			} else {
-				/* translators: date and time format for recent posts on the dashboard, see https://secure.php.net/date */
+				/* translators: date and time format for recent posts on the dashboard, see http://php.net/date */
 				$relative = date_i18n( __( 'M jS' ), $time );
 			}
 
@@ -958,7 +945,7 @@ function wp_dashboard_rss_output( $widget_id ) {
  * If $check_urls is empty, look for the rss feed url found in the dashboard
  * widget options of $widget_id. If cached, call $callback, a function that
  * echoes out output for this widget. If not cache, echo a "Loading..." stub
- * which is later replaced by Ajax call (see top of /wp-admin/index.php)
+ * which is later replaced by AJAX call (see top of /wp-admin/index.php)
  *
  * @since 2.5.0
  *
@@ -969,7 +956,7 @@ function wp_dashboard_rss_output( $widget_id ) {
  */
 function wp_dashboard_cached_rss_widget( $widget_id, $callback, $check_urls = array() ) {
 	$loading = '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="hide-if-js">' . __( 'This widget requires JavaScript.' ) . '</p>';
-	$doing_ajax = wp_doing_ajax();
+	$doing_ajax = ( defined('DOING_AJAX') && DOING_AJAX );
 
 	if ( empty($check_urls) ) {
 		$widgets = get_option( 'dashboard_widget_options' );
@@ -1079,7 +1066,7 @@ function wp_dashboard_primary() {
 		'news' => array(
 
 			/**
-			 * Filters the primary link URL for the 'WordPress News' dashboard widget.
+			 * Filter the primary link URL for the 'WordPress News' dashboard widget.
 			 *
 			 * @since 2.5.0
 			 *
@@ -1088,7 +1075,7 @@ function wp_dashboard_primary() {
 			'link' => apply_filters( 'dashboard_primary_link', __( 'https://wordpress.org/news/' ) ),
 
 			/**
-			 * Filters the primary feed URL for the 'WordPress News' dashboard widget.
+			 * Filter the primary feed URL for the 'WordPress News' dashboard widget.
 			 *
 			 * @since 2.3.0
 			 *
@@ -1097,7 +1084,7 @@ function wp_dashboard_primary() {
 			'url' => apply_filters( 'dashboard_primary_feed', __( 'http://wordpress.org/news/feed/' ) ),
 
 			/**
-			 * Filters the primary link title for the 'WordPress News' dashboard widget.
+			 * Filter the primary link title for the 'WordPress News' dashboard widget.
 			 *
 			 * @since 2.3.0
 			 *
@@ -1112,7 +1099,7 @@ function wp_dashboard_primary() {
 		'planet' => array(
 
 			/**
-			 * Filters the secondary link URL for the 'WordPress News' dashboard widget.
+			 * Filter the secondary link URL for the 'WordPress News' dashboard widget.
 			 *
 			 * @since 2.3.0
 			 *
@@ -1121,7 +1108,7 @@ function wp_dashboard_primary() {
 			'link' => apply_filters( 'dashboard_secondary_link', __( 'https://planet.wordpress.org/' ) ),
 
 			/**
-			 * Filters the secondary feed URL for the 'WordPress News' dashboard widget.
+			 * Filter the secondary feed URL for the 'WordPress News' dashboard widget.
 			 *
 			 * @since 2.3.0
 			 *
@@ -1130,7 +1117,7 @@ function wp_dashboard_primary() {
 			'url' => apply_filters( 'dashboard_secondary_feed', __( 'https://planet.wordpress.org/feed/' ) ),
 
 			/**
-			 * Filters the secondary link title for the 'WordPress News' dashboard widget.
+			 * Filter the secondary link title for the 'WordPress News' dashboard widget.
 			 *
 			 * @since 2.3.0
 			 *
@@ -1139,7 +1126,7 @@ function wp_dashboard_primary() {
 			'title'        => apply_filters( 'dashboard_secondary_title', __( 'Other WordPress News' ) ),
 
 			/**
-			 * Filters the number of secondary link items for the 'WordPress News' dashboard widget.
+			 * Filter the number of secondary link items for the 'WordPress News' dashboard widget.
 			 *
 			 * @since 4.4.0
 			 *
@@ -1152,7 +1139,7 @@ function wp_dashboard_primary() {
 		)
 	);
 
-	if ( ( ! defined( 'DISALLOW_FILE_MODS' ) || ! DISALLOW_FILE_MODS ) && ( ! is_multisite() && is_blog_admin() && current_user_can( 'install_plugins' ) ) || ( is_network_admin() && current_user_can( 'manage_network_plugins' ) && current_user_can( 'install_plugins' ) ) ) {
+	if ( ( ! is_multisite() && is_blog_admin() && current_user_can( 'install_plugins' ) ) || ( is_network_admin() && current_user_can( 'manage_network_plugins' ) && current_user_can( 'install_plugins' ) ) ) {
 		$feeds['plugins'] = array(
 			'link'         => '',
 			'url'          => array(
@@ -1272,7 +1259,7 @@ function wp_dashboard_plugins_output( $rss, $args = array() ) {
 /**
  * Display file upload quota on dashboard.
  *
- * Runs on the {@see 'activity_box_end'} hook in wp_dashboard_right_now().
+ * Runs on the activity_box_end hook in wp_dashboard_right_now().
  *
  * @since 3.0.0
  *
@@ -1356,7 +1343,7 @@ function wp_dashboard_browser_nag() {
 		$notice .= "<p class='browser-update-nag{$browser_nag_class}'>{$msg}</p>";
 
 		$browsehappy = 'http://browsehappy.com/';
-		$locale = get_user_locale();
+		$locale = get_locale();
 		if ( 'en_US' !== $locale )
 			$browsehappy = add_query_arg( 'locale', $locale, $browsehappy );
 
@@ -1366,7 +1353,7 @@ function wp_dashboard_browser_nag() {
 	}
 
 	/**
-	* Filters the notice output for the 'Browse Happy' nag meta box.
+	* Filter the notice output for the 'Browse Happy' nag meta box.
 	*
 	* @since 3.2.0
 	*
@@ -1396,6 +1383,8 @@ function dashboard_browser_nag_class( $classes ) {
  *
  * @since 3.2.0
  *
+ * @global string $wp_version
+ *
  * @return array|bool False on failure, array of browser data on success.
  */
 function wp_check_browser_version() {
@@ -1405,9 +1394,11 @@ function wp_check_browser_version() {
 	$key = md5( $_SERVER['HTTP_USER_AGENT'] );
 
 	if ( false === ($response = get_site_transient('browser_' . $key) ) ) {
+		global $wp_version;
+
 		$options = array(
 			'body'			=> array( 'useragent' => $_SERVER['HTTP_USER_AGENT'] ),
-			'user-agent'	=> 'WordPress/' . get_bloginfo( 'version' ) . '; ' . home_url()
+			'user-agent'	=> 'WordPress/' . $wp_version . '; ' . home_url()
 		);
 
 		$response = wp_remote_post( 'http://api.wordpress.org/core/browse-happy/1.1/', $options );

@@ -27,11 +27,9 @@
  * @property string $user_registered
  * @property string $user_activation_key
  * @property string $user_status
- * @property int    $user_level
  * @property string $display_name
  * @property string $spam
  * @property string $deleted
- * @property string $locale
  */
 class WP_User {
 	/**
@@ -91,14 +89,13 @@ class WP_User {
 	 * The filter context applied to user data fields.
 	 *
 	 * @since 2.9.0
-	 * @access public
+	 * @access private
 	 * @var string
 	 */
-	public $filter = null;
+	var $filter = null;
 
 	/**
 	 * @static
-	 * @since 3.3.0
 	 * @access private
 	 * @var array
 	 */
@@ -159,8 +156,6 @@ class WP_User {
 
 	/**
 	 * Sets up object properties, including capabilities.
-	 *
-	 * @since  3.3.0
 	 *
 	 * @param object $data    User DB row object.
 	 * @param int    $blog_id Optional. The site ID to initialize for.
@@ -247,7 +242,7 @@ class WP_User {
 	}
 
 	/**
-	 * Makes private/protected methods readable for backward compatibility.
+	 * Makes private/protected methods readable for backwards compatibility.
 	 *
 	 * @since 4.3.0
 	 * @access public
@@ -274,7 +269,7 @@ class WP_User {
 	 */
 	public function __isset( $key ) {
 		if ( 'id' == $key ) {
-			_deprecated_argument( 'WP_User->id', '2.1.0',
+			_deprecated_argument( 'WP_User->id', '2.1',
 				sprintf(
 					/* translators: %s: WP_User->ID */
 					__( 'Use %s instead.' ),
@@ -304,7 +299,7 @@ class WP_User {
 	 */
 	public function __get( $key ) {
 		if ( 'id' == $key ) {
-			_deprecated_argument( 'WP_User->id', '2.1.0',
+			_deprecated_argument( 'WP_User->id', '2.1',
 				sprintf(
 					/* translators: %s: WP_User->ID */
 					__( 'Use %s instead.' ),
@@ -343,7 +338,7 @@ class WP_User {
 	 */
 	public function __set( $key, $value ) {
 		if ( 'id' == $key ) {
-			_deprecated_argument( 'WP_User->id', '2.1.0',
+			_deprecated_argument( 'WP_User->id', '2.1',
 				sprintf(
 					/* translators: %s: WP_User->ID */
 					__( 'Use %s instead.' ),
@@ -367,7 +362,7 @@ class WP_User {
 	 */
 	public function __unset( $key ) {
 		if ( 'id' == $key ) {
-			_deprecated_argument( 'WP_User->id', '2.1.0',
+			_deprecated_argument( 'WP_User->id', '2.1',
 				sprintf(
 					/* translators: %s: WP_User->ID */
 					__( 'Use %s instead.' ),
@@ -717,7 +712,7 @@ class WP_User {
 	 */
 	public function has_cap( $cap ) {
 		if ( is_numeric( $cap ) ) {
-			_deprecated_argument( __FUNCTION__, '2.0.0', __('Usage of user levels by plugins and themes is deprecated. Use roles and capabilities instead.') );
+			_deprecated_argument( __FUNCTION__, '2.0', __('Usage of user levels by plugins and themes is deprecated. Use roles and capabilities instead.') );
 			$cap = $this->translate_level_to_cap( $cap );
 		}
 

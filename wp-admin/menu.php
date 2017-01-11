@@ -28,9 +28,8 @@ if ( is_multisite() ) {
 	$submenu[ 'index.php' ][5] = array( __('My Sites'), 'read', 'my-sites.php' );
 }
 
-if ( ! is_multisite() || current_user_can( 'update_core' ) ) {
+if ( ! is_multisite() || is_super_admin() )
 	$update_data = wp_get_update_data();
-}
 
 if ( ! is_multisite() ) {
 	if ( current_user_can( 'update_core' ) )
@@ -39,7 +38,7 @@ if ( ! is_multisite() ) {
 		$cap = 'update_plugins';
 	else
 		$cap = 'update_themes';
-	$submenu[ 'index.php' ][10] = array( sprintf( __('Updates %s'), "<span class='update-plugins count-{$update_data['counts']['total']}'><span class='update-count'>" . number_format_i18n($update_data['counts']['total']) . "</span></span>" ), $cap, 'update-core.php');
+	$submenu[ 'index.php' ][10] = array( sprintf( __('Updates %s'), "<span class='update-plugins count-{$update_data['counts']['total']}' title='{$update_data['title']}'><span class='update-count'>" . number_format_i18n($update_data['counts']['total']) . "</span></span>" ), $cap, 'update-core.php');
 	unset( $cap );
 }
 
@@ -266,7 +265,7 @@ $_wp_real_parent_file['page-new.php'] = 'edit.php?post_type=page';
 $_wp_real_parent_file['wpmu-admin.php'] = 'tools.php';
 $_wp_real_parent_file['ms-admin.php'] = 'tools.php';
 
-// Ensure backward compatibility.
+// ensure we're backwards compatible
 $compat = array(
 	'index' => 'dashboard',
 	'edit' => 'posts',
