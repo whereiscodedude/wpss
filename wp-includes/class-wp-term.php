@@ -250,6 +250,7 @@ final class WP_Term {
 				}
 
 				return sanitize_term( $data, $data->taxonomy, 'raw' );
+				break;
 		}
 	}
 }
