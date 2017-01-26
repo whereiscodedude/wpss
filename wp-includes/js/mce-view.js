@@ -428,7 +428,6 @@
 		 */
 		replaceMarkers: function() {
 			this.getMarkers( function( editor, node ) {
-				var selected = node === editor.selection.getNode();
 				var $viewNode;
 
 				if ( ! this.loader && $( node ).text() !== this.text ) {
@@ -441,13 +440,6 @@
 				);
 
 				editor.$( node ).replaceWith( $viewNode );
-
-				if ( selected ) {
-					setTimeout( function() {
-						editor.selection.select( $viewNode[0] );
-						editor.selection.collapse();
-					} );
-				}
 			} );
 		},
 

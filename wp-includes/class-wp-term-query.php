@@ -294,18 +294,18 @@ class WP_Term_Query {
 	/**
 	 * Get terms, based on query_vars.
 	 *
-	 * @since 4.6.0
+	 * @param 4.6.0
 	 * @access public
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
-	 * @return array List of terms.
+	 * @return array
 	 */
 	public function get_terms() {
 		global $wpdb;
 
 		$this->parse_query( $this->query_vars );
-		$args = &$this->query_vars;
+		$args = $this->query_vars;
 
 		// Set up meta_query so it's available to 'pre_get_terms'.
 		$this->meta_query = new WP_Meta_Query();
@@ -870,10 +870,10 @@ class WP_Term_Query {
 	 * Generate the ORDER BY clause for an 'orderby' param that is potentially related to a meta query.
 	 *
 	 * @since 4.6.0
-	 * @access protected
+	 * @access public
 	 *
 	 * @param string $orderby_raw Raw 'orderby' value passed to WP_Term_Query.
-	 * @return string ORDER BY clause.
+	 * @return string
 	 */
 	protected function parse_orderby_meta( $orderby_raw ) {
 		$orderby = '';

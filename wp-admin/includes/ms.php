@@ -704,10 +704,8 @@ function _access_denied_splash() {
  * @return bool True if the user has proper permissions, false if they do not.
  */
 function check_import_new_users( $permission ) {
-	if ( ! current_user_can( 'manage_network_users' ) ) {
+	if ( !is_super_admin() )
 		return false;
-	}
-
 	return true;
 }
 // See "import_allow_fetch_attachments" and "import_attachment_size_limit" filters too.

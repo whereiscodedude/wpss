@@ -190,7 +190,7 @@
 				] );
 
 				editor.on( 'wptoolbar', function( event ) {
-					if ( ! event.collapsed && isView( event.element ) ) {
+					if ( isView( event.element ) ) {
 						event.toolbar = toolbar;
 					}
 				} );

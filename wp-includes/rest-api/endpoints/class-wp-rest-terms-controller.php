@@ -352,6 +352,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 */
 	public function get_item( $request ) {
 		$term = $this->get_term( $request['id'] );
+
 		if ( is_wp_error( $term ) ) {
 			return $term;
 		}
@@ -402,7 +403,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 			$parent = get_term( (int) $request['parent'], $this->taxonomy );
 
 			if ( ! $parent ) {
-				return new WP_Error( 'rest_term_invalid', __( 'Parent term does not exist.' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_term_invalid', __( "Parent term doesn't exist." ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -508,7 +509,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 			$parent = get_term( (int) $request['parent'], $this->taxonomy );
 
 			if ( ! $parent ) {
-				return new WP_Error( 'rest_term_invalid', __( 'Parent term does not exist.' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_term_invalid', __( "Parent term doesn't exist." ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -525,7 +526,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 
 		$term = get_term( $term->term_id, $this->taxonomy );
 
-		/** This action is documented in wp-includes/rest-api/endpoints/class-wp-rest-terms-controller.php */
+		/* This action is documented in lib/endpoints/class-wp-rest-terms-controller.php */
 		do_action( "rest_insert_{$this->taxonomy}", $term, $request, false );
 
 		$schema = $this->get_item_schema();

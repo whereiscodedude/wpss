@@ -249,7 +249,7 @@ function twentyseventeen_content_width() {
 	 *
 	 * @since Twenty Seventeen 1.0
 	 *
-	 * @param int $content_width Content width in pixels.
+	 * @param $content_width integer
 	 */
 	$GLOBALS['content_width'] = apply_filters( 'twentyseventeen_content_width', $content_width );
 }
@@ -261,7 +261,7 @@ add_action( 'template_redirect', 'twentyseventeen_content_width', 0 );
 function twentyseventeen_fonts_url() {
 	$fonts_url = '';
 
-	/*
+	/**
 	 * Translators: If there are characters in your language that are not
 	 * supported by Libre Franklin, translate this to 'off'. Do not translate
 	 * into your own language.
@@ -349,7 +349,6 @@ add_action( 'widgets_init', 'twentyseventeen_widgets_init' );
  *
  * @since Twenty Seventeen 1.0
  *
- * @param string $link Link to single post/page.
  * @return string 'Continue reading' link prepended with an ellipsis.
  */
 function twentyseventeen_excerpt_more( $link ) {

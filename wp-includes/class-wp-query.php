@@ -690,14 +690,12 @@ class WP_Query {
 	 *                                                 passed. To use 'meta_value', or 'meta_value_num',
 	 *                                                 'meta_key=keyname' must be also be defined. To sort by a
 	 *                                                 specific `$meta_query` clause, use that clause's array key.
-	 *                                                 Accepts 'none', 'name', 'author', 'date', 'title',
-	 *                                                 'modified', 'menu_order', 'parent', 'ID', 'rand',
-	 *                                                 'relevance', 'RAND(x)' (where 'x' is an integer seed value),
+	 *                                                 Default 'date'. Accepts 'none', 'name', 'author', 'date',
+	 *                                                 'title', 'modified', 'menu_order', 'parent', 'ID', 'rand',
+	 *                                                 'RAND(x)' (where 'x' is an integer seed value),
 	 *                                                 'comment_count', 'meta_value', 'meta_value_num', 'post__in',
 	 *                                                 'post_name__in', 'post_parent__in', and the array keys
-	 *                                                 of `$meta_query`. Default is 'date', except when a search
-	 *                                                 is being performed, when the default is 'relevance'.
-	 *
+	 *                                                 of `$meta_query`.
 	 *     @type int          $p                       Post ID.
 	 *     @type int          $page                    Show the number of posts that would show up on page X of a
 	 *                                                 static front page.
@@ -3231,7 +3229,7 @@ class WP_Query {
 	 * @since 1.5.0
 	 * @access public
 	 *
-	 * @param string|array $query URL query string or array of query arguments.
+	 * @param string $query URL query string.
 	 * @return array List of posts.
 	 */
 	public function query( $query ) {
