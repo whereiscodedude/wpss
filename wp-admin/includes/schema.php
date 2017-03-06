@@ -861,12 +861,13 @@ function populate_roles_300() {
 	}
 }
 
-if ( !function_exists( 'install_network' ) ) :
 /**
  * Install Network.
  *
  * @since 3.0.0
+ *
  */
+if ( !function_exists( 'install_network' ) ) :
 function install_network() {
 	if ( ! defined( 'WP_INSTALLING_NETWORK' ) )
 		define( 'WP_INSTALLING_NETWORK', true );

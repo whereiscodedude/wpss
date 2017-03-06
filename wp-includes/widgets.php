@@ -281,12 +281,12 @@ function register_sidebar($args = array()) {
  *
  * @global array $wp_registered_sidebars Stores the new sidebar in this array by sidebar ID.
  *
- * @param string|int $sidebar_id The ID of the sidebar when it was registered.
+ * @param string $name The ID of the sidebar when it was added.
  */
-function unregister_sidebar( $sidebar_id ) {
+function unregister_sidebar( $name ) {
 	global $wp_registered_sidebars;
 
-	unset( $wp_registered_sidebars[ $sidebar_id ] );
+	unset( $wp_registered_sidebars[ $name ] );
 }
 
 /**

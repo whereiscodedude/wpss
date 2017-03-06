@@ -32,12 +32,7 @@ function map_meta_cap( $cap, $user_id ) {
 
 	switch ( $cap ) {
 	case 'remove_user':
-		// In multisite the user must be a super admin to remove themselves.
-		if ( isset( $args[0] ) && $user_id == $args[0] && ! is_super_admin( $user_id ) ) {
-			$caps[] = 'do_not_allow';
-		} else {
-			$caps[] = 'remove_users';
-		}
+		$caps[] = 'remove_users';
 		break;
 	case 'promote_user':
 	case 'add_users':
@@ -427,11 +422,7 @@ function map_meta_cap( $cap, $user_id ) {
 		$caps[] = 'edit_theme_options';
 		break;
 	case 'delete_site':
-		if ( is_multisite() ) {
-			$caps[] = 'manage_options';
-		} else {
-			$caps[] = 'do_not_allow';
-		}
+		$caps[] = 'manage_options';
 		break;
 	case 'edit_term':
 	case 'delete_term':
