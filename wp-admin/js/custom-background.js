@@ -1,8 +1,7 @@
-/* global ajaxurl */
 (function($) {
 	$(document).ready(function() {
-		var frame,
-			bgImage = $( '#custom-background-image' );
+		var bgImage = $("#custom-background-image"),
+			frame;
 
 		$('#background-color').wpColorPicker({
 			change: function( event, ui ) {
@@ -13,20 +12,12 @@
 			}
 		});
 
-		$( 'select[name="background-size"]' ).change( function() {
-			bgImage.css( 'background-size', $( this ).val() );
+		$('input[name="background-position-x"]').change(function() {
+			bgImage.css('background-position', $(this).val() + ' top');
 		});
 
-		$( 'input[name="background-position"]' ).change( function() {
-			bgImage.css( 'background-position', $( this ).val() );
-		});
-
-		$( 'input[name="background-repeat"]' ).change( function() {
-			bgImage.css( 'background-repeat', $( this ).is( ':checked' ) ? 'repeat' : 'no-repeat' );
-		});
-
-		$( 'input[name="background-attachment"]' ).change( function() {
-			bgImage.css( 'background-attachment', $( this ).is( ':checked' ) ? 'scroll' : 'fixed' );
+		$('input[name="background-repeat"]').change(function() {
+			bgImage.css('background-repeat', $(this).val());
 		});
 
 		$('#choose-from-library-link').click( function( event ) {
