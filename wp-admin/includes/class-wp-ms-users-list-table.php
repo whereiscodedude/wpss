@@ -1,19 +1,11 @@
 <?php
 /**
- * List Table API: WP_MS_Users_List_Table class
+ * Multisite Users List Table class.
  *
  * @package WordPress
- * @subpackage Administration
- * @since 3.1.0
- */
-
-/**
- * Core class used to implement displaying users in a list table for the network admin.
- *
+ * @subpackage List_Table
  * @since 3.1.0
  * @access private
- *
- * @see WP_List_Table
  */
 class WP_MS_Users_List_Table extends WP_List_Table {
 	/**
@@ -50,14 +42,10 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			'fields' => 'all_with_meta'
 		);
 
-		if ( wp_is_large_network( 'users' ) ) {
+		if ( wp_is_large_network( 'users' ) )
 			$args['search'] = ltrim( $args['search'], '*' );
-		} else if ( '' !== $args['search'] ) {
-			$args['search'] = trim( $args['search'], '*' );
-			$args['search'] = '*' . $args['search'] . '*';
-		}
 
-		if ( $role === 'super' ) {
+		if ( $role == 'super' ) {
 			$logins = implode( "', '", get_super_admins() );
 			$args['include'] = $wpdb->get_col( "SELECT ID FROM $wpdb->users WHERE user_login IN ('$logins')" );
 		}
@@ -81,15 +69,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		if ( isset( $_REQUEST['order'] ) )
 			$args['order'] = $_REQUEST['order'];
 
-		if ( ! empty( $_REQUEST['mode'] ) ) {
-			$mode = $_REQUEST['mode'] === 'excerpt' ? 'excerpt' : 'list';
-			set_user_setting( 'network_users_list_mode', $mode );
-		} else {
-			$mode = get_user_setting( 'network_users_list_mode', 'list' );
-		}
-
-		/** This filter is documented in wp-admin/includes/class-wp-users-list-table.php */
-		$args = apply_filters( 'users_list_table_query_args', $args );
+		$mode = empty( $_REQUEST['mode'] ) ? 'list' : $_REQUEST['mode'];
 
 		// Query the user IDs for this page
 		$wp_user_search = new WP_User_Query( $args );
@@ -138,7 +118,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		$class = $role != 'super' ? ' class="current"' : '';
 		$role_links = array();
 		$role_links['all'] = "<a href='" . network_admin_url('users.php') . "'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_users, 'users' ), number_format_i18n( $total_users ) ) . '</a>';
-		$class = $role === 'super' ? ' class="current"' : '';
+		$class = $role == 'super' ? ' class="current"' : '';
 		$role_links['super'] = "<a href='" . network_admin_url('users.php?role=super') . "'$class>" . sprintf( _n( 'Super Admin <span class="count">(%s)</span>', 'Super Admins <span class="count">(%s)</span>', $total_admins ), number_format_i18n( $total_admins ) ) . '</a>';
 
 		return $role_links;
@@ -153,9 +133,8 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 
 		parent::pagination ( $which );
 
-		if ( 'top' === $which ) {
+		if ( 'top' == $which )
 			$this->view_switcher( $mode );
-		}
 	}
 
 	/**
@@ -167,12 +146,12 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			'cb'         => '<input type="checkbox" />',
 			'username'   => __( 'Username' ),
 			'name'       => __( 'Name' ),
-			'email'      => __( 'Email' ),
+			'email'      => __( 'E-mail' ),
 			'registered' => _x( 'Registered', 'user' ),
 			'blogs'      => __( 'Sites' )
 		);
 		/**
-		 * Filters the columns displayed in the Network Admin Users list table.
+		 * Filter the columns displayed in the Network Admin Users list table.
 		 *
 		 * @since MU
 		 *
@@ -204,25 +183,10 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * @param WP_User $user The current WP_User object.
 	 */
 	public function column_cb( $user ) {
-		if ( is_super_admin( $user->ID ) ) {
-			return;
-		}
 		?>
 		<label class="screen-reader-text" for="blog_<?php echo $user->ID; ?>"><?php echo sprintf( __( 'Select %s' ), $user->user_login ); ?></label>
 		<input type="checkbox" id="blog_<?php echo $user->ID ?>" name="allusers[]" value="<?php echo esc_attr( $user->ID ) ?>" />
 		<?php
-	}
-
-	/**
-	 * Handles the ID column output.
-	 *
-	 * @since 4.4.0
-	 * @access public
-	 *
-	 * @param WP_User $user The current WP_User object.
-	 */
-	public function column_id( $user ) {
-		echo $user->ID;
 	}
 
 	/**
@@ -284,7 +248,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 */
 	public function column_registered( $user ) {
 		global $mode;
-		if ( 'list' === $mode ) {
+		if ( 'list' == $mode ) {
 			$date = __( 'Y/m/d' );
 		} else {
 			$date = __( 'Y/m/d g:i:s a' );
@@ -309,7 +273,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Handles the sites column output.
+	 * Handles the blogs/sites column output.
 	 *
 	 * @since 4.3.0
 	 * @access public
@@ -327,9 +291,9 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 				continue;
 			}
 
-			$path	= ( $val->path === '/' ) ? '' : $val->path;
+			$path	= ( $val->path == '/' ) ? '' : $val->path;
 			echo '<span class="site-' . $val->site_id . '" >';
-			echo '<a href="'. esc_url( network_admin_url( 'site-info.php?id=' . $val->userblog_id ) ) .'">' . str_replace( '.' . get_network()->domain, '', $val->domain . $path ) . '</a>';
+			echo '<a href="'. esc_url( network_admin_url( 'site-info.php?id=' . $val->userblog_id ) ) .'">' . str_replace( '.' . get_current_site()->domain, '', $val->domain . $path ) . '</a>';
 			echo ' <small class="row-actions">';
 			$actions = array();
 			$actions['edit'] = '<a href="'. esc_url( network_admin_url( 'site-info.php?id=' . $val->userblog_id ) ) .'">' . __( 'Edit' ) . '</a>';
@@ -351,7 +315,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			$actions['view'] = '<a class="' . $class . '" href="' . esc_url( get_home_url( $val->userblog_id ) ) . '">' . __( 'View' ) . '</a>';
 
 			/**
-			 * Filters the action links displayed next the sites a user belongs to
+			 * Filter the action links displayed next the sites a user belongs to
 			 * in the Network Admin Users list table.
 			 *
 			 * @since 3.1.0
@@ -446,7 +410,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		}
 
 		/**
-		 * Filters the action links displayed under each user in the Network Admin Users list table.
+		 * Filter the action links displayed under each user in the Network Admin Users list table.
 		 *
 		 * @since 3.2.0
 		 *
