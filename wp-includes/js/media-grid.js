@@ -774,10 +774,6 @@ Manage = MediaFrame.extend({
 	addNewClickHandler: function( event ) {
 		event.preventDefault();
 		this.trigger( 'toggle:upload:attachment' );
-
-		if ( this.uploader ) {
-			this.uploader.refresh();
-		}
 	},
 
 	/**
@@ -844,9 +840,6 @@ Manage = MediaFrame.extend({
 	startHistory: function() {
 		// Verify pushState support and activate
 		if ( window.history && window.history.pushState ) {
-			if ( Backbone.History.started ) {
-				Backbone.history.stop();
-			}
 			Backbone.history.start( {
 				root: window._wpMediaGridSettings.adminUrl,
 				pushState: true
