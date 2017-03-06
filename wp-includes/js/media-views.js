@@ -282,10 +282,8 @@ Cropper = wp.media.controller.State.extend({
 		toolbar:     'crop',
 		content:     'crop',
 		router:      false,
-		canSkipCrop: false,
 
-		// Default doCrop Ajax arguments to allow the Customizer (for example) to inject state.
-		doCropArgs: {}
+		canSkipCrop: false
 	},
 
 	activate: function() {
@@ -369,15 +367,11 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	doCrop: function( attachment ) {
-		return wp.ajax.post( 'custom-header-crop', _.extend(
-			{},
-			this.defaults.doCropArgs,
-			{
-				nonce: attachment.get( 'nonces' ).edit,
-				id: attachment.get( 'id' ),
-				cropDetails: attachment.get( 'cropDetails' )
-			}
-		) );
+		return wp.ajax.post( 'custom-header-crop', {
+			nonce: attachment.get('nonces').edit,
+			id: attachment.get('id'),
+			cropDetails: attachment.get('cropDetails')
+		} );
 	}
 });
 
@@ -400,19 +394,10 @@ var Controller = wp.media.controller,
 CustomizeImageCropper = Controller.Cropper.extend({
 	doCrop: function( attachment ) {
 		var cropDetails = attachment.get( 'cropDetails' ),
-			control = this.get( 'control' ),
-			ratio = cropDetails.width / cropDetails.height;
+			control = this.get( 'control' );
 
-		// Use crop measurements when flexible in both directions.
-		if ( control.params.flex_width && control.params.flex_height ) {
-			cropDetails.dst_width  = cropDetails.width;
-			cropDetails.dst_height = cropDetails.height;
-
-		// Constrain flexible side based on image ratio and size of the fixed side.
-		} else {
-			cropDetails.dst_width  = control.params.flex_width  ? control.params.height * ratio : control.params.width;
-			cropDetails.dst_height = control.params.flex_height ? control.params.width  / ratio : control.params.height;
-		}
+		cropDetails.dst_width  = control.params.width;
+		cropDetails.dst_height = control.params.height;
 
 		return wp.ajax.post( 'crop-image', {
 			wp_customize: 'on',
@@ -462,14 +447,14 @@ EditImage = wp.media.controller.State.extend({
 	 * @since 3.9.0
 	 */
 	activate: function() {
-		this.frame.on( 'toolbar:render:edit-image', _.bind( this.toolbar, this ) );
+		this.listenTo( this.frame, 'toolbar:render:edit-image', this.toolbar );
 	},
 
 	/**
 	 * @since 3.9.0
 	 */
 	deactivate: function() {
-		this.frame.off( 'toolbar:render:edit-image' );
+		this.stopListening( this.frame );
 	},
 
 	/**
@@ -3588,7 +3573,7 @@ Attachments = View.extend({
 	initSortable: function() {
 		var collection = this.collection;
 
-		if ( ! this.options.sortable || ! $.fn.sortable ) {
+		if ( wp.media.isTouchDevice || ! this.options.sortable || ! $.fn.sortable ) {
 			return;
 		}
 
@@ -3647,7 +3632,7 @@ Attachments = View.extend({
 	},
 
 	refreshSortable: function() {
-		if ( ! this.options.sortable || ! $.fn.sortable ) {
+		if ( wp.media.isTouchDevice || ! this.options.sortable || ! $.fn.sortable ) {
 			return;
 		}
 
@@ -3769,19 +3754,14 @@ AttachmentsBrowser = View.extend({
 			AttachmentView: wp.media.view.Attachment.Library
 		});
 
-		this.controller.on( 'toggle:upload:attachment', this.toggleUploader, this );
+		this.listenTo( this.controller, 'toggle:upload:attachment', _.bind( this.toggleUploader, this ) );
 		this.controller.on( 'edit:selection', this.editSelection );
 		this.createToolbar();
-		// In the Media Library, the sidebar is used to display errors before the attachments grid.
-		if ( this.options.sidebar && 'errors' === this.options.sidebar ) {
+		if ( this.options.sidebar ) {
 			this.createSidebar();
 		}
 		this.createUploader();
 		this.createAttachments();
-		// For accessibility reasons, place the normal sidebar after the attachments, see ticket #36909.
-		if ( this.options.sidebar && 'errors' !== this.options.sidebar ) {
-			this.createSidebar();
-		}
 		this.updateContent();
 
 		if ( ! this.options.sidebar || 'errors' === this.options.sidebar ) {
@@ -3961,9 +3941,7 @@ AttachmentsBrowser = View.extend({
 					controller: this.controller,
 					priority: -55,
 					click: function() {
-						var removed = [],
-							destroy = [],
-							selection = this.controller.state().get( 'selection' );
+						var removed = [], selection = this.controller.state().get( 'selection' );
 
 						if ( ! selection.length || ! window.confirm( l10n.warnBulkDelete ) ) {
 							return;
@@ -3975,20 +3953,11 @@ AttachmentsBrowser = View.extend({
 								return;
 							}
 
-							destroy.push( model );
+							model.destroy();
 						} );
 
-						if ( removed.length ) {
-							selection.remove( removed );
-						}
-
-						if ( destroy.length ) {
-							$.when.apply( null, destroy.map( function (item) {
-								return item.destroy();
-							} ) ).then( _.bind( function() {
-								this.controller.trigger( 'selection:action:done' );
-							}, this ) );
-						}
+						selection.remove( removed );
+						this.controller.trigger( 'selection:action:done' );
 					}
 				}).render() );
 			}
@@ -4101,8 +4070,8 @@ AttachmentsBrowser = View.extend({
 		});
 
 		// Add keydown listener to the instance of the Attachments view
-		this.controller.on( 'attachment:keydown:arrow',     _.bind( this.attachments.arrowEvent, this.attachments ) );
-		this.controller.on( 'attachment:details:shift-tab', _.bind( this.attachments.restoreFocus, this.attachments ) );
+		this.attachments.listenTo( this.controller, 'attachment:keydown:arrow',     this.attachments.arrowEvent );
+		this.attachments.listenTo( this.controller, 'attachment:details:shift-tab', this.attachments.restoreFocus );
 
 		this.views.add( this.attachments );
 
@@ -6714,8 +6683,6 @@ Modal = wp.media.View.extend({
 		'keydown': 'keydown'
 	},
 
-	clickedOpenerEl: null,
-
 	initialize: function() {
 		_.defaults( this.options, {
 			container: document.body,
@@ -6783,8 +6750,6 @@ Modal = wp.media.View.extend({
 			return this;
 		}
 
-		this.clickedOpenerEl = document.activeElement;
-
 		if ( ! this.views.attached ) {
 			this.attach();
 		}
@@ -6835,12 +6800,8 @@ Modal = wp.media.View.extend({
 		// Hide modal and remove restricted media modal tab focus once it's closed
 		this.$el.hide().undelegate( 'keydown' );
 
-		// Put focus back in useful location once modal is closed.
-		if ( null !== this.clickedOpenerEl ) {
-			this.clickedOpenerEl.focus();
-		} else {
-			$( '#wpbody-content' ).focus();
-		}
+		// Put focus back in useful location once modal is closed
+		$('#wpbody-content').focus();
 
 		this.propagate('close');
 
@@ -7085,12 +7046,14 @@ Search = wp.media.View.extend({
 
 	attributes: {
 		type:        'search',
-		placeholder: l10n.searchMediaPlaceholder
+		placeholder: l10n.search
 	},
 
 	events: {
 		'input':  'search',
-		'keyup':  'search'
+		'keyup':  'search',
+		'change': 'search',
+		'search': 'search'
 	},
 
 	/**
@@ -7101,13 +7064,13 @@ Search = wp.media.View.extend({
 		return this;
 	},
 
-	search: _.debounce( function( event ) {
+	search: function( event ) {
 		if ( event.target.value ) {
 			this.model.set( 'search', event.target.value );
 		} else {
 			this.model.unset('search');
 		}
-	}, 300 )
+	}
 });
 
 module.exports = Search;
@@ -7738,11 +7701,9 @@ Toolbar = View.extend({
 				disabled = false;
 
 			// Prevent insertion of attachments if any of them are still uploading
-			if ( selection && selection.models ) {
-				disabled = _.some( selection.models, function( attachment ) {
-					return attachment.get('uploading') === true;
-				});
-			}
+			disabled = _.some( selection.models, function( attachment ) {
+				return attachment.get('uploading') === true;
+			});
 
 			if ( requires.selection && selection && ! selection.length ) {
 				disabled = true;
@@ -8401,7 +8362,7 @@ UploaderWindow = wp.media.View.extend({
 	initialize: function() {
 		var uploader;
 
-		this.$browser = $( '<button type="button" class="browser" />' ).hide().appendTo( 'body' );
+		this.$browser = $('<a href="#" class="browser" />').hide().appendTo('body');
 
 		uploader = this.options.uploader = _.defaults( this.options.uploader || {}, {
 			dropzone:  this.$el,
