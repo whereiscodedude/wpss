@@ -420,7 +420,7 @@ function count_many_users_posts( $users, $post_type = 'post', $public_only = fal
  *
  * @since MU
  *
- * @return int The current user's ID, or 0 if no user is logged in.
+ * @return int The current user's ID
  */
 function get_current_user_id() {
 	if ( ! function_exists( 'wp_get_current_user' ) )
@@ -1208,7 +1208,7 @@ function sanitize_user_field($field, $value, $user_id, $context) {
 		if ( $prefixed ) {
 
 			/** This filter is documented in wp-includes/post.php */
-			$value = apply_filters( "{$field}", $value, $user_id, $context );
+			$value = apply_filters( $field, $value, $user_id, $context );
 		} else {
 
 			/**
@@ -2121,7 +2121,6 @@ function get_password_reset_key( $user ) {
 
 	// Now insert the key, hashed, into the DB.
 	if ( empty( $wp_hasher ) ) {
-		require_once ABSPATH . WPINC . '/class-phpass.php';
 		$wp_hasher = new PasswordHash( 8, true );
 	}
 	$hashed = time() . ':' . $wp_hasher->HashPassword( $key );
@@ -2166,7 +2165,6 @@ function check_password_reset_key($key, $login) {
 		return new WP_Error('invalid_key', __('Invalid key'));
 
 	if ( empty( $wp_hasher ) ) {
-		require_once ABSPATH . WPINC . '/class-phpass.php';
 		$wp_hasher = new PasswordHash( 8, true );
 	}
 

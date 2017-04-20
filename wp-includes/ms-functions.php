@@ -96,13 +96,11 @@ function get_active_blog_for_user( $user_id ) {
  * The count is cached and updated twice daily. This is not a live count.
  *
  * @since MU 2.7
- * @since 4.8.0 The $network_id parameter has been added.
  *
- * @param int|null $network_id ID of the network. Default is the current network.
- * @return int Number of active users on the network.
+ * @return int
  */
-function get_user_count( $network_id = null ) {
-	return get_network_option( $network_id, 'user_count' );
+function get_user_count() {
+	return get_site_option( 'user_count' );
 }
 
 /**
@@ -111,14 +109,15 @@ function get_user_count( $network_id = null ) {
  * The count is cached and updated twice daily. This is not a live count.
  *
  * @since MU 1.0
- * @since 3.7.0 The $network_id parameter has been deprecated.
- * @since 4.8.0 The $network_id parameter is now being used.
  *
- * @param int|null $network_id ID of the network. Default is the current network.
- * @return int Number of active sites on the network.
+ * @param int $network_id Deprecated, not supported.
+ * @return int
  */
-function get_blog_count( $network_id = null ) {
-	return get_network_option( $network_id, 'blog_count' );
+function get_blog_count( $network_id = 0 ) {
+	if ( func_num_args() )
+		_deprecated_argument( __FUNCTION__, '3.1.0' );
+
+	return get_site_option( 'blog_count' );
 }
 
 /**
@@ -577,9 +576,8 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 	if ( in_array( $blogname, $illegal_names ) )
 		$errors->add('blogname',  __( 'That name is not allowed.' ) );
 
-	if ( strlen( $blogname ) < 4 ) {
+	if ( strlen( $blogname ) < 4 && !is_super_admin() )
 		$errors->add('blogname',  __( 'Site name must be at least 4 characters.' ) );
-	}
 
 	// do not allow users to create a blog that conflicts with a page on the main blog.
 	if ( !is_subdomain_install() && $wpdb->get_var( $wpdb->prepare( "SELECT post_name FROM " . $wpdb->get_blog_prefix( $current_network->site_id ) . "posts WHERE post_type = 'page' AND post_name = %s", $blogname ) ) )
@@ -666,29 +664,13 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
  * @param string $title      The requested site title.
  * @param string $user       The user's requested login name.
  * @param string $user_email The user's email address.
- * @param array  $meta       Optional. Signup meta data. By default, contains the requested privacy setting and lang_id.
+ * @param array  $meta       By default, contains the requested privacy setting and lang_id.
  */
 function wpmu_signup_blog( $domain, $path, $title, $user, $user_email, $meta = array() )  {
 	global $wpdb;
 
 	$key = substr( md5( time() . wp_rand() . $domain ), 0, 16 );
-
-	/**
-	 * Filters the metadata for a site signup.
-	 *
-	 * The metadata will be serialized prior to storing it in the database.
-	 *
-	 * @since 4.8.0
-	 *
-	 * @param array  $meta       Signup meta data. Default empty array.
-	 * @param string $domain     The requested domain.
-	 * @param string $path       The requested path.
-	 * @param string $title      The requested site title.
-	 * @param string $user       The user's requested login name.
-	 * @param string $user_email The user's email address.
-	 * @param string $key        The user's activation key.
-	 */
-	$meta = apply_filters( 'signup_site_meta', $meta, $domain, $path, $title, $user, $user_email, $key );
+	$meta = serialize($meta);
 
 	$wpdb->insert( $wpdb->signups, array(
 		'domain' => $domain,
@@ -698,7 +680,7 @@ function wpmu_signup_blog( $domain, $path, $title, $user, $user_email, $meta = a
 		'user_email' => $user_email,
 		'registered' => current_time('mysql', true),
 		'activation_key' => $key,
-		'meta' => serialize( $meta )
+		'meta' => $meta
 	) );
 
 	/**
@@ -711,8 +693,8 @@ function wpmu_signup_blog( $domain, $path, $title, $user, $user_email, $meta = a
 	 * @param string $title      The requested site title.
 	 * @param string $user       The user's requested login name.
 	 * @param string $user_email The user's email address.
-	 * @param string $key        The user's activation key.
-	 * @param array  $meta       Signup meta data. By default, contains the requested privacy setting and lang_id.
+	 * @param string $key        The user's activation key
+	 * @param array  $meta       By default, contains the requested privacy setting and lang_id.
 	 */
 	do_action( 'after_signup_site', $domain, $path, $title, $user, $user_email, $key, $meta );
 }
@@ -729,7 +711,7 @@ function wpmu_signup_blog( $domain, $path, $title, $user, $user_email, $meta = a
  *
  * @param string $user       The user's requested login name.
  * @param string $user_email The user's email address.
- * @param array  $meta       Optional. Signup meta data. Default empty array.
+ * @param array  $meta       By default, this is an empty array.
  */
 function wpmu_signup_user( $user, $user_email, $meta = array() ) {
 	global $wpdb;
@@ -738,20 +720,7 @@ function wpmu_signup_user( $user, $user_email, $meta = array() ) {
 	$user = preg_replace( '/\s+/', '', sanitize_user( $user, true ) );
 	$user_email = sanitize_email( $user_email );
 	$key = substr( md5( time() . wp_rand() . $user_email ), 0, 16 );
-
-	/**
-	 * Filters the metadata for a user signup.
-	 *
-	 * The metadata will be serialized prior to storing it in the database.
-	 *
-	 * @since 4.8.0
-	 *
-	 * @param array  $meta       Signup meta data. Default empty array.
-	 * @param string $user       The user's requested login name.
-	 * @param string $user_email The user's email address.
-	 * @param string $key        The user's activation key.
-	 */
-	$meta = apply_filters( 'signup_user_meta', $meta, $user, $user_email, $key );
+	$meta = serialize($meta);
 
 	$wpdb->insert( $wpdb->signups, array(
 		'domain' => '',
@@ -761,7 +730,7 @@ function wpmu_signup_user( $user, $user_email, $meta = array() ) {
 		'user_email' => $user_email,
 		'registered' => current_time('mysql', true),
 		'activation_key' => $key,
-		'meta' => serialize( $meta )
+		'meta' => $meta
 	) );
 
 	/**
@@ -771,8 +740,8 @@ function wpmu_signup_user( $user, $user_email, $meta = array() ) {
 	 *
 	 * @param string $user       The user's requested login name.
 	 * @param string $user_email The user's email address.
-	 * @param string $key        The user's activation key.
-	 * @param array  $meta       Signup meta data. Default empty array.
+	 * @param string $key        The user's activation key
+	 * @param array  $meta       Additional signup meta. By default, this is an empty array.
 	 */
 	do_action( 'after_signup_user', $user, $user_email, $key, $meta );
 }
@@ -798,7 +767,7 @@ function wpmu_signup_user( $user, $user_email, $meta = array() ) {
  * @param string $user_login The user's login name.
  * @param string $user_email The user's email address.
  * @param string $key        The activation key created in wpmu_signup_blog()
- * @param array  $meta       Optional. Signup meta data. By default, contains the requested privacy setting and lang_id.
+ * @param array  $meta       By default, contains the requested privacy setting and lang_id.
  * @return bool
  */
 function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $user_email, $key, $meta = array() ) {
@@ -813,7 +782,7 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $us
 	 * @param string      $user_login User login name.
 	 * @param string      $user_email User email address.
 	 * @param string      $key        Activation key created in wpmu_signup_blog().
-	 * @param array       $meta       Signup meta data. By default, contains the requested privacy setting and lang_id.
+	 * @param array       $meta       By default, contains the requested privacy setting and lang_id.
 	 */
 	if ( ! apply_filters( 'wpmu_signup_blog_notification', $domain, $path, $title, $user_login, $user_email, $key, $meta ) ) {
 		return false;
@@ -850,7 +819,7 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $us
 		 * @param string $user_login User login name.
 		 * @param string $user_email User email address.
 		 * @param string $key        Activation key created in wpmu_signup_blog().
-		 * @param array  $meta       Signup meta data. By default, contains the requested privacy setting and lang_id.
+		 * @param array  $meta       By default, contains the requested privacy setting and lang_id.
 		 */
 		apply_filters( 'wpmu_signup_blog_notification_email',
 			__( "To activate your blog, please click the following link:\n\n%s\n\nAfter you activate, you will receive *another email* with your login.\n\nAfter you activate, you can visit your site here:\n\n%s" ),
@@ -874,7 +843,7 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $us
 		 * @param string $user_login User login name.
 		 * @param string $user_email User email address.
 		 * @param string $key        Activation key created in wpmu_signup_blog().
-		 * @param array  $meta       Signup meta data. By default, contains the requested privacy setting and lang_id.
+		 * @param array  $meta       By default, contains the requested privacy setting and lang_id.
 		 */
 		apply_filters( 'wpmu_signup_blog_notification_subject',
 			/* translators: New site notification email subject. 1: Network name, 2: New site URL */
@@ -911,7 +880,7 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $us
  * @param string $user_login The user's login name.
  * @param string $user_email The user's email address.
  * @param string $key        The activation key created in wpmu_signup_user()
- * @param array  $meta       Optional. Signup meta data. Default empty array.
+ * @param array  $meta       By default, an empty array.
  * @return bool
  */
 function wpmu_signup_user_notification( $user_login, $user_email, $key, $meta = array() ) {
@@ -923,7 +892,7 @@ function wpmu_signup_user_notification( $user_login, $user_email, $key, $meta = 
 	 * @param string $user_login User login name.
 	 * @param string $user_email User email address.
 	 * @param string $key        Activation key created in wpmu_signup_user().
-	 * @param array  $meta       Signup meta data. Default empty array.
+	 * @param array  $meta       Signup meta data.
 	 */
 	if ( ! apply_filters( 'wpmu_signup_user_notification', $user_login, $user_email, $key, $meta ) )
 		return false;
@@ -949,7 +918,7 @@ function wpmu_signup_user_notification( $user_login, $user_email, $key, $meta = 
 		 * @param string $user_login User login name.
 		 * @param string $user_email User email address.
 		 * @param string $key        Activation key created in wpmu_signup_user().
-		 * @param array  $meta       Signup meta data. Default empty array.
+		 * @param array  $meta       Signup meta data.
 		 */
 		apply_filters( 'wpmu_signup_user_notification_email',
 			__( "To activate your user, please click the following link:\n\n%s\n\nAfter you activate, you will receive *another email* with your login." ),
@@ -968,7 +937,7 @@ function wpmu_signup_user_notification( $user_login, $user_email, $key, $meta = 
 		 * @param string $user_login User login name.
 		 * @param string $user_email User email address.
 		 * @param string $key        Activation key created in wpmu_signup_user().
-		 * @param array  $meta       Signup meta data. Default empty array.
+		 * @param array  $meta       Signup meta data.
 		 */
 		apply_filters( 'wpmu_signup_user_notification_subject',
 			/* translators: New user notification email subject. 1: Network name, 2: New user login */
@@ -1074,7 +1043,7 @@ function wpmu_activate_signup($key) {
 	 * @param int    $user_id       User ID.
 	 * @param int    $password      User password.
 	 * @param string $signup_title  Site title.
-	 * @param array  $meta          Signup meta data. By default, contains the requested privacy setting and lang_id.
+	 * @param array  $meta          Signup meta data.
 	 */
 	do_action( 'wpmu_activate_blog', $blog_id, $user_id, $password, $signup->title, $meta );
 
@@ -1474,11 +1443,11 @@ function install_blog_defaults($blog_id, $user_id) {
  *
  * @since MU
  *
- * @param int    $blog_id  Blog ID.
- * @param int    $user_id  User ID.
- * @param string $password User password.
- * @param string $title    Site title.
- * @param array  $meta     Optional. Signup meta data. By default, contains the requested privacy setting and lang_id.
+ * @param int    $blog_id
+ * @param int    $user_id
+ * @param string $password
+ * @param string $title    The new blog's title
+ * @param array  $meta     Optional. Not used in the default function, but is passed along to hooks for customization.
  * @return bool
  */
 function wpmu_welcome_notification( $blog_id, $user_id, $password, $title, $meta = array() ) {
@@ -1495,7 +1464,7 @@ function wpmu_welcome_notification( $blog_id, $user_id, $password, $title, $meta
 	 * @param int      $user_id  User ID.
 	 * @param string   $password User password.
 	 * @param string   $title    Site title.
-	 * @param array    $meta     Signup meta data. By default, contains the requested privacy setting and lang_id.
+	 * @param array    $meta     Signup meta data.
 	 */
 	if ( ! apply_filters( 'wpmu_welcome_notification', $blog_id, $user_id, $password, $title, $meta ) )
 		return false;
@@ -1543,7 +1512,7 @@ We hope you enjoy your new site. Thanks!
 	 * @param int    $user_id       User ID.
 	 * @param string $password      User password.
 	 * @param string $title         Site title.
-	 * @param array  $meta          Signup meta data. By default, contains the requested privacy setting and lang_id.
+	 * @param array  $meta          Signup meta data.
 	 */
 	$welcome_email = apply_filters( 'update_welcome_email', $welcome_email, $blog_id, $user_id, $password, $title, $meta );
 	$admin_email = get_site_option( 'admin_email' );
@@ -1588,9 +1557,9 @@ We hope you enjoy your new site. Thanks!
  *
  * @since MU
  *
- * @param int    $user_id  User ID.
- * @param string $password User password.
- * @param array  $meta     Optional. Signup meta data. Default empty array.
+ * @param int    $user_id
+ * @param string $password
+ * @param array  $meta     Optional. Not used in the default function, but is passed along to hooks for customization.
  * @return bool
  */
 function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) {
@@ -1605,7 +1574,7 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 	 *
 	 * @param int    $user_id  User ID.
 	 * @param string $password User password.
-	 * @param array  $meta     Signup meta data. Default empty array.
+	 * @param array  $meta     Signup meta data.
 	 */
 	if ( ! apply_filters( 'wpmu_welcome_user_notification', $user_id, $password, $meta ) )
 		return false;
@@ -1626,7 +1595,7 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 	 * @param string $welcome_email The message body of the account activation success email.
 	 * @param int    $user_id       User ID.
 	 * @param string $password      User password.
-	 * @param array  $meta          Signup meta data. Default empty array.
+	 * @param array  $meta          Signup meta data.
 	 */
 	$welcome_email = apply_filters( 'update_welcome_user_email', $welcome_email, $user_id, $password, $meta );
 	$welcome_email = str_replace( 'SITE_NAME', $current_network->site_name, $welcome_email );
@@ -2271,16 +2240,13 @@ function wp_schedule_update_network_counts() {
 }
 
 /**
- * Update the network-wide counts for the current network.
+ *  Update the network-wide counts for the current network.
  *
- * @since 3.1.0
- * @since 4.8.0 The $network_id parameter has been added.
- *
- * @param int|null $network_id ID of the network. Default is the current network.
+ *  @since 3.1.0
  */
-function wp_update_network_counts( $network_id = null ) {
-	wp_update_network_user_counts( $network_id );
-	wp_update_network_site_counts( $network_id );
+function wp_update_network_counts() {
+	wp_update_network_user_counts();
+	wp_update_network_site_counts();
 }
 
 /**
@@ -2332,42 +2298,35 @@ function wp_maybe_update_network_user_counts() {
  * Update the network-wide site count.
  *
  * @since 3.7.0
- * @since 4.8.0 The $network_id parameter has been added.
  *
- * @param int|null $network_id ID of the network. Default is the current network.
+ * @global wpdb $wpdb WordPress database abstraction object.
  */
-function wp_update_network_site_counts( $network_id = null ) {
-	$network_id = (int) $network_id;
-	if ( ! $network_id ) {
-		$network_id = get_current_network_id();
-	}
+function wp_update_network_site_counts() {
+	global $wpdb;
 
 	$count = get_sites( array(
-		'network_id' => $network_id,
+		'network_id' => $wpdb->siteid,
 		'spam'       => 0,
 		'deleted'    => 0,
 		'archived'   => 0,
 		'count'      => true,
 	) );
 
-	update_network_option( $network_id, 'blog_count', $count );
+	update_site_option( 'blog_count', $count );
 }
 
 /**
  * Update the network-wide user count.
  *
  * @since 3.7.0
- * @since 4.8.0 The $network_id parameter has been added.
  *
  * @global wpdb $wpdb WordPress database abstraction object.
- *
- * @param int|null $network_id ID of the network. Default is the current network.
  */
-function wp_update_network_user_counts( $network_id = null ) {
+function wp_update_network_user_counts() {
 	global $wpdb;
 
 	$count = $wpdb->get_var( "SELECT COUNT(ID) as c FROM $wpdb->users WHERE spam = '0' AND deleted = '0'" );
-	update_network_option( $network_id, 'user_count', $count );
+	update_site_option( 'user_count', $count );
 }
 
 /**

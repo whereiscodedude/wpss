@@ -1496,7 +1496,7 @@ function utf8_uri_encode( $utf8_string, $length = 0 ) {
  * | -------- | ----- | ----------- | --------------------------------------- |
  * | U+00B7   | l·l   | ll          | Flown dot (between two Ls)              |
  *
- * Serbian (`sr_RS`) and Bosnian (`bs_BA`) locales:
+ * Serbian (`sr_RS`) locale:
  *
  * |   Code   | Glyph | Replacement |               Description               |
  * | -------- | ----- | ----------- | --------------------------------------- |
@@ -1506,7 +1506,6 @@ function utf8_uri_encode( $utf8_string, $length = 0 ) {
  * @since 1.2.1
  * @since 4.6.0 Added locale support for `de_CH`, `de_CH_informal`, and `ca`.
  * @since 4.7.0 Added locale support for `sr_RS`.
- * @since 4.8.0 Added locale support for `bs_BA`.
  *
  * @param string $string Text that might have accent characters
  * @return string Filtered string with replaced "nice" characters.
@@ -1712,7 +1711,7 @@ function remove_accents( $string ) {
 			$chars[ 'å' ] = 'aa';
 		} elseif ( 'ca' === $locale ) {
 			$chars[ 'l·l' ] = 'll';
-		} elseif ( 'sr_RS' === $locale || 'bs_BA' === $locale ) {
+		} elseif ( 'sr_RS' === $locale ) {
 			$chars[ 'Đ' ] = 'DJ';
 			$chars[ 'đ' ] = 'dj';
 		}
@@ -3377,7 +3376,7 @@ function wp_trim_words( $text, $num_words = 55, $more = null ) {
 	 * @since 3.3.0
 	 *
 	 * @param string $text          The trimmed text.
-	 * @param int    $num_words     The number of words to trim the text to. Default 55.
+	 * @param int    $num_words     The number of words to trim the text to. Default 5.
 	 * @param string $more          An optional string to append to the end of the trimmed text, e.g. &hellip;.
 	 * @param string $original_text The text before it was trimmed.
 	 */

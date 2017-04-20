@@ -1045,8 +1045,6 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 	/**
 	 * Let plugins pre-filter the image meta to be able to fix inconsistencies in the stored data.
 	 *
-	 * @since 4.5.0
-	 *
 	 * @param array  $image_meta    The image meta data as returned by 'wp_get_attachment_metadata()'.
 	 * @param array  $size_array    Array of width and height values in pixels (in that order).
 	 * @param string $image_src     The 'src' of the image.
@@ -3324,21 +3322,18 @@ function wp_enqueue_media( $args = array() ) {
 	/**
 	 * Allows showing or hiding the "Create Audio Playlist" button in the media library.
 	 *
-	 * By default, the "Create Audio Playlist" button will always be shown in
-	 * the media library.  If this filter returns `null`, a query will be run
-	 * to determine whether the media library contains any audio items.  This
-	 * was the default behavior prior to version 4.8.0, but this query is
-	 * expensive for large media libraries.
+	 * By default (if this filter returns `null`), a query will be run to
+	 * determine whether the media library contains any audio items.  This
+	 * query is expensive for large media libraries, so it may be desirable for
+	 * sites to override this behavior.
 	 *
 	 * @since 4.7.4
-	 * @since 4.8.0 The filter's default value is `true` rather than `null`.
 	 *
 	 * @link https://core.trac.wordpress.org/ticket/31071
 	 *
-	 * @param bool|null Whether to show the button, or `null` to decide based
-	 *                  on whether any audio files exist in the media library.
+	 * @param bool|null Whether to show the button, or `null` for default behavior.
 	 */
-	$show_audio_playlist = apply_filters( 'media_library_show_audio_playlist', true );
+	$show_audio_playlist = apply_filters( 'media_library_show_audio_playlist', null );
 	if ( null === $show_audio_playlist ) {
 		$show_audio_playlist = $wpdb->get_var( "
 			SELECT ID
@@ -3352,21 +3347,18 @@ function wp_enqueue_media( $args = array() ) {
 	/**
 	 * Allows showing or hiding the "Create Video Playlist" button in the media library.
 	 *
-	 * By default, the "Create Video Playlist" button will always be shown in
-	 * the media library.  If this filter returns `null`, a query will be run
-	 * to determine whether the media library contains any video items.  This
-	 * was the default behavior prior to version 4.8.0, but this query is
-	 * expensive for large media libraries.
+	 * By default (if this filter returns `null`), a query will be run to
+	 * determine whether the media library contains any video items.  This
+	 * query is expensive for large media libraries, so it may be desirable for
+	 * sites to override this behavior.
 	 *
 	 * @since 4.7.4
-	 * @since 4.8.0 The filter's default value is `true` rather than `null`.
 	 *
 	 * @link https://core.trac.wordpress.org/ticket/31071
 	 *
-	 * @param bool|null Whether to show the button, or `null` to decide based
-	 *                  on whether any video files exist in the media library.
+	 * @param bool|null Whether to show the button, or `null` for default behavior.
 	 */
-	$show_video_playlist = apply_filters( 'media_library_show_video_playlist', true );
+	$show_video_playlist = apply_filters( 'media_library_show_video_playlist', null );
 	if ( null === $show_video_playlist ) {
 		$show_video_playlist = $wpdb->get_var( "
 			SELECT ID
@@ -3495,8 +3487,8 @@ function wp_enqueue_media( $args = array() ) {
 		'unattached'             => __( 'Unattached' ),
 		'trash'                  => _x( 'Trash', 'noun' ),
 		'uploadedToThisPost'     => $post_type_object->labels->uploaded_to_this_item,
-		'warnDelete'             => __( "You are about to permanently delete this item.\nThis will remove it from your site.\n 'Cancel' to stop, 'OK' to delete." ),
-		'warnBulkDelete'         => __( "You are about to permanently delete these items.\nThis will remove them from your site.\n 'Cancel' to stop, 'OK' to delete." ),
+		'warnDelete'             => __( "You are about to permanently delete this item.\n  'Cancel' to stop, 'OK' to delete." ),
+		'warnBulkDelete'         => __( "You are about to permanently delete these items.\n  'Cancel' to stop, 'OK' to delete." ),
 		'warnBulkTrash'          => __( "You are about to trash these items.\n  'Cancel' to stop, 'OK' to delete." ),
 		'bulkSelect'             => __( 'Bulk Select' ),
 		'cancelSelection'        => __( 'Cancel Selection' ),

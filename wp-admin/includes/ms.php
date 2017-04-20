@@ -173,16 +173,6 @@ function wpmu_delete_blog( $blog_id, $drop = false ) {
 		clean_blog_cache( $blog );
 	}
 
-	/**
-	 * Fires after the site is deleted from the network.
-	 *
-	 * @since 4.8.0
-	 *
-	 * @param int  $blog_id The site ID.
-	 * @param bool $drop    True if site's tables should be dropped. Default is false.
-	 */
-	do_action( 'deleted_blog', $blog_id, $drop );
-
 	if ( $switch )
 		restore_current_blog();
 }
@@ -714,10 +704,8 @@ function _access_denied_splash() {
  * @return bool True if the user has proper permissions, false if they do not.
  */
 function check_import_new_users( $permission ) {
-	if ( ! current_user_can( 'manage_network_users' ) ) {
+	if ( !is_super_admin() )
 		return false;
-	}
-
 	return true;
 }
 // See "import_allow_fetch_attachments" and "import_attachment_size_limit" filters too.
@@ -785,7 +773,7 @@ function mu_dropdown_languages( $lang_files = array(), $current = '' ) {
 function site_admin_notice() {
 	global $wp_db_version, $pagenow;
 
-	if ( ! current_user_can( 'upgrade_network' ) ) {
+	if ( ! is_super_admin() ) {
 		return false;
 	}
 

@@ -77,7 +77,7 @@ function wp_default_scripts( &$scripts ) {
 
 	$scripts->add( 'common', "/wp-admin/js/common$suffix.js", array('jquery', 'hoverIntent', 'utils'), false, 1 );
 	did_action( 'init' ) && $scripts->localize( 'common', 'commonL10n', array(
-		'warnDelete'   => __( "You are about to permanently delete these items.\nThis will remove them from your site.\n 'Cancel' to stop, 'OK' to delete." ),
+		'warnDelete'   => __( "You are about to permanently delete these items.\n  'Cancel' to stop, 'OK' to delete." ),
 		'dismiss'      => __( 'Dismiss this notice.' ),
 		'collapseMenu' => __( 'Collapse Main menu' ),
 		'expandMenu'   => __( 'Expand Main menu' ),
@@ -280,7 +280,7 @@ function wp_default_scripts( &$scripts ) {
 		'queue_limit_exceeded' => __('You have attempted to queue too many files.'),
 		'file_exceeds_size_limit' => __('%s exceeds the maximum upload size for this site.'),
 		'zero_byte_file' => __('This file is empty. Please try another.'),
-		'invalid_filetype' => __('Sorry, this file type is not permitted for security reasons.'),
+		'invalid_filetype' => __('This file type is not allowed. Please try another.'),
 		'not_an_image' => __('This file is not an image. Please try another.'),
 		'image_memory_exceeded' => __('Memory exceeded. Please try another smaller file.'),
 		'image_dimensions_exceeded' => __('This is larger than the maximum size. Please try another.'),
@@ -637,34 +637,32 @@ function wp_default_scripts( &$scripts ) {
 				'noPlugins'                  => __( 'You do not appear to have any plugins available at this time.' ),
 				'noItemsSelected'            => __( 'Please select at least one item to perform this action on.' ),
 				'updating'                   => __( 'Updating...' ), // No ellipsis.
-				'pluginUpdated'              => _x( 'Updated!', 'plugin' ),
-				'themeUpdated'               => _x( 'Updated!', 'theme' ),
+				'updated'                    => __( 'Updated!' ),
 				'update'                     => __( 'Update' ),
 				'updateNow'                  => __( 'Update Now' ),
 				/* translators: %s: Plugin name and version */
-				'pluginUpdateNowLabel'       => _x( 'Update %s now', 'plugin' ),
+				'updateNowLabel'             => __( 'Update %s now' ),
 				'updateFailedShort'          => __( 'Update Failed!' ),
 				/* translators: %s: Error string for a failed update */
 				'updateFailed'               => __( 'Update Failed: %s' ),
 				/* translators: %s: Plugin name and version */
-				'pluginUpdatingLabel'        => _x( 'Updating %s...', 'plugin' ), // No ellipsis.
+				'updatingLabel'              => __( 'Updating %s...' ), // No ellipsis.
 				/* translators: %s: Plugin name and version */
-				'pluginUpdatedLabel'         => _x( '%s updated!', 'plugin' ),
+				'updatedLabel'               => __( '%s updated!' ),
 				/* translators: %s: Plugin name and version */
-				'pluginUpdateFailedLabel'    => _x( '%s update failed', 'plugin' ),
-				/* translators: Accessibility text */
+				'updateFailedLabel'          => __( '%s update failed' ),
+				/* translators: JavaScript accessible string */
 				'updatingMsg'                => __( 'Updating... please wait.' ), // No ellipsis.
-				/* translators: Accessibility text */
+				/* translators: JavaScript accessible string */
 				'updatedMsg'                 => __( 'Update completed successfully.' ),
-				/* translators: Accessibility text */
+				/* translators: JavaScript accessible string */
 				'updateCancel'               => __( 'Update canceled.' ),
 				'beforeunload'               => __( 'Updates may not complete if you navigate away from this page.' ),
 				'installNow'                 => __( 'Install Now' ),
 				/* translators: %s: Plugin name */
-				'pluginInstallNowLabel'      => _x( 'Install %s now', 'plugin' ),
+				'installNowLabel'            => __( 'Install %s now' ),
 				'installing'                 => __( 'Installing...' ),
-				'pluginInstalled'            => _x( 'Installed!', 'plugin' ),
-				'themeInstalled'             => _x( 'Installed!', 'theme' ),
+				'installed'                  => __( 'Installed!' ),
 				'installFailedShort'         => __( 'Install Failed!' ),
 				/* translators: %s: Error string for a failed installation */
 				'installFailed'              => __( 'Installation failed: %s' ),
@@ -693,8 +691,7 @@ function wp_default_scripts( &$scripts ) {
 				'deleting'                   => __( 'Deleting...' ),
 				/* translators: %s: Error string for a failed deletion */
 				'deleteFailed'               => __( 'Deletion failed: %s' ),
-				'pluginDeleted'              => _x( 'Deleted!', 'plugin' ),
-				'themeDeleted'               => _x( 'Deleted!', 'theme' ),
+				'deleted'                    => __( 'Deleted!' ),
 				'livePreview'                => __( 'Live Preview' ),
 				'activatePlugin'             => is_network_admin() ? __( 'Network Activate' ) : __( 'Activate' ),
 				'activateTheme'              => is_network_admin() ? __( 'Network Enable' ) : __( 'Activate' ),

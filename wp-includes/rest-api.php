@@ -998,7 +998,7 @@ function rest_get_avatar_urls( $email ) {
  */
 function rest_get_avatar_sizes() {
 	/**
-	 * Filters the REST avatar sizes.
+	 * Filter the REST avatar sizes.
 	 *
 	 * Use this filter to adjust the array of sizes returned by the
 	 * `rest_get_avatar_sizes` function.
@@ -1013,8 +1013,6 @@ function rest_get_avatar_sizes() {
 
 /**
  * Validate a value based on a schema.
- *
- * @since 4.7.0
  *
  * @param mixed  $value The value to validate.
  * @param array  $args  Schema array to use for validation.
@@ -1094,18 +1092,18 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 		if ( isset( $args['minimum'] ) && ! isset( $args['maximum'] ) ) {
 			if ( ! empty( $args['exclusiveMinimum'] ) && $value <= $args['minimum'] ) {
 				/* translators: 1: parameter, 2: minimum number */
-				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than %2$d' ), $param, $args['minimum'] ) );
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than %2$d (exclusive)' ), $param, $args['minimum'] ) );
 			} elseif ( empty( $args['exclusiveMinimum'] ) && $value < $args['minimum'] ) {
 				/* translators: 1: parameter, 2: minimum number */
-				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than or equal to %2$d' ), $param, $args['minimum'] ) );
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than %2$d (inclusive)' ), $param, $args['minimum'] ) );
 			}
 		} elseif ( isset( $args['maximum'] ) && ! isset( $args['minimum'] ) ) {
 			if ( ! empty( $args['exclusiveMaximum'] ) && $value >= $args['maximum'] ) {
 				/* translators: 1: parameter, 2: maximum number */
-				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than %2$d' ), $param, $args['maximum'] ) );
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than %2$d (exclusive)' ), $param, $args['maximum'] ) );
 			} elseif ( empty( $args['exclusiveMaximum'] ) && $value > $args['maximum'] ) {
 				/* translators: 1: parameter, 2: maximum number */
-				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than or equal to %2$d' ), $param, $args['maximum'] ) );
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than %2$d (inclusive)' ), $param, $args['maximum'] ) );
 			}
 		} elseif ( isset( $args['maximum'] ) && isset( $args['minimum'] ) ) {
 			if ( ! empty( $args['exclusiveMinimum'] ) && ! empty( $args['exclusiveMaximum'] ) ) {
@@ -1137,8 +1135,6 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 
 /**
  * Sanitize a value based on a schema.
- *
- * @since 4.7.0
  *
  * @param mixed $value The value to sanitize.
  * @param array $args  Schema array to use for sanitization.
