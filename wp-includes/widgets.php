@@ -281,12 +281,12 @@ function register_sidebar($args = array()) {
  *
  * @global array $wp_registered_sidebars Stores the new sidebar in this array by sidebar ID.
  *
- * @param string|int $sidebar_id The ID of the sidebar when it was registered.
+ * @param string $name The ID of the sidebar when it was added.
  */
-function unregister_sidebar( $sidebar_id ) {
+function unregister_sidebar( $name ) {
 	global $wp_registered_sidebars;
 
-	unset( $wp_registered_sidebars[ $sidebar_id ] );
+	unset( $wp_registered_sidebars[ $name ] );
 }
 
 /**
@@ -1233,7 +1233,7 @@ function wp_widget_rss_output( $rss, $args = array() ) {
 
 	if ( is_wp_error($rss) ) {
 		if ( is_admin() || current_user_can('manage_options') )
-			echo '<p><strong>' . __( 'RSS Error:' ) . '</strong> ' . $rss->get_error_message() . '</p>';
+			echo '<p>' . sprintf( __('<strong>RSS Error</strong>: %s'), $rss->get_error_message() ) . '</p>';
 		return;
 	}
 
@@ -1342,7 +1342,7 @@ function wp_widget_rss_form( $args, $inputs = null ) {
 	$args['show_date']      = isset( $args['show_date'] ) ? (int) $args['show_date'] : (int) $inputs['show_date'];
 
 	if ( ! empty( $args['error'] ) ) {
-		echo '<p class="widget-error"><strong>' . __( 'RSS Error:' ) . '</strong> ' . $args['error'] . '</p>';
+		echo '<p class="widget-error"><strong>' . sprintf( __( 'RSS Error: %s' ), $args['error'] ) . '</strong></p>';
 	}
 
 	$esc_number = esc_attr( $args['number'] );
@@ -1352,7 +1352,7 @@ function wp_widget_rss_form( $args, $inputs = null ) {
 	<input class="widefat" id="rss-url-<?php echo $esc_number; ?>" name="widget-rss[<?php echo $esc_number; ?>][url]" type="text" value="<?php echo esc_url( $args['url'] ); ?>" /></p>
 <?php endif; if ( $inputs['title'] ) : ?>
 	<p><label for="rss-title-<?php echo $esc_number; ?>"><?php _e( 'Give the feed a title (optional):' ); ?></label>
-	<input class="widefat" id="rss-title-<?php echo $esc_number; ?>" name="widget-rss[<?php echo $esc_number; ?>][title]" type="text" value="<?php echo esc_attr( $args['title'] ); ?>" placeholder="<?php esc_attr_e( '(Title from feed)' ) ?>" /></p>
+	<input class="widefat" id="rss-title-<?php echo $esc_number; ?>" name="widget-rss[<?php echo $esc_number; ?>][title]" type="text" value="<?php echo esc_attr( $args['title'] ); ?>" /></p>
 <?php endif; if ( $inputs['items'] ) : ?>
 	<p><label for="rss-items-<?php echo $esc_number; ?>"><?php _e( 'How many items would you like to display?' ); ?></label>
 	<select id="rss-items-<?php echo $esc_number; ?>" name="widget-rss[<?php echo $esc_number; ?>][items]">
