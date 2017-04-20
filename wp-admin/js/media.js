@@ -1,4 +1,4 @@
-/* global ajaxurl, attachMediaBoxL10n, _wpMediaGridSettings, showNotice */
+/* global ajaxurl, attachMediaBoxL10n */
 
 var findPosts;
 ( function( $ ){
@@ -32,7 +32,7 @@ var findPosts;
 		},
 
 		close: function() {
-			$('#find-posts-response').empty();
+			$('#find-posts-response').html('');
 			$('#find-posts').hide();
 			$( '.ui-find-overlay' ).hide();
 		},
@@ -51,14 +51,14 @@ var findPosts;
 				},
 				spinner = $( '.find-box-search .spinner' );
 
-			spinner.addClass( 'is-active' );
+			spinner.show();
 
 			$.ajax( ajaxurl, {
 				type: 'POST',
 				data: post,
 				dataType: 'json'
 			}).always( function() {
-				spinner.removeClass( 'is-active' );
+				spinner.hide();
 			}).done( function( x ) {
 				if ( ! x.success ) {
 					$( '#find-posts-response' ).text( attachMediaBoxL10n.error );
@@ -72,16 +72,13 @@ var findPosts;
 	};
 
 	$( document ).ready( function() {
-		var settings, $mediaGridWrap = $( '#wp-media-grid' );
+		var $mediaGridWrap = $( '#wp-media-grid' );
 
 		// Open up a manage media frame into the grid.
 		if ( $mediaGridWrap.length && window.wp && window.wp.media ) {
-			settings = _wpMediaGridSettings;
-
 			window.wp.media({
 				frame: 'manage',
-				container: $mediaGridWrap,
-				library: settings.queryVars
+				container: $mediaGridWrap
 			}).open();
 		}
 
@@ -99,15 +96,9 @@ var findPosts;
 		$( '#find-posts-close' ).click( findPosts.close );
 		$( '#doaction, #doaction2' ).click( function( event ) {
 			$( 'select[name^="action"]' ).each( function() {
-				var optionValue = $( this ).val();
-
-				if ( 'attach' === optionValue ) {
+				if ( $(this).val() === 'attach' ) {
 					event.preventDefault();
 					findPosts.open();
-				} else if ( 'delete' === optionValue ) {
-					if ( ! showNotice.warn() ) {
-						event.preventDefault();
-					}
 				}
 			});
 		});
