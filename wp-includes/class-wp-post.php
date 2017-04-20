@@ -211,9 +211,8 @@ final class WP_Post {
 		global $wpdb;
 
 		$post_id = (int) $post_id;
-		if ( ! $post_id ) {
+		if ( ! $post_id )
 			return false;
-		}
 
 		$_post = wp_cache_get( $post_id, 'posts' );
 
@@ -253,7 +252,7 @@ final class WP_Post {
 			return true;
 
 		if ( 'page_template' == $key )
-			return true;
+			return ( 'page' == $this->post_type );
 
 		if ( 'post_category' == $key )
 		   return true;
