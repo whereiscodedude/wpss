@@ -44,7 +44,7 @@ class WP_Widget_Pages extends WP_Widget {
 	public function widget( $args, $instance ) {
 
 		/**
-		 * Filters the widget title.
+		 * Filter the widget title.
 		 *
 		 * @since 2.6.0
 		 *
@@ -61,7 +61,7 @@ class WP_Widget_Pages extends WP_Widget {
 			$sortby = 'menu_order, post_title';
 
 		/**
-		 * Filters the arguments for the Pages widget.
+		 * Filter the arguments for the Pages widget.
 		 *
 		 * @since 2.8.0
 		 *
@@ -129,7 +129,7 @@ class WP_Widget_Pages extends WP_Widget {
 		?>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Title:' ); ?></label>
-			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" placeholder="<?php esc_attr_e( 'Pages' ); ?>" type="text" value="<?php echo esc_attr( $instance['title'] ); ?>" />
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $instance['title'] ); ?>" />
 		</p>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'sortby' ) ); ?>"><?php _e( 'Sort by:' ); ?></label>

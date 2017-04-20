@@ -14,13 +14,12 @@
 	background: #f7f7f7;
 }
 
-.widget-top .widget-action {
-	border: 0;
-	margin: 0;
-	padding: 10px;
-	background: none;
-	cursor: pointer;
+.widget-top a.widget-action,
+.widget-top a.widget-action:hover {
+	-webkit-box-shadow: none;
+	box-shadow: none;
 	outline: none;
+	text-decoration: none;
 }
 
 .widget-title h3,
@@ -51,7 +50,7 @@
 }
 
 .deleting .widget-title,
-.deleting .widget-top .widget-action .toggle-indicator:before {
+.deleting .widget-top a.widget-action:after {
 	color: #a0a5aa;
 }
 
@@ -348,7 +347,6 @@ div#widgets-right .closed .widgets-sortables {
 .js .widgets-holder-wrap.closed .widget,
 .js .widgets-holder-wrap.closed .sidebar-description,
 .js .widgets-holder-wrap.closed .remove-inactive-widgets,
-.js .widgets-holder-wrap.closed .description,
 .js .closed br.clear {
 	display: none;
 }
@@ -370,7 +368,7 @@ div#widgets-right .closed .widgets-sortables {
 /* Dragging widgets over the available widget area show's a "Deactivate" message */
 #removing-widget {
 	display: none;
-	font-weight: 400;
+	font-weight: normal;
 	padding-left: 15px;
 	font-size: 12px;
 	line-height: 1;

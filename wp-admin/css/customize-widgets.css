@@ -89,15 +89,15 @@
 	line-height: 16px;
 }
 
-.customize-control-widget_form.expanded .widget-action .toggle-indicator:before {
+.customize-control-widget_form.expanded a.widget-action:after {
 	content: "\f142";
 }
 
-.customize-control-widget_form.wide-widget-control .widget-action .toggle-indicator:before {
+.customize-control-widget_form.wide-widget-control a.widget-action:after {
 	content: "\f139";
 }
 
-.customize-control-widget_form.wide-widget-control.expanded .widget-action .toggle-indicator:before {
+.customize-control-widget_form.wide-widget-control.expanded a.widget-action:after {
 	content: "\f141";
 }
 
@@ -229,10 +229,8 @@
 
 #available-widgets .widget-tpl:hover,
 #available-widgets .widget-tpl.selected {
-	background: #f3f3f5;
+	background: #eee;
 	border-bottom-color: #ccc;
-	color: #0073aa;
-	border-left: 4px solid #0073aa;
 }
 
 #customize-controls .widget-title h3 {
@@ -438,12 +436,8 @@ body.adding-widget #customize-preview {
 	.last-widget {
 		margin-bottom: 15px;
 	}
-	/* This rule reduces the widgets titles height. */
 	.widget-title h3 {
 		padding: 13px 15px;
-	}
-	.widget-top .widget-action {
-		padding-bottom: 8px;
 	}
 	.widget-reorder-nav span {
 		height: 39px;
