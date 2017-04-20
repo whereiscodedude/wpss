@@ -1,8 +1,8 @@
 /**
  * plugin.js
  *
+ * Copyright, Moxiecode Systems AB
  * Released under LGPL License.
- * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
  *
  * License: http://www.tinymce.com/license
  * Contributing: http://www.tinymce.com/contributing
@@ -22,8 +22,7 @@
 (function(tinymce) {
 	var reported;
 
-	function noop() {
-	}
+	function noop() {}
 
 	function log(apiCall) {
 		if (!reported && window && window.console) {
@@ -105,15 +104,6 @@
 	};
 
 	function patchEditor(editor) {
-
-		function translate(str) {
-			var prefix = editor.settings.language || "en";
-			var prefixedStr = [prefix, str].join('.');
-			var translatedStr = tinymce.i18n.translate(prefixedStr);
-
-			return prefixedStr !== translatedStr ? translatedStr : tinymce.i18n.translate(str);
-		}
-
 		function patchEditorEvents(oldEventNames, argsMap) {
 			tinymce.each(oldEventNames.split(" "), function(oldName) {
 				editor["on" + oldName] = new Dispatcher(editor, oldName, argsMap);
@@ -180,9 +170,7 @@
 			onAdd: new Dispatcher(),
 			onPostRender: new Dispatcher(),
 
-			add: function(obj) {
-				return obj;
-			},
+			add: function(obj) { return obj; },
 			createButton: cmNoop,
 			createColorSplitButton: cmNoop,
 			createControl: cmNoop,
@@ -218,13 +206,13 @@
 
 		var originalAddButton = editor.addButton;
 		editor.addButton = function(name, settings) {
-			var originalOnPostRender;
+			var originalOnPostRender, string, translated;
 
 			function patchedPostRender() {
 				editor.controlManager.buttons[name] = this;
 
 				if (originalOnPostRender) {
-					return originalOnPostRender.apply(this, arguments);
+					return originalOnPostRender.call(this);
 				}
 			}
 
@@ -239,8 +227,15 @@
 				settings.onPostRender = patchedPostRender;
 			}
 
-			if (settings.title) {
-				settings.title = translate(settings.title);
+			if ( settings.title ) {
+				// WP
+				string = (editor.settings.language || "en") + "." + settings.title;
+				translated = tinymce.i18n.translate(string);
+
+				if ( string !== translated ) {
+					settings.title = translated;
+				}
+				// WP end
 			}
 
 			return originalAddButton.call(this, name, settings);
@@ -280,7 +275,7 @@
 	tinymce.addI18n = function(prefix, o) {
 		var I18n = tinymce.util.I18n, each = tinymce.each;
 
-		if (typeof prefix == "string" && prefix.indexOf('.') === -1) {
+		if (typeof(prefix) == "string" && prefix.indexOf('.') === -1) {
 			I18n.add(prefix, o);
 			return;
 		}
