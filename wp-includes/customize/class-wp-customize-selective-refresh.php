@@ -43,7 +43,7 @@ final class WP_Customize_Selective_Refresh {
 	 * Log of errors triggered when partials are rendered.
 	 *
 	 * @since 4.5.0
-	 * @access protected
+	 * @access private
 	 * @var array
 	 */
 	protected $triggered_errors = array();
@@ -52,7 +52,7 @@ final class WP_Customize_Selective_Refresh {
 	 * Keep track of the current partial being rendered.
 	 *
 	 * @since 4.5.0
-	 * @access protected
+	 * @access private
 	 * @var string
 	 */
 	protected $current_partial_id;
@@ -100,10 +100,10 @@ final class WP_Customize_Selective_Refresh {
 		} else {
 			$class = 'WP_Customize_Partial';
 
-			/** This filter is documented in wp-includes/customize/class-wp-customize-selective-refresh.php */
+			/** This filter (will be) documented in wp-includes/class-wp-customize-manager.php */
 			$args = apply_filters( 'customize_dynamic_partial_args', $args, $id );
 
-			/** This filter is documented in wp-includes/customize/class-wp-customize-selective-refresh.php */
+			/** This filter (will be) documented in wp-includes/class-wp-customize-manager.php */
 			$class = apply_filters( 'customize_dynamic_partial_class', $class, $id, $args );
 
 			$partial = new $class( $this, $id, $args );
@@ -179,24 +179,14 @@ final class WP_Customize_Selective_Refresh {
 			}
 		}
 
-		$switched_locale = switch_to_locale( get_user_locale() );
-		$l10n = array(
-			'shiftClickToEdit' => __( 'Shift-click to edit this element.' ),
-			'clickEditMenu' => __( 'Click to edit this menu.' ),
-			'clickEditWidget' => __( 'Click to edit this widget.' ),
-			'clickEditTitle' => __( 'Click to edit the site title.' ),
-			'clickEditMisc' => __( 'Click to edit this element.' ),
-			/* translators: %s: document.write() */
-			'badDocumentWrite' => sprintf( __( '%s is forbidden' ), 'document.write()' ),
-		);
-		if ( $switched_locale ) {
-			restore_previous_locale();
-		}
-
 		$exports = array(
 			'partials'       => $partials,
 			'renderQueryVar' => self::RENDER_QUERY_VAR,
-			'l10n'           => $l10n,
+			'l10n'           => array(
+				'shiftClickToEdit' => __( 'Shift-click to edit this element.' ),
+				/* translators: %s: document.write() */
+				'badDocumentWrite' => sprintf( __( '%s is forbidden' ), 'document.write()' ),
+			),
 		);
 
 		// Export data to JS.
@@ -287,7 +277,7 @@ final class WP_Customize_Selective_Refresh {
 	 * These errors will be relayed back to the client in the Ajax response.
 	 *
 	 * @since 4.5.0
-	 * @access public
+	 * @access private
 	 *
 	 * @param int    $errno   Error number.
 	 * @param string $errstr  Error string.
@@ -317,19 +307,20 @@ final class WP_Customize_Selective_Refresh {
 			return;
 		}
 
+		$this->manager->remove_preview_signature();
+
 		/*
 		 * Note that is_customize_preview() returning true will entail that the
 		 * user passed the 'customize' capability check and the nonce check, since
 		 * WP_Customize_Manager::setup_theme() is where the previewing flag is set.
 		 */
 		if ( ! is_customize_preview() ) {
-			wp_send_json_error( 'expected_customize_preview', 403 );
-		} elseif ( ! isset( $_POST['partials'] ) ) {
-			wp_send_json_error( 'missing_partials', 400 );
+			status_header( 403 );
+			wp_send_json_error( 'expected_customize_preview' );
+		} else if ( ! isset( $_POST['partials'] ) ) {
+			status_header( 400 );
+			wp_send_json_error( 'missing_partials' );
 		}
-
-		// Ensure that doing selective refresh on 404 template doesn't result in fallback rendering behavior (full refreshes).
-		status_header( 200 );
 
 		$partials = json_decode( wp_unslash( $_POST['partials'] ), true );
 
@@ -410,10 +401,6 @@ final class WP_Customize_Selective_Refresh {
 		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
 			$response['errors'] = $this->triggered_errors;
 		}
-
-		$setting_validities = $this->manager->validate_setting_values( $this->manager->unsanitized_post_values() );
-		$exported_setting_validities = array_map( array( $this->manager, 'prepare_setting_validity_for_js' ), $setting_validities );
-		$response['setting_validities'] = $exported_setting_validities;
 
 		/**
 		 * Filters the response from rendering the partials.

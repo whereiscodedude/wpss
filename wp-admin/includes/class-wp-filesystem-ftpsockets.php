@@ -121,10 +121,8 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 
 		$temp = wp_tempnam( $file );
 
-		if ( ! $temphandle = fopen( $temp, 'w+' ) ) {
-			unlink( $temp );
+		if ( ! $temphandle = fopen($temp, 'w+') )
 			return false;
-		}
 
 		mbstring_binary_safe_encoding();
 
@@ -470,10 +468,9 @@ class WP_Filesystem_ftpsockets extends WP_Filesystem_Base {
 	 *
 	 * @param string $path
 	 * @param bool $recursive
-	 * @return bool
 	 */
 	public function rmdir($path, $recursive = false ) {
-		return $this->delete($path, $recursive);
+		$this->delete($path, $recursive);
 	}
 
 	/**
