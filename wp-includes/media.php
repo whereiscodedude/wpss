@@ -1045,8 +1045,6 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 	/**
 	 * Let plugins pre-filter the image meta to be able to fix inconsistencies in the stored data.
 	 *
-	 * @since 4.5.0
-	 *
 	 * @param array  $image_meta    The image meta data as returned by 'wp_get_attachment_metadata()'.
 	 * @param array  $size_array    Array of width and height values in pixels (in that order).
 	 * @param string $image_src     The 'src' of the image.
@@ -3324,21 +3322,18 @@ function wp_enqueue_media( $args = array() ) {
 	/**
 	 * Allows showing or hiding the "Create Audio Playlist" button in the media library.
 	 *
-	 * By default, the "Create Audio Playlist" button will always be shown in
-	 * the media library.  If this filter returns `null`, a query will be run
-	 * to determine whether the media library contains any audio items.  This
-	 * was the default behavior prior to version 4.8.0, but this query is
-	 * expensive for large media libraries.
+	 * By default (if this filter returns `null`), a query will be run to
+	 * determine whether the media library contains any audio items.  This
+	 * query is expensive for large media libraries, so it may be desirable for
+	 * sites to override this behavior.
 	 *
 	 * @since 4.7.4
-	 * @since 4.8.0 The filter's default value is `true` rather than `null`.
 	 *
 	 * @link https://core.trac.wordpress.org/ticket/31071
 	 *
-	 * @param bool|null Whether to show the button, or `null` to decide based
-	 *                  on whether any audio files exist in the media library.
+	 * @param bool|null Whether to show the button, or `null` for default behavior.
 	 */
-	$show_audio_playlist = apply_filters( 'media_library_show_audio_playlist', true );
+	$show_audio_playlist = apply_filters( 'media_library_show_audio_playlist', null );
 	if ( null === $show_audio_playlist ) {
 		$show_audio_playlist = $wpdb->get_var( "
 			SELECT ID
@@ -3352,21 +3347,18 @@ function wp_enqueue_media( $args = array() ) {
 	/**
 	 * Allows showing or hiding the "Create Video Playlist" button in the media library.
 	 *
-	 * By default, the "Create Video Playlist" button will always be shown in
-	 * the media library.  If this filter returns `null`, a query will be run
-	 * to determine whether the media library contains any video items.  This
-	 * was the default behavior prior to version 4.8.0, but this query is
-	 * expensive for large media libraries.
+	 * By default (if this filter returns `null`), a query will be run to
+	 * determine whether the media library contains any video items.  This
+	 * query is expensive for large media libraries, so it may be desirable for
+	 * sites to override this behavior.
 	 *
 	 * @since 4.7.4
-	 * @since 4.8.0 The filter's default value is `true` rather than `null`.
 	 *
 	 * @link https://core.trac.wordpress.org/ticket/31071
 	 *
-	 * @param bool|null Whether to show the button, or `null` to decide based
-	 *                  on whether any video files exist in the media library.
+	 * @param bool|null Whether to show the button, or `null` for default behavior.
 	 */
-	$show_video_playlist = apply_filters( 'media_library_show_video_playlist', true );
+	$show_video_playlist = apply_filters( 'media_library_show_video_playlist', null );
 	if ( null === $show_video_playlist ) {
 		$show_video_playlist = $wpdb->get_var( "
 			SELECT ID
@@ -3414,7 +3406,6 @@ function wp_enqueue_media( $args = array() ) {
 		'captions'  => ! apply_filters( 'disable_captions', '' ),
 		'nonce'     => array(
 			'sendToEditor' => wp_create_nonce( 'media-send-to-editor' ),
-			'wpRestApi'    => wp_create_nonce( 'wp_rest' ),
 		),
 		'post'    => array(
 			'id' => 0,
@@ -3424,7 +3415,6 @@ function wp_enqueue_media( $args = array() ) {
 			'audio' => ( $show_audio_playlist ) ? 1 : 0,
 			'video' => ( $show_video_playlist ) ? 1 : 0,
 		),
-		'oEmbedProxyUrl' => rest_url( 'oembed/1.0/proxy' ),
 		'embedExts'    => $exts,
 		'embedMimes'   => $ext_mimes,
 		'contentWidth' => $content_width,
@@ -3497,8 +3487,8 @@ function wp_enqueue_media( $args = array() ) {
 		'unattached'             => __( 'Unattached' ),
 		'trash'                  => _x( 'Trash', 'noun' ),
 		'uploadedToThisPost'     => $post_type_object->labels->uploaded_to_this_item,
-		'warnDelete'             => __( "You are about to permanently delete this item from your site.\nThis action cannot be undone.\n 'Cancel' to stop, 'OK' to delete." ),
-		'warnBulkDelete'         => __( "You are about to permanently delete these items from your site.\nThis action cannot be undone.\n 'Cancel' to stop, 'OK' to delete." ),
+		'warnDelete'             => __( "You are about to permanently delete this item.\n  'Cancel' to stop, 'OK' to delete." ),
+		'warnBulkDelete'         => __( "You are about to permanently delete these items.\n  'Cancel' to stop, 'OK' to delete." ),
 		'warnBulkTrash'          => __( "You are about to trash these items.\n  'Cancel' to stop, 'OK' to delete." ),
 		'bulkSelect'             => __( 'Bulk Select' ),
 		'cancelSelection'        => __( 'Cancel Selection' ),
@@ -3546,8 +3536,7 @@ function wp_enqueue_media( $args = array() ) {
 		'cropImage' => __( 'Crop Image' ),
 		'cropYourImage' => __( 'Crop your image' ),
 		'cropping' => __( 'Cropping&hellip;' ),
-		/* translators: 1: suggested width number, 2: suggested height number. */
-		'suggestedDimensions' => __( 'Suggested image dimensions: %1$s by %2$s pixels.' ),
+		'suggestedDimensions' => __( 'Suggested image dimensions:' ),
 		'cropError' => __( 'There has been an error cropping your image.' ),
 
 		// Edit Audio
@@ -3745,7 +3734,7 @@ function get_post_galleries( $post, $html = true ) {
 			if ( 'gallery' === $shortcode[2] ) {
 				$srcs = array();
 
-				$shortcode_attrs = shortcode_parse_atts( $shortcode[3] );
+				$shortcode_attrs = shortcode_parse_atts( $shortcode[3] ); 
 				if ( ! is_array( $shortcode_attrs ) ) {
 					$shortcode_attrs = array();
 				}

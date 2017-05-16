@@ -4420,11 +4420,10 @@
 				function captureSettingModifiedDuringSave( setting ) {
 					modifiedWhileSaving[ setting.id ] = true;
 				}
+				api.bind( 'change', captureSettingModifiedDuringSave );
 
 				submit = function () {
 					var request, query, settingInvalidities = {}, latestRevision = api._latestRevision;
-
-					api.bind( 'change', captureSettingModifiedDuringSave );
 
 					/*
 					 * Block saving if there are any settings that are marked as
