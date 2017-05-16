@@ -1,27 +1,25 @@
 <?php
 /**
- * WordPress Ajax Process Execution
+ * WordPress AJAX Process Execution.
  *
  * @package WordPress
  * @subpackage Administration
  *
- * @link https://codex.wordpress.org/AJAX_in_Plugins
+ * @link http://codex.wordpress.org/AJAX_in_Plugins
  */
 
 /**
- * Executing Ajax process.
+ * Executing AJAX process.
  *
  * @since 2.1.0
  */
 define( 'DOING_AJAX', true );
-if ( ! defined( 'WP_ADMIN' ) ) {
-	define( 'WP_ADMIN', true );
-}
+define( 'WP_ADMIN', true );
 
 /** Load WordPress Bootstrap */
 require_once( dirname( dirname( __FILE__ ) ) . '/wp-load.php' );
 
-/** Allow for cross-domain requests (from the front end). */
+/** Allow for cross-domain requests (from the frontend). */
 send_origin_headers();
 
 // Require an action parameter
@@ -52,23 +50,16 @@ $core_actions_post = array(
 	'oembed-cache', 'image-editor', 'delete-comment', 'delete-tag', 'delete-link',
 	'delete-meta', 'delete-post', 'trash-post', 'untrash-post', 'delete-page', 'dim-comment',
 	'add-link-category', 'add-tag', 'get-tagcloud', 'get-comments', 'replyto-comment',
-	'edit-comment', 'add-menu-item', 'add-meta', 'add-user', 'closed-postboxes',
+	'edit-comment', 'add-menu-item', 'add-meta', 'add-user', 'autosave', 'closed-postboxes',
 	'hidden-columns', 'update-welcome-panel', 'menu-get-metabox', 'wp-link-ajax',
 	'menu-locations-save', 'menu-quick-search', 'meta-box-order', 'get-permalink',
 	'sample-permalink', 'inline-save', 'inline-save-tax', 'find_posts', 'widgets-order',
-	'save-widget', 'delete-inactive-widgets', 'set-post-thumbnail', 'date_format', 'time_format',
+	'save-widget', 'set-post-thumbnail', 'date_format', 'time_format', 'wp-fullscreen-save-post',
 	'wp-remove-post-lock', 'dismiss-wp-pointer', 'upload-attachment', 'get-attachment',
 	'query-attachments', 'save-attachment', 'save-attachment-compat', 'send-link-to-editor',
 	'send-attachment-to-editor', 'save-attachment-order', 'heartbeat', 'get-revision-diffs',
-	'save-user-color-scheme', 'update-widget', 'query-themes', 'parse-embed', 'set-attachment-thumbnail',
-	'parse-media-shortcode', 'destroy-sessions', 'install-plugin', 'update-plugin', 'press-this-save-post',
-	'press-this-add-category', 'crop-image', 'generate-password', 'save-wporg-username', 'delete-plugin',
-	'search-plugins', 'search-install-plugins', 'activate-plugin', 'update-theme', 'delete-theme',
-	'install-theme', 'get-post-thumbnail-html', 'get-community-events',
+	'save-user-color-scheme',
 );
-
-// Deprecated
-$core_actions_post[] = 'wp-fullscreen-save-post';
 
 // Register core Ajax calls.
 if ( ! empty( $_GET['action'] ) && in_array( $_GET['action'], $core_actions_get ) )
@@ -81,20 +72,20 @@ add_action( 'wp_ajax_nopriv_heartbeat', 'wp_ajax_nopriv_heartbeat', 1 );
 
 if ( is_user_logged_in() ) {
 	/**
-	 * Fires authenticated Ajax actions for logged-in users.
+	 * Fires authenticated AJAX actions for logged-in users.
 	 *
-	 * The dynamic portion of the hook name, `$_REQUEST['action']`,
-	 * refers to the name of the Ajax action callback being fired.
+	 * The dynamic portion of the hook name, $_REQUEST['action'],
+	 * refers to the name of the AJAX action callback being fired.
 	 *
 	 * @since 2.1.0
 	 */
 	do_action( 'wp_ajax_' . $_REQUEST['action'] );
 } else {
 	/**
-	 * Fires non-authenticated Ajax actions for logged-out users.
+	 * Fires non-authenticated AJAX actions for logged-out users.
 	 *
-	 * The dynamic portion of the hook name, `$_REQUEST['action']`,
-	 * refers to the name of the Ajax action callback being fired.
+	 * The dynamic portion of the hook name, $_REQUEST['action'],
+	 * refers to the name of the AJAX action callback being fired.
 	 *
 	 * @since 2.8.0
 	 */
