@@ -380,8 +380,6 @@ function _image_get_preview_ratio($w, $h) {
  * Returns an image resource. Internal use only.
  *
  * @since 2.9.0
- * @deprecated 3.5.0 Use WP_Image_Editor::rotate()
- * @see WP_Image_Editor::rotate()
  *
  * @ignore
  * @param resource  $img   Image resource.
@@ -404,8 +402,6 @@ function _rotate_image_resource($img, $angle) {
  * Flips an image resource. Internal use only.
  *
  * @since 2.9.0
- * @deprecated 3.5.0 Use WP_Image_Editor::flip()
- * @see WP_Image_Editor::flip()
  *
  * @ignore
  * @param resource $img  Image resource.

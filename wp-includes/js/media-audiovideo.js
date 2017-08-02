@@ -795,7 +795,7 @@ MediaDetails = AttachmentDisplay.extend({
 	 * @global MediaElementPlayer
 	 */
 	setPlayer : function() {
-		var src;
+		var baseSettings, src;
 
 		if ( this.players.length || ! this.media || this.scriptXhr ) {
 			return;
@@ -803,8 +803,9 @@ MediaDetails = AttachmentDisplay.extend({
 
 		src = this.model.get( 'src' );
 
-		if ( src && src.indexOf( 'vimeo' ) > -1 && ! ( 'Vimeo' in window ) ) {
-			this.scriptXhr = $.getScript( 'https://player.vimeo.com/api/player.js', _.bind( this.loadPlayer, this ) );
+		if ( src && src.indexOf( 'vimeo' ) > -1 && ! ( 'Froogaloop' in window ) ) {
+			baseSettings = wp.media.mixin.mejsSettings;
+			this.scriptXhr = $.getScript( baseSettings.pluginPath + 'froogaloop.min.js', _.bind( this.loadPlayer, this ) );
 		} else {
 			this.loadPlayer();
 		}

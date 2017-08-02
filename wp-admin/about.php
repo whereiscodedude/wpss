@@ -11,12 +11,9 @@ require_once( dirname( __FILE__ ) . '/admin.php' );
 
 if ( ! wp_is_mobile() ) {
 	wp_enqueue_style( 'wp-mediaelement' );
-	wp_enqueue_script( 'mediaelement-vimeo' );
 	wp_enqueue_script( 'wp-mediaelement' );
 	wp_localize_script( 'mediaelement', '_wpmejsSettings', array(
 		'pluginPath'        => includes_url( 'js/mediaelement/', 'relative' ),
-		'classPrefix'       => 'mejs-',
-		'stretching'        => 'responsive',
 		'pauseOtherPlayers' => '',
 	) );
 }
@@ -44,8 +41,29 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 			<a href="about.php" class="nav-tab nav-tab-active"><?php _e( 'What&#8217;s New' ); ?></a>
 			<a href="credits.php" class="nav-tab"><?php _e( 'Credits' ); ?></a>
 			<a href="freedoms.php" class="nav-tab"><?php _e( 'Freedoms' ); ?></a>
-			<a href="privacy.php" class="nav-tab"><?php _e( 'Privacy' ); ?></a>
 		</h2>
+
+		<div class="changelog point-releases">
+			<h3><?php _e( 'Maintenance Release' ); ?></h3>
+			<p>
+				<?php
+				printf(
+					/* translators: 1: WordPress version number, 2: plural number of bugs. */
+					_n(
+						'<strong>Version %1$s</strong> addressed %2$s bug.',
+						'<strong>Version %1$s</strong> addressed %2$s bugs.',
+						29
+					),
+					'4.8.1',
+					number_format_i18n( 29 )
+				);
+				?>
+				<?php
+				/* translators: %s: Codex URL */
+				printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.8.1' );
+				?>
+				</p>
+		</div>
 
 		<div class="feature-section one-col">
 			<div class="col">

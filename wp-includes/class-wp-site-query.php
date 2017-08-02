@@ -20,6 +20,7 @@ class WP_Site_Query {
 	 * SQL for database query.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 * @var string
 	 */
 	public $request;
@@ -28,6 +29,7 @@ class WP_Site_Query {
 	 * SQL query clauses.
 	 *
 	 * @since 4.6.0
+	 * @access protected
 	 * @var array
 	 */
 	protected $sql_clauses = array(
@@ -43,6 +45,7 @@ class WP_Site_Query {
 	 * Date query container.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 * @var object WP_Date_Query
 	 */
 	public $date_query = false;
@@ -51,6 +54,7 @@ class WP_Site_Query {
 	 * Query vars set by the user.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 * @var array
 	 */
 	public $query_vars;
@@ -59,6 +63,7 @@ class WP_Site_Query {
 	 * Default values for query vars.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 * @var array
 	 */
 	public $query_var_defaults;
@@ -67,6 +72,7 @@ class WP_Site_Query {
 	 * List of sites located by the query.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 * @var array
 	 */
 	public $sites;
@@ -75,6 +81,7 @@ class WP_Site_Query {
 	 * The amount of found sites for the current query.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 * @var int
 	 */
 	public $found_sites = 0;
@@ -83,6 +90,7 @@ class WP_Site_Query {
 	 * The number of pages.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 * @var int
 	 */
 	public $max_num_pages = 0;
@@ -92,6 +100,7 @@ class WP_Site_Query {
 	 *
 	 * @since 4.6.0
 	 * @since 4.8.0 Introduced the 'lang_id', 'lang__in', and 'lang__not_in' parameters.
+	 * @access public
 	 *
 	 * @param string|array $query {
 	 *     Optional. Array or query string of site query parameters. Default empty.
@@ -183,6 +192,7 @@ class WP_Site_Query {
 	 * Parses arguments passed to the site query with default query parameters.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 *
 	 * @see WP_Site_Query::__construct()
 	 *
@@ -209,6 +219,7 @@ class WP_Site_Query {
 	 * Sets up the WordPress query for retrieving sites.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 *
 	 * @param string|array $query Array or URL query string of parameters.
 	 * @return array|int List of sites, or number of sites when 'count' is passed as a query var.
@@ -223,6 +234,7 @@ class WP_Site_Query {
 	 * Retrieves a list of sites matching the query vars.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 *
 	 * @return array|int List of sites, or number of sites when 'count' is passed as a query var.
 	 */
@@ -239,12 +251,7 @@ class WP_Site_Query {
 		do_action_ref_array( 'pre_get_sites', array( &$this ) );
 
 		// $args can include anything. Only use the args defined in the query_var_defaults to compute the key.
-		$_args = wp_array_slice_assoc( $this->query_vars, array_keys( $this->query_var_defaults ) );
-
-		// Ignore the $fields argument as the queried result will be the same regardless.
-		unset( $_args['fields'] );
-
-		$key = md5( serialize( $_args ) );
+		$key = md5( serialize( wp_array_slice_assoc( $this->query_vars, array_keys( $this->query_var_defaults ) ) ) );
 		$last_changed = wp_cache_get_last_changed( 'sites' );
 
 		$cache_key = "get_sites:$key:$last_changed";
@@ -317,6 +324,7 @@ class WP_Site_Query {
 	 * Used internally to get a list of site IDs matching the query vars.
 	 *
 	 * @since 4.6.0
+	 * @access protected
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
@@ -581,6 +589,7 @@ class WP_Site_Query {
 	 * if the limit clause was used.
 	 *
 	 * @since 4.6.0
+	 * @access private
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
@@ -606,6 +615,7 @@ class WP_Site_Query {
 	 * Used internally to generate an SQL string for searching across multiple columns.
 	 *
 	 * @since 4.6.0
+	 * @access protected
 	 *
 	 * @global wpdb  $wpdb WordPress database abstraction object.
 	 *
@@ -634,6 +644,7 @@ class WP_Site_Query {
 	 * Parses and sanitizes 'orderby' keys passed to the site query.
 	 *
 	 * @since 4.6.0
+	 * @access protected
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
@@ -681,6 +692,7 @@ class WP_Site_Query {
 	 * Parses an 'order' query variable and cast it to 'ASC' or 'DESC' as necessary.
 	 *
 	 * @since 4.6.0
+	 * @access protected
 	 *
 	 * @param string $order The 'order' query variable.
 	 * @return string The sanitized 'order' query variable.

@@ -2851,7 +2851,7 @@
 		var insertedMenuIdMapping = {}, insertedMenuItemIdMapping = {};
 
 		_( data.nav_menu_updates ).each(function( update ) {
-			var oldCustomizeId, newCustomizeId, customizeId, oldSetting, newSetting, setting, settingValue, oldSection, newSection, wasSaved, widgetTemplate, navMenuCount, shouldExpandNewSection;
+			var oldCustomizeId, newCustomizeId, customizeId, oldSetting, newSetting, setting, settingValue, oldSection, newSection, wasSaved, widgetTemplate, navMenuCount;
 			if ( 'inserted' === update.status ) {
 				if ( ! update.previous_term_id ) {
 					throw new Error( 'Expected previous_term_id' );
@@ -2883,8 +2883,7 @@
 					previewer: api.previewer
 				} );
 
-				shouldExpandNewSection = oldSection.expanded();
-				if ( shouldExpandNewSection ) {
+				if ( oldSection.expanded() ) {
 					oldSection.collapse();
 				}
 
@@ -2959,7 +2958,8 @@
 					}
 				} );
 
-				if ( shouldExpandNewSection ) {
+				if ( oldSection.expanded.get() ) {
+					// @todo This doesn't seem to be working.
 					newSection.expand();
 				}
 			} else if ( 'updated' === update.status ) {

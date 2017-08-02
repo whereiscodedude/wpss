@@ -46,6 +46,7 @@ class WP_User {
 	 * The user's ID.
 	 *
 	 * @since 2.1.0
+	 * @access public
 	 * @var int
 	 */
 	public $ID = 0;
@@ -54,6 +55,7 @@ class WP_User {
 	 * The individual capabilities the user has been given.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var array
 	 */
 	public $caps = array();
@@ -62,6 +64,7 @@ class WP_User {
 	 * User metadata option name.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var string
 	 */
 	public $cap_key;
@@ -70,6 +73,7 @@ class WP_User {
 	 * The roles the user is part of.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var array
 	 */
 	public $roles = array();
@@ -78,6 +82,7 @@ class WP_User {
 	 * All capabilities the user has, including individual and role based.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var array
 	 */
 	public $allcaps = array();
@@ -86,6 +91,7 @@ class WP_User {
 	 * The filter context applied to user data fields.
 	 *
 	 * @since 2.9.0
+	 * @access public
 	 * @var string
 	 */
 	public $filter = null;
@@ -93,6 +99,7 @@ class WP_User {
 	/**
 	 * @static
 	 * @since 3.3.0
+	 * @access private
 	 * @var array
 	 */
 	private static $back_compat_keys;
@@ -103,6 +110,7 @@ class WP_User {
 	 * Retrieves the userdata and passes it to WP_User::init().
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
@@ -242,6 +250,7 @@ class WP_User {
 	 * Makes private/protected methods readable for backward compatibility.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param callable $name      Method to call.
 	 * @param array    $arguments Arguments to pass when calling.
@@ -258,6 +267,7 @@ class WP_User {
 	 * Magic method for checking the existence of a certain custom field.
 	 *
 	 * @since 3.3.0
+	 * @access public
 	 *
 	 * @param string $key User meta key to check if set.
 	 * @return bool Whether the given user meta key is set.
@@ -287,6 +297,7 @@ class WP_User {
 	 * Magic method for accessing custom fields.
 	 *
 	 * @since 3.3.0
+	 * @access public
 	 *
 	 * @param string $key User meta key to retrieve.
 	 * @return mixed Value of the given user meta key (if set). If `$key` is 'id', the user ID.
@@ -325,6 +336,7 @@ class WP_User {
 	 * the value on the WP_User instance.
 	 *
 	 * @since 3.3.0
+	 * @access public
 	 *
 	 * @param string $key   User meta key.
 	 * @param mixed  $value User meta value.
@@ -349,6 +361,7 @@ class WP_User {
 	 * Magic method for unsetting a certain custom field.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @param string $key User meta key to unset.
 	 */
@@ -376,6 +389,7 @@ class WP_User {
 	 * Determine whether the user exists in the database.
 	 *
 	 * @since 3.4.0
+	 * @access public
 	 *
 	 * @return bool True if user exists in the database, false if not.
 	 */
@@ -430,6 +444,7 @@ class WP_User {
 	 * property matching the 'cap_key' exists and is an array. If so, it will be
 	 * used.
 	 *
+	 * @access protected
 	 * @since 2.1.0
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
@@ -461,6 +476,7 @@ class WP_User {
 	 * granted permission to.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @return array List of all capabilities for the user.
 	 */
@@ -488,6 +504,7 @@ class WP_User {
 	 * Updates the user's meta data option with capabilities and roles.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name.
 	 */
@@ -516,6 +533,7 @@ class WP_User {
 	 * Remove role from user.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name.
 	 */
@@ -546,6 +564,7 @@ class WP_User {
 	 * of the roles from the user.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name.
 	 */
@@ -593,6 +612,7 @@ class WP_User {
 	 * value.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param int $max Max level of user.
 	 * @param string $item Level capability name.
@@ -615,6 +635,7 @@ class WP_User {
 	 * the all of the capabilities that the user has.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
@@ -628,6 +649,7 @@ class WP_User {
 	 * Add capability and grant or deny access to capability.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $cap Capability name.
 	 * @param bool $grant Whether to grant capability to user.
@@ -643,6 +665,7 @@ class WP_User {
 	 * Remove capability from user.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $cap Capability name.
 	 */
@@ -660,6 +683,7 @@ class WP_User {
 	 * Remove all of the capabilities of the user.
 	 *
 	 * @since 2.1.0
+	 * @access public
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
@@ -678,6 +702,7 @@ class WP_User {
 	 * in part, this practice is discouraged as it may produce unreliable results.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @see map_meta_cap()
 	 *
@@ -723,9 +748,6 @@ class WP_User {
 		// Everyone is allowed to exist.
 		$capabilities['exist'] = true;
 
-		// Nobody is allowed to do things they are not allowed to do.
-		unset( $capabilities['do_not_allow'] );
-
 		// Must have ALL requested caps.
 		foreach ( (array) $caps as $cap ) {
 			if ( empty( $capabilities[ $cap ] ) )
@@ -741,6 +763,7 @@ class WP_User {
 	 * Prepends 'level_' to level number.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param int $level Level number, 1 to 10.
 	 * @return string

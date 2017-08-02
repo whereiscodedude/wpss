@@ -10,9 +10,9 @@
 /**
  * Create HTML list of nav menu input items.
  *
+ * @package WordPress
  * @since 3.0.0
- *
- * @see Walker_Nav_Menu
+ * @uses Walker_Nav_Menu
  */
 class Walker_Nav_Menu_Edit extends Walker_Nav_Menu {
 	/**

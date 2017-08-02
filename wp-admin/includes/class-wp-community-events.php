@@ -18,6 +18,7 @@ class WP_Community_Events {
 	/**
 	 * ID for a WordPress user account.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
 	 * @var int
@@ -27,6 +28,7 @@ class WP_Community_Events {
 	/**
 	 * Stores location data for the user.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
 	 * @var bool|array
@@ -105,7 +107,7 @@ class WP_Community_Events {
 		} elseif ( 200 !== $response_code ) {
 			$response_error = new WP_Error(
 				'api-error',
-				/* translators: %d: numeric HTTP status code, e.g. 400, 403, 500, 504, etc. */
+				/* translators: %s is a numeric HTTP status code; e.g., 400, 403, 500, 504, etc. */
 				sprintf( __( 'Invalid API response code (%d)' ), $response_code )
 			);
 		} elseif ( ! isset( $response_body['location'], $response_body['events'] ) ) {
@@ -169,11 +171,12 @@ class WP_Community_Events {
 	/**
 	 * Builds an array of args to use in an HTTP request to the w.org Events API.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
-	 * @param string $search   Optional. City search string. Default empty string.
-	 * @param string $timezone Optional. Timezone string. Default empty string.
-	 * @return array The request args.
+	 * @param  string $search   Optional. City search string. Default empty string.
+	 * @param  string $timezone Optional. Timezone string. Default empty string.
+	 * @return @return array The request args.
 	 */
 	protected function get_request_args( $search = '', $timezone = '' ) {
 		$args = array(
@@ -218,7 +221,7 @@ class WP_Community_Events {
 	 * a proxy. In those cases, $_SERVER['REMOTE_ADDR'] is set to the proxy address rather
 	 * than the user's actual address.
 	 *
-	 * Modified from https://stackoverflow.com/a/2031935/450127, MIT license.
+	 * Modified from http://stackoverflow.com/a/2031935/450127, MIT license.
 	 * Modified from https://github.com/geertw/php-ip-anonymizer, MIT license.
 	 *
 	 * SECURITY WARNING: This function is _NOT_ intended to be used in
@@ -226,6 +229,7 @@ class WP_Community_Events {
 	 * _NOT_ guarantee that the returned address is valid or accurate, and it can
 	 * be easily spoofed.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
 	 * @return false|string The anonymized address on success; the given address
@@ -277,6 +281,7 @@ class WP_Community_Events {
 	 * Test if two pairs of latitude/longitude coordinates match each other.
 	 *
 	 * @since 4.8.0
+	 * @access protected
 	 *
 	 * @param array $a The first pair, with indexes 'latitude' and 'longitude'.
 	 * @param array $b The second pair, with indexes 'latitude' and 'longitude'.
@@ -298,6 +303,7 @@ class WP_Community_Events {
 	 * functions, and having it abstracted keeps the logic consistent and DRY,
 	 * which is less prone to errors.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
 	 * @param  array $location Should contain 'latitude' and 'longitude' indexes.
@@ -318,6 +324,7 @@ class WP_Community_Events {
 	/**
 	 * Caches an array of events data from the Events API.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
 	 * @param array    $events     Response body from the API request.
@@ -359,6 +366,7 @@ class WP_Community_Events {
 	 * the cache, then all users would see the events in the localized data/time
 	 * of the user who triggered the cache refresh, rather than their own.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
 	 * @param  array $response_body The response which contains the events.
@@ -387,6 +395,7 @@ class WP_Community_Events {
 	/**
 	 * Discards expired events, and reduces the remaining list.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
 	 * @param  array $response_body The response body which contains the events.
@@ -427,6 +436,7 @@ class WP_Community_Events {
 	 * Errors are logged instead of being triggered, to avoid breaking the JSON
 	 * response when called from AJAX handlers and `display_errors` is enabled.
 	 *
+	 * @access protected
 	 * @since 4.8.0
 	 *
 	 * @param string $message A description of what occurred.

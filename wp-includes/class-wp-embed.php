@@ -20,6 +20,7 @@ class WP_Embed {
 	 *
 	 * Bypasses the {@see 'embed_maybe_make_link'} filter.
 	 *
+	 * @access public
 	 * @var bool
 	 */
 	public $return_false_on_fail = false;

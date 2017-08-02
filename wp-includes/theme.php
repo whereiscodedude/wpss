@@ -35,7 +35,7 @@ function wp_get_themes( $args = array() ) {
 
 	$theme_directories = search_theme_directories();
 
-	if ( is_array( $wp_theme_directories ) && count( $wp_theme_directories ) > 1 ) {
+	if ( count( $wp_theme_directories ) > 1 ) {
 		// Make sure the current theme wins out, in case search_theme_directories() picks the wrong
 		// one in the case of a conflict. (Normally, last registered theme root wins.)
 		$current_theme = get_stylesheet();
@@ -627,9 +627,8 @@ function get_theme_root_uri( $stylesheet_or_template = false, $theme_root = fals
 function get_raw_theme_root( $stylesheet_or_template, $skip_cache = false ) {
 	global $wp_theme_directories;
 
-	if ( ! is_array( $wp_theme_directories ) || count( $wp_theme_directories ) <= 1 ) {
+	if ( count($wp_theme_directories) <= 1 )
 		return '/themes';
-	}
 
 	$theme_root = false;
 
@@ -1541,6 +1540,7 @@ function background_color() {
  * Default custom background callback.
  *
  * @since 3.0.0
+ * @access protected
  */
 function _custom_background_cb() {
 	// $background is the saved custom image, or the default image.
@@ -1620,6 +1620,7 @@ body.custom-background { <?php echo trim( $style ); ?> }
  * Render the Custom CSS style element.
  *
  * @since 4.7.0
+ * @access public
  */
 function wp_custom_css_cb() {
 	$styles = wp_get_custom_css();
@@ -1634,6 +1635,7 @@ function wp_custom_css_cb() {
  * Fetch the `custom_css` post for a given theme.
  *
  * @since 4.7.0
+ * @access public
  *
  * @param string $stylesheet Optional. A theme object stylesheet name. Defaults to the current theme.
  * @return WP_Post|null The custom_css post or null if none exists.
@@ -1685,6 +1687,7 @@ function wp_get_custom_css_post( $stylesheet = '' ) {
  * Fetch the saved Custom CSS content for rendering.
  *
  * @since 4.7.0
+ * @access public
  *
  * @param string $stylesheet Optional. A theme object stylesheet name. Defaults to the current theme.
  * @return string The Custom CSS Post content.
@@ -1720,6 +1723,7 @@ function wp_get_custom_css( $stylesheet = '' ) {
  * Inserts a `custom_css` post when one doesn't yet exist.
  *
  * @since 4.7.0
+ * @access public
  *
  * @param string $css CSS, stored in `post_content`.
  * @param array  $args {
@@ -2816,34 +2820,12 @@ function _wp_customize_include() {
 		$messenger_channel = sanitize_key( $input_vars['customize_messenger_channel'] );
 	}
 
-	/*
-	 * Note that settings must be previewed even outside the customizer preview
-	 * and also in the customizer pane itself. This is to enable loading an existing
-	 * changeset into the customizer. Previewing the settings only has to be prevented
-	 * here in the case of a customize_save action because this will cause WP to think
-	 * there is nothing changed that needs to be saved.
-	 */
-	$is_customize_save_action = (
-		wp_doing_ajax()
-		&&
-		isset( $_REQUEST['action'] )
-		&&
-		'customize_save' === wp_unslash( $_REQUEST['action'] )
-	);
-	$settings_previewed = ! $is_customize_save_action;
-
 	require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
-	$GLOBALS['wp_customize'] = new WP_Customize_Manager( compact( 'changeset_uuid', 'theme', 'messenger_channel', 'settings_previewed' ) );
+	$GLOBALS['wp_customize'] = new WP_Customize_Manager( compact( 'changeset_uuid', 'theme', 'messenger_channel' ) );
 }
 
 /**
- * Publishes a snapshot's changes.
- *
- * @since 4.7.0
- * @access private
- *
- * @global wpdb                 $wpdb         WordPress database abstraction object.
- * @global WP_Customize_Manager $wp_customize Customizer instance.
+ * Publish a snapshot's changes.
  *
  * @param string  $new_status     New post status.
  * @param string  $old_status     Old post status.
@@ -2865,10 +2847,7 @@ function _wp_customize_publish_changeset( $new_status, $old_status, $changeset_p
 
 	if ( empty( $wp_customize ) ) {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
-		$wp_customize = new WP_Customize_Manager( array(
-			'changeset_uuid' => $changeset_post->post_name,
-			'settings_previewed' => false,
-		) );
+		$wp_customize = new WP_Customize_Manager( array( 'changeset_uuid' => $changeset_post->post_name ) );
 	}
 
 	if ( ! did_action( 'customize_register' ) ) {

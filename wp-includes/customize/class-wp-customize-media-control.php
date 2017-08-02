@@ -19,6 +19,7 @@ class WP_Customize_Media_Control extends WP_Customize_Control {
 	 * Control type.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'media';
@@ -27,6 +28,7 @@ class WP_Customize_Media_Control extends WP_Customize_Control {
 	 * Media control mime type.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 * @var string
 	 */
 	public $mime_type = '';
@@ -35,6 +37,7 @@ class WP_Customize_Media_Control extends WP_Customize_Control {
 	 * Button labels.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 * @var array
 	 */
 	public $button_labels = array();

@@ -26,6 +26,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	 * Constructor.
 	 *
 	 * @since 3.1.0
+	 * @access public
 	 *
 	 * @see WP_List_Table::__construct() for more information on default arguments.
 	 *
@@ -226,6 +227,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function no_items() {
 		if ( $this->has_items ) {
@@ -261,6 +263,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	 * Gets the name of the primary column.
 	 *
 	 * @since 4.3.0
+	 * @access protected
 	 *
 	 * @return string Unalterable name of the primary column name, in this case, 'name'.
 	 */
@@ -340,6 +343,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function display_rows() {
 		foreach ( $this->items as $theme )
@@ -350,6 +354,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	 * Handles the checkbox column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_Theme $theme The current WP_Theme object.
 	 */
@@ -365,6 +370,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	 * Handles the name column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @global string $status
 	 * @global int    $page
@@ -389,6 +395,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 		$actions = array(
 			'enable' => '',
 			'disable' => '',
+			'edit' => '',
 			'delete' => ''
 		);
 
@@ -441,6 +448,21 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 			);
 		}
 
+		if ( current_user_can('edit_themes') ) {
+			$url = add_query_arg( array(
+				'theme' => $theme_key,
+			), 'theme-editor.php' );
+
+			/* translators: %s: theme name */
+			$aria_label = sprintf( __( 'Open %s in the Theme Editor' ), $theme->display( 'Name' ) );
+
+			$actions['edit'] = sprintf( '<a href="%s" class="edit" aria-label="%s">%s</a>',
+				esc_url( $url ),
+				esc_attr( $aria_label ),
+				__( 'Edit' )
+			);
+		}
+
 		if ( ! $allowed && current_user_can( 'delete_themes' ) && ! $this->is_site_themes && $stylesheet != get_option( 'stylesheet' ) && $stylesheet != get_option( 'template' ) ) {
 			$url = add_query_arg( array(
 				'action'       => 'delete-selected',
@@ -470,10 +492,10 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 		 * non-network enabled themes when editing a site in the Network admin.
 		 *
 		 * The default action links for the Network themes list table include
-		 * 'Network Enable', 'Network Disable', and 'Delete'.
+		 * 'Network Enable', 'Network Disable', 'Edit', and 'Delete'.
 		 *
 		 * The default action links for the Site themes list table include
-		 * 'Enable', and 'Disable'.
+		 * 'Enable', 'Disable', and 'Edit'.
 		 *
 		 * @since 2.8.0
 		 *
@@ -506,6 +528,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	 * Handles the description column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @global string $status
 	 * @global array  $totals
@@ -573,6 +596,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	 * Handles default column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_Theme $theme       The current WP_Theme object.
 	 * @param string   $column_name The current column name.
@@ -596,6 +620,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	 * Handles the output for a single table row.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_Theme $item The current WP_Theme object.
 	 */

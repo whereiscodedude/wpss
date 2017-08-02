@@ -20,6 +20,7 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	 * Constructor.
 	 *
 	 * @since  4.8.0
+	 * @access public
 	 */
 	public function __construct() {
 		parent::__construct( 'media_video', __( 'Video' ), array(
@@ -49,6 +50,7 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	 * Get schema for properties of a widget instance (item).
 	 *
 	 * @since  4.8.0
+	 * @access public
 	 *
 	 * @see WP_REST_Controller::get_item_schema()
 	 * @see WP_REST_Controller::get_additional_fields()
@@ -99,6 +101,7 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	 * Render the media on the frontend.
 	 *
 	 * @since  4.8.0
+	 * @access public
 	 *
 	 * @param array $instance Widget instance props.
 	 *
@@ -138,6 +141,7 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	 * Inject max-width and remove height for videos too constrained to fit inside sidebars on frontend.
 	 *
 	 * @since 4.8.0
+	 * @access public
 	 *
 	 * @param string $html Video shortcode HTML output.
 	 * @return string HTML Output.
@@ -158,20 +162,24 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	 * case a widget does get added.
 	 *
 	 * @since 4.8.0
+	 * @access public
 	 */
 	public function enqueue_preview_scripts() {
 		/** This filter is documented in wp-includes/media.php */
 		if ( 'mediaelement' === apply_filters( 'wp_video_shortcode_library', 'mediaelement' ) ) {
 			wp_enqueue_style( 'wp-mediaelement' );
-			wp_enqueue_script( 'mediaelement-vimeo' );
 			wp_enqueue_script( 'wp-mediaelement' );
 		}
+
+		// Enqueue script needed by Vimeo; see wp_video_shortcode().
+		wp_enqueue_script( 'froogaloop' );
 	}
 
 	/**
 	 * Loads the required scripts and styles for the widget control.
 	 *
 	 * @since 4.8.0
+	 * @access public
 	 */
 	public function enqueue_admin_scripts() {
 		parent::enqueue_admin_scripts();
@@ -210,6 +218,7 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	 * Render form template scripts.
 	 *
 	 * @since 4.8.0
+	 * @access public
 	 */
 	public function render_control_template_scripts() {
 		parent::render_control_template_scripts()

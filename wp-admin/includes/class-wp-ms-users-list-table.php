@@ -117,6 +117,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function no_items() {
 		_e( 'No users found.' );
@@ -174,7 +175,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		/**
 		 * Filters the columns displayed in the Network Admin Users list table.
 		 *
-		 * @since MU (3.0.0)
+		 * @since MU
 		 *
 		 * @param array $users_columns An array of user columns. Default 'cb', 'username',
 		 *                             'name', 'email', 'registered', 'blogs'.
@@ -199,6 +200,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Handles the checkbox column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_User $user The current WP_User object.
 	 */
@@ -216,6 +218,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Handles the ID column output.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @param WP_User $user The current WP_User object.
 	 */
@@ -227,6 +230,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Handles the username column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_User $user The current WP_User object.
 	 */
@@ -239,7 +243,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 
 		?><strong><a href="<?php echo $edit_link; ?>" class="edit"><?php echo $user->user_login; ?></a><?php
 		if ( in_array( $user->user_login, $super_admins ) ) {
-			echo ' &mdash; ' . __( 'Super Admin' );
+			echo ' - ' . __( 'Super Admin' );
 		}
 		?></strong>
 	<?php
@@ -249,21 +253,19 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Handles the name column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_User $user The current WP_User object.
 	 */
 	public function column_name( $user ) {
-		if ( $user->first_name && $user->last_name ) {
-			echo "$user->first_name $user->last_name";
-		} else {
-			echo '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">' . _x( 'Unknown', 'name' ) . '</span>';
-		}
+		echo "$user->first_name $user->last_name";
 	}
 
 	/**
 	 * Handles the email column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_User $user The current WP_User object.
 	 */
@@ -275,6 +277,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Handles the registered date column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @global string $mode List table view mode.
 	 *
@@ -292,6 +295,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 
 	/**
 	 * @since 4.3.0
+	 * @access protected
 	 *
 	 * @param WP_User $user
 	 * @param string  $classes
@@ -309,6 +313,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Handles the sites column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_User $user The current WP_User object.
 	 */
@@ -373,6 +378,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Handles the default column output.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param WP_User $user       The current WP_User object.
 	 * @param string $column_name The current column name.
@@ -406,6 +412,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Gets the name of the default primary column.
 	 *
 	 * @since 4.3.0
+	 * @access protected
 	 *
 	 * @return string Name of the default primary column, in this case, 'username'.
 	 */
@@ -417,6 +424,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	 * Generates and displays row action links.
 	 *
 	 * @since 4.3.0
+	 * @access protected
 	 *
 	 * @param object $user        User being acted upon.
 	 * @param string $column_name Current column name.

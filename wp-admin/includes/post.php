@@ -11,6 +11,7 @@
  *
  * Manipulates $_POST directly.
  *
+ * @package WordPress
  * @since 2.6.0
  *
  * @param bool $update Are we updating a pre-existing post?
@@ -564,11 +565,6 @@ function bulk_edit_posts( $post_data = null ) {
 			continue;
 		}
 
-		if ( isset( $post_data['post_format'] ) ) {
-			set_post_format( $post_ID, $post_data['post_format'] );
-			unset( $post_data['tax_input']['post_format'] );
-		}
-
 		$updated[] = wp_update_post( $post_data );
 
 		if ( isset( $post_data['sticky'] ) && current_user_can( $ptype->cap->edit_others_posts ) ) {
@@ -577,6 +573,9 @@ function bulk_edit_posts( $post_data = null ) {
 			else
 				unstick_post( $post_ID );
 		}
+
+		if ( isset( $post_data['post_format'] ) )
+			set_post_format( $post_ID, $post_data['post_format'] );
 	}
 
 	return array( 'updated' => $updated, 'skipped' => $skipped, 'locked' => $locked );
@@ -1661,6 +1660,8 @@ function _admin_notice_post_locked() {
 /**
  * Creates autosave data for the specified post from $_POST data.
  *
+ * @package WordPress
+ * @subpackage Post_Revisions
  * @since 2.6.0
  *
  * @param mixed $post_data Associative array containing the post data or int post ID.
@@ -1721,11 +1722,12 @@ function wp_create_post_autosave( $post_data ) {
 }
 
 /**
- * Saves a draft or manually autosaves for the purpose of showing a post preview.
+ * Save draft or manually autosave for showing preview.
  *
+ * @package WordPress
  * @since 2.7.0
  *
- * @return string URL to redirect to show the preview.
+ * @return str URL to redirect to show the preview
  */
 function post_preview() {
 

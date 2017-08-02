@@ -18,6 +18,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * Control type.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'nav_menu';
@@ -26,6 +27,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * The nav menu setting.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var WP_Customize_Nav_Menu_Setting
 	 */
 	public $setting;
@@ -34,6 +36,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * Don't render the control's content - it uses a JS template instead.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 */
 	public function render_content() {}
 
@@ -41,6 +44,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * JS/Underscore template for the control UI.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 */
 	public function content_template() {
 		?>
@@ -85,6 +89,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * Return parameters for this control.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @return array Exported parameters.
 	 */

@@ -37,6 +37,7 @@ class Plugin_Upgrader_Skin extends WP_Upgrader_Skin {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function after() {
 		$this->plugin = $this->upgrader->plugin_info();

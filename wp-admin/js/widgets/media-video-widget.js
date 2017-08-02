@@ -110,12 +110,13 @@
 				control.fetchEmbedDfd.abort();
 			}
 
-			control.fetchEmbedDfd = wp.apiRequest({
+			control.fetchEmbedDfd = jQuery.ajax({
 				url: wp.media.view.settings.oEmbedProxyUrl,
 				data: {
 					url: control.model.get( 'url' ),
 					maxwidth: control.model.get( 'width' ),
 					maxheight: control.model.get( 'height' ),
+					_wpnonce: wp.media.view.settings.nonce.wpRestApi,
 					discover: false
 				},
 				type: 'GET',

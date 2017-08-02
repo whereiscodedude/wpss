@@ -2697,7 +2697,7 @@ Attachment = View.extend({
 	},
 
 	events: {
-		'click':                          'toggleSelectionHandler',
+		'click .js--select-attachment':   'toggleSelectionHandler',
 		'change [data-setting]':          'updateSetting',
 		'change [data-setting] input':    'updateSetting',
 		'change [data-setting] select':   'updateSetting',
@@ -4624,10 +4624,9 @@ EmbedLink = wp.media.view.Settings.extend({
 	}, wp.media.controller.Embed.sensitivity ),
 
 	fetch: function() {
-		var url = this.model.get( 'url' ), re, youTubeEmbedMatch;
 
 		// check if they haven't typed in 500 ms
-		if ( $('#embed-url-field').val() !== url ) {
+		if ( $('#embed-url-field').val() !== this.model.get('url') ) {
 			return;
 		}
 
@@ -4635,19 +4634,13 @@ EmbedLink = wp.media.view.Settings.extend({
 			this.dfd.abort();
 		}
 
-		// Support YouTube embed urls, since they work once in the editor.
-		re = /https?:\/\/www\.youtube\.com\/embed\/([^/]+)/;
-		youTubeEmbedMatch = re.exec( url );
-		if ( youTubeEmbedMatch ) {
-			url = 'https://www.youtube.com/watch?v=' + youTubeEmbedMatch[ 1 ];
-		}
-
-		this.dfd = wp.apiRequest({
+		this.dfd = $.ajax({
 			url: wp.media.view.settings.oEmbedProxyUrl,
 			data: {
-				url: url,
+				url: this.model.get( 'url' ),
 				maxwidth: this.model.get( 'width' ),
-				maxheight: this.model.get( 'height' )
+				maxheight: this.model.get( 'height' ),
+				_wpnonce: wp.media.view.settings.nonce.wpRestApi
 			},
 			type: 'GET',
 			dataType: 'json',
@@ -5123,7 +5116,6 @@ ImageDetails = Select.extend({
 					style:    'primary',
 					text:     l10n.replace,
 					priority: 80,
-					requires: { selection: true },
 
 					click: function() {
 						var controller = this.controller,

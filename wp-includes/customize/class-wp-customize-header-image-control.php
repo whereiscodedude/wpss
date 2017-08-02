@@ -41,6 +41,7 @@ class WP_Customize_Header_Image_Control extends WP_Customize_Image_Control {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function enqueue() {
 		wp_enqueue_media();
@@ -84,6 +85,7 @@ class WP_Customize_Header_Image_Control extends WP_Customize_Image_Control {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function print_header_image_template() {
 		?>
@@ -155,6 +157,7 @@ class WP_Customize_Header_Image_Control extends WP_Customize_Image_Control {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function render_content() {
 		$this->print_header_image_template();

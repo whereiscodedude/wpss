@@ -27,6 +27,7 @@ class WP_Press_This {
 	 * Constructor.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function __construct() {}
 
@@ -34,6 +35,7 @@ class WP_Press_This {
 	 * App and site settings data, including i18n strings for the client-side.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @return array Site settings.
 	 */
@@ -54,6 +56,7 @@ class WP_Press_This {
 	 * Get the source's images and save them locally, for posterity, unless we can't.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param int    $post_id Post ID.
 	 * @param string $content Optional. Current expected markup for Press This. Expects slashed. Default empty.
@@ -96,6 +99,7 @@ class WP_Press_This {
 	 * Ajax handler for saving the post as draft or published.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function save_post() {
 		if ( empty( $_POST['post_ID'] ) || ! $post_id = (int) $_POST['post_ID'] ) {
@@ -206,6 +210,7 @@ class WP_Press_This {
 	 * Ajax handler for adding a new category.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function add_category() {
 		if ( false === wp_verify_nonce( $_POST['new_cat_nonce'], 'add-category' ) ) {
@@ -274,6 +279,7 @@ class WP_Press_This {
 	 * Downloads the source's HTML via server-side call for the given URL.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $url URL to scan.
 	 * @return string Source's HTML sanitized markup
@@ -556,6 +562,7 @@ class WP_Press_This {
 	 * Fetches and parses _meta, _images, and _links data from the source.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $url  URL to scan.
 	 * @param array  $data Optional. Existing data array if you have one. Default empty array.
@@ -665,6 +672,7 @@ class WP_Press_This {
 	 * Handles backward-compat with the legacy version of Press This by supporting its query string params.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @return array
 	 */
@@ -790,6 +798,7 @@ class WP_Press_This {
 	 * Adds another stylesheet inside TinyMCE.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $styles URL to editor stylesheet.
 	 * @return string Possibly modified stylesheets list.
@@ -811,6 +820,7 @@ class WP_Press_This {
 	 * Outputs the post format selection HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -858,6 +868,7 @@ class WP_Press_This {
 	 * Outputs the categories HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -915,6 +926,7 @@ class WP_Press_This {
 	 * Outputs the tags HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -965,6 +977,7 @@ class WP_Press_This {
 	 * Get a list of embeds with no duplicates.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return array Embeds selected to be available.
@@ -997,6 +1010,7 @@ class WP_Press_This {
 	 * Get a list of images with no duplicates.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return array
@@ -1030,6 +1044,7 @@ class WP_Press_This {
 	 * Gets the source page's canonical link, based on passed location and meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
  	 * @param array $data The site's data.
 	 * @return string Discovered canonical URL, or empty
@@ -1060,6 +1075,7 @@ class WP_Press_This {
 	 * Gets the source page's site name, based on passed meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return string Discovered site name, or empty
@@ -1082,6 +1098,7 @@ class WP_Press_This {
 	 * Gets the source page's title, based on passed title and meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return string Discovered page title, or empty
@@ -1110,6 +1127,7 @@ class WP_Press_This {
 	 * Features a blockquoted excerpt, as well as content attribution, if any.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return string Discovered content, or empty
@@ -1194,6 +1212,7 @@ class WP_Press_This {
 	 * Serves the app's base HTML, which in turns calls the load script.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @global WP_Locale $wp_locale
 	 * @global bool      $is_IE

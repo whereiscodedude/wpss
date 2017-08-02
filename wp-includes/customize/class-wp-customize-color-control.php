@@ -18,6 +18,7 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	/**
 	 * Type.
 	 *
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'color';
@@ -25,6 +26,7 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	/**
 	 * Statuses.
 	 *
+	 * @access public
 	 * @var array
 	 */
 	public $statuses;
@@ -33,6 +35,7 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	 * Mode.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 * @var string
 	 */
 	public $mode = 'full';

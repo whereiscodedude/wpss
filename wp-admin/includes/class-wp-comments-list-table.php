@@ -29,6 +29,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 	 * Constructor.
 	 *
 	 * @since 3.1.0
+	 * @access public
 	 *
 	 * @see WP_List_Table::__construct() for more information on default arguments.
 	 *
@@ -427,6 +428,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 	 * Get the name of the default primary column.
 	 *
 	 * @since 4.3.0
+	 * @access protected
 	 *
 	 * @return string Name of the default primary column, in this case, 'comment'.
 	 */
@@ -435,6 +437,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function display() {
 		wp_nonce_field( "fetch-list-" . get_class( $this ), '_ajax_fetch_list_nonce' );
@@ -507,6 +510,7 @@ class WP_Comments_List_Table extends WP_List_Table {
  	 * Generate and display row actions links.
  	 *
  	 * @since 4.3.0
+ 	 * @access protected
  	 *
  	 * @global string $comment_status Status for the current listed comments.
  	 *
@@ -711,6 +715,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 *
 	 * @param WP_Comment $comment The comment object.
 	 */
@@ -736,6 +741,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 *
 	 * @param WP_Comment $comment The comment object.
 	 */
