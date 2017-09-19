@@ -16,6 +16,7 @@ class Walker {
 	 * What the class handles.
 	 *
 	 * @since 2.1.0
+	 * @access public
 	 * @var string
 	 */
 	public $tree_type;
@@ -384,6 +385,7 @@ class Walker {
 	 * Calculates the total number of root elements.
 	 *
 	 * @since 2.7.0
+	 * @access public
 	 *
 	 * @param array $elements Elements to list.
 	 * @return int Number of root elements.
@@ -401,8 +403,6 @@ class Walker {
 
 	/**
 	 * Unset all the children for a given top level element.
-	 *
-	 * @since 2.7.0
 	 *
 	 * @param object $e
 	 * @param array $children_elements

@@ -20,6 +20,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 	 * Sets up a new Custom Menu widget instance.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 */
 	public function __construct() {
 		$widget_ops = array(
@@ -33,6 +34,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 	 * Outputs the content for the current Custom Menu widget instance.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -70,7 +72,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 		 *     @type callable|bool $fallback_cb Callback to fire if the menu doesn't exist. Default empty.
 		 *     @type mixed         $menu        Menu ID, slug, or name.
 		 * }
-		 * @param WP_Term  $nav_menu      Nav menu object for the current menu.
+		 * @param stdClass $nav_menu      Nav menu object for the current menu.
 		 * @param array    $args          Display arguments for the current widget.
 		 * @param array    $instance      Array of settings for the current widget.
 		 */
@@ -83,6 +85,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 	 * Handles updating settings for the current Custom Menu widget instance.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget::form().
@@ -104,6 +107,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 	 * Outputs the settings form for the Custom Menu widget.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 * @global WP_Customize_Manager $wp_customize

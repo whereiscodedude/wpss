@@ -20,6 +20,8 @@ if ( !current_user_can('edit_plugins') )
 $title = __("Edit Plugins");
 $parent_file = 'plugins.php';
 
+wp_reset_vars( array( 'action', 'error', 'file', 'plugin' ) );
+
 $plugins = get_plugins();
 
 if ( empty( $plugins ) ) {
@@ -34,23 +36,11 @@ if ( empty( $plugins ) ) {
 	exit;
 }
 
-$file = '';
-$plugin = '';
-if ( isset( $_REQUEST['file'] ) ) {
-	$file = wp_unslash( $_REQUEST['file'] );
-}
-
-if ( isset( $_REQUEST['plugin'] ) ) {
-	$plugin = wp_unslash( $_REQUEST['plugin'] );
-}
-
-if ( empty( $plugin ) ) {
-	if ( $file ) {
-		$plugin = $file;
-	} else {
-		$plugin = array_keys( $plugins );
-		$plugin = $plugin[0];
-	}
+if ( $file ) {
+	$plugin = $file;
+} elseif ( empty( $plugin ) ) {
+	$plugin = array_keys($plugins);
+	$plugin = $plugin[0];
 }
 
 $plugin_files = get_plugin_files($plugin);
@@ -62,7 +52,9 @@ $file = validate_file_to_edit($file, $plugin_files);
 $real_file = WP_PLUGIN_DIR . '/' . $file;
 $scrollto = isset($_REQUEST['scrollto']) ? (int) $_REQUEST['scrollto'] : 0;
 
-if ( isset( $_REQUEST['action'] ) && 'update' === $_REQUEST['action'] ) {
+switch ( $action ) {
+
+case 'update':
 
 	check_admin_referer('edit-plugin_' . $file);
 
@@ -75,10 +67,9 @@ if ( isset( $_REQUEST['action'] ) && 'update' === $_REQUEST['action'] ) {
 		$network_wide = is_plugin_active_for_network( $file );
 
 		// Deactivate so we can test it.
-		if ( is_plugin_active( $plugin ) || isset( $_POST['phperror'] ) ) {
-			if ( is_plugin_active( $plugin ) ) {
-				deactivate_plugins( $plugin, true );
-			}
+		if ( is_plugin_active($file) || isset($_POST['phperror']) ) {
+			if ( is_plugin_active($file) )
+				deactivate_plugins($file, true);
 
 			if ( ! is_network_admin() ) {
 				update_option( 'recently_activated', array( $file => time() ) + (array) get_option( 'recently_activated' ) );
@@ -86,69 +77,33 @@ if ( isset( $_REQUEST['action'] ) && 'update' === $_REQUEST['action'] ) {
 				update_site_option( 'recently_activated', array( $file => time() ) + (array) get_site_option( 'recently_activated' ) );
 			}
 
-			wp_redirect( add_query_arg( '_wpnonce', wp_create_nonce( 'edit-plugin-test_' . $file ), "plugin-editor.php?file=$file&plugin=$plugin&liveupdate=1&scrollto=$scrollto&networkwide=" . $network_wide ) );
+			wp_redirect(add_query_arg('_wpnonce', wp_create_nonce('edit-plugin-test_' . $file), "plugin-editor.php?file=$file&liveupdate=1&scrollto=$scrollto&networkwide=" . $network_wide));
 			exit;
 		}
-		wp_redirect( self_admin_url( "plugin-editor.php?file=$file&plugin=$plugin&a=te&scrollto=$scrollto" ) );
+		wp_redirect( self_admin_url("plugin-editor.php?file=$file&a=te&scrollto=$scrollto") );
 	} else {
-		wp_redirect( self_admin_url( "plugin-editor.php?file=$file&plugin=$plugin&scrollto=$scrollto" ) );
+		wp_redirect( self_admin_url("plugin-editor.php?file=$file&scrollto=$scrollto") );
 	}
 	exit;
 
-} else {
+default:
 
 	if ( isset($_GET['liveupdate']) ) {
 		check_admin_referer('edit-plugin-test_' . $file);
 
-		$error = validate_plugin( $plugin );
-
-		if ( is_wp_error( $error ) ) {
+		$error = validate_plugin($file);
+		if ( is_wp_error($error) )
 			wp_die( $error );
-		}
 
-		if ( ( ! empty( $_GET['networkwide'] ) && ! is_plugin_active_for_network( $file ) ) || ! is_plugin_active( $file ) ) {
-			activate_plugin( $plugin, "plugin-editor.php?file=" . urlencode( $file ) . "&phperror=1", ! empty( $_GET['networkwide'] ) );
-		} // we'll override this later if the plugin can be included without fatal error
+		if ( ( ! empty( $_GET['networkwide'] ) && ! is_plugin_active_for_network($file) ) || ! is_plugin_active($file) )
+			activate_plugin($file, "plugin-editor.php?file=" . urlencode( $file ) . "&phperror=1", ! empty( $_GET['networkwide'] ) ); // we'll override this later if the plugin can be included without fatal error
 
-		wp_redirect( self_admin_url( 'plugin-editor.php?file=' . urlencode( $file ) . '&plugin=' . urlencode( $plugin ) . "&a=te&scrollto=$scrollto" ) );
+		wp_redirect( self_admin_url("plugin-editor.php?file=" . urlencode( $file ) . "&a=te&scrollto=$scrollto") );
 		exit;
 	}
 
 	// List of allowable extensions
-	$editable_extensions = array(
-		'bash',
-		'conf',
-		'css',
-		'diff',
-		'htm',
-		'html',
-		'http',
-		'inc',
-		'include',
-		'js',
-		'json',
-		'jsx',
-		'less',
-		'md',
-		'patch',
-		'php',
-		'php3',
-		'php4',
-		'php5',
-		'php7',
-		'phps',
-		'phtml',
-		'sass',
-		'scss',
-		'sh',
-		'sql',
-		'svg',
-		'text',
-		'txt',
-		'xml',
-		'yaml',
-		'yml',
-	);
+	$editable_extensions = array('php', 'txt', 'text', 'js', 'css', 'html', 'htm', 'xml', 'inc', 'include');
 
 	/**
 	 * Filters file type extensions editable in the plugin editor.
@@ -185,16 +140,10 @@ if ( isset( $_REQUEST['action'] ) && 'update' === $_REQUEST['action'] ) {
 
 	get_current_screen()->set_help_sidebar(
 		'<p><strong>' . __('For more information:') . '</strong></p>' .
-		'<p>' . __('<a href="https://codex.wordpress.org/Plugins_Editor_Screen">Documentation on Editing Plugins</a>') . '</p>' .
-		'<p>' . __('<a href="https://codex.wordpress.org/Writing_a_Plugin">Documentation on Writing Plugins</a>') . '</p>' .
-		'<p>' . __('<a href="https://wordpress.org/support/">Support Forums</a>') . '</p>'
+		'<p>' . __('<a href="https://codex.wordpress.org/Plugins_Editor_Screen" target="_blank">Documentation on Editing Plugins</a>') . '</p>' .
+		'<p>' . __('<a href="https://codex.wordpress.org/Writing_a_Plugin" target="_blank">Documentation on Writing Plugins</a>') . '</p>' .
+		'<p>' . __('<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 	);
-
-	$settings = wp_enqueue_code_editor( array( 'file' => $real_file ) );
-	if ( ! empty( $settings ) ) {
-		wp_enqueue_script( 'wp-theme-plugin-editor' );
-		wp_add_inline_script( 'wp-theme-plugin-editor', sprintf( 'jQuery( function() { wp.themePluginEditor.init( %s ); } )', wp_json_encode( $settings ) ) );
-	}
 
 	require_once(ABSPATH . 'wp-admin/admin-header.php');
 
@@ -275,7 +224,7 @@ if ( isset( $_REQUEST['action'] ) && 'update' === $_REQUEST['action'] ) {
 	}
 ?>
 		</select>
-		<?php submit_button( __( 'Select' ), '', 'Submit', false ); ?>
+		<?php submit_button( __( 'Select' ), 'button', 'Submit', false ); ?>
 	</form>
 </div>
 <br class="clear" />
@@ -311,10 +260,10 @@ foreach ( $plugin_files as $plugin_file ) :
 		<input type="hidden" name="scrollto" id="scrollto" value="<?php echo $scrollto; ?>" />
 		</div>
 		<?php if ( !empty( $docs_select ) ) : ?>
-		<div id="documentation" class="hide-if-no-js"><label for="docs-list"><?php _e('Documentation:') ?></label> <?php echo $docs_select ?> <input type="button" class="button" value="<?php esc_attr_e( 'Look Up' ) ?> " onclick="if ( '' != jQuery('#docs-list').val() ) { window.open( 'https://api.wordpress.org/core/handbook/1.0/?function=' + escape( jQuery( '#docs-list' ).val() ) + '&amp;locale=<?php echo urlencode( get_user_locale() ) ?>&amp;version=<?php echo urlencode( get_bloginfo( 'version' ) ) ?>&amp;redirect=true'); }" /></div>
+		<div id="documentation" class="hide-if-no-js"><label for="docs-list"><?php _e('Documentation:') ?></label> <?php echo $docs_select ?> <input type="button" class="button" value="<?php esc_attr_e( 'Look Up' ) ?> " onclick="if ( '' != jQuery('#docs-list').val() ) { window.open( 'https://api.wordpress.org/core/handbook/1.0/?function=' + escape( jQuery( '#docs-list' ).val() ) + '&amp;locale=<?php echo urlencode( get_locale() ) ?>&amp;version=<?php echo urlencode( $wp_version ) ?>&amp;redirect=true'); }" /></div>
 		<?php endif; ?>
 <?php if ( is_writeable($real_file) ) : ?>
-	<?php if ( in_array( $plugin, (array) get_option( 'active_plugins', array() ) ) ) { ?>
+	<?php if ( in_array( $file, (array) get_option( 'active_plugins', array() ) ) ) { ?>
 		<p><?php _e('<strong>Warning:</strong> Making changes to active plugins is not recommended. If your changes cause a fatal error, the plugin will be automatically deactivated.'); ?></p>
 	<?php } ?>
 	<p class="submit">
@@ -340,6 +289,6 @@ jQuery(document).ready(function($){
 });
 </script>
 <?php
+	break;
 }
-
 include(ABSPATH . "wp-admin/admin-footer.php");

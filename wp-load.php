@@ -13,6 +13,8 @@
  * directory to allow the WordPress directory to remain
  * untouched.
  *
+ * @internal This file must be parsable by PHP4.
+ *
  * @package WordPress
  */
 
@@ -38,7 +40,7 @@ if ( file_exists( ABSPATH . 'wp-config.php') ) {
 
 } elseif ( @file_exists( dirname( ABSPATH ) . '/wp-config.php' ) && ! @file_exists( dirname( ABSPATH ) . '/wp-settings.php' ) ) {
 
-	/** The config file resides one level above ABSPATH but is not part of another installation */
+	/** The config file resides one level above ABSPATH but is not part of another install */
 	require_once( dirname( ABSPATH ) . '/wp-config.php' );
 
 } else {

@@ -20,6 +20,7 @@ class WP_Embed {
 	 *
 	 * Bypasses the {@see 'embed_maybe_make_link'} filter.
 	 *
+	 * @access public
 	 * @var bool
 	 */
 	public $return_false_on_fail = false;
@@ -383,3 +384,4 @@ class WP_Embed {
 		return apply_filters( 'embed_maybe_make_link', $output, $url );
 	}
 }
+$GLOBALS['wp_embed'] = new WP_Embed();

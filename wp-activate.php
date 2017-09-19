@@ -36,7 +36,7 @@ do_action( 'activate_header' );
  *
  * Fires on {@see 'wp_head'}.
  *
- * @since MU (3.0.0)
+ * @since MU
  */
 function do_activate_header() {
 	/**
@@ -53,7 +53,7 @@ add_action( 'wp_head', 'do_activate_header' );
 /**
  * Loads styles specific to this page.
  *
- * @since MU (3.0.0)
+ * @since MU
  */
 function wpmu_activate_stylesheet() {
 	?>
@@ -125,7 +125,7 @@ get_header( 'wp-activate' );
 				<?php
 			}
 		} else {
-			$url = isset( $result['blog_id'] ) ? get_home_url( (int) $result['blog_id'] ) : '';
+			$url = isset( $result['blog_id'] ) ? get_blogaddress_by_id( (int) $result['blog_id'] ) : '';
 			$user = get_userdata( (int) $result['user_id'] );
 			?>
 			<h2><?php _e('Your account is now active!'); ?></h2>

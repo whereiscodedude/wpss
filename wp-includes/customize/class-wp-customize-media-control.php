@@ -19,6 +19,7 @@ class WP_Customize_Media_Control extends WP_Customize_Control {
 	 * Control type.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'media';
@@ -27,6 +28,7 @@ class WP_Customize_Media_Control extends WP_Customize_Control {
 	 * Media control mime type.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 * @var string
 	 */
 	public $mime_type = '';
@@ -35,6 +37,7 @@ class WP_Customize_Media_Control extends WP_Customize_Control {
 	 * Button labels.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 * @var array
 	 */
 	public $button_labels = array();
@@ -189,6 +192,7 @@ class WP_Customize_Media_Control extends WP_Customize_Control {
 					<# if ( data.canUpload ) { #>
 					<button type="button" class="button remove-button">{{ data.button_labels.remove }}</button>
 					<button type="button" class="button upload-button control-focus" id="{{ data.settings['default'] }}-button">{{ data.button_labels.change }}</button>
+					<div style="clear:both"></div>
 					<# } #>
 				</div>
 			</div>
@@ -204,6 +208,7 @@ class WP_Customize_Media_Control extends WP_Customize_Control {
 					<# if ( data.canUpload ) { #>
 					<button type="button" class="button upload-button" id="{{ data.settings['default'] }}-button">{{ data.button_labels.select }}</button>
 					<# } #>
+					<div style="clear:both"></div>
 				</div>
 			</div>
 		<# } #>

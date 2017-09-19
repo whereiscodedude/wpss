@@ -28,6 +28,7 @@ class WP_Roles {
 	 * List of roles and capabilities.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var array
 	 */
 	public $roles;
@@ -36,6 +37,7 @@ class WP_Roles {
 	 * List of the role objects.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var array
 	 */
 	public $role_objects = array();
@@ -44,6 +46,7 @@ class WP_Roles {
 	 * List of role names.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var array
 	 */
 	public $role_names = array();
@@ -52,6 +55,7 @@ class WP_Roles {
 	 * Option name for storing role list.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var string
 	 */
 	public $role_key;
@@ -60,6 +64,7 @@ class WP_Roles {
 	 * Whether to use the database for retrieval and storage.
 	 *
 	 * @since 2.1.0
+	 * @access public
 	 * @var bool
 	 */
 	public $use_db = true;
@@ -77,6 +82,7 @@ class WP_Roles {
 	 * Make private/protected methods readable for backward compatibility.
 	 *
 	 * @since 4.0.0
+	 * @access public
 	 *
 	 * @param callable $name      Method to call.
 	 * @param array    $arguments Arguments to pass when calling.
@@ -97,12 +103,13 @@ class WP_Roles {
 	 * be used and the role option will not be updated or used.
 	 *
 	 * @since 2.1.0
+	 * @access protected
 	 *
+	 * @global wpdb  $wpdb          WordPress database abstraction object.
 	 * @global array $wp_user_roles Used to set the 'roles' property value.
 	 */
 	protected function _init() {
-		global $wp_user_roles, $wpdb;
-
+		global $wpdb, $wp_user_roles;
 		$this->role_key = $wpdb->get_blog_prefix() . 'user_roles';
 		if ( ! empty( $wp_user_roles ) ) {
 			$this->roles = $wp_user_roles;
@@ -120,15 +127,6 @@ class WP_Roles {
 			$this->role_objects[$role] = new WP_Role( $role, $this->roles[$role]['capabilities'] );
 			$this->role_names[$role] = $this->roles[$role]['name'];
 		}
-
-		/**
-		 * After the roles have been initialized, allow plugins to add their own roles.
-		 *
-		 * @since 4.7.0
-		 *
-		 * @param WP_Roles $this A reference to the WP_Roles object.
-		 */
-		do_action( 'wp_roles_init', $this );
 	}
 
 	/**
@@ -138,11 +136,29 @@ class WP_Roles {
 	 * after switching wpdb to a new site ID.
 	 *
 	 * @since 3.5.0
-	 * @deprecated 4.7.0 Use new WP_Roles()
+	 * @access public
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	public function reinit() {
-		_deprecated_function( __METHOD__, '4.7.0', 'new WP_Roles()' );
-		$this->_init();
+		// There is no need to reinit if using the wp_user_roles global.
+		if ( ! $this->use_db )
+			return;
+
+		global $wpdb;
+
+		// Duplicated from _init() to avoid an extra function call.
+		$this->role_key = $wpdb->get_blog_prefix() . 'user_roles';
+		$this->roles = get_option( $this->role_key );
+		if ( empty( $this->roles ) )
+			return;
+
+		$this->role_objects = array();
+		$this->role_names =  array();
+		foreach ( array_keys( $this->roles ) as $role ) {
+			$this->role_objects[$role] = new WP_Role( $role, $this->roles[$role]['capabilities'] );
+			$this->role_names[$role] = $this->roles[$role]['name'];
+		}
 	}
 
 	/**
@@ -154,6 +170,7 @@ class WP_Roles {
 	 * To explicitly deny a role a capability you set the value for that capability to false.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name.
 	 * @param string $display_name Role display name.
@@ -180,6 +197,7 @@ class WP_Roles {
 	 * Remove role by name.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name.
 	 */
@@ -202,6 +220,7 @@ class WP_Roles {
 	 * Add capability to role.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name.
 	 * @param string $cap Capability name.
@@ -220,6 +239,7 @@ class WP_Roles {
 	 * Remove capability from role.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name.
 	 * @param string $cap Capability name.
@@ -237,6 +257,7 @@ class WP_Roles {
 	 * Retrieve role object by name.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name.
 	 * @return WP_Role|null WP_Role object if found, null if the role does not exist.
@@ -252,6 +273,7 @@ class WP_Roles {
 	 * Retrieve list of role names.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @return array List of role names.
 	 */
@@ -263,6 +285,7 @@ class WP_Roles {
 	 * Whether role name is currently in the list of available roles.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 *
 	 * @param string $role Role name to look up.
 	 * @return bool

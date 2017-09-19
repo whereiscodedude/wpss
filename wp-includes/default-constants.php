@@ -349,7 +349,7 @@ function wp_templating_constants() {
 	define('STYLESHEETPATH', get_stylesheet_directory());
 
 	/**
-	 * Slug of the default theme for this installation.
+	 * Slug of the default theme for this install.
 	 * Used as the default theme when installing new sites.
 	 * It will be used as the fallback if the current theme doesn't exist.
 	 *
@@ -357,6 +357,6 @@ function wp_templating_constants() {
 	 * @see WP_Theme::get_core_default_theme()
 	 */
 	if ( !defined('WP_DEFAULT_THEME') )
-		define( 'WP_DEFAULT_THEME', 'twentyseventeen' );
+		define( 'WP_DEFAULT_THEME', 'twentysixteen' );
 
 }

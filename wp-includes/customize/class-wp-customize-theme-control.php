@@ -20,6 +20,7 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 	 * Customize control type.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'theme';
@@ -28,6 +29,7 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 	 * Theme object.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 * @var WP_Theme
 	 */
 	public $theme;
@@ -36,6 +38,7 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 	 * Refresh the parameters passed to the JavaScript via JSON.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @see WP_Customize_Control::to_json()
 	 */
@@ -48,6 +51,7 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 	 * Don't render the control content from PHP, as it's rendered via JS on load.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function render_content() {}
 
@@ -55,11 +59,12 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 	 * Render a JS template for theme display.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function content_template() {
 		$current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-		$active_url  = esc_url( remove_query_arg( 'customize_theme', $current_url ) );
-		$preview_url = esc_url( add_query_arg( 'customize_theme', '__THEME__', $current_url ) ); // Token because esc_url() strips curly braces.
+		$active_url  = esc_url( remove_query_arg( 'theme', $current_url ) );
+		$preview_url = esc_url( add_query_arg( 'theme', '__THEME__', $current_url ) ); // Token because esc_url() strips curly braces.
 		$preview_url = str_replace( '__THEME__', '{{ data.theme.id }}', $preview_url );
 		?>
 		<# if ( data.theme.isActiveTheme ) { #>
@@ -82,10 +87,7 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 				<span class="more-details" id="{{ data.theme.id }}-action"><?php _e( 'Live Preview' ); ?></span>
 			<# } #>
 
-			<div class="theme-author"><?php
-				/* translators: Theme author name */
-				printf( _x( 'By %s', 'theme author' ), '{{ data.theme.author }}' );
-			?></div>
+			<div class="theme-author"><?php printf( __( 'By %s' ), '{{ data.theme.author }}' ); ?></div>
 
 			<# if ( data.theme.isActiveTheme ) { #>
 				<h3 class="theme-name" id="{{ data.theme.id }}-name">

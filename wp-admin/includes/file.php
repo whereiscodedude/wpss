@@ -35,7 +35,7 @@ $wp_file_descriptions = array(
 	'singular.php'          => __( 'Singular Template' ),
 	'single.php'            => __( 'Single Post' ),
 	'page.php'              => __( 'Single Page' ),
-	'front-page.php'        => __( 'Homepage' ),
+	'front-page.php'        => __( 'Static Front Page' ),
 	// Attachments
 	'attachment.php'        => __( 'Attachment Template' ),
 	'image.php'             => __( 'Image Attachment Template' ),
@@ -69,8 +69,7 @@ $wp_file_descriptions = array(
  *
  * @since 1.5.0
  *
- * @global array $wp_file_descriptions Theme file descriptions.
- * @global array $allowed_files        List of allowed files. 
+ * @global array $wp_file_descriptions
  * @param string $file Filesystem path or filename
  * @return string Description of file from $wp_file_descriptions or basename of $file if description doesn't exist.
  *                Appends 'Page Template' to basename of $file if the file is a page template
@@ -78,10 +77,9 @@ $wp_file_descriptions = array(
 function get_file_description( $file ) {
 	global $wp_file_descriptions, $allowed_files;
 
-	$dirname = pathinfo( $file, PATHINFO_DIRNAME );
-
+	$relative_pathinfo = pathinfo( $file );
 	$file_path = $allowed_files[ $file ];
-	if ( isset( $wp_file_descriptions[ basename( $file ) ] ) && '.' === $dirname ) {
+	if ( isset( $wp_file_descriptions[ basename( $file ) ] ) && '.' === $relative_pathinfo['dirname'] ) {
 		return $wp_file_descriptions[ basename( $file ) ];
 	} elseif ( file_exists( $file_path ) && is_file( $file_path ) ) {
 		$template_data = implode( '', file( $file_path ) );
@@ -371,39 +369,21 @@ function _wp_handle_upload( &$file, $overrides, $time, $action ) {
 
 	// Move the file to the uploads dir.
 	$new_file = $uploads['path'] . "/$filename";
+	if ( 'wp_handle_upload' === $action ) {
+		$move_new_file = @ move_uploaded_file( $file['tmp_name'], $new_file );
+	} else {
+		// use copy and unlink because rename breaks streams.
+		$move_new_file = @ copy( $file['tmp_name'], $new_file );
+		unlink( $file['tmp_name'] );
+	}
 
- 	/**
-	 * Filters whether to short-circuit moving the uploaded file after passing all checks.
-	 *
-	 * If a non-null value is passed to the filter, moving the file and any related error
-	 * reporting will be completely skipped.
-	 *
-	 * @since 4.9.0
-	 *
-	 * @param string $move_new_file If null (default) move the file after the upload.
-	 * @param string $file          An array of data for a single file.
-	 * @param string $new_file      Filename of the newly-uploaded file.
-	 * @param string $type          File type.
-	 */
-	$move_new_file = apply_filters( 'pre_move_uploaded_file', null, $file, $new_file, $type );
-
-	if ( null === $move_new_file ) {
-		if ( 'wp_handle_upload' === $action ) {
-			$move_new_file = @ move_uploaded_file( $file['tmp_name'], $new_file );
+	if ( false === $move_new_file ) {
+		if ( 0 === strpos( $uploads['basedir'], ABSPATH ) ) {
+			$error_path = str_replace( ABSPATH, '', $uploads['basedir'] ) . $uploads['subdir'];
 		} else {
-			// use copy and unlink because rename breaks streams.
-			$move_new_file = @ copy( $file['tmp_name'], $new_file );
-			unlink( $file['tmp_name'] );
+			$error_path = basename( $uploads['basedir'] ) . $uploads['subdir'];
 		}
-
-		if ( false === $move_new_file ) {
-			if ( 0 === strpos( $uploads['basedir'], ABSPATH ) ) {
-				$error_path = str_replace( ABSPATH, '', $uploads['basedir'] ) . $uploads['subdir'];
-			} else {
-				$error_path = basename( $uploads['basedir'] ) . $uploads['subdir'];
-			}
-			return $upload_error_handler( $file, sprintf( __('The uploaded file could not be moved to %s.' ), $error_path ) );
-		}
+		return $upload_error_handler( $file, sprintf( __('The uploaded file could not be moved to %s.' ), $error_path ) );
 	}
 
 	// Set correct file permissions.
@@ -686,7 +666,7 @@ function _unzip_file_ziparchive($file, $to, $needed_dirs = array() ) {
 	 * A disk that has zero free bytes has bigger problems.
 	 * Require we have enough space to unzip the file and copy its contents, with a 10% buffer.
 	 */
-	if ( wp_doing_cron() ) {
+	if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
 		$available_space = @disk_free_space( WP_CONTENT_DIR );
 		if ( $available_space && ( $uncompressed_size * 2.1 ) > $available_space )
 			return new WP_Error( 'disk_full_unzip_file', __( 'Could not copy files. You may have run out of disk space.' ), compact( 'uncompressed_size', 'available_space' ) );
@@ -792,7 +772,7 @@ function _unzip_file_pclzip($file, $to, $needed_dirs = array()) {
 	 * A disk that has zero free bytes has bigger problems.
 	 * Require we have enough space to unzip the file and copy its contents, with a 10% buffer.
 	 */
-	if ( wp_doing_cron() ) {
+	if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
 		$available_space = @disk_free_space( WP_CONTENT_DIR );
 		if ( $available_space && ( $uncompressed_size * 2.1 ) > $available_space )
 			return new WP_Error( 'disk_full_unzip_file', __( 'Could not copy files. You may have run out of disk space.' ), compact( 'uncompressed_size', 'available_space' ) );
@@ -1280,7 +1260,7 @@ if ( isset( $types['ssh'] ) ) {
 		$hidden_class = ' class="hidden"';
 	}
 ?>
-<fieldset id="ssh-keys"<?php echo $hidden_class; ?>>
+<fieldset id="ssh-keys"<?php echo $hidden_class; ?>">
 <legend><?php _e( 'Authentication Keys' ); ?></legend>
 <label for="public_key">
 	<span class="field-title"><?php _e('Public Key:') ?></span>
@@ -1303,7 +1283,7 @@ foreach ( (array) $extra_fields as $field ) {
 	<p class="request-filesystem-credentials-action-buttons">
 		<?php wp_nonce_field( 'filesystem-credentials', '_fs_nonce', false, true ); ?>
 		<button class="button cancel-button" data-js-action="close" type="button"><?php _e( 'Cancel' ); ?></button>
-		<?php submit_button( __( 'Proceed' ), '', 'upgrade', false ); ?>
+		<?php submit_button( __( 'Proceed' ), 'button', 'upgrade', false ); ?>
 	</p>
 </div>
 </form>

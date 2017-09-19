@@ -34,6 +34,7 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function before() {
 		if ( !empty($this->api) )
@@ -41,6 +42,7 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function after() {
 		$plugin_file = $this->upgrader->plugin_info();
@@ -50,12 +52,12 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 		$from = isset($_GET['from']) ? wp_unslash( $_GET['from'] ) : 'plugins';
 
 		if ( 'import' == $from )
-			$install_actions['activate_plugin'] = '<a class="button button-primary" href="' . wp_nonce_url( 'plugins.php?action=activate&amp;from=import&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Activate Plugin &amp; Run Importer' ) . '</a>';
+			$install_actions['activate_plugin'] = '<a href="' . wp_nonce_url( 'plugins.php?action=activate&amp;from=import&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Activate Plugin &amp; Run Importer' ) . '</a>';
 		else
-			$install_actions['activate_plugin'] = '<a class="button button-primary" href="' . wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Activate Plugin' ) . '</a>';
+			$install_actions['activate_plugin'] = '<a href="' . wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Activate Plugin' ) . '</a>';
 
 		if ( is_multisite() && current_user_can( 'manage_network_plugins' ) ) {
-			$install_actions['network_activate'] = '<a class="button button-primary" href="' . wp_nonce_url( 'plugins.php?action=activate&amp;networkwide=1&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Network Activate' ) . '</a>';
+			$install_actions['network_activate'] = '<a href="' . wp_nonce_url( 'plugins.php?action=activate&amp;networkwide=1&amp;plugin=' . urlencode( $plugin_file ), 'activate-plugin_' . $plugin_file ) . '" target="_parent">' . __( 'Network Activate' ) . '</a>';
 			unset( $install_actions['activate_plugin'] );
 		}
 
@@ -71,7 +73,7 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 
 		if ( ! $this->result || is_wp_error($this->result) ) {
 			unset( $install_actions['activate_plugin'], $install_actions['network_activate'] );
-		} elseif ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
+		} elseif ( ! current_user_can( 'activate_plugins' ) ) {
 			unset( $install_actions['activate_plugin'] );
 		}
 
@@ -88,8 +90,7 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 		 */
 		$install_actions = apply_filters( 'install_plugin_complete_actions', $install_actions, $this->api, $plugin_file );
 
-		if ( ! empty( $install_actions ) ) {
-			$this->feedback( implode( ' ', (array) $install_actions ) );
-		}
+		if ( ! empty($install_actions) )
+			$this->feedback(implode(' | ', (array)$install_actions));
 	}
 }
