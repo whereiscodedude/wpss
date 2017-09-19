@@ -36,7 +36,7 @@ do_action( 'activate_header' );
  *
  * Fires on {@see 'wp_head'}.
  *
- * @since MU (3.0.0)
+ * @since MU
  */
 function do_activate_header() {
 	/**
@@ -53,7 +53,7 @@ add_action( 'wp_head', 'do_activate_header' );
 /**
  * Loads styles specific to this page.
  *
- * @since MU (3.0.0)
+ * @since MU
  */
 function wpmu_activate_stylesheet() {
 	?>

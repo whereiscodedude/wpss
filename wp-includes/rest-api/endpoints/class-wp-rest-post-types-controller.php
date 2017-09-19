@@ -20,6 +20,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	 * Constructor.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 */
 	public function __construct() {
 		$this->namespace = 'wp/v2';
@@ -30,6 +31,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	 * Registers the routes for the objects of the controller.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @see register_rest_route()
 	 */
@@ -67,6 +69,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	 * Checks whether a given request has permission to read types.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|true True if the request has read access, WP_Error object otherwise.
@@ -89,6 +92,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	 * Retrieves all public post types.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response Response object on success, or WP_Error object on failure.
@@ -112,6 +116,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	 * Retrieves a specific post type.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response Response object on success, or WP_Error object on failure.
@@ -140,6 +145,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	 * Prepares a post type object for serialization.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @param stdClass        $post_type Post type data.
 	 * @param WP_REST_Request $request   Full details about the request.
@@ -149,8 +155,6 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 		$taxonomies = wp_list_filter( get_object_taxonomies( $post_type->name, 'objects' ), array( 'show_in_rest' => true ) );
 		$taxonomies = wp_list_pluck( $taxonomies, 'name' );
 		$base = ! empty( $post_type->rest_base ) ? $post_type->rest_base : $post_type->name;
-		$supports = get_all_post_type_supports( $post_type->name );
-
 		$data = array(
 			'capabilities' => $post_type->cap,
 			'description'  => $post_type->description,
@@ -158,7 +162,6 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 			'labels'       => $post_type->labels,
 			'name'         => $post_type->label,
 			'slug'         => $post_type->name,
-			'supports'     => $supports,
 			'taxonomies'   => array_values( $taxonomies ),
 			'rest_base'    => $base,
 		);
@@ -196,6 +199,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	 * Retrieves the post type's schema, conforming to JSON Schema.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @return array Item schema data.
 	 */
@@ -241,12 +245,6 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 					'context'      => array( 'view', 'edit', 'embed' ),
 					'readonly'     => true,
 				),
-				'supports'         => array(
-					'description'  => __( 'All features, supported by the post type.' ),
-					'type'         => 'object',
-					'context'      => array( 'edit' ),
-					'readonly'     => true,
-				),
 				'taxonomies'       => array(
 					'description'  => __( 'Taxonomies associated with post type.' ),
 					'type'         => 'array',
@@ -271,6 +269,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	 * Retrieves the query params for collections.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @return array Collection parameters.
 	 */

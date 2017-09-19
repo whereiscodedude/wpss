@@ -34,6 +34,7 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function before() {
 		if ( !empty($this->api) )
@@ -41,6 +42,7 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function after() {
 		$plugin_file = $this->upgrader->plugin_info();
@@ -71,7 +73,7 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 
 		if ( ! $this->result || is_wp_error($this->result) ) {
 			unset( $install_actions['activate_plugin'], $install_actions['network_activate'] );
-		} elseif ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
+		} elseif ( ! current_user_can( 'activate_plugins' ) ) {
 			unset( $install_actions['activate_plugin'] );
 		}
 

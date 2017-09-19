@@ -22,6 +22,7 @@ class WP_Customize_New_Menu_Section extends WP_Customize_Section {
 	 * Control type.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'new_menu';
@@ -30,6 +31,7 @@ class WP_Customize_New_Menu_Section extends WP_Customize_Section {
 	 * Render the section, and the controls that have been added to it.
 	 *
 	 * @since 4.3.0
+	 * @access protected
 	 */
 	protected function render() {
 		?>

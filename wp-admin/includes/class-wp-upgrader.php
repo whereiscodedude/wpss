@@ -54,6 +54,7 @@ class WP_Upgrader {
 	 * The error/notification strings used to update the user on the progress.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 * @var array $strings
 	 */
 	public $strings = array();
@@ -62,6 +63,7 @@ class WP_Upgrader {
 	 * The upgrader skin being used.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 * @var Automatic_Upgrader_Skin|WP_Upgrader_Skin $skin
 	 */
 	public $skin = null;
@@ -75,11 +77,12 @@ class WP_Upgrader {
 	 * it.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @var WP_Error|array $result {
 	 *      @type string $source             The full path to the source the files were installed from.
 	 *      @type string $source_files       List of all the files in the source directory.
-	 *      @type string $destination        The full path to the installation destination folder.
+	 *      @type string $destination        The full path to the install destination folder.
 	 *      @type string $destination_name   The name of the destination folder, or empty if `$destination`
 	 *                                       and `$local_destination` are the same.
 	 *      @type string $local_destination  The full local path to the destination folder. This is usually
@@ -97,6 +100,7 @@ class WP_Upgrader {
 	 * Set by the bulk update methods.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 * @var int $update_count
 	 */
 	public $update_count = 0;
@@ -107,6 +111,7 @@ class WP_Upgrader {
 	 * Used by the bulk update methods, and incremented for each update.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 * @var int
 	 */
 	public $update_current = 0;
@@ -115,6 +120,7 @@ class WP_Upgrader {
 	 * Construct the upgrader with a skin.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param WP_Upgrader_Skin $skin The upgrader skin to use. Default is a WP_Upgrader_Skin.
 	 *                               instance.
@@ -133,6 +139,7 @@ class WP_Upgrader {
 	 * and also add the generic strings to `WP_Upgrader::$strings`.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function init() {
 		$this->skin->set_upgrader($this);
@@ -143,6 +150,7 @@ class WP_Upgrader {
 	 * Add the generic strings to WP_Upgrader::$strings.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function generic_strings() {
 		$this->strings['bad_request'] = __('Invalid data provided.');
@@ -171,6 +179,7 @@ class WP_Upgrader {
 	 * Connect to the filesystem.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem Subclass
 	 *
@@ -234,6 +243,7 @@ class WP_Upgrader {
 	 * Download a package.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param string $package The URI of the package. If this is the full path to an
 	 *                        existing local file, it will be returned untouched.
@@ -245,6 +255,7 @@ class WP_Upgrader {
 		 * Filters whether to return the package.
 		 *
 		 * @since 3.7.0
+		 * @access public
 		 *
 		 * @param bool        $reply   Whether to bail without returning the package.
 		 *                             Default false.
@@ -275,6 +286,7 @@ class WP_Upgrader {
 	 * Unpack a compressed package file.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem Subclass
 	 *
@@ -326,6 +338,7 @@ class WP_Upgrader {
 	 * Clears the directory where this item is going to be installed into.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem Subclass
 	 *
@@ -389,6 +402,7 @@ class WP_Upgrader {
 	 * clear out the destination folder if it already exists.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem Subclass
 	 * @global array              $wp_theme_directories
@@ -570,11 +584,11 @@ class WP_Upgrader {
 		$this->result = compact( 'source', 'source_files', 'destination', 'destination_name', 'local_destination', 'remote_destination', 'clear_destination' );
 
 		/**
-		 * Filters the installation response after the installation has finished.
+		 * Filters the install response after the installation has finished.
 		 *
 		 * @since 2.8.0
 		 *
-		 * @param bool  $response   Installation response.
+		 * @param bool  $response   Install response.
 		 * @param array $hook_extra Extra arguments passed to hooked filters.
 		 * @param array $result     Installation result data.
 		 */
@@ -590,12 +604,13 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Run an upgrade/installation.
+	 * Run an upgrade/install.
 	 *
 	 * Attempts to download the package (if it is not a local file), unpack it, and
 	 * install it in the destination folder.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $options {
 	 *     Array or string of arguments for upgrading/installing a package.
@@ -612,7 +627,7 @@ class WP_Upgrader {
 	 *     @type bool   $abort_if_destination_exists Whether to abort the installation if the destination
 	 *                                               folder already exists. When true, `$clear_destination`
 	 *                                               should be false. Default true.
-	 *     @type bool   $is_multi                    Whether this run is one of multiple upgrade/installation
+	 *     @type bool   $is_multi                    Whether this run is one of multiple upgrade/install
 	 *                                               actions being performed in bulk. When true, the skin
 	 *                                               WP_Upgrader::header() and WP_Upgrader::footer()
 	 *                                               aren't called. Default false.
@@ -735,7 +750,7 @@ class WP_Upgrader {
 			$this->skin->error($result);
 			$this->skin->feedback('process_failed');
 		} else {
-			// Installation succeeded.
+			// Install succeeded.
 			$this->skin->feedback('process_success');
 		}
 
@@ -787,6 +802,7 @@ class WP_Upgrader {
 	 * Creates/deletes the maintenance file to enable/disable maintenance mode.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem Subclass
 	 *
@@ -811,6 +827,7 @@ class WP_Upgrader {
  	 * Creates a lock using WordPress options.
  	 *
  	 * @since 4.5.0
+ 	 * @access public
  	 * @static
  	 *
  	 * @param string $lock_name       The name of this unique lock.
@@ -857,6 +874,7 @@ class WP_Upgrader {
  	 * Releases an upgrader lock.
  	 *
  	 * @since 4.5.0
+ 	 * @access public
  	 * @static
 	 *
 	 * @see WP_Upgrader::create_lock()

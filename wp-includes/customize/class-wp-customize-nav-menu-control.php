@@ -18,6 +18,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * Control type.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'nav_menu';
@@ -26,6 +27,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * The nav menu setting.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var WP_Customize_Nav_Menu_Setting
 	 */
 	public $setting;
@@ -34,6 +36,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * Don't render the control's content - it uses a JS template instead.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 */
 	public function render_content() {}
 
@@ -41,6 +44,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * JS/Underscore template for the control UI.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 */
 	public function content_template() {
 		?>
@@ -48,12 +52,12 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 			<?php _e( 'Add Items' ); ?>
 		</button>
 		<button type="button" class="button-link reorder-toggle" aria-label="<?php esc_attr_e( 'Reorder menu items' ); ?>" aria-describedby="reorder-items-desc-{{ data.menu_id }}">
-			<span class="reorder"><?php _e( 'Reorder' ); ?></span>
-			<span class="reorder-done"><?php _e( 'Done' ); ?></span>
+			<span class="reorder"><?php _ex( 'Reorder', 'Reorder menu items in Customizer' ); ?></span>
+			<span class="reorder-done"><?php _ex( 'Done', 'Cancel reordering menu items in Customizer' ); ?></span>
 		</button>
 		<p class="screen-reader-text" id="reorder-items-desc-{{ data.menu_id }}"><?php _e( 'When in reorder mode, additional controls to reorder menu items will be available in the items list above.' ); ?></p>
 		<span class="menu-delete-item">
-			<button type="button" class="button-link button-link-delete">
+			<button type="button" class="button-link menu-delete">
 				<?php _e( 'Delete Menu' ); ?>
 			</button>
 		</span>
@@ -85,6 +89,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 * Return parameters for this control.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @return array Exported parameters.
 	 */

@@ -665,19 +665,11 @@
 
 		// Opens the panel.
 		open: function( menuControl ) {
-			var panel = this, close;
-
 			this.currentMenuControl = menuControl;
 
 			this.itemSectionHeight();
 
 			$( 'body' ).addClass( 'adding-menu-items' );
-
-			close = function() {
-				panel.close();
-				$( this ).off( 'click', close );
-			};
-			$( '#customize-preview' ).on( 'click', close );
 
 			// Collapse all controls.
 			_( this.currentMenuControl.getMenuItemControls() ).each( function( control ) {
@@ -2229,7 +2221,8 @@
 				}
 			} );
 
-			control.container.find( '.menu-delete-item .button-link-delete' ).on( 'click', function( event ) {
+			control.container.find( '.menu-delete-item' ).on( 'click', function( event ) {
+				event.stopPropagation();
 				event.preventDefault();
 				control.setting.set( false );
 			});
@@ -2851,7 +2844,7 @@
 		var insertedMenuIdMapping = {}, insertedMenuItemIdMapping = {};
 
 		_( data.nav_menu_updates ).each(function( update ) {
-			var oldCustomizeId, newCustomizeId, customizeId, oldSetting, newSetting, setting, settingValue, oldSection, newSection, wasSaved, widgetTemplate, navMenuCount, shouldExpandNewSection;
+			var oldCustomizeId, newCustomizeId, customizeId, oldSetting, newSetting, setting, settingValue, oldSection, newSection, wasSaved, widgetTemplate, navMenuCount;
 			if ( 'inserted' === update.status ) {
 				if ( ! update.previous_term_id ) {
 					throw new Error( 'Expected previous_term_id' );
@@ -2883,8 +2876,7 @@
 					previewer: api.previewer
 				} );
 
-				shouldExpandNewSection = oldSection.expanded();
-				if ( shouldExpandNewSection ) {
+				if ( oldSection.expanded() ) {
 					oldSection.collapse();
 				}
 
@@ -2959,7 +2951,8 @@
 					}
 				} );
 
-				if ( shouldExpandNewSection ) {
+				if ( oldSection.expanded.get() ) {
+					// @todo This doesn't seem to be working.
 					newSection.expand();
 				}
 			} else if ( 'updated' === update.status ) {

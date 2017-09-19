@@ -44,19 +44,12 @@ function get_option( $option, $default = false ) {
 	 *
 	 * @since 1.5.0
 	 * @since 4.4.0 The `$option` parameter was added.
-	 * @since 4.9.0 The `$default` parameter was added.
 	 *
-	 *
-	 * @param bool|mixed $pre_option The value to return instead of the option value. This differs from
-	 *                               `$default`, which is used as the fallback value in the event the option
-	 *                               doesn't exist elsewhere in get_option(). Default false (to skip past the
-	 *                               short-circuit).
+	 * @param bool|mixed $pre_option Value to return instead of the option value.
+	 *                               Default false to skip it.
 	 * @param string     $option     Option name.
-	 * @param mixed      $default    The fallback value to return if the option does not exist.
-	 *                               Default is false.
 	 */
-	$pre = apply_filters( "pre_option_{$option}", false, $option, $default );
-
+	$pre = apply_filters( "pre_option_{$option}", false, $option );
 	if ( false !== $pre )
 		return $pre;
 
@@ -109,7 +102,7 @@ function get_option( $option, $default = false ) {
 					wp_cache_set( 'notoptions', $notoptions, 'options' );
 
 					/** This filter is documented in wp-includes/option.php */
-					return apply_filters( "default_option_{$option}", $default, $option, $passed_default );
+					return apply_filters( 'default_option_' . $option, $default, $option, $passed_default );
 				}
 			}
 		}
@@ -121,7 +114,7 @@ function get_option( $option, $default = false ) {
 			$value = $row->option_value;
 		} else {
 			/** This filter is documented in wp-includes/option.php */
-			return apply_filters( "default_option_{$option}", $default, $option, $passed_default );
+			return apply_filters( 'default_option_' . $option, $default, $option, $passed_default );
 		}
 	}
 
@@ -214,25 +207,25 @@ function wp_load_alloptions() {
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @param int $network_id Optional site ID for which to query the options. Defaults to the current site.
+ * @param int $site_id Optional site ID for which to query the options. Defaults to the current site.
  */
-function wp_load_core_site_options( $network_id = null ) {
+function wp_load_core_site_options( $site_id = null ) {
 	global $wpdb;
 
 	if ( ! is_multisite() || wp_using_ext_object_cache() || wp_installing() )
 		return;
 
-	if ( empty($network_id) )
-		$network_id = get_current_network_id();
+	if ( empty($site_id) )
+		$site_id = $wpdb->siteid;
 
 	$core_options = array('site_name', 'siteurl', 'active_sitewide_plugins', '_site_transient_timeout_theme_roots', '_site_transient_theme_roots', 'site_admins', 'can_compress_scripts', 'global_terms_enabled', 'ms_files_rewriting' );
 
 	$core_options_in = "'" . implode("', '", $core_options) . "'";
-	$options = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->sitemeta WHERE meta_key IN ($core_options_in) AND site_id = %d", $network_id ) );
+	$options = $wpdb->get_results( $wpdb->prepare("SELECT meta_key, meta_value FROM $wpdb->sitemeta WHERE meta_key IN ($core_options_in) AND site_id = %d", $site_id) );
 
 	foreach ( $options as $option ) {
 		$key = $option->meta_key;
-		$cache_key = "{$network_id}:$key";
+		$cache_key = "{$site_id}:$key";
 		$option->meta_value = maybe_unserialize( $option->meta_value );
 
 		wp_cache_set( $cache_key, $option->meta_value, 'site-options' );
@@ -302,21 +295,12 @@ function update_option( $option, $value, $autoload = null ) {
 	 */
 	$value = apply_filters( 'pre_update_option', $value, $option, $old_value );
 
-	/*
-	 * If the new and old values are the same, no need to update.
-	 *
-	 * Unserialized values will be adequate in most cases. If the unserialized
-	 * data differs, the (maybe) serialized data is checked to avoid
-	 * unnecessary database calls for otherwise identical object instances.
-	 *
-	 * See https://core.trac.wordpress.org/ticket/38903
-	 */
-	if ( $value === $old_value || maybe_serialize( $value ) === maybe_serialize( $old_value ) ) {
+	// If the new and old values are the same, no need to update.
+	if ( $value === $old_value )
 		return false;
-	}
 
 	/** This filter is documented in wp-includes/option.php */
-	if ( apply_filters( "default_option_{$option}", false, $option, false ) === $old_value ) {
+	if ( apply_filters( 'default_option_' . $option, false, $option, false ) === $old_value ) {
 		// Default setting for new options is 'yes'.
 		if ( null === $autoload ) {
 			$autoload = 'yes';
@@ -437,7 +421,7 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 	$notoptions = wp_cache_get( 'notoptions', 'options' );
 	if ( !is_array( $notoptions ) || !isset( $notoptions[$option] ) )
 		/** This filter is documented in wp-includes/option.php */
-		if ( apply_filters( "default_option_{$option}", false, $option, false ) !== get_option( $option ) )
+		if ( apply_filters( 'default_option_' . $option, false, $option, false ) !== get_option( $option ) )
 			return false;
 
 	$serialized_value = maybe_serialize( $value );
@@ -815,7 +799,7 @@ function wp_user_settings() {
 		return;
 	}
 
-	if ( ! is_user_member_of_blog() ) {
+	if ( is_super_admin() && ! is_user_member_of_blog() ) {
 		return;
 	}
 
@@ -979,7 +963,7 @@ function wp_set_all_user_settings( $user_settings ) {
 		return false;
 	}
 
-	if ( ! is_user_member_of_blog() ) {
+	if ( is_super_admin() && ! is_user_member_of_blog() ) {
 		return;
 	}
 
@@ -1123,18 +1107,12 @@ function get_network_option( $network_id, $option, $default = false ) {
 	 * @since 3.0.0
 	 * @since 4.4.0 The `$option` parameter was added.
 	 * @since 4.7.0 The `$network_id` parameter was added.
-	 * @since 4.9.0 The `$default` parameter was added.
 	 *
-	 * @param mixed  $pre_option The value to return instead of the option value. This differs from
-	 *                           `$default`, which is used as the fallback value in the event the
-	 *                           option doesn't exist elsewhere in get_network_option(). Default
-	 *                           is false (to skip past the short-circuit).
+	 * @param mixed  $pre_option The default value to return if the option does not exist.
 	 * @param string $option     Option name.
 	 * @param int    $network_id ID of the network.
-	 * @param mixed  $default    The fallback value to return if the option does not exist.
-	 *                           Default is false.
 	 */
-	$pre = apply_filters( "pre_site_option_{$option}", false, $option, $network_id, $default );
+	$pre = apply_filters( "pre_site_option_{$option}", false, $option, $network_id );
 
 	if ( false !== $pre ) {
 		return $pre;
@@ -1654,7 +1632,7 @@ function get_site_transient( $transient ) {
  * @see set_transient()
  *
  * @param string $transient  Transient name. Expected to not be SQL-escaped. Must be
- *                           167 characters or fewer in length.
+ *                           40 characters or fewer in length.
  * @param mixed  $value      Transient value. Expected to not be SQL-escaped.
  * @param int    $expiration Optional. Time until expiration in seconds. Default 0 (no expiration).
  * @return bool False if value was not set and true if value was set.
@@ -1884,7 +1862,6 @@ function register_initial_settings() {
  *     Data used to describe the setting when registered.
  *
  *     @type string   $type              The type of data associated with this setting.
- *                                       Valid values are 'string', 'boolean', 'integer', and 'number'.
  *     @type string   $description       A description of the data attached to this setting.
  *     @type callable $sanitize_callback A callback function that sanitizes the option's value.
  *     @type bool     $show_in_rest      Whether data associated with this setting should be included in the REST API.
@@ -1927,22 +1904,12 @@ function register_setting( $option_group, $option_name, $args = array() ) {
 	}
 
 	if ( 'misc' == $option_group ) {
-		_deprecated_argument( __FUNCTION__, '3.0.0',
-			/* translators: %s: misc */
-			sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ),
-				'misc'
-			)
-		);
+		_deprecated_argument( __FUNCTION__, '3.0.0', sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ), 'misc' ) );
 		$option_group = 'general';
 	}
 
 	if ( 'privacy' == $option_group ) {
-		_deprecated_argument( __FUNCTION__, '3.5.0',
-			/* translators: %s: privacy */
-			sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ),
-				'privacy'
-			)
-		);
+		_deprecated_argument( __FUNCTION__, '3.5.0', sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ), 'privacy' ) );
 		$option_group = 'reading';
 	}
 
@@ -1973,22 +1940,12 @@ function unregister_setting( $option_group, $option_name, $deprecated = '' ) {
 	global $new_whitelist_options, $wp_registered_settings;
 
 	if ( 'misc' == $option_group ) {
-		_deprecated_argument( __FUNCTION__, '3.0.0',
-			/* translators: %s: misc */
-			sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ),
-				'misc'
-			)
-		);
+		_deprecated_argument( __FUNCTION__, '3.0.0', sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ), 'misc' ) );
 		$option_group = 'general';
 	}
 
 	if ( 'privacy' == $option_group ) {
-		_deprecated_argument( __FUNCTION__, '3.5.0',
-			/* translators: %s: privacy */
-			sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ),
-				'privacy'
-			)
-		);
+		_deprecated_argument( __FUNCTION__, '3.5.0', sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ), 'privacy' ) );
 		$option_group = 'reading';
 	}
 
@@ -1997,13 +1954,7 @@ function unregister_setting( $option_group, $option_name, $deprecated = '' ) {
 		unset( $new_whitelist_options[ $option_group ][ $pos ] );
 	}
 	if ( '' !== $deprecated ) {
-		_deprecated_argument( __FUNCTION__, '4.7.0',
-			/* translators: 1: $sanitize_callback, 2: register_setting() */
-			sprintf( __( '%1$s is deprecated. The callback from %2$s is used instead.' ),
-				'<code>$sanitize_callback</code>',
-				'<code>register_setting()</code>'
-			)
-		);
+		_deprecated_argument( __FUNCTION__, '4.7.0', __( '$sanitize_callback is deprecated. The callback from register_setting() is used instead.' ) );
 		remove_filter( "sanitize_option_{$option_name}", $deprecated );
 	}
 

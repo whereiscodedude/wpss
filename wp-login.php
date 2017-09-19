@@ -359,8 +359,6 @@ function retrieve_password() {
 	/**
 	 * Filters the message body of the password reset mail.
 	 *
-	 * If the filtered message is empty, the password reset email will not be sent.
-	 *
 	 * @since 2.8.0
 	 * @since 4.1.0 Added `$user_login` and `$user_data` parameters.
 	 *
@@ -430,15 +428,6 @@ do_action( "login_form_{$action}" );
 $http_post = ('POST' == $_SERVER['REQUEST_METHOD']);
 $interim_login = isset($_REQUEST['interim-login']);
 
-/**
- * Filters the separator used between login form navigation links.
- *
- * @since 4.9.0
- *
- * @param string $login_link_separator The separator used between login form navigation links.
- */
-$login_link_separator = apply_filters( 'login_link_separator', ' | ' );
-
 switch ($action) {
 
 case 'postpass' :
@@ -447,7 +436,6 @@ case 'postpass' :
 		exit();
 	}
 
-	require_once ABSPATH . WPINC . '/class-phpass.php';
 	$hasher = new PasswordHash( 8, true );
 
 	/**
@@ -564,10 +552,8 @@ case 'retrievepassword' :
 if ( get_option( 'users_can_register' ) ) :
 	$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
 
-	echo esc_html( $login_link_separator );
-
 	/** This filter is documented in wp-includes/general-template.php */
-	echo apply_filters( 'register', $registration_url );
+	echo ' | ' . apply_filters( 'register', $registration_url );
 endif;
 ?>
 </p>
@@ -679,10 +665,8 @@ case 'rp' :
 if ( get_option( 'users_can_register' ) ) :
 	$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
 
-	echo esc_html( $login_link_separator );
-
 	/** This filter is documented in wp-includes/general-template.php */
-	echo apply_filters( 'register', $registration_url );
+	echo ' | ' . apply_filters( 'register', $registration_url );
 endif;
 ?>
 </p>
@@ -713,7 +697,7 @@ case 'register' :
 	$user_email = '';
 	if ( $http_post ) {
 		$user_login = isset( $_POST['user_login'] ) ? $_POST['user_login'] : '';
-		$user_email = isset( $_POST['user_email'] ) ? wp_unslash( $_POST['user_email'] ) : '';
+		$user_email = isset( $_POST['user_email'] ) ? $_POST['user_email'] : '';
 		$errors = register_new_user($user_login, $user_email);
 		if ( !is_wp_error($errors) ) {
 			$redirect_to = !empty( $_POST['redirect_to'] ) ? $_POST['redirect_to'] : 'wp-login.php?checkemail=registered';
@@ -757,8 +741,7 @@ case 'register' :
 </form>
 
 <p id="nav">
-<a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( 'Log in' ); ?></a>
-<?php echo esc_html( $login_link_separator ); ?>
+<a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( 'Log in' ); ?></a> |
 <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php _e( 'Lost your password?' ); ?></a>
 </p>
 
@@ -950,9 +933,7 @@ default:
 		$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
 
 		/** This filter is documented in wp-includes/general-template.php */
-		echo apply_filters( 'register', $registration_url );
-
-		echo esc_html( $login_link_separator );
+		echo apply_filters( 'register', $registration_url ) . ' | ';
 	endif;
 	?>
 	<a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php _e( 'Lost your password?' ); ?></a>
@@ -980,15 +961,7 @@ d.select();
 }, 200);
 }
 
-<?php
-/**
- * Filters whether to print the call to `wp_attempt_focus()` on the login screen.
- *
- * @since 4.8.0
- *
- * @param bool $print Whether to print the function call. Default true.
- */
-if ( apply_filters( 'enable_login_autofocus', true ) && ! $error ) { ?>
+<?php if ( !$error ) { ?>
 wp_attempt_focus();
 <?php } ?>
 if(typeof wpOnload=='function')wpOnload();

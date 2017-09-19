@@ -6,17 +6,12 @@
 	 * Initialise the WP_API.
 	 */
 	function WP_API() {
-		/** @namespace wp.api.models */
 		this.models = {};
-		/** @namespace wp.api.collections */
 		this.collections = {};
-		/** @namespace wp.api.views */
 		this.views = {};
 	}
 
-	/** @namespace wp */
 	window.wp            = window.wp || {};
-	/** @namespace wp.api */
 	wp.api               = wp.api || new WP_API();
 	wp.api.versionString = wp.api.versionString || 'wp/v2/';
 
@@ -33,39 +28,9 @@
 
 	var pad, r;
 
-	/** @namespace wp */
 	window.wp = window.wp || {};
-	/** @namespace wp.api */
 	wp.api = wp.api || {};
-	/** @namespace wp.api.utils */
 	wp.api.utils = wp.api.utils || {};
-
-	/**
-	 * Determine model based on API route.
-	 *
-	 * @param {string} route    The API route.
-	 *
-	 * @return {Backbone Model} The model found at given route. Undefined if not found.
-	 */
-	wp.api.getModelByRoute = function( route ) {
-		return _.find( wp.api.models, function( model ) {
-			return model.prototype.route && route === model.prototype.route.index;
-		} );
-	};
-
-	/**
-	 * Determine collection based on API route.
-	 *
-	 * @param {string} route    The API route.
-	 *
-	 * @return {Backbone Model} The collection found at given route. Undefined if not found.
-	 */
-	wp.api.getCollectionByRoute = function( route ) {
-		return _.find( wp.api.collections, function( collection ) {
-			return collection.prototype.route && route === collection.prototype.route.index;
-		} );
-	};
-
 
 	/**
 	 * ECMAScript 5 shim, adapted from MDN.
@@ -1032,11 +997,7 @@
 
 	var Endpoint, initializedDeferreds = {},
 		wpApiSettings = window.wpApiSettings || {};
-
-	/** @namespace wp */
 	window.wp = window.wp || {};
-
-	/** @namespace wp.api */
 	wp.api    = wp.api || {};
 
 	// If wpApiSettings is unavailable, try the default.
@@ -1044,7 +1005,7 @@
 		wpApiSettings.root = window.location.origin + '/wp-json/';
 	}
 
-	Endpoint = Backbone.Model.extend(/** @lends Endpoint.prototype */{
+	Endpoint = Backbone.Model.extend( {
 		defaults: {
 			apiRoot: wpApiSettings.root,
 			versionString: wp.api.versionString,
@@ -1093,8 +1054,6 @@
 					 * When the server returns the schema model data, store the data in a sessionCache so we don't
 					 * have to retrieve it again for this session. Then, construct the models and collections based
 					 * on the schema model data.
-					 *
-					 * @callback
 					 */
 					success: function( newSchemaModel ) {
 
@@ -1153,10 +1112,7 @@
 					'PostsRevisions':  'PostRevisions',
 					'PostsTags':       'PostTags'
 				}
-			},
-
-			modelEndpoints = routeModel.get( 'modelEndpoints' ),
-			modelRegex     = new RegExp( '(?:.*[+)]|\/(' + modelEndpoints.join( '|' ) + '))$' );
+			};
 
 			/**
 			 * Iterate thru the routes, picking up models and collections to build. Builds two arrays,
@@ -1181,8 +1137,8 @@
 						index !== ( '/' + routeModel.get( 'versionString' ).slice( 0, -1 ) )
 				) {
 
-					// Single items end with a regex, or a special case word.
-					if ( modelRegex.test( index ) ) {
+					// Single items end with a regex (or the special case 'me').
+					if ( /(?:.*[+)]|\/me)$/.test( index ) ) {
 						modelRoutes.push( { index: index, route: route } );
 					} else {
 
@@ -1404,11 +1360,10 @@
 	wp.api.init = function( args ) {
 		var endpoint, attributes = {}, deferred, promise;
 
-		args                      = args || {};
-		attributes.apiRoot        = args.apiRoot || wpApiSettings.root || '/wp-json';
-		attributes.versionString  = args.versionString || wpApiSettings.versionString || 'wp/v2/';
-		attributes.schema         = args.schema || null;
-		attributes.modelEndpoints = args.modelEndpoints || [ 'me', 'settings' ];
+		args                     = args || {};
+		attributes.apiRoot       = args.apiRoot || wpApiSettings.root || '/wp-json';
+		attributes.versionString = args.versionString || wpApiSettings.versionString || 'wp/v2/';
+		attributes.schema        = args.schema || null;
 		if ( ! attributes.schema && attributes.apiRoot === wpApiSettings.root && attributes.versionString === wpApiSettings.versionString ) {
 			attributes.schema = wpApiSettings.schema;
 		}
