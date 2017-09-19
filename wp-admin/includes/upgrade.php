@@ -8,7 +8,7 @@
  * @subpackage Administration
  */
 
-/** Include user installation customization script. */
+/** Include user install customize script. */
 if ( file_exists(WP_CONTENT_DIR . '/install.php') )
 	require (WP_CONTENT_DIR . '/install.php');
 
@@ -95,7 +95,7 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 
 	flush_rewrite_rules();
 
-	wp_new_blog_notification($blog_title, $guessurl, $user_id, ($email_password ? $user_password : __('The password you chose during installation.') ) );
+	wp_new_blog_notification($blog_title, $guessurl, $user_id, ($email_password ? $user_password : __('The password you chose during the install.') ) );
 
 	wp_cache_flush();
 
@@ -285,7 +285,7 @@ As a new WordPress user, you should go to <a href=\"%s\">your dashboard</a> to d
 endif;
 
 /**
- * Maybe enable pretty permalinks on installation.
+ * Maybe enable pretty permalinks on install.
  *
  * If after enabling pretty permalinks don't work, fallback to query-string permalinks.
  *
@@ -452,7 +452,7 @@ function wp_upgrade() {
 endif;
 
 /**
- * Functions to be called in installation and upgrade scripts.
+ * Functions to be called in install and upgrade scripts.
  *
  * Contains conditional checks to determine which upgrade scripts to run,
  * based on database version and WP version being updated-to.
@@ -2060,7 +2060,7 @@ function get_alloptions_110() {
 }
 
 /**
- * Utility version of get_option that is private to installation/upgrade.
+ * Utility version of get_option that is private to install/upgrade.
  *
  * @ignore
  * @since 1.5.1

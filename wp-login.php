@@ -430,15 +430,6 @@ do_action( "login_form_{$action}" );
 $http_post = ('POST' == $_SERVER['REQUEST_METHOD']);
 $interim_login = isset($_REQUEST['interim-login']);
 
-/**
- * Filters the separator used between login form navigation links.
- *
- * @since 4.9.0
- *
- * @param string $login_link_separator The separator used between login form navigation links.
- */
-$login_link_separator = apply_filters( 'login_link_separator', ' | ' );
-
 switch ($action) {
 
 case 'postpass' :
@@ -564,10 +555,8 @@ case 'retrievepassword' :
 if ( get_option( 'users_can_register' ) ) :
 	$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
 
-	echo esc_html( $login_link_separator );
-
 	/** This filter is documented in wp-includes/general-template.php */
-	echo apply_filters( 'register', $registration_url );
+	echo ' | ' . apply_filters( 'register', $registration_url );
 endif;
 ?>
 </p>
@@ -679,10 +668,8 @@ case 'rp' :
 if ( get_option( 'users_can_register' ) ) :
 	$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
 
-	echo esc_html( $login_link_separator );
-
 	/** This filter is documented in wp-includes/general-template.php */
-	echo apply_filters( 'register', $registration_url );
+	echo ' | ' . apply_filters( 'register', $registration_url );
 endif;
 ?>
 </p>
@@ -757,8 +744,7 @@ case 'register' :
 </form>
 
 <p id="nav">
-<a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( 'Log in' ); ?></a>
-<?php echo esc_html( $login_link_separator ); ?>
+<a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( 'Log in' ); ?></a> |
 <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php _e( 'Lost your password?' ); ?></a>
 </p>
 
@@ -950,9 +936,7 @@ default:
 		$registration_url = sprintf( '<a href="%s">%s</a>', esc_url( wp_registration_url() ), __( 'Register' ) );
 
 		/** This filter is documented in wp-includes/general-template.php */
-		echo apply_filters( 'register', $registration_url );
-
-		echo esc_html( $login_link_separator );
+		echo apply_filters( 'register', $registration_url ) . ' | ';
 	endif;
 	?>
 	<a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php _e( 'Lost your password?' ); ?></a>
@@ -980,7 +964,6 @@ d.select();
 }, 200);
 }
 
-<?php
 /**
  * Filters whether to print the call to `wp_attempt_focus()` on the login screen.
  *
@@ -988,7 +971,7 @@ d.select();
  *
  * @param bool $print Whether to print the function call. Default true.
  */
-if ( apply_filters( 'enable_login_autofocus', true ) && ! $error ) { ?>
+<?php if ( apply_filters( 'enable_login_autofocus', true ) && ! $error ) { ?>
 wp_attempt_focus();
 <?php } ?>
 if(typeof wpOnload=='function')wpOnload();

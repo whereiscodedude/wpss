@@ -63,40 +63,7 @@ if ( $theme->errors() && 'theme_no_stylesheet' == $theme->errors()->get_error_co
 
 $allowed_files = $style_files = array();
 $has_templates = false;
-$default_types = array(
-	'bash',
-	'conf',
-	'css',
-	'diff',
-	'htm',
-	'html',
-	'http',
-	'inc',
-	'include',
-	'js',
-	'json',
-	'jsx',
-	'less',
-	'md',
-	'patch',
-	'php',
-	'php3',
-	'php4',
-	'php5',
-	'php7',
-	'phps',
-	'phtml',
-	'sass',
-	'scss',
-	'sh',
-	'sql',
-	'svg',
-	'text',
-	'txt',
-	'xml',
-	'yaml',
-	'yml',
-);
+$default_types = array( 'php', 'css' );
 
 /**
  * Filters the list of file types allowed for editing in the Theme editor.
@@ -158,12 +125,6 @@ case 'update':
 	exit;
 
 default:
-
-	$settings = wp_enqueue_code_editor( compact( 'file' ) );
-	if ( ! empty( $settings ) ) {
-		wp_enqueue_script( 'wp-theme-plugin-editor' );
-		wp_add_inline_script( 'wp-theme-plugin-editor', sprintf( 'jQuery( function() { wp.themePluginEditor.init( %s ); } )', wp_json_encode( $settings ) ) );
-	}
 
 	require_once( ABSPATH . 'wp-admin/admin-header.php' );
 

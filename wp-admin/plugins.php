@@ -29,9 +29,8 @@ if ( $action ) {
 
 	switch ( $action ) {
 		case 'activate':
-			if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
-				wp_die( __( 'Sorry, you are not allowed to activate this plugin.' ) );
-			}
+			if ( ! current_user_can('activate_plugins') )
+				wp_die(__('Sorry, you are not allowed to activate plugins for this site.'));
 
 			if ( is_multisite() && ! is_network_admin() && is_network_only_plugin( $plugin ) ) {
 				wp_redirect( self_admin_url("plugins.php?plugin_status=$status&paged=$page&s=$s") );
@@ -87,10 +86,6 @@ if ( $action ) {
 				foreach ( $plugins as $i => $plugin ) {
 					// Only activate plugins which are not already active and are not network-only when on Multisite.
 					if ( is_plugin_active( $plugin ) || ( is_multisite() && is_network_only_plugin( $plugin ) ) ) {
-						unset( $plugins[ $i ] );
-					}
-					// Only activate plugins which the user can activate.
-					if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
 						unset( $plugins[ $i ] );
 					}
 				}
@@ -151,9 +146,8 @@ if ( $action ) {
 			exit;
 
 		case 'error_scrape':
-			if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
-				wp_die( __( 'Sorry, you are not allowed to activate this plugin.' ) );
-			}
+			if ( ! current_user_can('activate_plugins') )
+				wp_die(__('Sorry, you are not allowed to activate plugins for this site.'));
 
 			check_admin_referer('plugin-activation-error_' . $plugin);
 
@@ -173,9 +167,8 @@ if ( $action ) {
 			exit;
 
 		case 'deactivate':
-			if ( ! current_user_can( 'deactivate_plugin', $plugin ) ) {
-				wp_die( __( 'Sorry, you are not allowed to deactivate this plugin.' ) );
-			}
+			if ( ! current_user_can('activate_plugins') )
+				wp_die(__('Sorry, you are not allowed to deactivate plugins for this site.'));
 
 			check_admin_referer('deactivate-plugin_' . $plugin);
 
@@ -199,9 +192,8 @@ if ( $action ) {
 			exit;
 
 		case 'deactivate-selected':
-			if ( ! current_user_can( 'deactivate_plugins' ) ) {
+			if ( ! current_user_can('activate_plugins') )
 				wp_die(__('Sorry, you are not allowed to deactivate plugins for this site.'));
-			}
 
 			check_admin_referer('bulk-plugins');
 
@@ -212,14 +204,6 @@ if ( $action ) {
 			} else {
 				$plugins = array_filter( $plugins, 'is_plugin_active' );
 				$plugins = array_diff( $plugins, array_filter( $plugins, 'is_plugin_active_for_network' ) );
-
-				foreach ( $plugins as $i => $plugin ) {
-					// Only deactivate plugins which the user can deactivate.
-					if ( ! current_user_can( 'deactivate_plugin', $plugin ) ) {
-						unset( $plugins[ $i ] );
-					}
-				}
-
 			}
 			if ( empty($plugins) ) {
 				wp_redirect( self_admin_url("plugins.php?plugin_status=$status&paged=$page&s=$s") );

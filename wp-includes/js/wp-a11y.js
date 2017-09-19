@@ -1,4 +1,3 @@
-/** @namespace wp */
 window.wp = window.wp || {};
 
 ( function ( wp, $ ) {
@@ -95,7 +94,6 @@ window.wp = window.wp || {};
 		}
 	});
 
-	/** @namespace wp.a11y */
 	wp.a11y = wp.a11y || {};
 	wp.a11y.speak = speak;
 

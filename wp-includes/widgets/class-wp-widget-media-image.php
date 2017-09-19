@@ -20,6 +20,7 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 	 * Constructor.
 	 *
 	 * @since  4.8.0
+	 * @access public
 	 */
 	public function __construct() {
 		parent::__construct( 'media_image', __( 'Image' ), array(
@@ -47,6 +48,7 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 	 * Get schema for properties of a widget instance (item).
 	 *
 	 * @since  4.8.0
+	 * @access public
 	 *
 	 * @see WP_REST_Controller::get_item_schema()
 	 * @see WP_REST_Controller::get_additional_fields()
@@ -95,7 +97,7 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 					'default' => 'none',
 					'media_prop' => 'link',
 					'description' => __( 'Link To' ),
-					'should_preview_update' => true,
+					'should_preview_update' => false,
 				),
 				'link_url' => array(
 					'type' => 'string',
@@ -103,7 +105,7 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 					'format' => 'uri',
 					'media_prop' => 'linkUrl',
 					'description' => __( 'URL' ),
-					'should_preview_update' => true,
+					'should_preview_update' => false,
 				),
 				'image_classes' => array(
 					'type' => 'string',
@@ -162,6 +164,7 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 	 * Render the media on the frontend.
 	 *
 	 * @since  4.8.0
+	 * @access public
 	 *
 	 * @param array $instance Widget instance props.
 	 * @return void
@@ -264,6 +267,7 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 	 * Loads the required media files for the media manager and scripts for media widgets.
 	 *
 	 * @since 4.8.0
+	 * @access public
 	 */
 	public function enqueue_admin_scripts() {
 		parent::enqueue_admin_scripts();
@@ -302,22 +306,16 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 	 * Render form template scripts.
 	 *
 	 * @since 4.8.0
+	 * @access public
 	 */
 	public function render_control_template_scripts() {
 		parent::render_control_template_scripts();
 
 		?>
-		<script type="text/html" id="tmpl-wp-media-widget-image-fields">
-			<# var elementIdPrefix = 'el' + String( Math.random() ) + '_'; #>
-			<# if ( data.url ) { #>
-			<p class="media-widget-image-link">
-				<label for="{{ elementIdPrefix }}linkUrl"><?php esc_html_e( 'Link to:' ); ?></label>
-				<input id="{{ elementIdPrefix }}linkUrl" type="url" class="widefat link" value="{{ data.link_url }}" placeholder="http://">
-			</p>
-			<# } #>
-		</script>
 		<script type="text/html" id="tmpl-wp-media-widget-image-preview">
-			<# var describedById = 'describedBy-' + String( Math.random() ); #>
+			<#
+			var describedById = 'describedBy-' + String( Math.random() );
+			#>
 			<# if ( data.error && 'missing_attachment' === data.error ) { #>
 				<div class="notice notice-error notice-alt notice-missing-attachment">
 					<p><?php echo $this->l10n['missing_attachment']; ?></p>

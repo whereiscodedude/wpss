@@ -19,6 +19,7 @@ class Walker_Nav_Menu extends Walker {
 	 * What the class handles.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 * @var string
 	 *
 	 * @see Walker::$tree_type
@@ -29,6 +30,7 @@ class Walker_Nav_Menu extends Walker {
 	 * Database fields to use.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 * @todo Decouple this.
 	 * @var array
 	 *

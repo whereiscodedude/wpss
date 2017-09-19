@@ -22,15 +22,17 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	 * Result of the language pack upgrade.
 	 *
 	 * @since 3.7.0
+	 * @access public
 	 * @var array|WP_Error $result
 	 * @see WP_Upgrader::$result
 	 */
 	public $result;
 
 	/**
-	 * Whether a bulk upgrade/installation is being performed.
+	 * Whether a bulk upgrade/install is being performed.
 	 *
 	 * @since 3.7.0
+	 * @access public
 	 * @var bool $bulk
 	 */
 	public $bulk = true;
@@ -41,6 +43,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	 * Hooked to the {@see 'upgrader_process_complete'} action by default.
 	 *
 	 * @since 3.7.0
+	 * @access public
 	 * @static
 	 *
 	 * @param false|WP_Upgrader $upgrader Optional. WP_Upgrader instance or false. If `$upgrader` is
@@ -60,7 +63,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 		}
 
 		/*
-		 * Avoid messing with VCS installations, at least for now.
+		 * Avoid messing with VCS installs, at least for now.
 		 * Noted: this is not the ideal way to accomplish this.
 		 */
 		$check_vcs = new WP_Automatic_Updater;
@@ -107,6 +110,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	 * Initialize the upgrade strings.
 	 *
 	 * @since 3.7.0
+	 * @access public
 	 */
 	public function upgrade_strings() {
 		$this->strings['starting_upgrade'] = __( 'Some of your translations need updating. Sit tight for a few more seconds while we update them as well.' );
@@ -122,6 +126,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	 * Upgrade a language pack.
 	 *
 	 * @since 3.7.0
+	 * @access public
 	 *
 	 * @param string|false $update Optional. Whether an update offer is available. Default false.
 	 * @param array        $args   Optional. Other optional arguments, see
@@ -146,6 +151,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	 * Bulk upgrade language packs.
 	 *
 	 * @since 3.7.0
+	 * @access public
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem Subclass
 	 *
@@ -301,6 +307,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	 * Language_Pack_Upgrader::bulk_upgrade().
 	 *
 	 * @since 3.7.0
+	 * @access public
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem Subclass
 	 *
@@ -342,6 +349,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	 * Get the name of an item being updated.
 	 *
 	 * @since 3.7.0
+	 * @access public
 	 *
 	 * @param object $update The data for an update.
 	 * @return string The name of the item being updated.

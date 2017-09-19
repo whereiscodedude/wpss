@@ -19,6 +19,8 @@ define( 'REST_API_VERSION', '2.0' );
  *
  * @since 4.4.0
  *
+ * @global WP_REST_Server $wp_rest_server ResponseHandler instance (usually WP_REST_Server).
+ *
  * @param string $namespace The first URL segment after core prefix. Should be unique to your package/plugin.
  * @param string $route     The base URL for route you are adding.
  * @param array  $args      Optional. Either an array of options for the endpoint, or an array of arrays for
@@ -28,6 +30,9 @@ define( 'REST_API_VERSION', '2.0' );
  * @return bool True on success, false on error.
  */
 function register_rest_route( $namespace, $route, $args = array(), $override = false ) {
+	/** @var WP_REST_Server $wp_rest_server */
+	global $wp_rest_server;
+
 	if ( empty( $namespace ) ) {
 		/*
 		 * Non-namespaced routes are not allowed, with the exception of the main
@@ -69,7 +74,7 @@ function register_rest_route( $namespace, $route, $args = array(), $override = f
 	}
 
 	$full_route = '/' . trim( $namespace, '/' ) . '/' . trim( $route, '/' );
-	rest_get_server()->register_route( $namespace, $full_route, $args, $override );
+	$wp_rest_server->register_route( $namespace, $full_route, $args, $override );
 	return true;
 }
 
@@ -240,6 +245,7 @@ function create_initial_rest_routes() {
  * @since 4.4.0
  *
  * @global WP             $wp             Current WordPress environment instance.
+ * @global WP_REST_Server $wp_rest_server ResponseHandler instance (usually WP_REST_Server).
  */
 function rest_api_loaded() {
 	if ( empty( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
@@ -380,6 +386,8 @@ function rest_url( $path = '', $scheme = 'json' ) {
  * Used primarily to route internal requests through WP_REST_Server.
  *
  * @since 4.4.0
+ *
+ * @global WP_REST_Server $wp_rest_server ResponseHandler instance (usually WP_REST_Server).
  *
  * @param WP_REST_Request|string $request Request.
  * @return WP_REST_Response REST response.
@@ -696,6 +704,7 @@ function rest_output_link_header() {
  * @since 4.4.0
  *
  * @global mixed          $wp_rest_auth_cookie
+ * @global WP_REST_Server $wp_rest_server      REST server instance.
  *
  * @param WP_Error|mixed $result Error from another authentication handler,
  *                               null if we should handle it, or another value
@@ -707,7 +716,7 @@ function rest_cookie_check_errors( $result ) {
 		return $result;
 	}
 
-	global $wp_rest_auth_cookie;
+	global $wp_rest_auth_cookie, $wp_rest_server;
 
 	/*
 	 * Is cookie authentication being used? (If we get an auth
@@ -741,7 +750,7 @@ function rest_cookie_check_errors( $result ) {
 	}
 
 	// Send a refreshed nonce in header.
-	rest_get_server()->send_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+	$wp_rest_server->send_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
 
 	return true;
 }

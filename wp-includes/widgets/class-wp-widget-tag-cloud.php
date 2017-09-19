@@ -20,6 +20,7 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 	 * Sets up a new Tag Cloud widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function __construct() {
 		$widget_ops = array(
@@ -33,6 +34,7 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 	 * Outputs the content for the current Tag Cloud widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -93,6 +95,7 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 	 * Handles updating settings for the current Tag Cloud widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget::form().
@@ -111,6 +114,7 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 	 * Outputs the Tag Cloud widget settings form.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 */
@@ -180,6 +184,7 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 	 * Retrieves the taxonomy for the current Tag cloud widget instance.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 * @return string Name of the current taxonomy if set, otherwise 'post_tag'.

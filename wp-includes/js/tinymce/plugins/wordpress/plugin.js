@@ -187,8 +187,7 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 		var parent, html, title,
 			classname = 'wp-more-tag',
 			dom = editor.dom,
-			node = editor.selection.getNode(),
-			rootNode = editor.getBody();
+			node = editor.selection.getNode();
 
 		tag = tag || 'more';
 		classname += ' mce-wp-' + tag;
@@ -198,14 +197,14 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			'data-wp-more="' + tag + '" data-mce-resize="false" data-mce-placeholder="1" />';
 
 		// Most common case
-		if ( node === rootNode || ( node.nodeName === 'P' && node.parentNode === rootNode ) ) {
+		if ( node.nodeName === 'BODY' || ( node.nodeName === 'P' && node.parentNode.nodeName === 'BODY' ) ) {
 			editor.insertContent( html );
 			return;
 		}
 
 		// Get the top level parent node
 		parent = dom.getParent( node, function( found ) {
-			if ( found.parentNode && found.parentNode === rootNode ) {
+			if ( found.parentNode && found.parentNode.nodeName === 'BODY' ) {
 				return true;
 			}
 
