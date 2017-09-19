@@ -21,6 +21,7 @@ class WP_Widget_Calendar extends WP_Widget {
 	 * @since 4.4.0
 	 *
 	 * @static
+	 * @access private
 	 * @var int
 	 */
 	private static $instance = 0;
@@ -29,20 +30,18 @@ class WP_Widget_Calendar extends WP_Widget {
 	 * Sets up a new Calendar widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function __construct() {
-		$widget_ops = array(
-			'classname' => 'widget_calendar',
-			'description' => __( 'A calendar of your site&#8217;s Posts.' ),
-			'customize_selective_refresh' => true,
-		);
-		parent::__construct( 'calendar', __( 'Calendar' ), $widget_ops );
+		$widget_ops = array('classname' => 'widget_calendar', 'description' => __( 'A calendar of your site&#8217;s Posts.') );
+		parent::__construct('calendar', __('Calendar'), $widget_ops);
 	}
 
 	/**
 	 * Outputs the content for the current Calendar widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -72,6 +71,7 @@ class WP_Widget_Calendar extends WP_Widget {
 	 * Handles updating settings for the current Calendar widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget::form().
@@ -89,6 +89,7 @@ class WP_Widget_Calendar extends WP_Widget {
 	 * Outputs the settings form for the Calendar widget.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 */

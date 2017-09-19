@@ -20,20 +20,18 @@ class WP_Widget_Pages extends WP_Widget {
 	 * Sets up a new Pages widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function __construct() {
-		$widget_ops = array(
-			'classname' => 'widget_pages',
-			'description' => __( 'A list of your site&#8217;s Pages.' ),
-			'customize_selective_refresh' => true,
-		);
-		parent::__construct( 'pages', __( 'Pages' ), $widget_ops );
+		$widget_ops = array('classname' => 'widget_pages', 'description' => __( 'A list of your site&#8217;s Pages.') );
+		parent::__construct('pages', __('Pages'), $widget_ops);
 	}
 
 	/**
 	 * Outputs the content for the current Pages widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -42,7 +40,7 @@ class WP_Widget_Pages extends WP_Widget {
 	public function widget( $args, $instance ) {
 
 		/**
-		 * Filters the widget title.
+		 * Filter the widget title.
 		 *
 		 * @since 2.6.0
 		 *
@@ -59,7 +57,7 @@ class WP_Widget_Pages extends WP_Widget {
 			$sortby = 'menu_order, post_title';
 
 		/**
-		 * Filters the arguments for the Pages widget.
+		 * Filter the arguments for the Pages widget.
 		 *
 		 * @since 2.8.0
 		 *
@@ -92,6 +90,7 @@ class WP_Widget_Pages extends WP_Widget {
 	 * Handles updating settings for the current Pages widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget::form().
@@ -116,6 +115,7 @@ class WP_Widget_Pages extends WP_Widget {
 	 * Outputs the settings form for the Pages widget.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 */

@@ -22,6 +22,7 @@ class WP_Customize_Nav_Menu_Location_Control extends WP_Customize_Control {
 	 * Control type.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'nav_menu_location';
@@ -30,6 +31,7 @@ class WP_Customize_Nav_Menu_Location_Control extends WP_Customize_Control {
 	 * Location ID.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var string
 	 */
 	public $location_id = '';
@@ -38,6 +40,7 @@ class WP_Customize_Nav_Menu_Location_Control extends WP_Customize_Control {
 	 * Refresh the parameters passed to JavaScript via JSON.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @see WP_Customize_Control::to_json()
 	 */
@@ -50,6 +53,7 @@ class WP_Customize_Nav_Menu_Location_Control extends WP_Customize_Control {
 	 * Render content just like a normal select control.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 */
 	public function render_content() {
 		if ( empty( $this->choices ) ) {
@@ -73,7 +77,6 @@ class WP_Customize_Nav_Menu_Location_Control extends WP_Customize_Control {
 				?>
 			</select>
 		</label>
-		<button type="button" class="button-link edit-menu<?php if ( ! $this->value() ) { echo ' hidden'; } ?>" aria-label="<?php esc_attr_e( 'Edit selected menu' ); ?>"><?php _e( 'Edit Menu' ); ?></button>
 		<?php
 	}
 }

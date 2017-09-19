@@ -22,20 +22,18 @@ class WP_Widget_Meta extends WP_Widget {
 	 * Sets up a new Meta widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function __construct() {
-		$widget_ops = array(
-			'classname' => 'widget_meta',
-			'description' => __( 'Login, RSS, &amp; WordPress.org links.' ),
-			'customize_selective_refresh' => true,
-		);
-		parent::__construct( 'meta', __( 'Meta' ), $widget_ops );
+		$widget_ops = array('classname' => 'widget_meta', 'description' => __( "Login, RSS, &amp; WordPress.org links.") );
+		parent::__construct('meta', __('Meta'), $widget_ops);
 	}
 
 	/**
 	 * Outputs the content for the current Meta widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -57,7 +55,7 @@ class WP_Widget_Meta extends WP_Widget {
 			<li><a href="<?php echo esc_url( get_bloginfo( 'comments_rss2_url' ) ); ?>"><?php _e('Comments <abbr title="Really Simple Syndication">RSS</abbr>'); ?></a></li>
 			<?php
 			/**
-			 * Filters the "Powered by WordPress" text in the Meta widget.
+			 * Filter the "Powered by WordPress" text in the Meta widget.
 			 *
 			 * @since 3.6.0
 			 *
@@ -80,6 +78,7 @@ class WP_Widget_Meta extends WP_Widget {
 	 * Handles updating settings for the current Meta widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget::form().
@@ -97,6 +96,7 @@ class WP_Widget_Meta extends WP_Widget {
 	 * Outputs the settings form for the Meta widget.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 */
