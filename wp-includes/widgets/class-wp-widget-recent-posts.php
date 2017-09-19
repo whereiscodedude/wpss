@@ -20,6 +20,7 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 	 * Sets up a new Recent Posts widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function __construct() {
 		$widget_ops = array(
@@ -35,6 +36,7 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 	 * Outputs the content for the current Recent Posts widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -56,7 +58,7 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 		$show_date = isset( $instance['show_date'] ) ? $instance['show_date'] : false;
 
 		/**
-		 * Filters the arguments for the Recent Posts widget.
+		 * Filter the arguments for the Recent Posts widget.
 		 *
 		 * @since 3.4.0
 		 *
@@ -80,7 +82,7 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 		<ul>
 		<?php while ( $r->have_posts() ) : $r->the_post(); ?>
 			<li>
-				<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : _e( '(no title)' ); ?></a>
+				<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
 			<?php if ( $show_date ) : ?>
 				<span class="post-date"><?php echo get_the_date(); ?></span>
 			<?php endif; ?>
@@ -99,6 +101,7 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 	 * Handles updating the settings for the current Recent Posts widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget::form().
@@ -117,6 +120,7 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 	 * Outputs the settings form for the Recent Posts widget.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 */

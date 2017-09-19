@@ -20,6 +20,7 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 	 * Sets up a new Recent Comments widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function __construct() {
 		$widget_ops = array(
@@ -39,10 +40,11 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 	 * Outputs the default styles for the Recent Comments widget.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function recent_comments_style() {
 		/**
-		 * Filters the Recent Comments default widget styles.
+		 * Filter the Recent Comments default widget styles.
 		 *
 		 * @since 3.1.0
 		 *
@@ -61,6 +63,7 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 	 * Outputs the content for the current Recent Comments widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -82,7 +85,7 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 			$number = 5;
 
 		/**
-		 * Filters the arguments for the Recent Comments widget.
+		 * Filter the arguments for the Recent Comments widget.
 		 *
 		 * @since 3.4.0
 		 *
@@ -127,6 +130,7 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 	 * Handles updating settings for the current Recent Comments widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget::form().
@@ -144,6 +148,7 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 	 * Outputs the settings form for the Recent Comments widget.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 */
@@ -163,10 +168,11 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 	 * Flushes the Recent Comments widget cache.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @deprecated 4.4.0 Fragment caching was removed in favor of split queries.
 	 */
 	public function flush_widget_cache() {
-		_deprecated_function( __METHOD__, '4.4.0' );
+		_deprecated_function( __METHOD__, '4.4' );
 	}
 }

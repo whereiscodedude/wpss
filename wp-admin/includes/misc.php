@@ -17,10 +17,10 @@ function got_mod_rewrite() {
 	$got_rewrite = apache_mod_loaded('mod_rewrite', true);
 
 	/**
-	 * Filters whether Apache and mod_rewrite are present.
+	 * Filter whether Apache and mod_rewrite are present.
 	 *
 	 * This filter was previously used to force URL rewriting for other servers,
-	 * like nginx. Use the {@see 'got_url_rewrite'} filter in got_url_rewrite() instead.
+	 * like nginx. Use the got_url_rewrite filter in got_url_rewrite() instead.
 	 *
 	 * @since 2.5.0
 	 *
@@ -46,7 +46,7 @@ function got_url_rewrite() {
 	$got_url_rewrite = ( got_mod_rewrite() || $GLOBALS['is_nginx'] || iis7_supports_permalinks() );
 
 	/**
-	 * Filters whether URL rewriting is available.
+	 * Filter whether URL rewriting is available.
 	 *
 	 * @since 3.7.0
 	 *
@@ -133,7 +133,7 @@ function insert_with_markers( $filename, $marker, $insertion ) {
 		$lines[] = rtrim( fgets( $fp ), "\r\n" );
 	}
 
-	// Split out the existing file into the preceding lines, and those that appear after the marker
+	// Split out the existing file into the preceeding lines, and those that appear after the marker
 	$pre_lines = $post_lines = $existing_lines = array();
 	$found_marker = $found_end_marker = false;
 	foreach ( $lines as $line ) {
@@ -369,7 +369,7 @@ function wp_doc_link_parse( $content ) {
 	sort( $functions );
 
 	/**
-	 * Filters the list of functions and classes to be ignored from the documentation lookup.
+	 * Filter the list of functions and classes to be ignored from the documentation lookup.
 	 *
 	 * @since 2.8.0
 	 *
@@ -438,7 +438,7 @@ function set_screen_options() {
 			default:
 
 				/**
-				 * Filters a screen option value before it is set.
+				 * Filter a screen option value before it is set.
 				 *
 				 * The filter can also be used to modify non-standard [items]_per_page
 				 * settings. See the parent function for a full list of standard options.
@@ -881,7 +881,7 @@ function heartbeat_autosave( $response, $data ) {
 		} elseif ( empty( $saved ) ) {
 			$response['wp_autosave'] = array( 'success' => false, 'message' => __( 'Error while saving.' ) );
 		} else {
-			/* translators: draft saved date format, see https://secure.php.net/date */
+			/* translators: draft saved date format, see http://php.net/date */
 			$draft_saved_date_format = __( 'g:i:s a' );
 			/* translators: %s: date and time */
 			$response['wp_autosave'] = array( 'success' => true, 'message' => sprintf( __( 'Draft saved at %s.' ), date_i18n( $draft_saved_date_format ) ) );
@@ -889,6 +889,24 @@ function heartbeat_autosave( $response, $data ) {
 	}
 
 	return $response;
+}
+
+/**
+ * Disables autocomplete on the 'post' form (Add/Edit Post screens) for WebKit browsers,
+ * as they disregard the autocomplete setting on the editor textarea. That can break the editor
+ * when the user navigates to it with the browser's Back button. See #28037
+ *
+ * @since 4.0.0
+ *
+ * @global bool $is_safari
+ * @global bool $is_chrome
+ */
+function post_form_autocomplete_off() {
+	global $is_safari, $is_chrome;
+
+	if ( $is_safari || $is_chrome ) {
+		echo ' autocomplete="off"';
+	}
 }
 
 /**
@@ -917,102 +935,4 @@ function wp_admin_canonical_url() {
 		}
 	</script>
 <?php
-}
-
-/**
- * Outputs JS that reloads the page if the user navigated to it with the Back or Forward button.
- *
- * Used on the Edit Post and Add New Post screens. Needed to ensure the page is not loaded from browser cache,
- * so the post title and editor content are the last saved versions. Ideally this script should run first in the head.
- *
- * @since 4.6.0
- */
-function wp_page_reload_on_back_button_js() {
-	?>
-	<script>
-		if ( typeof performance !== 'undefined' && performance.navigation && performance.navigation.type === 2 ) {
-			document.location.reload( true );
-		}
-	</script>
-	<?php
-}
-
-/**
- * Send a confirmation request email when a change of site admin email address is attempted.
- *
- * The new site admin address will not become active until confirmed.
- *
- * @since 3.0.0
- * @since 4.9.0 This function was moved from wp-admin/includes/ms.php so it's no longer Multisite specific.
- *
- * @param string $old_value The old site admin email address.
- * @param string $value     The proposed new site admin email address.
- */
-function update_option_new_admin_email( $old_value, $value ) {
-	if ( $value == get_option( 'admin_email' ) || ! is_email( $value ) ) {
-		return;
-	}
-
-	$hash = md5( $value . time() . mt_rand() );
-	$new_admin_email = array(
-		'hash'     => $hash,
-		'newemail' => $value,
-	);
-	update_option( 'adminhash', $new_admin_email );
-
-	$switched_locale = switch_to_locale( get_user_locale() );
-
-	/* translators: Do not translate USERNAME, ADMIN_URL, EMAIL, SITENAME, SITEURL: those are placeholders. */
-	$email_text = __( 'Howdy ###USERNAME###,
-
-You recently requested to have the administration email address on
-your site changed.
-
-If this is correct, please click on the following link to change it:
-###ADMIN_URL###
-
-You can safely ignore and delete this email if you do not want to
-take this action.
-
-This email has been sent to ###EMAIL###
-
-Regards,
-All at ###SITENAME###
-###SITEURL###' );
-
-	/**
-	 * Filters the text of the email sent when a change of site admin email address is attempted.
-	 *
-	 * The following strings have a special meaning and will get replaced dynamically:
-	 * ###USERNAME###  The current user's username.
-	 * ###ADMIN_URL### The link to click on to confirm the email change.
-	 * ###EMAIL###     The proposed new site admin email address.
-	 * ###SITENAME###  The name of the site.
-	 * ###SITEURL###   The URL to the site.
-	 *
-	 * @since MU (3.0.0)
-	 * @since 4.9.0 This filter is no longer Multisite specific.
-	 *
-	 * @param string $email_text      Text in the email.
-	 * @param array  $new_admin_email {
-	 *     Data relating to the new site admin email address.
-	 *
-	 *     @type string $hash     The secure hash used in the confirmation link URL.
-	 *     @type string $newemail The proposed new site admin email address.
-	 * }
-	 */
-	$content = apply_filters( 'new_admin_email_content', $email_text, $new_admin_email );
-
-	$current_user = wp_get_current_user();
-	$content = str_replace( '###USERNAME###', $current_user->user_login, $content );
-	$content = str_replace( '###ADMIN_URL###', esc_url( self_admin_url( 'options.php?adminhash=' . $hash ) ), $content );
-	$content = str_replace( '###EMAIL###', $value, $content );
-	$content = str_replace( '###SITENAME###', wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ), $content );
-	$content = str_replace( '###SITEURL###', home_url(), $content );
-
-	wp_mail( $value, sprintf( __( '[%s] New Admin Email Address' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ), $content );
-
-	if ( $switched_locale ) {
-		restore_previous_locale();
-	}
 }

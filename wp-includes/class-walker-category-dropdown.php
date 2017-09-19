@@ -20,6 +20,7 @@ class Walker_CategoryDropdown extends Walker {
 	 * What the class handles.
 	 *
 	 * @since 2.1.0
+	 * @access private
 	 * @var string
 	 *
 	 * @see Walker::$tree_type
@@ -30,6 +31,7 @@ class Walker_CategoryDropdown extends Walker {
 	 * Database fields to use.
 	 *
 	 * @since 2.1.0
+	 * @access public
 	 * @todo Decouple this
 	 * @var array
 	 *
@@ -41,6 +43,7 @@ class Walker_CategoryDropdown extends Walker {
 	 * Starts the element output.
 	 *
 	 * @since 2.1.0
+	 * @access public
 	 *
 	 * @see Walker::start_el()
 	 *

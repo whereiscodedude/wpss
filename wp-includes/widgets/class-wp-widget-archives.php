@@ -20,6 +20,7 @@ class WP_Widget_Archives extends WP_Widget {
 	 * Sets up a new Archives widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 */
 	public function __construct() {
 		$widget_ops = array(
@@ -34,6 +35,7 @@ class WP_Widget_Archives extends WP_Widget {
 	 * Outputs the content for the current Archives widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -58,7 +60,7 @@ class WP_Widget_Archives extends WP_Widget {
 		<select id="<?php echo esc_attr( $dropdown_id ); ?>" name="archive-dropdown" onchange='document.location.href=this.options[this.selectedIndex].value;'>
 			<?php
 			/**
-			 * Filters the arguments for the Archives widget drop-down.
+			 * Filter the arguments for the Archives widget drop-down.
 			 *
 			 * @since 2.8.0
 			 *
@@ -99,7 +101,7 @@ class WP_Widget_Archives extends WP_Widget {
 		<ul>
 		<?php
 		/**
-		 * Filters the arguments for the Archives widget.
+		 * Filter the arguments for the Archives widget.
 		 *
 		 * @since 2.8.0
 		 *
@@ -123,6 +125,7 @@ class WP_Widget_Archives extends WP_Widget {
 	 * Handles updating settings for the current Archives widget instance.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget_Archives::form().
@@ -143,6 +146,7 @@ class WP_Widget_Archives extends WP_Widget {
 	 * Outputs the settings form for the Archives widget.
 	 *
 	 * @since 2.8.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
 	 */

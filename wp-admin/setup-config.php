@@ -5,6 +5,8 @@
  * The permissions for the base directory must allow for writing files in order
  * for the wp-config.php to be created using this page.
  *
+ * @internal This file must be parsable by PHP4.
+ *
  * @package WordPress
  * @subpackage Administration
  */
@@ -26,16 +28,14 @@ define('WP_SETUP_CONFIG', true);
  */
 error_reporting(0);
 
-if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', dirname( dirname( __FILE__ ) ) . '/' );
-}
+define( 'ABSPATH', dirname( dirname( __FILE__ ) ) . '/' );
 
 require( ABSPATH . 'wp-settings.php' );
 
 /** Load WordPress Administration Upgrade API */
 require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
-/** Load WordPress Translation Installation API */
+/** Load WordPress Translation Install API */
 require_once( ABSPATH . 'wp-admin/includes/translation-install.php' );
 
 nocache_headers();
@@ -57,7 +57,7 @@ if ( file_exists( ABSPATH . 'wp-config.php' ) )
 		) . '</p>'
 	);
 
-// Check if wp-config.php exists above the root directory but is not part of another installation
+// Check if wp-config.php exists above the root directory but is not part of another install
 if ( @file_exists( ABSPATH . '../wp-config.php' ) && ! @file_exists( ABSPATH . '../wp-settings.php' ) ) {
 	wp_die( '<p>' . sprintf(
 			/* translators: %s: install.php */
@@ -99,13 +99,13 @@ function setup_config_display_header( $body_classes = array() ) {
 	<?php wp_admin_css( 'install', true ); ?>
 </head>
 <body class="<?php echo implode( ' ', $body_classes ); ?>">
-<p id="logo"><a href="<?php echo esc_url( __( 'https://wordpress.org/' ) ); ?>" tabindex="-1"><?php _e( 'WordPress' ); ?></a></p>
+<p id="logo"><a href="<?php esc_attr_e( 'https://wordpress.org/' ); ?>" tabindex="-1"><?php _e( 'WordPress' ); ?></a></p>
 <?php
 } // end function setup_config_display_header();
 
 $language = '';
 if ( ! empty( $_REQUEST['language'] ) ) {
-	$language = preg_replace( '/[^a-zA-Z0-9_]/', '', $_REQUEST['language'] );
+	$language = preg_replace( '/[^a-zA-Z_]/', '', $_REQUEST['language'] );
 } elseif ( isset( $GLOBALS['wp_local_package'] ) ) {
 	$language = $GLOBALS['wp_local_package'];
 }
@@ -276,12 +276,6 @@ switch($step) {
 	if ( ! empty( $wpdb->error ) )
 		wp_die( $wpdb->error->get_error_message() . $tryagain_link );
 
-	$wpdb->query( "SELECT $prefix" );
-	if ( ! $wpdb->last_error ) {
-		// MySQL was able to parse the prefix as a value, which we don't want. Bail.
-		wp_die( __( '<strong>ERROR</strong>: "Table Prefix" is invalid.' ) );
-	}
-
 	// Generate keys and salts using secure CSPRNG; fallback to API if enabled; further fallback to original wp_generate_password().
 	try {
 		$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_ []{}<>~`+=,.;:/?|';
@@ -314,6 +308,7 @@ switch($step) {
 	}
 
 	$key = 0;
+	// Not a PHP5-style by-reference foreach, as this file must be parseable by PHP4.
 	foreach ( $config_file as $line_num => $line ) {
 		if ( '$table_prefix  =' == substr( $line, 0, 16 ) ) {
 			$config_file[ $line_num ] = '$table_prefix  = \'' . addcslashes( $prefix, "\\'" ) . "';\r\n";
@@ -368,8 +363,8 @@ switch($step) {
 			echo htmlentities($line, ENT_COMPAT, 'UTF-8');
 		}
 ?></textarea>
-<p><?php _e( 'After you&#8217;ve done that, click &#8220;Run the installation.&#8221;' ); ?></p>
-<p class="step"><a href="<?php echo $install; ?>" class="button button-large"><?php _e( 'Run the installation' ); ?></a></p>
+<p><?php _e( 'After you&#8217;ve done that, click &#8220;Run the install.&#8221;' ); ?></p>
+<p class="step"><a href="<?php echo $install; ?>" class="button button-large"><?php _e( 'Run the install' ); ?></a></p>
 <script>
 (function(){
 if ( ! /iPad|iPod|iPhone/.test( navigator.userAgent ) ) {
@@ -401,7 +396,7 @@ if ( ! /iPad|iPod|iPhone/.test( navigator.userAgent ) ) {
 <h1 class="screen-reader-text"><?php _e( 'Successful database connection' ) ?></h1>
 <p><?php _e( 'All right, sparky! You&#8217;ve made it through this part of the installation. WordPress can now communicate with your database. If you are ready, time now to&hellip;' ); ?></p>
 
-<p class="step"><a href="<?php echo $install; ?>" class="button button-large"><?php _e( 'Run the installation' ); ?></a></p>
+<p class="step"><a href="<?php echo $install; ?>" class="button button-large"><?php _e( 'Run the install' ); ?></a></p>
 <?php
 	endif;
 	break;

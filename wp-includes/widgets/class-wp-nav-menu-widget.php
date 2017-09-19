@@ -14,12 +14,13 @@
  *
  * @see WP_Widget
  */
-class WP_Nav_Menu_Widget extends WP_Widget {
+ class WP_Nav_Menu_Widget extends WP_Widget {
 
 	/**
 	 * Sets up a new Custom Menu widget instance.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 */
 	public function __construct() {
 		$widget_ops = array(
@@ -33,6 +34,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 	 * Outputs the content for the current Custom Menu widget instance.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
@@ -59,7 +61,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 		);
 
 		/**
-		 * Filters the arguments for the Custom Menu widget.
+		 * Filter the arguments for the Custom Menu widget.
 		 *
 		 * @since 4.2.0
 		 * @since 4.4.0 Added the `$instance` parameter.
@@ -70,7 +72,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 		 *     @type callable|bool $fallback_cb Callback to fire if the menu doesn't exist. Default empty.
 		 *     @type mixed         $menu        Menu ID, slug, or name.
 		 * }
-		 * @param WP_Term  $nav_menu      Nav menu object for the current menu.
+		 * @param stdClass $nav_menu      Nav menu object for the current menu.
 		 * @param array    $args          Display arguments for the current widget.
 		 * @param array    $instance      Array of settings for the current widget.
 		 */
@@ -83,6 +85,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 	 * Handles updating settings for the current Custom Menu widget instance.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 *
 	 * @param array $new_instance New settings for this instance as input by the user via
 	 *                            WP_Widget::form().
@@ -104,12 +107,11 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 	 * Outputs the settings form for the Custom Menu widget.
 	 *
 	 * @since 3.0.0
+	 * @access public
 	 *
 	 * @param array $instance Current settings.
-	 * @global WP_Customize_Manager $wp_customize
 	 */
 	public function form( $instance ) {
-		global $wp_customize;
 		$title = isset( $instance['title'] ) ? $instance['title'] : '';
 		$nav_menu = isset( $instance['nav_menu'] ) ? $instance['nav_menu'] : '';
 
@@ -120,7 +122,7 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 		?>
 		<p class="nav-menu-widget-no-menus-message" <?php if ( ! empty( $menus ) ) { echo ' style="display:none" '; } ?>>
 			<?php
-			if ( $wp_customize instanceof WP_Customize_Manager ) {
+			if ( isset( $GLOBALS['wp_customize'] ) && $GLOBALS['wp_customize'] instanceof WP_Customize_Manager ) {
 				$url = 'javascript: wp.customize.panel( "nav_menus" ).focus();';
 			} else {
 				$url = admin_url( 'nav-menus.php' );
@@ -144,11 +146,6 @@ class WP_Nav_Menu_Widget extends WP_Widget {
 					<?php endforeach; ?>
 				</select>
 			</p>
-			<?php if ( $wp_customize instanceof WP_Customize_Manager ) : ?>
-				<p class="edit-selected-nav-menu" style="<?php if ( ! $nav_menu ) { echo 'display: none;'; } ?>">
-					<button type="button" class="button"><?php _e( 'Edit Menu' ) ?></button>
-				</p>
-			<?php endif; ?>
 		</div>
 		<?php
 	}

@@ -213,7 +213,7 @@ function twentysixteen_categorized_blog() {
 		set_transient( 'twentysixteen_categories', $all_the_cool_cats );
 	}
 
-	if ( $all_the_cool_cats > 1 || is_preview() ) {
+	if ( $all_the_cool_cats > 1 ) {
 		// This blog has more than 1 category so twentysixteen_categorized_blog should return true.
 		return true;
 	} else {

@@ -13,8 +13,8 @@
  * @since 4.2.0
  */
 class WP_Press_This {
+
 	// Used to trigger the bookmarklet update notice.
-	const VERSION = 8;
 	public $version = 8;
 
 	private $images = array();
@@ -27,6 +27,7 @@ class WP_Press_This {
 	 * Constructor.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function __construct() {}
 
@@ -34,13 +35,14 @@ class WP_Press_This {
 	 * App and site settings data, including i18n strings for the client-side.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @return array Site settings.
 	 */
 	public function site_settings() {
 		return array(
 			/**
-			 * Filters whether or not Press This should redirect the user in the parent window upon save.
+			 * Filter whether or not Press This should redirect the user in the parent window upon save.
 			 *
 			 * @since 4.2.0
 			 *
@@ -54,6 +56,7 @@ class WP_Press_This {
 	 * Get the source's images and save them locally, for posterity, unless we can't.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param int    $post_id Post ID.
 	 * @param string $content Optional. Current expected markup for Press This. Expects slashed. Default empty.
@@ -93,9 +96,10 @@ class WP_Press_This {
 	}
 
 	/**
-	 * Ajax handler for saving the post as draft or published.
+	 * AJAX handler for saving the post as draft or published.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function save_post() {
 		if ( empty( $_POST['post_ID'] ) || ! $post_id = (int) $_POST['post_ID'] ) {
@@ -148,9 +152,8 @@ class WP_Press_This {
 		$post_data['post_content'] = $this->side_load_images( $post_id, $post_data['post_content'] );
 
 		/**
-		 * Filters the post data of a Press This post before saving/updating.
-		 *
-		 * The {@see 'side_load_images'} action has already run at this point.
+		 * Filter the post data of a Press This post before saving/updating, after
+		 * side_load_images action had run.
 		 *
 		 * @since 4.5.0
 		 *
@@ -183,7 +186,7 @@ class WP_Press_This {
 			}
 
 			/**
-			 * Filters the URL to redirect to when Press This saves.
+			 * Filter the URL to redirect to when Press This saves.
 			 *
 			 * @since 4.2.0
 			 *
@@ -203,9 +206,10 @@ class WP_Press_This {
 	}
 
 	/**
-	 * Ajax handler for adding a new category.
+	 * AJAX handler for adding a new category.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function add_category() {
 		if ( false === wp_verify_nonce( $_POST['new_cat_nonce'], 'add-category' ) ) {
@@ -274,11 +278,14 @@ class WP_Press_This {
 	 * Downloads the source's HTML via server-side call for the given URL.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $url URL to scan.
 	 * @return string Source's HTML sanitized markup
 	 */
 	public function fetch_source_html( $url ) {
+		global $wp_version;
+
 		if ( empty( $url ) ) {
 			return new WP_Error( 'invalid-url', __( 'A valid URL was not provided.' ) );
 		}
@@ -286,7 +293,7 @@ class WP_Press_This {
 		$remote_url = wp_safe_remote_get( $url, array(
 			'timeout' => 30,
 			// Use an explicit user-agent for Press This
-			'user-agent' => 'Press This (WordPress/' . get_bloginfo( 'version' ) . '); ' . get_bloginfo( 'url' )
+			'user-agent' => 'Press This (WordPress/' . $wp_version . '); ' . get_bloginfo( 'url' )
 		) );
 
 		if ( is_wp_error( $remote_url ) ) {
@@ -459,7 +466,7 @@ class WP_Press_This {
 	 * Limit embed source URLs to specific providers.
 	 *
 	 * Not all core oEmbed providers are supported. Supported providers include YouTube, Vimeo,
-	 * Daily Motion, SoundCloud, and Twitter.
+	 * Vine, Daily Motion, SoundCloud, and Twitter.
 	 *
 	 * @ignore
 	 * @since 4.2.0
@@ -482,10 +489,14 @@ class WP_Press_This {
 		} else if ( preg_match( '!//vimeo\.com/moogaloop\.swf\?clip_id=([\d]+)$!i', $src, $src_matches ) ) {
 			// Embedded Vimeo Flash videos
 			$src = 'https://vimeo.com/' . (int) $src_matches[1];
+		} else if ( preg_match( '!//vine\.co/v/([^/]+)/embed!i', $src, $src_matches ) ) {
+			// Embedded Vine videos
+			$src = 'https://vine.co/v/' . $src_matches[1];
 		} else if ( preg_match( '!//(www\.)?dailymotion\.com/embed/video/([^/?]+)([/?].+)?!i', $src, $src_matches ) ) {
 			// Embedded Daily Motion videos
 			$src = 'https://www.dailymotion.com/video/' . $src_matches[2];
 		} else {
+			require_once( ABSPATH . WPINC . '/class-oembed.php' );
 			$oembed = _wp_oembed_get_object();
 
 			if ( ! $oembed->get_provider( $src, array( 'discover' => false ) ) ) {
@@ -553,6 +564,7 @@ class WP_Press_This {
 	 * Fetches and parses _meta, _images, and _links data from the source.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $url  URL to scan.
 	 * @param array  $data Optional. Existing data array if you have one. Default empty array.
@@ -662,6 +674,7 @@ class WP_Press_This {
 	 * Handles backward-compat with the legacy version of Press This by supporting its query string params.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @return array
 	 */
@@ -695,7 +708,7 @@ class WP_Press_This {
 		}
 
 		/**
-		 * Filters whether to enable in-source media discovery in Press This.
+		 * Filter whether to enable in-source media discovery in Press This.
 		 *
 		 * @since 4.2.0
 		 *
@@ -774,7 +787,7 @@ class WP_Press_This {
 		}
 
 		/**
-		 * Filters the Press This data array.
+		 * Filter the Press This data array.
 		 *
 		 * @since 4.2.0
 		 *
@@ -787,6 +800,7 @@ class WP_Press_This {
 	 * Adds another stylesheet inside TinyMCE.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $styles URL to editor stylesheet.
 	 * @return string Possibly modified stylesheets list.
@@ -801,13 +815,43 @@ class WP_Press_This {
 			$press_this = str_replace( '.css', '-rtl.css', $press_this );
 		}
 
-		return $styles . $press_this;
+		$open_sans_font_url = '';
+
+		/* translators: If there are characters in your language that are not supported
+		 * by Open Sans, translate this to 'off'. Do not translate into your own language.
+		 */
+		if ( 'off' !== _x( 'on', 'Open Sans font: on or off' ) ) {
+			$subsets = 'latin,latin-ext';
+
+			/* translators: To add an additional Open Sans character subset specific to your language,
+			 * translate this to 'greek', 'cyrillic' or 'vietnamese'. Do not translate into your own language.
+			 */
+			$subset = _x( 'no-subset', 'Open Sans font: add new subset (greek, cyrillic, vietnamese)' );
+
+			if ( 'cyrillic' == $subset ) {
+				$subsets .= ',cyrillic,cyrillic-ext';
+			} elseif ( 'greek' == $subset ) {
+				$subsets .= ',greek,greek-ext';
+			} elseif ( 'vietnamese' == $subset ) {
+				$subsets .= ',vietnamese';
+			}
+
+			$query_args = array(
+				'family' => urlencode( 'Open Sans:400italic,700italic,400,600,700' ),
+				'subset' => urlencode( $subsets ),
+			);
+
+			$open_sans_font_url = ',' . add_query_arg( $query_args, 'https://fonts.googleapis.com/css' );
+		}
+
+		return $styles . $press_this . $open_sans_font_url;
 	}
 
 	/**
 	 * Outputs the post format selection HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -855,6 +899,7 @@ class WP_Press_This {
 	 * Outputs the categories HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -912,6 +957,7 @@ class WP_Press_This {
 	 * Outputs the tags HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -953,7 +999,7 @@ class WP_Press_This {
 
 		if ( $user_can_assign_terms ) {
 			?>
-			<button type="button" class="button-link tagcloud-link" id="link-post_tag" aria-expanded="false"><?php echo $taxonomy->labels->choose_from_most_used; ?></button>
+			<button type="button" class="button-link tagcloud-link" id="link-post_tag"><?php echo $taxonomy->labels->choose_from_most_used; ?></button>
 			<?php
 		}
 	}
@@ -962,6 +1008,7 @@ class WP_Press_This {
 	 * Get a list of embeds with no duplicates.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return array Embeds selected to be available.
@@ -994,6 +1041,7 @@ class WP_Press_This {
 	 * Get a list of images with no duplicates.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return array
@@ -1027,6 +1075,7 @@ class WP_Press_This {
 	 * Gets the source page's canonical link, based on passed location and meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
  	 * @param array $data The site's data.
 	 * @return string Discovered canonical URL, or empty
@@ -1057,6 +1106,7 @@ class WP_Press_This {
 	 * Gets the source page's site name, based on passed meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return string Discovered site name, or empty
@@ -1079,6 +1129,7 @@ class WP_Press_This {
 	 * Gets the source page's title, based on passed title and meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return string Discovered page title, or empty
@@ -1107,6 +1158,7 @@ class WP_Press_This {
 	 * Features a blockquoted excerpt, as well as content attribution, if any.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
 	 * @return string Discovered content, or empty
@@ -1147,7 +1199,7 @@ class WP_Press_This {
 		}
 
 		/**
-		 * Filters the default HTML tags used in the suggested content for the editor.
+		 * Filter the default HTML tags used in the suggested content for the editor.
 		 *
 		 * The HTML strings use printf format. After filtering the content is added at the specified places with `sprintf()`.
 		 *
@@ -1191,14 +1243,14 @@ class WP_Press_This {
 	 * Serves the app's base HTML, which in turns calls the load script.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @global WP_Locale $wp_locale
+	 * @global string    $wp_version
 	 * @global bool      $is_IE
 	 */
 	public function html() {
-		global $wp_locale;
-
-		$wp_version = get_bloginfo( 'version' );
+		global $wp_locale, $wp_version;
 
 		// Get data, new (POST) and old (GET).
 		$data = $this->merge_or_fetch_data();
@@ -1324,7 +1376,7 @@ class WP_Press_This {
 	$admin_body_class .= ' branch-' . str_replace( array( '.', ',' ), '-', floatval( $wp_version ) );
 	$admin_body_class .= ' version-' . str_replace( '.', '-', preg_replace( '/^([.0-9]+).*/', '$1', $wp_version ) );
 	$admin_body_class .= ' admin-color-' . sanitize_html_class( get_user_option( 'admin_color' ), 'fresh' );
-	$admin_body_class .= ' locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_user_locale() ) ) );
+	$admin_body_class .= ' locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_locale() ) ) );
 
 	/** This filter is documented in wp-admin/admin-header.php */
 	$admin_body_classes = apply_filters( 'admin_body_class', '' );
@@ -1428,7 +1480,7 @@ class WP_Press_This {
 			<div class="post-options">
 
 				<?php if ( $supports_formats ) : ?>
-					<button type="button" class="post-option">
+					<button type="button" class="button-link post-option">
 						<span class="dashicons dashicons-admin-post"></span>
 						<span class="post-option-title"><?php _ex( 'Format', 'post format' ); ?></span>
 						<span class="post-option-contents" id="post-option-post-format"><?php echo esc_html( get_post_format_string( $post_format ) ); ?></span>
@@ -1437,7 +1489,7 @@ class WP_Press_This {
 				<?php endif; ?>
 
 				<?php if ( $show_categories ) : ?>
-					<button type="button" class="post-option">
+					<button type="button" class="button-link post-option">
 						<span class="dashicons dashicons-category"></span>
 						<span class="post-option-title"><?php _e( 'Categories' ); ?></span>
 						<span class="dashicons post-option-forward"></span>
@@ -1445,7 +1497,7 @@ class WP_Press_This {
 				<?php endif; ?>
 
 				<?php if ( $show_tags ) : ?>
-					<button type="button" class="post-option">
+					<button type="button" class="button-link post-option">
 						<span class="dashicons dashicons-tag"></span>
 						<span class="post-option-title"><?php _e( 'Tags' ); ?></span>
 						<span class="dashicons post-option-forward"></span>
@@ -1455,7 +1507,7 @@ class WP_Press_This {
 
 			<?php if ( $supports_formats ) : ?>
 				<div class="setting-modal is-off-screen is-hidden">
-					<button type="button" class="modal-close">
+					<button type="button" class="button-link modal-close">
 						<span class="dashicons post-option-back"></span>
 						<span class="setting-title" aria-hidden="true"><?php _ex( 'Format', 'post format' ); ?></span>
 						<span class="screen-reader-text"><?php _e( 'Back to post options' ) ?></span>
@@ -1466,7 +1518,7 @@ class WP_Press_This {
 
 			<?php if ( $show_categories ) : ?>
 				<div class="setting-modal is-off-screen is-hidden">
-					<button type="button" class="modal-close">
+					<button type="button" class="button-link modal-close">
 						<span class="dashicons post-option-back"></span>
 						<span class="setting-title" aria-hidden="true"><?php _e( 'Categories' ); ?></span>
 						<span class="screen-reader-text"><?php _e( 'Back to post options' ) ?></span>
@@ -1477,7 +1529,7 @@ class WP_Press_This {
 
 			<?php if ( $show_tags ) : ?>
 				<div class="setting-modal tags is-off-screen is-hidden">
-					<button type="button" class="modal-close">
+					<button type="button" class="button-link modal-close">
 						<span class="dashicons post-option-back"></span>
 						<span class="setting-title" aria-hidden="true"><?php _e( 'Tags' ); ?></span>
 						<span class="screen-reader-text"><?php _e( 'Back to post options' ) ?></span>
@@ -1490,7 +1542,7 @@ class WP_Press_This {
 
 	<div class="press-this-actions">
 		<div class="pressthis-media-buttons">
-			<button type="button" class="insert-media" data-editor="pressthis">
+			<button type="button" class="insert-media button-link" data-editor="pressthis">
 				<span class="dashicons dashicons-admin-media"></span>
 				<span class="screen-reader-text"><?php _e( 'Add Media' ); ?></span>
 			</button>
@@ -1519,10 +1571,7 @@ class WP_Press_This {
 
 	<?php
 	/** This action is documented in wp-admin/admin-footer.php */
-	do_action( 'admin_footer', '' );
-
-	/** This action is documented in wp-admin/admin-footer.php */
-	do_action( 'admin_print_footer_scripts-press-this.php' );
+	do_action( 'admin_footer' );
 
 	/** This action is documented in wp-admin/admin-footer.php */
 	do_action( 'admin_print_footer_scripts' );
@@ -1536,3 +1585,9 @@ class WP_Press_This {
 		die();
 	}
 }
+
+/**
+ *
+ * @global WP_Press_This $wp_press_this
+ */
+$GLOBALS['wp_press_this'] = new WP_Press_This;
