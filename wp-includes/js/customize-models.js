@@ -1,7 +1,6 @@
-/* global _wpCustomizeHeader */
+/* globals _wpCustomizeHeader, _ */
 (function( $, wp ) {
 	var api = wp.customize;
-	/** @namespace wp.customize.HeaderTool */
 	api.HeaderTool = {};
 
 
@@ -14,13 +13,10 @@
 	 * These calls are made regardless of whether the user actually saves new
 	 * Customizer settings.
 	 *
-	 * @memberOf wp.customize.HeaderTool
-	 * @alias wp.customize.HeaderTool.ImageModel
-	 *
 	 * @constructor
 	 * @augments Backbone.Model
 	 */
-	api.HeaderTool.ImageModel = Backbone.Model.extend(/** @lends wp.customize.HeaderTool.ImageModel.prototype */{
+	api.HeaderTool.ImageModel = Backbone.Model.extend({
 		defaults: function() {
 			return {
 				header: {
@@ -129,9 +125,6 @@
 	/**
 	 * wp.customize.HeaderTool.ChoiceList
 	 *
-	 * @memberOf wp.customize.HeaderTool
-	 * @alias wp.customize.HeaderTool.ChoiceList
-	 *
 	 * @constructor
 	 * @augments Backbone.Collection
 	 */
@@ -238,9 +231,6 @@
 
 	/**
 	 * wp.customize.HeaderTool.DefaultsList
-	 *
-	 * @memberOf wp.customize.HeaderTool
-	 * @alias wp.customize.HeaderTool.DefaultsList
 	 *
 	 * @constructor
 	 * @augments wp.customize.HeaderTool.ChoiceList
