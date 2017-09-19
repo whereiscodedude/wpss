@@ -13,8 +13,8 @@
  * @since 4.2.0
  */
 class WP_Press_This {
+
 	// Used to trigger the bookmarklet update notice.
-	const VERSION = 8;
 	public $version = 8;
 
 	private $images = array();
@@ -27,6 +27,7 @@ class WP_Press_This {
 	 * Constructor.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function __construct() {}
 
@@ -34,17 +35,18 @@ class WP_Press_This {
 	 * App and site settings data, including i18n strings for the client-side.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @return array Site settings.
 	 */
 	public function site_settings() {
 		return array(
 			/**
-			 * Filters whether or not Press This should redirect the user in the parent window upon save.
+			 * Filter whether or not Press This should redirect the user in the parent window upon save.
 			 *
 			 * @since 4.2.0
 			 *
-			 * @param bool $redirect Whether to redirect in parent window or not. Default false.
+			 * @param bool false Whether to redirect in parent window or not. Default false.
 			 */
 			'redirInParent' => apply_filters( 'press_this_redirect_in_parent', false ),
 		);
@@ -54,6 +56,7 @@ class WP_Press_This {
 	 * Get the source's images and save them locally, for posterity, unless we can't.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param int    $post_id Post ID.
 	 * @param string $content Optional. Current expected markup for Press This. Expects slashed. Default empty.
@@ -88,14 +91,15 @@ class WP_Press_This {
 			}
 		}
 
-		// Expected slashed
+		// Edxpected slashed
 		return wp_slash( $content );
 	}
 
 	/**
-	 * Ajax handler for saving the post as draft or published.
+	 * AJAX handler for saving the post as draft or published.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function save_post() {
 		if ( empty( $_POST['post_ID'] ) || ! $post_id = (int) $_POST['post_ID'] ) {
@@ -108,7 +112,7 @@ class WP_Press_This {
 			wp_send_json_error( array( 'errorMessage' => __( 'Invalid post.' ) ) );
 		}
 
-		$post_data = array(
+		$post = array(
 			'ID'            => $post_id,
 			'post_title'    => ( ! empty( $_POST['post_title'] ) ) ? sanitize_text_field( trim( $_POST['post_title'] ) ) : '',
 			'post_content'  => ( ! empty( $_POST['post_content'] ) ) ? trim( $_POST['post_content'] ) : '',
@@ -139,51 +143,35 @@ class WP_Press_This {
 		// Toggle status to pending if user cannot actually publish
 		if ( ! empty( $_POST['post_status'] ) && 'publish' === $_POST['post_status'] ) {
 			if ( current_user_can( 'publish_posts' ) ) {
-				$post_data['post_status'] = 'publish';
+				$post['post_status'] = 'publish';
 			} else {
-				$post_data['post_status'] = 'pending';
+				$post['post_status'] = 'pending';
 			}
 		}
 
-		$post_data['post_content'] = $this->side_load_images( $post_id, $post_data['post_content'] );
+		$post['post_content'] = $this->side_load_images( $post_id, $post['post_content'] );
 
-		/**
-		 * Filters the post data of a Press This post before saving/updating.
-		 *
-		 * The {@see 'side_load_images'} action has already run at this point.
-		 *
-		 * @since 4.5.0
-		 *
-		 * @param array $post_data The post data.
-		 */
-		$post_data = apply_filters( 'press_this_save_post', $post_data );
-
-		$updated = wp_update_post( $post_data, true );
+		$updated = wp_update_post( $post, true );
 
 		if ( is_wp_error( $updated ) ) {
 			wp_send_json_error( array( 'errorMessage' => $updated->get_error_message() ) );
 		} else {
-			if ( isset( $post_data['post_format'] ) ) {
-				if ( current_theme_supports( 'post-formats', $post_data['post_format'] ) ) {
-					set_post_format( $post_id, $post_data['post_format'] );
-				} elseif ( $post_data['post_format'] ) {
+			if ( isset( $post['post_format'] ) ) {
+				if ( current_theme_supports( 'post-formats', $post['post_format'] ) ) {
+					set_post_format( $post_id, $post['post_format'] );
+				} elseif ( $post['post_format'] ) {
 					set_post_format( $post_id, false );
 				}
 			}
 
-			$forceRedirect = false;
-
 			if ( 'publish' === get_post_status( $post_id ) ) {
 				$redirect = get_post_permalink( $post_id );
-			} elseif ( isset( $_POST['pt-force-redirect'] ) && $_POST['pt-force-redirect'] === 'true' ) {
-				$forceRedirect = true;
-				$redirect = get_edit_post_link( $post_id, 'js' );
 			} else {
 				$redirect = false;
 			}
 
 			/**
-			 * Filters the URL to redirect to when Press This saves.
+			 * Filter the URL to redirect to when Press This saves.
 			 *
 			 * @since 4.2.0
 			 *
@@ -192,10 +180,10 @@ class WP_Press_This {
 			 * @param int    $post_id Post ID.
 			 * @param string $status  Post status.
 			 */
-			$redirect = apply_filters( 'press_this_save_redirect', $redirect, $post_id, $post_data['post_status'] );
+			$redirect = apply_filters( 'press_this_save_redirect', $redirect, $post_id, $post['post_status'] );
 
 			if ( $redirect ) {
-				wp_send_json_success( array( 'redirect' => $redirect, 'force' => $forceRedirect ) );
+				wp_send_json_success( array( 'redirect' => $redirect ) );
 			} else {
 				wp_send_json_success( array( 'postSaved' => true ) );
 			}
@@ -203,9 +191,10 @@ class WP_Press_This {
 	}
 
 	/**
-	 * Ajax handler for adding a new category.
+	 * AJAX handler for adding a new category.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 */
 	public function add_category() {
 		if ( false === wp_verify_nonce( $_POST['new_cat_nonce'], 'add-category' ) ) {
@@ -230,16 +219,10 @@ class WP_Press_This {
 				continue;
 			}
 
-			// @todo Find a more performant way to check existence, maybe get_term() with a separate parent check.
-			if ( term_exists( $cat_name, $taxonomy->name, $parent ) ) {
-				if ( count( $names ) === 1 ) {
-					wp_send_json_error( array( 'errorMessage' => __( 'This category already exists.' ) ) );
-				} else {
-					continue;
-				}
+			// @todo Find a more performant to check existence, maybe get_term() with a separate parent check.
+			if ( ! $cat_id = term_exists( $cat_name, $taxonomy->name, $parent ) ) {
+				$cat_id = wp_insert_term( $cat_name, $taxonomy->name, array( 'parent' => $parent ) );
 			}
-
-			$cat_id = wp_insert_term( $cat_name, $taxonomy->name, array( 'parent' => $parent ) );
 
 			if ( is_wp_error( $cat_id ) ) {
 				continue;
@@ -274,48 +257,51 @@ class WP_Press_This {
 	 * Downloads the source's HTML via server-side call for the given URL.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $url URL to scan.
 	 * @return string Source's HTML sanitized markup
 	 */
 	public function fetch_source_html( $url ) {
-		if ( empty( $url ) ) {
-			return new WP_Error( 'invalid-url', __( 'A valid URL was not provided.' ) );
+		// Download source page to tmp file.
+		$source_tmp_file = ( ! empty( $url ) ) ? download_url( $url, 30 ) : '';
+		$source_content  = '';
+
+		if ( ! is_wp_error( $source_tmp_file ) && file_exists( $source_tmp_file ) ) {
+
+			// Get the content of the source page from the tmp file..
+			$source_content = wp_kses(
+				@file_get_contents( $source_tmp_file ),
+				array(
+					'img' => array(
+						'src'      => array(),
+						'width'    => array(),
+						'height'   => array(),
+					),
+					'iframe' => array(
+						'src'      => array(),
+					),
+					'link' => array(
+						'rel'      => array(),
+						'itemprop' => array(),
+						'href'     => array(),
+					),
+					'meta' => array(
+						'property' => array(),
+						'name'     => array(),
+						'content'  => array(),
+					)
+				)
+			);
+
+			// All done with backward compatibility. Let's do some cleanup, for good measure :)
+			unlink( $source_tmp_file );
+
+		} else if ( is_wp_error( $source_tmp_file ) ) {
+			$source_content = new WP_Error( 'upload-error',  sprintf( __( 'Error: %s' ), sprintf( __( 'Could not download the source URL (native error: %s).' ), $source_tmp_file->get_error_message() ) ) );
+		} else if ( ! file_exists( $source_tmp_file ) ) {
+			$source_content = new WP_Error( 'no-local-file',  sprintf( __( 'Error: %s' ), __( 'Could not save or locate the temporary download file for the source URL.' ) ) );
 		}
-
-		$remote_url = wp_safe_remote_get( $url, array(
-			'timeout' => 30,
-			// Use an explicit user-agent for Press This
-			'user-agent' => 'Press This (WordPress/' . get_bloginfo( 'version' ) . '); ' . get_bloginfo( 'url' )
-		) );
-
-		if ( is_wp_error( $remote_url ) ) {
-			return $remote_url;
-		}
-
-		$allowed_elements = array(
-			'img' => array(
-				'src'      => true,
-				'width'    => true,
-				'height'   => true,
-			),
-			'iframe' => array(
-				'src'      => true,
-			),
-			'link' => array(
-				'rel'      => true,
-				'itemprop' => true,
-				'href'     => true,
-			),
-			'meta' => array(
-				'property' => true,
-				'name'     => true,
-				'content'  => true,
-			)
-		);
-
-		$source_content = wp_remote_retrieve_body( $remote_url );
-		$source_content = wp_kses( $source_content, $allowed_elements );
 
 		return $source_content;
 	}
@@ -390,7 +376,7 @@ class WP_Press_This {
 			return ''; // Return empty rather than a truncated/invalid URL
 		}
 
-		// Does not look like a URL.
+		// Does not look like an URL.
 		if ( ! preg_match( '/^([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+$/', $url ) ) {
 			return '';
 		}
@@ -411,8 +397,8 @@ class WP_Press_This {
 	/**
 	 * Utility method to limit image source URLs.
 	 *
-	 * Excluded URLs include share-this type buttons, loaders, spinners, spacers, WordPress interface images,
-	 * tiny buttons or thumbs, mathtag.com or quantserve.com images, or the WordPress.com stats gif.
+	 * Excluded URLs include share-this type buttons, loaders, spinners, spacers, WP interface images,
+	 * tiny buttons or thumbs, mathtag.com or quantserve.com images, or the WP stats gif.
 	 *
 	 * @ignore
 	 * @since 4.2.0
@@ -423,32 +409,32 @@ class WP_Press_This {
 	private function _limit_img( $src ) {
 		$src = $this->_limit_url( $src );
 
-		if ( preg_match( '!/ad[sx]?/!i', $src ) ) {
+		if ( preg_match( '/\/ad[sx]{1}?\//', $src ) ) {
 			// Ads
 			return '';
-		} else if ( preg_match( '!(/share-?this[^.]+?\.[a-z0-9]{3,4})(\?.*)?$!i', $src ) ) {
+		} else if ( preg_match( '/(\/share-?this[^\.]+?\.[a-z0-9]{3,4})(\?.*)?$/', $src ) ) {
 			// Share-this type button
 			return '';
-		} else if ( preg_match( '!/(spinner|loading|spacer|blank|rss)\.(gif|jpg|png)!i', $src ) ) {
+		} else if ( preg_match( '/\/(spinner|loading|spacer|blank|rss)\.(gif|jpg|png)/', $src ) ) {
 			// Loaders, spinners, spacers
 			return '';
-		} else if ( preg_match( '!/([^./]+[-_])?(spinner|loading|spacer|blank)s?([-_][^./]+)?\.[a-z0-9]{3,4}!i', $src ) ) {
+		} else if ( preg_match( '/\/([^\.\/]+[-_]{1})?(spinner|loading|spacer|blank)s?([-_]{1}[^\.\/]+)?\.[a-z0-9]{3,4}/', $src ) ) {
 			// Fancy loaders, spinners, spacers
 			return '';
-		} else if ( preg_match( '!([^./]+[-_])?thumb[^.]*\.(gif|jpg|png)$!i', $src ) ) {
+		} else if ( preg_match( '/([^\.\/]+[-_]{1})?thumb[^.]*\.(gif|jpg|png)$/', $src ) ) {
 			// Thumbnails, too small, usually irrelevant to context
 			return '';
-		} else if ( false !== stripos( $src, '/wp-includes/' ) ) {
-			// Classic WordPress interface images
+		} else if ( preg_match( '/\/wp-includes\//', $src ) ) {
+			// Classic WP interface images
 			return '';
-		} else if ( preg_match( '![^\d]\d{1,2}x\d+\.(gif|jpg|png)$!i', $src ) ) {
+		} else if ( preg_match( '/[^\d]{1}\d{1,2}x\d+\.(gif|jpg|png)$/', $src ) ) {
 			// Most often tiny buttons/thumbs (< 100px wide)
 			return '';
-		} else if ( preg_match( '!/pixel\.(mathtag|quantserve)\.com!i', $src ) ) {
+		} else if ( preg_match( '/\/pixel\.(mathtag|quantserve)\.com/', $src ) ) {
 			// See mathtag.com and https://www.quantcast.com/how-we-do-it/iab-standard-measurement/how-we-collect-data/
 			return '';
-		} else if ( preg_match( '!/[gb]\.gif(\?.+)?$!i', $src ) ) {
-			// WordPress.com stats gif
+		} else if ( preg_match( '/\/[gb]\.gif(\?.+)?$/', $src ) ) {
+			// Classic WP stats gif
 			return '';
 		}
 
@@ -459,7 +445,7 @@ class WP_Press_This {
 	 * Limit embed source URLs to specific providers.
 	 *
 	 * Not all core oEmbed providers are supported. Supported providers include YouTube, Vimeo,
-	 * Daily Motion, SoundCloud, and Twitter.
+	 * Vine, Daily Motion, SoundCloud, and Twitter.
 	 *
 	 * @ignore
 	 * @since 4.2.0
@@ -470,27 +456,29 @@ class WP_Press_This {
 	private function _limit_embed( $src ) {
 		$src = $this->_limit_url( $src );
 
-		if ( empty( $src ) )
-			return '';
-
-		if ( preg_match( '!//(m|www)\.youtube\.com/(embed|v)/([^?]+)\?.+$!i', $src, $src_matches ) ) {
+		if ( preg_match( '/\/\/(m|www)\.youtube\.com\/(embed|v)\/([^\?]+)\?.+$/', $src, $src_matches ) ) {
 			// Embedded Youtube videos (www or mobile)
 			$src = 'https://www.youtube.com/watch?v=' . $src_matches[3];
-		} else if ( preg_match( '!//player\.vimeo\.com/video/([\d]+)([?/].*)?$!i', $src, $src_matches ) ) {
+		} else if ( preg_match( '/\/\/player\.vimeo\.com\/video\/([\d]+)([\?\/]{1}.*)?$/', $src, $src_matches ) ) {
 			// Embedded Vimeo iframe videos
 			$src = 'https://vimeo.com/' . (int) $src_matches[1];
-		} else if ( preg_match( '!//vimeo\.com/moogaloop\.swf\?clip_id=([\d]+)$!i', $src, $src_matches ) ) {
+		} else if ( preg_match( '/\/\/vimeo\.com\/moogaloop\.swf\?clip_id=([\d]+)$/', $src, $src_matches ) ) {
 			// Embedded Vimeo Flash videos
 			$src = 'https://vimeo.com/' . (int) $src_matches[1];
-		} else if ( preg_match( '!//(www\.)?dailymotion\.com/embed/video/([^/?]+)([/?].+)?!i', $src, $src_matches ) ) {
+		} else if ( preg_match( '/\/\/vine\.co\/v\/([^\/]+)\/embed/', $src, $src_matches ) ) {
+			// Embedded Vine videos
+			$src = 'https://vine.co/v/' . $src_matches[1];
+		} else if ( preg_match( '/\/\/(www\.)?dailymotion\.com\/embed\/video\/([^\/\?]+)([\/\?]{1}.+)?/', $src, $src_matches ) ) {
 			// Embedded Daily Motion videos
 			$src = 'https://www.dailymotion.com/video/' . $src_matches[2];
-		} else {
-			$oembed = _wp_oembed_get_object();
-
-			if ( ! $oembed->get_provider( $src, array( 'discover' => false ) ) ) {
-				$src = '';
-			}
+		} else if ( ! preg_match( '/\/\/(m|www)\.youtube\.com\/watch\?/', $src )          // Youtube video page (www or mobile)
+		            && ! preg_match( '/\/youtu\.be\/.+$/', $src )                         // Youtu.be video page
+		            && ! preg_match( '/\/\/vimeo\.com\/[\d]+$/', $src )                   // Vimeo video page
+		            && ! preg_match( '/\/\/(www\.)?dailymotion\.com\/video\/.+$/', $src ) // Daily Motion video page
+		            && ! preg_match( '/\/\/soundcloud\.com\/.+$/', $src )                 // SoundCloud audio page
+		            && ! preg_match( '/\/\/twitter\.com\/[^\/]+\/status\/[\d]+$/', $src ) // Twitter status page
+		            && ! preg_match( '/\/\/vine\.co\/v\/[^\/]+/', $src ) ) {              // Vine video page
+			$src = '';
 		}
 
 		return $src;
@@ -553,6 +541,7 @@ class WP_Press_This {
 	 * Fetches and parses _meta, _images, and _links data from the source.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $url  URL to scan.
 	 * @param array  $data Optional. Existing data array if you have one. Default empty array.
@@ -662,6 +651,7 @@ class WP_Press_This {
 	 * Handles backward-compat with the legacy version of Press This by supporting its query string params.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @return array
 	 */
@@ -695,7 +685,7 @@ class WP_Press_This {
 		}
 
 		/**
-		 * Filters whether to enable in-source media discovery in Press This.
+		 * Filter whether to enable in-source media discovery in Press This.
 		 *
 		 * @since 4.2.0
 		 *
@@ -762,19 +752,10 @@ class WP_Press_This {
 					}
 				}
 			}
-
-			// Support passing a single image src as `i`
-			if ( ! empty( $_REQUEST['i'] ) && ( $img_src = $this->_limit_img( wp_unslash( $_REQUEST['i'] ) ) ) ) {
-				if ( empty( $data['_images'] ) ) {
-					$data['_images'] = array( $img_src );
-				} elseif ( ! in_array( $img_src, $data['_images'], true ) ) {
-					array_unshift( $data['_images'], $img_src );
-				}
-			}
 		}
 
 		/**
-		 * Filters the Press This data array.
+		 * Filter the Press This data array.
 		 *
 		 * @since 4.2.0
 		 *
@@ -787,6 +768,7 @@ class WP_Press_This {
 	 * Adds another stylesheet inside TinyMCE.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param string $styles URL to editor stylesheet.
 	 * @return string Possibly modified stylesheets list.
@@ -808,6 +790,7 @@ class WP_Press_This {
 	 * Outputs the post format selection HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -829,7 +812,7 @@ class WP_Press_This {
 
 				?>
 				<div id="post-formats-select">
-				<fieldset><legend class="screen-reader-text"><?php _e( 'Post Formats' ); ?></legend>
+				<fieldset><legend class="screen-reader-text"><?php _e( 'Post formats' ); ?></legend>
 					<input type="radio" name="post_format" class="post-format" id="post-format-0" value="0" <?php checked( $post_format, '0' ); ?> />
 					<label for="post-format-0" class="post-format-icon post-format-standard"><?php echo get_post_format_string( 'standard' ); ?></label>
 					<?php
@@ -855,6 +838,7 @@ class WP_Press_This {
 	 * Outputs the categories HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -869,7 +853,7 @@ class WP_Press_This {
 		// Only show "add" if user can edit terms
 		if ( current_user_can( $taxonomy->cap->edit_terms ) ) {
 			?>
-			<button type="button" class="add-cat-toggle button-link" aria-expanded="false">
+			<button type="button" class="add-cat-toggle button-subtle" aria-expanded="false">
 				<span class="dashicons dashicons-plus"></span><span class="screen-reader-text"><?php _e( 'Toggle add category' ); ?></span>
 			</button>
 			<div class="add-category is-hidden">
@@ -912,6 +896,7 @@ class WP_Press_This {
 	 * Outputs the tags HTML.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -953,7 +938,7 @@ class WP_Press_This {
 
 		if ( $user_can_assign_terms ) {
 			?>
-			<button type="button" class="button-link tagcloud-link" id="link-post_tag" aria-expanded="false"><?php echo $taxonomy->labels->choose_from_most_used; ?></button>
+			<button type="button" class="button-reset button-link tagcloud-link" id="link-post_tag"><?php echo $taxonomy->labels->choose_from_most_used; ?></button>
 			<?php
 		}
 	}
@@ -962,20 +947,16 @@ class WP_Press_This {
 	 * Get a list of embeds with no duplicates.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
-	 * @return array Embeds selected to be available.
+	 * @returns array Embeds selected to be available.
 	 */
 	public function get_embeds( $data ) {
 		$selected_embeds = array();
 
-		// Make sure to add the Pressed page if it's a valid oembed itself
-		if ( ! empty ( $data['u'] ) && $this->_limit_embed( $data['u'] ) ) {
-			$data['_embeds'][] = $data['u'];
-		}
-
 		if ( ! empty( $data['_embeds'] ) ) {
-			foreach ( $data['_embeds'] as $src ) {
+			foreach( $data['_embeds'] as $src ) {
 				$prot_relative_src = preg_replace( '/^https?:/', '', $src );
 
 				if ( in_array( $prot_relative_src, $this->embeds ) ) {
@@ -994,15 +975,16 @@ class WP_Press_This {
 	 * Get a list of images with no duplicates.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
-	 * @return array
+	 * @returns array
 	 */
 	public function get_images( $data ) {
 		$selected_images = array();
 
 		if ( ! empty( $data['_images'] ) ) {
-			foreach ( $data['_images'] as $src ) {
+			foreach( $data['_images'] as $src ) {
 				if ( false !== strpos( $src, 'gravatar.com' ) ) {
 					$src = preg_replace( '%http://[\d]+\.gravatar\.com/%', 'https://secure.gravatar.com/', $src );
 				}
@@ -1027,9 +1009,10 @@ class WP_Press_This {
 	 * Gets the source page's canonical link, based on passed location and meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
  	 * @param array $data The site's data.
-	 * @return string Discovered canonical URL, or empty
+	 * @returns string Discovered canonical URL, or empty
 	 */
 	public function get_canonical_link( $data ) {
 		$link = '';
@@ -1057,9 +1040,10 @@ class WP_Press_This {
 	 * Gets the source page's site name, based on passed meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
-	 * @return string Discovered site name, or empty
+	 * @returns string Discovered site name, or empty
 	 */
 	public function get_source_site_name( $data ) {
 		$name = '';
@@ -1079,16 +1063,17 @@ class WP_Press_This {
 	 * Gets the source page's title, based on passed title and meta data.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
-	 * @return string Discovered page title, or empty
+	 * @returns string Discovered page title, or empty
 	 */
 	public function get_suggested_title( $data ) {
 		$title = '';
 
 		if ( ! empty( $data['t'] ) ) {
 			$title = $data['t'];
-		} elseif ( ! empty( $data['_meta'] ) ) {
+		} elseif( ! empty( $data['_meta'] ) ) {
 			if ( ! empty( $data['_meta']['twitter:title'] ) ) {
 				$title = $data['_meta']['twitter:title'];
 			} else if ( ! empty( $data['_meta']['og:title'] ) ) {
@@ -1107,9 +1092,10 @@ class WP_Press_This {
 	 * Features a blockquoted excerpt, as well as content attribution, if any.
 	 *
 	 * @since 4.2.0
+	 * @access public
 	 *
 	 * @param array $data The site's data.
-	 * @return string Discovered content, or empty
+	 * @returns string Discovered content, or empty
 	 */
 	public function get_suggested_content( $data ) {
 		$content = $text = '';
@@ -1133,7 +1119,10 @@ class WP_Press_This {
 
 		$default_html = array( 'quote' => '', 'link' => '', 'embed' => '' );
 
-		if ( ! empty( $data['u'] ) && $this->_limit_embed( $data['u'] ) ) {
+		require_once( ABSPATH . WPINC . '/class-oembed.php' );
+		$oembed = _wp_oembed_get_object();
+
+		if ( ! empty( $data['u'] ) && $oembed->get_provider( $data['u'], array( 'discover' => false ) ) ) {
 			$default_html['embed'] = '<p>[embed]' . $data['u'] . '[/embed]</p>';
 
 			if ( ! empty( $data['s'] ) ) {
@@ -1147,17 +1136,12 @@ class WP_Press_This {
 		}
 
 		/**
-		 * Filters the default HTML tags used in the suggested content for the editor.
-		 *
-		 * The HTML strings use printf format. After filtering the content is added at the specified places with `sprintf()`.
+		 * Filter the default HTML for the Press This editor.
 		 *
 		 * @since 4.2.0
 		 *
-		 * @param array $default_html Associative array with three possible keys:
-		 *                                - 'quote' where %1$s is replaced with the site description or the selected content.
-		 *                                - 'link' where %1$s is link href, %2$s is link text, usually the source page title.
-		 *                                - 'embed' which contains an [embed] shortcode when the source page offers embeddable content.
-		 * @param array $data         Associative array containing the data from the source page.
+		 * @param array $default_html Associative array with two keys: 'quote' where %1$s is replaced with the site description
+		 *                            or the selected content, and 'link' there %1$s is link href, %2$s is link text.
 		 */
 		$default_html = apply_filters( 'press_this_suggested_html', $default_html, $data );
 
@@ -1191,19 +1175,19 @@ class WP_Press_This {
 	 * Serves the app's base HTML, which in turns calls the load script.
 	 *
 	 * @since 4.2.0
-	 *
-	 * @global WP_Locale $wp_locale
-	 * @global bool      $is_IE
+	 * @access public
 	 */
 	public function html() {
-		global $wp_locale;
-
-		$wp_version = get_bloginfo( 'version' );
+		global $wp_locale, $wp_version;
 
 		// Get data, new (POST) and old (GET).
 		$data = $this->merge_or_fetch_data();
 
 		$post_title = $this->get_suggested_title( $data );
+
+		if ( empty( $title ) ) {
+			$title = __( 'New Post' );
+		}
 
 		$post_content = $this->get_suggested_content( $data );
 
@@ -1324,7 +1308,7 @@ class WP_Press_This {
 	$admin_body_class .= ' branch-' . str_replace( array( '.', ',' ), '-', floatval( $wp_version ) );
 	$admin_body_class .= ' version-' . str_replace( '.', '-', preg_replace( '/^([.0-9]+).*/', '$1', $wp_version ) );
 	$admin_body_class .= ' admin-color-' . sanitize_html_class( get_user_option( 'admin_color' ), 'fresh' );
-	$admin_body_class .= ' locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_user_locale() ) ) );
+	$admin_body_class .= ' locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_locale() ) ) );
 
 	/** This filter is documented in wp-admin/admin-header.php */
 	$admin_body_classes = apply_filters( 'admin_body_class', '' );
@@ -1338,7 +1322,7 @@ class WP_Press_This {
 				<span class="current-site-name"><?php bloginfo( 'name' ); ?></span>
 			</a>
 		</h1>
-		<button type="button" class="options button-link closed">
+		<button type="button" class="options button-subtle closed">
 			<span class="dashicons dashicons-tag on-closed"></span>
 			<span class="screen-reader-text on-closed"><?php _e( 'Show post options' ); ?></span>
 			<span aria-hidden="true" class="on-open"><?php _e( 'Done' ); ?></span>
@@ -1361,7 +1345,6 @@ class WP_Press_This {
 		<input type="hidden" name="post_status" id="post_status" value="draft" />
 		<input type="hidden" name="wp-preview" id="wp-preview" value="" />
 		<input type="hidden" name="post_title" id="post_title" value="" />
-		<input type="hidden" name="pt-force-redirect" id="pt-force-redirect" value="" />
 		<?php
 
 		wp_nonce_field( 'update-post_' . $post_ID, '_wpnonce', false );
@@ -1410,13 +1393,11 @@ class WP_Press_This {
 						'statusbar'             => false,
 						'autoresize_min_height' => 600,
 						'wp_autoresize_on'      => true,
-						'plugins'               => 'lists,media,paste,tabfocus,fullscreen,wordpress,wpautoresize,wpeditimage,wpgallery,wplink,wptextpattern,wpview',
+						'plugins'               => 'lists,media,paste,tabfocus,fullscreen,wordpress,wpautoresize,wpeditimage,wpgallery,wplink,wpview',
 						'toolbar1'              => 'bold,italic,bullist,numlist,blockquote,link,unlink',
 						'toolbar2'              => 'undo,redo',
 					),
-					'quicktags' => array(
-						'buttons' => 'strong,em,link,block,del,ins,img,ul,ol,li,code,more',
-					),
+					'quicktags' => false,
 				) );
 
 				?>
@@ -1428,7 +1409,7 @@ class WP_Press_This {
 			<div class="post-options">
 
 				<?php if ( $supports_formats ) : ?>
-					<button type="button" class="post-option">
+					<button type="button" class="button-reset post-option">
 						<span class="dashicons dashicons-admin-post"></span>
 						<span class="post-option-title"><?php _ex( 'Format', 'post format' ); ?></span>
 						<span class="post-option-contents" id="post-option-post-format"><?php echo esc_html( get_post_format_string( $post_format ) ); ?></span>
@@ -1437,7 +1418,7 @@ class WP_Press_This {
 				<?php endif; ?>
 
 				<?php if ( $show_categories ) : ?>
-					<button type="button" class="post-option">
+					<button type="button" class="button-reset post-option">
 						<span class="dashicons dashicons-category"></span>
 						<span class="post-option-title"><?php _e( 'Categories' ); ?></span>
 						<span class="dashicons post-option-forward"></span>
@@ -1445,7 +1426,7 @@ class WP_Press_This {
 				<?php endif; ?>
 
 				<?php if ( $show_tags ) : ?>
-					<button type="button" class="post-option">
+					<button type="button" class="button-reset post-option">
 						<span class="dashicons dashicons-tag"></span>
 						<span class="post-option-title"><?php _e( 'Tags' ); ?></span>
 						<span class="dashicons post-option-forward"></span>
@@ -1455,7 +1436,7 @@ class WP_Press_This {
 
 			<?php if ( $supports_formats ) : ?>
 				<div class="setting-modal is-off-screen is-hidden">
-					<button type="button" class="modal-close">
+					<button type="button" class="button-reset modal-close">
 						<span class="dashicons post-option-back"></span>
 						<span class="setting-title" aria-hidden="true"><?php _ex( 'Format', 'post format' ); ?></span>
 						<span class="screen-reader-text"><?php _e( 'Back to post options' ) ?></span>
@@ -1466,7 +1447,7 @@ class WP_Press_This {
 
 			<?php if ( $show_categories ) : ?>
 				<div class="setting-modal is-off-screen is-hidden">
-					<button type="button" class="modal-close">
+					<button type="button" class="button-reset modal-close">
 						<span class="dashicons post-option-back"></span>
 						<span class="setting-title" aria-hidden="true"><?php _e( 'Categories' ); ?></span>
 						<span class="screen-reader-text"><?php _e( 'Back to post options' ) ?></span>
@@ -1477,7 +1458,7 @@ class WP_Press_This {
 
 			<?php if ( $show_tags ) : ?>
 				<div class="setting-modal tags is-off-screen is-hidden">
-					<button type="button" class="modal-close">
+					<button type="button" class="button-reset modal-close">
 						<span class="dashicons post-option-back"></span>
 						<span class="setting-title" aria-hidden="true"><?php _e( 'Tags' ); ?></span>
 						<span class="screen-reader-text"><?php _e( 'Back to post options' ) ?></span>
@@ -1490,39 +1471,27 @@ class WP_Press_This {
 
 	<div class="press-this-actions">
 		<div class="pressthis-media-buttons">
-			<button type="button" class="insert-media" data-editor="pressthis">
+			<button type="button" class="insert-media button-subtle" data-editor="pressthis">
 				<span class="dashicons dashicons-admin-media"></span>
 				<span class="screen-reader-text"><?php _e( 'Add Media' ); ?></span>
 			</button>
 		</div>
 		<div class="post-actions">
 			<span class="spinner">&nbsp;</span>
-			<div class="split-button">
-				<div class="split-button-head">
-					<button type="button" class="publish-button split-button-primary" aria-live="polite">
-						<span class="publish"><?php echo ( current_user_can( 'publish_posts' ) ) ? __( 'Publish' ) : __( 'Submit for Review' ); ?></span>
-						<span class="saving-draft"><?php _e( 'Saving&hellip;' ); ?></span>
-					</button><button type="button" class="split-button-toggle" aria-haspopup="true" aria-expanded="false">
-						<i class="dashicons dashicons-arrow-down-alt2"></i>
-						<span class="screen-reader-text"><?php _e('More actions'); ?></span>
-					</button>
-				</div>
-				<ul class="split-button-body">
-					<li><button type="button" class="button-link draft-button split-button-option"><?php _e( 'Save Draft' ); ?></button></li>
-					<li><button type="button" class="button-link standard-editor-button split-button-option"><?php _e( 'Standard Editor' ); ?></button></li>
-					<li><button type="button" class="button-link preview-button split-button-option"><?php _e( 'Preview' ); ?></button></li>
-				</ul>
-			</div>
+			<button type="button" class="button-subtle draft-button" aria-live="polite">
+				<span class="save-draft"><?php _e( 'Save Draft' ); ?></span>
+				<span class="saving-draft"><?php _e( 'Saving...' ); ?></span>
+			</button>
+			<a href="<?php echo esc_url( get_edit_post_link( $post_ID ) ); ?>" class="edit-post-link" style="display: none;" target="_blank"><?php _e( 'Standard Editor' ); ?></a>
+			<button type="button" class="button-subtle preview-button"><?php _e( 'Preview' ); ?></button>
+			<button type="button" class="button-primary publish-button"><?php echo ( current_user_can( 'publish_posts' ) ) ? __( 'Publish' ) : __( 'Submit for Review' ); ?></button>
 		</div>
 	</div>
 	</form>
 
 	<?php
 	/** This action is documented in wp-admin/admin-footer.php */
-	do_action( 'admin_footer', '' );
-
-	/** This action is documented in wp-admin/admin-footer.php */
-	do_action( 'admin_print_footer_scripts-press-this.php' );
+	do_action( 'admin_footer' );
 
 	/** This action is documented in wp-admin/admin-footer.php */
 	do_action( 'admin_print_footer_scripts' );
@@ -1536,3 +1505,5 @@ class WP_Press_This {
 		die();
 	}
 }
+
+$GLOBALS['wp_press_this'] = new WP_Press_This;
