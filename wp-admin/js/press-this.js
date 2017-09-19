@@ -8,6 +8,7 @@
 			$window               = $( window ),
 			$document             = $( document ),
 			saveAlert             = false,
+			textarea              = document.createElement( 'textarea' ),
 			sidebarIsOpen         = false,
 			settings              = window.wpPressThisConfig || {},
 			data                  = window.wpPressThisData || {},
@@ -55,6 +56,38 @@
 		}
 
 		/**
+		 * Strips HTML tags
+		 *
+		 * @param string string Text to have the HTML tags striped out of.
+		 * @returns string Stripped text.
+		 */
+		function stripTags( string ) {
+			string = string || '';
+
+			return string
+				.replace( /<!--[\s\S]*?(-->|$)/g, '' )
+				.replace( /<(script|style)[^>]*>[\s\S]*?(<\/\1>|$)/ig, '' )
+				.replace( /<\/?[a-z][\s\S]*?(>|$)/ig, '' );
+		}
+
+		/**
+		 * Strip HTML tags and convert HTML entities.
+		 *
+		 * @param text string Text.
+		 * @returns string Sanitized text.
+		 */
+		function sanitizeText( text ) {
+			var _text = stripTags( text );
+
+			try {
+				textarea.innerHTML = _text;
+				_text = stripTags( textarea.value );
+			} catch ( er ) {}
+
+			return _text;
+		}
+
+		/**
 		 * Allow only HTTP or protocol relative URLs.
 		 *
 		 * @param url string The URL.
@@ -64,7 +97,7 @@
 			url = $.trim( url || '' );
 
 			if ( /^(?:https?:)?\/\//.test( url ) ) {
-				url = wp.sanitize.stripTags( url );
+				url = stripTags( url );
 				return url.replace( /["\\]+/g, '' );
 			}
 
@@ -191,7 +224,7 @@
 				$image.replaceWith( $( '<span>' ).text( $image.attr( 'alt' ) ) );
 			});
 
-			return wp.sanitize.sanitizeText( $element.text() );
+			return sanitizeText( $element.text() );
 		}
 
 		/**
@@ -290,7 +323,7 @@
 					link = src;
 				}
 
-				newContent = '<a href="' + link + '"><img class="alignnone size-full" src="' + src + '" alt="" /></a>';
+				newContent = '<a href="' + link + '"><img class="alignnone size-full" src="' + src + '" /></a>';
 			} else {
 				newContent = '[embed]' + src + '[/embed]';
 			}
@@ -740,8 +773,7 @@
 
 			// Publish, Draft and Preview buttons
 			$( '.post-actions' ).on( 'click.press-this', function( event ) {
-				var location,
-					$target = $( event.target ),
+				var $target = $( event.target ),
 					$button = $target.closest( 'button' );
 
 				if ( $button.length ) {
@@ -750,15 +782,6 @@
 						submitPost( 'draft' );
 					} else if ( $button.hasClass( 'publish-button' ) ) {
 						$button.addClass( 'is-saving' );
-
-						if ( window.history.replaceState ) {
-							location = window.location.href;
-							location += ( location.indexOf( '?' ) !== -1 ) ? '&' : '?';
-							location += 'wp-press-this-reload=true';
-
-							window.history.replaceState( null, null, location );
-						}
-
 						submitPost( 'publish' );
 					} else if ( $button.hasClass( 'preview-button' ) ) {
 						prepareFormData();

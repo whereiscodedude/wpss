@@ -15,12 +15,8 @@ class WP_Embed {
 	public $last_url = '';
 
 	/**
-	 * When a URL cannot be embedded, return false instead of returning a link
-	 * or the URL.
-	 *
-	 * Bypasses the {@see 'embed_maybe_make_link'} filter.
-	 *
-	 * @var bool
+	 * When an URL cannot be embedded, return false instead of returning a link
+	 * or the URL. Bypasses the 'embed_maybe_make_link' filter.
 	 */
 	public $return_false_on_fail = false;
 
@@ -37,9 +33,8 @@ class WP_Embed {
 		// Attempts to embed all URLs in a post
 		add_filter( 'the_content', array( $this, 'autoembed' ), 8 );
 
-		// After a post is saved, cache oEmbed items via Ajax
+		// After a post is saved, cache oEmbed items via AJAX
 		add_action( 'edit_form_advanced', array( $this, 'maybe_run_ajax_cache' ) );
-		add_action( 'edit_page_form', array( $this, 'maybe_run_ajax_cache' ) );
 	}
 
 	/**
@@ -47,7 +42,7 @@ class WP_Embed {
 	 *
 	 * Since the [embed] shortcode needs to be run earlier than other shortcodes,
 	 * this function removes all existing shortcodes, registers the [embed] shortcode,
-	 * calls do_shortcode(), and then re-registers the old shortcodes.
+	 * calls {@link do_shortcode()}, and then re-registers the old shortcodes.
 	 *
 	 * @global array $shortcode_tags
 	 *
@@ -74,7 +69,7 @@ class WP_Embed {
 
 	/**
 	 * If a post/page was saved, then output JavaScript to make
-	 * an Ajax request that will call WP_Embed::cache_oembed().
+	 * an AJAX request that will call WP_Embed::cache_oembed().
 	 */
 	public function maybe_run_ajax_cache() {
 		$post = get_post();
@@ -92,10 +87,7 @@ class WP_Embed {
 	}
 
 	/**
-	 * Registers an embed handler.
-	 *
-	 * Do not use this function directly, use wp_embed_register_handler() instead.
-	 *
+	 * Register an embed handler. Do not use this function directly, use {@link wp_embed_register_handler()} instead.
 	 * This function should probably also only be used for sites that do not support oEmbed.
 	 *
 	 * @param string $id An internal ID/name for the handler. Needs to be unique.
@@ -111,9 +103,7 @@ class WP_Embed {
 	}
 
 	/**
-	 * Unregisters a previously-registered embed handler.
-	 *
-	 * Do not use this function directly, use wp_embed_unregister_handler() instead.
+	 * Unregister a previously registered embed handler. Do not use this function directly, use {@link wp_embed_unregister_handler()} instead.
 	 *
 	 * @param string $id The handler ID that should be removed.
 	 * @param int $priority Optional. The priority of the handler to be removed (default: 10).
@@ -123,11 +113,10 @@ class WP_Embed {
 	}
 
 	/**
-	 * The do_shortcode() callback function.
+	 * The {@link do_shortcode()} callback function.
 	 *
-	 * Attempts to convert a URL into embed HTML. Starts by checking the URL against the regex of
-	 * the registered embed handlers. If none of the regex matches and it's enabled, then the URL
-	 * will be given to the WP_oEmbed class.
+	 * Attempts to convert a URL into embed HTML. Starts by checking the URL against the regex of the registered embed handlers.
+	 * If none of the regex matches and it's enabled, then the URL will be given to the {@link WP_oEmbed} class.
 	 *
 	 * @param array $attr {
 	 *     Shortcode attributes. Optional.
@@ -169,7 +158,7 @@ class WP_Embed {
 				if ( preg_match( $handler['regex'], $url, $matches ) && is_callable( $handler['callback'] ) ) {
 					if ( false !== $return = call_user_func( $handler['callback'], $matches, $attr, $url, $rawattr ) )
 						/**
-						 * Filters the returned embed handler.
+						 * Filter the returned embed handler.
 						 *
 						 * @since 2.9.0
 						 *
@@ -197,7 +186,7 @@ class WP_Embed {
 			$cachekey_time = '_oembed_time_' . $key_suffix;
 
 			/**
-			 * Filters the oEmbed TTL value (time to live).
+			 * Filter the oEmbed TTL value (time to live).
 			 *
 			 * @since 4.0.0
 			 *
@@ -224,7 +213,7 @@ class WP_Embed {
 
 				if ( ! empty( $cache ) ) {
 					/**
-					 * Filters the cached oEmbed HTML.
+					 * Filter the cached oEmbed HTML.
 					 *
 					 * @since 2.9.0
 					 *
@@ -240,16 +229,15 @@ class WP_Embed {
 			}
 
 			/**
-			 * Filters whether to inspect the given URL for discoverable link tags.
+			 * Filter whether to inspect the given URL for discoverable link tags.
 			 *
 			 * @since 2.9.0
-			 * @since 4.4.0 The default value changed to true.
 			 *
 			 * @see WP_oEmbed::discover()
 			 *
-			 * @param bool $enable Whether to enable `<link>` tag discovery. Default true.
+			 * @param bool $enable Whether to enable `<link>` tag discovery. Default false.
 			 */
-			$attr['discover'] = ( apply_filters( 'embed_oembed_discover', true ) );
+			$attr['discover'] = ( apply_filters( 'embed_oembed_discover', false ) && author_can( $post_ID, 'unfiltered_html' ) );
 
 			// Use oEmbed to get the HTML
 			$html = wp_oembed_get( $url, $attr );
@@ -283,7 +271,7 @@ class WP_Embed {
 		if ( empty($post_metas) )
 			return;
 
-		foreach ( $post_metas as $post_meta_key ) {
+		foreach( $post_metas as $post_meta_key ) {
 			if ( '_oembed_' == substr( $post_meta_key, 0, 8 ) )
 				delete_post_meta( $post_ID, $post_meta_key );
 		}
@@ -299,7 +287,7 @@ class WP_Embed {
 
 		$post_types = get_post_types( array( 'show_ui' => true ) );
 		/**
-		 * Filters the array of post types to cache oEmbed results for.
+		 * Filter the array of post types to cache oEmbed results for.
 		 *
 		 * @since 2.9.0
 		 *
@@ -322,9 +310,9 @@ class WP_Embed {
 	}
 
 	/**
-	 * Passes any unlinked URLs that are on their own line to WP_Embed::shortcode() for potential embedding.
+	 * Passes any unlinked URLs that are on their own line to {@link WP_Embed::shortcode()} for potential embedding.
 	 *
-	 * @see WP_Embed::autoembed_callback()
+	 * @uses WP_Embed::autoembed_callback()
 	 *
 	 * @param string $content The content to be searched.
 	 * @return string Potentially modified $content.
@@ -333,19 +321,15 @@ class WP_Embed {
 		// Replace line breaks from all HTML elements with placeholders.
 		$content = wp_replace_in_html_tags( $content, array( "\n" => '<!-- wp-line-break -->' ) );
 
-		if ( preg_match( '#(^|\s|>)https?://#i', $content ) ) {
-			// Find URLs on their own line.
-			$content = preg_replace_callback( '|^(\s*)(https?://[^\s<>"]+)(\s*)$|im', array( $this, 'autoembed_callback' ), $content );
-			// Find URLs in their own paragraph.
-			$content = preg_replace_callback( '|(<p(?: [^>]*)?>\s*)(https?://[^\s<>"]+)(\s*<\/p>)|i', array( $this, 'autoembed_callback' ), $content );
-		}
+		// Find URLs that are on their own line.
+		$content = preg_replace_callback( '|^(\s*)(https?://[^\s"]+)(\s*)$|im', array( $this, 'autoembed_callback' ), $content );
 
 		// Put the line breaks back.
 		return str_replace( '<!-- wp-line-break -->', "\n", $content );
 	}
 
 	/**
-	 * Callback function for WP_Embed::autoembed().
+	 * Callback function for {@link WP_Embed::autoembed()}.
 	 *
 	 * @param array $match A regex match array.
 	 * @return string The embed HTML on success, otherwise the original URL.
@@ -373,7 +357,7 @@ class WP_Embed {
 		$output = ( $this->linkifunknown ) ? '<a href="' . esc_url($url) . '">' . esc_html($url) . '</a>' : $url;
 
 		/**
-		 * Filters the returned, maybe-linked embed URL.
+		 * Filter the returned, maybe-linked embed URL.
 		 *
 		 * @since 2.9.0
 		 *
@@ -383,3 +367,4 @@ class WP_Embed {
 		return apply_filters( 'embed_maybe_make_link', $output, $url );
 	}
 }
+$GLOBALS['wp_embed'] = new WP_Embed();
