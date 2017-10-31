@@ -2540,7 +2540,7 @@ h2.widget-title {
 	padding: 0.5em 0;
 }
 
-.widget:not(.widget_tag_cloud) ul li + li {
+.widget ul li + li {
 	margin-top: -1px;
 }
 
@@ -2582,7 +2582,7 @@ h2.widget-title {
 	padding-top: 1em;
 }
 
-/* Widget markup */
+/* widget markup */
 
 .widget .post-date,
 .widget .rss-date {
@@ -2733,14 +2733,6 @@ h2.widget-title {
 
 /* Tag cloud widget */
 
-.tagcloud ul li {
-	float: left;
-	border-top: 0;
-	border-bottom: 0;
-	padding: 0;
-	margin: 4px 4px 0 0;
-}
-
 .tagcloud,
 .widget_tag_cloud,
 .wp_widget_tag_cloud {
@@ -2753,8 +2745,12 @@ h2.widget-title {
 	border: 1px solid #ddd;
 	-webkit-box-shadow: none;
 	box-shadow: none;
-	display: block;
-	padding: 4px 10px 5px;
+	display: inline-block;
+	float: left;
+	font-size: 14px !important; /* !important to overwrite inline styles */
+	font-size: 0.875rem !important;
+	margin: 4px 4px 0 0 !important;
+	padding: 4px 10px 5px !important;
 	position: relative;
 	-webkit-transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.3s ease-in-out;
 	transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.3s ease-in-out;
@@ -2784,16 +2780,6 @@ h2.widget-title {
 
 .widget_calendar tfoot td {
 	border: 0;
-}
-
-/* Gallery widget */
-
-.gallery-columns-5 .gallery-caption,
-.gallery-columns-6 .gallery-caption,
-.gallery-columns-7 .gallery-caption,
-.gallery-columns-8 .gallery-caption,
-.gallery-columns-9 .gallery-caption {
-	display: none;
 }
 
 /*--------------------------------------------------------------
@@ -2828,14 +2814,6 @@ iframe,
 object {
 	margin-bottom: 1.5em;
 	max-width: 100%;
-}
-
-/* Remove bottom on embeds that wrapped in paragraphs via wpautop. */
-
-p > embed:only-child,
-p > iframe:only-child,
-p > object:only-child {
-	margin-bottom: 0;
 }
 
 .wp-caption,
@@ -3036,10 +3014,7 @@ p > object:only-child {
 
 .gallery-item a,
 .gallery-item a:hover,
-.gallery-item a:focus,
-.widget-area .gallery-item a,
-.widget-area .gallery-item a:hover,
-.widget-area .gallery-item a:focus {
+.gallery-item a:focus {
 	-webkit-box-shadow: none;
 	box-shadow: none;
 	background: none;
@@ -3112,7 +3087,7 @@ p > object:only-child {
 }
 
 /* Add some space around the visual edit shortcut buttons. */
-.twentyseventeen-panel > .customize-partial-edit-shortcut > button {
+.twentyseventeen-panel .customize-partial-edit-shortcut button {
 	top: 30px;
 	left: 30px;
 }

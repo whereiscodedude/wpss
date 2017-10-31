@@ -1922,6 +1922,7 @@ section.ephemera .entry-title a span {
 }
 
 /* Calendar Widget */
+
 .widget_calendar #wp-calendar {
 	color: #555;
 	width: 95%;
@@ -1951,6 +1952,7 @@ section.ephemera .entry-title a span {
 }
 
 /* Text Widget */
+
 .widget_text ul,
 .widget_text ol {
 	margin: 0 0 1.625em 2.5em;
@@ -1960,29 +1962,6 @@ section.ephemera .entry-title a span {
 .widget_text ul ol,
 .widget_text ol ul {
 	margin-bottom: 0;
-}
-
-/* Tag Cloud Widget */
-.tagcloud ul {
-	list-style-type: none;
-}
-
-.tagcloud ul li {
-	display: inline-block;
-}
-
-/* Helps galleries in widget areas look presentable in most cases. */
-#page .widget-area .gallery-columns-2 img,
-#page .widget-area .gallery-columns-3 img,
-#page .widget-area .gallery-columns-4 img,
-#page .widget-area .gallery-columns-5 img,
-#page .widget-area .gallery-columns-6 img,
-#page .widget-area .gallery-columns-7 img,
-#page .widget-area .gallery-columns-8 img,
-#page .widget-area .gallery-columns-9 img {
-	border: none;
-	max-width: 90%;
-	width: auto;
 }
 
 /* =Comments
