@@ -34,6 +34,7 @@ function get_query_var( $var, $default = '' ) {
  * Wrapper for WP_Query::get_queried_object().
  *
  * @since 3.1.0
+ * @access public
  *
  * @global WP_Query $wp_query Global WP_Query instance.
  *
@@ -596,8 +597,7 @@ function is_single( $post = '' ) {
 }
 
 /**
- * Is the query for an existing single post of any post type (post, attachment, page,
- * custom post types)?
+ * Is the query for an existing single post of any post type (post, attachment, page, ... )?
  *
  * If the $post_types parameter is specified, this function will additionally
  * check if the query is for one of the Posts Types specified.
