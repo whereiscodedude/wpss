@@ -11,14 +11,14 @@
  * functions.php file. The child theme's functions.php file is included before
  * the parent theme's file, so the child theme functions would be used.
  *
- * @link https://codex.wordpress.org/Theme_Development
- * @link https://codex.wordpress.org/Child_Themes
+ * @link http://codex.wordpress.org/Theme_Development
+ * @link http://codex.wordpress.org/Child_Themes
  *
  * Functions that are not pluggable (not wrapped in function_exists()) are
  * instead attached to a filter or action hook.
  *
  * For more information on hooks, actions, and filters,
- * @link https://codex.wordpress.org/Plugin_API
+ * @link http://codex.wordpress.org/Plugin_API
  *
  * @package WordPress
  * @subpackage Twenty_Fourteen
@@ -60,12 +60,12 @@ function twentyfourteen_setup() {
 	/*
 	 * Make Twenty Fourteen available for translation.
 	 *
-	 * Translations can be filed at WordPress.org. See: https://translate.wordpress.org/projects/wp-themes/twentyfourteen
+	 * Translations can be added to the /languages/ directory.
 	 * If you're building a theme based on Twenty Fourteen, use a find and
 	 * replace to change 'twentyfourteen' to the name of your theme in all
 	 * template files.
 	 */
-	load_theme_textdomain( 'twentyfourteen' );
+	load_theme_textdomain( 'twentyfourteen', get_template_directory() . '/languages' );
 
 	// This theme styles the visual editor to resemble the theme style.
 	add_editor_style( array( 'css/editor-style.css', twentyfourteen_font_url(), 'genericons/genericons.css' ) );
@@ -94,7 +94,7 @@ function twentyfourteen_setup() {
 
 	/*
 	 * Enable support for Post Formats.
-	 * See https://codex.wordpress.org/Post_Formats
+	 * See http://codex.wordpress.org/Post_Formats
 	 */
 	add_theme_support( 'post-formats', array(
 		'aside', 'image', 'video', 'audio', 'quote', 'link', 'gallery',
@@ -113,9 +113,6 @@ function twentyfourteen_setup() {
 
 	// This theme uses its own gallery styles.
 	add_filter( 'use_default_gallery_style', '__return_false' );
-
-	// Indicate widget sidebars can use selective refresh in the Customizer.
-	add_theme_support( 'customize-selective-refresh-widgets' );
 }
 endif; // twentyfourteen_setup
 add_action( 'after_setup_theme', 'twentyfourteen_setup' );
@@ -218,7 +215,7 @@ function twentyfourteen_font_url() {
 			'family' => urlencode( 'Lato:300,400,700,900,300italic,400italic,700italic' ),
 			'subset' => urlencode( 'latin,latin-ext' ),
 		);
-		$font_url = add_query_arg( $query_args, 'https://fonts.googleapis.com/css' );
+		$font_url = add_query_arg( $query_args, '//fonts.googleapis.com/css' );
 	}
 
 	return $font_url;
@@ -263,7 +260,7 @@ function twentyfourteen_scripts() {
 		) );
 	}
 
-	wp_enqueue_script( 'twentyfourteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20150315', true );
+	wp_enqueue_script( 'twentyfourteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20140616', true );
 }
 add_action( 'wp_enqueue_scripts', 'twentyfourteen_scripts' );
 
@@ -276,31 +273,6 @@ function twentyfourteen_admin_fonts() {
 	wp_enqueue_style( 'twentyfourteen-lato', twentyfourteen_font_url(), array(), null );
 }
 add_action( 'admin_print_scripts-appearance_page_custom-header', 'twentyfourteen_admin_fonts' );
-
-/**
- * Add preconnect for Google Fonts.
- *
- * @since Twenty Fourteen 1.9
- *
- * @param array   $urls          URLs to print for resource hints.
- * @param string  $relation_type The relation type the URLs are printed.
- * @return array URLs to print for resource hints.
- */
-function twentyfourteen_resource_hints( $urls, $relation_type ) {
-	if ( wp_style_is( 'twentyfourteen-lato', 'queue' ) && 'preconnect' === $relation_type ) {
-		if ( version_compare( $GLOBALS['wp_version'], '4.7-alpha', '>=' ) ) {
-			$urls[] = array(
-				'href' => 'https://fonts.gstatic.com',
-				'crossorigin',
-			);
-		} else {
-			$urls[] = 'https://fonts.gstatic.com';
-		}
-	}
-
-	return $urls;
-}
-add_filter( 'wp_resource_hints', 'twentyfourteen_resource_hints', 10, 2 );
 
 if ( ! function_exists( 'twentyfourteen_the_attached_image' ) ) :
 /**
@@ -344,9 +316,9 @@ function twentyfourteen_the_attached_image() {
 
 	// If there is more than 1 attachment in a gallery...
 	if ( count( $attachment_ids ) > 1 ) {
-		foreach ( $attachment_ids as $idx => $attachment_id ) {
+		foreach ( $attachment_ids as $attachment_id ) {
 			if ( $attachment_id == $post->ID ) {
-				$next_id = $attachment_ids[ ( $idx + 1 ) % count( $attachment_ids ) ];
+				$next_id = current( $attachment_ids );
 				break;
 			}
 		}
@@ -358,7 +330,7 @@ function twentyfourteen_the_attached_image() {
 
 		// or get the URL of the first image attachment.
 		else {
-			$next_attachment_url = get_attachment_link( reset( $attachment_ids ) );
+			$next_attachment_url = get_attachment_link( array_shift( $attachment_ids ) );
 		}
 	}
 
@@ -527,27 +499,6 @@ function twentyfourteen_wp_title( $title, $sep ) {
 }
 add_filter( 'wp_title', 'twentyfourteen_wp_title', 10, 2 );
 
-
-/**
- * Modifies tag cloud widget arguments to display all tags in the same font size
- * and use list format for better accessibility.
- *
- * @since Twenty Fourteen 2.1
- *
- * @param array $args Arguments for tag cloud widget.
- * @return array The filtered arguments for tag cloud widget.
- */
-function twentyfourteen_widget_tag_cloud_args( $args ) {
-	$args['largest']  = 22;
-	$args['smallest'] = 8;
-	$args['unit']     = 'pt';
-	$args['format']   = 'list';
-
-	return $args;
-}
-add_filter( 'widget_tag_cloud_args', 'twentyfourteen_widget_tag_cloud_args' );
-
-
 // Implement Custom Header features.
 require get_template_directory() . '/inc/custom-header.php';
 
@@ -566,17 +517,3 @@ require get_template_directory() . '/inc/customizer.php';
 if ( ! class_exists( 'Featured_Content' ) && 'plugins.php' !== $GLOBALS['pagenow'] ) {
 	require get_template_directory() . '/inc/featured-content.php';
 }
-
-/**
- * Add an `is_customize_preview` function if it is missing.
- *
- * Enables installing Twenty Fourteen in WordPress versions before 4.0.0 when the
- * `is_customize_preview` function was introduced.
- */
-if ( ! function_exists( 'is_customize_preview' ) ) :
-function is_customize_preview() {
-	global $wp_customize;
-
-	return ( $wp_customize instanceof WP_Customize_Manager ) && $wp_customize->is_preview();
-}
-endif;
