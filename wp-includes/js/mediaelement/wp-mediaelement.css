@@ -1,6 +1,5 @@
 .mejs-container {
 	clear: both;
-	max-width: 100%;
 }
 
 .mejs-container * {
@@ -14,22 +13,13 @@
 	background: #222;
 }
 
-.mejs-time {
-	font-weight: normal;
-	word-wrap: normal;
-}
-
-.mejs-controls a.mejs-horizontal-volume-slider {
-	display: table;
-}
-
 .mejs-controls .mejs-time-rail .mejs-time-loaded,
 .mejs-controls .mejs-horizontal-volume-slider .mejs-horizontal-volume-current {
 	background: #fff;
 }
 
 .mejs-controls .mejs-time-rail .mejs-time-current {
-	background: #0073aa;
+	background: #0074a2;
 }
 
 .mejs-controls .mejs-time-rail .mejs-time-total,
@@ -87,18 +77,14 @@
 }
 
 .media-embed-details .setting p,
-.media-embed-details .setting .remove-setting {
+.media-embed-details .setting a {
 	color: #a00;
 	font-size: 10px;
 	text-transform: uppercase;
 }
 
-.media-embed-details .setting .remove-setting {
-	padding: 0;
-}
-
 .media-embed-details .setting a:hover {
-	color: #dc3232;
+	color: #f00;
 }
 
 .media-embed-details .embed-media-settings .checkbox-setting {
@@ -109,11 +95,6 @@
 .wp-video {
 	max-width: 100%;
 	height: auto;
-}
-
-.wp_attachment_holder .wp-video,
-.wp_attachment_holder .wp-audio-shortcode {
-	margin-top: 18px;
 }
 
 video.wp-video-shortcode,
@@ -152,7 +133,7 @@ video.wp-video-shortcode,
 
 .wp-playlist .mejs-container {
 	margin: 0;
-	max-width: 100%;
+	width: 100%;
 }
 
 .wp-playlist .mejs-controls .mejs-button button {
@@ -237,12 +218,12 @@ video.wp-video-shortcode,
 	border-bottom: 0;
 }
 
-.wp-playlist-light .wp-playlist-caption {
+.wp-playlist-light .wp-playlist-item {
 	color: #333;
 }
 
-.wp-playlist-dark .wp-playlist-caption {
-	color: #ddd;
+.wp-playlist-dark .wp-playlist-item {
+	color: #dedede;
 }
 
 .wp-playlist-playing {
