@@ -71,19 +71,22 @@ unset($menu_page, $compat);
 $_wp_submenu_nopriv = array();
 $_wp_menu_nopriv = array();
 // Loop over submenus and remove pages for which the user does not have privs.
-foreach ($submenu as $parent => $sub) {
-	foreach ($sub as $index => $data) {
-		if ( ! current_user_can($data[1]) ) {
-			unset($submenu[$parent][$index]);
-			$_wp_submenu_nopriv[$parent][$data[2]] = true;
+foreach ( array( 'submenu' ) as $sub_loop ) {
+	foreach ($$sub_loop as $parent => $sub) {
+		foreach ($sub as $index => $data) {
+			if ( ! current_user_can($data[1]) ) {
+				unset(${$sub_loop}[$parent][$index]);
+				$_wp_submenu_nopriv[$parent][$data[2]] = true;
+			}
 		}
-	}
-	unset($index, $data);
+		unset($index, $data);
 
-	if ( empty($submenu[$parent]) )
-		unset($submenu[$parent]);
+		if ( empty(${$sub_loop}[$parent]) )
+			unset(${$sub_loop}[$parent]);
+	}
+	unset($sub, $parent);
 }
-unset($sub, $parent);
+unset($sub_loop);
 
 /*
  * Loop over the top-level menu.
@@ -94,13 +97,11 @@ foreach ( $menu as $id => $data ) {
 	if ( empty($submenu[$data[2]]) )
 		continue;
 	$subs = $submenu[$data[2]];
-	$first_sub = reset( $subs );
+	$first_sub = array_shift($subs);
 	$old_parent = $data[2];
 	$new_parent = $first_sub[2];
-	/*
-	 * If the first submenu is not the same as the assigned parent,
-	 * make the first submenu the new parent.
-	 */
+	// If the first submenu is not the same as the assigned parent,
+	// make the first submenu the new parent.
 	if ( $new_parent != $old_parent ) {
 		$_wp_real_parent_file[$old_parent] = $new_parent;
 		$menu[$id][2] = $new_parent;
@@ -163,7 +164,7 @@ foreach ( $menu as $id => $data ) {
 	 */
 	if ( ! empty( $submenu[$data[2]] ) && 1 == count ( $submenu[$data[2]] ) ) {
 		$subs = $submenu[$data[2]];
-		$first_sub = reset( $subs );
+		$first_sub = array_shift($subs);
 		if ( $data[2] == $first_sub[2] )
 			unset( $submenu[$data[2]] );
 	}
@@ -178,23 +179,29 @@ foreach ( $menu as $id => $data ) {
 }
 unset($id, $data, $subs, $first_sub);
 
-/**
- *
- * @param string $add
- * @param string $class
- * @return string
- */
+// Remove any duplicated separators
+$separator_found = false;
+foreach ( $menu as $id => $data ) {
+	if ( 0 == strcmp('wp-menu-separator', $data[4] ) ) {
+		if (false == $separator_found) {
+			$separator_found = true;
+		} else {
+			unset($menu[$id]);
+			$separator_found = false;
+		}
+	} else {
+		$separator_found = false;
+	}
+}
+unset($id, $data);
+
 function add_cssclass($add, $class) {
 	$class = empty($class) ? $add : $class .= ' ' . $add;
 	return $class;
 }
 
-/**
- *
- * @param array $menu
- * @return array
- */
 function add_menu_classes($menu) {
+
 	$first = $lastorder = false;
 	$i = 0;
 	$mc = count($menu);
@@ -229,7 +236,7 @@ function add_menu_classes($menu) {
 	}
 
 	/**
-	 * Filters administration menus array with classes added for top-level items.
+	 * Filter administration menus array with classes added for top-level items.
 	 *
 	 * @since 2.7.0
 	 *
@@ -241,9 +248,9 @@ function add_menu_classes($menu) {
 uksort($menu, "strnatcasecmp"); // make it all pretty
 
 /**
- * Filters whether to enable custom ordering of the administration menu.
+ * Filter whether to enable custom ordering of the administration menu.
  *
- * See the {@see 'menu_order'} filter for reordering menu items.
+ * See the 'menu_order' filter for reordering menu items.
  *
  * @since 2.8.0
  *
@@ -258,9 +265,9 @@ if ( apply_filters( 'custom_menu_order', false ) ) {
 	$default_menu_order = $menu_order;
 
 	/**
-	 * Filters the order of administration menu items.
+	 * Filter the order of administration menu items.
 	 *
-	 * A truthy value must first be passed to the {@see 'custom_menu_order'} filter
+	 * A truthy value must first be passed to the 'custom_menu_order' filter
 	 * for this filter to work. Use the following to enable custom menu ordering:
 	 *
 	 *     add_filter( 'custom_menu_order', '__return_true' );
@@ -273,15 +280,6 @@ if ( apply_filters( 'custom_menu_order', false ) ) {
 	$menu_order = array_flip($menu_order);
 	$default_menu_order = array_flip($default_menu_order);
 
-	/**
-	 *
-	 * @global array $menu_order
-	 * @global array $default_menu_order
-	 *
-	 * @param array $a
-	 * @param array $b
-	 * @return int
-	 */
 	function sort_menu($a, $b) {
 		global $menu_order, $default_menu_order;
 		$a = $a[2];
@@ -303,26 +301,6 @@ if ( apply_filters( 'custom_menu_order', false ) ) {
 	unset($menu_order, $default_menu_order);
 }
 
-// Prevent adjacent separators
-$prev_menu_was_separator = false;
-foreach ( $menu as $id => $data ) {
-	if ( false === stristr( $data[4], 'wp-menu-separator' ) ) {
-
-		// This item is not a separator, so falsey the toggler and do nothing
-		$prev_menu_was_separator = false;
-	} else {
-
-		// The previous item was a separator, so unset this one
-		if ( true === $prev_menu_was_separator ) {
-			unset( $menu[ $id ] );
-		}
-
-		// This item is a separator, so truthy the toggler and move on
-		$prev_menu_was_separator = true;
-	}
-}
-unset( $id, $data, $prev_menu_was_separator );
-
 // Remove the last menu item if it is a separator.
 $last_menu_key = array_keys( $menu );
 $last_menu_key = array_pop( $last_menu_key );
@@ -339,7 +317,7 @@ if ( !user_can_access_admin_page() ) {
 	 */
 	do_action( 'admin_page_access_denied' );
 
-	wp_die( __( 'Sorry, you are not allowed to access this page.' ), 403 );
+	wp_die( __('You do not have sufficient permissions to access this page.') );
 }
 
 $menu = add_menu_classes($menu);
