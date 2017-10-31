@@ -9,239 +9,216 @@
 /** WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
-if ( ! wp_is_mobile() ) {
-	wp_enqueue_style( 'wp-mediaelement' );
-	wp_enqueue_script( 'mediaelement-vimeo' );
-	wp_enqueue_script( 'wp-mediaelement' );
-	wp_localize_script( 'mediaelement', '_wpmejsSettings', array(
-		'pluginPath'        => includes_url( 'js/mediaelement/', 'relative' ),
-		'classPrefix'       => 'mejs-',
-		'stretching'        => 'responsive',
-		'pauseOtherPlayers' => '',
-	) );
+if ( current_user_can( 'customize' ) ) {
+	wp_enqueue_script( 'customize-loader' );
 }
 
-$video_url = 'https://videopress.com/embed/AHz0Ca46?hd=true';
-$lang_code = str_replace( '_', '-', get_user_locale() );
-list( $lang_code ) = explode( '-', $lang_code );
-if ( 'en' !== $lang_code ) {
-	$video_url = add_query_arg( 'defaultLangCode', $lang_code, $video_url );
+$video_url = 'https://videopress.com/embed/scFdjVo6?hd=true';
+$locale    = str_replace( '_', '-', get_locale() );
+list( $locale ) = explode( '-', $locale );
+if ( 'en' !== $locale ) {
+	$video_url = add_query_arg( 'defaultLangCode', $locale, $video_url );
 }
 
 $title = __( 'About' );
 
-list( $display_version ) = explode( '-', get_bloginfo( 'version' ) );
+list( $display_version ) = explode( '-', $wp_version );
 
 include( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
 	<div class="wrap about-wrap">
 		<h1><?php printf( __( 'Welcome to WordPress&nbsp;%s' ), $display_version ); ?></h1>
 
-		<p class="about-text"><?php printf( __( 'Thank you for updating to the latest version! WordPress %s will smooth your design workflow and keep you safe from coding errors.' ), $display_version ); ?></p>
+		<div class="about-text"><?php printf( __( 'Thank you for updating! WordPress %s streamlines your workflow, whether you&#8217;re writing or building your site.' ), $display_version ); ?></div>
 		<div class="wp-badge"><?php printf( __( 'Version %s' ), $display_version ); ?></div>
 
 		<h2 class="nav-tab-wrapper wp-clearfix">
 			<a href="about.php" class="nav-tab nav-tab-active"><?php _e( 'What&#8217;s New' ); ?></a>
 			<a href="credits.php" class="nav-tab"><?php _e( 'Credits' ); ?></a>
 			<a href="freedoms.php" class="nav-tab"><?php _e( 'Freedoms' ); ?></a>
-			<a href="privacy.php" class="nav-tab"><?php _e( 'Privacy' ); ?></a>
 		</h2>
 
-		<div class="feature-section one-col">
+		<div class="changelog point-releases">
+			<h3><?php _e( 'Maintenance and Security Releases' ); ?></h3>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed one security issue.' ), '4.5.11' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.11' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.5.10' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.10' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.5.9' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.9' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed %2$s bug.',
+					'<strong>Version %1$s</strong> addressed %2$s bugs.', 1 ), '4.5.8', number_format_i18n( 1 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.8' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.5.7' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.7' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.5.6' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.6' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.5.5' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.5' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.5.4' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.4' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+				'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.', 17 ), '4.5.3', number_format_i18n( 17 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.3' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.5.2' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.2' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed %2$s bug.',
+				'<strong>Version %1$s</strong> addressed %2$s bugs.', 12 ), '4.5.1', number_format_i18n( 12 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.5.1' ); ?>
+			</p>
+		</div>
+
+		<div class="headline-feature feature-video" style="background-color:#191E23;">
+			<iframe width="1050" height="591" src="<?php echo esc_url( $video_url ); ?>" frameborder="0" allowfullscreen></iframe>
+			<script src="https://videopress.com/videopress-iframe.js"></script>
+		</div>
+
+		<hr>
+
+		<div class="feature-section two-col">
+			<h2><?php _e( 'Editing Improvements' ); ?></h2>
 			<div class="col">
-				<h2>
+				<img src="https://s.w.org/images/core/4.5/link-edit-560.png" alt="" srcset="https://s.w.org/images/core/4.5/link-edit-1000.png 1000w, https://s.w.org/images/core/4.5/link-edit-800.png 800w, https://s.w.org/images/core/4.5/link-edit-680.png 680w, https://s.w.org/images/core/4.5/link-edit-560.png 560w, https://s.w.org/images/core/4.5/link-edit-400.png 400w, https://s.w.org/images/core/4.5/link-edit-280.png 280w" sizes="(max-width: 500px) calc(100vw - 40px), (max-width: 781px) calc((100vw - 70px) * .466), (max-width: 959px) calc((100vw - 116px) * .469), (max-width: 1290px) calc((100vw - 240px) * .472), 496px"/>
+				<h3><?php _e( 'Inline Linking' ); ?></h3>
+				<p><?php _e( 'Stay focused on your writing with a less distracting interface that keeps you in place and allows you to easily link to your content.' ); ?></p>
+			</div>
+			<div class="col">
+				<img src="https://s.w.org/images/core/4.5/formatting-560.png" alt="" srcset="https://s.w.org/images/core/4.5/formatting-1000.png 1000w, https://s.w.org/images/core/4.5/formatting-800.png 800w, https://s.w.org/images/core/4.5/formatting-680.png 680w, https://s.w.org/images/core/4.5/formatting-560.png 560w, https://s.w.org/images/core/4.5/formatting-400.png 400w, https://s.w.org/images/core/4.5/formatting-280.png 280w" sizes="(max-width: 500px) calc(100vw - 40px), (max-width: 781px) calc((100vw - 70px) * .466), (max-width: 959px) calc((100vw - 116px) * .469), (max-width: 1290px) calc((100vw - 240px) * .472), 496px"/>
+				<h3><?php _e( 'Formatting Shortcuts' ); ?></h3>
+				<p><?php _e( 'Do you enjoy using formatting shortcuts for lists and headings? Now they&#8217;re even more useful, with horizontal lines and <code>&lt;code&gt;</code>.' ); ?></p>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="feature-section two-col">
+			<h2><?php _e( 'Customization Improvements' ); ?></h2>
+			<div class="col">
+				<img src="https://s.w.org/images/core/4.5/preview-icons-560.png" alt="" srcset="https://s.w.org/images/core/4.5/preview-icons-1000.png 1000w, https://s.w.org/images/core/4.5/preview-icons-800.png 800w, https://s.w.org/images/core/4.5/preview-icons-680.png 680w, https://s.w.org/images/core/4.5/preview-icons-560.png 560w, https://s.w.org/images/core/4.5/preview-icons-400.png 400w, https://s.w.org/images/core/4.5/preview-icons-280.png 280w" sizes="(max-width: 500px) calc(100vw - 40px), (max-width: 781px) calc((100vw - 70px) * .466), (max-width: 959px) calc((100vw - 116px) * .469), (max-width: 1290px) calc((100vw - 240px) * .472), 496px"/>
+				<h3><?php _e( 'Live Responsive Previews' ); ?></h3>
+				<p><?php _e( 'Make sure your site looks great on all screens!' ); ?>
 					<?php
+					if ( current_user_can( 'customize' ) ) {
+						$customize_url = admin_url( 'customize.php' );
 						printf(
-							/* translators: %s: party popper emoji */
-							__( 'Major Customizer Improvements, Code Error Checking, and More! %s' ),
-							'&#x1F389'
+							/* translators: %s: URL to customizer */
+							__( 'Preview mobile, tablet, and desktop views directly in the <a href="%s" class="load-customize">customizer</a>.' ),
+							esc_url( $customize_url )
 						);
-					?>
-				</h2>
-				<p><?php _e( 'Welcome to an improved Customizer workflow with design drafts, locking, scheduling, and preview links. What&#8217;s more, code syntax highlighting and error checking will make for a clean and smooth site building experience. Finally, if all that wasn&#8217;t pretty great, we&#8217;ve got a great new Gallery widget and improvements to theme browsing and switching.' ); ?></p>
-			</div>
-		</div>
-
-		<hr />
-
-		<h2>
-			<?php
-				printf(
-					/* translators: %s: wrench emoji */
-					__( 'Customizer Workflow Improved %s' ),
-					'&#x1F527'
-				);
-			?>
-		</h2>
-
-		<div class="headline-feature one-col">
-			<div class="col">
-				
-			</div>
-		</div>
-
-		<div class="feature-section two-col">
-			<div class="col">
-				<h3><?php _e( 'Draft and Schedule Site Design Customizations' ); ?></h3>
-				<p><?php _e( 'Yes, you read that right. Just like you can draft and revise posts and schedule them to go live on the date and time you choose, you can now tinker with your site&#8217;s design and schedule those design changes to go live as you please.' ); ?></p>
+					} else {
+						_e( 'Preview mobile, tablet, and desktop views directly in the customizer.' );
+					}
+				?></p>
 			</div>
 			<div class="col">
-				<h3><?php _e( 'Collaborate with Design Preview Links' ); ?></h3>
-				<p><?php _e( 'Need to get some feedback on proposed site design changes? WordPress 4.9 gives you a preview link you can send to your team and customers so that you can collect and integrate feedback before you schedule the changes to go live. Can we say collaboration&#43;&#43;?' ); ?></p>
-			</div>
-			<div class="col">
-				<h3><?php _e( 'Design Locking To Guard Your Changes' ); ?></h3>
-				<p><?php _e( 'Ever encounter a scenario where two designers walk into a project and designer A overrides designer B&#8217;s beautiful changes? WordPress 4.9&#8217;s design lock feature (similar to post locking) secures your draft design so that no one can make changes to it or erase all your hard work.' );?></p>
-			</div>
-			<div class="col">
-				<h3><?php _e( 'A Prompt to Protect Your Work' ); ?></h3>
-				<p><?php _e( 'Were you lured away from your desk before you saved your new draft design? Fear not, when you return, WordPress 4.9 will politely ask whether or not you&#8217;d like to save your unsaved changes.' ); ?></p>
-			</div>
-		</div>
-
-		<hr />
-		
-		<h2>
-			<?php
-				printf(
-					/* translators: %s: technologist (woman) emoji */
-					__( 'Coding Enhancements %s' ),
-					'&#x1F469;&#x1F3FE;&#x200D;&#x1F4BB'
-				);
-			?>
-		</h2>
-
-		<div class="feature-section three-col">
-			<div class="col">
-				<h3><?php _e( 'Syntax Highlighting and Error Checking? Yes, Please!' ); ?></h3>
-				<p><?php _e( 'You&#8217;ve got a display problem but can&#8217;t quite figure out exactly what went wrong in the CSS you lovingly wrote. With syntax highlighting and error checking for CSS editing and the Custom HTML widget introduced in WordPress 4.8.1, you&#8217;ll pinpoint coding errors quickly. Practically guaranteed to help you scan code more easily and suss out and fix code errors quickly.' ); ?></p>
-			</div>
-			<div class="col">
-				<h3><?php _e( 'Sandbox for Safety' ); ?></h3>
-				<p><?php _e( 'The dreaded white screen. You&#8217;ll avoid it when working on themes and plugin code because WordPress 4.9 will warn you about saving an error. You&#8217;ll sleep better at night.' ); ?></p>
-			</div>
-			<div class="col">
-				<h3><?php _e( 'Warning: Potential Danger Ahead!' ); ?></h3>
-				<p><?php _e( 'When you edit themes and plugins directly, WordPress 4.9 will politely warn you that this is a dangerous practice. It will recommend that you backup your files before saving, so they don&#8217;t get overwritten by the next update. Take the safe route: your future self will thank you. Your team and customers will thank you.' );?></p>
-			</div>
-		</div>
-
-		<hr />
-
-		<h2>
-			<?php
-				printf(
-					/* translators: %s: frame with picture emoji */
-					__( 'Even More Widget Updates %s' ),
-					'&#x1F5BC'
-				);
-			?>
-		</h2>
-
-		<div class="feature-section two-col">
-			<div class="col">
-				<h3><?php _e( 'The New Gallery Widget' ); ?></h3>
-				<p><?php _e( 'An incremental improvement to the media changes hatched in WordPress 4.8, you can now add a gallery via widget. Yes!' ); ?></p>
-			</div>
-			<div class="col">
-				<h3><?php _e( 'Press a Button, Add Media' ); ?></h3>
-				<p><?php _e( 'Want to add media to your text widget? Embed images, video, and audio directly into the widget along with your text, with our simple but useful Add Media button. Woo!' ); ?></p>
-			</div>
-		</div>
-
-		<hr />
-
-		<h2>
-			<?php
-				printf(
-					/* translators: %s: hammer emoji */
-					__( 'Site Building Improvements %s' ),
-					'&#x1F528'
-				);
-			?>	
-		</h2>
-
-		<div class="feature-section two-col">
-			<div class="col">
-				<h3><?php _e( 'More Reliable Theme Switching' ); ?></h3>
-				<p><?php _e( 'When you switch themes, widgets sometimes think they can just up and move location. Improvements in WordPress 4.9 offer more persistent menu and widget placement when you decide it&#8217;s time for a new theme. Additionally, you can preview installed themes or download, install, and preview new themes right. Nothing says handy like being able to preview before you deploy. ' ); ?></p>
-			</div>
-			<div class="col">
-				<h3><?php _e( 'Better Menu Instructions = Less Confusion' ); ?></h3>
-				<p><?php _e( 'Were you confused by the steps to create a new menu? Perhaps no longer! We&#8217;ve ironed out the UX for a smoother menu creation process. Newly updated copy will guide you.' ); ?></p>
-			</div>
-		</div>
-
-		<hr />
-		
-		<div class="feature-section one-col">
-			<div class="col">
-				<h2>
+				<img src="https://s.w.org/images/core/4.5/custom-logos-560.png" alt="" srcset="https://s.w.org/images/core/4.5/custom-logos-1000.png 1000w, https://s.w.org/images/core/4.5/custom-logos-800.png 800w, https://s.w.org/images/core/4.5/custom-logos-680.png 680w, https://s.w.org/images/core/4.5/custom-logos-560.png 560w, https://s.w.org/images/core/4.5/custom-logos-400.png 400w, https://s.w.org/images/core/4.5/custom-logos-280.png 280w" sizes="(max-width: 500px) calc(100vw - 40px), (max-width: 781px) calc((100vw - 70px) * .466), (max-width: 959px) calc((100vw - 116px) * .469), (max-width: 1290px) calc((100vw - 240px) * .472), 496px"/>
+				<h3><?php _e( 'Custom Logos' ); ?></h3>
+				<p><?php _e( 'Themes can now support logos for your business or brand.' ); ?>
 					<?php
+					if ( current_theme_supports( 'custom-logo' ) && current_user_can( 'customize' ) ) {
 						printf(
-							/* translators: %s: handshake emoji */
-							__( 'Lend a Hand with Gutenberg %s' ),
-							'&#x1F91D'
+							/* translators: %s: URL to Site Identity section of the customizer */
+							__( 'Your theme supports custom logos! Try it out right now in the <a href="%s" class="load-customize">Site Identity</a> section of the customizer.' ),
+							esc_url( add_query_arg( array( 'autofocus' => array( 'section' => 'title_tagline' ) ), $customize_url ) )
 						);
-					?>
-				</h2>
-				<p><?php printf(
-					__( 'WordPress is working on a new way to create and control your content and we&#8217;d love to have your help. Interested in being an <a href="%s">early tester</a> or getting involved with the Gutenberg project? <a href="%s">Contribute on GitHub</a>.' ),
-					__( 'https://wordpress.org/plugins/gutenberg/' ),
-					'https://github.com/WordPress/gutenberg' ); ?></p>
+					} else {
+						_e( 'The Twenty Fifteen and Twenty Sixteen themes have been updated to support custom logos, which can be found in the Site Identity section of the customizer.' );
+					}
+					?></p>
 			</div>
 		</div>
-		
+
 		<hr />
 
 		<div class="changelog">
-			<h2><?php
-				printf(
-					/* translators: %s: smiling face with smiling eyes emoji */
-					__( 'Developer Happiness %s' ),
-					'&#x1F60A'
-				);
-			?></h2>
+			<h2><?php _e( 'Under the Hood' ); ?></h2>
 
 			<div class="under-the-hood three-col">
 				<div class="col">
-					<h3><a href="#"><?php _e( 'Heading' ); ?></a></h3>
-					<p><?php _e( 'Paragraph' ); ?></p>
+					<h3><?php _e( 'Selective Refresh' ); ?></h3>
+					<p><?php
+						printf(
+							/* translators: %s: URL to the development post of the new feature */
+							__( 'The customizer now supports a <a href="%s">comprehensive framework</a> for rendering parts of the preview without rewriting your PHP code in JavaScript.' ),
+							'https://make.wordpress.org/core/2016/02/16/selective-refresh-in-the-customizer/'
+						);
+						if ( current_user_can( 'customize' ) && current_user_can( 'edit_theme_options' ) ) {
+							if ( current_theme_supports( 'menus' ) && ! current_theme_supports( 'customize-selective-refresh-widgets' ) ) {
+								printf(
+									/* translators: %s: URL to Menus section of the customizer  */
+									' ' . __( 'See it in action with <a href="%s" class="load-customize">Menus</a>.' ),
+									esc_url( add_query_arg( array( 'autofocus' => array( 'panel' => 'nav_menus' ) ), $customize_url ) )
+								);
+							} elseif ( current_theme_supports( 'customize-selective-refresh-widgets' ) ) { // If widgets are supported, menus are also because of the menus widget.
+								printf(
+									/* translators: 1: URL to Menus section of the customizer, 2: URL to Widgets section of the customizer */
+									' ' . __( 'See it in action with <a href="%1$s" class="load-customize">Menus</a> or <a href="%2$s" class="load-customize">Widgets</a>.' ),
+									esc_url( add_query_arg( array( 'autofocus' => array( 'panel' => 'nav_menus' ) ), $customize_url ) ),
+									esc_url( add_query_arg( array( 'autofocus' => array( 'panel' => 'widgets' ) ), $customize_url ) )
+								);
+							}
+						}
+					?></p>
 				</div>
 				<div class="col">
-					<h3><a href="#"><?php _e( 'Heading' ); ?></a></h3>
-					<p><?php _e( 'Paragraph' ); ?></p>
+					<h3><?php _e( 'Smart Image Resizing' ); ?></h3>
+					<p><?php
+						printf(
+							/* translators: %s: URL to the development post of the new feature */
+							__( 'Generated images now load up to 50&#37; faster with no noticeable quality loss. <a href="%s">It&#8217;s really cool</a>.' ),
+							'https://make.wordpress.org/core/2016/03/12/performance-improvements-for-images-in-wordpress-4-5/'
+						);
+					?></p>
 				</div>
 				<div class="col">
-					<h3><a href="#"><?php _e( 'Heading' ); ?></a></h3>
-					<p><?php _e( 'Paragraph' ); ?></p>
-				</div>
-				<div class="col">
-					<h3><a href="#"><?php _e( 'Heading' ); ?></a></h3>
-					<p><?php _e( 'Paragraph' ); ?></p>
-				</div>
-				<div class="col">
-					<h3><a href="#"><?php _e( 'Heading' ); ?></a></h3>
-					<p><?php _e( 'Paragraph' ); ?></p>
-				</div>
-				<div class="col">
-					<h3><a href="#"><?php _e( 'Heading' ); ?></a></h3>
-					<p><?php _e( 'Paragraph' ); ?></p>
+					<h3><?php _e( 'JavaScript Library Updates' ); ?></h3>
+					<p><?php _e( 'jQuery 1.12.3, jQuery Migrate 1.4.0, Backbone 1.2.3, and Underscore 1.8.3 are bundled.' ); ?></p>
 				</div>
 			</div>
+
+			<div class="under-the-hood two-col">
+				<div class="col">
+					<h3><?php _e( 'Script Loader Improvements' ); ?></h3>
+					<p><?php
+						printf(
+							/* translators: %s: wp_add_inline_script() */
+							__( 'Better support has been added for script header/footer dependencies. New %s enables adding extra code to registered scripts.' ),
+							'<code><a href="https://make.wordpress.org/core/2016/03/08/enhanced-script-loader-in-wordpress-4-5/">wp_add_inline_script()</a></code>'
+						);
+					?></p>
+				</div>
+				<div class="col">
+					<h3><?php _e( 'Better Embed Templates' ); ?></h3>
+					<p><?php
+						printf(
+							/* translators: %s: URL to the development post of the new feature */
+							__( 'Embed templates have been split into parts and can be <a href="%s">directly overridden by themes</a> via the template hierarchy.' ),
+							'https://make.wordpress.org/core/2016/03/11/embeds-changes-in-wordpress-4-5/'
+						);
+					?></p>
+				</div>
+			</div>
+
+			<div class="return-to-dashboard">
+				<?php if ( current_user_can( 'update_core' ) && isset( $_GET['updated'] ) ) : ?>
+					<a href="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>">
+						<?php is_multisite() ? _e( 'Return to Updates' ) : _e( 'Return to Dashboard &rarr; Updates' ); ?>
+					</a> |
+				<?php endif; ?>
+				<a href="<?php echo esc_url( self_admin_url() ); ?>"><?php is_blog_admin() ? _e( 'Go to Dashboard &rarr; Home' ) : _e( 'Go to Dashboard' ); ?></a>
+			</div>
+
 		</div>
-
-		<hr />
-
-		<div class="return-to-dashboard">
-			<?php if ( current_user_can( 'update_core' ) && isset( $_GET['updated'] ) ) : ?>
-				<a href="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>">
-					<?php is_multisite() ? _e( 'Return to Updates' ) : _e( 'Return to Dashboard &rarr; Updates' ); ?>
-				</a> |
-			<?php endif; ?>
-			<a href="<?php echo esc_url( self_admin_url() ); ?>"><?php is_blog_admin() ? _e( 'Go to Dashboard &rarr; Home' ) : _e( 'Go to Dashboard' ); ?></a>
-		</div>
-
 	</div>
 <?php
 

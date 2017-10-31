@@ -20,6 +20,7 @@ class Walker_Comment extends Walker {
 	 * What the class handles.
 	 *
 	 * @since 2.7.0
+	 * @access public
 	 * @var string
 	 *
 	 * @see Walker::$tree_type
@@ -30,6 +31,7 @@ class Walker_Comment extends Walker {
 	 * Database fields to use.
 	 *
 	 * @since 2.7.0
+	 * @access public
 	 * @var array
 	 *
 	 * @see Walker::$db_fields
@@ -41,11 +43,12 @@ class Walker_Comment extends Walker {
 	 * Starts the list before the elements are added.
 	 *
 	 * @since 2.7.0
+	 * @access public
 	 *
 	 * @see Walker::start_lvl()
 	 * @global int $comment_depth
 	 *
-	 * @param string $output Used to append additional content (passed by reference).
+	 * @param string $output Passed by reference. Used to append additional content.
 	 * @param int    $depth  Optional. Depth of the current comment. Default 0.
 	 * @param array  $args   Optional. Uses 'style' argument for type of HTML list. Default empty array.
 	 */
@@ -69,11 +72,12 @@ class Walker_Comment extends Walker {
 	 * Ends the list of items after the elements are added.
 	 *
 	 * @since 2.7.0
+	 * @access public
 	 *
 	 * @see Walker::end_lvl()
 	 * @global int $comment_depth
 	 *
-	 * @param string $output Used to append additional content (passed by reference).
+	 * @param string $output Passed by reference. Used to append additional content.
 	 * @param int    $depth  Optional. Depth of the current comment. Default 0.
 	 * @param array  $args   Optional. Will only append content if style argument value is 'ol' or 'ul'.
 	 *                       Default empty array.
@@ -114,6 +118,7 @@ class Walker_Comment extends Walker {
 	 *      2.2
 	 *
 	 * @since 2.7.0
+	 * @access public
 	 *
 	 * @see Walker::display_element()
 	 * @see wp_list_comments()
@@ -152,6 +157,7 @@ class Walker_Comment extends Walker {
 	 * Starts the element output.
 	 *
 	 * @since 2.7.0
+	 * @access public
 	 *
 	 * @see Walker::start_el()
 	 * @see wp_list_comments()
@@ -195,6 +201,7 @@ class Walker_Comment extends Walker {
 	 * Ends the element output, if needed.
 	 *
 	 * @since 2.7.0
+	 * @access public
 	 *
 	 * @see Walker::end_el()
 	 * @see wp_list_comments()
@@ -221,6 +228,7 @@ class Walker_Comment extends Walker {
 	 * Outputs a pingback comment.
 	 *
 	 * @since 3.6.0
+	 * @access protected
 	 *
 	 * @see wp_list_comments()
 	 *
@@ -242,6 +250,7 @@ class Walker_Comment extends Walker {
 	 * Outputs a single comment.
 	 *
 	 * @since 3.6.0
+	 * @access protected
 	 *
 	 * @see wp_list_comments()
 	 *
@@ -264,12 +273,7 @@ class Walker_Comment extends Walker {
 		<?php endif; ?>
 		<div class="comment-author vcard">
 			<?php if ( 0 != $args['avatar_size'] ) echo get_avatar( $comment, $args['avatar_size'] ); ?>
-			<?php
-				/* translators: %s: comment author link */
-				printf( __( '%s <span class="says">says:</span>' ),
-					sprintf( '<cite class="fn">%s</cite>', get_comment_author_link( $comment ) )
-				);
-			?>
+			<?php printf( __( '<cite class="fn">%s</cite> <span class="says">says:</span>' ), get_comment_author_link( $comment ) ); ?>
 		</div>
 		<?php if ( '0' == $comment->comment_approved ) : ?>
 		<em class="comment-awaiting-moderation"><?php _e( 'Your comment is awaiting moderation.' ) ?></em>
@@ -283,7 +287,7 @@ class Walker_Comment extends Walker {
 			?>
 		</div>
 
-		<?php comment_text( $comment, array_merge( $args, array( 'add_below' => $add_below, 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?>
+		<?php comment_text( get_comment_id(), array_merge( $args, array( 'add_below' => $add_below, 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?>
 
 		<?php
 		comment_reply_link( array_merge( $args, array(
@@ -305,6 +309,7 @@ class Walker_Comment extends Walker {
 	 * Outputs a comment in the HTML5 format.
 	 *
 	 * @since 3.6.0
+	 * @access protected
 	 *
 	 * @see wp_list_comments()
 	 *
@@ -320,12 +325,7 @@ class Walker_Comment extends Walker {
 				<footer class="comment-meta">
 					<div class="comment-author vcard">
 						<?php if ( 0 != $args['avatar_size'] ) echo get_avatar( $comment, $args['avatar_size'] ); ?>
-						<?php
-							/* translators: %s: comment author link */
-							printf( __( '%s <span class="says">says:</span>' ),
-								sprintf( '<b class="fn">%s</b>', get_comment_author_link( $comment ) )
-							);
-						?>
+						<?php printf( __( '%s <span class="says">says:</span>' ), sprintf( '<b class="fn">%s</b>', get_comment_author_link( $comment ) ) ); ?>
 					</div><!-- .comment-author -->
 
 					<div class="comment-metadata">
