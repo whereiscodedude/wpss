@@ -24,6 +24,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	 * Constructor.
 	 *
 	 * @since 3.1.0
+	 * @access public
 	 *
 	 * @see WP_List_Table::__construct() for more information on default arguments.
 	 *
@@ -46,6 +47,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function prepare_items() {
 		$themes = wp_get_themes( array( 'allowed' => true ) );
@@ -81,6 +83,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function no_items() {
 		if ( $this->search_terms || $this->features ) {
@@ -88,14 +91,13 @@ class WP_Themes_List_Table extends WP_List_Table {
 			return;
 		}
 
-		$blog_id = get_current_blog_id();
 		if ( is_multisite() ) {
 			if ( current_user_can( 'install_themes' ) && current_user_can( 'manage_network_themes' ) ) {
-				printf( __( 'You only have one theme enabled for this site right now. Visit the Network Admin to <a href="%1$s">enable</a> or <a href="%2$s">install</a> more themes.' ), network_admin_url( 'site-themes.php?id=' . $blog_id ), network_admin_url( 'theme-install.php' ) );
+				printf( __( 'You only have one theme enabled for this site right now. Visit the Network Admin to <a href="%1$s">enable</a> or <a href="%2$s">install</a> more themes.' ), network_admin_url( 'site-themes.php?id=' . $GLOBALS['blog_id'] ), network_admin_url( 'theme-install.php' ) );
 
 				return;
 			} elseif ( current_user_can( 'manage_network_themes' ) ) {
-				printf( __( 'You only have one theme enabled for this site right now. Visit the Network Admin to <a href="%1$s">enable</a> more themes.' ), network_admin_url( 'site-themes.php?id=' . $blog_id ) );
+				printf( __( 'You only have one theme enabled for this site right now. Visit the Network Admin to <a href="%1$s">enable</a> more themes.' ), network_admin_url( 'site-themes.php?id=' . $GLOBALS['blog_id'] ) );
 
 				return;
 			}
@@ -127,6 +129,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function display() {
 		wp_nonce_field( "fetch-list-" . get_class( $this ), '_ajax_fetch_list_nonce' );
@@ -150,6 +153,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function display_rows_or_placeholder() {
 		if ( $this->has_items() ) {
@@ -162,6 +166,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function display_rows() {
 		$themes = $this->items;
@@ -192,10 +197,10 @@ class WP_Themes_List_Table extends WP_List_Table {
 					. "' );" . '">' . __( 'Delete' ) . '</a>';
 
 			/** This filter is documented in wp-admin/includes/class-wp-ms-themes-list-table.php */
-			$actions       = apply_filters( 'theme_action_links', $actions, $theme, 'all' );
+			$actions       = apply_filters( 'theme_action_links', $actions, $theme );
 
 			/** This filter is documented in wp-admin/includes/class-wp-ms-themes-list-table.php */
-			$actions       = apply_filters( "theme_action_links_$stylesheet", $actions, $theme, 'all' );
+			$actions       = apply_filters( "theme_action_links_$stylesheet", $actions, $theme );
 			$delete_action = isset( $actions['delete'] ) ? '<div class="delete-theme">' . $actions['delete'] . '</div>' : '';
 			unset( $actions['delete'] );
 
@@ -280,6 +285,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	 * Send required variables to JavaScript land
 	 *
 	 * @since 3.4.0
+	 * @access public
 	 *
 	 * @param array $extra_args
 	 */

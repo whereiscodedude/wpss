@@ -191,31 +191,6 @@ function twentythirteen_scripts_styles() {
 add_action( 'wp_enqueue_scripts', 'twentythirteen_scripts_styles' );
 
 /**
- * Add preconnect for Google Fonts.
- *
- * @since Twenty Thirteen 2.1
- *
- * @param array   $urls          URLs to print for resource hints.
- * @param string  $relation_type The relation type the URLs are printed.
- * @return array URLs to print for resource hints.
- */
-function twentythirteen_resource_hints( $urls, $relation_type ) {
-	if ( wp_style_is( 'twentythirteen-fonts', 'queue' ) && 'preconnect' === $relation_type ) {
-		if ( version_compare( $GLOBALS['wp_version'], '4.7-alpha', '>=' ) ) {
-			$urls[] = array(
-				'href' => 'https://fonts.gstatic.com',
-				'crossorigin',
-			);
-		} else {
-			$urls[] = 'https://fonts.gstatic.com';
-		}
-	}
-
-	return $urls;
-}
-add_filter( 'wp_resource_hints', 'twentythirteen_resource_hints', 10, 2 );
-
-/**
  * Filter the page title.
  *
  * Creates a nicely formatted and more specific title element text for output
@@ -615,22 +590,3 @@ function twentythirteen_customize_preview_js() {
 	wp_enqueue_script( 'twentythirteen-customizer', get_template_directory_uri() . '/js/theme-customizer.js', array( 'customize-preview' ), '20141120', true );
 }
 add_action( 'customize_preview_init', 'twentythirteen_customize_preview_js' );
-
-/**
- * Modifies tag cloud widget arguments to display all tags in the same font size
- * and use list format for better accessibility.
- *
- * @since Twenty Thirteen 2.3
- *
- * @param array $args Arguments for tag cloud widget.
- * @return array The filtered arguments for tag cloud widget.
- */
-function twentythirteen_widget_tag_cloud_args( $args ) {
-	$args['largest']  = 22;
-	$args['smallest'] = 8;
-	$args['unit']     = 'pt';
-	$args['format']   = 'list';
-
-	return $args;
-}
-add_filter( 'widget_tag_cloud_args', 'twentythirteen_widget_tag_cloud_args' );

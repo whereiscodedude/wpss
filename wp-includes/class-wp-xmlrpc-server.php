@@ -16,14 +16,15 @@
  * As of WordPress 3.5.0, XML-RPC is enabled by default. It can be disabled
  * via the {@see 'xmlrpc_enabled'} filter found in wp_xmlrpc_server::login().
  *
+ * @package WordPress
+ * @subpackage Publishing
  * @since 1.5.0
- *
- * @see IXR_Server
  */
 class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Methods.
 	 *
+	 * @access public
 	 * @var array
 	 */
 	public $methods;
@@ -31,6 +32,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Blog options.
 	 *
+	 * @access public
 	 * @var array
 	 */
 	public $blog_options;
@@ -38,6 +40,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * IXR_Error instance.
 	 *
+	 * @access public
 	 * @var IXR_Error
 	 */
 	public $error;
@@ -45,6 +48,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Flags that the user authentication has failed in this instance of wp_xmlrpc_server.
 	 *
+	 * @access protected
 	 * @var bool
 	 */
 	protected $auth_failed = false;
@@ -170,8 +174,9 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * Make private/protected methods readable for backward compatibility.
 	 *
 	 * @since 4.0.0
+	 * @access public
 	 *
-	 * @param string   $name      Method to call.
+	 * @param callable $name      Method to call.
 	 * @param array    $arguments Arguments to pass when calling.
 	 * @return array|IXR_Error|false Return value of the callback, false otherwise.
 	 */
@@ -186,6 +191,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * Serves the XML-RPC request.
 	 *
 	 * @since 2.9.0
+	 * @access public
 	 */
 	public function serve_request() {
 		$this->IXR_Server($this->methods);
@@ -398,75 +404,17 @@ class wp_xmlrpc_server extends IXR_Server {
 	}
 
 	/**
-	 * Retrieve custom fields for a term.
-	 *
-	 * @since 4.9.0
-	 *
-	 * @param int $term_id Term ID.
-	 * @return array Array of custom fields, if they exist.
-	 */
-	public function get_term_custom_fields( $term_id ) {
-		$term_id = (int) $term_id;
-
-		$custom_fields = array();
-
-		foreach ( (array) has_term_meta( $term_id ) as $meta ) {
-
-			if ( ! current_user_can( 'edit_term_meta', $term_id ) ) {
-				continue;
-			}
-
-			$custom_fields[] = array(
-				'id'    => $meta['meta_id'],
-				'key'   => $meta['meta_key'],
-				'value' => $meta['meta_value'],
-			);
-		}
-
-		return $custom_fields;
-	}
-
-	/**
-	 * Set custom fields for a term.
-	 *
-	 * @since 4.9.0
-	 *
-	 * @param int $term_id Term ID.
-	 * @param array $fields Custom fields.
-	 */
-	public function set_term_custom_fields( $term_id, $fields ) {
-		$term_id = (int) $term_id;
-
-		foreach ( (array) $fields as $meta ) {
-			if ( isset( $meta['id'] ) ) {
-				$meta['id'] = (int) $meta['id'];
-				$pmeta = get_metadata_by_mid( 'term', $meta['id'] );
-				if ( isset( $meta['key'] ) ) {
-					$meta['key'] = wp_unslash( $meta['key'] );
-					if ( $meta['key'] !== $pmeta->meta_key ) {
-						continue;
-					}
-					$meta['value'] = wp_unslash( $meta['value'] );
-					if ( current_user_can( 'edit_term_meta', $term_id ) ) {
-						update_metadata_by_mid( 'term', $meta['id'], $meta['value'] );
-					}
-				} elseif ( current_user_can( 'delete_term_meta', $term_id ) ) {
-					delete_metadata_by_mid( 'term', $meta['id'] );
-				}
-			} elseif ( current_user_can( 'add_term_meta', $term_id ) ) {
-				add_term_meta( $term_id, $meta['key'], $meta['value'] );
-			}
-		}
-	}
-
-	/**
 	 * Set up blog options property.
 	 *
 	 * Passes property through {@see 'xmlrpc_blog_options'} filter.
 	 *
 	 * @since 2.6.0
+	 *
+	 * @global string $wp_version
 	 */
 	public function initialise_blog_option_info() {
+		global $wp_version;
+
 		$this->blog_options = array(
 			// Read only options
 			'software_name'     => array(
@@ -477,7 +425,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			'software_version'  => array(
 				'desc'          => __( 'Software Version' ),
 				'readonly'      => true,
-				'value'         => get_bloginfo( 'version' )
+				'value'         => $wp_version
 			),
 			'blog_url'          => array(
 				'desc'          => __( 'WordPress Address (URL)' ),
@@ -648,10 +596,6 @@ class wp_xmlrpc_server extends IXR_Server {
 	 *  - 'xmlrpc' - url of xmlrpc endpoint
 	 */
 	public function wp_getUsersBlogs( $args ) {
-		if ( ! $this->minimum_args( $args, 2 ) ) {
-			return $this->error;
-		}
-
 		// If this isn't on WPMU then just use blogger_getUsersBlogs
 		if ( !is_multisite() ) {
 			array_unshift( $args, 1 );
@@ -689,7 +633,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		foreach ( $blogs as $blog ) {
 			// Don't include blogs that aren't hosted at this site.
-			if ( $blog->site_id != get_current_network_id() )
+			if ( $blog->site_id != get_current_site()->id )
 				continue;
 
 			$blog_id = $blog->userblog_id;
@@ -718,6 +662,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * Checks if the method received at least the minimum number of arguments.
 	 *
 	 * @since 3.4.0
+	 * @access protected
 	 *
 	 * @param string|array $args Sanitize single string or array of strings.
 	 * @param int $count         Minimum number of arguments.
@@ -735,6 +680,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Prepares taxonomy data for return in an XML-RPC object.
 	 *
+	 * @access protected
 	 *
 	 * @param object $taxonomy The unprepared taxonomy data.
 	 * @param array $fields    The subset of taxonomy fields to return.
@@ -767,9 +713,9 @@ class wp_xmlrpc_server extends IXR_Server {
 		 *
 		 * @since 3.4.0
 		 *
-		 * @param array       $_taxonomy An array of taxonomy data.
-		 * @param WP_Taxonomy $taxonomy  Taxonomy object.
-		 * @param array       $fields    The subset of taxonomy fields to return.
+		 * @param array  $_taxonomy An array of taxonomy data.
+		 * @param object $taxonomy  Taxonomy object.
+		 * @param array  $fields    The subset of taxonomy fields to return.
 		 */
 		return apply_filters( 'xmlrpc_prepare_taxonomy', $_taxonomy, $taxonomy, $fields );
 	}
@@ -777,6 +723,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Prepares term data for return in an XML-RPC object.
 	 *
+	 * @access protected
 	 *
 	 * @param array|object $term The unprepared term data.
 	 * @return array The prepared term data.
@@ -795,9 +742,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		// Count we are happy to return as an integer because people really shouldn't use terms that much.
 		$_term['count'] = intval( $_term['count'] );
 
-		// Get term meta.
-		$_term['custom_fields'] = $this->get_term_custom_fields( $_term['term_id'] );
-
 		/**
 		 * Filters XML-RPC-prepared data for the given term.
 		 *
@@ -812,6 +756,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Convert a WordPress date string to an IXR_Date object.
 	 *
+	 * @access protected
 	 *
 	 * @param string $date Date string to convert.
 	 * @return IXR_Date IXR_Date object.
@@ -826,6 +771,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Convert a WordPress GMT date string to an IXR_Date object.
 	 *
+	 * @access protected
 	 *
 	 * @param string $date_gmt WordPress GMT date string.
 	 * @param string $date     Date string.
@@ -841,6 +787,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Prepares post data for return in an XML-RPC object.
 	 *
+	 * @access protected
 	 *
 	 * @param array $post   The unprepared post data.
 	 * @param array $fields The subset of post type fields to return.
@@ -941,6 +888,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 *
 	 * @since 3.4.0
 	 * @since 4.6.0 Converted the `$post_type` parameter to accept a WP_Post_Type object.
+	 * @access protected
 	 *
 	 * @param WP_Post_Type $post_type Post type object.
 	 * @param array        $fields    The subset of post fields to return.
@@ -991,6 +939,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Prepares media item data for return in an XML-RPC object.
 	 *
+	 * @access protected
 	 *
 	 * @param object $media_item     The unprepared media item data.
 	 * @param string $thumbnail_size The image size to use for the thumbnail URL.
@@ -1030,6 +979,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Prepares page data for return in an XML-RPC object.
 	 *
+	 * @access protected
 	 *
 	 * @param object $page The unprepared page data.
 	 * @return array The prepared page data.
@@ -1110,6 +1060,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Prepares comment data for return in an XML-RPC object.
 	 *
+	 * @access protected
 	 *
 	 * @param object $comment The unprepared comment data.
 	 * @return array The prepared comment data.
@@ -1158,6 +1109,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Prepares user data for return in an XML-RPC object.
 	 *
+	 * @access protected
 	 *
 	 * @param WP_User $user   The unprepared user object.
 	 * @param array   $fields The subset of user fields to return.
@@ -1302,6 +1254,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * and determining if the user has permission to do so
 	 *
 	 * @since 4.3.0
+	 * @access private
 	 *
 	 * @param array $post_data
 	 * @param bool  $update
@@ -1322,7 +1275,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			}
 		} elseif ( isset( $post_data['sticky'] ) )  {
 			if ( ! current_user_can( $post_type->cap->edit_others_posts ) ) {
-				return new IXR_Error( 401, __( 'Sorry, you are not allowed to make posts sticky.' ) );
+				return new IXR_Error( 401, __( 'Sorry, you are not allowed to stick this post.' ) );
 			}
 
 			$sticky = wp_validate_boolean( $post_data['sticky'] );
@@ -1338,6 +1291,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * Helper method for wp_newPost() and wp_editPost(), containing shared logic.
 	 *
 	 * @since 3.4.0
+	 * @access protected
 	 *
 	 * @see wp_insert_post()
 	 *
@@ -1396,12 +1350,12 @@ class wp_xmlrpc_server extends IXR_Server {
 				break;
 			case 'private':
 				if ( ! current_user_can( $post_type->cap->publish_posts ) )
-					return new IXR_Error( 401, __( 'Sorry, you are not allowed to create private posts in this post type.' ) );
+					return new IXR_Error( 401, __( 'Sorry, you are not allowed to create private posts in this post type' ) );
 				break;
 			case 'publish':
 			case 'future':
 				if ( ! current_user_can( $post_type->cap->publish_posts ) )
-					return new IXR_Error( 401, __( 'Sorry, you are not allowed to publish posts in this post type.' ) );
+					return new IXR_Error( 401, __( 'Sorry, you are not allowed to publish posts in this post type' ) );
 				break;
 			default:
 				if ( ! get_post_status_object( $post_data['post_status'] ) )
@@ -1410,7 +1364,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		}
 
 		if ( ! empty( $post_data['post_password'] ) && ! current_user_can( $post_type->cap->publish_posts ) )
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to create password protected posts in this post type.' ) );
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to create password protected posts in this post type' ) );
 
 		$post_data['post_author'] = absint( $post_data['post_author'] );
 		if ( ! empty( $post_data['post_author'] ) && $post_data['post_author'] != $user->ID ) {
@@ -1592,7 +1546,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error( 500, $post_ID->get_error_message() );
 
 		if ( ! $post_ID )
-			return new IXR_Error( 401, __( 'Sorry, your entry could not be posted.' ) );
+			return new IXR_Error( 401, __( 'Sorry, your entry could not be posted. Something wrong happened.' ) );
 
 		return strval( $post_ID );
 	}
@@ -1858,13 +1812,13 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( isset( $filter['post_type'] ) ) {
 			$post_type = get_post_type_object( $filter['post_type'] );
 			if ( ! ( (bool) $post_type ) )
-				return new IXR_Error( 403, __( 'Invalid post type.' ) );
+				return new IXR_Error( 403, __( 'The post type specified is not valid' ) );
 		} else {
 			$post_type = get_post_type_object( 'post' );
 		}
 
 		if ( ! current_user_can( $post_type->cap->edit_posts ) )
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit posts in this post type.' ) );
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit posts in this post type.' ));
 
 		$query['post_type'] = $post_type->name;
 
@@ -1946,9 +1900,8 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$taxonomy = get_taxonomy( $content_struct['taxonomy'] );
 
-		if ( ! current_user_can( $taxonomy->cap->edit_terms ) ) {
+		if ( ! current_user_can( $taxonomy->cap->manage_terms ) )
 			return new IXR_Error( 401, __( 'Sorry, you are not allowed to create terms in this taxonomy.' ) );
-		}
 
 		$taxonomy = (array) $taxonomy;
 
@@ -1987,12 +1940,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error( 500, $term->get_error_message() );
 
 		if ( ! $term )
-			return new IXR_Error( 500, __( 'Sorry, your term could not be created.' ) );
-
-		// Add term meta.
-		if ( isset( $content_struct['custom_fields'] ) ) {
-			$this->set_term_custom_fields( $term['term_id'], $content_struct['custom_fields'] );
-		}
+			return new IXR_Error( 500, __( 'Sorry, your term could not be created. Something wrong happened.' ) );
 
 		return strval( $term['term_id'] );
 	}
@@ -2039,6 +1987,9 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$taxonomy = get_taxonomy( $content_struct['taxonomy'] );
 
+		if ( ! current_user_can( $taxonomy->cap->edit_terms ) )
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit terms in this taxonomy.' ) );
+
 		$taxonomy = (array) $taxonomy;
 
 		// hold the data of the term
@@ -2052,10 +2003,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( ! $term )
 			return new IXR_Error( 404, __( 'Invalid term ID.' ) );
 
-		if ( ! current_user_can( 'edit_term', $term_id ) ) {
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit this term.' ) );
-		}
-
 		if ( isset( $content_struct['name'] ) ) {
 			$term_data['name'] = trim( $content_struct['name'] );
 
@@ -2065,7 +2012,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		if ( ! empty( $content_struct['parent'] ) ) {
 			if ( ! $taxonomy['hierarchical'] )
-				return new IXR_Error( 403, __( 'Cannot set parent term, taxonomy is not hierarchical.' ) );
+				return new IXR_Error( 403, __( "This taxonomy is not hierarchical so you can't set a parent." ) );
 
 			$parent_term_id = (int) $content_struct['parent'];
 			$parent_term = get_term( $parent_term_id , $taxonomy['name'] );
@@ -2092,11 +2039,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		if ( ! $term )
 			return new IXR_Error( 500, __( 'Sorry, editing the term failed.' ) );
-
-		// Update term meta.
-		if ( isset( $content_struct['custom_fields'] ) ) {
-			$this->set_term_custom_fields( $term_id, $content_struct['custom_fields'] );
-		}
 
 		return true;
 	}
@@ -2140,6 +2082,10 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error( 403, __( 'Invalid taxonomy.' ) );
 
 		$taxonomy = get_taxonomy( $taxonomy );
+
+		if ( ! current_user_can( $taxonomy->cap->delete_terms ) )
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to delete terms in this taxonomy.' ) );
+
 		$term = get_term( $term_id, $taxonomy->name );
 
 		if ( is_wp_error( $term ) )
@@ -2147,10 +2093,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		if ( ! $term )
 			return new IXR_Error( 404, __( 'Invalid term ID.' ) );
-
-		if ( ! current_user_can( 'delete_term', $term_id ) ) {
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to delete this term.' ) );
-		}
 
 		$result = wp_delete_term( $term_id, $taxonomy->name );
 
@@ -2212,6 +2154,9 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$taxonomy = get_taxonomy( $taxonomy );
 
+		if ( ! current_user_can( $taxonomy->cap->assign_terms ) )
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to assign terms in this taxonomy.' ) );
+
 		$term = get_term( $term_id , $taxonomy->name, ARRAY_A );
 
 		if ( is_wp_error( $term ) )
@@ -2219,10 +2164,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		if ( ! $term )
 			return new IXR_Error( 404, __( 'Invalid term ID.' ) );
-
-		if ( ! current_user_can( 'assign_term', $term_id ) ) {
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to assign this term.' ) );
-		}
 
 		return $this->_prepare_term( $term );
 	}
@@ -2555,7 +2496,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		do_action( 'xmlrpc_call', 'wp.getUsers' );
 
 		if ( ! current_user_can( 'list_users' ) )
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to list users.' ) );
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to browse users.' ) );
 
 		$query = array( 'fields' => 'all_with_meta' );
 
@@ -2571,7 +2512,7 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		if ( isset( $filter['role'] ) ) {
 			if ( get_role( $filter['role'] ) === null )
-				return new IXR_Error( 403, __( 'Invalid role.' ) );
+				return new IXR_Error( 403, __( 'The role specified is not valid' ) );
 
 			$query['role'] = $filter['role'];
 		}
@@ -3137,9 +3078,8 @@ class wp_xmlrpc_server extends IXR_Server {
 		do_action( 'xmlrpc_call', 'wp.newCategory' );
 
 		// Make sure the user is allowed to add a category.
-		if ( ! current_user_can( 'manage_categories' ) ) {
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to add a category.' ) );
-		}
+		if ( !current_user_can('manage_categories') )
+			return new IXR_Error(401, __('Sorry, you are not allowed to add a category.'));
 
 		// If no slug was provided make it empty so that
 		// WordPress will generate one.
@@ -3213,9 +3153,8 @@ class wp_xmlrpc_server extends IXR_Server {
 		/** This action is documented in wp-includes/class-wp-xmlrpc-server.php */
 		do_action( 'xmlrpc_call', 'wp.deleteCategory' );
 
-		if ( ! current_user_can( 'delete_term', $category_id ) ) {
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to delete this category.' ) );
-		}
+		if ( !current_user_can('manage_categories') )
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to delete a category.' ) );
 
 		$status = wp_delete_term( $category_id, 'category' );
 
@@ -3444,8 +3383,8 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error( 404, __( 'Invalid comment ID.' ) );
 		}
 
-		if ( ! current_user_can( 'edit_comment', $comment_ID ) ) {
-			return new IXR_Error( 403, __( 'Sorry, you are not allowed to delete this comment.' ) );
+		if ( !current_user_can( 'edit_comment', $comment_ID ) ) {
+			return new IXR_Error( 403, __( 'Sorry, you are not allowed to moderate or edit this comment.' ) );
 		}
 
 		/** This action is documented in wp-includes/class-wp-xmlrpc-server.php */
@@ -3555,7 +3494,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error(500, $result->get_error_message());
 
 		if ( !$result )
-			return new IXR_Error(500, __('Sorry, the comment could not be edited.'));
+			return new IXR_Error(500, __('Sorry, the comment could not be edited. Something wrong happened.'));
 
 		/**
 		 * Fires after a comment has been successfully updated via XML-RPC.
@@ -3609,7 +3548,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( !$user ) {
 			$logged_in = false;
 			if ( $allow_anon && get_option('comment_registration') ) {
-				return new IXR_Error( 403, __( 'You must be registered to comment.' ) );
+				return new IXR_Error( 403, __( 'You must be registered to comment' ) );
 			} elseif ( ! $allow_anon ) {
 				return $this->error;
 			}
@@ -3634,14 +3573,8 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error( 403, __( 'Sorry, comments are closed for this item.' ) );
 		}
 
-		if ( empty( $content_struct['content'] ) ) {
-			return new IXR_Error( 403, __( 'Comment is required.' ) );
-		}
-
-		$comment = array(
-			'comment_post_ID' => $post_id,
-			'comment_content' => $content_struct['content'],
-		);
+		$comment = array();
+		$comment['comment_post_ID'] = $post_id;
 
 		if ( $logged_in ) {
 			$display_name = $user->display_name;
@@ -3669,25 +3602,20 @@ class wp_xmlrpc_server extends IXR_Server {
 
 			if ( get_option('require_name_email') ) {
 				if ( 6 > strlen($comment['comment_author_email']) || '' == $comment['comment_author'] )
-					return new IXR_Error( 403, __( 'Comment author name and email are required.' ) );
+					return new IXR_Error( 403, __( 'Comment author name and email are required' ) );
 				elseif ( !is_email($comment['comment_author_email']) )
-					return new IXR_Error( 403, __( 'A valid email address is required.' ) );
+					return new IXR_Error( 403, __( 'A valid email address is required' ) );
 			}
 		}
 
 		$comment['comment_parent'] = isset($content_struct['comment_parent']) ? absint($content_struct['comment_parent']) : 0;
 
+		$comment['comment_content'] =  isset($content_struct['content']) ? $content_struct['content'] : null;
+
 		/** This action is documented in wp-includes/class-wp-xmlrpc-server.php */
 		do_action( 'xmlrpc_call', 'wp.newComment' );
 
-		$comment_ID = wp_new_comment( $comment, true );
-		if ( is_wp_error( $comment_ID ) ) {
-			return new IXR_Error( 403, $comment_ID->get_error_message() );
-		}
-
-		if ( ! $comment_ID ) {
-			return new IXR_Error( 403, __( 'An unidentified error has occurred.' ) );
-		}
+		$comment_ID = wp_new_comment( $comment );
 
 		/**
 		 * Fires after a new comment has been successfully created via XML-RPC.
@@ -4198,7 +4126,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		$post_type = get_post_type_object( $post_type_name );
 
 		if ( ! current_user_can( $post_type->cap->edit_posts ) )
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit posts in this post type.' ) );
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit this post type.' ) );
 
 		return $this->_prepare_post_type( $post_type, $fields );
 	}
@@ -4416,13 +4344,8 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * @return array|IXR_Error
 	 */
 	public function blogger_getUsersBlogs($args) {
-		if ( ! $this->minimum_args( $args, 3 ) ) {
-			return $this->error;
-		}
-
-		if ( is_multisite() ) {
+		if ( is_multisite() )
 			return $this->_multisite_getUsersBlogs($args);
-		}
 
 		$this->escape($args);
 
@@ -4452,6 +4375,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * Private function for retrieving a users blogs for multisite setups
 	 *
 	 * @since 3.0.0
+	 * @access protected
 	 *
 	 * @param array $args {
 	 *     Method arguments. Note: arguments must be ordered as documented.
@@ -4462,7 +4386,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * @return array|IXR_Error
 	 */
 	protected function _multisite_getUsersBlogs( $args ) {
-		$current_blog = get_site();
+		$current_blog = get_blog_details();
 
 		$domain = $current_blog->domain;
 		$path = $current_blog->path . 'xmlrpc.php';
@@ -4724,7 +4648,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error(500, $post_ID->get_error_message());
 
 		if ( !$post_ID )
-			return new IXR_Error(500, __('Sorry, your entry could not be posted.'));
+			return new IXR_Error(500, __('Sorry, your entry could not be posted. Something wrong happened.'));
 
 		$this->attach_uploads( $post_ID, $post_content );
 
@@ -4978,7 +4902,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( isset( $content_struct['wp_post_format'] ) ) {
 			$content_struct['wp_post_format'] = sanitize_key( $content_struct['wp_post_format'] );
 			if ( !array_key_exists( $content_struct['wp_post_format'], get_post_format_strings() ) ) {
-				return new IXR_Error( 404, __( 'Invalid post format.' ) );
+				return new IXR_Error( 404, __( 'Invalid post format' ) );
 			}
 		}
 
@@ -5183,7 +5107,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error(500, $post_ID->get_error_message());
 
 		if ( !$post_ID )
-			return new IXR_Error(500, __('Sorry, your entry could not be posted.'));
+			return new IXR_Error(500, __('Sorry, your entry could not be posted. Something wrong happened.'));
 
 		/**
 		 * Fires after a new post has been successfully created via the XML-RPC MovableType API.
@@ -5302,7 +5226,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( isset( $content_struct['wp_post_format'] ) ) {
 			$content_struct['wp_post_format'] = sanitize_key( $content_struct['wp_post_format'] );
 			if ( !array_key_exists( $content_struct['wp_post_format'], get_post_format_strings() ) ) {
-				return new IXR_Error( 404, __( 'Invalid post format.' ) );
+				return new IXR_Error( 404, __( 'Invalid post format' ) );
 			}
 		}
 
@@ -5504,7 +5428,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return new IXR_Error(500, $result->get_error_message());
 
 		if ( !$result )
-			return new IXR_Error(500, __('Sorry, your entry could not be edited.'));
+			return new IXR_Error(500, __('Sorry, your entry could not be edited. Something wrong happened.'));
 
 		// Only posts can be sticky
 		if ( $post_type == 'post' && isset( $content_struct['sticky'] ) ) {
@@ -5917,9 +5841,8 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$upload = wp_upload_bits($name, null, $bits);
 		if ( ! empty($upload['error']) ) {
-			/* translators: 1: file name, 2: error message */
-			$errorString = sprintf( __( 'Could not write file %1$s (%2$s).' ), $name, $upload['error'] );
-			return new IXR_Error( 500, $errorString );
+			$errorString = sprintf(__('Could not write file %1$s (%2$s)'), $name, $upload['error']);
+			return new IXR_Error(500, $errorString);
 		}
 		// Construct the attachment array
 		$post_id = 0;
@@ -6292,6 +6215,9 @@ class wp_xmlrpc_server extends IXR_Server {
 	 *
 	 * @since 1.5.0
 	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 * @global string $wp_version
+	 *
 	 * @param array  $args {
 	 *     Method arguments. Note: arguments must be ordered as documented.
 	 *
@@ -6301,7 +6227,7 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * @return string|IXR_Error
 	 */
 	public function pingback_ping( $args ) {
-		global $wpdb;
+		global $wpdb, $wp_version;
 
 		/** This action is documented in wp-includes/class-wp-xmlrpc-server.php */
 		do_action( 'xmlrpc_call', 'pingback.ping' );
@@ -6389,7 +6315,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		$remote_ip = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
 
 		/** This filter is documented in wp-includes/class-http.php */
-		$user_agent = apply_filters( 'http_headers_useragent', 'WordPress/' . get_bloginfo( 'version' ) . '; ' . get_bloginfo( 'url' ) );
+		$user_agent = apply_filters( 'http_headers_useragent', 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ) );
 
 		// Let's check the remote site
 		$http_api_args = array(
@@ -6425,10 +6351,9 @@ class wp_xmlrpc_server extends IXR_Server {
 		$remote_source = preg_replace( "/<\/*(h1|h2|h3|h4|h5|h6|p|th|td|li|dt|dd|pre|caption|input|textarea|button|body)[^>]*>/", "\n\n", $remote_source );
 
 		preg_match( '|<title>([^<]*?)</title>|is', $remote_source, $matchtitle );
-		$title = isset( $matchtitle[1] ) ? $matchtitle[1] : '';
-		if ( empty( $title ) ) {
-			return $this->pingback_error( 32, __( 'We cannot find a title on that page.' ) );
-		}
+		$title = $matchtitle[1];
+		if ( empty( $title ) )
+			return $this->pingback_error( 32, __('We cannot find a title on that page.' ) );
 
 		$remote_source = strip_tags( $remote_source, '<a>' ); // just keep the tag we need
 
@@ -6487,10 +6412,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$comment_ID = wp_new_comment($commentdata);
 
-		if ( is_wp_error( $comment_ID ) ) {
-			return $this->pingback_error( 0, $comment_ID->get_error_message() );
-		}
-
 		/**
 		 * Fires after a post pingback has been sent.
 		 *
@@ -6500,8 +6421,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		 */
 		do_action( 'pingback_post', $comment_ID );
 
-		/* translators: 1: URL of the page linked from, 2: URL of the page linked to */
-		return sprintf( __( 'Pingback from %1$s to %2$s registered. Keep the web talking! :-)' ), $pagelinkedfrom, $pagelinkedto );
+		return sprintf(__('Pingback from %1$s to %2$s registered. Keep the web talking! :-)'), $pagelinkedfrom, $pagelinkedto);
 	}
 
 	/**

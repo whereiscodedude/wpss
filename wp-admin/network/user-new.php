@@ -10,6 +10,9 @@
 /** Load WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
+if ( ! is_multisite() )
+	wp_die( __( 'Multisite support is not enabled.' ) );
+
 if ( ! current_user_can('create_users') )
 	wp_die(__('Sorry, you are not allowed to add users to this network.'));
 
@@ -23,8 +26,8 @@ get_current_screen()->add_help_tab( array(
 
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __('For more information:') . '</strong></p>' .
-	'<p>' . __('<a href="https://codex.wordpress.org/Network_Admin_Users_Screen">Documentation on Network Users</a>') . '</p>' .
-	'<p>' . __('<a href="https://wordpress.org/support/forum/multisite/">Support Forums</a>') . '</p>'
+	'<p>' . __('<a href="https://codex.wordpress.org/Network_Admin_Users_Screen" target="_blank">Documentation on Network Users</a>') . '</p>' .
+	'<p>' . __('<a href="https://wordpress.org/support/forum/multisite/" target="_blank">Support Forums</a>') . '</p>'
 );
 
 if ( isset($_REQUEST['action']) && 'add-user' == $_REQUEST['action'] ) {
@@ -49,12 +52,12 @@ if ( isset($_REQUEST['action']) && 'add-user' == $_REQUEST['action'] ) {
 	 		$add_user_errors = new WP_Error( 'add_user_fail', __( 'Cannot add user.' ) );
 		} else {
 			/**
-			 * Fires after a new user has been created via the network user-new.php page.
-			 *
-			 * @since 4.4.0
-			 *
-			 * @param int $user_id ID of the newly created user.
-			 */
+			  * Fires after a new user has been created via the network user-new.php page.
+			  *
+			  * @since 4.4.0
+			  *
+			  * @param int $user_id ID of the newly created user.
+			  */
 			do_action( 'network_user_new_created_user', $user_id );
 			wp_redirect( add_query_arg( array('update' => 'added', 'user_id' => $user_id ), 'user-new.php' ) );
 			exit;

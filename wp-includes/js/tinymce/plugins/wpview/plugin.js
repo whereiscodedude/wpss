@@ -88,7 +88,7 @@
 				}
 			}
 
-			event.content = wp.mce.views.setMarkers( event.content, editor );
+			event.content = wp.mce.views.setMarkers( event.content );
 		} );
 
 		// Replace any new markers nodes with views.
@@ -97,7 +97,7 @@
 		} );
 
 		// Empty view nodes for easier processing.
-		editor.on( 'preprocess hide', function( event ) {
+		editor.on( 'preprocess', function( event ) {
 			editor.$( 'div[data-wpview-text], p[data-wpview-marker]', event.node ).each( function( i, node ) {
 				node.innerHTML = '.';
 			} );
@@ -184,7 +184,7 @@
 				] );
 
 				editor.on( 'wptoolbar', function( event ) {
-					if ( ! event.collapsed && isView( event.element ) ) {
+					if ( isView( event.element ) ) {
 						event.toolbar = toolbar;
 					}
 				} );

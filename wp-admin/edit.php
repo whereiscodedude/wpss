@@ -162,10 +162,6 @@ if ( $doaction ) {
 				}
 			}
 			break;
-		default:
-			/** This action is documented in wp-admin/edit-comments.php */
-			$sendback = apply_filters( 'handle_bulk_actions-' . get_current_screen()->id, $sendback, $doaction, $post_ids );
-			break;
 	}
 
 	$sendback = remove_query_arg( array('action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view'), $sendback );
@@ -173,8 +169,8 @@ if ( $doaction ) {
 	wp_redirect($sendback);
 	exit();
 } elseif ( ! empty($_REQUEST['_wp_http_referer']) ) {
-	wp_redirect( remove_query_arg( array('_wp_http_referer', '_wpnonce'), wp_unslash($_SERVER['REQUEST_URI']) ) );
-	exit;
+	 wp_redirect( remove_query_arg( array('_wp_http_referer', '_wpnonce'), wp_unslash($_SERVER['REQUEST_URI']) ) );
+	 exit;
 }
 
 $wp_list_table->prepare_items();
@@ -225,8 +221,8 @@ if ( 'post' == $post_type ) {
 
 	get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __('For more information:') . '</strong></p>' .
-	'<p>' . __('<a href="https://codex.wordpress.org/Posts_Screen">Documentation on Managing Posts</a>') . '</p>' .
-	'<p>' . __('<a href="https://wordpress.org/support/">Support Forums</a>') . '</p>'
+	'<p>' . __('<a href="https://codex.wordpress.org/Posts_Screen" target="_blank">Documentation on Managing Posts</a>') . '</p>' .
+	'<p>' . __('<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 	);
 
 } elseif ( 'page' == $post_type ) {
@@ -246,8 +242,8 @@ if ( 'post' == $post_type ) {
 
 	get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __('For more information:') . '</strong></p>' .
-	'<p>' . __('<a href="https://codex.wordpress.org/Pages_Screen">Documentation on Managing Pages</a>') . '</p>' .
-	'<p>' . __('<a href="https://wordpress.org/support/">Support Forums</a>') . '</p>'
+	'<p>' . __('<a href="https://codex.wordpress.org/Pages_Screen" target="_blank">Documentation on Managing Pages</a>') . '</p>' .
+	'<p>' . __('<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 	);
 
 }
@@ -272,7 +268,7 @@ $bulk_messages = array();
 $bulk_messages['post'] = array(
 	'updated'   => _n( '%s post updated.', '%s posts updated.', $bulk_counts['updated'] ),
 	'locked'    => ( 1 == $bulk_counts['locked'] ) ? __( '1 post not updated, somebody is editing it.' ) :
-					_n( '%s post not updated, somebody is editing it.', '%s posts not updated, somebody is editing them.', $bulk_counts['locked'] ),
+	                   _n( '%s post not updated, somebody is editing it.', '%s posts not updated, somebody is editing them.', $bulk_counts['locked'] ),
 	'deleted'   => _n( '%s post permanently deleted.', '%s posts permanently deleted.', $bulk_counts['deleted'] ),
 	'trashed'   => _n( '%s post moved to the Trash.', '%s posts moved to the Trash.', $bulk_counts['trashed'] ),
 	'untrashed' => _n( '%s post restored from the Trash.', '%s posts restored from the Trash.', $bulk_counts['untrashed'] ),
@@ -280,7 +276,7 @@ $bulk_messages['post'] = array(
 $bulk_messages['page'] = array(
 	'updated'   => _n( '%s page updated.', '%s pages updated.', $bulk_counts['updated'] ),
 	'locked'    => ( 1 == $bulk_counts['locked'] ) ? __( '1 page not updated, somebody is editing it.' ) :
-					_n( '%s page not updated, somebody is editing it.', '%s pages not updated, somebody is editing them.', $bulk_counts['locked'] ),
+	                   _n( '%s page not updated, somebody is editing it.', '%s pages not updated, somebody is editing them.', $bulk_counts['locked'] ),
 	'deleted'   => _n( '%s page permanently deleted.', '%s pages permanently deleted.', $bulk_counts['deleted'] ),
 	'trashed'   => _n( '%s page moved to the Trash.', '%s pages moved to the Trash.', $bulk_counts['trashed'] ),
 	'untrashed' => _n( '%s page restored from the Trash.', '%s pages restored from the Trash.', $bulk_counts['untrashed'] ),
@@ -303,22 +299,16 @@ $bulk_counts = array_filter( $bulk_counts );
 require_once( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
 <div class="wrap">
-<h1 class="wp-heading-inline"><?php
+<h1><?php
 echo esc_html( $post_type_object->labels->name );
-?></h1>
-
-<?php
-if ( current_user_can( $post_type_object->cap->create_posts ) ) {
+if ( current_user_can( $post_type_object->cap->create_posts ) )
 	echo ' <a href="' . esc_url( admin_url( $post_new_file ) ) . '" class="page-title-action">' . esc_html( $post_type_object->labels->add_new ) . '</a>';
-}
 
 if ( isset( $_REQUEST['s'] ) && strlen( $_REQUEST['s'] ) ) {
 	/* translators: %s: search keywords */
 	printf( ' <span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', get_search_query() );
 }
-?>
-
-<hr class="wp-header-end">
+?></h1>
 
 <?php
 // If we have a bulk message to issue:
@@ -350,11 +340,6 @@ $_SERVER['REQUEST_URI'] = remove_query_arg( array( 'locked', 'skipped', 'updated
 
 <input type="hidden" name="post_status" class="post_status_page" value="<?php echo !empty($_REQUEST['post_status']) ? esc_attr($_REQUEST['post_status']) : 'all'; ?>" />
 <input type="hidden" name="post_type" class="post_type_page" value="<?php echo $post_type; ?>" />
-
-<?php if ( ! empty( $_REQUEST['author'] ) ) { ?>
-<input type="hidden" name="author" value="<?php echo esc_attr( $_REQUEST['author'] ); ?>" />
-<?php } ?>
-
 <?php if ( ! empty( $_REQUEST['show_sticky'] ) ) { ?>
 <input type="hidden" name="show_sticky" value="1" />
 <?php } ?>
