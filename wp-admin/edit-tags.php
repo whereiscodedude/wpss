@@ -18,7 +18,7 @@ if ( ! $tax )
 	wp_die( __( 'Invalid taxonomy.' ) );
 
 if ( ! in_array( $tax->name, get_taxonomies( array( 'show_ui' => true ) ) ) ) {
-	wp_die( __( 'Sorry, you are not allowed to edit terms in this taxonomy.' ) );
+   wp_die( __( 'Sorry, you are not allowed to edit terms in this taxonomy.' ) );
 }
 
 if ( ! current_user_can( $tax->cap->manage_terms ) ) {
@@ -527,9 +527,6 @@ do_action( "{$taxonomy}_add_form", $taxonomy );
 
 <div id="col-right">
 <div class="col-wrap">
-
-<?php $wp_list_table->views(); ?>
-
 <form id="posts-filter" method="post">
 <input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
 <input type="hidden" name="post_type" value="<?php echo esc_attr( $post_type ); ?>" />
@@ -547,7 +544,7 @@ do_action( "{$taxonomy}_add_form", $taxonomy );
 		/* translators: %s: default category */
 		__( 'Deleting a category does not delete the posts in that category. Instead, posts that were only assigned to the deleted category are set to the category %s.' ),
 		/** This filter is documented in wp-includes/category-template.php */
-		'<strong>' . apply_filters( 'the_category', get_cat_name( get_option( 'default_category') ), '', '' ) . '</strong>'
+		'<strong>' . apply_filters( 'the_category', get_cat_name( get_option( 'default_category') ) ) . '</strong>'
 	);
 	?>
 </p>

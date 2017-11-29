@@ -615,9 +615,9 @@ function wp_kses_one_attr( $string, $element ) {
  * @global array $allowedtags
  * @global array $allowedentitynames
  *
- * @param string|array $context The context for which to retrieve tags.
- *                              Allowed values are post, strip, data, entities, or
- *                              the name of a field filter such as pre_user_description.
+ * @param string $context The context for which to retrieve tags.
+ *                        Allowed values are post, strip, data,entities, or
+ *                        the name of a field filter such as pre_user_description.
  * @return array List of allowed tags and their allowed attributes.
  */
 function wp_kses_allowed_html( $context = '' ) {
@@ -629,8 +629,9 @@ function wp_kses_allowed_html( $context = '' ) {
 		 *
 		 * @since 3.5.0
 		 *
-		 * @param array  $context      Context to judge allowed tags by.
-		 * @param string $context_type Context type (explicit).
+		 * @param string $tags    Allowed tags, attributes, and/or entities.
+		 * @param string $context Context to judge allowed tags by. Allowed values are 'post',
+		 *                        'data', 'strip', 'entities', 'explicit', or the name of a filter.
 		 */
 		return apply_filters( 'wp_kses_allowed_html', $context, 'explicit' );
 	}
@@ -1093,9 +1094,8 @@ function wp_kses_hair_parse( $attr ) {
 		return array();
 	}
 
-	// phpcs:disable Squiz.Strings.ConcatenationSpacing.PaddingFound -- don't remove regex indentation
 	$regex =
-	'(?:'
+	  '(?:'
 	.     '[-a-zA-Z:]+'   // Attribute name.
 	. '|'
 	.     '\[\[?[^\[\]]+\]\]?' // Shortcode in the name position implies unfiltered_html.
@@ -1114,7 +1114,6 @@ function wp_kses_hair_parse( $attr ) {
 	.     '(?:\s|$)'      // If attribute has no value, space is required.
 	. ')'
 	. '\s*';              // Trailing space is optional except as mentioned above.
-	// phpcs:enable
 
 	// Although it is possible to reduce this procedure to a single regexp,
 	// we must run that regexp twice to get exactly the expected result.
