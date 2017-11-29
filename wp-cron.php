@@ -1,14 +1,7 @@
 <?php
 /**
- * A pseudo-CRON daemon for scheduling WordPress tasks
- *
- * WP Cron is triggered when the site receives a visit. In the scenario
- * where a site may not receive enough visits to execute scheduled tasks
- * in a timely manner, this file can be called directly or via a server
- * CRON daemon for X number of times.
- *
- * Defining DISABLE_WP_CRON as true and calling this file directly are
- * mutually exclusive and the latter does not rely on the former to work.
+ * WordPress Cron Implementation for hosts, which do not offer CRON or for which
+ * the user has not set up a CRON job pointing to this file.
  *
  * The HTTP request to this file will not slow down the visitor who happens to
  * visit when the cron job is needed to run.
@@ -33,18 +26,7 @@ if ( !defined('ABSPATH') ) {
 	require_once( dirname( __FILE__ ) . '/wp-load.php' );
 }
 
-/**
- * Retrieves the cron lock.
- *
- * Returns the uncached `doing_cron` transient.
- *
- * @ignore
- * @since 3.3.0
- *
- * @global wpdb $wpdb WordPress database abstraction object.
- *
- * @return string|false Value of the `doing_cron` transient, 0|false otherwise.
- */
+// Uncached doing_cron transient fetch
 function _get_cron_lock() {
 	global $wpdb;
 
@@ -73,9 +55,7 @@ $gmt_time = microtime( true );
 if ( isset($keys[0]) && $keys[0] > $gmt_time )
 	die();
 
-
-// The cron lock: a unix timestamp from when the cron was spawned.
-$doing_cron_transient = get_transient( 'doing_cron' );
+$doing_cron_transient = get_transient( 'doing_cron');
 
 // Use global $doing_wp_cron lock otherwise use the GET lock. If no lock, trying grabbing a new lock.
 if ( empty( $doing_wp_cron ) ) {
@@ -90,10 +70,7 @@ if ( empty( $doing_wp_cron ) ) {
 	}
 }
 
-/*
- * The cron lock (a unix timestamp set when the cron was spawned),
- * must match $doing_wp_cron (the "key").
- */
+// Check lock
 if ( $doing_cron_transient != $doing_wp_cron )
 	return;
 
@@ -117,7 +94,7 @@ foreach ( $crons as $timestamp => $cronhooks ) {
 			/**
 			 * Fires scheduled events.
 			 *
-			 * @ignore
+			 * @internal
 			 * @since 2.1.0
 			 *
 			 * @param string $hook Name of the hook that was scheduled to be fired.
