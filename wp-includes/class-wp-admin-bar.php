@@ -27,12 +27,13 @@ class WP_Admin_Bar {
 				return is_ssl() ? 'https://' : 'http://';
 
 			case 'menu' :
-				_deprecated_argument( 'WP_Admin_Bar', '3.3.0', 'Modify admin bar nodes with WP_Admin_Bar::get_node(), WP_Admin_Bar::add_node(), and WP_Admin_Bar::remove_node(), not the <code>menu</code> property.' );
+				_deprecated_argument( 'WP_Admin_Bar', '3.3', 'Modify admin bar nodes with WP_Admin_Bar::get_node(), WP_Admin_Bar::add_node(), and WP_Admin_Bar::remove_node(), not the <code>menu</code> property.' );
 				return array(); // Sorry, folks.
 		}
 	}
 
 	/**
+	 * @access public
 	 */
 	public function initialize() {
 		$this->user = new stdClass;
@@ -95,10 +96,7 @@ class WP_Admin_Bar {
 	}
 
 	/**
-	 * Adds a node to the menu.
-	 *
-	 * @since 3.1.0
-	 * @since 4.5.0 Added the ability to pass 'lang' and 'dir' meta data.
+	 * Add a node to the menu.
 	 *
 	 * @param array $args {
 	 *     Arguments for adding a node.
@@ -108,7 +106,7 @@ class WP_Admin_Bar {
 	 *     @type string $parent Optional. ID of the parent node.
 	 *     @type string $href   Optional. Link for the item.
 	 *     @type bool   $group  Optional. Whether or not the node is a group. Default false.
-	 *     @type array  $meta   Meta data including the following keys: 'html', 'class', 'rel', 'lang', 'dir',
+	 *     @type array  $meta   Meta data including the following keys: 'html', 'class', 'rel',
 	 *                          'onclick', 'target', 'title', 'tabindex'. Default empty.
 	 * }
 	 */
@@ -125,7 +123,7 @@ class WP_Admin_Bar {
 			if ( empty( $args['title'] ) )
 				return;
 
-			_doing_it_wrong( __METHOD__, __( 'The menu ID should not be empty.' ), '3.3.0' );
+			_doing_it_wrong( __METHOD__, __( 'The menu ID should not be empty.' ), '3.3' );
 			// Deprecated: Generate an ID from the title.
 			$args['id'] = esc_attr( sanitize_title( trim( $args['title'] ) ) );
 		}
@@ -256,6 +254,7 @@ class WP_Admin_Bar {
 	}
 
 	/**
+	 * @access public
 	 */
 	public function render() {
 		$root = $this->_bind();
@@ -434,11 +433,11 @@ class WP_Admin_Bar {
 		if ( $node->type != 'container' || empty( $node->children ) )
 			return;
 
-		echo '<div id="' . esc_attr( 'wp-admin-bar-' . $node->id ) . '" class="ab-group-container">';
-		foreach ( $node->children as $group ) {
-			$this->_render_group( $group );
-		}
-		echo '</div>';
+		?><div id="<?php echo esc_attr( 'wp-admin-bar-' . $node->id ); ?>" class="ab-group-container"><?php
+			foreach ( $node->children as $group ) {
+				$this->_render_group( $group );
+			}
+		?></div><?php
 	}
 
 	/**
@@ -457,11 +456,11 @@ class WP_Admin_Bar {
 		else
 			$class = '';
 
-		echo "<ul id='" . esc_attr( 'wp-admin-bar-' . $node->id ) . "'$class>";
-		foreach ( $node->children as $item ) {
-			$this->_render_item( $item );
-		}
-		echo '</ul>';
+		?><ul id="<?php echo esc_attr( 'wp-admin-bar-' . $node->id ); ?>"<?php echo $class; ?>><?php
+			foreach ( $node->children as $item ) {
+				$this->_render_item( $item );
+			}
+		?></ul><?php
 	}
 
 	/**
@@ -474,9 +473,8 @@ class WP_Admin_Bar {
 		$is_parent = ! empty( $node->children );
 		$has_link  = ! empty( $node->href );
 
-		// Allow only numeric values, then casted to integers, and allow a tabindex value of `0` for a11y.
-		$tabindex = ( isset( $node->meta['tabindex'] ) && is_numeric( $node->meta['tabindex'] ) ) ? (int) $node->meta['tabindex'] : '';
-		$aria_attributes = ( '' !== $tabindex ) ? ' tabindex="' . $tabindex . '"' : '';
+		$tabindex = isset( $node->meta['tabindex'] ) ? (int) $node->meta['tabindex'] : '';
+		$aria_attributes = $tabindex ? 'tabindex="' . $tabindex . '"' : '';
 
 		$menuclass = '';
 
@@ -491,65 +489,66 @@ class WP_Admin_Bar {
 		if ( $menuclass )
 			$menuclass = ' class="' . esc_attr( trim( $menuclass ) ) . '"';
 
-		echo "<li id='" . esc_attr( 'wp-admin-bar-' . $node->id ) . "'$menuclass>";
+		?>
 
-		if ( $has_link ) {
-			$attributes = array( 'onclick', 'target', 'title', 'rel', 'lang', 'dir' );
-			echo "<a class='ab-item'$aria_attributes href='" . esc_url( $node->href ) . "'";
-			if ( ! empty( $node->meta['onclick'] ) ) {
-				echo ' onclick="' . esc_js( $node->meta['onclick'] ) . '"';
-			}
-		} else {
-			$attributes = array( 'onclick', 'target', 'title', 'rel', 'lang', 'dir' );
-			echo '<div class="ab-item ab-empty-item"' . $aria_attributes;
-		}
+		<li id="<?php echo esc_attr( 'wp-admin-bar-' . $node->id ); ?>"<?php echo $menuclass; ?>><?php
+			if ( $has_link ):
+				?><a class="ab-item" <?php echo $aria_attributes; ?> href="<?php echo esc_url( $node->href ) ?>"<?php
+					if ( ! empty( $node->meta['onclick'] ) ) :
+						?> onclick="<?php echo esc_js( $node->meta['onclick'] ); ?>"<?php
+					endif;
+				if ( ! empty( $node->meta['target'] ) ) :
+					?> target="<?php echo esc_attr( $node->meta['target'] ); ?>"<?php
+				endif;
+				if ( ! empty( $node->meta['title'] ) ) :
+					?> title="<?php echo esc_attr( $node->meta['title'] ); ?>"<?php
+				endif;
+				if ( ! empty( $node->meta['rel'] ) ) :
+					?> rel="<?php echo esc_attr( $node->meta['rel'] ); ?>"<?php
+				endif;
+				?>><?php
+			else:
+				?><div class="ab-item ab-empty-item" <?php echo $aria_attributes;
+				if ( ! empty( $node->meta['title'] ) ) :
+					?> title="<?php echo esc_attr( $node->meta['title'] ); ?>"<?php
+				endif;
+				?>><?php
+			endif;
 
-		foreach ( $attributes as $attribute ) {
-			if ( ! empty( $node->meta[ $attribute ] ) ) {
-				echo " $attribute='" . esc_attr( $node->meta[ $attribute ] ) . "'";
-			}
-		}
+			echo $node->title;
 
-		echo ">{$node->title}";
+			if ( $has_link ) :
+				?></a><?php
+			else:
+				?></div><?php
+			endif;
 
-		if ( $has_link ) {
-			echo '</a>';
-		} else {
-			echo '</div>';
-		}
+			if ( $is_parent ) :
+				?><div class="ab-sub-wrapper"><?php
+					foreach ( $node->children as $group ) {
+						$this->_render_group( $group );
+					}
+				?></div><?php
+			endif;
 
-		if ( $is_parent ) {
-			echo '<div class="ab-sub-wrapper">';
-			foreach ( $node->children as $group ) {
-				$this->_render_group( $group );
-			}
-			echo '</div>';
-		}
+			if ( ! empty( $node->meta['html'] ) )
+				echo $node->meta['html'];
 
-		if ( ! empty( $node->meta['html'] ) ) {
-			echo $node->meta['html'];
-		}
-
-		echo '</li>';
+			?>
+		</li><?php
 	}
 
 	/**
-	 * Renders toolbar items recursively.
-	 *
-	 * @since 3.1.0
-	 * @deprecated 3.3.0 Use WP_Admin_Bar::_render_item() or WP_Admin_bar::render() instead.
-	 * @see WP_Admin_Bar::_render_item()
-	 * @see WP_Admin_Bar::render()
-	 *
 	 * @param string $id    Unused.
 	 * @param object $node
 	 */
 	public function recursive_render( $id, $node ) {
-		_deprecated_function( __METHOD__, '3.3.0', 'WP_Admin_bar::render(), WP_Admin_Bar::_render_item()' );
+		_deprecated_function( __METHOD__, '3.3', 'WP_Admin_bar::render(), WP_Admin_Bar::_render_item()' );
 		$this->_render_item( $node );
 	}
 
 	/**
+	 * @access public
 	 */
 	public function add_menus() {
 		// User related, aligned right.
