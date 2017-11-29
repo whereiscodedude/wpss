@@ -615,9 +615,9 @@ function wp_kses_one_attr( $string, $element ) {
  * @global array $allowedtags
  * @global array $allowedentitynames
  *
- * @param string|array $context The context for which to retrieve tags.
- *                              Allowed values are post, strip, data, entities, or
- *                              the name of a field filter such as pre_user_description.
+ * @param string $context The context for which to retrieve tags.
+ *                        Allowed values are post, strip, data,entities, or
+ *                        the name of a field filter such as pre_user_description.
  * @return array List of allowed tags and their allowed attributes.
  */
 function wp_kses_allowed_html( $context = '' ) {
@@ -629,8 +629,9 @@ function wp_kses_allowed_html( $context = '' ) {
 		 *
 		 * @since 3.5.0
 		 *
-		 * @param array  $context      Context to judge allowed tags by.
-		 * @param string $context_type Context type (explicit).
+		 * @param string $tags    Allowed tags, attributes, and/or entities.
+		 * @param string $context Context to judge allowed tags by. Allowed values are 'post',
+		 *                        'data', 'strip', 'entities', 'explicit', or the name of a filter.
 		 */
 		return apply_filters( 'wp_kses_allowed_html', $context, 'explicit' );
 	}
@@ -827,9 +828,8 @@ function wp_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 		$xhtml_slash = ' /';
 
 	// Are any attributes allowed at all for this element?
-	if ( ! isset( $allowed_html[ strtolower( $element ) ] ) || true === $allowed_html[ strtolower( $element ) ] || count( $allowed_html[ strtolower( $element ) ] ) == 0 ) {
+	if ( ! isset($allowed_html[strtolower($element)]) || count($allowed_html[strtolower($element)]) == 0 )
 		return "<$element$xhtml_slash>";
-	}
 
 	// Split it
 	$attrarr = wp_kses_hair($attr, $allowed_protocols);
@@ -1093,9 +1093,8 @@ function wp_kses_hair_parse( $attr ) {
 		return array();
 	}
 
-	// phpcs:disable Squiz.Strings.ConcatenationSpacing.PaddingFound -- don't remove regex indentation
 	$regex =
-	'(?:'
+	  '(?:'
 	.     '[-a-zA-Z:]+'   // Attribute name.
 	. '|'
 	.     '\[\[?[^\[\]]+\]\]?' // Shortcode in the name position implies unfiltered_html.
@@ -1114,7 +1113,6 @@ function wp_kses_hair_parse( $attr ) {
 	.     '(?:\s|$)'      // If attribute has no value, space is required.
 	. ')'
 	. '\s*';              // Trailing space is optional except as mentioned above.
-	// phpcs:enable
 
 	// Although it is possible to reduce this procedure to a single regexp,
 	// we must run that regexp twice to get exactly the expected result.
@@ -1451,7 +1449,6 @@ function wp_kses_normalize_entities2($matches) {
  * This function helps wp_kses_normalize_entities() to only accept valid Unicode
  * numeric entities in hex form.
  *
- * @since 2.7.0
  * @access private
  *
  * @param array $matches preg_replace_callback() matches array
@@ -1467,8 +1464,6 @@ function wp_kses_normalize_entities3($matches) {
 
 /**
  * Helper function to determine if a Unicode value is valid.
- *
- * @since 2.7.0
  *
  * @param int $i Unicode value
  * @return bool True if the value was a valid Unicode number
@@ -1502,8 +1497,6 @@ function wp_kses_decode_entities($string) {
 /**
  * Regex callback for wp_kses_decode_entities()
  *
- * @since 2.9.0
- *
  * @param array $match preg match
  * @return string
  */
@@ -1513,8 +1506,6 @@ function _wp_kses_decode_entities_chr( $match ) {
 
 /**
  * Regex callback for wp_kses_decode_entities()
- *
- * @since 2.9.0
  *
  * @param array $match preg match
  * @return string

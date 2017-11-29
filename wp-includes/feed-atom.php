@@ -14,25 +14,25 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
 do_action( 'rss_tag_pre', 'atom' );
 ?>
 <feed
-	xmlns="http://www.w3.org/2005/Atom"
-	xmlns:thr="http://purl.org/syndication/thread/1.0"
-	xml:lang="<?php bloginfo_rss( 'language' ); ?>"
-	xml:base="<?php bloginfo_rss('url') ?>/wp-atom.php"
-	<?php
-	/**
-	 * Fires at end of the Atom feed root to add namespaces.
-	 *
-	 * @since 2.0.0
-	 */
-	do_action( 'atom_ns' );
-	?>
->
+  xmlns="http://www.w3.org/2005/Atom"
+  xmlns:thr="http://purl.org/syndication/thread/1.0"
+  xml:lang="<?php bloginfo_rss( 'language' ); ?>"
+  xml:base="<?php bloginfo_rss('url') ?>/wp-atom.php"
+  <?php
+  /**
+   * Fires at end of the Atom feed root to add namespaces.
+   *
+   * @since 2.0.0
+   */
+  do_action( 'atom_ns' );
+  ?>
+ >
 	<title type="text"><?php wp_title_rss(); ?></title>
 	<subtitle type="text"><?php bloginfo_rss("description") ?></subtitle>
 
 	<updated><?php
 		$date = get_lastpostmodified( 'GMT' );
-		echo $date ? mysql2date( 'Y-m-d\TH:i:s\Z', $date, false ) : date( 'Y-m-d\TH:i:s\Z' );
+		echo $date ? mysql2date( 'Y-m-d\TH:i:s\Z', $date ) : date( 'Y-m-d\TH:i:s\Z' );
 	?></updated>
 
 	<link rel="alternate" type="<?php bloginfo_rss('html_type'); ?>" href="<?php bloginfo_rss('url') ?>" />

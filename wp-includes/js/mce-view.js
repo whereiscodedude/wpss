@@ -85,11 +85,10 @@
 		 * and creates a new instance for every match.
 		 *
 		 * @param {String} content The string to scan.
-		 * @param {tinymce.Editor} editor The editor.
 		 *
 		 * @return {String} The string with markers.
 		 */
-		setMarkers: function( content, editor ) {
+		setMarkers: function( content ) {
 			var pieces = [ { content: content } ],
 				self = this,
 				instance, current;
@@ -116,7 +115,6 @@
 							pieces.push( { content: remaining.substring( 0, result.index ) } );
 						}
 
-						result.options.editor = editor;
 						instance = self.createInstance( type, result.content, result.options );
 						text = instance.loader ? '.' : instance.text;
 
@@ -280,7 +278,7 @@
 
 	wp.mce.View.extend = Backbone.View.extend;
 
-	_.extend( wp.mce.View.prototype, /** @lends wp.mce.View.prototype */{
+	_.extend( wp.mce.View.prototype, {
 
 		/**
 		 * The content.
@@ -428,7 +426,6 @@
 		 */
 		replaceMarkers: function() {
 			this.getMarkers( function( editor, node ) {
-				var selected = node === editor.selection.getNode();
 				var $viewNode;
 
 				if ( ! this.loader && $( node ).text() !== tinymce.DOM.decode( this.text ) ) {
@@ -441,13 +438,6 @@
 				);
 
 				editor.$( node ).replaceWith( $viewNode );
-
-				if ( selected ) {
-					setTimeout( function() {
-						editor.selection.select( $viewNode[0] );
-						editor.selection.collapse();
-					} );
-				}
 			} );
 		},
 
@@ -468,7 +458,7 @@
 		 * @param {Boolean}  rendered Only set for (un)rendered nodes. Optional.
 		 */
 		setContent: function( content, callback, rendered ) {
-			if ( _.isObject( content ) && ( content.sandbox || content.head || content.body.indexOf( '<script' ) !== -1 ) ) {
+			if ( _.isObject( content ) && content.body.indexOf( '<script' ) !== -1 ) {
 				this.setIframes( content.head || '', content.body, callback, rendered );
 			} else if ( _.isString( content ) && content.indexOf( '<script' ) !== -1 ) {
 				this.setIframes( '', content, callback, rendered );
@@ -592,9 +582,6 @@
 									'display: none;' +
 									'content: "";' +
 								'}' +
-								'iframe {' +
-									'max-width: 100%;' +
-								'}' +
 							'</style>' +
 						'</head>' +
 						'<body id="wpview-iframe-sandbox" class="' + bodyClasses + '">' +
@@ -634,22 +621,10 @@
 				}
 
 				function reload() {
-					if ( ! editor.isHidden() ) {
-						$( node ).data( 'rendered', null );
+					$( node ).data( 'rendered', null );
 
-						setTimeout( function() {
-							wp.mce.views.render();
-						} );
-					}
-				}
-
-				function addObserver() {
-					observer = new MutationObserver( _.debounce( resize, 100 ) );
-
-					observer.observe( iframeDoc.body, {
-						attributes: true,
-						childList: true,
-						subtree: true
+					setTimeout( function() {
+						wp.mce.views.render();
 					} );
 				}
 
@@ -658,11 +633,13 @@
 				MutationObserver = iframeWin.MutationObserver || iframeWin.WebKitMutationObserver || iframeWin.MozMutationObserver;
 
 				if ( MutationObserver ) {
-					if ( ! iframeDoc.body ) {
-						iframeDoc.addEventListener( 'DOMContentLoaded', addObserver, false );
-					} else {
-						addObserver();
-					}
+					observer = new MutationObserver( _.debounce( resize, 100 ) );
+
+					observer.observe( iframeDoc.body, {
+						attributes: true,
+						childList: true,
+						subtree: true
+					} );
 				} else {
 					for ( i = 1; i < 6; i++ ) {
 						setTimeout( resize, i * 700 );
@@ -852,7 +829,7 @@
 		action: 'parse-media-shortcode',
 
 		initialize: function() {
-			var self = this, maxwidth = null;
+			var self = this;
 
 			if ( this.url ) {
 				this.loader = false;
@@ -861,16 +838,10 @@
 				} );
 			}
 
-			// Obtain the target width for the embed.
-			if ( self.editor ) {
-				maxwidth = self.editor.iframeElement.clientWidth - 20; // Minus the sum of horizontal margins and borders.
-			}
-
 			wp.ajax.post( this.action, {
 				post_ID: media.view.settings.post.id,
 				type: this.shortcode.tag,
-				shortcode: this.shortcode.string(),
-				maxwidth: maxwidth
+				shortcode: this.shortcode.string()
 			} )
 			.done( function( response ) {
 				self.render( response );

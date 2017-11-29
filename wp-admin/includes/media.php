@@ -274,8 +274,7 @@ function media_handle_upload($file_id, $post_id, $post_data = array(), $override
 
 	$time = current_time('mysql');
 	if ( $post = get_post($post_id) ) {
-		// The post date doesn't usually matter for pages, so don't backdate this upload.
-		if ( 'page' !== $post->post_type && substr( $post->post_date, 0, 4 ) > 0 )
+		if ( substr( $post->post_date, 0, 4 ) > 0 )
 			$time = $post->post_date;
 	}
 
@@ -379,7 +378,7 @@ function media_handle_upload($file_id, $post_id, $post_data = array(), $override
 	unset( $attachment['ID'] );
 
 	// Save the data
-	$id = wp_insert_attachment( $attachment, $file, $post_id, true );
+	$id = wp_insert_attachment($attachment, $file, $post_id);
 	if ( !is_wp_error($id) ) {
 		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
 	}
@@ -525,14 +524,9 @@ if ( is_string( $content_func ) ) {
 	 */
 	do_action( "admin_head_{$content_func}" );
 }
-
-$body_id_attr = '';
-if ( isset( $GLOBALS['body_id'] ) ) {
-	$body_id_attr = ' id="' . $GLOBALS['body_id'] . '"';
-}
 ?>
 </head>
-<body<?php echo $body_id_attr; ?> class="wp-core-ui no-js">
+<body<?php if ( isset($GLOBALS['body_id']) ) echo ' id="' . $GLOBALS['body_id'] . '"'; ?> class="wp-core-ui no-js">
 <script type="text/javascript">
 document.body.className = document.body.className.replace('no-js', 'js');
 </script>
@@ -858,12 +852,11 @@ function wp_media_upload_handler() {
  *
  * @since 2.6.0
  * @since 4.2.0 Introduced the `$return` parameter.
- * @since 4.8.0 Introduced the 'id' option within the `$return` parameter.
  *
  * @param string $file    The URL of the image to download.
  * @param int    $post_id The post ID the media is to be associated with.
  * @param string $desc    Optional. Description of the image.
- * @param string $return  Optional. Accepts 'html' (image tag html) or 'src' (URL), or 'id' (attachment ID). Default 'html'.
+ * @param string $return  Optional. Accepts 'html' (image tag html) or 'src' (URL). Default 'html'.
  * @return string|WP_Error Populated HTML img tag on success, WP_Error object otherwise.
  */
 function media_sideload_image( $file, $post_id, $desc = null, $return = 'html' ) {
@@ -892,9 +885,6 @@ function media_sideload_image( $file, $post_id, $desc = null, $return = 'html' )
 		// If error storing permanently, unlink.
 		if ( is_wp_error( $id ) ) {
 			@unlink( $file_array['tmp_name'] );
-			return $id;
-		// If attachment id was requested, return it early.
-		} elseif ( $return === 'id' ) {
 			return $id;
 		}
 
@@ -1509,12 +1499,12 @@ function get_media_item( $attachment_id, $args = null ) {
 			$delete = "<a href='" . wp_nonce_url( "post.php?action=delete&amp;post=$attachment_id", 'delete-post_' . $attachment_id ) . "' id='del[$attachment_id]' class='delete-permanently'>" . __( 'Delete Permanently' ) . '</a>';
 		} elseif ( !MEDIA_TRASH ) {
 			$delete = "<a href='#' class='del-link' onclick=\"document.getElementById('del_attachment_$attachment_id').style.display='block';return false;\">" . __( 'Delete' ) . "</a>
-				<div id='del_attachment_$attachment_id' class='del-attachment' style='display:none;'>" .
-				/* translators: %s: file name */
-				'<p>' . sprintf( __( 'You are about to delete %s.' ), '<strong>' . $filename . '</strong>' ) . "</p>
-				<a href='" . wp_nonce_url( "post.php?action=delete&amp;post=$attachment_id", 'delete-post_' . $attachment_id ) . "' id='del[$attachment_id]' class='button'>" . __( 'Continue' ) . "</a>
-				<a href='#' class='button' onclick=\"this.parentNode.style.display='none';return false;\">" . __( 'Cancel' ) . "</a>
-				</div>";
+			 <div id='del_attachment_$attachment_id' class='del-attachment' style='display:none;'>" .
+			 /* translators: %s: file name */
+			'<p>' . sprintf( __( 'You are about to delete %s.' ), '<strong>' . $filename . '</strong>' ) . "</p>
+			 <a href='" . wp_nonce_url( "post.php?action=delete&amp;post=$attachment_id", 'delete-post_' . $attachment_id ) . "' id='del[$attachment_id]' class='button'>" . __( 'Continue' ) . "</a>
+			 <a href='#' class='button' onclick=\"this.parentNode.style.display='none';return false;\">" . __( 'Cancel' ) . "</a>
+			 </div>";
 		} else {
 			$delete = "<a href='" . wp_nonce_url( "post.php?action=trash&amp;post=$attachment_id", 'trash-post_' . $attachment_id ) . "' id='del[$attachment_id]' class='delete'>" . __( 'Move to Trash' ) . "</a>
 			<a href='" . wp_nonce_url( "post.php?action=untrash&amp;post=$attachment_id", 'untrash-post_' . $attachment_id ) . "' id='undo[$attachment_id]' class='undo hidden'>" . __( 'Undo' ) . "</a>";
@@ -1874,16 +1864,15 @@ $post_params = array(
  */
 $post_params = apply_filters( 'upload_post_params', $post_params );
 
-/*
- * Since 4.9 the `runtimes` setting is hardcoded in our version of Plupload to `html5,html4`,
- * and the `flash_swf_url` and `silverlight_xap_url` are not used.
- */
 $plupload_init = array(
+	'runtimes'            => 'html5,flash,silverlight,html4',
 	'browse_button'       => 'plupload-browse-button',
 	'container'           => 'plupload-upload-ui',
 	'drop_element'        => 'drag-drop-area',
 	'file_data_name'      => 'async-upload',
 	'url'                 => $upload_action_url,
+	'flash_swf_url'       => includes_url( 'js/plupload/plupload.flash.swf' ),
+	'silverlight_xap_url' => includes_url( 'js/plupload/plupload.silverlight.xap' ),
 	'filters' => array(
 		'max_file_size'   => $max_upload_size . 'b',
 	),
@@ -2671,7 +2660,7 @@ function media_upload_flash_bypass() {
 function media_upload_html_bypass() {
 	?>
 	<p class="upload-html-bypass hide-if-no-js">
-		<?php _e('You are using the browser&#8217;s built-in file uploader. The WordPress uploader includes multiple file selection and drag and drop capability. <a href="#">Switch to the multi-file uploader</a>.'); ?>
+	   <?php _e('You are using the browser&#8217;s built-in file uploader. The WordPress uploader includes multiple file selection and drag and drop capability. <a href="#">Switch to the multi-file uploader</a>.'); ?>
 	</p>
 	<?php
 }
@@ -2743,22 +2732,15 @@ function edit_form_image_editor( $post ) {
 			$nonce = wp_create_nonce( "image_editor-$post->ID" );
 			$image_edit_button = "<input type='button' id='imgedit-open-btn-$post->ID' onclick='imageEdit.open( $post->ID, \"$nonce\" )' class='button' value='" . esc_attr__( 'Edit Image' ) . "' /> <span class='spinner'></span>";
 		}
-
-		$open_style = $not_open_style = '';
-		if ( $open ) {
-			$open_style = ' style="display:none"';
-		} else {
-			$not_open_style = ' style="display:none"';
-		}
 	?>
 
 		<div class="imgedit-response" id="imgedit-response-<?php echo $attachment_id; ?>"></div>
 
-		<div<?php echo $open_style; ?> class="wp_attachment_image wp-clearfix" id="media-head-<?php echo $attachment_id; ?>">
+		<div<?php if ( $open ) echo ' style="display:none"'; ?> class="wp_attachment_image wp-clearfix" id="media-head-<?php echo $attachment_id; ?>">
 			<p id="thumbnail-head-<?php echo $attachment_id; ?>"><img class="thumbnail" src="<?php echo set_url_scheme( $thumb_url[0] ); ?>" style="max-width:100%" alt="" /></p>
 			<p><?php echo $image_edit_button; ?></p>
 		</div>
-		<div<?php echo $not_open_style; ?> class="image-editor" id="image-editor-<?php echo $attachment_id; ?>">
+		<div<?php if ( ! $open ) echo ' style="display:none"'; ?> class="image-editor" id="image-editor-<?php echo $attachment_id; ?>">
 			<?php if ( $open ) wp_image_editor( $attachment_id ); ?>
 		</div>
 	<?php
@@ -2912,10 +2894,6 @@ function attachment_submitbox_metadata() {
 		endif;
 
 	if ( preg_match( '#^(audio|video)/#', $post->post_mime_type ) ) {
-		$fields = array(
-			'length_formatted' => __( 'Length:' ),
-			'bitrate'          => __( 'Bitrate:' ),
-		);
 
 		/**
 		 * Filters the audio and video metadata fields to be shown in the publish meta box.
@@ -2924,12 +2902,13 @@ function attachment_submitbox_metadata() {
 		 * metadata key, and the value should be the desired label.
 		 *
 		 * @since 3.7.0
-		 * @since 4.9.0 Added the `$post` parameter.
 		 *
-		 * @param array   $fields An array of the attachment metadata keys and labels.
-		 * @param WP_Post $post   WP_Post object for the current attachment.
+		 * @param array $fields An array of the attachment metadata keys and labels.
 		 */
-		$fields = apply_filters( 'media_submitbox_misc_sections', $fields, $post );
+		$fields = apply_filters( 'media_submitbox_misc_sections', array(
+			'length_formatted' => __( 'Length:' ),
+			'bitrate'          => __( 'Bitrate:' ),
+		) );
 
 		foreach ( $fields as $key => $label ) {
 			if ( empty( $meta[ $key ] ) ) {
@@ -2954,11 +2933,6 @@ function attachment_submitbox_metadata() {
 	<?php
 		}
 
-		$fields = array(
-			'dataformat' => __( 'Audio Format:' ),
-			'codec'      => __( 'Audio Codec:' )
-		);
-
 		/**
 		 * Filters the audio attachment metadata fields to be shown in the publish meta box.
 		 *
@@ -2966,12 +2940,13 @@ function attachment_submitbox_metadata() {
 		 * metadata key, and the value should be the desired label.
 		 *
 		 * @since 3.7.0
-		 * @since 4.9.0 Added the `$post` parameter.
 		 *
-		 * @param array   $fields An array of the attachment metadata keys and labels.
-		 * @param WP_Post $post   WP_Post object for the current attachment.
+		 * @param array $fields An array of the attachment metadata keys and labels.
 		 */
-		$audio_fields = apply_filters( 'audio_submitbox_misc_sections', $fields, $post );
+		$audio_fields = apply_filters( 'audio_submitbox_misc_sections', array(
+			'dataformat' => __( 'Audio Format:' ),
+			'codec'      => __( 'Audio Codec:' )
+		) );
 
 		foreach ( $audio_fields as $key => $label ) {
 			if ( empty( $meta['audio'][ $key ] ) ) {
@@ -3095,32 +3070,9 @@ function wp_read_video_metadata( $file ) {
 		$metadata['audio'] = $data['audio'];
 	}
 
-	if ( empty( $metadata['created_timestamp'] ) ) {
-		$created_timestamp = wp_get_media_creation_timestamp( $data );
-
-		if ( $created_timestamp !== false ) {
-			$metadata['created_timestamp'] = $created_timestamp;
-		}
-	}
-
 	wp_add_id3_tag_data( $metadata, $data );
 
-	$file_format = isset( $metadata['fileformat'] ) ? $metadata['fileformat'] : null;
-
-	/**
-	 * Filters the array of metadata retrieved from a video.
-	 *
-	 * In core, usually this selection is what is stored.
-	 * More complete data can be parsed from the `$data` parameter.
-	 *
-	 * @since 4.9.0
-	 *
-	 * @param array  $metadata       Filtered Video metadata.
-	 * @param string $file           Path to video file.
-	 * @param string $file_format    File format of video, as analyzed by getID3.
-	 * @param string $data           Raw metadata from getID3.
-	 */
-	return apply_filters( 'wp_read_video_metadata', $metadata, $file, $file_format, $data );
+	return $metadata;
 }
 
 /**
@@ -3166,55 +3118,6 @@ function wp_read_audio_metadata( $file ) {
 	wp_add_id3_tag_data( $metadata, $data );
 
 	return $metadata;
-}
-
-/**
- * Parse creation date from media metadata.
- *
- * The getID3 library doesn't have a standard method for getting creation dates,
- * so the location of this data can vary based on the MIME type.
- *
- * @since 4.9.0
- *
- * @link https://github.com/JamesHeinrich/getID3/blob/master/structure.txt
- *
- * @param array $metadata The metadata returned by getID3::analyze().
- * @return int|bool A UNIX timestamp for the media's creation date if available
- *                  or a boolean FALSE if a timestamp could not be determined.
- */
-function wp_get_media_creation_timestamp( $metadata ) {
-	$creation_date = false;
-
-	if ( empty( $metadata['fileformat'] ) ) {
-		return $creation_date;
-	}
-
-	switch ( $metadata['fileformat'] ) {
-		case 'asf':
-			if ( isset( $metadata['asf']['file_properties_object']['creation_date_unix'] ) ) {
-				$creation_date = (int) $metadata['asf']['file_properties_object']['creation_date_unix'];
-			}
-			break;
-
-		case 'matroska':
-		case 'webm':
-			if ( isset( $metadata['matroska']['comments']['creation_time']['0'] ) ) {
-				$creation_date = strtotime( $metadata['matroska']['comments']['creation_time']['0'] );
-			}
-			elseif ( isset( $metadata['matroska']['info']['0']['DateUTC_unix'] ) ) {
-				$creation_date = (int) $metadata['matroska']['info']['0']['DateUTC_unix'];
-			}
-			break;
-
-		case 'quicktime':
-		case 'mp4':
-			if ( isset( $metadata['quicktime']['moov']['subatoms']['0']['creation_time_unix'] ) ) {
-				$creation_date = (int) $metadata['quicktime']['moov']['subatoms']['0']['creation_time_unix'];
-			}
-			break;
-	}
-
-	return $creation_date;
 }
 
 /**

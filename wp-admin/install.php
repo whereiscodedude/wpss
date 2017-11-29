@@ -49,7 +49,7 @@ nocache_headers();
 $step = isset( $_GET['step'] ) ? (int) $_GET['step'] : 0;
 
 /**
- * Display installation header.
+ * Display install header.
  *
  * @since 2.5.0
  *
@@ -86,8 +86,6 @@ function display_header( $body_classes = '' ) {
  * Display installer setup form.
  *
  * @since 2.8.0
- *
- * @global wpdb $wpdb WordPress database abstraction object.
  *
  * @param string|null $error
  */
@@ -195,7 +193,7 @@ function display_setup_form( $error = null ) {
 						<?php
 						/** This action is documented in wp-admin/options-reading.php */
 						do_action( 'blog_privacy_selector' );
-					} else { ?>
+					 } else { ?>
 						<label for="blog_public"><input name="blog_public" type="checkbox" id="blog_public" value="0" <?php checked( 0, $blog_public ); ?> />
 						<?php _e( 'Discourage search engines from indexing this site' ); ?></label>
 						<p class="description"><?php _e( 'It is up to search engines to honor this request.' ); ?></p>
@@ -281,7 +279,7 @@ if ( defined( 'DO_NOT_UPGRADE_GLOBAL_TABLES' ) ) {
  */
 $language = '';
 if ( ! empty( $_REQUEST['language'] ) ) {
-	$language = preg_replace( '/[^a-zA-Z0-9_]/', '', $_REQUEST['language'] );
+	$language = preg_replace( '/[^a-zA-Z_]/', '', $_REQUEST['language'] );
 } elseif ( isset( $GLOBALS['wp_local_package'] ) ) {
 	$language = $GLOBALS['wp_local_package'];
 }
