@@ -423,7 +423,7 @@ class WP_Query {
 	 * @since 3.2.0
 	 * @var bool
 	 */
-	public $thumbnails_cached = false;
+	 public $thumbnails_cached = false;
 
 	/**
 	 * Cached list of search stopwords.
@@ -3362,7 +3362,7 @@ class WP_Query {
 	 *
 	 * @since 4.0.0
 	 *
-	 * @param string   $name      Method to call.
+	 * @param callable $name      Method to call.
 	 * @param array    $arguments Arguments to pass when calling.
 	 * @return mixed|false Return value of the callback, false otherwise.
 	 */

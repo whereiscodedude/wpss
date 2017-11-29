@@ -1016,7 +1016,7 @@ function post_custom( $key = '' ) {
  */
 function the_meta() {
 	if ( $keys = get_post_custom_keys() ) {
-		$li_html = '';
+		echo "<ul class='post-meta'>\n";
 		foreach ( (array) $keys as $key ) {
 			$keyt = trim( $key );
 			if ( is_protected_meta( $keyt, 'post' ) ) {
@@ -1041,12 +1041,9 @@ function the_meta() {
 			 * @param string $key   Meta key.
 			 * @param string $value Meta value.
 			 */
-			$li_html .= apply_filters( 'the_meta_key', $html, $key, $value );
+			echo apply_filters( 'the_meta_key', $html, $key, $value );
 		}
-
-		if ( $li_html ) {
-			echo "<ul class='post-meta'>\n{$li_html}</ul>\n";
-		}
+		echo "</ul>\n";
 	}
 }
 

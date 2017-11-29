@@ -379,12 +379,7 @@ class WP_Term_Query {
 			}
 
 			if ( ! $in_hierarchy ) {
-				if ( 'count' == $args['fields'] ) {
-					return 0;
-				} else {
-					$this->terms = array();
-					return $this->terms;
-				}
+				return array();
 			}
 		}
 

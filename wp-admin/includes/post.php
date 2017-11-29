@@ -64,8 +64,7 @@ function _wp_translate_postdata( $update = false, $post_data = null ) {
 	}
 
 	if ( isset( $post_data['user_ID'] ) && ( $post_data['post_author'] != $post_data['user_ID'] )
-		&& ! current_user_can( $ptype->cap->edit_others_posts ) ) {
-
+		 && ! current_user_can( $ptype->cap->edit_others_posts ) ) {
 		if ( $update ) {
 			if ( 'page' == $post_data['post_type'] )
 				return new WP_Error( 'edit_others_pages', __( 'Sorry, you are not allowed to edit pages as this user.' ) );
@@ -328,11 +327,46 @@ function edit_post( $post_data = null ) {
 	// Convert taxonomy input to term IDs, to avoid ambiguity.
 	if ( isset( $post_data['tax_input'] ) ) {
 		foreach ( (array) $post_data['tax_input'] as $taxonomy => $terms ) {
-			$tax_object = get_taxonomy( $taxonomy );
-
-			if ( $tax_object && isset( $tax_object->meta_box_sanitize_cb ) ) {
-				$post_data['tax_input'][ $taxonomy ] = call_user_func_array( $tax_object->meta_box_sanitize_cb, array( $taxonomy, $terms ) );
+			// Hierarchical taxonomy data is already sent as term IDs, so no conversion is necessary.
+			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
+				continue;
 			}
+
+			/*
+			 * Assume that a 'tax_input' string is a comma-separated list of term names.
+			 * Some languages may use a character other than a comma as a delimiter, so we standardize on
+			 * commas before parsing the list.
+			 */
+			if ( ! is_array( $terms ) ) {
+				$comma = _x( ',', 'tag delimiter' );
+				if ( ',' !== $comma ) {
+					$terms = str_replace( $comma, ',', $terms );
+				}
+				$terms = explode( ',', trim( $terms, " \n\t\r\0\x0B," ) );
+			}
+
+			$clean_terms = array();
+			foreach ( $terms as $term ) {
+				// Empty terms are invalid input.
+				if ( empty( $term ) ) {
+					continue;
+				}
+
+				$_term = get_terms( $taxonomy, array(
+					'name' => $term,
+					'fields' => 'ids',
+					'hide_empty' => false,
+				) );
+
+				if ( ! empty( $_term ) ) {
+					$clean_terms[] = intval( $_term[0] );
+				} else {
+					// No existing term was found, so pass the string. A new term will be created.
+					$clean_terms[] = $term;
+				}
+			}
+
+			$post_data['tax_input'][ $taxonomy ] = $clean_terms;
 		}
 	}
 
@@ -1835,62 +1869,4 @@ function redirect_post($post_id = '') {
 	 */
 	wp_redirect( apply_filters( 'redirect_post_location', $location, $post_id ) );
 	exit;
-}
-
-/**
- * Sanitizes POST values from a checkbox taxonomy metabox.
- *
- * @since 5.0.0
- *
- * @param mixed $terms Raw term data from the 'tax_input' field.
- * @return array
- */
-function taxonomy_meta_box_sanitize_cb_checkboxes( $taxonmy, $terms ) {
-	return array_map( 'intval', $terms );
-}
-
-/**
- * Sanitizes POST values from an input taxonomy metabox.
- *
- * @since 5.0.0
- *
- * @param mixed $terms Raw term data from the 'tax_input' field.
- * @return array
- */
-function taxonomy_meta_box_sanitize_cb_input( $taxonomy, $terms ) {
-	/*
-	 * Assume that a 'tax_input' string is a comma-separated list of term names.
-	 * Some languages may use a character other than a comma as a delimiter, so we standardize on
-	 * commas before parsing the list.
-	 */
-	if ( ! is_array( $terms ) ) {
-		$comma = _x( ',', 'tag delimiter' );
-		if ( ',' !== $comma ) {
-			$terms = str_replace( $comma, ',', $terms );
-		}
-		$terms = explode( ',', trim( $terms, " \n\t\r\0\x0B," ) );
-	}
-
-	$clean_terms = array();
-	foreach ( $terms as $term ) {
-		// Empty terms are invalid input.
-		if ( empty( $term ) ) {
-			continue;
-		}
-
-		$_term = get_terms( $taxonomy, array(
-			'name' => $term,
-			'fields' => 'ids',
-			'hide_empty' => false,
-		) );
-
-		if ( ! empty( $_term ) ) {
-			$clean_terms[] = intval( $_term[0] );
-		} else {
-			// No existing term was found, so pass the string. A new term will be created.
-			$clean_terms[] = $term;
-		}
-	}
-
-	return $clean_terms;
 }
