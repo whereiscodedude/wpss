@@ -18,6 +18,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var string
+	 * @access public
 	 */
 	public $action;
 
@@ -27,6 +28,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var string
+	 * @access public
 	 */
 	public $base;
 
@@ -35,6 +37,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.4.0
 	 * @var int
+	 * @access private
 	 */
 	private $columns = 0;
 
@@ -43,6 +46,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var string
+	 * @access public
 	 */
 	public $id;
 
@@ -51,6 +55,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.5.0
 	 * @var string
+	 * @access protected
 	 */
 	protected $in_admin;
 
@@ -62,6 +67,7 @@ final class WP_Screen {
 	 * @since 3.3.0
 	 * @deprecated 3.5.0
 	 * @var bool
+	 * @access public
 	 */
 	public $is_network;
 
@@ -73,6 +79,7 @@ final class WP_Screen {
 	 * @since 3.3.0
 	 * @deprecated 3.5.0
 	 * @var bool
+	 * @access public
 	 */
 	public $is_user;
 
@@ -83,6 +90,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var string
+	 * @access public
 	 */
 	public $parent_base;
 
@@ -92,6 +100,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var string
+	 * @access public
 	 */
 	public $parent_file;
 
@@ -102,6 +111,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var string
+	 * @access public
 	 */
 	public $post_type;
 
@@ -110,6 +120,7 @@ final class WP_Screen {
 	 * The 'edit-tags.php?taxonomy=category' screen has a taxonomy of 'category'.
 	 * @since 3.3.0
 	 * @var string
+	 * @access public
 	 */
 	public $taxonomy;
 
@@ -118,6 +129,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var array
+	 * @access private
 	 */
 	private $_help_tabs = array();
 
@@ -126,6 +138,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var string
+	 * @access private
 	 */
 	private $_help_sidebar = '';
 
@@ -133,6 +146,7 @@ final class WP_Screen {
 	 * The accessible hidden headings and text associated with the screen, if any.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 * @var array
 	 */
 	private $_screen_reader_content = array();
@@ -141,6 +155,7 @@ final class WP_Screen {
 	 * Stores old string-based help.
 	 *
 	 * @static
+	 * @access private
 	 *
 	 * @var array
 	 */
@@ -151,6 +166,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var array
+	 * @access private
 	 */
 	private $_options = array();
 
@@ -160,6 +176,7 @@ final class WP_Screen {
 	 * @since 3.3.0
 	 *
 	 * @static
+	 * @access private
 	 *
 	 * @var array
 	 */
@@ -170,6 +187,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var bool
+	 * @access private
 	 */
 	private $_show_screen_options;
 
@@ -178,6 +196,7 @@ final class WP_Screen {
 	 *
 	 * @since 3.3.0
 	 * @var string
+	 * @access private
 	 */
 	private $_screen_settings;
 
@@ -185,6 +204,7 @@ final class WP_Screen {
 	 * Fetches a screen object.
 	 *
 	 * @since 3.3.0
+	 * @access public
 	 *
 	 * @static
 	 *
@@ -288,9 +308,6 @@ final class WP_Screen {
 					if ( null === $post_type && is_object_in_taxonomy( 'post', $taxonomy ? $taxonomy : 'post_tag' ) )
 						$post_type = 'post';
 					break;
-				case 'upload':
-					$post_type = 'attachment';
-					break;
 			}
 		}
 
@@ -380,6 +397,7 @@ final class WP_Screen {
 	 * Constructor
 	 *
 	 * @since 3.3.0
+	 * @access private
 	 */
 	private function __construct() {}
 
@@ -400,7 +418,9 @@ final class WP_Screen {
 	}
 
 	/**
-	 * Sets the old string-based contextual help for the screen for backward compatibility.
+	 * Sets the old string-based contextual help for the screen.
+	 *
+	 * For backwards compatibility.
 	 *
 	 * @since 3.3.0
 	 *
@@ -702,7 +722,7 @@ final class WP_Screen {
 	/**
 	 * Render the screen's help section.
 	 *
-	 * This will trigger the deprecated filters for backward compatibility.
+	 * This will trigger the deprecated filters for backwards compatibility.
 	 *
 	 * @since 3.3.0
 	 *
@@ -711,7 +731,7 @@ final class WP_Screen {
 	public function render_screen_meta() {
 
 		/**
-		 * Filters the legacy contextual help list.
+		 * Filter the legacy contextual help list.
 		 *
 		 * @since 2.7.0
 		 * @deprecated 3.3.0 Use get_current_screen()->add_help_tab() or
@@ -725,7 +745,7 @@ final class WP_Screen {
 		$old_help = isset( self::$_old_compat_help[ $this->id ] ) ? self::$_old_compat_help[ $this->id ] : '';
 
 		/**
-		 * Filters the legacy contextual help text.
+		 * Filter the legacy contextual help text.
 		 *
 		 * @since 2.7.0
 		 * @deprecated 3.3.0 Use get_current_screen()->add_help_tab() or
@@ -742,7 +762,7 @@ final class WP_Screen {
 		if ( empty( $old_help ) && ! $this->get_help_tabs() ) {
 
 			/**
-			 * Filters the default legacy contextual help text.
+			 * Filter the default legacy contextual help text.
 			 *
 			 * @since 2.8.0
 			 * @deprecated 3.3.0 Use get_current_screen()->add_help_tab() or
@@ -831,10 +851,10 @@ final class WP_Screen {
 		// Setup layout columns
 
 		/**
-		 * Filters the array of screen layout columns.
+		 * Filter the array of screen layout columns.
 		 *
 		 * This hook provides back-compat for plugins using the back-compat
-		 * Filters instead of add_screen_option().
+		 * filter instead of add_screen_option().
 		 *
 		 * @since 2.8.0
 		 *
@@ -912,7 +932,7 @@ final class WP_Screen {
 		}
 
 		/**
-		 * Filters the screen settings text displayed in the Screen Options tab.
+		 * Filter the screen settings text displayed in the Screen Options tab.
 		 *
 		 * This filter is currently only used on the Widgets screen to enable
 		 * accessibility mode.
@@ -928,7 +948,7 @@ final class WP_Screen {
 			$show_screen = true;
 
 		/**
-		 * Filters whether to show the Screen Options tab.
+		 * Filter whether to show the Screen Options tab.
 		 *
 		 * @since 3.2.0
 		 *
@@ -978,7 +998,7 @@ final class WP_Screen {
 		echo $this->_screen_settings;
 
 		/**
-		 * Filters whether to show the Screen Options submit button.
+		 * Filter whether to show the Screen Options submit button.
 		 *
 		 * @since 4.4.0
 		 *
@@ -1064,12 +1084,9 @@ final class WP_Screen {
 				continue;
 			}
 
-			/*
-			 * The Comments column uses HTML in the display name with some screen
-			 * reader text. Make sure to strip tags from the Comments column
-			 * title and any other custom column title plugins might add.
-			 */
-			$title = wp_strip_all_tags( $title );
+			if ( 'comments' == $column ) {
+				$title = __( 'Comments' );
+			}
 
 			$id = "$column-hide";
 			echo '<label>';
@@ -1148,7 +1165,7 @@ final class WP_Screen {
 			$per_page = apply_filters( 'edit_categories_per_page', $per_page );
 		} else {
 			/** This filter is documented in wp-admin/includes/class-wp-list-table.php */
-			$per_page = apply_filters( "{$option}", $per_page );
+			$per_page = apply_filters( $option, $per_page );
 		}
 
 		// Back compat
@@ -1178,8 +1195,6 @@ final class WP_Screen {
 	 * Render the list table view mode preferences.
 	 *
 	 * @since 4.4.0
-	 *
-	 * @global string $mode List table view mode.
 	 */
 	public function render_view_mode() {
 		$screen = get_current_screen();
@@ -1192,12 +1207,12 @@ final class WP_Screen {
 		$view_mode_post_types = get_post_types( array( 'hierarchical' => false, 'show_ui' => true ) );
 
 		/**
-		 * Filters the post types that have different view mode options.
+		 * Filter the post types that have different view mode options.
 		 *
 		 * @since 4.4.0
 		 *
 		 * @param array $view_mode_post_types Array of post types that can change view modes.
-		 *                                    Default non-hierarchical post types with show_ui on.
+		 *                                    Default hierarchical post types with show_ui on.
 		 */
 		$view_mode_post_types = apply_filters( 'view_mode_post_types', $view_mode_post_types );
 

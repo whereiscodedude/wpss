@@ -2,15 +2,15 @@
 /**
  * @package WordPress
  * @subpackage Theme_Compat
- * @deprecated 3.0.0
+ * @deprecated 3.0
  *
- * This file is here for backward compatibility with old themes and will be removed in a future version
+ * This file is here for Backwards compatibility with old themes and will be removed in a future version
  *
  */
 _deprecated_file(
 	/* translators: %s: template name */
 	sprintf( __( 'Theme without %s' ), basename( __FILE__ ) ),
-	'3.0.0',
+	'3.0',
 	null,
 	/* translators: %s: template name */
 	sprintf( __( 'Please include a %s template in your theme.' ), basename( __FILE__ ) )
@@ -56,12 +56,12 @@ _deprecated_file(
 		<div class="alignleft"><?php previous_comments_link() ?></div>
 		<div class="alignright"><?php next_comments_link() ?></div>
 	</div>
-<?php else : // this is displayed if there are no comments so far ?>
+ <?php else : // this is displayed if there are no comments so far ?>
 
 	<?php if ( comments_open() ) : ?>
 		<!-- If comments are open, but there are no comments. -->
 
-	<?php else : // comments are closed ?>
+	 <?php else : // comments are closed ?>
 		<!-- If comments are closed. -->
 		<p class="nocomments"><?php _e('Comments are closed.'); ?></p>
 
