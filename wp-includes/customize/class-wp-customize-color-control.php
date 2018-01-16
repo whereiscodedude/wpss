@@ -18,6 +18,7 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	/**
 	 * Type.
 	 *
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'color';
@@ -25,6 +26,7 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	/**
 	 * Statuses.
 	 *
+	 * @access public
 	 * @var array
 	 */
 	public $statuses;
@@ -33,6 +35,7 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	 * Mode.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 * @var string
 	 */
 	public $mode = 'full';
@@ -48,7 +51,7 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	 * @param array                $args    Optional. Arguments to override class property defaults.
 	 */
 	public function __construct( $manager, $id, $args = array() ) {
-		$this->statuses = array( '' => __( 'Default' ) );
+		$this->statuses = array( '' => __('Default') );
 		parent::__construct( $manager, $id, $args );
 	}
 
@@ -70,9 +73,9 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	 */
 	public function to_json() {
 		parent::to_json();
-		$this->json['statuses']     = $this->statuses;
+		$this->json['statuses'] = $this->statuses;
 		$this->json['defaultValue'] = $this->setting->default;
-		$this->json['mode']         = $this->mode;
+		$this->json['mode'] = $this->mode;
 	}
 
 	/**
@@ -89,31 +92,32 @@ class WP_Customize_Color_Control extends WP_Customize_Control {
 	 */
 	public function content_template() {
 		?>
-		<# var defaultValue = '#RRGGBB', defaultValueAttr = '',
+		<# var defaultValue = '',
 			isHueSlider = data.mode === 'hue';
-		if ( data.defaultValue && _.isString( data.defaultValue ) && ! isHueSlider ) {
+
+		if ( data.defaultValue && ! isHueSlider ) {
 			if ( '#' !== data.defaultValue.substring( 0, 1 ) ) {
 				defaultValue = '#' + data.defaultValue;
 			} else {
 				defaultValue = data.defaultValue;
 			}
-			defaultValueAttr = ' data-default-color=' + defaultValue; // Quotes added automatically.
+			defaultValue = ' data-default-color=' + defaultValue; // Quotes added automatically.
 		} #>
-		<# if ( data.label ) { #>
-			<span class="customize-control-title">{{{ data.label }}}</span>
-		<# } #>
-		<# if ( data.description ) { #>
-			<span class="description customize-control-description">{{{ data.description }}}</span>
-		<# } #>
-		<div class="customize-control-content">
-			<label><span class="screen-reader-text">{{{ data.label }}}</span>
-			<# if ( isHueSlider ) { #>
-				<input class="color-picker-hue" type="text" data-type="hue" />
-			<# } else { #>
-				<input class="color-picker-hex" type="text" maxlength="7" placeholder="{{ defaultValue }}" {{ defaultValueAttr }} />
-			 <# } #>
-			</label>
-		</div>
+		<label>
+			<# if ( data.label ) { #>
+				<span class="customize-control-title">{{{ data.label }}}</span>
+			<# } #>
+			<# if ( data.description ) { #>
+				<span class="description customize-control-description">{{{ data.description }}}</span>
+			<# } #>
+			<div class="customize-control-content">
+				<# if ( isHueSlider ) { #>
+					<input class="color-picker-hue" type="text" data-type="hue" />
+				<# } else { #>
+					<input class="color-picker-hex" type="text" maxlength="7" placeholder="<?php esc_attr_e( 'Hex Value' ); ?>" {{ defaultValue }} />
+				<# } #>
+			</div>
+		</label>
 		<?php
 	}
 }
