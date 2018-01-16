@@ -730,10 +730,10 @@ div.mce-menu .mce-menu-item-sep,
 	cursor: default;
 }
 
-.mce-menubtn.mce-fixed-width span {
+.mce-menubtn.mce-fixed-width button {
 	overflow-x: hidden;
 	text-overflow: ellipsis;
-	width: 82px;
+	width: 110px;
 }
 
 /* Charmap modal */

@@ -12,8 +12,6 @@
 		 * Ensures media elements that have already been initialized won't be
 		 * processed again.
 		 *
-		 * @memberOf wp.mediaelement
-		 *
 		 * @since 4.4.0
 		 *
 		 * @returns {void}
@@ -58,10 +56,6 @@
 		};
 	}
 
-	/**
-	 * @namespace wp.mediaelement
-	 * @memberOf wp
-	 */
 	window.wp.mediaelement = new wpMediaElement();
 
 	$( window.wp.mediaelement.initialize );
