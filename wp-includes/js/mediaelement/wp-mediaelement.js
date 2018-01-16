@@ -1,69 +1,16 @@
-/* global _wpmejsSettings */
-(function( window, $ ) {
+/* global mejs, _wpmejsSettings */
+(function ($) {
+	// add mime-type aliases to MediaElement plugin support
+	mejs.plugins.silverlight[0].types.push('video/x-ms-wmv');
+	mejs.plugins.silverlight[0].types.push('audio/x-ms-wma');
 
-	window.wp = window.wp || {};
-
-	function wpMediaElement() {
+	$(function () {
 		var settings = {};
 
-		/**
-		 * Initialize media elements.
-		 *
-		 * Ensures media elements that have already been initialized won't be
-		 * processed again.
-		 *
-		 * @memberOf wp.mediaelement
-		 *
-		 * @since 4.4.0
-		 *
-		 * @returns {void}
-		 */
-		function initialize() {
-			if ( typeof _wpmejsSettings !== 'undefined' ) {
-				settings = $.extend( true, {}, _wpmejsSettings );
-			}
-			settings.classPrefix = 'mejs-';
-			settings.success = settings.success || function ( mejs ) {
-				var autoplay, loop;
+		if ( typeof _wpmejsSettings !== 'undefined' )
+			settings.pluginPath = _wpmejsSettings.pluginPath;
 
-				if ( mejs.rendererName && -1 !== mejs.rendererName.indexOf( 'flash' ) ) {
-					autoplay = mejs.attributes.autoplay && 'false' !== mejs.attributes.autoplay;
-					loop = mejs.attributes.loop && 'false' !== mejs.attributes.loop;
+		$('.wp-audio-shortcode, .wp-video-shortcode').mediaelementplayer( settings );
+	});
 
-					if ( autoplay ) {
-						mejs.addEventListener( 'canplay', function() {
-							mejs.play();
-						}, false );
-					}
-
-					if ( loop ) {
-						mejs.addEventListener( 'ended', function() {
-							mejs.play();
-						}, false );
-					}
-				}
-			};
-
-			// Only initialize new media elements.
-			$( '.wp-audio-shortcode, .wp-video-shortcode' )
-				.not( '.mejs-container' )
-				.filter(function () {
-					return ! $( this ).parent().hasClass( 'mejs-mediaelement' );
-				})
-				.mediaelementplayer( settings );
-		}
-
-		return {
-			initialize: initialize
-		};
-	}
-
-	/**
-	 * @namespace wp.mediaelement
-	 * @memberOf wp
-	 */
-	window.wp.mediaelement = new wpMediaElement();
-
-	$( window.wp.mediaelement.initialize );
-
-})( window, jQuery );
+}(jQuery));

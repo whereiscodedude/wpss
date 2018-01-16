@@ -17,12 +17,7 @@
 		</div>
 		<?php endif; ?>
 		<header class="entry-header">
-			<?php
-			if ( ! post_password_required() && ! is_attachment() ) :
-				the_post_thumbnail();
-			endif;
-			?>
-
+			<?php the_post_thumbnail(); ?>
 			<?php if ( is_single() ) : ?>
 			<h1 class="entry-title"><?php the_title(); ?></h1>
 			<?php else : ?>
@@ -44,14 +39,7 @@
 		<?php else : ?>
 		<div class="entry-content">
 			<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'twentytwelve' ) ); ?>
-			<?php
-			wp_link_pages(
-				array(
-					'before' => '<div class="page-links">' . __( 'Pages:', 'twentytwelve' ),
-					'after'  => '</div>',
-				)
-			);
-?>
+			<?php wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'twentytwelve' ), 'after' => '</div>' ) ); ?>
 		</div><!-- .entry-content -->
 		<?php endif; ?>
 
