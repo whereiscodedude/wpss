@@ -17,13 +17,13 @@
  * @property-read array  $ancestors
  * @property-read int    $post_category
  * @property-read string $tag_input
+ *
  */
 final class WP_Post {
 
 	/**
 	 * Post ID.
 	 *
-	 * @since 3.5.0
 	 * @var int
 	 */
 	public $ID;
@@ -33,7 +33,6 @@ final class WP_Post {
 	 *
 	 * A numeric string, for compatibility reasons.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_author = 0;
@@ -41,7 +40,6 @@ final class WP_Post {
 	/**
 	 * The post's local publication time.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_date = '0000-00-00 00:00:00';
@@ -49,7 +47,6 @@ final class WP_Post {
 	/**
 	 * The post's GMT publication time.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_date_gmt = '0000-00-00 00:00:00';
@@ -57,7 +54,6 @@ final class WP_Post {
 	/**
 	 * The post's content.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_content = '';
@@ -65,7 +61,6 @@ final class WP_Post {
 	/**
 	 * The post's title.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_title = '';
@@ -73,7 +68,6 @@ final class WP_Post {
 	/**
 	 * The post's excerpt.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_excerpt = '';
@@ -81,7 +75,6 @@ final class WP_Post {
 	/**
 	 * The post's status.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_status = 'publish';
@@ -89,7 +82,6 @@ final class WP_Post {
 	/**
 	 * Whether comments are allowed.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $comment_status = 'open';
@@ -97,7 +89,6 @@ final class WP_Post {
 	/**
 	 * Whether pings are allowed.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $ping_status = 'open';
@@ -105,7 +96,6 @@ final class WP_Post {
 	/**
 	 * The post's password in plain text.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_password = '';
@@ -113,7 +103,6 @@ final class WP_Post {
 	/**
 	 * The post's slug.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_name = '';
@@ -121,7 +110,6 @@ final class WP_Post {
 	/**
 	 * URLs queued to be pinged.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $to_ping = '';
@@ -129,7 +117,6 @@ final class WP_Post {
 	/**
 	 * URLs that have been pinged.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $pinged = '';
@@ -137,7 +124,6 @@ final class WP_Post {
 	/**
 	 * The post's local modified time.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_modified = '0000-00-00 00:00:00';
@@ -145,7 +131,6 @@ final class WP_Post {
 	/**
 	 * The post's GMT modified time.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_modified_gmt = '0000-00-00 00:00:00';
@@ -153,7 +138,7 @@ final class WP_Post {
 	/**
 	 * A utility DB field for post content.
 	 *
-	 * @since 3.5.0
+	 *
 	 * @var string
 	 */
 	public $post_content_filtered = '';
@@ -161,7 +146,6 @@ final class WP_Post {
 	/**
 	 * ID of a post's parent post.
 	 *
-	 * @since 3.5.0
 	 * @var int
 	 */
 	public $post_parent = 0;
@@ -169,7 +153,6 @@ final class WP_Post {
 	/**
 	 * The unique identifier for a post, not necessarily a URL, used as the feed GUID.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $guid = '';
@@ -177,7 +160,6 @@ final class WP_Post {
 	/**
 	 * A field used for ordering posts.
 	 *
-	 * @since 3.5.0
 	 * @var int
 	 */
 	public $menu_order = 0;
@@ -185,7 +167,6 @@ final class WP_Post {
 	/**
 	 * The post's type, like post or page.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_type = 'post';
@@ -193,7 +174,6 @@ final class WP_Post {
 	/**
 	 * An attachment's mime type.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $post_mime_type = '';
@@ -203,7 +183,6 @@ final class WP_Post {
 	 *
 	 * A numeric string, for compatibility reasons.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $comment_count = 0;
@@ -213,7 +192,6 @@ final class WP_Post {
 	 *
 	 * Does not correspond to a DB field.
 	 *
-	 * @since 3.5.0
 	 * @var string
 	 */
 	public $filter;
@@ -221,8 +199,8 @@ final class WP_Post {
 	/**
 	 * Retrieve WP_Post instance.
 	 *
-	 * @since 3.5.0
 	 * @static
+	 * @access public
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
@@ -233,18 +211,16 @@ final class WP_Post {
 		global $wpdb;
 
 		$post_id = (int) $post_id;
-		if ( ! $post_id ) {
+		if ( ! $post_id )
 			return false;
-		}
 
 		$_post = wp_cache_get( $post_id, 'posts' );
 
 		if ( ! $_post ) {
 			$_post = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->posts WHERE ID = %d LIMIT 1", $post_id ) );
 
-			if ( ! $_post ) {
+			if ( ! $_post )
 				return false;
-			}
 
 			$_post = sanitize_post( $_post, 'raw' );
 			wp_cache_add( $_post->ID, $_post, 'posts' );
@@ -258,48 +234,37 @@ final class WP_Post {
 	/**
 	 * Constructor.
 	 *
-	 * @since 3.5.0
-	 *
 	 * @param WP_Post|object $post Post object.
 	 */
 	public function __construct( $post ) {
-		foreach ( get_object_vars( $post ) as $key => $value ) {
+		foreach ( get_object_vars( $post ) as $key => $value )
 			$this->$key = $value;
-		}
 	}
 
 	/**
 	 * Isset-er.
 	 *
-	 * @since 3.5.0
-	 *
 	 * @param string $key Property to check if set.
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		if ( 'ancestors' == $key ) {
+		if ( 'ancestors' == $key )
 			return true;
-		}
 
-		if ( 'page_template' == $key ) {
-			return true;
-		}
+		if ( 'page_template' == $key )
+			return ( 'page' == $this->post_type );
 
-		if ( 'post_category' == $key ) {
-			return true;
-		}
+		if ( 'post_category' == $key )
+		   return true;
 
-		if ( 'tags_input' == $key ) {
-			return true;
-		}
+		if ( 'tags_input' == $key )
+		   return true;
 
 		return metadata_exists( 'post', $this->ID, $key );
 	}
 
 	/**
 	 * Getter.
-	 *
-	 * @since 3.5.0
 	 *
 	 * @param string $key Key to get.
 	 * @return mixed
@@ -310,39 +275,33 @@ final class WP_Post {
 		}
 
 		if ( 'post_category' == $key ) {
-			if ( is_object_in_taxonomy( $this->post_type, 'category' ) ) {
+			if ( is_object_in_taxonomy( $this->post_type, 'category' ) )
 				$terms = get_the_terms( $this, 'category' );
-			}
 
-			if ( empty( $terms ) ) {
+			if ( empty( $terms ) )
 				return array();
-			}
 
 			return wp_list_pluck( $terms, 'term_id' );
 		}
 
 		if ( 'tags_input' == $key ) {
-			if ( is_object_in_taxonomy( $this->post_type, 'post_tag' ) ) {
+			if ( is_object_in_taxonomy( $this->post_type, 'post_tag' ) )
 				$terms = get_the_terms( $this, 'post_tag' );
-			}
 
-			if ( empty( $terms ) ) {
+			if ( empty( $terms ) )
 				return array();
-			}
 
 			return wp_list_pluck( $terms, 'name' );
 		}
 
 		// Rest of the values need filtering.
-		if ( 'ancestors' == $key ) {
+		if ( 'ancestors' == $key )
 			$value = get_post_ancestors( $this );
-		} else {
+		else
 			$value = get_post_meta( $this->ID, $key, true );
-		}
 
-		if ( $this->filter ) {
+		if ( $this->filter )
 			$value = sanitize_post_field( $key, $value, $this->ID, $this->filter );
-		}
 
 		return $value;
 	}
@@ -350,19 +309,15 @@ final class WP_Post {
 	/**
 	 * {@Missing Summary}
 	 *
-	 * @since 3.5.0
-	 *
 	 * @param string $filter Filter.
 	 * @return self|array|bool|object|WP_Post
 	 */
 	public function filter( $filter ) {
-		if ( $this->filter == $filter ) {
+		if ( $this->filter == $filter )
 			return $this;
-		}
 
-		if ( $filter == 'raw' ) {
+		if ( $filter == 'raw' )
 			return self::get_instance( $this->ID );
-		}
 
 		return sanitize_post( $this, $filter );
 	}
@@ -370,17 +325,14 @@ final class WP_Post {
 	/**
 	 * Convert object to array.
 	 *
-	 * @since 3.5.0
-	 *
 	 * @return array Object as array.
 	 */
 	public function to_array() {
 		$post = get_object_vars( $this );
 
 		foreach ( array( 'ancestors', 'page_template', 'post_category', 'tags_input' ) as $key ) {
-			if ( $this->__isset( $key ) ) {
+			if ( $this->__isset( $key ) )
 				$post[ $key ] = $this->__get( $key );
-			}
 		}
 
 		return $post;

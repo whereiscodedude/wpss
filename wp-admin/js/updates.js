@@ -2,6 +2,9 @@
  * Functions for ajaxified updates, deletions and installs inside the WordPress admin.
  *
  * @version 4.2.0
+ *
+ * @package WordPress
+ * @subpackage Administration
  */
 
 /* global pagenow */
@@ -18,12 +21,10 @@
  * @param {Array}   settings.plugins.inactive           Base names of inactive plugins.
  * @param {Array}   settings.plugins.upgrade            Base names of plugins with updates available.
  * @param {Array}   settings.plugins.recently_activated Base names of recently activated plugins.
- * @param {object=} settings.themes                     Plugin/theme status information or null.
- * @param {number}  settings.themes.all                 Amount of all themes.
- * @param {number}  settings.themes.upgrade             Amount of themes with updates available.
- * @param {number}  settings.themes.disabled            Amount of disabled themes.
- * @param {object=} settings.totals                     Combined information for available update counts.
- * @param {number}  settings.totals.count               Holds the amount of available updates.
+ * @param {object=} settings.totals                     Plugin/theme status information or null.
+ * @param {number}  settings.totals.all                 Amount of all plugins or themes.
+ * @param {number}  settings.totals.upgrade             Amount of plugins or themes with updates available.
+ * @param {number}  settings.totals.disabled            Amount of disabled themes.
  */
 (function( $, wp, settings ) {
 	var $document = $( document );
@@ -35,7 +36,7 @@
 	 *
 	 * @since 4.2.0
 	 *
-	 * @namespace wp.updates
+	 * @type {object}
 	 */
 	wp.updates = {};
 
@@ -81,19 +82,19 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 Added `available` property to indicate whether credentials have been provided.
 	 *
-	 * @type {Object}
-	 * @property {Object} filesystemCredentials.ftp                Holds FTP credentials.
-	 * @property {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
-	 * @property {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
-	 * @property {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
-	 * @property {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
-	 *                                                             Default empty string.
-	 * @property {Object} filesystemCredentials.ssh                Holds SSH credentials.
-	 * @property {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
-	 * @property {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
-	 * @property {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
-	 * @property {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
-	 *                                                             Default 'false'.
+	 * @type {object} filesystemCredentials                    Holds filesystem credentials.
+	 * @type {object} filesystemCredentials.ftp                Holds FTP credentials.
+	 * @type {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
+	 * @type {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
+	 * @type {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
+	 * @type {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
+	 *                                                         Default empty string.
+	 * @type {object} filesystemCredentials.ssh                Holds SSH credentials.
+	 * @type {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
+	 * @type {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
+	 * @type {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
+	 * @type {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
+	 *                                                         Default 'false'.
 	 */
 	wp.updates.filesystemCredentials = {
 		ftp:       {
@@ -125,7 +126,7 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @type {function}
+	 * @type {function} A function that lazily-compiles the template requested.
 	 */
 	wp.updates.adminNotice = wp.template( 'wp-updates-admin-notice' );
 
@@ -180,11 +181,7 @@
 		if ( $notice.length ) {
 			$notice.replaceWith( $adminNotice );
 		} else {
-			if ( 'customize' === pagenow ) {
-				$( '.customize-themes-notifications' ).append( $adminNotice );
-			} else {
-				$( '.wrap' ).find( '> h1' ).after( $adminNotice );
-			}
+			$( '.wrap' ).find( '> h1' ).after( $adminNotice );
 		}
 
 		$document.trigger( 'wp-updates-notice-added' );
@@ -263,71 +260,6 @@
 	};
 
 	/**
-	 * Refreshes update counts everywhere on the screen.
-	 *
-	 * @since 4.7.0
-	 */
-	wp.updates.refreshCount = function() {
-		var $adminBarUpdates              = $( '#wp-admin-bar-updates' ),
-			$dashboardNavMenuUpdateCount  = $( 'a[href="update-core.php"] .update-plugins' ),
-			$pluginsNavMenuUpdateCount    = $( 'a[href="plugins.php"] .update-plugins' ),
-			$appearanceNavMenuUpdateCount = $( 'a[href="themes.php"] .update-plugins' ),
-			itemCount;
-
-		$adminBarUpdates.find( '.ab-item' ).removeAttr( 'title' );
-		$adminBarUpdates.find( '.ab-label' ).text( settings.totals.counts.total );
-
-		// Remove the update count from the toolbar if it's zero.
-		if ( 0 === settings.totals.counts.total ) {
-			$adminBarUpdates.find( '.ab-label' ).parents( 'li' ).remove();
-		}
-
-		// Update the "Updates" menu item.
-		$dashboardNavMenuUpdateCount.each( function( index, element ) {
-			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.total );
-		} );
-		if ( settings.totals.counts.total > 0 ) {
-			$dashboardNavMenuUpdateCount.find( '.update-count' ).text( settings.totals.counts.total );
-		} else {
-			$dashboardNavMenuUpdateCount.remove();
-		}
-
-		// Update the "Plugins" menu item.
-		$pluginsNavMenuUpdateCount.each( function( index, element ) {
-			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.plugins );
-		} );
-		if ( settings.totals.counts.total > 0 ) {
-			$pluginsNavMenuUpdateCount.find( '.plugin-count' ).text( settings.totals.counts.plugins );
-		} else {
-			$pluginsNavMenuUpdateCount.remove();
-		}
-
-		// Update the "Appearance" menu item.
-		$appearanceNavMenuUpdateCount.each( function( index, element ) {
-			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.themes );
-		} );
-		if ( settings.totals.counts.total > 0 ) {
-			$appearanceNavMenuUpdateCount.find( '.theme-count' ).text( settings.totals.counts.themes );
-		} else {
-			$appearanceNavMenuUpdateCount.remove();
-		}
-
-		// Update list table filter navigation.
-		if ( 'plugins' === pagenow || 'plugins-network' === pagenow ) {
-			itemCount = settings.totals.counts.plugins;
-		} else if ( 'themes' === pagenow || 'themes-network' === pagenow ) {
-			itemCount = settings.totals.counts.themes;
-		}
-
-		if ( itemCount > 0 ) {
-			$( '.subsubsub .upgrade .count' ).text( '(' + itemCount + ')' );
-		} else {
-			$( '.subsubsub .upgrade' ).remove();
-			$( '.subsubsub li:last' ).html( function() { return $( this ).children(); } );
-		}
-	};
-
-	/**
 	 * Decrements the update counts throughout the various menus.
 	 *
 	 * This includes the toolbar, the "Updates" menu item and the menu items
@@ -339,15 +271,62 @@
 	 *                      Can be 'plugin', 'theme'.
 	 */
 	wp.updates.decrementCount = function( type ) {
-		settings.totals.counts.total = Math.max( --settings.totals.counts.total, 0 );
+		var $adminBarUpdates             = $( '#wp-admin-bar-updates' ),
+			$dashboardNavMenuUpdateCount = $( 'a[href="update-core.php"] .update-plugins' ),
+			count                        = $adminBarUpdates.find( '.ab-label' ).text(),
+			$menuItem, $itemCount, itemCount;
 
-		if ( 'plugin' === type ) {
-			settings.totals.counts.plugins = Math.max( --settings.totals.counts.plugins, 0 );
-		} else if ( 'theme' === type ) {
-			settings.totals.counts.themes = Math.max( --settings.totals.counts.themes, 0 );
+		count = parseInt( count, 10 ) - 1;
+
+		if ( count < 0 || isNaN( count ) ) {
+			return;
 		}
 
-		wp.updates.refreshCount( type );
+		$adminBarUpdates.find( '.ab-item' ).removeAttr( 'title' );
+		$adminBarUpdates.find( '.ab-label' ).text( count );
+
+		// Remove the update count from the toolbar if it's zero.
+		if ( ! count ) {
+			$adminBarUpdates.find( '.ab-label' ).parents( 'li' ).remove();
+		}
+
+		// Update the "Updates" menu item.
+		$dashboardNavMenuUpdateCount.each( function( index, element ) {
+			element.className = element.className.replace( /count-\d+/, 'count-' + count );
+		} );
+
+		$dashboardNavMenuUpdateCount.removeAttr( 'title' );
+		$dashboardNavMenuUpdateCount.find( '.update-count' ).text( count );
+
+		if ( 'plugin' === type ) {
+			$menuItem  = $( '#menu-plugins' );
+			$itemCount = $menuItem.find( '.plugin-count' );
+		} else if ( 'theme' === type ) {
+			$menuItem  = $( '#menu-appearance' );
+			$itemCount = $menuItem.find( '.theme-count' );
+		}
+
+		// Decrement the counter of the other menu items.
+		if ( $itemCount ) {
+			itemCount = $itemCount.eq( 0 ).text();
+			itemCount = parseInt( itemCount, 10 ) - 1;
+		}
+
+		if ( itemCount < 0 || isNaN( itemCount ) ) {
+			return;
+		}
+
+		if ( itemCount > 0 ) {
+			$( '.subsubsub .upgrade .count' ).text( '(' + itemCount + ')' );
+
+			$itemCount.text( itemCount );
+			$menuItem.find( '.update-plugins' ).each( function( index, element ) {
+				element.className = element.className.replace( /count-\d+/, 'count-' + itemCount );
+			} );
+		} else {
+			$( '.subsubsub .upgrade' ).remove();
+			$menuItem.find( '.update-plugins' ).remove();
+		}
 	};
 
 	/**
@@ -375,11 +354,11 @@
 		if ( 'plugins' === pagenow || 'plugins-network' === pagenow ) {
 			$updateRow = $( 'tr[data-plugin="' + args.plugin + '"]' );
 			$message   = $updateRow.find( '.update-message' ).removeClass( 'notice-error' ).addClass( 'updating-message notice-warning' ).find( 'p' );
-			message    = wp.updates.l10n.pluginUpdatingLabel.replace( '%s', $updateRow.find( '.plugin-title strong' ).text() );
+			message    = wp.updates.l10n.updatingLabel.replace( '%s', $updateRow.find( '.plugin-title strong' ).text() );
 		} else if ( 'plugin-install' === pagenow || 'plugin-install-network' === pagenow ) {
 			$card    = $( '.plugin-card-' + args.slug );
 			$message = $card.find( '.update-now' ).addClass( 'updating-message' );
-			message  = wp.updates.l10n.pluginUpdatingLabel.replace( '%s', $message.data( 'name' ) );
+			message  = wp.updates.l10n.updatingLabel.replace( '%s', $message.data( 'name' ) );
 
 			// Remove previous error messages, if any.
 			$card.removeClass( 'plugin-card-update-failed' ).find( '.notice.notice-error' ).remove();
@@ -404,6 +383,7 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginSuccess`.
 	 *
+	 * @typedef {object} updatePluginSuccess
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin to be updated.
 	 * @param {string} response.plugin     Basename of the plugin to be updated.
@@ -432,8 +412,8 @@
 		}
 
 		$updateMessage
-			.attr( 'aria-label', wp.updates.l10n.pluginUpdatedLabel.replace( '%s', response.pluginName ) )
-			.text( wp.updates.l10n.pluginUpdated );
+			.attr( 'aria-label', wp.updates.l10n.updatedLabel.replace( '%s', response.pluginName ) )
+			.text( wp.updates.l10n.updated );
 
 		wp.a11y.speak( wp.updates.l10n.updatedMsg, 'polite' );
 
@@ -448,6 +428,7 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginError`.
 	 *
+	 * @typedef {object} updatePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be updated.
 	 * @param {string}  response.plugin       Basename of the plugin to be updated.
@@ -478,7 +459,7 @@
 
 			if ( response.pluginName ) {
 				$message.find( 'p' )
-					.attr( 'aria-label', wp.updates.l10n.pluginUpdateFailedLabel.replace( '%s', response.pluginName ) );
+					.attr( 'aria-label', wp.updates.l10n.updateFailedLabel.replace( '%s', response.pluginName ) );
 			} else {
 				$message.find( 'p' ).removeAttr( 'aria-label' );
 			}
@@ -495,7 +476,7 @@
 
 			if ( response.pluginName ) {
 				$card.find( '.update-now' )
-					.attr( 'aria-label', wp.updates.l10n.pluginUpdateFailedLabel.replace( '%s', response.pluginName ) );
+					.attr( 'aria-label', wp.updates.l10n.updateFailedLabel.replace( '%s', response.pluginName ) );
 			} else {
 				$card.find( '.update-now' ).removeAttr( 'aria-label' );
 			}
@@ -569,6 +550,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installPluginSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -581,7 +563,7 @@
 			.removeClass( 'updating-message' )
 			.addClass( 'updated-message installed button-disabled' )
 			.attr( 'aria-label', wp.updates.l10n.pluginInstalledLabel.replace( '%s', response.pluginName ) )
-			.text( wp.updates.l10n.pluginInstalled );
+			.text( wp.updates.l10n.installed );
 
 		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
 
@@ -604,6 +586,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installPluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
 	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
@@ -654,6 +637,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installImporterSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -685,6 +669,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installImporterError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
 	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
@@ -759,7 +744,8 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param {Object} response            Response from the server.
+	 * @typedef {object} deletePluginSuccess
+	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin that was deleted.
 	 * @param {string} response.plugin     Base name of the plugin that was deleted.
 	 * @param {string} response.pluginName Name of the plugin that was deleted.
@@ -773,11 +759,7 @@
 				$pluginRow       = $( this ),
 				columnCount      = $form.find( 'thead th:not(.hidden), thead td' ).length,
 				pluginDeletedRow = wp.template( 'item-deleted-row' ),
-				/**
-				 * Plugins Base names of plugins in their different states.
-				 *
-				 * @type {Object}
-				 */
+				/** @type {object} plugins Base names of plugins in their different states. */
 				plugins          = settings.plugins;
 
 			// Add a success message after deleting a plugin.
@@ -842,7 +824,7 @@
 			}
 		} );
 
-		wp.a11y.speak( wp.updates.l10n.pluginDeleted, 'polite' );
+		wp.a11y.speak( wp.updates.l10n.deleted, 'polite' );
 
 		$document.trigger( 'wp-plugin-delete-success', response );
 	};
@@ -852,6 +834,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} deletePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be deleted.
 	 * @param {string}  response.plugin       Base name of the plugin to be deleted
@@ -927,17 +910,6 @@
 		if ( 'themes-network' === pagenow ) {
 			$notice = $( '[data-slug="' + args.slug + '"]' ).find( '.update-message' ).removeClass( 'notice-error' ).addClass( 'updating-message notice-warning' ).find( 'p' );
 
-		} else if ( 'customize' === pagenow ) {
-
-			// Update the theme details UI.
-			$notice = $( '[data-slug="' + args.slug + '"].notice' ).removeClass( 'notice-large' );
-
-			$notice.find( 'h3' ).remove();
-
-			// Add the top-level UI, and update both.
-			$notice = $notice.add( $( '#customize-control-installed_theme_' + args.slug ).find( '.update-message' ) );
-			$notice = $notice.addClass( 'updating-message' ).find( 'p' );
-
 		} else {
 			$notice = $( '#update-theme' ).closest( '.notice' ).removeClass( 'notice-large' );
 
@@ -964,6 +936,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} updateThemeSuccess
 	 * @param {object} response
 	 * @param {string} response.slug       Slug of the theme to be updated.
 	 * @param {object} response.theme      Updated theme.
@@ -975,22 +948,11 @@
 			$theme         = $( '[data-slug="' + response.slug + '"]' ),
 			updatedMessage = {
 				className: 'updated-message notice-success notice-alt',
-				message:   wp.updates.l10n.themeUpdated
+				message:   wp.updates.l10n.updated
 			},
 			$notice, newText;
 
-		if ( 'customize' === pagenow ) {
-			$theme = $( '.updating-message' ).siblings( '.theme-name' );
-
-			if ( $theme.length ) {
-
-				// Update the version number in the row.
-				newText = $theme.html().replace( response.oldVersion, response.newVersion );
-				$theme.html( newText );
-			}
-
-			$notice = $( '.theme-info .notice' ).add( wp.customize.control( 'installed_theme_' + response.slug ).container.find( '.theme' ).find( '.update-message' ) );
-		} else if ( 'themes-network' === pagenow ) {
+		if ( 'themes-network' === pagenow ) {
 			$notice = $theme.find( '.update-message' );
 
 			// Update the version number in the row.
@@ -1015,7 +977,7 @@
 		$document.trigger( 'wp-theme-update-success', response );
 
 		// Show updated message after modal re-rendered.
-		if ( isModalOpen && 'customize' !== pagenow ) {
+		if ( isModalOpen ) {
 			$( '.theme-info .theme-author' ).after( wp.updates.adminNotice( updatedMessage ) );
 		}
 	};
@@ -1025,6 +987,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} updateThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be updated.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1041,10 +1004,6 @@
 
 		if ( wp.updates.maybeHandleCredentialError( response, 'update-theme' ) ) {
 			return;
-		}
-
-		if ( 'customize' === pagenow ) {
-			$theme = wp.customize.control( 'installed_theme_' + response.slug ).container.find( '.theme' );
 		}
 
 		if ( 'themes-network' === pagenow ) {
@@ -1110,6 +1069,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installThemeSuccess
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.customizeUrl URL to the Customizer for the just installed theme.
@@ -1125,7 +1085,7 @@
 			.removeClass( 'updating-message' )
 			.addClass( 'updated-message disabled' )
 			.attr( 'aria-label', wp.updates.l10n.themeInstalledLabel.replace( '%s', response.themeName ) )
-			.text( wp.updates.l10n.themeInstalled );
+			.text( wp.updates.l10n.installed );
 
 		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
 
@@ -1148,7 +1108,7 @@
 				$message.siblings( '.preview' ).replaceWith( function () {
 					return $( '<a>' )
 						.attr( 'href', response.customizeUrl )
-						.addClass( 'button load-customize' )
+						.addClass( 'button button-secondary load-customize' )
 						.text( wp.updates.l10n.livePreview );
 				} );
 			}
@@ -1160,6 +1120,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1181,23 +1142,12 @@
 			return;
 		}
 
-		if ( 'customize' === pagenow ) {
-			if ( $document.find( 'body' ).hasClass( 'modal-open' ) ) {
-				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
-				$card   = $( '.theme-overlay .theme-info' ).prepend( $message );
-			} else {
-				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
-				$card   = $button.closest( '.theme' ).addClass( 'theme-install-failed' ).append( $message );
-			}
-			wp.customize.notifications.remove( 'theme_installing' );
+		if ( $document.find( 'body' ).hasClass( 'full-overlay-active' ) ) {
+			$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
+			$card   = $( '.install-theme-info' ).prepend( $message );
 		} else {
-			if ( $document.find( 'body' ).hasClass( 'full-overlay-active' ) ) {
-				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
-				$card   = $( '.install-theme-info' ).prepend( $message );
-			} else {
-				$card   = $( '[data-slug="' + response.slug + '"]' ).removeClass( 'focus' ).addClass( 'theme-install-failed' ).append( $message );
-				$button = $card.find( '.theme-install' );
-			}
+			$card   = $( '[data-slug="' + response.slug + '"]' ).removeClass( 'focus' ).addClass( 'theme-install-failed' ).append( $message );
+			$button = $card.find( '.theme-install' );
 		}
 
 		$button
@@ -1211,7 +1161,7 @@
 	};
 
 	/**
-	 * Sends an Ajax request to the server to delete a theme.
+	 * Sends an Ajax request to the server to install a theme.
 	 *
 	 * @since 4.6.0
 	 *
@@ -1257,6 +1207,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} deleteThemeSuccess
 	 * @param {object} response      Response from the server.
 	 * @param {string} response.slug Slug of the theme that was deleted.
 	 */
@@ -1269,7 +1220,7 @@
 			$themeRows.css( { backgroundColor: '#faafaa' } ).fadeOut( 350, function() {
 				var $views     = $( '.subsubsub' ),
 					$themeRow  = $( this ),
-					totals     = settings.themes,
+					totals     = settings.totals,
 					deletedRow = wp.template( 'item-deleted-row' );
 
 				if ( ! $themeRow.hasClass( 'plugin-update-tr' ) ) {
@@ -1305,7 +1256,7 @@
 			} );
 		}
 
-		wp.a11y.speak( wp.updates.l10n.themeDeleted, 'polite' );
+		wp.a11y.speak( wp.updates.l10n.deleted, 'polite' );
 
 		$document.trigger( 'wp-theme-delete-success', response );
 	};
@@ -1315,6 +1266,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} deleteThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be deleted.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1548,11 +1500,11 @@
 	 * @param {string} message Error message.
 	 */
 	wp.updates.showErrorInCredentialsForm = function( message ) {
-		var $filesystemForm = $( '#request-filesystem-credentials-form' );
+		var $modal = $( '#request-filesystem-credentials-form' );
 
 		// Remove any existing error.
-		$filesystemForm.find( '.notice' ).remove();
-		$filesystemForm.find( '#request-filesystem-credentials-title' ).after( '<div class="notice notice-alt notice-error"><p>' + message + '</p></div>' );
+		$modal.find( '.notice' ).remove();
+		$modal.find( '#request-filesystem-credentials-title' ).after( '<div class="notice notice-alt notice-error"><p>' + message + '</p></div>' );
 	};
 
 	/**
@@ -1588,6 +1540,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} maybeHandleCredentialError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.
@@ -1701,16 +1654,9 @@
 	$( function() {
 		var $pluginFilter        = $( '#plugin-filter' ),
 			$bulkActionForm      = $( '#bulk-action-form' ),
-			$filesystemForm      = $( '#request-filesystem-credentials-form' ),
 			$filesystemModal     = $( '#request-filesystem-credentials-dialog' ),
 			$pluginSearch        = $( '.plugins-php .wp-filter-search' ),
 			$pluginInstallSearch = $( '.plugin-install-php .wp-filter-search' );
-
-		settings = _.extend( settings, window._wpUpdatesItemCounts || {} );
-
-		if ( settings.totals ) {
-			wp.updates.refreshCount();
-		}
 
 		/*
 		 * Whether a user needs to submit filesystem credentials.
@@ -1758,7 +1704,7 @@
 		 *
 		 * @since 4.2.0
 		 */
-		$filesystemForm.on( 'change', 'input[name="connection_type"]', function() {
+		$filesystemModal.on( 'change', 'input[name="connection_type"]', function() {
 			$( '#ssh-keys' ).toggleClass( 'hidden', ( 'ssh' !== $( this ).val() ) );
 		} ).change();
 
@@ -1807,9 +1753,9 @@
 
 				if ( 'plugin-install' === pagenow || 'plugin-install-network' === pagenow ) {
 					if ( 'update-plugin' === job.action ) {
-						$message.attr( 'aria-label', wp.updates.l10n.pluginUpdateNowLabel.replace( '%s', $message.data( 'name' ) ) );
+						$message.attr( 'aria-label', wp.updates.l10n.updateNowLabel.replace( '%s', $message.data( 'name' ) ) );
 					} else if ( 'install-plugin' === job.action ) {
-						$message.attr( 'aria-label', wp.updates.l10n.pluginInstallNowLabel.replace( '%s', $message.data( 'name' ) ) );
+						$message.attr( 'aria-label', wp.updates.l10n.installNowLabel.replace( '%s', $message.data( 'name' ) ) );
 					}
 				}
 			}
@@ -1934,7 +1880,6 @@
 
 			wp.updates.installPlugin( {
 				slug:    $button.data( 'slug' ),
-				pagenow: pagenow,
 				success: wp.updates.installImporterSuccess,
 				error:   wp.updates.installImporterError
 			} );
@@ -2023,7 +1968,7 @@
 		 *
 		 * @param {Event} event Event interface.
 		 */
-		$bulkActionForm.on( 'click', '[type="submit"]:not([name="clear-recent-list"])', function( event ) {
+		$bulkActionForm.on( 'click', '[type="submit"]', function( event ) {
 			var bulkAction    = $( event.target ).siblings( 'select' ).val(),
 				itemsSelected = $bulkActionForm.find( 'input[name="checked[]"]:checked' ),
 				success       = 0,
@@ -2244,12 +2189,10 @@
 		 */
 		$pluginSearch.on( 'keyup input', _.debounce( function( event ) {
 			var data = {
-				_ajax_nonce:   wp.updates.ajaxNonce,
-				s:             event.target.value,
-				pagenow:       pagenow,
-				plugin_status: 'all'
-			},
-			queryArgs;
+				_ajax_nonce: wp.updates.ajaxNonce,
+				s:           event.target.value,
+				pagenow:     pagenow
+			};
 
 			// Clear on escape.
 			if ( 'keyup' === event.type && 27 === event.which ) {
@@ -2262,14 +2205,8 @@
 				wp.updates.searchTerm = data.s;
 			}
 
-			queryArgs = _.object( _.compact( _.map( location.search.slice( 1 ).split( '&' ), function( item ) {
-				if ( item ) return item.split( '=' );
-			} ) ) );
-
-			data.plugin_status = queryArgs.plugin_status || 'all';
-
 			if ( window.history && window.history.replaceState ) {
-				window.history.replaceState( null, '', location.href.split( '?' )[ 0 ] + '?s=' + data.s + '&plugin_status=' + data.plugin_status );
+				window.history.replaceState( null, '', location.href.split( '?' )[ 0 ] + '?s=' + data.s );
 			}
 
 			if ( 'undefined' !== typeof wp.updates.searchRequest ) {
@@ -2278,7 +2215,6 @@
 
 			$bulkActionForm.empty();
 			$( 'body' ).addClass( 'loading-content' );
-			$( '.subsubsub .current' ).removeClass( 'current' );
 
 			wp.updates.searchRequest = wp.ajax.post( 'search-plugins', data ).done( function( response ) {
 
@@ -2288,11 +2224,10 @@
 
 				if ( ! data.s.length ) {
 					$oldSubTitle.remove();
-					$( '.subsubsub .' + data.plugin_status + ' a' ).addClass( 'current' );
 				} else if ( $oldSubTitle.length ) {
 					$oldSubTitle.replaceWith( $subTitle );
 				} else {
-					$( '.wp-header-end' ).before( $subTitle );
+					$( '.wrap h1' ).append( $subTitle );
 				}
 
 				$( 'body' ).removeClass( 'loading-content' );
@@ -2316,16 +2251,6 @@
 			event.preventDefault();
 
 			$( 'input.wp-filter-search' ).trigger( 'input' );
-		} );
-
-		/** 
-		 * Trigger a search event when the "Try Again" button is clicked. 
-		 * 
-		 * @since 4.9.0
-		 */ 
-		$document.on( 'click', '.try-again', function( event ) { 
-			event.preventDefault(); 
-			$pluginInstallSearch.trigger( 'input' ); 
 		} );
 
 		/**
@@ -2456,4 +2381,4 @@
 		 */
 		$( window ).on( 'beforeunload', wp.updates.beforeunload );
 	} );
-})( jQuery, window.wp, window._wpUpdatesSettings );
+})( jQuery, window.wp, _.extend( window._wpUpdatesSettings, window._wpUpdatesItemCounts || {} ) );
