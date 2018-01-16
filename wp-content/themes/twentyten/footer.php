@@ -17,7 +17,7 @@
 
 <?php
 	/*
-	 * A sidebar in the footer? Yep. You can customize
+	 * A sidebar in the footer? Yep. You can can customize
 	 * your footer with four columns of widgets.
 	 */
 	get_sidebar( 'footer' );
@@ -36,9 +36,8 @@
 				 *
 				 * @since Twenty Ten 1.0
 				 */
-				do_action( 'twentyten_credits' );
-				?>
-				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'twentyten' ) ); ?>" title="<?php esc_attr_e( 'Semantic Personal Publishing Platform', 'twentyten' ); ?>"><?php printf( __( 'Proudly powered by %s.', 'twentyten' ), 'WordPress' ); ?></a>
+				do_action( 'twentyten_credits' ); ?>
+				<a href="<?php echo esc_url( __( 'http://wordpress.org/', 'twentyten' ) ); ?>" title="<?php esc_attr_e( 'Semantic Personal Publishing Platform', 'twentyten' ); ?>"><?php printf( __( 'Proudly powered by %s.', 'twentyten' ), 'WordPress' ); ?></a>
 			</div><!-- #site-generator -->
 
 		</div><!-- #colophon -->
