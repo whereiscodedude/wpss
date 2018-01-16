@@ -1,14 +1,6 @@
 <?php
 /**
- * Administration API: WP_Site_Icon class
- *
- * @package WordPress
- * @subpackage Administration
- * @since 4.3.0
- */
-
-/**
- * Core class used to implement site icon functionality.
+ * Class for implementing site icon functionality.
  *
  * @since 4.3.0
  */
@@ -18,14 +10,16 @@ class WP_Site_Icon {
 	 * The minimum size of the site icon.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var int
 	 */
-	public $min_size = 512;
+	public $min_size  = 512;
 
 	/**
 	 * The size to which to crop the image so that we can display it in the UI nicely.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var int
 	 */
 	public $page_crop = 512;
@@ -34,6 +28,7 @@ class WP_Site_Icon {
 	 * List of site icon sizes.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var array
 	 */
 	public $site_icon_sizes = array(
@@ -67,6 +62,7 @@ class WP_Site_Icon {
 	 * Registers actions and filters.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 */
 	public function __construct() {
 		add_action( 'delete_attachment', array( $this, 'delete_attachment_data' ) );
@@ -84,7 +80,7 @@ class WP_Site_Icon {
 	 */
 	public function create_attachment_object( $cropped, $parent_attachment_id ) {
 		$parent     = get_post( $parent_attachment_id );
-		$parent_url = wp_get_attachment_url( $parent->ID );
+		$parent_url = $parent->guid;
 		$url        = str_replace( basename( $parent_url ), basename( $cropped ), $parent_url );
 
 		$size       = @getimagesize( $cropped );
@@ -96,7 +92,7 @@ class WP_Site_Icon {
 			'post_content'   => $url,
 			'post_mime_type' => $image_type,
 			'guid'           => $url,
-			'context'        => 'site-icon',
+			'context'        => 'site-icon'
 		);
 
 		return $object;
@@ -106,6 +102,7 @@ class WP_Site_Icon {
 	 * Inserts an attachment.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param array  $object Attachment object.
 	 * @param string $file   File path of the attached image.
@@ -116,7 +113,7 @@ class WP_Site_Icon {
 		$metadata      = wp_generate_attachment_metadata( $attachment_id, $file );
 
 		/**
-		 * Filters the site icon attachment metadata.
+		 * Filter the site icon attachment metadata.
 		 *
 		 * @since 4.3.0
 		 *
@@ -134,6 +131,7 @@ class WP_Site_Icon {
 	 * Adds additional sizes to be made when creating the site_icon images.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param array $sizes List of additional sizes.
 	 * @return array Additional image sizes.
@@ -142,7 +140,7 @@ class WP_Site_Icon {
 		$only_crop_sizes = array();
 
 		/**
-		 * Filters the different dimensions that a site icon is saved in.
+		 * Filter the different dimensions that a site icon is saved in.
 		 *
 		 * @since 4.3.0
 		 *
@@ -178,6 +176,7 @@ class WP_Site_Icon {
 	 * Adds Site Icon sizes to the array of image sizes on demand.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param array $sizes List of image sizes.
 	 * @return array List of intermediate image sizes.
@@ -196,6 +195,7 @@ class WP_Site_Icon {
 	 * Deletes the Site Icon when the image file is deleted.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param int $post_id Attachment ID.
 	 */
@@ -211,6 +211,7 @@ class WP_Site_Icon {
 	 * Adds custom image sizes when meta data for an image is requested, that happens to be used as Site Icon.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 *
 	 * @param null|array|string $value    The value get_metadata() should return a single metadata value, or an
 	 *                                    array of values.
@@ -220,14 +221,17 @@ class WP_Site_Icon {
 	 * @return array|null|string The attachment metadata value, array of values, or null.
 	 */
 	public function get_post_metadata( $value, $post_id, $meta_key, $single ) {
-		if ( $single && '_wp_attachment_backup_sizes' === $meta_key ) {
-			$site_icon_id = get_option( 'site_icon' );
+		$site_icon_id = get_option( 'site_icon' );
 
-			if ( $post_id == $site_icon_id ) {
-				add_filter( 'intermediate_image_sizes', array( $this, 'intermediate_image_sizes' ) );
-			}
+		if ( $post_id == $site_icon_id && '_wp_attachment_backup_sizes' == $meta_key && $single ) {
+			add_filter( 'intermediate_image_sizes', array( $this, 'intermediate_image_sizes' ) );
 		}
 
 		return $value;
 	}
 }
+
+/**
+ * @global WP_Site_Icon $wp_site_icon
+ */
+$GLOBALS['wp_site_icon'] = new WP_Site_Icon;
