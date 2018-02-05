@@ -245,8 +245,6 @@ wpWidgets = {
 			/**
 			 * Open Sidebar when a Widget gets dragged over it.
 			 *
-			 * @ignore
-			 *
 			 * @param {object} event jQuery event object.
 			 */
 			over: function( event ) {
@@ -269,8 +267,6 @@ wpWidgets = {
 
 			/**
 			 * Close Sidebar when the Widget gets dragged out of it.
-			 *
-			 * @ignore
 			 *
 			 * @param {object} event jQuery event object.
 			 */
