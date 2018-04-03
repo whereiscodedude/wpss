@@ -632,37 +632,15 @@ commentReply = {
 	},
 
 	close : function() {
-		var commentRow = $(),
-			replyRow = $( '#replyrow' );
+		var c, replyrow = $('#replyrow');
 
 		// replyrow is not showing?
-		if ( replyRow.parent().is( '#com-reply' ) ) {
+		if ( replyrow.parent().is('#com-reply') )
 			return;
-		}
 
-		if ( this.cid ) {
-			commentRow = $( '#comment-' + this.cid );
-		}
-
-		/*
-		 * When closing the Quick Edit form, show the comment row and move focus
-		 * back to the Quick Edit button.
-		 */
-		if ( 'edit-comment' === this.act ) {
-			commentRow.fadeIn( 300, function() {
-				commentRow
-					.show()
-					.find( '.vim-q' )
-						.attr( 'aria-expanded', 'false' )
-						.focus();
-			} ).css( 'backgroundColor', '' );
-		}
-
-		// When closing the Reply form, move focus back to the Reply button.
-		if ( 'replyto-comment' === this.act ) {
-			commentRow.find( '.vim-r' )
-				.attr( 'aria-expanded', 'false' )
-				.focus();
+		if ( this.cid && this.act == 'edit-comment' ) {
+			c = $('#comment-' + this.cid);
+			c.fadeIn(300, function(){ c.show(); }).css('backgroundColor', '');
 		}
 
 		// reset the Quicktags buttons
@@ -671,14 +649,12 @@ commentReply = {
 
 		$('#add-new-comment').css('display', '');
 
-		replyRow.hide();
-		$( '#com-reply' ).append( replyRow );
+		replyrow.hide();
+		$('#com-reply').append( replyrow );
 		$('#replycontent').css('height', '').val('');
 		$('#edithead input').val('');
-		$( '.notice-error', replyRow )
-			.addClass( 'hidden' )
-			.find( '.error' ).empty();
-		$( '.spinner', replyRow ).removeClass( 'is-active' );
+		$('.error', replyrow).empty().hide();
+		$( '.spinner', replyrow ).removeClass( 'is-active' );
 
 		this.cid = '';
 		this.originalContent = '';
@@ -778,10 +754,9 @@ commentReply = {
 	},
 
 	send : function() {
-		var post = {},
-			$errorNotice = $( '#replysubmit .error-notice' );
+		var post = {};
 
-		$errorNotice.addClass( 'hidden' );
+		$('#replysubmit .error').hide();
 		$( '#replysubmit .spinner' ).addClass( 'is-active' );
 
 		$('#replyrow input').not(':button').each(function() {
@@ -872,19 +847,16 @@ commentReply = {
 	},
 
 	error : function(r) {
-		var er = r.statusText,
-			$errorNotice = $( '#replysubmit .notice-error' ),
-			$error = $errorNotice.find( '.error' );
+		var er = r.statusText;
 
 		$( '#replysubmit .spinner' ).removeClass( 'is-active' );
 
 		if ( r.responseText )
 			er = r.responseText.replace( /<.[^<>]*?>/g, '' );
 
-		if ( er ) {
-			$errorNotice.removeClass( 'hidden' );
-			$error.html( er );
-		}
+		if ( er )
+			$('#replysubmit .error').html(er).show();
+
 	},
 
 	addcomment: function(post_id) {
@@ -982,7 +954,8 @@ $(document).ready(function(){
 	}
 
 	// Quick Edit and Reply have an inline comment editor.
-	$( '#the-comment-list' ).on( 'click', '.comment-inline', function() {
+	$( '#the-comment-list' ).on( 'click', '.comment-inline', function (e) {
+		e.preventDefault();
 		var $el = $( this ),
 			action = 'replyto';
 
@@ -990,7 +963,6 @@ $(document).ready(function(){
 			action = $el.data( 'action' );
 		}
 
-		$( this ).attr( 'aria-expanded', 'true' );
 		commentReply.open( $el.data( 'commentId' ), $el.data( 'postId' ), action );
 	} );
 });
