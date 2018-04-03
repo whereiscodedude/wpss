@@ -1,93 +1,66 @@
-/* global tinymce, QTags */
-
-/**
- * Contains global functions for the media upload within the post edit screen.
- *
- * Updates the ThickBox anchor href and the ThickBox's own properties in order
- * to set the size and position on every resize event. Also adds a function to
- * send HTML or text to the currently active editor.
- *
- * @file
- * @since 2.5.0
- *
- * @requires jQuery
- */
+/* global tinymce, QTags, tb_remove */
+// send html to the post editor
 
 var wpActiveEditor, send_to_editor;
 
-/**
- * Sends the HTML passed in the parameters to TinyMCE.
- *
- * @since 2.5.0
- *
- * @global
- *
- * @param {string} html The HTML to be sent to the editor.
- * @returns {void|boolean} Returns false when both TinyMCE and QTags instances
- *                         are unavailable. This means that the HTML was not
- *                         sent to the editor.
- */
-send_to_editor = function( html ) {
-	var editor,
-		hasTinymce = typeof tinymce !== 'undefined',
-		hasQuicktags = typeof QTags !== 'undefined';
+send_to_editor = function(h) {
+	var ed, mce = typeof(tinymce) != 'undefined', qt = typeof(QTags) != 'undefined';
 
-	// If no active editor is set, try to set it.
-	if ( ! wpActiveEditor ) {
-		if ( hasTinymce && tinymce.activeEditor ) {
-			editor = tinymce.activeEditor;
-			wpActiveEditor = editor.id;
-		} else if ( ! hasQuicktags ) {
+	if ( !wpActiveEditor ) {
+		if ( mce && tinymce.activeEditor ) {
+			ed = tinymce.activeEditor;
+			wpActiveEditor = ed.id;
+		} else if ( !qt ) {
 			return false;
 		}
-	} else if ( hasTinymce ) {
-		editor = tinymce.get( wpActiveEditor );
+	} else if ( mce ) {
+		if ( tinymce.activeEditor && (tinymce.activeEditor.id == 'mce_fullscreen' || tinymce.activeEditor.id == 'wp_mce_fullscreen') )
+			ed = tinymce.activeEditor;
+		else
+			ed = tinymce.get(wpActiveEditor);
 	}
 
-	// If the editor is set and not hidden, insert the HTML into the content of the
-	// editor.
-	if ( editor && ! editor.isHidden() ) {
-		editor.execCommand( 'mceInsertContent', false, html );
-	} else if ( hasQuicktags ) {
-		// If quick tags are available, insert the HTML into its content.
-		QTags.insertContent( html );
+	if ( ed && !ed.isHidden() ) {
+		// restore caret position on IE
+		if ( tinymce.isIE && ed.windowManager.insertimagebookmark )
+			ed.selection.moveToBookmark(ed.windowManager.insertimagebookmark);
+
+		if ( h.indexOf('[caption') !== -1 ) {
+			if ( ed.wpSetImgCaption )
+				h = ed.wpSetImgCaption(h);
+		} else if ( h.indexOf('[gallery') !== -1 ) {
+			if ( ed.plugins.wpgallery )
+				h = ed.plugins.wpgallery._do_gallery(h);
+		} else if ( h.indexOf('[embed') === 0 ) {
+			if ( ed.plugins.wordpress )
+				h = ed.plugins.wordpress._setEmbed(h);
+		}
+
+		ed.execCommand('mceInsertContent', false, h);
+	} else if ( qt ) {
+		QTags.insertContent(h);
 	} else {
-		// If neither the TinyMCE editor and the quick tags are available, add the HTML
-		// to the current active editor.
-		document.getElementById( wpActiveEditor ).value += html;
+		document.getElementById(wpActiveEditor).value += h;
 	}
 
-	// If the old thickbox remove function exists, call it.
-	if ( window.tb_remove ) {
-		try { window.tb_remove(); } catch( e ) {}
-	}
+	try{tb_remove();}catch(e){}
 };
 
+// thickbox settings
 var tb_position;
 (function($) {
-	/**
-	 * Recalculates and applies the new ThickBox position based on the current
-	 * window size.
-	 *
-	 * @since 2.6.0
-	 *
-	 * @global
-	 *
-	 * @returns {Object[]} Array containing jQuery objects for all the found
-	 *                     ThickBox anchors.
-	 */
 	tb_position = function() {
 		var tbWindow = $('#TB_window'),
 			width = $(window).width(),
 			H = $(window).height(),
-			W = ( 833 < width ) ? 833 : width,
+			W = ( 720 < width ) ? 720 : width,
 			adminbar_height = 0;
 
-		if ( $('#wpadminbar').length ) {
-			adminbar_height = parseInt( $('#wpadminbar').css('height'), 10 );
+		if ( $('body.admin-bar').length ) {
+			adminbar_height = parseInt( jQuery('#wpadminbar').css('height'), 10 );
 		}
 
-		if ( tbWindow.length ) {
+		if ( tbWindow.size() ) {
 			tbWindow.width( W - 50 ).height( H - 45 - adminbar_height );
 			$('#TB_iframeContent').width( W - 50 ).height( H - 75 - adminbar_height );
 			tbWindow.css({'margin-left': '-' + parseInt( ( ( W - 50 ) / 2 ), 10 ) + 'px'});
@@ -95,11 +68,6 @@ var tb_position;
 				tbWindow.css({'top': 20 + adminbar_height + 'px', 'margin-top': '0'});
 		}
 
-		/**
-		 * Recalculates the new height and width for all links with a ThickBox class.
-		 *
-		 * @since 2.6.0
-		 */
 		return $('a.thickbox').each( function() {
 			var href = $(this).attr('href');
 			if ( ! href ) return;
@@ -109,7 +77,18 @@ var tb_position;
 		});
 	};
 
-	// Add handler to recalculates the ThickBox position when the window is resized.
 	$(window).resize(function(){ tb_position(); });
+
+	// store caret position in IE
+	$(document).ready(function($){
+		$('a.thickbox').click(function(){
+			var ed;
+
+			if ( typeof(tinymce) != 'undefined' && tinymce.isIE && ( ed = tinymce.get(wpActiveEditor) ) && !ed.isHidden() ) {
+				ed.focus();
+				ed.windowManager.insertimagebookmark = ed.selection.getBookmark();
+			}
+		});
+	});
 
 })(jQuery);
