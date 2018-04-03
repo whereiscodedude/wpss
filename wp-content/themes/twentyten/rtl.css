@@ -101,6 +101,13 @@ blockquote {
 	font-style: normal;
 }
 
+/* Text meant only for screen readers */
+.screen-reader-text {
+	left: auto;
+	text-indent:-9000px;
+	overflow:hidden;
+}
+
 
 /* =Header
 -------------------------------------------------------------- */
@@ -264,15 +271,6 @@ div.menu li{
 #main .widget-area ul ul {
 	margin-right: 1.3em;
 	margin-left: 0;
-}
-.widget_text ol {
-	margin-left: auto;
-	margin-right: 1.3em;
-}
-
-#main .widget-area .tagcloud ul,
-.widget-area .tagcloud ul {
-	margin-right: 0;
 }
 
 /* =Footer
