@@ -1,7 +1,3 @@
-/**
- * @output wp-includes/js/wp-ajax-response.js
- */
-
 var wpAjax = jQuery.extend( {
 	unserialize: function( s ) {
 		var r = {}, q, pp, i, p;
@@ -60,7 +56,7 @@ var wpAjax = jQuery.extend( {
 		selector = jQuery( selector );
 		return !wpAjax.invalidateForm( selector.find('.form-required').filter( function() { return jQuery('input:visible', this).val() === ''; } ) ).length;
 	}
-}, wpAjax || { noPerm: 'Sorry, you are not allowed to do that.', broken: 'Something went wrong.' } );
+}, wpAjax || { noPerm: 'You do not have permission to do that.', broken: 'An unidentified error has occurred.' } );
 
 // Basic form validation
 jQuery(document).ready( function($){
