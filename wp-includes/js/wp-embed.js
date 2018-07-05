@@ -2,7 +2,6 @@
  * WordPress inline HTML embed
  *
  * @since 4.4.0
- * @output wp-includes/js/wp-embed.js
  *
  * This file cannot have ampersands in it. This is to ensure
  * it can be embedded in older versions of WordPress.
@@ -20,7 +19,6 @@
 			}
 		}
 
-	/** @namespace wp */
 	window.wp = window.wp || {};
 
 	if ( !! window.wp.receiveEmbedMessage ) {
