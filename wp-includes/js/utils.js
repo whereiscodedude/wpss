@@ -1,11 +1,6 @@
-/**
- * Cookie functions.
- *
- * @output wp-includes/js/utils.js
- */
-
 /* global userSettings */
 /* exported getUserSetting, setUserSetting, deleteUserSetting */
+// utility functions
 
 var wpCookies = {
 // The following functions are from Cookie.js class in TinyMCE 3, Moxiecode, used under LGPL.
@@ -115,7 +110,7 @@ var wpCookies = {
 		if ( typeof( expires ) === 'object' && expires.toGMTString ) {
 			expires = expires.toGMTString();
 		} else if ( parseInt( expires, 10 ) ) {
-			d.setTime( d.getTime() + ( parseInt( expires, 10 ) * 1000 ) ); // time must be in milliseconds
+			d.setTime( d.getTime() + ( parseInt( expires, 10 ) * 1000 ) ); // time must be in miliseconds
 			expires = d.toGMTString();
 		} else {
 			expires = '';
