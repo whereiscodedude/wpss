@@ -136,7 +136,7 @@ class Services_JSON
     *                                   from encode() should be checked with isError()
     *                           - SERVICES_JSON_USE_TO_JSON:  call toJSON when serializing objects
     *                                   It serializes the return value from the toJSON call rather 
-    *                                   than the object itself, toJSON can return associative arrays, 
+    *                                   than the object it'self,  toJSON can return associative arrays, 
     *                                   strings or numbers, if you return an object, make sure it does
     *                                   not have a toJSON method, otherwise an error will occur.
     */
@@ -252,7 +252,7 @@ class Services_JSON
     *
     * @param    mixed   $var    any number, boolean, string, array, or object to be encoded.
     *                           see argument 1 to Services_JSON() above for array-parsing behavior.
-    *                           if var is a string, note that encode() always expects it
+    *                           if var is a strng, note that encode() always expects it
     *                           to be in ASCII or UTF-8 format!
     *
     * @return   mixed   JSON string representation of input var or an error if a problem occurs
@@ -268,7 +268,7 @@ class Services_JSON
     *
     * @param    mixed   $var    any number, boolean, string, array, or object to be encoded.
     *                           see argument 1 to Services_JSON() above for array-parsing behavior.
-    *                           if var is a string, note that encode() always expects it
+    *                           if var is a strng, note that encode() always expects it
     *                           to be in ASCII or UTF-8 format!
     *
     * @return   mixed   JSON string representation of input var or an error if a problem occurs
@@ -289,7 +289,7 @@ class Services_JSON
     *
     * @param    mixed   $var    any number, boolean, string, array, or object to be encoded.
     *                           see argument 1 to Services_JSON() above for array-parsing behavior.
-    *                           if var is a string, note that encode() always expects it
+    *                           if var is a strng, note that encode() always expects it
     *                           to be in ASCII or UTF-8 format!
     *
     * @return   mixed   JSON string representation of input var or an error if a problem occurs
@@ -445,7 +445,7 @@ class Services_JSON
             case 'array':
                /*
                 * As per JSON spec if any array key is not an integer
-                * we must treat the whole array as an object. We
+                * we must treat the the whole array as an object. We
                 * also try to catch a sparsely populated associative
                 * array with numeric keys here because some JS engines
                 * will create an array with empty indexes up to
