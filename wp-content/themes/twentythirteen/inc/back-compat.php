@@ -39,16 +39,14 @@ function twentythirteen_upgrade_notice() {
 }
 
 /**
- * Prevent the Customizer from being loaded on WordPress versions prior to 3.6.
+ * Prevent the Theme Customizer from being loaded on WordPress versions prior to 3.6.
  *
  * @since Twenty Thirteen 1.0
  */
 function twentythirteen_customize() {
-	wp_die(
-		sprintf( __( 'Twenty Thirteen requires at least WordPress version 3.6. You are running version %s. Please upgrade and try again.', 'twentythirteen' ), $GLOBALS['wp_version'] ), '', array(
-			'back_link' => true,
-		)
-	);
+	wp_die( sprintf( __( 'Twenty Thirteen requires at least WordPress version 3.6. You are running version %s. Please upgrade and try again.', 'twentythirteen' ), $GLOBALS['wp_version'] ), '', array(
+		'back_link' => true,
+	) );
 }
 add_action( 'load-customize.php', 'twentythirteen_customize' );
 

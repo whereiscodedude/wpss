@@ -5,7 +5,7 @@
  * Used to display archive-type pages if nothing more specific matches a query.
  * For example, puts together date-based pages if no date.php file exists.
  *
- * @link https://codex.wordpress.org/Template_Hierarchy
+ * @link http://codex.wordpress.org/Template_Hierarchy
  *
  * @package WordPress
  * @subpackage Twenty_Ten
@@ -25,9 +25,8 @@ get_header(); ?>
 	 * We reset this later so we can run the loop
 	 * properly with a call to rewind_posts().
 	 */
-if ( have_posts() ) {
-	the_post();
-}
+	if ( have_posts() )
+		the_post();
 ?>
 
 			<h1 class="page-title">
@@ -55,7 +54,7 @@ if ( have_posts() ) {
 	 * If you want to overload this in a child theme then include a file
 	 * called loop-archive.php and that will be used instead.
 	 */
-	get_template_part( 'loop', 'archive' );
+	 get_template_part( 'loop', 'archive' );
 ?>
 
 			</div><!-- #content -->
