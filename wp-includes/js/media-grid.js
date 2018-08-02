@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -74,36 +74,24 @@
 /* 7 */,
 /* 8 */,
 /* 9 */,
-/* 10 */,
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(12);
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * @output wp-includes/js/media-grid.js
- */
 
 var media = wp.media;
 
-media.controller.EditAttachmentMetadata = __webpack_require__( 13 );
-media.view.MediaFrame.Manage = __webpack_require__( 14 );
-media.view.Attachment.Details.TwoColumn = __webpack_require__( 15 );
-media.view.MediaFrame.Manage.Router = __webpack_require__( 16 );
-media.view.EditImage.Details = __webpack_require__( 17 );
-media.view.MediaFrame.EditAttachments = __webpack_require__( 18 );
-media.view.SelectModeToggleButton = __webpack_require__( 19 );
-media.view.DeleteSelectedButton = __webpack_require__( 20 );
-media.view.DeleteSelectedPermanentlyButton = __webpack_require__( 21 );
+media.controller.EditAttachmentMetadata = __webpack_require__( 11 );
+media.view.MediaFrame.Manage = __webpack_require__( 12 );
+media.view.Attachment.Details.TwoColumn = __webpack_require__( 13 );
+media.view.MediaFrame.Manage.Router = __webpack_require__( 14 );
+media.view.EditImage.Details = __webpack_require__( 15 );
+media.view.MediaFrame.EditAttachments = __webpack_require__( 16 );
+media.view.SelectModeToggleButton = __webpack_require__( 17 );
+media.view.DeleteSelectedButton = __webpack_require__( 18 );
+media.view.DeleteSelectedPermanentlyButton = __webpack_require__( 19 );
 
 
 /***/ }),
-/* 13 */
+/* 11 */
 /***/ (function(module, exports) {
 
 var l10n = wp.media.view.l10n,
@@ -137,7 +125,7 @@ module.exports = EditAttachmentMetadata;
 
 
 /***/ }),
-/* 14 */
+/* 12 */
 /***/ (function(module, exports) {
 
 var MediaFrame = wp.media.view.MediaFrame,
@@ -430,7 +418,7 @@ module.exports = Manage;
 
 
 /***/ }),
-/* 15 */
+/* 13 */
 /***/ (function(module, exports) {
 
 var Details = wp.media.view.Attachment.Details,
@@ -487,7 +475,7 @@ module.exports = TwoColumn;
 
 
 /***/ }),
-/* 16 */
+/* 14 */
 /***/ (function(module, exports) {
 
 /**
@@ -560,7 +548,7 @@ module.exports = Router;
 
 
 /***/ }),
-/* 17 */
+/* 15 */
 /***/ (function(module, exports) {
 
 var View = wp.media.View,
@@ -601,7 +589,7 @@ module.exports = Details;
 
 
 /***/ }),
-/* 18 */
+/* 16 */
 /***/ (function(module, exports) {
 
 var Frame = wp.media.view.Frame,
@@ -865,7 +853,7 @@ module.exports = EditAttachments;
 
 
 /***/ }),
-/* 19 */
+/* 17 */
 /***/ (function(module, exports) {
 
 
@@ -946,7 +934,7 @@ module.exports = SelectModeToggle;
 
 
 /***/ }),
-/* 20 */
+/* 18 */
 /***/ (function(module, exports) {
 
 var Button = wp.media.view.Button,
@@ -1005,7 +993,7 @@ module.exports = DeleteSelected;
 
 
 /***/ }),
-/* 21 */
+/* 19 */
 /***/ (function(module, exports) {
 
 var Button = wp.media.view.Button,
