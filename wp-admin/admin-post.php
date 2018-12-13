@@ -13,16 +13,15 @@ if ( ! defined( 'WP_ADMIN' ) ) {
 	define( 'WP_ADMIN', true );
 }
 
-if ( defined( 'ABSPATH' ) ) {
-	require_once( ABSPATH . 'wp-load.php' );
-} else {
+if ( defined('ABSPATH') )
+	require_once(ABSPATH . 'wp-load.php');
+else
 	require_once( dirname( dirname( __FILE__ ) ) . '/wp-load.php' );
-}
 
-/** Allow for cross-domain requests (from the front end). */
+/** Allow for cross-domain requests (from the frontend). */
 send_origin_headers();
 
-require_once( ABSPATH . 'wp-admin/includes/admin.php' );
+require_once(ABSPATH . 'wp-admin/includes/admin.php');
 
 nocache_headers();
 
@@ -43,7 +42,7 @@ if ( ! wp_validate_auth_cookie() ) {
 		/**
 		 * Fires on a non-authenticated admin post request for the given action.
 		 *
-		 * The dynamic portion of the hook name, `$action`, refers to the given
+		 * The dynamic portion of the hook name, $action, refers to the given
 		 * request action.
 		 *
 		 * @since 2.6.0
@@ -62,7 +61,7 @@ if ( ! wp_validate_auth_cookie() ) {
 		/**
 		 * Fires on an authenticated admin post request for the given action.
 		 *
-		 * The dynamic portion of the hook name, `$action`, refers to the given
+		 * The dynamic portion of the hook name, $action, refers to the given
 		 * request action.
 		 *
 		 * @since 2.6.0
