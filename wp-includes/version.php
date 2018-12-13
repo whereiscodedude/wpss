@@ -1,33 +1,24 @@
 <?php
 /**
- * WordPress Version
- *
- * Contains version information for the current WordPress release.
- *
- * @package WordPress
- * @since 1.1.0
- */
-
-/**
  * The WordPress version string
  *
  * @global string $wp_version
  */
-$wp_version = '5.1-alpha-44048';
+$wp_version = '3.9.26';
 
 /**
  * Holds the WordPress DB revision, increments when changes are made to the WordPress DB schema.
  *
  * @global int $wp_db_version
  */
-$wp_db_version = 42836;
+$wp_db_version = 27918;
 
 /**
  * Holds the TinyMCE version
  *
  * @global string $tinymce_version
  */
-$tinymce_version = '4800-20180716';
+$tinymce_version = '4021-20150505';
 
 /**
  * Holds the required PHP version
