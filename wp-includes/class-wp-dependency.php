@@ -20,6 +20,7 @@ class _WP_Dependency {
 	/**
 	 * The handle name.
 	 *
+	 * @access public
 	 * @since 2.6.0
 	 * @var null
 	 */
@@ -28,6 +29,7 @@ class _WP_Dependency {
 	/**
 	 * The handle source.
 	 *
+	 * @access public
 	 * @since 2.6.0
 	 * @var null
 	 */
@@ -36,6 +38,7 @@ class _WP_Dependency {
 	/**
 	 * An array of handle dependencies.
 	 *
+	 * @access public
 	 * @since 2.6.0
 	 * @var array
 	 */
@@ -46,6 +49,7 @@ class _WP_Dependency {
 	 *
 	 * Used for cache-busting.
 	 *
+	 * @access public
 	 * @since 2.6.0
 	 * @var bool|string
 	 */
@@ -54,6 +58,7 @@ class _WP_Dependency {
 	/**
 	 * Additional arguments for the handle.
 	 *
+	 * @access public
 	 * @since 2.6.0
 	 * @var null
 	 */
@@ -62,6 +67,7 @@ class _WP_Dependency {
 	/**
 	 * Extra data to supply to the handle.
 	 *
+	 * @access public
 	 * @since 2.6.0
 	 * @var array
 	 */
@@ -74,14 +80,14 @@ class _WP_Dependency {
 	 */
 	public function __construct() {
 		@list( $this->handle, $this->src, $this->deps, $this->ver, $this->args ) = func_get_args();
-		if ( ! is_array( $this->deps ) ) {
+		if ( ! is_array($this->deps) )
 			$this->deps = array();
-		}
 	}
 
 	/**
 	 * Add handle data.
 	 *
+	 * @access public
 	 * @since 2.6.0
 	 *
 	 * @param string $name The data key to add.
@@ -89,10 +95,9 @@ class _WP_Dependency {
 	 * @return bool False if not scalar, true otherwise.
 	 */
 	public function add_data( $name, $data ) {
-		if ( ! is_scalar( $name ) ) {
+		if ( !is_scalar($name) )
 			return false;
-		}
-		$this->extra[ $name ] = $data;
+		$this->extra[$name] = $data;
 		return true;
 	}
 
