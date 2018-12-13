@@ -75,11 +75,9 @@
 	} )();
 
 	/**
-	 * Add or remove ARIA attributes.
-	 *
+	 * @summary Add or remove ARIA attributes.
 	 * Uses jQuery's width() function to determine the size of the window and add
 	 * the default ARIA attributes for the menu toggle if it's visible.
-	 *
 	 * @since Twenty Thirteen 1.5
 	 */
 	function onResizeARIA() {
@@ -121,13 +119,9 @@
 	/**
 	 * Arranges footer widgets vertically.
 	 */
-	$( function() {
-		var columnWidth, widgetArea;
-		if ( ! $.isFunction( $.fn.masonry ) ) {
-			return;
-		}
-		columnWidth = body.is( '.sidebar' ) ? 228 : 245;
-		widgetArea = $( '#secondary .widget-area' );
+	if ( $.isFunction( $.fn.masonry ) ) {
+		var columnWidth = body.is( '.sidebar' ) ? 228 : 245,
+			widgetArea = $( '#secondary .widget-area' );
 
 		widgetArea.masonry( {
 			itemSelector: '.widget',
@@ -163,5 +157,5 @@
 				}
 			} );
 		}
-	} );
+	}
 } )( jQuery );
