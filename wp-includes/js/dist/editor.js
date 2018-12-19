@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["editor"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 303);
+/******/ 	return __webpack_require__(__webpack_require__.s = 302);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -2300,7 +2300,7 @@ g = (function() {
 
 try {
 	// This works if eval is allowed (see CSP)
-	g = g || new Function("return this")();
+	g = g || Function("return this")() || (1, eval)("this");
 } catch (e) {
 	// This works if the window reference is available
 	if (typeof window === "object") g = window;
@@ -2323,7 +2323,7 @@ module.exports = g;
 /* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(270);
+module.exports = __webpack_require__(269);
 
 
 /***/ }),
@@ -2334,7 +2334,7 @@ module.exports = __webpack_require__(270);
 "use strict";
 
 exports.__esModule = true;
-var TextareaAutosize_1 = __webpack_require__(271);
+var TextareaAutosize_1 = __webpack_require__(270);
 exports["default"] = TextareaAutosize_1["default"];
 
 
@@ -3239,7 +3239,7 @@ if (typeof Object.create === 'function') {
 /* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/punycode v1.4.1 by @mathias */
+/* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/punycode v1.3.2 by @mathias */
 ;(function(root) {
 
 	/** Detect free variables */
@@ -3305,7 +3305,7 @@ if (typeof Object.create === 'function') {
 	 * @returns {Error} Throws a `RangeError` with the applicable error message.
 	 */
 	function error(type) {
-		throw new RangeError(errors[type]);
+		throw RangeError(errors[type]);
 	}
 
 	/**
@@ -3452,7 +3452,7 @@ if (typeof Object.create === 'function') {
 
 	/**
 	 * Bias adaptation function as per section 3.4 of RFC 3492.
-	 * https://tools.ietf.org/html/rfc3492#section-3.4
+	 * http://tools.ietf.org/html/rfc3492#section-3.4
 	 * @private
 	 */
 	function adapt(delta, numPoints, firstTime) {
@@ -3727,7 +3727,7 @@ if (typeof Object.create === 'function') {
 		 * @memberOf punycode
 		 * @type String
 		 */
-		'version': '1.4.1',
+		'version': '1.3.2',
 		/**
 		 * An object of methods to convert from JavaScript's internal character
 		 * representation (UCS-2) to Unicode code points, and back.
@@ -7035,8 +7035,7 @@ var hasOwnProperty = Object.hasOwnProperty || function (obj, key) {
 /* 266 */,
 /* 267 */,
 /* 268 */,
-/* 269 */,
-/* 270 */
+/* 269 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7201,7 +7200,7 @@ function separateState(state) {
 }
 
 /***/ }),
-/* 271 */
+/* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7236,8 +7235,8 @@ var __rest = (this && this.__rest) || function (s, e) {
 exports.__esModule = true;
 var React = __webpack_require__(26);
 var PropTypes = __webpack_require__(29);
-var autosize = __webpack_require__(272);
-var _getLineHeight = __webpack_require__(273);
+var autosize = __webpack_require__(271);
+var _getLineHeight = __webpack_require__(272);
 var getLineHeight = _getLineHeight;
 var UPDATE = 'autosize:update';
 var DESTROY = 'autosize:destroy';
@@ -7329,7 +7328,7 @@ exports["default"] = TextareaAutosize;
 
 
 /***/ }),
-/* 272 */
+/* 271 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -7617,11 +7616,11 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 });
 
 /***/ }),
-/* 273 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Load in dependencies
-var computedStyle = __webpack_require__(274);
+var computedStyle = __webpack_require__(273);
 
 /**
  * Calculate the `line-height` of a given node
@@ -7720,7 +7719,7 @@ module.exports = lineHeight;
 
 
 /***/ }),
-/* 274 */
+/* 273 */
 /***/ (function(module, exports) {
 
 // This code has been refactored for 140 bytes
@@ -7753,6 +7752,7 @@ module.exports = computedStyle;
 
 
 /***/ }),
+/* 274 */,
 /* 275 */,
 /* 276 */,
 /* 277 */,
@@ -7780,8 +7780,7 @@ module.exports = computedStyle;
 /* 299 */,
 /* 300 */,
 /* 301 */,
-/* 302 */,
-/* 303 */
+/* 302 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
