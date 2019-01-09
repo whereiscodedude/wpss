@@ -4,7 +4,7 @@
  *
  * Used to display archive-type pages for posts in a category.
  *
- * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
+ * @link https://codex.wordpress.org/Template_Hierarchy
  *
  * @package WordPress
  * @subpackage Twenty_Twelve
@@ -27,8 +27,7 @@ get_header(); ?>
 
 			<?php
 			/* Start the Loop */
-			while ( have_posts() ) :
-				the_post();
+			while ( have_posts() ) : the_post();
 
 				/* Include the post format-specific template for the content. If you want to
 				 * this in a child theme then include a file called content-___.php
