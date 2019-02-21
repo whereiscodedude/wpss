@@ -479,15 +479,16 @@ function wp_comment_reply( $position = 1, $checkbox = false, $mode = 'single', $
 	</div>
 
 	<div id="replysubmit" class="submit">
-		<p class="reply-submit-buttons">
-			<button type="button" class="save button button-primary">
+		<p>
+			<a href="#comments-form" class="save button button-primary alignright">
 				<span id="addbtn" style="display: none;"><?php _e( 'Add Comment' ); ?></span>
 				<span id="savebtn" style="display: none;"><?php _e( 'Update Comment' ); ?></span>
 				<span id="replybtn" style="display: none;"><?php _e( 'Submit Reply' ); ?></span>
-			</button>
-			<button type="button" class="cancel button"><?php _e( 'Cancel' ); ?></button>
+			</a>
+			<a href="#comments-form" class="cancel button alignleft"><?php _e( 'Cancel' ); ?></a>
 			<span class="waiting spinner"></span>
 		</p>
+		<br class="clear" />
 		<div class="notice notice-error notice-alt inline hidden">
 			<p class="error"></p>
 		</div>
