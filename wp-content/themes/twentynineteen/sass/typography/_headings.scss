@@ -18,13 +18,14 @@
 .site-title,
 .site-info,
 #cancel-comment-reply-link,
+img:after,
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-	@include font-family( $font__heading );
+	font-family: $font__heading;
 }
 
 .main-navigation,
@@ -52,7 +53,7 @@ h6 {
 }
 
 .page-title {
-	@include font-family( $font__body );
+	font-family: $font__body;
 }
 
 .site-branding,

@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["wordcount"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 314);
+/******/ 	return __webpack_require__(__webpack_require__.s = 310);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -94,7 +94,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["wordcount"] =
 
 /***/ }),
 
-/***/ 314:
+/***/ 310:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -317,13 +317,6 @@ var defaultSettings = {
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/wordcount/build-module/index.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "count", function() { return count; });
-/**
- * External dependencies
- */
-
-/**
- * Internal dependencies
- */
 
 
 
