@@ -9,154 +9,276 @@
 /** WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
-wp_enqueue_script( 'underscore' );
+wp_enqueue_style( 'wp-mediaelement' );
+wp_enqueue_script( 'wp-mediaelement' );
+wp_localize_script( 'mediaelement', '_wpmejsSettings', array(
+	'pluginPath' => includes_url( 'js/mediaelement/', 'relative' ),
+	'pauseOtherPlayers' => ''
+) );
 
-/* translators: Page title of the About WordPress page in the admin. */
-$title = _x( 'About', 'page title' );
+if ( current_user_can( 'install_plugins' ) ) {
+	add_thickbox();
+	wp_enqueue_script( 'plugin-install' );
+}
 
-list( $display_version ) = explode( '-', get_bloginfo( 'version' ) );
+$video_url = 'https://videopress.com/embed/J44FHXvg?hd=true';
+$locale    = str_replace( '_', '-', get_locale() );
+list( $locale ) = explode( '-', $locale );
+if ( 'en' !== $locale ) {
+	$video_url = add_query_arg( 'defaultLangCode', $locale, $video_url );
+}
 
-wp_enqueue_style( 'wp-block-library' );
+wp_oembed_add_host_js();
+
+$title = __( 'About' );
+
+list( $display_version ) = explode( '-', $wp_version );
 
 include( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
-	<div class="wrap about-wrap full-width-layout">
+	<div class="wrap about-wrap">
 		<h1><?php printf( __( 'Welcome to WordPress&nbsp;%s' ), $display_version ); ?></h1>
 
-		<p class="about-text"><?php printf( __( 'Thank you for updating to the latest version!' ), $display_version ); ?></p>
-
+		<div class="about-text"><?php printf( __( 'Thank you for updating! WordPress %s makes your site more connected and responsive.' ), $display_version ); ?></div>
 		<div class="wp-badge"><?php printf( __( 'Version %s' ), $display_version ); ?></div>
 
-		<h2 class="nav-tab-wrapper wp-clearfix">
+		<h2 class="nav-tab-wrapper">
 			<a href="about.php" class="nav-tab nav-tab-active"><?php _e( 'What&#8217;s New' ); ?></a>
 			<a href="credits.php" class="nav-tab"><?php _e( 'Credits' ); ?></a>
 			<a href="freedoms.php" class="nav-tab"><?php _e( 'Freedoms' ); ?></a>
-			<a href="freedoms.php?privacy-notice" class="nav-tab"><?php _e( 'Privacy' ); ?></a>
 		</h2>
 
-		<h2 class="feature-section-header"><?php _e( 'A Little Better Every Day' ); ?></h2>
-
-		<div class="feature-section headline-feature one-col">
-			<div class="col">
-				<div class="inline-svg">
-					<img src="https://s.w.org/images/core/5.1/update.svg" alt="">
-				</div>
-				<p><?php _e( 'You&#8217;ve successfully upgraded to WordPress 5.1! Following WordPress 5.0&#8212;a major release which introduced the new block editor&#8212;5.1 focuses on polish, in particular by improving overall performance of the editor. In addition, this release paves the way for a better, faster, and more secure WordPress with some essential tools for site administrators and developers.' ); ?></p>
-			</div>
-		</div>
-
-		<div class="feature-section one-col is-wide wp-clearfix">
-			<div class="col">
-				<h3><?php _e( 'Site Health' ); ?></h3>
-				<div class="inline-svg alignright">
-					<img src="https://s.w.org/images/core/5.1/site-health.svg" alt="">
-				</div>
-				<p><?php printf( __( 'With security and speed in mind, this release introduces WordPress&#8217;s first <a href="%s">Site Health</a> features. WordPress will start showing notices to administrators of sites that run long-outdated versions of PHP, which is the programming language that powers WordPress.' ), 'https://make.wordpress.org/core/2019/01/14/php-site-health-mechanisms-in-5-1/' ); ?></p>
-
-				<p><?php _e( 'When installing new plugins, WordPress&#8217;s Site Health features will check whether a plugin requires a version of PHP incompatible with your site. If so, WordPress will prevent you from installing that plugin.' ); ?></p>
-
+		<div class="changelog point-releases">
+			<h3><?php _e( 'Maintenance and Security Releases' ); ?> </h3>
+			<p>
 				<?php
-				$response = wp_check_php_version();
-				if ( $response && isset( $response['is_acceptable'] ) && ! $response['is_acceptable'] && current_user_can( 'update_php' ) ) :
-					?>
-					<p><em><?php _e( 'WordPress has detected your site is running an outdated version of PHP. You will see this notice on your dashboard with instructions for contacting your host.' ); ?></em></p>
-				<?php endif; ?>
-
-				<p><a class="button button-default button-hero" href="<?php echo esc_url( wp_get_update_php_url() ); ?>"><?php _e( 'Learn more about updating PHP' ); ?></a></p>
-			</div>
+				printf(
+					/* translators: %s: WordPress version number */
+					__( '<strong>Version %s</strong> addressed some security issues.' ),
+					'4.4.18'
+				);
+				?>
+				<?php
+				printf(
+					/* translators: %s: HelpHub URL */
+					__( 'For more information, see <a href="%s">the release notes</a>.' ),
+					sprintf(
+						/* translators: %s: WordPress version */
+						esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+						sanitize_title( '4.4.18' )
+					)
+				);
+				?>
+			</p>
+			<p>
+				<?php
+				/* translators: %s: WordPress version number */
+				printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.17' );
+				?>
+				<?php
+				/* translators: %s: Codex URL */
+				printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.17' );
+				?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed one security issue.' ), '4.4.16' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.16' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.15' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.15' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed one security issue.' ), '4.4.14' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.14' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.13' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.13' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed one security issue.' ), '4.4.12' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.12' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.11' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.11' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.10' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.10' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed %2$s bug.',
+					'<strong>Version %1$s</strong> addressed %2$s bugs.', 1 ), '4.4.9', number_format_i18n( 1 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.9' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.8' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.8' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.7' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.7' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.6' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.6' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+				'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.', 1 ), '4.4.5', number_format_i18n( 1 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.5' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.4.4' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.4' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+				'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.', 6 ), '4.4.3', number_format_i18n( 6 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.3' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+				'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.', 17 ), '4.4.2', number_format_i18n( 17 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.2' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+				'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.', 52 ), '4.4.1', number_format_i18n( 52 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.4.1' ); ?>
+			</p>
 		</div>
 
-		<div class="feature-section one-col is-wide wp-clearfix">
-			<div class="col">
-				<h3><?php _e( 'Editor Performance' ); ?></h3>
-				<div class="inline-svg alignright">
-					<img src="https://s.w.org/images/core/5.1/editor-performance.svg" alt="">
-				</div>
-				<p><?php _e( 'Introduced in WordPress 5.0, the new block editor continues to improve. Most significantly, WordPress 5.1 includes solid performance improvements within the editor. The editor should feel a little quicker to start, and typing should feel smoother. Nevertheless, expect more performance improvements in the next releases.' ); ?></p>
-				<?php if ( current_user_can( 'edit_posts' ) ) : ?>
-					<p><a class="button button-default button-hero" href="<?php echo esc_url( admin_url( 'post-new.php' ) ); ?>"><?php _e( 'Build your first post' ); ?></a></p>
-				<?php endif; ?>
-			</div>
+		<div class="headline-feature feature-video">
+			<iframe width="1050" height="591" src="<?php echo esc_url( $video_url ); ?>" frameborder="0" allowfullscreen></iframe>
+			<script src="https://videopress.com/videopress-iframe.js"></script>
 		</div>
 
-		<hr />
+		<hr>
 
-		<h3 class="under-the-hood-header"><?php _e( 'Developer Happiness' ); ?></h3>
-
-		<div class="under-the-hood feature-section three-col">
-			<div class="col">
-				<h4><?php _e( 'Multisite Metadata' ); ?></h4>
-				<p>
-					<?php _e( '5.1 introduces a new database table to store metadata associated with sites and allows for the storage of arbitrary site data relevant in a multisite / network context.' ); ?>
-					<br>
-					<?php printf( __( '<a href="%s">Read more.</a>' ), 'https://make.wordpress.org/core/2019/01/28/multisite-support-for-site-metadata-in-5-1/' ); ?>
-				</p>
+		<div class="headline-feature feature-section one-col">
+			<h2><?php _e( 'Twenty Sixteen' ); ?></h2>
+			<div class="media-container">
+				<img src="https://s.w.org/images/core/4.4/twenty-sixteen-white-fullsize-2x.png" alt="" srcset="https://s.w.org/images/core/4.4/twenty-sixteen-white-smartphone-1x.png 268w, https://s.w.org/images/core/4.4/twenty-sixteen-white-smartphone-2x.png 536w, https://s.w.org/images/core/4.4/twenty-sixteen-white-tablet-1x.png 558w, https://s.w.org/images/core/4.4/twenty-sixteen-white-desktop-1x.png 840w, https://s.w.org/images/core/4.4/twenty-sixteen-white-fullsize-1x.png 1086w, https://s.w.org/images/core/4.4/twenty-sixteen-white-tablet-2x.png 1116w, https://s.w.org/images/core/4.4/twenty-sixteen-white-desktop-2x.png 1680w, https://s.w.org/images/core/4.4/twenty-sixteen-white-fullsize-2x.png 2172w" sizes="(max-width: 500px) calc((100vw - 40px) * .8), (max-width: 782px) calc((100vw - 70px) * .8), (max-width: 960px) calc((100vw - 116px) * .8), (max-width: 1290px) calc((100vw - 240px) * .8), 840px" />
 			</div>
-			<div class="col">
-				<h4><?php _e( 'Cron API' ); ?></h4>
-				<p>
-					<?php _e( 'The Cron API has been updated with new functions to assist with returning data and includes new filters for modifying cron storage. Other changes in behavior affect cron spawning on servers running FastCGI and PHP-FPM versions 7.0.16 and above.' ); ?>
-					<br>
-					<?php printf( __( '<a href="%s">Read more.</a>' ), 'https://make.wordpress.org/core/2019/01/09/cron-improvements-with-php-fpm-in-wordpress-5-1/' ); ?>
-				</p>
-			</div>
-			<div class="col">
-				<h4><?php _e( 'New JS Build Processes' ); ?></h4>
-				<p>
-					<?php _e( 'WordPress 5.1 features a new JavaScript build option, following the large reorganization of code started in the 5.0 release.' ); ?>
-					<br>
-					<?php printf( __( '<a href="%s">Read more.</a>' ), 'https://make.wordpress.org/core/2018/05/16/preparing-wordpress-for-a-javascript-future-part-1-build-step-and-folder-reorganization/' ); ?>
-				</p>
-			</div>
-		</div>
-
-		<div class="under-the-hood feature-section two-col">
-			<div class="col is-span-two">
-				<h4><?php _e( 'Other Developer Goodness' ); ?></h4>
-				<p>
-					<?php _e( 'Miscellaneous improvements include updates to values for the <code>WP_DEBUG_LOG</code> constant, new test config file constant in the test suite, new plugin action hooks, short-circuit filters for <code>wp_unique_post_slug()</code> and <code>WP_User_Query</code> and <code>count_users()</code>, a new <code>human_readable_duration</code> function, improved taxonomy metabox sanitization, limited <code>LIKE</code> support for meta keys when using <code>WP_Meta_Query</code>, a new “doing it wrong” notice when registering REST API endpoints, and more!' ); ?>
-					<br>
-					<?php printf( __( '<a href="%s">Read more.</a>' ), 'https://make.wordpress.org/core/2019/01/23/miscellaneous-developer-focused-changes-in-5-1/' ); ?>
-				</p>
-				<p>
-					<a class="button button-default button-hero" href="<?php echo esc_url( 'https://developer.wordpress.org/' ); ?>"><?php _e( 'Learn how to get started' ); ?></a>
-				</p>
-			</div>
-			<div class="col">
-				<div class="inline-svg">
-					<img src="https://s.w.org/images/core/5.1/under-the-hood.svg" alt="">
-				</div>
-			</div>
-		</div>
-
-		<hr />
-
-		<?php if ( ! file_exists( WP_PLUGIN_DIR . '/classic-editor/classic-editor.php' ) ) : ?>
-			<h2 class="feature-section-header"><?php _e( 'Keep it Classic' ); ?></h2>
-
-			<div class="feature-section one-col" id="classic-editor">
+			<div class="two-col">
 				<div class="col">
-					<p><?php _e( 'Prefer to stick with the familiar Classic Editor? No problem! Support for the Classic Editor plugin will remain in WordPress through 2021.' ); ?></p>
-					<p><?php _e( 'The Classic Editor plugin restores the previous WordPress editor and the Edit Post screen. It lets you keep using plugins that extend it, add old-style meta boxes, or otherwise depend on the previous editor. To install, visit your plugins page and click the &#8220;Install Now&#8221; button next to &#8220;Classic Editor&#8221;. After the plugin finishes installing, click &#8220;Activate&#8221;. That’s it!' ); ?></p>
-					<p><?php _e( 'Note to users of assistive technology: if you experience usability issues with the block editor, we recommend you continue to use the Classic Editor.' ); ?></p>
-					<?php if ( current_user_can( 'install_plugins' ) ) { ?>
-						<div class="col cta">
-							<a class="button button-primary button-hero" href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'plugin-install.php?tab=favorites&user=wordpressdotorg&save=0' ), 'save_wporg_username_' . get_current_user_id() ) ); ?>"><?php _e( 'Install the Classic Editor' ); ?></a>
+					<h3><?php _e( 'Introducing Twenty Sixteen' ); ?></h3>
+					<p><?php _e( 'Our newest default theme, Twenty Sixteen, is a modern take on a classic blog design.' ); ?></p>
+					<p><?php _e( 'Twenty Sixteen was built to look great on any device. A fluid grid design, flexible header, fun color schemes, and more, will make your content shine.' ); ?></p>
+					<div class="horizontal-image">
+						<div class="content">
+							<img class="feature-image horizontal-screen" src="https://s.w.org/images/core/4.4/twenty-sixteen-dark-fullsize-2x.png?2" alt=""  srcset="https://s.w.org/images/core/4.4/twenty-sixteen-dark-smartphone-1x.png?2 268w, https://s.w.org/images/core/4.4/twenty-sixteen-dark-smartphone-2x.png?2 535w, https://s.w.org/images/core/4.4/twenty-sixteen-dark-desktop-1x.png?2 558w, https://s.w.org/images/core/4.4/twenty-sixteen-dark-fullsize-1x.png?2 783w, https://s.w.org/images/core/4.4/twenty-sixteen-dark-desktop-2x.png?2 1116w, https://s.w.org/images/core/4.4/twenty-sixteen-dark-fullsize-2x.png?2 1566w" sizes="(max-width: 500px) calc((100vw - 40px) * .8), (max-width: 782px) calc((100vw - 70px) * .8), (max-width: 960px) calc((100vw - 116px) * .5216), (max-width: 1290px) calc((100vw - 240px) * .5216), 548px" />
 						</div>
-					<?php } ?>
+					</div>
+				</div>
+				<div class="col feature-image">
+					<img class="vertical-screen" src="https://s.w.org/images/core/4.4/twenty-sixteen-red-fullsize-2x.png" alt="" srcset="https://s.w.org/images/core/4.4/twenty-sixteen-red-smartphone-1x.png 107w, https://s.w.org/images/core/4.4/twenty-sixteen-red-smartphone-2x.png 214w, https://s.w.org/images/core/4.4/twenty-sixteen-red-desktop-1x.png 252w, https://s.w.org/images/core/4.4/twenty-sixteen-red-fullsize-1x.png 410w, https://s.w.org/images/core/4.4/twenty-sixteen-red-desktop-2x.png 504w, https://s.w.org/images/core/4.4/twenty-sixteen-red-fullsize-2x.png 820w" sizes="(max-width: 500px) calc((100vw - 40px) * .32), (max-width: 782px) calc((100vw - 70px) * .32), (max-width: 960px) calc((100vw - 116px) * .24), (max-width: 1290px) calc((100vw - 240px) * .24), 252px" />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="feature-section two-col">
+			<div class="col">
+				<div class="media-container">
+					<img src="https://s.w.org/images/core/4.4/responsive-devices-fullsize-2x.png" alt="" srcset="https://s.w.org/images/core/4.4/responsive-devices-smartphone-1x.png 335w, https://s.w.org/images/core/4.4/responsive-devices-desktop-1x.png 500w, https://s.w.org/images/core/4.4/responsive-devices-smartphone-2x.png 670w, https://s.w.org/images/core/4.4/responsive-devices-tablet-1x.png 698w, https://s.w.org/images/core/4.4/responsive-devices-desktop-2x.png 1000w, https://s.w.org/images/core/4.4/responsive-devices-fullsize-1x.png 1200w, https://s.w.org/images/core/4.4/responsive-devices-tablet-2x.png 1396w, https://s.w.org/images/core/4.4/responsive-devices-fullsize-2x.png 2400w" sizes="(max-width: 500px) calc(100vw - 40px), (max-width: 782px) calc(100vw - 70px), (max-width: 960px) calc((100vw - 116px) * .476), (max-width: 1290px) calc((100vw - 240px) * .476), 500px" />
+				</div>
+			</div>
+			<div class="col">
+				<h3><?php _e( 'Responsive images' ); ?></h3>
+				<p><?php _e( 'WordPress now takes a smarter approach to displaying appropriate image sizes on any device, ensuring a perfect fit every time. You don&#8217;t need to do anything to your theme, it just works.' ); ?></p>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="feature-section two-col">
+			<div class="col">
+				<div class="embed-container">
+					<blockquote data-secret="OcUe7B6Edh" class="wp-embedded-content"><a href="https://wordpress.org/news/2015/12/clifford/">WordPress 4.4 &ldquo;Clifford&rdquo;</a></blockquote><iframe class="wp-embedded-content" sandbox="allow-scripts" security="restricted" style="display:none;" src="https://wordpress.org/news/2015/12/clifford/embed/#?secret=OcUe7B6Edh" data-secret="OcUe7B6Edh" width="600" height="338" title="<?php esc_attr_e( 'Embedded WordPress Post' ); ?>" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+				</div>
+			</div>
+			<div class="col">
+				<h3><?php _e( 'Embed your WordPress content' ); ?></h3>
+				<p><?php _e( 'Now you can embed your posts on other sites, even other WordPress sites. Simply drop a post URL into the editor and see an instant embed preview, complete with the title, excerpt, and featured image if you&#8217;ve set one. We&#8217;ll even include your site icon and links for comments and sharing.' ); ?></p>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="feature-section two-col">
+			<div class="col">
+				<div class="embed-container embed-reverbnation">
+					<iframe width="640" height="150" scrolling="no" frameborder="no" src="https://www.reverbnation.com/widget_code/html_widget/artist_607?widget_id=55&amp;pwc[song_ids]=3731874&amp;pwc[size]=small"></iframe>
+				</div>
+			</div>
+			<div class="col">
+				<h3><?php _e( 'Even more embed providers' ); ?></h3>
+				<p><?php _e( 'In addition to post embeds, WordPress 4.4 also adds support for five new oEmbed providers: Cloudup, Reddit&nbsp;Comments, ReverbNation, Speaker&nbsp;Deck, and VideoPress.' ); ?></p>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="changelog">
+			<h3><?php _e( 'Under the Hood' ); ?></h3>
+
+			<div class="feature-section under-the-hood one-col">
+				<div class="col">
+					<h4><?php _e( 'REST API infrastructure' ); ?></h4>
+					<div class="two-col-text">
+						<p><?php _e( 'Infrastructure for the REST API has been integrated into core, marking a new era in developing with WordPress. The REST API serves to provide developers with a path forward for building and extending RESTful APIs on top of WordPress.' ); ?></p>
+						<p><?php
+							if ( current_user_can( 'install_plugins' ) ) {
+								$url_args = array(
+									'tab'       => 'plugin-information',
+									'plugin'    => 'rest-api',
+									'TB_iframe' => true,
+									'width'     => 600,
+									'height'    => 550
+								);
+
+								$plugin_link = '<a href="' . esc_url( add_query_arg( $url_args, network_admin_url( 'plugin-install.php' ) ) ) . '" class="thickbox">WordPress REST API</a>';
+							} else {
+								$plugin_link = '<a href="https://wordpress.org/plugins/rest-api">WordPress REST API</a>';
+							}
+
+							/* translators: WordPress REST API plugin link */
+							printf( __( 'Infrastructure is the first part of a multi-stage rollout for the REST API. Inclusion of core endpoints is targeted for an upcoming release. To get a sneak peek of the core endpoints, and for more information on extending the REST API, check out the official %s plugin.' ), $plugin_link );
+						?></p>
+					</div>
 				</div>
 			</div>
 
-			<hr />
-		<?php endif; ?>
+			<div class="feature-section under-the-hood three-col">
+				<div class="col">
+					<h4><?php _e( 'Term meta' ); ?></h4>
+					<p><?php
+						/* translators: 1: add_term_meta() docs link, 2: get_term_meta() docs link, 3: update_term_meta() docs link */
+						printf( __( 'Terms now support metadata, just like posts. See %1$s, %2$s, and %3$s for more information.' ),
+							'<a href="https://developer.wordpress.org/reference/functions/add_term_meta"><code>add_term_meta()</code></a>',
+							'<a href="https://developer.wordpress.org/reference/functions/get_term_meta"><code>get_term_meta()</code></a>',
+							'<a href="https://developer.wordpress.org/reference/functions/update_term_meta"><code>update_term_meta()</code></a>'
+				         );
+					?></p>
+				</div>
+				<div class="col">
+					<h4><?php _e( 'Comment query improvements' ); ?></h4>
+					<p><?php
+						/* translators: WP_Comment_Query class name */
+						printf( __( 'Comment queries now have cache handling to improve performance. New arguments in %s make crafting robust comment queries simpler.' ), '<code>WP_Comment_Query</code>' );
+					?></p>
+				</div>
+				<div class="col">
+					<h4><?php _e( 'Term, comment, and network objects' ); ?></h4>
+					<p><?php
+						/* translators: 1: WP_Term class name, WP_Comment class name, WP_Network class name */
+						printf( __( 'New %1$s, %2$s, and %3$s objects make interacting with terms, comments, and networks more predictable and intuitive in code.' ),
+							'<code>WP_Term</code>',
+							'<code>WP_Comment</code>',
+							'<code>WP_Network</code>'
+						);
+					?></p>
+				</div>
+			</div>
 
-		<div class="return-to-dashboard">
-			<?php if ( current_user_can( 'update_core' ) && isset( $_GET['updated'] ) ) : ?>
-				<a href="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>">
-					<?php is_multisite() ? _e( 'Return to Updates' ) : _e( 'Return to Dashboard &rarr; Updates' ); ?>
-				</a> |
-			<?php endif; ?>
-			<a href="<?php echo esc_url( self_admin_url() ); ?>"><?php is_blog_admin() ? _e( 'Go to Dashboard &rarr; Home' ) : _e( 'Go to Dashboard' ); ?></a>
+			<div class="return-to-dashboard">
+				<?php if ( current_user_can( 'update_core' ) && isset( $_GET['updated'] ) ) : ?>
+					<a href="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>">
+						<?php is_multisite() ? _e( 'Return to Updates' ) : _e( 'Return to Dashboard &rarr; Updates' ); ?>
+					</a> |
+				<?php endif; ?>
+				<a href="<?php echo esc_url( self_admin_url() ); ?>"><?php is_blog_admin() ? _e( 'Go to Dashboard &rarr; Home' ) : _e( 'Go to Dashboard' ); ?></a>
+			</div>
+
 		</div>
 	</div>
 <?php
@@ -181,22 +303,16 @@ __( '<strong>Version %s</strong> addressed one security issue.' );
 __( '<strong>Version %s</strong> addressed some security issues.' );
 
 /* translators: 1: WordPress version number, 2: plural number of bugs. */
-_n_noop(
-	'<strong>Version %1$s</strong> addressed %2$s bug.',
-	'<strong>Version %1$s</strong> addressed %2$s bugs.'
-);
+_n_noop( '<strong>Version %1$s</strong> addressed %2$s bug.',
+         '<strong>Version %1$s</strong> addressed %2$s bugs.' );
 
 /* translators: 1: WordPress version number, 2: plural number of bugs. Singular security issue. */
-_n_noop(
-	'<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bug.',
-	'<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bugs.'
-);
+_n_noop( '<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bug.',
+         '<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bugs.' );
 
 /* translators: 1: WordPress version number, 2: plural number of bugs. More than one security issue. */
-_n_noop(
-	'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
-	'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.'
-);
+_n_noop( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+         '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.' );
 
 /* translators: %s: Codex URL */
 __( 'For more information, see <a href="%s">the release notes</a>.' );
