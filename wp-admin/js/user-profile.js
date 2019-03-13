@@ -1,7 +1,3 @@
-/**
- * @output wp-admin/js/user-profile.js
- */
-
 /* global ajaxurl, pwsL10n, userProfileL10n */
 (function($) {
 	var updateLock = false,
@@ -17,7 +13,19 @@
 		$toggleButton,
 		$submitButtons,
 		$submitButton,
-		currentPass;
+		currentPass,
+		inputEvent;
+
+	/*
+	 * Use feature detection to determine whether password inputs should use
+	 * the `keyup` or `input` event. Input is preferred but lacks support
+	 * in legacy browsers.
+	 */
+	if ( 'oninput' in document.createElement( 'input' ) ) {
+		inputEvent = 'input';
+	} else {
+		inputEvent = 'keyup';
+	}
 
 	function generatePassword() {
 		if ( typeof zxcvbn !== 'function' ) {
@@ -59,7 +67,7 @@
 			.addClass( $pass1[0].className )
 			.data( 'pw', $pass1.data( 'pw' ) )
 			.val( $pass1.val() )
-			.on( 'input', function () {
+			.on( inputEvent, function () {
 				if ( $pass1Text.val() === currentPass ) {
 					return;
 				}
@@ -74,7 +82,7 @@
 			generatePassword();
 		}
 
-		$pass1.on( 'input' + ' pwupdate', function () {
+		$pass1.on( inputEvent + ' pwupdate', function () {
 			if ( $pass1.val() === currentPass ) {
 				return;
 			}
@@ -153,7 +161,7 @@
 		// hide this
 		$('.user-pass2-wrap').hide();
 
-		$submitButton = $( '#submit, #wp-submit' ).on( 'click', function () {
+		$submitButton = $( '#submit' ).on( 'click', function () {
 			updateLock = false;
 		});
 
@@ -176,7 +184,7 @@
 		 * This fixes the issue by copying any changes from the hidden
 		 * pass2 field to the pass1 field, then running check_pass_strength.
 		 */
-		$pass2 = $( '#pass2' ).on( 'input', function () {
+		$pass2 = $('#pass2').on( inputEvent, function () {
 			if ( $pass2.val().length > 0 ) {
 				$pass1.val( $pass2.val() );
 				$pass2.val('');
@@ -306,7 +314,7 @@
 
 		if ( passStrength.className ) {
 			$pass1.add( $pass1Text ).addClass( passStrength.className );
-			if ( $( passStrength ).is( '.short, .bad' ) ) {
+			if ( 'short' === passStrength.className || 'bad' === passStrength.className ) {
 				if ( ! $weakCheckbox.prop( 'checked' ) ) {
 					$submitButtons.prop( 'disabled', true );
 				}
@@ -320,11 +328,9 @@
 
 	$(document).ready( function() {
 		var $colorpicker, $stylesheet, user_id, current_user_id,
-			select       = $( '#display_name' ),
-			current_name = select.val(),
-			greeting     = $( '#wp-admin-bar-my-account' ).find( '.display-name' );
+			select = $( '#display_name' );
 
-		$( '#pass1' ).val( '' ).on( 'input' + ' pwupdate', check_pass_strength );
+		$('#pass1').val('').on( inputEvent + ' pwupdate', check_pass_strength );
 		$('#pass-strength-result').show();
 		$('.color-palette').click( function() {
 			$(this).siblings('input[name="admin_color"]').prop('checked', true);
@@ -364,19 +370,6 @@
 					}
 				});
 			});
-
-			/**
-			 * Replaces "Howdy, *" in the admin toolbar whenever the display name dropdown is updated for one's own profile.
-			 */
-			select.on( 'change', function() {
-				if ( user_id !== current_user_id ) {
-					return;
-				}
-
-				var display_name = $.trim( this.value ) || current_name;
-
-				greeting.text( display_name );
-			} );
 		}
 
 		$colorpicker = $( '#color-picker' );

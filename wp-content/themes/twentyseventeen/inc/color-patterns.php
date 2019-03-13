@@ -18,12 +18,12 @@ function twentyseventeen_custom_colors_css() {
 	 *
 	 * @since Twenty Seventeen 1.0
 	 *
-	 * @param int $saturation Color saturation level.
+	 * @param $saturation integer
 	 */
-	$saturation         = absint( apply_filters( 'twentyseventeen_custom_colors_saturation', 50 ) );
+	$saturation = absint( apply_filters( 'twentyseventeen_custom_colors_saturation', 50 ) );
 	$reduced_saturation = ( .8 * $saturation ) . '%';
-	$saturation         = $saturation . '%';
-	$css                = '
+	$saturation = $saturation . '%';
+	$css = '
 /**
  * Twenty Seventeen: Color Patterns
  *
@@ -36,8 +36,6 @@ function twentyseventeen_custom_colors_css() {
 .colors-custom .entry-content a:hover,
 .colors-custom .entry-summary a:focus,
 .colors-custom .entry-summary a:hover,
-.colors-custom .comment-content a:focus,
-.colors-custom .comment-content a:hover,
 .colors-custom .widget a:focus,
 .colors-custom .widget a:hover,
 .colors-custom .site-footer .widget-area a:focus,
@@ -93,12 +91,11 @@ function twentyseventeen_custom_colors_css() {
 
 .colors-custom .entry-content a,
 .colors-custom .entry-summary a,
-.colors-custom .comment-content a,
 .colors-custom .widget a,
 .colors-custom .site-footer .widget-area a,
 .colors-custom .posts-navigation a,
 .colors-custom .widget_authors a strong {
-	-webkit-box-shadow: inset 0 -1px 0 hsl( ' . $hue . ', ' . $saturation . ', 6% ); /* base: rgba(15, 15, 15, 1); */
+	-webkit-box-shadow: inset 0 -1px 0 hsl( ' . $hue . ', ' . $saturation  . ', 6% ); /* base: rgba(15, 15, 15, 1); */
 	box-shadow: inset 0 -1px 0 hsl( ' . $hue . ', ' . $saturation . ', 6% ); /* base: rgba(15, 15, 15, 1); */
 }
 
@@ -155,8 +152,6 @@ function twentyseventeen_custom_colors_css() {
 .colors-custom .entry-content a:hover,
 .colors-custom .entry-summary a:focus,
 .colors-custom .entry-summary a:hover,
-.colors-custom .comment-content a:focus,
-.colors-custom .comment-content a:hover,
 .colors-custom .widget a:focus,
 .colors-custom .widget a:hover,
 .colors-custom .site-footer .widget-area a:focus,
@@ -206,7 +201,7 @@ function twentyseventeen_custom_colors_css() {
 .colors-custom .widget ul li a:focus,
 .colors-custom .widget ul li a:hover {
 	-webkit-box-shadow: inset 0 0 0 hsl( ' . $hue . ', ' . $saturation . ', 13% ), 0 3px 0 hsl( ' . $hue . ', ' . $saturation . ', 13% );
-	box-shadow: inset 0 0 0 hsl( ' . $hue . ', ' . $saturation . ' , 13% ), 0 3px 0 hsl( ' . $hue . ', ' . $saturation . ', 13% );
+	box-shadow: inset 0 0 0 hsl( ' . $hue . ', ' . $saturation. ' , 13% ), 0 3px 0 hsl( ' . $hue . ', ' . $saturation . ', 13% );
 }
 
 body.colors-custom,
@@ -498,8 +493,6 @@ body.colors-custom,
 .colors-custom .entry-content a:focus,
 .colors-custom .entry-summary a:hover,
 .colors-custom .entry-summary a:focus,
-.colors-custom .comment-content a:focus,
-.colors-custom .comment-content a:hover,
 .colors-custom .widget a:hover,
 .colors-custom .widget a:focus,
 .colors-custom .site-footer .widget-area a:hover,
@@ -567,14 +560,15 @@ body.colors-custom,
 	}
 }';
 
+
 	/**
 	 * Filters Twenty Seventeen custom colors CSS.
 	 *
 	 * @since Twenty Seventeen 1.0
 	 *
-	 * @param string $css        Base theme colors CSS.
-	 * @param int    $hue        The user's selected color hue.
-	 * @param string $saturation Filtered theme color saturation level.
+	 * @param $css        string Base theme colors CSS.
+	 * @param $hue        int    The user's selected color hue.
+	 * @param $saturation string Filtered theme color saturation level.
 	 */
 	return apply_filters( 'twentyseventeen_custom_colors_css', $css, $hue, $saturation );
 }

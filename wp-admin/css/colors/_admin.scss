@@ -84,7 +84,9 @@ input[type=radio]:checked:before {
 /* List tables */
 
 .wrap .add-new-h2:hover, /* deprecated */
-.wrap .page-title-action:hover {
+.wrap .page-title-action:hover,
+.tablenav .tablenav-pages a:hover,
+.tablenav .tablenav-pages a:focus {
 	color: $menu-text;
 	background-color: $menu-background;
 }
@@ -406,7 +408,12 @@ ul#adminmenu > li.current > a.current:after {
 }
 
 .media-selection .attachment.selection.details .thumbnail {
-	box-shadow: 0 0 0 1px #fff, 0 0 0 3px $highlight-color;
+	-webkit-box-shadow:
+		0px 0px 0px 1px #fff,
+		0px 0px 0px 3px $highlight-color;
+	box-shadow:
+		0px 0px 0px 1px #fff,
+		0px 0px 0px 3px $highlight-color;
 }
 
 
