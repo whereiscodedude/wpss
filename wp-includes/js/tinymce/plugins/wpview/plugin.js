@@ -1,12 +1,9 @@
 /**
  * WordPress View plugin.
  */
-( function( tinymce ) {
+( function( tinymce, wp ) {
 	tinymce.PluginManager.add( 'wpview', function( editor ) {
 		function noop () {}
-
-		// Set this here as wp-tinymce.js may be loaded too early.
-		var wp = window.wp;
 
 		if ( ! wp || ! wp.mce || ! wp.mce.views ) {
 			return {
@@ -91,7 +88,7 @@
 				}
 			}
 
-			event.content = wp.mce.views.setMarkers( event.content, editor );
+			event.content = wp.mce.views.setMarkers( event.content );
 		} );
 
 		// Replace any new markers nodes with views.
@@ -100,7 +97,7 @@
 		} );
 
 		// Empty view nodes for easier processing.
-		editor.on( 'preprocess hide', function( event ) {
+		editor.on( 'preprocess', function( event ) {
 			editor.$( 'div[data-wpview-text], p[data-wpview-marker]', event.node ).each( function( i, node ) {
 				node.innerHTML = '.';
 			} );
@@ -158,7 +155,7 @@
 		} );
 
 		editor.addButton( 'wp_view_edit', {
-			tooltip: 'Edit|button', // '|button' is not displayed, only used for context
+			tooltip: 'Edit ', // trailing space is needed, used for context
 			icon: 'dashicon dashicons-edit',
 			onclick: function() {
 				var node = editor.selection.getNode();
@@ -187,7 +184,7 @@
 				] );
 
 				editor.on( 'wptoolbar', function( event ) {
-					if ( ! event.collapsed && isView( event.element ) ) {
+					if ( isView( event.element ) ) {
 						event.toolbar = toolbar;
 					}
 				} );
@@ -202,4 +199,4 @@
 			getView: noop
 		};
 	} );
-} )( window.tinymce );
+} )( window.tinymce, window.wp );
