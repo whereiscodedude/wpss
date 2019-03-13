@@ -2096,7 +2096,7 @@ function wp_upload_dir( $time = null, $create_dir = true, $refresh_cache = false
 				if ( 0 === strpos( $uploads['basedir'], ABSPATH ) ) {
 					$error_path = str_replace( ABSPATH, '', $uploads['basedir'] ) . $uploads['subdir'];
 				} else {
-					$error_path = wp_basename( $uploads['basedir'] ) . $uploads['subdir'];
+					$error_path = basename( $uploads['basedir'] ) . $uploads['subdir'];
 				}
 
 				$uploads['error'] = sprintf(
@@ -2381,7 +2381,7 @@ function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
 		if ( 0 === strpos( $upload['basedir'], ABSPATH ) ) {
 			$error_path = str_replace( ABSPATH, '', $upload['basedir'] ) . $upload['subdir'];
 		} else {
-			$error_path = wp_basename( $upload['basedir'] ) . $upload['subdir'];
+			$error_path = basename( $upload['basedir'] ) . $upload['subdir'];
 		}
 
 		$message = sprintf(
@@ -3058,9 +3058,9 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 
 	if ( ! did_action( 'admin_head' ) ) :
 		if ( ! headers_sent() ) {
-			header( 'Content-Type: text/html; charset=utf-8' );
 			status_header( $r['response'] );
 			nocache_headers();
+			header( 'Content-Type: text/html; charset=utf-8' );
 		}
 
 		$text_direction = $r['text_direction'];
@@ -3092,8 +3092,8 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 			margin: 2em auto;
 			padding: 1em 2em;
 			max-width: 700px;
-			-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
+			-webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.13);
+			box-shadow: 0 1px 3px rgba(0,0,0,0.13);
 		}
 		h1 {
 			border-bottom: 1px solid #dadada;
@@ -3130,10 +3130,10 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 			color: #124964;
 			-webkit-box-shadow:
 				0 0 0 1px #5b9dd9,
-				0 0 2px 1px rgba(30, 140, 190, 0.8);
+				0 0 2px 1px rgba(30, 140, 190, .8);
 			box-shadow:
 				0 0 0 1px #5b9dd9,
-				0 0 2px 1px rgba(30, 140, 190, 0.8);
+				0 0 2px 1px rgba(30, 140, 190, .8);
 			outline: none;
 		}
 		.button {
@@ -3174,18 +3174,18 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 			color: #23282d;
 		}
 
-		.button:focus {
+		.button:focus  {
 			border-color: #5b9dd9;
-			-webkit-box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
-			box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
+			-webkit-box-shadow: 0 0 3px rgba( 0, 115, 170, .8 );
+			box-shadow: 0 0 3px rgba( 0, 115, 170, .8 );
 			outline: none;
 		}
 
 		.button:active {
 			background: #eee;
 			border-color: #999;
-			 -webkit-box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
-			 box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
+			 -webkit-box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.5 );
+			 box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.5 );
 			 -webkit-transform: translateY(1px);
 			 -ms-transform: translateY(1px);
 			 transform: translateY(1px);
@@ -3238,7 +3238,6 @@ function _json_wp_die_handler( $message, $title = '', $args = array() ) {
 		if ( null !== $r['response'] ) {
 			status_header( $r['response'] );
 		}
-		nocache_headers();
 	}
 
 	echo wp_json_encode( $data );
@@ -3265,10 +3264,6 @@ function _xmlrpc_wp_die_handler( $message, $title = '', $args = array() ) {
 	global $wp_xmlrpc_server;
 
 	list( $message, $title, $r ) = _wp_die_process_input( $message, $title, $args );
-
-	if ( ! headers_sent() ) {
-		nocache_headers();
-	}
 
 	if ( $wp_xmlrpc_server ) {
 		$error = new IXR_Error( $r['response'], $message );
@@ -3300,12 +3295,9 @@ function _ajax_wp_die_handler( $message, $title = '', $args = array() ) {
 
 	list( $message, $title, $r ) = _wp_die_process_input( $message, $title, $args );
 
-	if ( ! headers_sent() ) {
-		// This is intentional. For backward-compatibility, support passing null here.
-		if ( null !== $args['response'] ) {
-			status_header( $r['response'] );
-		}
-		nocache_headers();
+	// This is intentional. For backward-compatibility, support passing null here.
+	if ( ! headers_sent() && null !== $args['response'] ) {
+		status_header( $r['response'] );
 	}
 
 	if ( is_scalar( $message ) ) {
@@ -4256,7 +4248,28 @@ function dead_db() {
 	}
 
 	// Otherwise, be terse.
-	wp_die( '<h1>' . __( 'Error establishing a database connection' ) . '</h1>', __( 'Database Error' ) );
+	status_header( 500 );
+	nocache_headers();
+	header( 'Content-Type: text/html; charset=utf-8' );
+
+	$dir_attr = '';
+	if ( is_rtl() ) {
+		$dir_attr = ' dir="rtl"';
+	}
+	?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"<?php echo $dir_attr; ?>>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title><?php _e( 'Database Error' ); ?></title>
+
+</head>
+<body>
+	<h1><?php _e( 'Error establishing a database connection' ); ?></h1>
+</body>
+</html>
+	<?php
+	die();
 }
 
 /**

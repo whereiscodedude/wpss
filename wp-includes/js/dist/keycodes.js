@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["keycodes"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 328);
+/******/ 	return __webpack_require__(__webpack_require__.s = 326);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -116,7 +116,7 @@ function _defineProperty(obj, key, value) {
 
 /***/ }),
 
-/***/ 18:
+/***/ 19:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -156,7 +156,7 @@ function _toConsumableArray(arr) {
 
 /***/ }),
 
-/***/ 328:
+/***/ 326:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -166,7 +166,7 @@ __webpack_require__.r(__webpack_exports__);
 var defineProperty = __webpack_require__(15);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 2 modules
-var toConsumableArray = __webpack_require__(18);
+var toConsumableArray = __webpack_require__(19);
 
 // EXTERNAL MODULE: external "lodash"
 var external_lodash_ = __webpack_require__(2);
@@ -256,7 +256,8 @@ var DOWN = 40;
 var DELETE = 46;
 var F10 = 121;
 var ALT = 'alt';
-var CTRL = 'ctrl';
+var CTRL = 'ctrl'; // Understood in both Mousetrap and TinyMCE.
+
 var COMMAND = 'meta';
 var SHIFT = 'shift';
 var modifiers = {
@@ -303,7 +304,7 @@ var rawShortcut = Object(external_lodash_["mapValues"])(modifiers, function (mod
   return function (character) {
     var _isApple = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : isAppleOS;
 
-    return [].concat(Object(toConsumableArray["a" /* default */])(modifier(_isApple)), [character.toLowerCase()]).join('+');
+    return Object(toConsumableArray["a" /* default */])(modifier(_isApple)).concat([character.toLowerCase()]).join('+');
   };
 });
 /**
@@ -326,13 +327,13 @@ var displayShortcutList = Object(external_lodash_["mapValues"])(modifiers, funct
       var replacementKey = Object(external_lodash_["get"])(replacementKeyMap, key, key); // If on the Mac, adhere to platform convention and don't show plus between keys.
 
       if (isApple) {
-        return [].concat(Object(toConsumableArray["a" /* default */])(accumulator), [replacementKey]);
+        return Object(toConsumableArray["a" /* default */])(accumulator).concat([replacementKey]);
       }
 
-      return [].concat(Object(toConsumableArray["a" /* default */])(accumulator), [replacementKey, '+']);
+      return Object(toConsumableArray["a" /* default */])(accumulator).concat([replacementKey, '+']);
     }, []);
     var capitalizedCharacter = Object(external_lodash_["capitalize"])(character);
-    return [].concat(Object(toConsumableArray["a" /* default */])(modifierKeys), [capitalizedCharacter]);
+    return Object(toConsumableArray["a" /* default */])(modifierKeys).concat([capitalizedCharacter]);
   };
 });
 /**
@@ -363,7 +364,7 @@ var shortcutAriaLabel = Object(external_lodash_["mapValues"])(modifiers, functio
     var isApple = _isApple();
 
     var replacementKeyMap = (_replacementKeyMap2 = {}, Object(defineProperty["a" /* default */])(_replacementKeyMap2, SHIFT, 'Shift'), Object(defineProperty["a" /* default */])(_replacementKeyMap2, COMMAND, isApple ? 'Command' : 'Control'), Object(defineProperty["a" /* default */])(_replacementKeyMap2, CTRL, 'Control'), Object(defineProperty["a" /* default */])(_replacementKeyMap2, ALT, isApple ? 'Option' : 'Alt'), Object(defineProperty["a" /* default */])(_replacementKeyMap2, ',', Object(external_this_wp_i18n_["__"])('Comma')), Object(defineProperty["a" /* default */])(_replacementKeyMap2, '.', Object(external_this_wp_i18n_["__"])('Period')), Object(defineProperty["a" /* default */])(_replacementKeyMap2, '`', Object(external_this_wp_i18n_["__"])('Backtick')), _replacementKeyMap2);
-    return [].concat(Object(toConsumableArray["a" /* default */])(modifier(_isApple)), [character]).map(function (key) {
+    return Object(toConsumableArray["a" /* default */])(modifier(_isApple)).concat([character]).map(function (key) {
       return Object(external_lodash_["capitalize"])(Object(external_lodash_["get"])(replacementKeyMap, key, key));
     }).join(isApple ? ' ' : ' + ');
   };

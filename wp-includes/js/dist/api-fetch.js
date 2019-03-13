@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["apiFetch"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 318);
+/******/ 	return __webpack_require__(__webpack_require__.s = 315);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -160,14 +160,21 @@ function _objectWithoutProperties(source, excluded) {
 
 /***/ }),
 
-/***/ 22:
+/***/ 23:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["hooks"]; }());
+
+/***/ }),
+
+/***/ 24:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["wp"]["url"]; }());
 
 /***/ }),
 
-/***/ 318:
+/***/ 315:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -182,33 +189,60 @@ var objectWithoutProperties = __webpack_require__(21);
 // EXTERNAL MODULE: external {"this":["wp","i18n"]}
 var external_this_wp_i18n_ = __webpack_require__(1);
 
+// EXTERNAL MODULE: external {"this":["wp","hooks"]}
+var external_this_wp_hooks_ = __webpack_require__(23);
+
 // CONCATENATED MODULE: ./node_modules/@wordpress/api-fetch/build-module/middlewares/nonce.js
 
 
-function createNonceMiddleware(nonce) {
-  function middleware(options, next) {
-    var _options$headers = options.headers,
-        headers = _options$headers === void 0 ? {} : _options$headers; // If an 'X-WP-Nonce' header (or any case-insensitive variation
+/**
+ * External dependencies
+ */
+
+
+var nonce_createNonceMiddleware = function createNonceMiddleware(nonce) {
+  var usedNonce = nonce;
+  /**
+   * This is not ideal but it's fine for now.
+   *
+   * Configure heartbeat to refresh the wp-api nonce, keeping the editor
+   * authorization intact.
+   */
+
+  Object(external_this_wp_hooks_["addAction"])('heartbeat.tick', 'core/api-fetch/create-nonce-middleware', function (response) {
+    if (response['rest-nonce']) {
+      usedNonce = response['rest-nonce'];
+    }
+  });
+  return function (options, next) {
+    var headers = options.headers || {}; // If an 'X-WP-Nonce' header (or any case-insensitive variation
     // thereof) was specified, no need to add a nonce header.
 
+    var addNonceHeader = true;
+
     for (var headerName in headers) {
-      if (headerName.toLowerCase() === 'x-wp-nonce') {
-        return next(options);
+      if (headers.hasOwnProperty(headerName)) {
+        if (headerName.toLowerCase() === 'x-wp-nonce') {
+          addNonceHeader = false;
+          break;
+        }
       }
     }
 
+    if (addNonceHeader) {
+      // Do not mutate the original headers object, if any.
+      headers = Object(objectSpread["a" /* default */])({}, headers, {
+        'X-WP-Nonce': usedNonce
+      });
+    }
+
     return next(Object(objectSpread["a" /* default */])({}, options, {
-      headers: Object(objectSpread["a" /* default */])({}, headers, {
-        'X-WP-Nonce': middleware.nonce
-      })
+      headers: headers
     }));
-  }
+  };
+};
 
-  middleware.nonce = nonce;
-  return middleware;
-}
-
-/* harmony default export */ var middlewares_nonce = (createNonceMiddleware);
+/* harmony default export */ var middlewares_nonce = (nonce_createNonceMiddleware);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/api-fetch/build-module/middlewares/namespace-endpoint.js
 
@@ -326,10 +360,10 @@ var createPreloadingMiddleware = function createPreloadingMiddleware(preloadedDa
 /* harmony default export */ var preloading = (createPreloadingMiddleware);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(41);
+var asyncToGenerator = __webpack_require__(38);
 
 // EXTERNAL MODULE: external {"this":["wp","url"]}
-var external_this_wp_url_ = __webpack_require__(22);
+var external_this_wp_url_ = __webpack_require__(24);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/api-fetch/build-module/middlewares/fetch-all-middleware.js
 
@@ -611,114 +645,96 @@ var DEFAULT_HEADERS = {
 var DEFAULT_OPTIONS = {
   credentials: 'include'
 };
-var middlewares = [user_locale, namespace_endpoint, http_v1, fetch_all_middleware];
+var middlewares = [];
 
 function registerMiddleware(middleware) {
-  middlewares.unshift(middleware);
-}
-
-var build_module_defaultFetchHandler = function defaultFetchHandler(nextOptions) {
-  var url = nextOptions.url,
-      path = nextOptions.path,
-      data = nextOptions.data,
-      _nextOptions$parse = nextOptions.parse,
-      parse = _nextOptions$parse === void 0 ? true : _nextOptions$parse,
-      remainingOptions = Object(objectWithoutProperties["a" /* default */])(nextOptions, ["url", "path", "data", "parse"]);
-
-  var body = nextOptions.body,
-      headers = nextOptions.headers; // Merge explicitly-provided headers with default values.
-
-  headers = Object(objectSpread["a" /* default */])({}, DEFAULT_HEADERS, headers); // The `data` property is a shorthand for sending a JSON body.
-
-  if (data) {
-    body = JSON.stringify(data);
-    headers['Content-Type'] = 'application/json';
-  }
-
-  var responsePromise = window.fetch(url || path, Object(objectSpread["a" /* default */])({}, DEFAULT_OPTIONS, remainingOptions, {
-    body: body,
-    headers: headers
-  }));
-
-  var checkStatus = function checkStatus(response) {
-    if (response.status >= 200 && response.status < 300) {
-      return response;
-    }
-
-    throw response;
-  };
-
-  var parseResponse = function parseResponse(response) {
-    if (parse) {
-      if (response.status === 204) {
-        return null;
-      }
-
-      return response.json ? response.json() : Promise.reject(response);
-    }
-
-    return response;
-  };
-
-  return responsePromise.then(checkStatus).then(parseResponse).catch(function (response) {
-    if (!parse) {
-      throw response;
-    }
-
-    var invalidJsonError = {
-      code: 'invalid_json',
-      message: Object(external_this_wp_i18n_["__"])('The response is not a valid JSON response.')
-    };
-
-    if (!response || !response.json) {
-      throw invalidJsonError;
-    }
-
-    return response.json().catch(function () {
-      throw invalidJsonError;
-    }).then(function (error) {
-      var unknownError = {
-        code: 'unknown_error',
-        message: Object(external_this_wp_i18n_["__"])('An unknown error occurred.')
-      };
-      throw error || unknownError;
-    });
-  });
-};
-
-var fetchHandler = build_module_defaultFetchHandler;
-/**
- * Defines a custom fetch handler for making the requests that will override
- * the default one using window.fetch
- *
- * @param {Function} newFetchHandler The new fetch handler
- */
-
-function setFetchHandler(newFetchHandler) {
-  fetchHandler = newFetchHandler;
+  middlewares.push(middleware);
 }
 
 function apiFetch(options) {
-  var steps = [].concat(middlewares, [fetchHandler]);
+  var raw = function raw(nextOptions) {
+    var url = nextOptions.url,
+        path = nextOptions.path,
+        data = nextOptions.data,
+        _nextOptions$parse = nextOptions.parse,
+        parse = _nextOptions$parse === void 0 ? true : _nextOptions$parse,
+        remainingOptions = Object(objectWithoutProperties["a" /* default */])(nextOptions, ["url", "path", "data", "parse"]);
 
-  var createRunStep = function createRunStep(index) {
-    return function (workingOptions) {
-      var step = steps[index];
+    var body = nextOptions.body,
+        headers = nextOptions.headers; // Merge explicitly-provided headers with default values.
 
-      if (index === steps.length - 1) {
-        return step(workingOptions);
+    headers = Object(objectSpread["a" /* default */])({}, DEFAULT_HEADERS, headers); // The `data` property is a shorthand for sending a JSON body.
+
+    if (data) {
+      body = JSON.stringify(data);
+      headers['Content-Type'] = 'application/json';
+    }
+
+    var responsePromise = window.fetch(url || path, Object(objectSpread["a" /* default */])({}, DEFAULT_OPTIONS, remainingOptions, {
+      body: body,
+      headers: headers
+    }));
+
+    var checkStatus = function checkStatus(response) {
+      if (response.status >= 200 && response.status < 300) {
+        return response;
       }
 
-      var next = createRunStep(index + 1);
-      return step(workingOptions, next);
+      throw response;
+    };
+
+    var parseResponse = function parseResponse(response) {
+      if (parse) {
+        if (response.status === 204) {
+          return null;
+        }
+
+        return response.json ? response.json() : Promise.reject(response);
+      }
+
+      return response;
+    };
+
+    return responsePromise.then(checkStatus).then(parseResponse).catch(function (response) {
+      if (!parse) {
+        throw response;
+      }
+
+      var invalidJsonError = {
+        code: 'invalid_json',
+        message: Object(external_this_wp_i18n_["__"])('The response is not a valid JSON response.')
+      };
+
+      if (!response || !response.json) {
+        throw invalidJsonError;
+      }
+
+      return response.json().catch(function () {
+        throw invalidJsonError;
+      }).then(function (error) {
+        var unknownError = {
+          code: 'unknown_error',
+          message: Object(external_this_wp_i18n_["__"])('An unknown error occurred.')
+        };
+        throw error || unknownError;
+      });
+    });
+  };
+
+  var steps = [raw, fetch_all_middleware, http_v1, namespace_endpoint, user_locale].concat(middlewares).reverse();
+
+  var runMiddleware = function runMiddleware(index) {
+    return function (nextOptions) {
+      var nextMiddleware = steps[index];
+      var next = runMiddleware(index + 1);
+      return nextMiddleware(nextOptions, next);
     };
   };
 
-  return createRunStep(0)(options);
+  return runMiddleware(0)(options);
 }
 
 apiFetch.use = registerMiddleware;
-apiFetch.setFetchHandler = setFetchHandler;
 apiFetch.createNonceMiddleware = middlewares_nonce;
 apiFetch.createPreloadingMiddleware = preloading;
 apiFetch.createRootURLMiddleware = root_url;
@@ -728,7 +744,7 @@ apiFetch.fetchAllMiddleware = fetch_all_middleware;
 
 /***/ }),
 
-/***/ 41:
+/***/ 38:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -19,7 +19,7 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 	}
 
 	function toggleToolbars( state ) {
-		var initial, toolbars, iframeHeight,
+		var initial, toolbars,
 			pixels = 0,
 			classicBlockToolbar = tinymce.$( '.block-library-classic__toolbar' );
 
@@ -44,24 +44,18 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 				if ( i > 0 ) {
 					if ( state === 'hide' ) {
 						toolbar.hide();
-						pixels += 34;
+						pixels += 30;
 					} else {
 						toolbar.show();
-						pixels -= 34;
+						pixels -= 30;
 					}
 				}
 			});
 		}
 
 		// Resize editor iframe, not needed for iOS and inline instances.
-		// Don't resize if the editor is in a hidden container.
-		if ( pixels && ! tinymce.Env.iOS && editor.iframeElement && editor.iframeElement.clientHeight ) {
-			iframeHeight = editor.iframeElement.clientHeight + pixels;
-
-			// Keep min-height.
-			if ( iframeHeight > 50  ) {
-				DOM.setStyle( editor.iframeElement, 'height', iframeHeight );
-			}
+		if ( pixels && ! tinymce.Env.iOS && editor.iframeElement ) {
+			DOM.setStyle( editor.iframeElement, 'height', editor.iframeElement.clientHeight + pixels );
 		}
 
 		if ( ! initial ) {

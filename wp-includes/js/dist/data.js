@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["data"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 310);
+/******/ 	return __webpack_require__(__webpack_require__.s = 309);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -107,12 +107,12 @@ function _classCallCheck(instance, Constructor) {
 
 /***/ }),
 
-/***/ 11:
+/***/ 12:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _possibleConstructorReturn; });
-/* harmony import */ var _helpers_esm_typeof__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(29);
+/* harmony import */ var _helpers_esm_typeof__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(28);
 /* harmony import */ var _assertThisInitialized__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
 
 
@@ -126,21 +126,7 @@ function _possibleConstructorReturn(self, call) {
 
 /***/ }),
 
-/***/ 12:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _getPrototypeOf; });
-function _getPrototypeOf(o) {
-  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
-  };
-  return _getPrototypeOf(o);
-}
-
-/***/ }),
-
-/***/ 121:
+/***/ 120:
 /***/ (function(module, exports) {
 
 module.exports = function(originalModule) {
@@ -172,6 +158,20 @@ module.exports = function(originalModule) {
 /***/ }),
 
 /***/ 13:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _getPrototypeOf; });
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+/***/ }),
+
+/***/ 14:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -227,7 +227,7 @@ function _defineProperty(obj, key, value) {
 
 /***/ }),
 
-/***/ 174:
+/***/ 173:
 /***/ (function(module, exports) {
 
 function combineReducers( reducers ) {
@@ -290,6 +290,38 @@ module.exports = combineReducers;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _extends; });
+function _extends() {
+  _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends.apply(this, arguments);
+}
+
+/***/ }),
+
+/***/ 188:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["reduxRoutine"]; }());
+
+/***/ }),
+
+/***/ 19:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithoutHoles.js
 function _arrayWithoutHoles(arr) {
@@ -319,45 +351,6 @@ function _toConsumableArray(arr) {
 
 /***/ }),
 
-/***/ 189:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["reduxRoutine"]; }());
-
-/***/ }),
-
-/***/ 19:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _extends; });
-function _extends() {
-  _extends = Object.assign || function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-
-    return target;
-  };
-
-  return _extends.apply(this, arguments);
-}
-
-/***/ }),
-
-/***/ 190:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["priorityQueue"]; }());
-
-/***/ }),
-
 /***/ 2:
 /***/ (function(module, exports) {
 
@@ -371,7 +364,7 @@ function _extends() {
 "use strict";
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithHoles.js
-var arrayWithHoles = __webpack_require__(34);
+var arrayWithHoles = __webpack_require__(35);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
 function _iterableToArrayLimit(arr, i) {
@@ -400,7 +393,7 @@ function _iterableToArrayLimit(arr, i) {
   return _arr;
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableRest.js
-var nonIterableRest = __webpack_require__(35);
+var nonIterableRest = __webpack_require__(36);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _slicedToArray; });
@@ -413,7 +406,7 @@ function _slicedToArray(arr, i) {
 
 /***/ }),
 
-/***/ 29:
+/***/ 28:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -451,7 +444,7 @@ function _assertThisInitialized(self) {
 
 /***/ }),
 
-/***/ 310:
+/***/ 309:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -474,7 +467,7 @@ __webpack_require__.d(plugins_namespaceObject, "controls", function() { return c
 __webpack_require__.d(plugins_namespaceObject, "persistence", function() { return plugins_persistence; });
 
 // EXTERNAL MODULE: ./node_modules/turbo-combine-reducers/index.js
-var turbo_combine_reducers = __webpack_require__(174);
+var turbo_combine_reducers = __webpack_require__(173);
 var turbo_combine_reducers_default = /*#__PURE__*/__webpack_require__.n(turbo_combine_reducers);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js + 1 modules
@@ -487,13 +480,13 @@ var objectSpread = __webpack_require__(8);
 var external_lodash_ = __webpack_require__(2);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(41);
+var asyncToGenerator = __webpack_require__(38);
 
 // EXTERNAL MODULE: ./node_modules/redux/es/redux.js
-var redux = __webpack_require__(65);
+var redux = __webpack_require__(62);
 
 // EXTERNAL MODULE: ./node_modules/is-promise/index.js
-var is_promise = __webpack_require__(89);
+var is_promise = __webpack_require__(86);
 var is_promise_default = /*#__PURE__*/__webpack_require__.n(is_promise);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/promise-middleware.js
@@ -526,7 +519,7 @@ var promise_middleware_promiseMiddleware = function promiseMiddleware() {
 /* harmony default export */ var promise_middleware = (promise_middleware_promiseMiddleware);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 2 modules
-var toConsumableArray = __webpack_require__(18);
+var toConsumableArray = __webpack_require__(19);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/resolvers-cache-middleware.js
 
@@ -601,14 +594,14 @@ var resolvers_cache_middleware_createResolversCacheMiddleware = function createR
  *
  * @param {string} key              Identifying string used for namespace and redex dev tools.
  * @param {Object} options          Contains reducer, actions, selectors, and resolvers.
- * @param {Object} registry         Registry reference.
+ * @param {Object} registry         Temporary registry reference, required for namespace updates.
  *
  * @return {Object} Store Object.
  */
 
 function createNamespace(key, options, registry) {
   var reducer = options.reducer;
-  var store = createReduxStore(key, options, registry);
+  var store = createReduxStore(reducer, key, registry);
   var selectors, actions, resolvers;
 
   if (options.actions) {
@@ -616,7 +609,7 @@ function createNamespace(key, options, registry) {
   }
 
   if (options.selectors) {
-    selectors = mapSelectors(options.selectors, store, registry);
+    selectors = mapSelectors(options.selectors, store);
   }
 
   if (options.resolvers) {
@@ -665,15 +658,14 @@ function createNamespace(key, options, registry) {
 /**
  * Creates a redux store for a namespace.
  *
- * @param {string} key      Part of the state shape to register the
- *                          selectors for.
- * @param {Object} options  Registered store options.
- * @param {Object} registry Registry reference, for resolver enhancer support.
- *
- * @return {Object} Newly created redux store.
+ * @param {Function} reducer    Root reducer for redux store.
+ * @param {string} key          Part of the state shape to register the
+ *                              selectors for.
+ * @param {Object} registry     Registry reference, for resolver enhancer support.
+ * @return {Object}             Newly created redux store.
  */
 
-function createReduxStore(key, options, registry) {
+function createReduxStore(reducer, key, registry) {
   var enhancers = [Object(redux["a" /* applyMiddleware */])(resolvers_cache_middleware(registry, key), promise_middleware)];
 
   if (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION__) {
@@ -683,9 +675,7 @@ function createReduxStore(key, options, registry) {
     }));
   }
 
-  var reducer = options.reducer,
-      initialState = options.initialState;
-  return Object(redux["c" /* createStore */])(reducer, initialState, Object(external_lodash_["flowRight"])(enhancers));
+  return Object(redux["c" /* createStore */])(reducer, Object(external_lodash_["flowRight"])(enhancers));
 }
 /**
  * Maps selectors to a redux store.
@@ -694,15 +684,12 @@ function createReduxStore(key, options, registry) {
  *                            public facing API. Selectors will get passed the
  *                            state as first argument.
  * @param {Object} store      The redux store to which the selectors should be mapped.
- * @param {Object} registry   Registry reference.
- *
  * @return {Object}           Selectors mapped to the redux store provided.
  */
 
 
-function mapSelectors(selectors, store, registry) {
-  var createStateSelector = function createStateSelector(registeredSelector) {
-    var selector = registeredSelector.isRegistrySelector ? registeredSelector(registry.select) : registeredSelector;
+function mapSelectors(selectors, store) {
+  var createStateSelector = function createStateSelector(selector) {
     return function runSelector() {
       // This function is an optimized implementation of:
       //
@@ -949,7 +936,7 @@ function _fulfillWithRegistry() {
 }
 
 // EXTERNAL MODULE: ./node_modules/equivalent-key-map/equivalent-key-map.js
-var equivalent_key_map = __webpack_require__(68);
+var equivalent_key_map = __webpack_require__(66);
 var equivalent_key_map_default = /*#__PURE__*/__webpack_require__.n(equivalent_key_map);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
@@ -1391,21 +1378,17 @@ function createRegistry() {
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/default-registry.js
-/**
- * Internal dependencies
- */
 
 /* harmony default export */ var default_registry = (createRegistry());
 
 // EXTERNAL MODULE: external {"this":["wp","reduxRoutine"]}
-var external_this_wp_reduxRoutine_ = __webpack_require__(189);
+var external_this_wp_reduxRoutine_ = __webpack_require__(188);
 var external_this_wp_reduxRoutine_default = /*#__PURE__*/__webpack_require__.n(external_this_wp_reduxRoutine_);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/plugins/controls/index.js
 /**
  * External dependencies
  */
-
 
 /**
  * WordPress dependencies
@@ -1418,10 +1401,7 @@ var external_this_wp_reduxRoutine_default = /*#__PURE__*/__webpack_require__.n(e
       var store = registry.registerStore(reducerKey, options);
 
       if (options.controls) {
-        var normalizedControls = Object(external_lodash_["mapValues"])(options.controls, function (control) {
-          return control.isRegistryControl ? control(registry) : control;
-        });
-        var middleware = external_this_wp_reduxRoutine_default()(normalizedControls);
+        var middleware = external_this_wp_reduxRoutine_default()(options.controls);
         var enhancer = Object(redux["a" /* applyMiddleware */])(middleware);
 
         var createStore = function createStore() {
@@ -1493,7 +1473,6 @@ try {
  */
 
 
-
 /**
  * Persistence plugin options.
  *
@@ -1520,24 +1499,21 @@ var DEFAULT_STORAGE = storage_default;
 
 var DEFAULT_STORAGE_KEY = 'WP_DATA';
 /**
- * Higher-order reducer which invokes the original reducer only if state is
- * inequal from that of the action's `nextState` property, otherwise returning
- * the original state reference.
+ * Higher-order reducer to provides an initial value when state is undefined.
  *
- * @param {Function} reducer Original reducer.
+ * @param {Function} reducer      Original reducer.
+ * @param {*}         initialState Value to use as initial state.
  *
  * @return {Function} Enhanced reducer.
  */
 
-var withLazySameState = function withLazySameState(reducer) {
-  return function (state, action) {
-    if (action.nextState === state) {
-      return state;
-    }
-
+function withInitialState(reducer, initialState) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+    var action = arguments.length > 1 ? arguments[1] : undefined;
     return reducer(state, action);
   };
-};
+}
 /**
  * Creates a persistence interface, exposing getter and setter methods (`get`
  * and `set` respectively).
@@ -1607,7 +1583,7 @@ function createPersistenceInterface(options) {
  * @return {WPDataPlugin} Data plugin.
  */
 
-var persistence_persistencePlugin = function persistencePlugin(registry, pluginOptions) {
+/* harmony default export */ var plugins_persistence = (function (registry, pluginOptions) {
   var persistence = createPersistenceInterface(pluginOptions);
   /**
    * Creates an enhanced store dispatch function, triggering the state of the
@@ -1621,35 +1597,15 @@ var persistence_persistencePlugin = function persistencePlugin(registry, pluginO
    */
 
   function createPersistOnChange(getState, reducerKey, keys) {
-    var getPersistedState;
-
-    if (Array.isArray(keys)) {
-      // Given keys, the persisted state should by produced as an object
-      // of the subset of keys. This implementation uses combineReducers
-      // to leverage its behavior of returning the same object when none
-      // of the property values changes. This allows a strict reference
-      // equality to bypass a persistence set on an unchanging state.
-      var reducers = keys.reduce(function (result, key) {
-        return Object.assign(result, Object(defineProperty["a" /* default */])({}, key, function (state, action) {
-          return action.nextState[key];
-        }));
-      }, {});
-      getPersistedState = withLazySameState(turbo_combine_reducers_default()(reducers));
-    } else {
-      getPersistedState = function getPersistedState(state, action) {
-        return action.nextState;
-      };
-    }
-
-    var lastState = getPersistedState(undefined, {
-      nextState: getState()
-    });
+    var lastState = getState();
     return function (result) {
-      var state = getPersistedState(lastState, {
-        nextState: getState()
-      });
+      var state = getState();
 
       if (state !== lastState) {
+        if (Array.isArray(keys)) {
+          state = Object(external_lodash_["pick"])(state, keys);
+        }
+
         persistence.set(reducerKey, state);
         lastState = state;
       }
@@ -1662,72 +1618,25 @@ var persistence_persistencePlugin = function persistencePlugin(registry, pluginO
     registerStore: function registerStore(reducerKey, options) {
       if (!options.persist) {
         return registry.registerStore(reducerKey, options);
-      } // Load from persistence to use as initial state.
-
-
-      var persistedState = persistence.get()[reducerKey];
-
-      if (persistedState !== undefined) {
-        var initialState = options.reducer(undefined, {
-          type: '@@WP/PERSISTENCE_RESTORE'
-        });
-
-        if (Object(external_lodash_["isPlainObject"])(initialState) && Object(external_lodash_["isPlainObject"])(persistedState)) {
-          // If state is an object, ensure that:
-          // - Other keys are left intact when persisting only a
-          //   subset of keys.
-          // - New keys in what would otherwise be used as initial
-          //   state are deeply merged as base for persisted value.
-          initialState = Object(external_lodash_["merge"])({}, initialState, persistedState);
-        } else {
-          // If there is a mismatch in object-likeness of default
-          // initial or persisted state, defer to persisted value.
-          initialState = persistedState;
-        }
-
-        options = Object(objectSpread["a" /* default */])({}, options, {
-          initialState: initialState
-        });
       }
 
+      var initialState = persistence.get()[reducerKey];
+      options = Object(objectSpread["a" /* default */])({}, options, {
+        reducer: withInitialState(options.reducer, initialState)
+      });
       var store = registry.registerStore(reducerKey, options);
       store.dispatch = Object(external_lodash_["flow"])([store.dispatch, createPersistOnChange(store.getState, reducerKey, options.persist)]);
       return store;
     }
   };
-};
-/**
- * Deprecated: Remove this function once WordPress 5.3 is released.
- */
-
-
-persistence_persistencePlugin.__unstableMigrate = function (pluginOptions) {
-  var persistence = createPersistenceInterface(pluginOptions); // Preferences migration to introduce the block editor module
-
-  var persistedState = persistence.get();
-  var coreEditorState = persistedState['core/editor'];
-
-  if (coreEditorState && coreEditorState.preferences && coreEditorState.preferences.insertUsage) {
-    var blockEditorState = {
-      preferences: {
-        insertUsage: coreEditorState.preferences.insertUsage
-      }
-    };
-    persistence.set('core/editor', Object(objectSpread["a" /* default */])({}, coreEditorState, {
-      preferences: Object(external_lodash_["omit"])(coreEditorState.preferences, ['insertUsage'])
-    }));
-    persistence.set('core/block-editor', blockEditorState);
-  }
-};
-
-/* harmony default export */ var plugins_persistence = (persistence_persistencePlugin);
+});
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/plugins/index.js
 
 
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/extends.js
-var esm_extends = __webpack_require__(19);
+var esm_extends = __webpack_require__(18);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/classCallCheck.js
 var classCallCheck = __webpack_require__(10);
@@ -1736,13 +1645,13 @@ var classCallCheck = __webpack_require__(10);
 var createClass = __webpack_require__(9);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/possibleConstructorReturn.js
-var possibleConstructorReturn = __webpack_require__(11);
+var possibleConstructorReturn = __webpack_require__(12);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/getPrototypeOf.js
-var getPrototypeOf = __webpack_require__(12);
+var getPrototypeOf = __webpack_require__(13);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inherits.js + 1 modules
-var inherits = __webpack_require__(13);
+var inherits = __webpack_require__(14);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
 var assertThisInitialized = __webpack_require__(3);
@@ -1752,12 +1661,10 @@ var external_this_wp_element_ = __webpack_require__(0);
 
 // EXTERNAL MODULE: external {"this":["wp","isShallowEqual"]}
 var external_this_wp_isShallowEqual_ = __webpack_require__(40);
+var external_this_wp_isShallowEqual_default = /*#__PURE__*/__webpack_require__.n(external_this_wp_isShallowEqual_);
 
 // EXTERNAL MODULE: external {"this":["wp","compose"]}
 var external_this_wp_compose_ = __webpack_require__(7);
-
-// EXTERNAL MODULE: external {"this":["wp","priorityQueue"]}
-var external_this_wp_priorityQueue_ = __webpack_require__(190);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/components/registry-provider/index.js
 /**
@@ -1777,19 +1684,6 @@ var _createContext = Object(external_this_wp_element_["createContext"])(default_
 var RegistryConsumer = Consumer;
 /* harmony default export */ var registry_provider = (Provider);
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/components/async-mode-provider/index.js
-/**
- * WordPress dependencies
- */
-
-
-var async_mode_provider_createContext = Object(external_this_wp_element_["createContext"])(false),
-    async_mode_provider_Consumer = async_mode_provider_createContext.Consumer,
-    async_mode_provider_Provider = async_mode_provider_createContext.Provider;
-
-var AsyncModeConsumer = async_mode_provider_Consumer;
-/* harmony default export */ var async_mode_provider = (async_mode_provider_Provider);
-
 // CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/components/with-select/index.js
 
 
@@ -1806,14 +1700,11 @@ var AsyncModeConsumer = async_mode_provider_Consumer;
 
 
 
-
 /**
  * Internal dependencies
  */
 
 
-
-var renderQueue = Object(external_this_wp_priorityQueue_["createQueue"])();
 /**
  * Higher-order component used to inject state-derived props using registered
  * selectors.
@@ -1883,37 +1774,31 @@ var with_select_withSelect = function withSelect(mapSelectToProps) {
         value: function componentWillUnmount() {
           this.canRunSelection = false;
           this.unsubscribe();
-          renderQueue.flush(this);
         }
       }, {
         key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps, nextState) {
           // Cycle subscription if registry changes.
           var hasRegistryChanged = nextProps.registry !== this.props.registry;
-          var hasSyncRenderingChanged = nextProps.isAsync !== this.props.isAsync;
 
           if (hasRegistryChanged) {
             this.unsubscribe();
             this.subscribe(nextProps.registry);
-          }
-
-          if (hasSyncRenderingChanged) {
-            renderQueue.flush(this);
           } // Treat a registry change as equivalent to `ownProps`, to reflect
           // `mergeProps` to rendered component if and only if updated.
 
 
-          var hasPropsChanged = hasRegistryChanged || !Object(external_this_wp_isShallowEqual_["isShallowEqualObjects"])(this.props.ownProps, nextProps.ownProps); // Only render if props have changed or merge props have been updated
+          var hasPropsChanged = hasRegistryChanged || !external_this_wp_isShallowEqual_default()(this.props.ownProps, nextProps.ownProps); // Only render if props have changed or merge props have been updated
           // from the store subscriber.
 
-          if (this.state === nextState && !hasPropsChanged && !hasSyncRenderingChanged) {
+          if (this.state === nextState && !hasPropsChanged) {
             return false;
           }
 
-          if (hasPropsChanged || hasSyncRenderingChanged) {
+          if (hasPropsChanged) {
             var nextMergeProps = getNextMergeProps(nextProps);
 
-            if (!Object(external_this_wp_isShallowEqual_["isShallowEqualObjects"])(this.mergeProps, nextMergeProps)) {
+            if (!external_this_wp_isShallowEqual_default()(this.mergeProps, nextMergeProps)) {
               // If merge props change as a result of the incoming props,
               // they should be reflected as such in the upcoming render.
               // While side effects are discouraged in lifecycle methods,
@@ -1939,7 +1824,7 @@ var with_select_withSelect = function withSelect(mapSelectToProps) {
 
           var nextMergeProps = getNextMergeProps(this.props);
 
-          if (Object(external_this_wp_isShallowEqual_["isShallowEqualObjects"])(this.mergeProps, nextMergeProps)) {
+          if (external_this_wp_isShallowEqual_default()(this.mergeProps, nextMergeProps)) {
             return;
           }
 
@@ -1956,15 +1841,7 @@ var with_select_withSelect = function withSelect(mapSelectToProps) {
       }, {
         key: "subscribe",
         value: function subscribe(registry) {
-          var _this2 = this;
-
-          this.unsubscribe = registry.subscribe(function () {
-            if (_this2.props.isAsync) {
-              renderQueue.add(_this2, _this2.onStoreChange);
-            } else {
-              _this2.onStoreChange();
-            }
-          });
+          this.unsubscribe = registry.subscribe(this.onStoreChange);
         }
       }, {
         key: "render",
@@ -1977,13 +1854,10 @@ var with_select_withSelect = function withSelect(mapSelectToProps) {
     }(external_this_wp_element_["Component"]);
 
     return function (ownProps) {
-      return Object(external_this_wp_element_["createElement"])(AsyncModeConsumer, null, function (isAsync) {
-        return Object(external_this_wp_element_["createElement"])(RegistryConsumer, null, function (registry) {
-          return Object(external_this_wp_element_["createElement"])(ComponentWithSelect, {
-            ownProps: ownProps,
-            registry: registry,
-            isAsync: isAsync
-          });
+      return Object(external_this_wp_element_["createElement"])(RegistryConsumer, null, function (registry) {
+        return Object(external_this_wp_element_["createElement"])(ComponentWithSelect, {
+          ownProps: ownProps,
+          registry: registry
         });
       });
     };
@@ -2112,31 +1986,6 @@ var with_dispatch_withDispatch = function withDispatch(mapDispatchToProps) {
 
 /* harmony default export */ var with_dispatch = (with_dispatch_withDispatch);
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/factory.js
-/**
- * Mark a selector as a registry selector.
- *
- * @param {function} registrySelector Function receiving a registry object and returning a state selector.
- *
- * @return {function} marked registry selector.
- */
-function createRegistrySelector(registrySelector) {
-  registrySelector.isRegistrySelector = true;
-  return registrySelector;
-}
-/**
- * Mark a control as a registry control.
- *
- * @param {function} registryControl Function receiving a registry object and returning a control.
- *
- * @return {function} marked registry control.
- */
-
-function createRegistryControl(registryControl) {
-  registryControl.isRegistryControl = true;
-  return registryControl;
-}
-
 // CONCATENATED MODULE: ./node_modules/@wordpress/data/build-module/index.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "select", function() { return build_module_select; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dispatch", function() { return build_module_dispatch; });
@@ -2148,11 +1997,8 @@ function createRegistryControl(registryControl) {
 /* concated harmony reexport withDispatch */__webpack_require__.d(__webpack_exports__, "withDispatch", function() { return with_dispatch; });
 /* concated harmony reexport RegistryProvider */__webpack_require__.d(__webpack_exports__, "RegistryProvider", function() { return registry_provider; });
 /* concated harmony reexport RegistryConsumer */__webpack_require__.d(__webpack_exports__, "RegistryConsumer", function() { return RegistryConsumer; });
-/* concated harmony reexport __experimentalAsyncModeProvider */__webpack_require__.d(__webpack_exports__, "__experimentalAsyncModeProvider", function() { return async_mode_provider; });
 /* concated harmony reexport createRegistry */__webpack_require__.d(__webpack_exports__, "createRegistry", function() { return createRegistry; });
 /* concated harmony reexport plugins */__webpack_require__.d(__webpack_exports__, "plugins", function() { return plugins_namespaceObject; });
-/* concated harmony reexport createRegistrySelector */__webpack_require__.d(__webpack_exports__, "createRegistrySelector", function() { return createRegistrySelector; });
-/* concated harmony reexport createRegistryControl */__webpack_require__.d(__webpack_exports__, "createRegistryControl", function() { return createRegistryControl; });
 /* concated harmony reexport combineReducers */__webpack_require__.d(__webpack_exports__, "combineReducers", function() { return turbo_combine_reducers_default.a; });
 /**
  * External dependencies
@@ -2161,8 +2007,6 @@ function createRegistryControl(registryControl) {
 /**
  * Internal dependencies
  */
-
-
 
 
 
@@ -2204,7 +2048,7 @@ function _iterableToArray(iter) {
 
 /***/ }),
 
-/***/ 34:
+/***/ 35:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2215,7 +2059,7 @@ function _arrayWithHoles(arr) {
 
 /***/ }),
 
-/***/ 35:
+/***/ 36:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2226,14 +2070,7 @@ function _nonIterableRest() {
 
 /***/ }),
 
-/***/ 40:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["isShallowEqual"]; }());
-
-/***/ }),
-
-/***/ 41:
+/***/ 38:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2276,6 +2113,13 @@ function _asyncToGenerator(fn) {
 
 /***/ }),
 
+/***/ 40:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["isShallowEqual"]; }());
+
+/***/ }),
+
 /***/ 51:
 /***/ (function(module, exports) {
 
@@ -2303,7 +2147,7 @@ module.exports = g;
 
 /***/ }),
 
-/***/ 65:
+/***/ 62:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2313,7 +2157,7 @@ module.exports = g;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return applyMiddleware; });
 /* unused harmony export compose */
 /* unused harmony export __DO_NOT_USE__ActionTypes */
-/* harmony import */ var symbol_observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(69);
+/* harmony import */ var symbol_observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(67);
 
 
 /**
@@ -2940,7 +2784,7 @@ if (false) {}
 
 /***/ }),
 
-/***/ 68:
+/***/ 66:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3255,11 +3099,11 @@ module.exports = EquivalentKeyMap;
 
 /***/ }),
 
-/***/ 69:
+/***/ 67:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var _ponyfill_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(88);
+/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var _ponyfill_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(85);
 /* global window */
 
 
@@ -3278,7 +3122,7 @@ if (typeof self !== 'undefined') {
 var result = Object(_ponyfill_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(root);
 /* harmony default export */ __webpack_exports__["a"] = (result);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51), __webpack_require__(121)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51), __webpack_require__(120)(module)))
 
 /***/ }),
 
@@ -3317,7 +3161,7 @@ function _objectSpread(target) {
 
 /***/ }),
 
-/***/ 88:
+/***/ 85:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3343,7 +3187,7 @@ function symbolObservablePonyfill(root) {
 
 /***/ }),
 
-/***/ 89:
+/***/ 86:
 /***/ (function(module, exports) {
 
 module.exports = isPromise;

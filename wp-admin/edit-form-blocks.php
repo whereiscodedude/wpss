@@ -48,7 +48,6 @@ $preload_paths = array(
 	sprintf( '/wp/v2/types/%s?context=edit', $post_type ),
 	sprintf( '/wp/v2/users/me?post_type=%s&context=edit', $post_type ),
 	array( '/wp/v2/media', 'OPTIONS' ),
-	array( '/wp/v2/blocks', 'OPTIONS' ),
 );
 
 /**
@@ -307,7 +306,7 @@ if ( false !== $color_palette ) {
 	$editor_settings['colors'] = $color_palette;
 }
 
-if ( false !== $font_sizes ) {
+if ( ! empty( $font_sizes ) ) {
 	$editor_settings['fontSizes'] = $font_sizes;
 }
 

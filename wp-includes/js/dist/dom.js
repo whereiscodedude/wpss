@@ -82,12 +82,12 @@ this["wp"] = this["wp"] || {}; this["wp"]["dom"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 325);
+/******/ 	return __webpack_require__(__webpack_require__.s = 324);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 18:
+/***/ 19:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -127,7 +127,7 @@ function _toConsumableArray(arr) {
 
 /***/ }),
 
-/***/ 325:
+/***/ 324:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -141,7 +141,7 @@ __webpack_require__.d(tabbable_namespaceObject, "isTabbableIndex", function() { 
 __webpack_require__.d(tabbable_namespaceObject, "find", function() { return tabbable_find; });
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 2 modules
-var toConsumableArray = __webpack_require__(18);
+var toConsumableArray = __webpack_require__(19);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/dom/build-module/focusable.js
 
@@ -445,24 +445,20 @@ function isHorizontalEdge(container, isReverse) {
   if (offset !== extentOffset) {
     return false;
   } // If confirmed to be at extent, traverse up through DOM, verifying that
-  // the node is at first or last child for reverse or forward respectively
-  // (ignoring empty text nodes). Continue until container is reached.
+  // the node is at first or last child for reverse or forward respectively.
+  // Continue until container is reached.
 
 
-  var order = isReverse ? 'previous' : 'next';
+  var order = isReverse ? 'first' : 'last';
 
   while (node !== container) {
-    var next = node["".concat(order, "Sibling")]; // Skip over empty text nodes.
+    var parentNode = node.parentNode;
 
-    while (next && next.nodeType === TEXT_NODE && next.data === '') {
-      next = next["".concat(order, "Sibling")];
-    }
-
-    if (next) {
+    if (parentNode["".concat(order, "Child")] !== node) {
       return false;
     }
 
-    node = node.parentNode;
+    node = parentNode;
   } // If reached, range is assumed to be at edge.
 
 

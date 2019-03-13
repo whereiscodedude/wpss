@@ -82,12 +82,12 @@ this["wp"] = this["wp"] || {}; this["wp"]["coreData"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 311);
+/******/ 	return __webpack_require__(__webpack_require__.s = 310);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 121:
+/***/ 120:
 /***/ (function(module, exports) {
 
 module.exports = function(originalModule) {
@@ -140,7 +140,7 @@ function _defineProperty(obj, key, value) {
 
 /***/ }),
 
-/***/ 18:
+/***/ 19:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -180,7 +180,7 @@ function _toConsumableArray(arr) {
 
 /***/ }),
 
-/***/ 22:
+/***/ 24:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["wp"]["url"]; }());
@@ -193,7 +193,7 @@ function _toConsumableArray(arr) {
 "use strict";
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithHoles.js
-var arrayWithHoles = __webpack_require__(34);
+var arrayWithHoles = __webpack_require__(35);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
 function _iterableToArrayLimit(arr, i) {
@@ -222,7 +222,7 @@ function _iterableToArrayLimit(arr, i) {
   return _arr;
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableRest.js
-var nonIterableRest = __webpack_require__(35);
+var nonIterableRest = __webpack_require__(36);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _slicedToArray; });
@@ -235,7 +235,14 @@ function _slicedToArray(arr, i) {
 
 /***/ }),
 
-/***/ 28:
+/***/ 30:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["apiFetch"]; }());
+
+/***/ }),
+
+/***/ 31:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -517,14 +524,7 @@ function isShallowEqual( a, b, fromIndex ) {
 
 /***/ }),
 
-/***/ 31:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["apiFetch"]; }());
-
-/***/ }),
-
-/***/ 311:
+/***/ 310:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -538,7 +538,6 @@ __webpack_require__.d(build_module_actions_namespaceObject, "receiveThemeSupport
 __webpack_require__.d(build_module_actions_namespaceObject, "receiveEmbedPreview", function() { return receiveEmbedPreview; });
 __webpack_require__.d(build_module_actions_namespaceObject, "saveEntityRecord", function() { return saveEntityRecord; });
 __webpack_require__.d(build_module_actions_namespaceObject, "receiveUploadPermissions", function() { return receiveUploadPermissions; });
-__webpack_require__.d(build_module_actions_namespaceObject, "receiveUserPermission", function() { return receiveUserPermission; });
 var build_module_selectors_namespaceObject = {};
 __webpack_require__.r(build_module_selectors_namespaceObject);
 __webpack_require__.d(build_module_selectors_namespaceObject, "isRequestingEmbedPreview", function() { return isRequestingEmbedPreview; });
@@ -551,8 +550,7 @@ __webpack_require__.d(build_module_selectors_namespaceObject, "getEntityRecords"
 __webpack_require__.d(build_module_selectors_namespaceObject, "getThemeSupports", function() { return getThemeSupports; });
 __webpack_require__.d(build_module_selectors_namespaceObject, "getEmbedPreview", function() { return getEmbedPreview; });
 __webpack_require__.d(build_module_selectors_namespaceObject, "isPreviewEmbedFallback", function() { return isPreviewEmbedFallback; });
-__webpack_require__.d(build_module_selectors_namespaceObject, "hasUploadPermissions", function() { return hasUploadPermissions; });
-__webpack_require__.d(build_module_selectors_namespaceObject, "canUser", function() { return canUser; });
+__webpack_require__.d(build_module_selectors_namespaceObject, "hasUploadPermissions", function() { return selectors_hasUploadPermissions; });
 var resolvers_namespaceObject = {};
 __webpack_require__.r(resolvers_namespaceObject);
 __webpack_require__.d(resolvers_namespaceObject, "getAuthors", function() { return resolvers_getAuthors; });
@@ -561,7 +559,6 @@ __webpack_require__.d(resolvers_namespaceObject, "getEntityRecords", function() 
 __webpack_require__.d(resolvers_namespaceObject, "getThemeSupports", function() { return resolvers_getThemeSupports; });
 __webpack_require__.d(resolvers_namespaceObject, "getEmbedPreview", function() { return resolvers_getEmbedPreview; });
 __webpack_require__.d(resolvers_namespaceObject, "hasUploadPermissions", function() { return resolvers_hasUploadPermissions; });
-__webpack_require__.d(resolvers_namespaceObject, "canUser", function() { return resolvers_canUser; });
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/objectSpread.js
 var objectSpread = __webpack_require__(8);
@@ -573,7 +570,7 @@ var external_this_wp_data_ = __webpack_require__(5);
 var slicedToArray = __webpack_require__(25);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 2 modules
-var toConsumableArray = __webpack_require__(18);
+var toConsumableArray = __webpack_require__(19);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
 var defineProperty = __webpack_require__(15);
@@ -746,14 +743,14 @@ function receiveQueriedItems(items) {
 }
 
 // EXTERNAL MODULE: ./node_modules/rememo/es/rememo.js
-var rememo = __webpack_require__(28);
+var rememo = __webpack_require__(31);
 
 // EXTERNAL MODULE: ./node_modules/equivalent-key-map/equivalent-key-map.js
-var equivalent_key_map = __webpack_require__(68);
+var equivalent_key_map = __webpack_require__(66);
 var equivalent_key_map_default = /*#__PURE__*/__webpack_require__.n(equivalent_key_map);
 
 // EXTERNAL MODULE: external {"this":["wp","url"]}
-var external_this_wp_url_ = __webpack_require__(22);
+var external_this_wp_url_ = __webpack_require__(24);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/core-data/build-module/queried-data/get-query-parts.js
 
@@ -921,10 +918,10 @@ var getQueriedItems = Object(rememo["a" /* default */])(function (state) {
 });
 
 // EXTERNAL MODULE: ./node_modules/redux/es/redux.js
-var redux = __webpack_require__(65);
+var redux = __webpack_require__(62);
 
 // EXTERNAL MODULE: external {"this":["wp","apiFetch"]}
-var external_this_wp_apiFetch_ = __webpack_require__(31);
+var external_this_wp_apiFetch_ = __webpack_require__(30);
 var external_this_wp_apiFetch_default = /*#__PURE__*/__webpack_require__.n(external_this_wp_apiFetch_);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/core-data/build-module/controls.js
@@ -972,15 +969,13 @@ var controls = {
     var request = _ref.request;
     return external_this_wp_apiFetch_default()(request);
   },
-  SELECT: Object(external_this_wp_data_["createRegistryControl"])(function (registry) {
-    return function (_ref2) {
-      var _registry$select;
+  SELECT: function SELECT(_ref2) {
+    var _selectData;
 
-      var selectorName = _ref2.selectorName,
-          args = _ref2.args;
-      return (_registry$select = registry.select('core'))[selectorName].apply(_registry$select, Object(toConsumableArray["a" /* default */])(args));
-    };
-  })
+    var selectorName = _ref2.selectorName,
+        args = _ref2.args;
+    return (_selectData = Object(external_this_wp_data_["select"])('core'))[selectorName].apply(_selectData, Object(toConsumableArray["a" /* default */])(args));
+  }
 };
 /* harmony default export */ var build_module_controls = (controls);
 
@@ -1159,26 +1154,8 @@ function saveEntityRecord(kind, name, record) {
 
 function receiveUploadPermissions(hasUploadPermissions) {
   return {
-    type: 'RECEIVE_USER_PERMISSION',
-    key: 'create/media',
-    isAllowed: hasUploadPermissions
-  };
-}
-/**
- * Returns an action object used in signalling that the current user has
- * permission to perform an action on a REST resource.
- *
- * @param {string}  key       A key that represents the action and REST resource.
- * @param {boolean} isAllowed Whether or not the user can perform the action.
- *
- * @return {Object} Action object.
- */
-
-function receiveUserPermission(key, isAllowed) {
-  return {
-    type: 'RECEIVE_USER_PERMISSION',
-    key: key,
-    isAllowed: isAllowed
+    type: 'RECEIVE_UPLOAD_PERMISSIONS',
+    hasUploadPermissions: hasUploadPermissions
   };
 }
 
@@ -1647,7 +1624,7 @@ function entitiesConfig() {
 
   switch (action.type) {
     case 'ADD_ENTITIES':
-      return [].concat(Object(toConsumableArray["a" /* default */])(state), Object(toConsumableArray["a" /* default */])(action.entities));
+      return Object(toConsumableArray["a" /* default */])(state).concat(Object(toConsumableArray["a" /* default */])(action.entities));
   }
 
   return state;
@@ -1718,22 +1695,21 @@ function embedPreviews() {
   return state;
 }
 /**
- * State which tracks whether the user can perform an action on a REST
- * resource.
+ * Reducer managing Upload permissions.
  *
- * @param  {Object} state  Current state.
- * @param  {Object} action Dispatched action.
+ * @param  {Object}  state  Current state.
+ * @param  {Object}  action Dispatched action.
  *
  * @return {Object} Updated state.
  */
 
-function userPermissions() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+function hasUploadPermissions() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
   switch (action.type) {
-    case 'RECEIVE_USER_PERMISSION':
-      return Object(objectSpread["a" /* default */])({}, state, Object(defineProperty["a" /* default */])({}, action.key, action.isAllowed));
+    case 'RECEIVE_UPLOAD_PERMISSIONS':
+      return action.hasUploadPermissions;
   }
 
   return state;
@@ -1745,12 +1721,8 @@ function userPermissions() {
   themeSupports: themeSupports,
   entities: reducer_entities,
   embedPreviews: embedPreviews,
-  userPermissions: userPermissions
+  hasUploadPermissions: hasUploadPermissions
 }));
-
-// EXTERNAL MODULE: external {"this":["wp","deprecated"]}
-var external_this_wp_deprecated_ = __webpack_require__(49);
-var external_this_wp_deprecated_default = /*#__PURE__*/__webpack_require__.n(external_this_wp_deprecated_);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/core-data/build-module/name.js
 /**
@@ -1772,13 +1744,29 @@ var REDUCER_KEY = 'core';
  */
 
 
-
 /**
  * Internal dependencies
  */
 
 
 
+/**
+ * Returns true if resolution is in progress for the core selector of the given
+ * name and arguments.
+ *
+ * @param {string} selectorName Core data selector name.
+ * @param {...*}   args         Arguments passed to selector.
+ *
+ * @return {boolean} Whether resolution is in progress.
+ */
+
+function isResolving(selectorName) {
+  for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    args[_key - 1] = arguments[_key];
+  }
+
+  return Object(external_this_wp_data_["select"])('core/data').isResolving(REDUCER_KEY, selectorName, args);
+}
 /**
  * Returns true if a request is in progress for embed preview data, or false
  * otherwise.
@@ -1789,11 +1777,10 @@ var REDUCER_KEY = 'core';
  * @return {boolean} Whether a request is in progress for an embed preview.
  */
 
-var isRequestingEmbedPreview = Object(external_this_wp_data_["createRegistrySelector"])(function (select) {
-  return function (state, url) {
-    return select('core/data').isResolving(REDUCER_KEY, 'getEmbedPreview', [url]);
-  };
-});
+
+function isRequestingEmbedPreview(state, url) {
+  return isResolving('getEmbedPreview', url);
+}
 /**
  * Returns all available authors.
  *
@@ -1933,49 +1920,15 @@ function isPreviewEmbedFallback(state, url) {
   return preview.html === oEmbedLinkCheck;
 }
 /**
- * Returns whether the current user can upload media.
+ * Return Upload Permissions.
  *
- * Calling this may trigger an OPTIONS request to the REST API via the
- * `canUser()` resolver.
+ * @param  {Object}  state State tree.
  *
- * https://developer.wordpress.org/rest-api/reference/
- *
- * @deprecated since 5.0. Callers should use the more generic `canUser()` selector instead of
- *             `hasUploadPermissions()`, e.g. `canUser( 'create', 'media' )`.
- *
- * @param {Object} state Data state.
- *
- * @return {boolean} Whether or not the user can upload media. Defaults to `true` if the OPTIONS
- *                   request is being made.
+ * @return {boolean} Upload Permissions.
  */
 
-function hasUploadPermissions(state) {
-  external_this_wp_deprecated_default()("select( 'core' ).hasUploadPermissions()", {
-    alternative: "select( 'core' ).canUser( 'create', 'media' )"
-  });
-  return Object(external_lodash_["defaultTo"])(canUser(state, 'create', 'media'), true);
-}
-/**
- * Returns whether the current user can perform the given action on the given
- * REST resource.
- *
- * Calling this may trigger an OPTIONS request to the REST API via the
- * `canUser()` resolver.
- *
- * https://developer.wordpress.org/rest-api/reference/
- *
- * @param {Object}   state            Data state.
- * @param {string}   action           Action to check. One of: 'create', 'read', 'update', 'delete'.
- * @param {string}   resource         REST resource to check, e.g. 'media' or 'posts'.
- * @param {string=}  id               Optional ID of the rest resource to check.
- *
- * @return {boolean|undefined} Whether or not the user can perform the action,
- *                             or `undefined` if the OPTIONS request is still being made.
- */
-
-function canUser(state, action, resource, id) {
-  var key = Object(external_lodash_["compact"])([action, resource, id]).join('/');
-  return Object(external_lodash_["get"])(state, ['userPermissions', key]);
+function selectors_hasUploadPermissions(state) {
+  return state.hasUploadPermissions;
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/core-data/build-module/resolvers.js
@@ -1998,10 +1951,7 @@ regeneratorRuntime.mark(resolvers_getThemeSupports),
 regeneratorRuntime.mark(resolvers_getEmbedPreview),
     _marked6 =
 /*#__PURE__*/
-regeneratorRuntime.mark(resolvers_hasUploadPermissions),
-    _marked7 =
-/*#__PURE__*/
-regeneratorRuntime.mark(resolvers_canUser);
+regeneratorRuntime.mark(resolvers_hasUploadPermissions);
 
 /**
  * External dependencies
@@ -2010,7 +1960,6 @@ regeneratorRuntime.mark(resolvers_canUser);
 /**
  * WordPress dependencies
  */
-
 
 
 /**
@@ -2230,84 +2179,24 @@ function resolvers_getEmbedPreview(url) {
 }
 /**
  * Requests Upload Permissions from the REST API.
- *
- * @deprecated since 5.0. Callers should use the more generic `canUser()` selector instead of
- *            `hasUploadPermissions()`, e.g. `canUser( 'create', 'media' )`.
  */
 
 function resolvers_hasUploadPermissions() {
+  var response, allowHeader;
   return regeneratorRuntime.wrap(function hasUploadPermissions$(_context6) {
     while (1) {
       switch (_context6.prev = _context6.next) {
         case 0:
-          external_this_wp_deprecated_default()("select( 'core' ).hasUploadPermissions()", {
-            alternative: "select( 'core' ).canUser( 'create', 'media' )"
-          });
-          return _context6.delegateYield(resolvers_canUser('create', 'media'), "t0", 2);
-
-        case 2:
-        case "end":
-          return _context6.stop();
-      }
-    }
-  }, _marked6, this);
-}
-/**
- * Checks whether the current user can perform the given action on the given
- * REST resource.
- *
- * @param {string}  action   Action to check. One of: 'create', 'read', 'update',
- *                           'delete'.
- * @param {string}  resource REST resource to check, e.g. 'media' or 'posts'.
- * @param {?string} id       ID of the rest resource to check.
- */
-
-function resolvers_canUser(action, resource, id) {
-  var methods, method, path, response, allowHeader, key, isAllowed;
-  return regeneratorRuntime.wrap(function canUser$(_context7) {
-    while (1) {
-      switch (_context7.prev = _context7.next) {
-        case 0:
-          methods = {
-            create: 'POST',
-            read: 'GET',
-            update: 'PUT',
-            delete: 'DELETE'
-          };
-          method = methods[action];
-
-          if (method) {
-            _context7.next = 4;
-            break;
-          }
-
-          throw new Error("'".concat(action, "' is not a valid action."));
-
-        case 4:
-          path = id ? "/wp/v2/".concat(resource, "/").concat(id) : "/wp/v2/".concat(resource);
-          _context7.prev = 5;
-          _context7.next = 8;
+          _context6.next = 2;
           return apiFetch({
-            path: path,
-            // Ideally this would always be an OPTIONS request, but unfortunately there's
-            // a bug in the REST API which causes the Allow header to not be sent on
-            // OPTIONS requests to /posts/:id routes.
-            // https://core.trac.wordpress.org/ticket/45753
-            method: id ? 'GET' : 'OPTIONS',
+            path: '/wp/v2/media',
+            method: 'OPTIONS',
             parse: false
           });
 
-        case 8:
-          response = _context7.sent;
-          _context7.next = 14;
-          break;
+        case 2:
+          response = _context6.sent;
 
-        case 11:
-          _context7.prev = 11;
-          _context7.t0 = _context7["catch"](5);
-          return _context7.abrupt("return");
-
-        case 14:
           if (Object(external_lodash_["hasIn"])(response, ['headers', 'get'])) {
             // If the request is fetched using the fetch api, the header can be
             // retrieved using the 'get' method.
@@ -2318,17 +2207,15 @@ function resolvers_canUser(action, resource, id) {
             allowHeader = Object(external_lodash_["get"])(response, ['headers', 'Allow'], '');
           }
 
-          key = Object(external_lodash_["compact"])([action, resource, id]).join('/');
-          isAllowed = Object(external_lodash_["includes"])(allowHeader, method);
-          _context7.next = 19;
-          return receiveUserPermission(key, isAllowed);
+          _context6.next = 6;
+          return receiveUploadPermissions(Object(external_lodash_["includes"])(allowHeader, 'POST'));
 
-        case 19:
+        case 6:
         case "end":
-          return _context7.stop();
+          return _context6.stop();
       }
     }
-  }, _marked7, this, [[5, 11]]);
+  }, _marked6, this);
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/core-data/build-module/index.js
@@ -2433,7 +2320,7 @@ function _iterableToArray(iter) {
 
 /***/ }),
 
-/***/ 34:
+/***/ 35:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2444,7 +2331,7 @@ function _arrayWithHoles(arr) {
 
 /***/ }),
 
-/***/ 35:
+/***/ 36:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2452,13 +2339,6 @@ function _arrayWithHoles(arr) {
 function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance");
 }
-
-/***/ }),
-
-/***/ 49:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["deprecated"]; }());
 
 /***/ }),
 
@@ -2496,7 +2376,7 @@ module.exports = g;
 
 /***/ }),
 
-/***/ 65:
+/***/ 62:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2506,7 +2386,7 @@ module.exports = g;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return applyMiddleware; });
 /* unused harmony export compose */
 /* unused harmony export __DO_NOT_USE__ActionTypes */
-/* harmony import */ var symbol_observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(69);
+/* harmony import */ var symbol_observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(67);
 
 
 /**
@@ -3133,7 +3013,7 @@ if (false) {}
 
 /***/ }),
 
-/***/ 68:
+/***/ 66:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3448,11 +3328,11 @@ module.exports = EquivalentKeyMap;
 
 /***/ }),
 
-/***/ 69:
+/***/ 67:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var _ponyfill_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(88);
+/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var _ponyfill_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(85);
 /* global window */
 
 
@@ -3471,7 +3351,7 @@ if (typeof self !== 'undefined') {
 var result = Object(_ponyfill_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(root);
 /* harmony default export */ __webpack_exports__["a"] = (result);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51), __webpack_require__(121)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51), __webpack_require__(120)(module)))
 
 /***/ }),
 
@@ -3503,7 +3383,7 @@ function _objectSpread(target) {
 
 /***/ }),
 
-/***/ 88:
+/***/ 85:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

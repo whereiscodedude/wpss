@@ -82,27 +82,23 @@ this["wp"] = this["wp"] || {}; this["wp"]["a11y"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 326);
+/******/ 	return __webpack_require__(__webpack_require__.s = 325);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 183:
+/***/ 182:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["wp"]["domReady"]; }());
 
 /***/ }),
 
-/***/ 326:
+/***/ 325:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-
-// EXTERNAL MODULE: external {"this":["wp","domReady"]}
-var external_this_wp_domReady_ = __webpack_require__(183);
-var external_this_wp_domReady_default = /*#__PURE__*/__webpack_require__.n(external_this_wp_domReady_);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/a11y/build-module/addContainer.js
 /**
@@ -141,6 +137,10 @@ var clear = function clear() {
 
 /* harmony default export */ var build_module_clear = (clear);
 
+// EXTERNAL MODULE: external {"this":["wp","domReady"]}
+var external_this_wp_domReady_ = __webpack_require__(182);
+var external_this_wp_domReady_default = /*#__PURE__*/__webpack_require__.n(external_this_wp_domReady_);
+
 // CONCATENATED MODULE: ./node_modules/@wordpress/a11y/build-module/filterMessage.js
 var previousMessage = '';
 /**
@@ -174,13 +174,6 @@ var filterMessage = function filterMessage(message) {
 // CONCATENATED MODULE: ./node_modules/@wordpress/a11y/build-module/index.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setup", function() { return build_module_setup; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "speak", function() { return build_module_speak; });
-/**
- * WordPress dependencies
- */
-
-/**
- * Internal dependencies
- */
 
 
 
