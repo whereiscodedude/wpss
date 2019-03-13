@@ -117,9 +117,6 @@ function render_block_core_latest_comments( $attributes = array() ) {
 	}
 
 	$class = 'wp-block-latest-comments';
-	if ( ! empty( $attributes['className'] ) ) {
-		$class .= ' ' . $attributes['className'];
-	}
 	if ( isset( $attributes['align'] ) ) {
 		$class .= " align{$attributes['align']}";
 	}

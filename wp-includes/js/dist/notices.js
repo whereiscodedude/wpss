@@ -82,12 +82,12 @@ this["wp"] = this["wp"] || {}; this["wp"]["notices"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 280);
+/******/ 	return __webpack_require__(__webpack_require__.s = 279);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 123:
+/***/ 122:
 /***/ (function(module, exports) {
 
 function _interopRequireDefault(obj) {
@@ -100,7 +100,7 @@ module.exports = _interopRequireDefault;
 
 /***/ }),
 
-/***/ 176:
+/***/ 175:
 /***/ (function(module, exports) {
 
 function _defineProperty(obj, key, value) {
@@ -122,7 +122,7 @@ module.exports = _defineProperty;
 
 /***/ }),
 
-/***/ 177:
+/***/ 176:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -161,26 +161,26 @@ exports.DEFAULT_STATUS = DEFAULT_STATUS;
 
 /***/ }),
 
+/***/ 279:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(280);
+
+
+/***/ }),
+
 /***/ 280:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(281);
+var _interopRequireWildcard = __webpack_require__(281);
 
-
-/***/ }),
-
-/***/ 281:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireWildcard = __webpack_require__(282);
-
-var _interopRequireDefault = __webpack_require__(123);
+var _interopRequireDefault = __webpack_require__(122);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -189,13 +189,13 @@ exports.default = void 0;
 
 var _data = __webpack_require__(5);
 
-var _reducer = _interopRequireDefault(__webpack_require__(283));
+var _reducer = _interopRequireDefault(__webpack_require__(282));
 
-var actions = _interopRequireWildcard(__webpack_require__(290));
+var actions = _interopRequireWildcard(__webpack_require__(289));
 
-var selectors = _interopRequireWildcard(__webpack_require__(291));
+var selectors = _interopRequireWildcard(__webpack_require__(290));
 
-var _controls = _interopRequireDefault(__webpack_require__(292));
+var _controls = _interopRequireDefault(__webpack_require__(291));
 
 /**
  * WordPress dependencies
@@ -216,7 +216,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 282:
+/***/ 281:
 /***/ (function(module, exports) {
 
 function _interopRequireWildcard(obj) {
@@ -248,24 +248,24 @@ module.exports = _interopRequireWildcard;
 
 /***/ }),
 
-/***/ 283:
+/***/ 282:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _interopRequireDefault = __webpack_require__(123);
+var _interopRequireDefault = __webpack_require__(122);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
 
-var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(284));
+var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(283));
 
 var _lodash = __webpack_require__(2);
 
-var _onSubKey = _interopRequireDefault(__webpack_require__(288));
+var _onSubKey = _interopRequireDefault(__webpack_require__(287));
 
 /**
  * External dependencies
@@ -291,9 +291,9 @@ var notices = (0, _onSubKey.default)('context')(function () {
   switch (action.type) {
     case 'CREATE_NOTICE':
       // Avoid duplicates on ID.
-      return [].concat((0, _toConsumableArray2.default)((0, _lodash.reject)(state, {
+      return (0, _toConsumableArray2.default)((0, _lodash.reject)(state, {
         id: action.notice.id
-      })), [action.notice]);
+      })).concat([action.notice]);
 
     case 'REMOVE_NOTICE':
       return (0, _lodash.reject)(state, {
@@ -309,14 +309,14 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 284:
+/***/ 283:
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayWithoutHoles = __webpack_require__(285);
+var arrayWithoutHoles = __webpack_require__(284);
 
-var iterableToArray = __webpack_require__(286);
+var iterableToArray = __webpack_require__(285);
 
-var nonIterableSpread = __webpack_require__(287);
+var nonIterableSpread = __webpack_require__(286);
 
 function _toConsumableArray(arr) {
   return arrayWithoutHoles(arr) || iterableToArray(arr) || nonIterableSpread();
@@ -326,7 +326,7 @@ module.exports = _toConsumableArray;
 
 /***/ }),
 
-/***/ 285:
+/***/ 284:
 /***/ (function(module, exports) {
 
 function _arrayWithoutHoles(arr) {
@@ -343,7 +343,7 @@ module.exports = _arrayWithoutHoles;
 
 /***/ }),
 
-/***/ 286:
+/***/ 285:
 /***/ (function(module, exports) {
 
 function _iterableToArray(iter) {
@@ -354,7 +354,7 @@ module.exports = _iterableToArray;
 
 /***/ }),
 
-/***/ 287:
+/***/ 286:
 /***/ (function(module, exports) {
 
 function _nonIterableSpread() {
@@ -365,22 +365,22 @@ module.exports = _nonIterableSpread;
 
 /***/ }),
 
-/***/ 288:
+/***/ 287:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _interopRequireDefault = __webpack_require__(123);
+var _interopRequireDefault = __webpack_require__(122);
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = exports.onSubKey = void 0;
 
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(176));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(175));
 
-var _objectSpread3 = _interopRequireDefault(__webpack_require__(289));
+var _objectSpread3 = _interopRequireDefault(__webpack_require__(288));
 
 /**
  * Higher-order reducer creator which creates a combined reducer object, keyed
@@ -423,10 +423,10 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 289:
+/***/ 288:
 /***/ (function(module, exports, __webpack_require__) {
 
-var defineProperty = __webpack_require__(176);
+var defineProperty = __webpack_require__(175);
 
 function _objectSpread(target) {
   for (var i = 1; i < arguments.length; i++) {
@@ -451,7 +451,7 @@ module.exports = _objectSpread;
 
 /***/ }),
 
-/***/ 290:
+/***/ 289:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -469,7 +469,7 @@ exports.removeNotice = removeNotice;
 
 var _lodash = __webpack_require__(2);
 
-var _constants = __webpack_require__(177);
+var _constants = __webpack_require__(176);
 
 var _marked =
 /*#__PURE__*/
@@ -648,7 +648,7 @@ function removeNotice(id) {
 
 /***/ }),
 
-/***/ 291:
+/***/ 290:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -659,7 +659,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getNotices = getNotices;
 
-var _constants = __webpack_require__(177);
+var _constants = __webpack_require__(176);
 
 /**
  * Internal dependencies
@@ -725,7 +725,7 @@ function getNotices(state) {
 
 /***/ }),
 
-/***/ 292:
+/***/ 291:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

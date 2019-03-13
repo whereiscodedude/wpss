@@ -48,7 +48,6 @@ $preload_paths = array(
 	sprintf( '/wp/v2/types/%s?context=edit', $post_type ),
 	sprintf( '/wp/v2/users/me?post_type=%s&context=edit', $post_type ),
 	array( '/wp/v2/media', 'OPTIONS' ),
-	array( '/wp/v2/blocks', 'OPTIONS' ),
 );
 
 /**
@@ -96,7 +95,7 @@ wp_add_inline_script(
  * but should be included in its save payload.
  */
 $initial_edits = null;
-$is_new_post   = false;
+$is_new_post = false;
 if ( 'auto-draft' === $post->post_status ) {
 	$is_new_post = true;
 	// Override "(Auto Draft)" new post default title with empty string, or filtered value.
@@ -274,7 +273,7 @@ $editor_settings = array(
 	'titlePlaceholder'       => apply_filters( 'enter_title_here', __( 'Add title' ), $post ),
 	'bodyPlaceholder'        => $body_placeholder,
 	'isRTL'                  => is_rtl(),
-	'autosaveInterval'       => AUTOSAVE_INTERVAL,
+	'autosaveInterval'       => 10,
 	'maxUploadFileSize'      => $max_upload_size,
 	'allowedMimeTypes'       => get_allowed_mime_types(),
 	'styles'                 => $styles,
@@ -307,7 +306,7 @@ if ( false !== $color_palette ) {
 	$editor_settings['colors'] = $color_palette;
 }
 
-if ( false !== $font_sizes ) {
+if ( ! empty( $font_sizes ) ) {
 	$editor_settings['fontSizes'] = $font_sizes;
 }
 
@@ -409,7 +408,7 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 			<p>
 				<?php
 					$message = sprintf(
-						/* translators: %s: Classic Editor plugin URL */
+						/* translators: %s: https://wordpress.org/plugins/classic-editor/ */
 						__( 'The block editor requires JavaScript. Please enable JavaScript in your browser settings, or try the <a href="%s">Classic Editor plugin</a>.' ),
 						__( 'https://wordpress.org/plugins/classic-editor/' )
 					);
