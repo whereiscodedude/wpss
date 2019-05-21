@@ -723,13 +723,8 @@ function customize_themes_print_templates() {
 							{{{ data.stars }}}
 							<a class="num-ratings" target="_blank" href="{{ data.reviews_url }}">
 								<?php
-								printf(
-									'%1$s <span class="screen-reader-text">%2$s</span>',
-									/* translators: %s: number of ratings */
-									sprintf( __( '(%s ratings)' ), '{{ data.num_ratings }}' ),
-									/* translators: accessibility text */
-									__( '(opens in a new tab)' )
-								);
+								/* translators: %s: number of ratings */
+								echo sprintf( __( '(%s ratings) <span class="screen-reader-text">link to view ratings opens in a new tab</span>' ), '{{ data.num_ratings }}' );
 								?>
 							</a>
 						</div>

@@ -2276,11 +2276,7 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 			'term_taxonomy_id' => $tt_id,
 		);
 	}
-
-	if ( false === $wpdb->insert( $wpdb->term_taxonomy, compact( 'term_id', 'taxonomy', 'description', 'parent' ) + array( 'count' => 0 ) ) ) {
-		return new WP_Error( 'db_insert_error', __( 'Could not insert term taxonomy into the database.' ), $wpdb->last_error );
-	}
-
+	$wpdb->insert( $wpdb->term_taxonomy, compact( 'term_id', 'taxonomy', 'description', 'parent' ) + array( 'count' => 0 ) );
 	$tt_id = (int) $wpdb->insert_id;
 
 	/*
