@@ -149,7 +149,7 @@ function excerpt_remove_blocks( $content ) {
 	 * If a dynamic block is added to this list, it must not generate another
 	 * excerpt, as this will cause an infinite loop to occur.
 	 *
-	 * @since 5.0.0
+	 * @since 4.4.0
 	 *
 	 * @param array $allowed_blocks The list of allowed blocks.
 	 */
@@ -301,8 +301,9 @@ function parse_blocks( $content ) {
  * Parses dynamic blocks out of `post_content` and re-renders them.
  *
  * @since 5.0.0
+ * @global WP_Post $post The post to edit.
  *
- * @param string $content Post content.
+ * @param  string $content Post content.
  * @return string Updated post content.
  */
 function do_blocks( $content ) {

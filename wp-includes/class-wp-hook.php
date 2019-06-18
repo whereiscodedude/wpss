@@ -253,12 +253,12 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * Calls the callback functions that have been added to a filter hook.
+	 * Calls the callback functions added to a filter hook.
 	 *
 	 * @since 4.7.0
 	 *
 	 * @param mixed $value The value to filter.
-	 * @param array $args  Additional parameters to pass to the callback functions.
+	 * @param array $args  Arguments to pass to callbacks.
 	 * @return mixed The filtered value after all hooked functions are applied to it.
 	 */
 	public function apply_filters( $value, $args ) {
@@ -299,11 +299,11 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * Calls the callback functions that have been added to an action hook.
+	 * Executes the callback functions hooked on a specific action hook.
 	 *
 	 * @since 4.7.0
 	 *
-	 * @param array $args Parameters to pass to the callback functions.
+	 * @param mixed $args Arguments to pass to the hook callbacks.
 	 */
 	public function do_action( $args ) {
 		$this->doing_action = true;

@@ -166,7 +166,7 @@ if ( ! function_exists( 'twentynineteen_post_thumbnail' ) ) :
 	}
 endif;
 
-if ( ! function_exists( 'twentynineteen_get_user_avatar_markup' ) ) :
+if ( ! function_exists( 'twentynineteen_comment_avatar' ) ) :
 	/**
 	 * Returns the HTML markup to generate a user avatar.
 	 */

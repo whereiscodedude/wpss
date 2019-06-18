@@ -165,9 +165,8 @@ function twentytwelve_get_font_url() {
 		}
 
 		$query_args = array(
-			'family'  => urlencode( 'Open Sans:400italic,700italic,400,700' ),
-			'subset'  => urlencode( $subsets ),
-			'display' => urlencode( 'fallback' ),
+			'family' => 'Open+Sans:400italic,700italic,400,700',
+			'subset' => $subsets,
 		);
 		$font_url   = add_query_arg( $query_args, 'https://fonts.googleapis.com/css' );
 	}

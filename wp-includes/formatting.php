@@ -3040,9 +3040,7 @@ function wp_rel_nofollow_callback( $matches ) {
 function wp_targeted_link_rel( $text ) {
 	// Don't run (more expensive) regex if no links with targets.
 	if ( stripos( $text, 'target' ) !== false && stripos( $text, '<a ' ) !== false ) {
-		if ( ! is_serialized( $text ) ) {
-			$text = preg_replace_callback( '|<a\s([^>]*target\s*=[^>]*)>|i', 'wp_targeted_link_rel_callback', $text );
-		}
+		$text = preg_replace_callback( '|<a\s([^>]*target\s*=[^>]*)>|i', 'wp_targeted_link_rel_callback', $text );
 	}
 
 	return $text;
@@ -3432,13 +3430,13 @@ function get_date_from_gmt( $string, $format = 'Y-m-d H:i:s' ) {
 	if ( $tz ) {
 		$datetime = date_create( $string, new DateTimeZone( 'UTC' ) );
 		if ( ! $datetime ) {
-			return gmdate( $format, 0 );
+			return date( $format, 0 );
 		}
 		$datetime->setTimezone( new DateTimeZone( $tz ) );
 		$string_localtime = $datetime->format( $format );
 	} else {
 		if ( ! preg_match( '#([0-9]{1,4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})#', $string, $matches ) ) {
-			return gmdate( $format, 0 );
+			return date( $format, 0 );
 		}
 		$string_time      = gmmktime( $matches[4], $matches[5], $matches[6], $matches[2], $matches[3], $matches[1] );
 		$string_localtime = gmdate( $format, $string_time + get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
@@ -3680,7 +3678,9 @@ function human_time_diff( $from, $to = '' ) {
 /**
  * Generates an excerpt from the content, if needed.
  *
- * Returns a maximum of 55 words with an ellipsis appended if necessary.
+ * The excerpt word amount will be 55 words and if the amount is greater than
+ * that, then the string ' [&hellip;]' will be appended to the excerpt. If the string
+ * is less than 55 words, then the content will be returned as is.
  *
  * The 55 word limit can be modified by plugins/themes using the {@see 'excerpt_length'} filter
  * The ' [&hellip;]' string can be modified by plugins/themes using the {@see 'excerpt_more'} filter
@@ -3705,18 +3705,14 @@ function wp_trim_excerpt( $text = '', $post = null ) {
 		$text = apply_filters( 'the_content', $text );
 		$text = str_replace( ']]>', ']]&gt;', $text );
 
-		/* translators: Maximum number of words used in a post excerpt. */
-		$excerpt_length = intval( _x( '55', 'excerpt_length' ) );
-
 		/**
-		 * Filters the maximum number of words in a post excerpt.
+		 * Filters the number of words in an excerpt.
 		 *
 		 * @since 2.7.0
 		 *
-		 * @param int $number The maximum number of words. Default 55.
+		 * @param int $number The number of words. Default 55.
 		 */
-		$excerpt_length = apply_filters( 'excerpt_length', $excerpt_length );
-
+		$excerpt_length = apply_filters( 'excerpt_length', 55 );
 		/**
 		 * Filters the string in the "more" link displayed after a trimmed excerpt.
 		 *
@@ -3727,7 +3723,6 @@ function wp_trim_excerpt( $text = '', $post = null ) {
 		$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
 		$text         = wp_trim_words( $text, $excerpt_length, $excerpt_more );
 	}
-
 	/**
 	 * Filters the trimmed excerpt string.
 	 *
@@ -4814,8 +4809,8 @@ function wp_pre_kses_less_than_callback( $matches ) {
  * @since 2.5.0
  * @link https://secure.php.net/sprintf
  *
- * @param string $pattern The string which formatted args are inserted.
- * @param mixed  ...$args Arguments to be formatted into the $pattern string.
+ * @param string $pattern   The string which formatted args are inserted.
+ * @param mixed  $args ,... Arguments to be formatted into the $pattern string.
  * @return string The formatted string.
  */
 function wp_sprintf( $pattern ) {
@@ -5523,7 +5518,7 @@ function _print_emoji_detection_script() {
 
 		/*
 		 * If you're looking at a src version of this file, you'll see an "include"
-		 * statement below. This is used by the `npm run build` process to directly
+		 * statement below. This is used by the `grunt build` process to directly
 		 * include a minified version of wp-emoji-loader.js, instead of using the
 		 * readfile() method from above.
 		 *
@@ -5739,7 +5734,7 @@ function wp_staticize_emoji_for_email( $mail ) {
  * Returns arrays of emoji data.
  *
  * These arrays are automatically built from the regex in twemoji.js - if they need to be updated,
- * you should update the regex there, then run the `npm run grunt precommit:emoji` job.
+ * you should update the regex there, then run the `grunt precommit:emoji` job.
  *
  * @since 4.9.0
  * @access private

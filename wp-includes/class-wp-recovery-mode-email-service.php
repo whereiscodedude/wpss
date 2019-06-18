@@ -62,14 +62,7 @@ final class WP_Recovery_Mode_Email_Service {
 				return true;
 			}
 
-			return new WP_Error(
-				'email_failed',
-				sprintf(
-					/* translators: %s: mail() */
-					__( 'The email could not be sent. Possible reason: your host may have disabled the %s function.' ),
-					'mail()'
-				)
-			);
+			return new WP_Error( 'email_failed', __( 'The email could not be sent. Possible reason: your host may have disabled the mail() function.' ) );
 		}
 
 		$err_message = sprintf(

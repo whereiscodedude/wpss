@@ -41,7 +41,7 @@ function mysql2date( $format, $date, $translate = true ) {
 	if ( $translate ) {
 		return date_i18n( $format, $i );
 	} else {
-		return gmdate( $format, $i );
+		return date( $format, $i );
 	}
 }
 
@@ -111,12 +111,12 @@ function date_i18n( $dateformatstring, $timestamp_with_offset = false, $gmt = fa
 	$dateformatstring = preg_replace( '/(?<!\\\\)r/', DATE_RFC2822, $dateformatstring );
 
 	if ( ( ! empty( $wp_locale->month ) ) && ( ! empty( $wp_locale->weekday ) ) ) {
-		$datemonth            = $wp_locale->get_month( gmdate( 'm', $i ) );
+		$datemonth            = $wp_locale->get_month( date( 'm', $i ) );
 		$datemonth_abbrev     = $wp_locale->get_month_abbrev( $datemonth );
-		$dateweekday          = $wp_locale->get_weekday( gmdate( 'w', $i ) );
+		$dateweekday          = $wp_locale->get_weekday( date( 'w', $i ) );
 		$dateweekday_abbrev   = $wp_locale->get_weekday_abbrev( $dateweekday );
-		$datemeridiem         = $wp_locale->get_meridiem( gmdate( 'a', $i ) );
-		$datemeridiem_capital = $wp_locale->get_meridiem( gmdate( 'A', $i ) );
+		$datemeridiem         = $wp_locale->get_meridiem( date( 'a', $i ) );
+		$datemeridiem_capital = $wp_locale->get_meridiem( date( 'A', $i ) );
 		$dateformatstring     = ' ' . $dateformatstring;
 		$dateformatstring     = preg_replace( '/([^\\\])D/', "\\1" . backslashit( $dateweekday_abbrev ), $dateformatstring );
 		$dateformatstring     = preg_replace( '/([^\\\])F/', "\\1" . backslashit( $datemonth ), $dateformatstring );
@@ -177,7 +177,7 @@ function date_i18n( $dateformatstring, $timestamp_with_offset = false, $gmt = fa
 			}
 		}
 	}
-	$j = @gmdate( $dateformatstring, $i );
+	$j = @date( $dateformatstring, $i );
 
 	/**
 	 * Filters the date formatted based on the locale.
@@ -415,7 +415,7 @@ function get_weekstartend( $mysqlstring, $start_of_week = '' ) {
 	$day = mktime( 0, 0, 0, $md, $mm, $my );
 
 	// The day of the week from the timestamp.
-	$weekday = gmdate( 'w', $day );
+	$weekday = date( 'w', $day );
 
 	if ( ! is_numeric( $start_of_week ) ) {
 		$start_of_week = get_option( 'start_of_week' );
@@ -797,8 +797,7 @@ function wp_get_http_headers( $url, $deprecated = false ) {
  */
 function is_new_day() {
 	global $currentday, $previousday;
-
-	if ( $currentday !== $previousday ) {
+	if ( $currentday != $previousday ) {
 		return 1;
 	} else {
 		return 0;
@@ -3177,7 +3176,7 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 			display: inline-block;
 			text-decoration: none;
 			font-size: 13px;
-			line-height: 2;
+			line-height: 26px;
 			height: 28px;
 			margin: 0;
 			padding: 0 10px 1px;
@@ -3197,7 +3196,7 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 
 		.button.button-large {
 			height: 30px;
-			line-height: 2.15384615;
+			line-height: 28px;
 			padding: 0 12px 2px;
 		}
 

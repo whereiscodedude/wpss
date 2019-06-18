@@ -293,17 +293,12 @@ if ( isset( $_GET['update'] ) ) {
 				$messages[] = __( 'Invitation email sent to user. A confirmation link must be clicked for them to be added to your site.' );
 				break;
 			case 'addnoconfirmation':
-				$message = __( 'User has been added to your site.' );
-
-				if ( $edit_link ) {
-					$message .= sprintf(
-						' <a href="%s">%s</a>',
-						$edit_link,
-						__( 'Edit user' )
-					);
+				if ( empty( $edit_link ) ) {
+					$messages[] = __( 'User has been added to your site.' );
+				} else {
+					/* translators: %s: edit page url */
+					$messages[] = sprintf( __( 'User has been added to your site. <a href="%s">Edit user</a>' ), $edit_link );
 				}
-
-				$messages[] = $message;
 				break;
 			case 'addexisting':
 				$messages[] = __( 'That user is already a member of this site.' );
@@ -398,7 +393,7 @@ if ( is_multisite() && current_user_can( 'promote_users' ) ) {
 <input name="action" type="hidden" value="adduser" />
 	<?php wp_nonce_field( 'add-user', '_wpnonce_add-user' ); ?>
 
-<table class="form-table" role="presentation">
+<table class="form-table">
 	<tr class="form-field form-required">
 		<th scope="row"><label for="adduser-email"><?php echo $label; ?></label></th>
 		<td><input name="email" type="<?php echo $type; ?>" id="adduser-email" class="wp-suggest-user" value="" /></td>
@@ -467,7 +462,7 @@ if ( current_user_can( 'create_users' ) ) {
 	$new_user_ignore_pass       = $creating && isset( $_POST['noconfirmation'] ) ? wp_unslash( $_POST['noconfirmation'] ) : '';
 
 	?>
-<table class="form-table" role="presentation">
+<table class="form-table">
 	<tr class="form-field form-required">
 		<th scope="row"><label for="user_login"><?php _e( 'Username' ); ?> <span class="description"><?php _e( '(required)' ); ?></span></label></th>
 		<td><input name="user_login" type="text" id="user_login" value="<?php echo esc_attr( $new_user_login ); ?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" /></td>

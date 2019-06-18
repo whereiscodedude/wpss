@@ -337,7 +337,6 @@ function is_registered_sidebar( $sidebar_id ) {
  *     @type string $description Widget description for display in the widget administration
  *                               panel and/or theme.
  * }
- * @param mixed      ...$params       Optional additional parameters to pass to the callback function when it's called.
  */
 function wp_register_sidebar_widget( $id, $name, $output_callback, $options = array() ) {
 	global $wp_registered_widgets, $wp_registered_widget_controls, $wp_registered_widget_updates, $_wp_deprecated_widgets_callbacks;
@@ -465,10 +464,10 @@ function wp_unregister_sidebar_widget( $id ) {
  * @global array $wp_registered_widgets
  * @global array $_wp_deprecated_widgets_callbacks
  *
- * @param int|string $id               Sidebar ID.
- * @param string     $name             Sidebar display name.
- * @param callable   $control_callback Run when sidebar is displayed.
- * @param array      $options {
+ * @param int|string   $id               Sidebar ID.
+ * @param string       $name             Sidebar display name.
+ * @param callable     $control_callback Run when sidebar is displayed.
+ * @param array $options {
  *     Optional. Array or string of control options. Default empty array.
  *
  *     @type int        $height  Never used. Default 200.
@@ -477,7 +476,6 @@ function wp_unregister_sidebar_widget( $id ) {
  *     @type int|string $id_base Required for multi-widgets, i.e widgets that allow multiple instances such as the
  *                               text widget. The widget id will end up looking like `{$id_base}-{$unique_number}`.
  * }
- * @param mixed      ...$params        Optional additional parameters to pass to the callback function when it's called.
  */
 function wp_register_widget_control( $id, $name, $control_callback, $options = array() ) {
 	global $wp_registered_widget_controls, $wp_registered_widget_updates, $wp_registered_widgets, $_wp_deprecated_widgets_callbacks;
@@ -541,7 +539,6 @@ function wp_register_widget_control( $id, $name, $control_callback, $options = a
  * @param callable $update_callback Update callback method for the widget.
  * @param array    $options         Optional. Widget control options. See wp_register_widget_control().
  *                                  Default empty array.
- * @param mixed    ...$params       Optional additional parameters to pass to the callback function when it's called.
  */
 function _register_widget_update_callback( $id_base, $update_callback, $options = array() ) {
 	global $wp_registered_widget_updates;
@@ -574,9 +571,7 @@ function _register_widget_update_callback( $id_base, $update_callback, $options 
  * @param callable   $form_callback Form callback.
  * @param array      $options       Optional. Widget control options. See wp_register_widget_control().
  *                                  Default empty array.
- * @param mixed      ...$params     Optional additional parameters to pass to the callback function when it's called.
  */
-
 function _register_widget_form_callback( $id, $name, $form_callback, $options = array() ) {
 	global $wp_registered_widget_controls;
 

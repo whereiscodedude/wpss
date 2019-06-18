@@ -423,7 +423,7 @@ function comment_author_url_link( $linktext = '', $before = '', $after = '', $co
  *                                 Default empty.
  * @param int|WP_Comment $comment  Comment ID or WP_Comment object. Default current comment.
  * @param int|WP_Post    $post_id  Post ID or WP_Post object. Default current post.
- * @param bool           $echo     Optional. Whether to echo or return the output.
+ * @param bool           $echo     Optional. Whether to cho or return the output.
  *                                 Default true.
  * @return string If `$echo` is false, the class will be returned. Void otherwise.
  */
@@ -577,35 +577,42 @@ function comment_date( $d = '', $comment_ID = 0 ) {
 }
 
 /**
- * Retrieves the excerpt of the given comment.
+ * Retrieve the excerpt of the current comment.
  *
- * Returns a maximum of 20 words with an ellipsis appended if necessary.
+ * Will cut each word and only output the first 20 words with '&hellip;' at the end.
+ * If the word count is less than 20, then no truncating is done and no '&hellip;'
+ * will appear.
  *
  * @since 1.5.0
  * @since 4.4.0 Added the ability for `$comment_ID` to also accept a WP_Comment object.
  *
  * @param int|WP_Comment $comment_ID  WP_Comment or ID of the comment for which to get the excerpt.
  *                                    Default current comment.
- * @return string The possibly truncated comment excerpt.
+ * @return string The maybe truncated comment with 20 words or less.
  */
 function get_comment_excerpt( $comment_ID = 0 ) {
 	$comment      = get_comment( $comment_ID );
 	$comment_text = strip_tags( str_replace( array( "\n", "\r" ), ' ', $comment->comment_content ) );
-
-	/* translators: Maximum number of words used in a comment excerpt. */
-	$comment_excerpt_length = intval( _x( '20', 'comment_excerpt_length' ) );
+	$words        = explode( ' ', $comment_text );
 
 	/**
-	 * Filters the maximum number of words used in the comment excerpt.
+	 * Filters the amount of words used in the comment excerpt.
 	 *
 	 * @since 4.4.0
 	 *
 	 * @param int $comment_excerpt_length The amount of words you want to display in the comment excerpt.
 	 */
-	$comment_excerpt_length = apply_filters( 'comment_excerpt_length', $comment_excerpt_length );
+	$comment_excerpt_length = apply_filters( 'comment_excerpt_length', 20 );
 
-	$excerpt = wp_trim_words( $comment_text, $comment_excerpt_length, '&hellip;' );
+	$use_ellipsis = count( $words ) > $comment_excerpt_length;
+	if ( $use_ellipsis ) {
+		$words = array_slice( $words, 0, $comment_excerpt_length );
+	}
 
+	$excerpt = trim( join( ' ', $words ) );
+	if ( $use_ellipsis ) {
+		$excerpt .= '&hellip;';
+	}
 	/**
 	 * Filters the retrieved comment excerpt.
 	 *

@@ -529,7 +529,8 @@ $( document ).on( 'heartbeat-tick.wp-check-locked-posts', function( e, data ) {
 				row.addClass('wp-locked');
 			}
 		} else if ( row.hasClass('wp-locked') ) {
-			row.removeClass( 'wp-locked' ).find( '.locked-info span' ).empty();
+			// Make room for the CSS animation
+			row.removeClass('wp-locked').delay(1000).find('.locked-info span').empty();
 		}
 	});
 }).on( 'heartbeat-send.wp-check-locked-posts', function( e, data ) {

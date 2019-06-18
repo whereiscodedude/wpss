@@ -266,7 +266,7 @@ table.diff .diff-addedline ins {
 }
 
 .diff-title strong {
-	line-height: 2.46153846;
+	line-height: 32px;
 	min-width: 60px;
 	text-align: right;
 	float: left;
@@ -275,7 +275,7 @@ table.diff .diff-addedline ins {
 
 .revisions-controls .author-card .author-info {
 	font-size: 12px;
-	line-height: 1.33333333;
+	line-height: 16px;
 }
 
 .revisions-controls .author-card .avatar,

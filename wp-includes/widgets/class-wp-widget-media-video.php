@@ -12,7 +12,6 @@
  *
  * @since 4.8.0
  *
- * @see WP_Widget_Media
  * @see WP_Widget
  */
 class WP_Widget_Media_Video extends WP_Widget_Media {

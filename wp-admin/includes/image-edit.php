@@ -64,14 +64,16 @@ function wp_image_editor( $post_id, $msg = false ) {
 		<fieldset class="imgedit-scale">
 		<legend><?php _e( 'New dimensions:' ); ?></legend>
 		<div class="nowrap">
-		<label for="imgedit-scale-width-<?php echo $post_id; ?>" class="screen-reader-text"><?php _e( 'scale width' ); ?></label>
+		<label><span class="screen-reader-text"><?php _e( 'scale width' ); ?></span>
 		<input type="text" id="imgedit-scale-width-<?php echo $post_id; ?>" onkeyup="imageEdit.scaleChanged(<?php echo $post_id; ?>, 1, this)" onblur="imageEdit.scaleChanged(<?php echo $post_id; ?>, 1, this)" value="<?php echo isset( $meta['width'] ) ? $meta['width'] : 0; ?>" />
-		<span class="imgedit-separator" aria-hidden="true">&times;</span>
-		<label for="imgedit-scale-height-<?php echo $post_id; ?>" class="screen-reader-text"><?php _e( 'scale height' ); ?></label>
+		</label>
+		<span class="imgedit-separator">&times;</span>
+		<label><span class="screen-reader-text"><?php _e( 'scale height' ); ?></span>
 		<input type="text" id="imgedit-scale-height-<?php echo $post_id; ?>" onkeyup="imageEdit.scaleChanged(<?php echo $post_id; ?>, 0, this)" onblur="imageEdit.scaleChanged(<?php echo $post_id; ?>, 0, this)" value="<?php echo isset( $meta['height'] ) ? $meta['height'] : 0; ?>" />
+		</label>
 		<span class="imgedit-scale-warn" id="imgedit-scale-warn-<?php echo $post_id; ?>">!</span>
 		<input id="imgedit-scale-button" type="button" onclick="imageEdit.action(<?php echo "$post_id, '$nonce'"; ?>, 'scale')" class="button button-primary" value="<?php esc_attr_e( 'Scale' ); ?>" />
-		</div>
+		 </div>
 		</fieldset>
 
 		</div>
@@ -122,22 +124,26 @@ function wp_image_editor( $post_id, $msg = false ) {
 	<fieldset class="imgedit-crop-ratio">
 		<legend><?php _e( 'Aspect ratio:' ); ?></legend>
 		<div class="nowrap">
-		<label for="imgedit-crop-width-<?php echo $post_id; ?>" class="screen-reader-text"><?php _e( 'crop ratio width' ); ?></label>
+		<label><span class="screen-reader-text"><?php _e( 'crop ratio width' ); ?></span>
 		<input type="text" id="imgedit-crop-width-<?php echo $post_id; ?>" onkeyup="imageEdit.setRatioSelection(<?php echo $post_id; ?>, 0, this)" onblur="imageEdit.setRatioSelection(<?php echo $post_id; ?>, 0, this)" />
-		<span class="imgedit-separator" aria-hidden="true">:</span>
-		<label for="imgedit-crop-height-<?php echo $post_id; ?>" class="screen-reader-text"><?php _e( 'crop ratio height' ); ?></label>
+		</label>
+		<span class="imgedit-separator">:</span>
+		<label><span class="screen-reader-text"><?php _e( 'crop ratio height' ); ?></span>
 		<input type="text" id="imgedit-crop-height-<?php echo $post_id; ?>" onkeyup="imageEdit.setRatioSelection(<?php echo $post_id; ?>, 1, this)" onblur="imageEdit.setRatioSelection(<?php echo $post_id; ?>, 1, this)" />
+		</label>
 		</div>
 	</fieldset>
 
 	<fieldset id="imgedit-crop-sel-<?php echo $post_id; ?>" class="imgedit-crop-sel">
 		<legend><?php _e( 'Selection:' ); ?></legend>
 		<div class="nowrap">
-		<label for="imgedit-sel-width-<?php echo $post_id; ?>" class="screen-reader-text"><?php _e( 'selection width' ); ?></label>
+		<label><span class="screen-reader-text"><?php _e( 'selection width' ); ?></span>
 		<input type="text" id="imgedit-sel-width-<?php echo $post_id; ?>" onkeyup="imageEdit.setNumSelection(<?php echo $post_id; ?>, this)" onblur="imageEdit.setNumSelection(<?php echo $post_id; ?>, this)" />
-		<span class="imgedit-separator" aria-hidden="true">&times;</span>
-		<label for="imgedit-sel-height-<?php echo $post_id; ?>" class="screen-reader-text"><?php _e( 'selection height' ); ?></label>
+		</label>
+		<span class="imgedit-separator">&times;</span>
+		<label><span class="screen-reader-text"><?php _e( 'selection height' ); ?></span>
 		<input type="text" id="imgedit-sel-height-<?php echo $post_id; ?>" onkeyup="imageEdit.setNumSelection(<?php echo $post_id; ?>, this)" onblur="imageEdit.setNumSelection(<?php echo $post_id; ?>, this)" />
+		</label>
 		</div>
 	</fieldset>
 
@@ -162,22 +168,19 @@ function wp_image_editor( $post_id, $msg = false ) {
 
 	<div id="imgedit-save-target-<?php echo $post_id; ?>" class="imgedit-save-target">
 	<fieldset>
-		<legend><?php _e( 'Apply changes to:' ); ?></legend>
+		<legend><strong><?php _e( 'Apply changes to:' ); ?></strong></legend>
 
-		<span class="imgedit-label">
-			<input type="radio" id="imgedit-target-all" name="imgedit-target-<?php echo $post_id; ?>" value="all" checked="checked" />
-			<label for="imgedit-target-all"><?php _e( 'All image sizes' ); ?></label>
-		</span>
+		<label class="imgedit-label">
+		<input type="radio" name="imgedit-target-<?php echo $post_id; ?>" value="all" checked="checked" />
+		<?php _e( 'All image sizes' ); ?></label>
 
-		<span class="imgedit-label">
-			<input type="radio" id="imgedit-target-thumbnail" name="imgedit-target-<?php echo $post_id; ?>" value="thumbnail" />
-			<label for="imgedit-target-thumbnail"><?php _e( 'Thumbnail' ); ?></label>
-		</span>
+		<label class="imgedit-label">
+		<input type="radio" name="imgedit-target-<?php echo $post_id; ?>" value="thumbnail" />
+		<?php _e( 'Thumbnail' ); ?></label>
 
-		<span class="imgedit-label">
-			<input type="radio" id="imgedit-target-nothumb" name="imgedit-target-<?php echo $post_id; ?>" value="nothumb" />
-			<label for="imgedit-target-nothumb"><?php _e( 'All sizes except thumbnail' ); ?></label>
-		</span>
+		<label class="imgedit-label">
+		<input type="radio" name="imgedit-target-<?php echo $post_id; ?>" value="nothumb" />
+		<?php _e( 'All sizes except thumbnail' ); ?></label>
 	</fieldset>
 	</div>
 	</div>

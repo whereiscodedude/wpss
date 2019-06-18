@@ -20,10 +20,8 @@ require( ABSPATH . WPINC . '/version.php' );
 
 $load = $_GET['load'];
 if ( is_array( $load ) ) {
-	ksort( $load );
 	$load = implode( '', $load );
 }
-
 $load = preg_replace( '/[^a-z0-9,_-]+/i', '', $load );
 $load = array_unique( explode( ',', $load ) );
 

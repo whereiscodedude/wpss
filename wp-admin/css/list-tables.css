@@ -58,7 +58,7 @@
 	background-color: #72777c;
 	color: #fff;
 	font-size: 11px;
-	line-height: 1.90909090;
+	line-height: 21px;
 	text-align: center;
 }
 
@@ -109,7 +109,7 @@
 	background: #ca4a1f;
 	color: #fff;
 	font-size: 9px;
-	line-height: 1.88888888;
+	line-height: 17px;
 	text-align: center;
 }
 
@@ -402,7 +402,7 @@ table.media .column-title .filename {
 }
 
 #commentsdiv .inside .row-actions {
-	line-height: 1.38461538;
+	line-height: 18px;
 }
 
 #commentsdiv .inside .column-author {
@@ -460,7 +460,7 @@ table.media .column-title .filename {
 	top: -4px;
 	left: -8px;
 	color: #444;
-	line-height: 0.5;
+	line-height: 10px;
 	position: relative;
 	vertical-align: top;
 	-webkit-font-smoothing: antialiased;
@@ -537,14 +537,13 @@ th.asc a:focus span.sorting-indicator:before {
 	content: "\f142";
 }
 
-.locked-indicator {
-	display: none;
+tr.wp-locked .locked-indicator {
 	margin-left: 6px;
 	height: 20px;
 	width: 16px;
 }
 
-.locked-indicator-icon:before {
+tr.wp-locked .locked-indicator-icon:before {
 	color: #82878c;
 	content: "\f160";
 	display: inline-block;
@@ -555,25 +554,30 @@ th.asc a:focus span.sorting-indicator:before {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.locked-info {
+tr.wp-locked .check-column label,
+tr.wp-locked .check-column input[type="checkbox"],
+tr.wp-locked .row-actions .inline,
+tr.wp-locked .row-actions .trash {
 	display: none;
+}
+
+tr .locked-info {
+	height: 0;
+	opacity: 0;
+}
+
+tr.wp-locked .locked-info {
 	margin-top: 4px;
+	height: auto;
+	opacity: 1;
 }
 
 .locked-text {
 	vertical-align: top;
 }
 
-.wp-locked .locked-indicator,
-.wp-locked .locked-info {
-	display: block;
-}
-
-tr.wp-locked .check-column label,
-tr.wp-locked .check-column input[type="checkbox"],
-tr.wp-locked .row-actions .inline,
-tr.wp-locked .row-actions .trash {
-	display: none;
+tr.locked-info, tr.wp-locked .locked-info {
+	transition: height 1s, opacity 0.5s;
 }
 
 .fixed .column-comments .sorting-indicator {
@@ -711,7 +715,7 @@ th.asc a:focus span.sorting-indicator {
 	width: 28px;
 	height: 28px;
 	text-align: center;
-	line-height: 1.84615384;
+	line-height: 24px;
 	text-decoration: none;
 }
 
@@ -972,7 +976,7 @@ tr.inline-edit-row td,
 
 .inline-edit-row fieldset.inline-edit-date select {
 	margin: 1px;
-	line-height: 2;
+	line-height: 28px;
 }
 
 .inline-edit-row fieldset label span.input-text-wrap,
@@ -1166,7 +1170,7 @@ ul.cat-checklist {
 }
 
 .plugins td.desc {
-	line-height: 1.5;
+	line-height: 1.5em;
 }
 
 .plugins .desc ul,
@@ -1522,7 +1526,7 @@ div.action-links,
 }
 
 .plugin-card .column-rating {
-	line-height: 1.76923076;
+	line-height: 23px;
 }
 
 .plugin-card .column-rating,
@@ -1691,7 +1695,7 @@ div.action-links,
 	.view-switch a {
 		width: 36px;
 		height: 36px;
-		line-height: 2.53846153;
+		line-height: 33px;
 	}
 
 	/* Pagination */
@@ -1742,7 +1746,7 @@ div.action-links,
 		min-width: 44px;
 		padding: 12px 6px;
 		font-size: 16px;
-		line-height: 1.125;
+		line-height: 18px;
 	}
 
 	/* WP List Table Adjustments: General */

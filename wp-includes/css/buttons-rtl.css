@@ -46,7 +46,7 @@ TABLE OF CONTENTS:
 	display: inline-block;
 	text-decoration: none;
 	font-size: 13px;
-	line-height: 2;
+	line-height: 26px;
 	height: 28px;
 	margin: 0;
 	padding: 0 10px 1px;
@@ -72,14 +72,14 @@ TABLE OF CONTENTS:
 .wp-core-ui .button.button-large,
 .wp-core-ui .button-group.button-large .button {
 	height: 30px;
-	line-height: 2.15384615;
+	line-height: 28px;
 	padding: 0 12px 2px;
 }
 
 .wp-core-ui .button.button-small,
 .wp-core-ui .button-group.button-small .button {
 	height: 24px;
-	line-height: 2;
+	line-height: 22px;
 	padding: 0 8px 1px;
 	font-size: 11px;
 }
@@ -88,7 +88,7 @@ TABLE OF CONTENTS:
 .wp-core-ui .button-group.button-hero .button {
 	font-size: 14px;
 	height: 46px;
-	line-height: 3.14285714;
+	line-height: 44px;
 	padding: 0 36px;
 }
 
@@ -316,6 +316,7 @@ TABLE OF CONTENTS:
 	display: inline-block;
 	border-radius: 0;
 	margin-left: -1px;
+	z-index: 10;
 }
 
 .wp-core-ui .button-group > .button-primary {
@@ -381,7 +382,7 @@ TABLE OF CONTENTS:
 	.wp-core-ui.wp-customizer .button {
 		padding: 0 10px 1px;
 		font-size: 13px;
-		line-height: 2;
+		line-height: 26px;
 		height: 28px;
 		margin: 0;
 		vertical-align: inherit;
@@ -396,7 +397,7 @@ TABLE OF CONTENTS:
 
 	.interim-login .button.button-large {
 		height: 30px;
-		line-height: 2;
+		line-height: 28px;
 		padding: 0 12px 2px;
 	}
 
