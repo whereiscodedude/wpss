@@ -1,11 +1,9 @@
+/* global isRtl */
 /**
  * @file Revisions interface functions, Backbone classes and
  * the revisions.php document.ready bootstrap.
  *
- * @output wp-admin/js/revisions.js
  */
-
-/* global isRtl */
 
 window.wp = window.wp || {};
 
@@ -16,7 +14,7 @@ window.wp = window.wp || {};
 	 */
 	revisions = wp.revisions = { model: {}, view: {}, controller: {} };
 
-	// Link post revisions data served from the back end.
+	// Link post revisions data served from the back-end.
 	revisions.settings = window._wpRevisionsSettings || {};
 
 	// For debugging
@@ -413,9 +411,6 @@ window.wp = window.wp || {};
 			// Start the router if browser supports History API
 			if ( window.history && window.history.pushState ) {
 				this.router = new revisions.Router({ model: this });
-				if ( Backbone.History.started ) {
-					Backbone.history.stop();
-				}
 				Backbone.history.start({ pushState: true });
 			}
 		},
