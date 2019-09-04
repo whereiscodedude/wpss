@@ -1,7 +1,3 @@
-/**
- * @output wp-admin/js/widgets/media-video-widget.js
- */
-
 /* eslint consistent-this: [ "error", "control" ] */
 (function( component ) {
 	'use strict';
@@ -11,12 +7,10 @@
 	/**
 	 * Custom video details frame that removes the replace-video state.
 	 *
-	 * @class    wp.mediaWidgets.controlConstructors~VideoDetailsMediaFrame
-	 * @augments wp.media.view.MediaFrame.VideoDetails
-	 *
-	 * @private
+	 * @class VideoDetailsMediaFrame
+	 * @constructor
 	 */
-	VideoDetailsMediaFrame = wp.media.view.MediaFrame.VideoDetails.extend(/** @lends wp.mediaWidgets.controlConstructors~VideoDetailsMediaFrame.prototype */{
+	VideoDetailsMediaFrame = wp.media.view.MediaFrame.VideoDetails.extend({
 
 		/**
 		 * Create the default states.
@@ -55,8 +49,8 @@
 	 *
 	 * See WP_Widget_Video::enqueue_admin_scripts() for amending prototype from PHP exports.
 	 *
-	 * @class    wp.mediaWidgets.modelConstructors.media_video
-	 * @augments wp.mediaWidgets.MediaWidgetModel
+	 * @class VideoWidgetModel
+	 * @constructor
 	 */
 	VideoWidgetModel = component.MediaWidgetModel.extend({});
 
@@ -65,10 +59,10 @@
 	 *
 	 * See WP_Widget_Video::enqueue_admin_scripts() for amending prototype from PHP exports.
 	 *
-	 * @class    wp.mediaWidgets.controlConstructors.media_video
-	 * @augments wp.mediaWidgets.MediaWidgetControl
+	 * @class VideoWidgetControl
+	 * @constructor
 	 */
-	VideoWidgetControl = component.MediaWidgetControl.extend(/** @lends wp.mediaWidgets.controlConstructors.media_video.prototype */{
+	VideoWidgetControl = component.MediaWidgetControl.extend({
 
 		/**
 		 * Show display settings.
@@ -116,12 +110,13 @@
 				control.fetchEmbedDfd.abort();
 			}
 
-			control.fetchEmbedDfd = wp.apiRequest({
+			control.fetchEmbedDfd = jQuery.ajax({
 				url: wp.media.view.settings.oEmbedProxyUrl,
 				data: {
 					url: control.model.get( 'url' ),
 					maxwidth: control.model.get( 'width' ),
 					maxheight: control.model.get( 'height' ),
+					_wpnonce: wp.media.view.settings.nonce.wpRestApi,
 					discover: false
 				},
 				type: 'GET',
@@ -142,12 +137,13 @@
 		/**
 		 * Whether a url is a supported external host.
 		 *
-		 * @deprecated since 4.9.
-		 *
+		 * @param {String} url - Video url.
 		 * @returns {boolean} Whether url is a supported video host.
 		 */
-		isHostedVideo: function isHostedVideo() {
-			return true;
+		isHostedVideo: function isHostedVideo( url ) {
+			var parsedUrl = document.createElement( 'a' );
+			parsedUrl.href = url;
+			return /vimeo|youtu\.?be/.test( parsedUrl.host );
 		},
 
 		/**
@@ -156,7 +152,7 @@
 		 * @returns {void}
 		 */
 		renderPreview: function renderPreview() {
-			var control = this, previewContainer, previewTemplate, attachmentId, attachmentUrl, poster, html = '', isOEmbed = false, mime, error, urlParser, matches;
+			var control = this, previewContainer, previewTemplate, attachmentId, attachmentUrl, poster, isHostedEmbed = false, mime, error;
 			attachmentId = control.model.get( 'attachment_id' );
 			attachmentUrl = control.model.get( 'url' );
 			error = control.model.get( 'error' );
@@ -165,30 +161,20 @@
 				return;
 			}
 
+			if ( ! attachmentId && attachmentUrl ) {
+				isHostedEmbed = control.isHostedVideo( attachmentUrl );
+			}
+
+			if ( isHostedEmbed ) {
+				control.fetchEmbed();
+				poster = control.oembedResponses[ attachmentUrl ] ? control.oembedResponses[ attachmentUrl ].thumbnail_url : null;
+			}
+
 			// Verify the selected attachment mime is supported.
 			mime = control.selectedAttachment.get( 'mime' );
 			if ( mime && attachmentId ) {
 				if ( ! _.contains( _.values( wp.media.view.settings.embedMimes ), mime ) ) {
 					error = 'unsupported_file_type';
-				}
-			} else if ( ! attachmentId ) {
-				urlParser = document.createElement( 'a' );
-				urlParser.href = attachmentUrl;
-				matches = urlParser.pathname.toLowerCase().match( /\.(\w+)$/ );
-				if ( matches ) {
-					if ( ! _.contains( _.keys( wp.media.view.settings.embedMimes ), matches[1] ) ) {
-						error = 'unsupported_file_type';
-					}
-				} else {
-					isOEmbed = true;
-				}
-			}
-
-			if ( isOEmbed ) {
-				control.fetchEmbed();
-				if ( control.oembedResponses[ attachmentUrl ] ) {
-					poster = control.oembedResponses[ attachmentUrl ].thumbnail_url;
-					html = control.oembedResponses[ attachmentUrl ].html.replace( /\swidth="\d+"/, ' width="100%"' ).replace( /\sheight="\d+"/, '' );
 				}
 			}
 
@@ -197,12 +183,11 @@
 
 			previewContainer.html( previewTemplate({
 				model: {
-					attachment_id: attachmentId,
-					html: html,
+					attachment_id: control.model.get( 'attachment_id' ),
 					src: attachmentUrl,
 					poster: poster
 				},
-				is_oembed: isOEmbed,
+				is_hosted_embed: isHostedEmbed,
 				error: error
 			}));
 			wp.mediaelement.initialize();

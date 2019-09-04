@@ -1,8 +1,3 @@
-/**
- * @output wp-includes/js/wp-a11y.js
- */
-
-/** @namespace wp */
 window.wp = window.wp || {};
 
 ( function ( wp, $ ) {
@@ -18,17 +13,16 @@ window.wp = window.wp || {};
 	 * @since 4.2.0
 	 * @since 4.3.0 Introduced the 'ariaLive' argument.
 	 *
-	 * @param {String} message    The message to be announced by Assistive Technologies.
-	 * @param {String} [ariaLive] The politeness level for aria-live. Possible values:
-	 *                            polite or assertive. Default polite.
-	 * @returns {void}
+	 * @param {String} message  The message to be announced by Assistive Technologies.
+	 * @param {String} ariaLive Optional. The politeness level for aria-live. Possible values:
+	 *                          polite or assertive. Default polite.
 	 */
 	function speak( message, ariaLive ) {
 		// Clear previous messages to allow repeated strings being read out.
 		clear();
 
-		// Remove HTML tags, ensuring only text is sent to screen readers.
-		message = wp.sanitize.stripTagsAndEncodeText( message );
+		// Ensure only text is sent to screen readers.
+		message = $( '<p>' ).html( message ).text();
 
 		/*
 		 * Safari 10+VoiceOver don't announce repeated, identical strings. We use
@@ -100,7 +94,6 @@ window.wp = window.wp || {};
 		}
 	});
 
-	/** @namespace wp.a11y */
 	wp.a11y = wp.a11y || {};
 	wp.a11y.speak = speak;
 

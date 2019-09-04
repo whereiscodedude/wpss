@@ -1,12 +1,9 @@
 /**
  * WordPress View plugin.
  */
-( function( tinymce ) {
+( function( tinymce, wp ) {
 	tinymce.PluginManager.add( 'wpview', function( editor ) {
 		function noop () {}
-
-		// Set this here as wp-tinymce.js may be loaded too early.
-		var wp = window.wp;
 
 		if ( ! wp || ! wp.mce || ! wp.mce.views ) {
 			return {
@@ -25,7 +22,7 @@
 				return '<p>' + window.decodeURIComponent( $1 ) + '</p>';
 			}
 
-			if ( ! content || content.indexOf( ' data-wpview-' ) === -1 ) {
+			if ( ! content ) {
 				return content;
 			}
 
@@ -91,7 +88,7 @@
 				}
 			}
 
-			event.content = wp.mce.views.setMarkers( event.content, editor );
+			event.content = wp.mce.views.setMarkers( event.content );
 		} );
 
 		// Replace any new markers nodes with views.
@@ -111,30 +108,10 @@
 			event.content = resetViews( event.content );
 		} );
 
-		// Prevent adding of undo levels when replacing wpview markers
-		// or when there are changes only in the (non-editable) previews.
+		// Replace views with their text inside undo levels.
+		// This also prevents that new levels are added when there are changes inside the views.
 		editor.on( 'beforeaddundo', function( event ) {
-			var lastContent;
-			var newContent = event.level.content || ( event.level.fragments && event.level.fragments.join( '' ) );
-
-			if ( ! event.lastLevel ) {
-				lastContent = editor.startContent;
-			} else {
-				lastContent = event.lastLevel.content || ( event.lastLevel.fragments && event.lastLevel.fragments.join( '' ) );
-			}
-
-			if (
-				! newContent ||
-				! lastContent ||
-				newContent.indexOf( ' data-wpview-' ) === -1 ||
-				lastContent.indexOf( ' data-wpview-' ) === -1
-			) {
-				return;
-			}
-
-			if ( resetViews( lastContent ) === resetViews( newContent ) ) {
-				event.preventDefault();
-			}
+			event.level.content = resetViews( event.level.content );
 		} );
 
 		// Make sure views are copied as their text.
@@ -178,7 +155,7 @@
 		} );
 
 		editor.addButton( 'wp_view_edit', {
-			tooltip: 'Edit|button', // '|button' is not displayed, only used for context
+			tooltip: 'Edit ', // trailing space is needed, used for context
 			icon: 'dashicon dashicons-edit',
 			onclick: function() {
 				var node = editor.selection.getNode();
@@ -222,4 +199,4 @@
 			getView: noop
 		};
 	} );
-} )( window.tinymce );
+} )( window.tinymce, window.wp );
