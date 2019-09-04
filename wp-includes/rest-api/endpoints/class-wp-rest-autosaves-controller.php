@@ -12,7 +12,6 @@
  *
  * @since 5.0.0
  *
- * @see WP_REST_Revisions_Controller
  * @see WP_REST_Controller
  */
 class WP_REST_Autosaves_Controller extends WP_REST_Revisions_Controller {
@@ -244,7 +243,7 @@ class WP_REST_Autosaves_Controller extends WP_REST_Revisions_Controller {
 		$parent_id = (int) $request->get_param( 'parent' );
 
 		if ( $parent_id <= 0 ) {
-			return new WP_Error( 'rest_post_invalid_id', __( 'Invalid post parent ID.' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_post_invalid_id', __( 'Invalid parent post ID.' ), array( 'status' => 404 ) );
 		}
 
 		$autosave = wp_get_post_autosave( $parent_id );
@@ -296,10 +295,6 @@ class WP_REST_Autosaves_Controller extends WP_REST_Revisions_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
-		}
-
 		$schema = $this->revisions_controller->get_item_schema();
 
 		$schema['properties']['preview_link'] = array(
@@ -310,8 +305,7 @@ class WP_REST_Autosaves_Controller extends WP_REST_Revisions_Controller {
 			'readonly'    => true,
 		);
 
-		$this->schema = $schema;
-		return $this->add_additional_fields_schema( $this->schema );
+		return $schema;
 	}
 
 	/**

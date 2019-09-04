@@ -102,14 +102,14 @@ function register_rest_route( $namespace, $route, $args = array(), $override = f
  * @param array  $args {
  *     Optional. An array of arguments used to handle the registered field.
  *
- *     @type callable|null $get_callback    Optional. The callback function used to retrieve the field value. Default is
- *                                          'null', the field will not be returned in the response. The function will
- *                                          be passed the prepared object data.
- *     @type callable|null $update_callback Optional. The callback function used to set and update the field value. Default
- *                                          is 'null', the value cannot be set or updated. The function will be passed
- *                                          the model object, like WP_Post.
- *     @type array|null $schema             Optional. The callback function used to create the schema for this field.
- *                                          Default is 'null', no schema entry will be returned.
+ *     @type string|array|null $get_callback    Optional. The callback function used to retrieve the field
+ *                                              value. Default is 'null', the field will not be returned in
+ *                                              the response.
+ *     @type string|array|null $update_callback Optional. The callback function used to set and update the
+ *                                              field value. Default is 'null', the value cannot be set or
+ *                                              updated.
+ *     @type string|array|null $schema          Optional. The callback function used to create the schema for
+ *                                              this field. Default is 'null', no schema entry will be returned.
  * }
  */
 function register_rest_field( $object_type, $attribute, $args = array() ) {
@@ -151,7 +151,7 @@ function rest_api_init() {
  * @since 4.4.0
  *
  * @see add_rewrite_rule()
- * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
+ * @global WP_Rewrite $wp_rewrite
  */
 function rest_api_register_rewrites() {
 	global $wp_rewrite;
@@ -283,7 +283,7 @@ function create_initial_rest_routes() {
  *
  * @since 4.4.0
  *
- * @global WP $wp Current WordPress environment instance.
+ * @global WP             $wp             Current WordPress environment instance.
  */
 function rest_api_loaded() {
 	if ( empty( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
@@ -338,7 +338,7 @@ function rest_get_url_prefix() {
  * @since 4.4.0
  *
  * @todo Check if this is even necessary
- * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
+ * @global WP_Rewrite $wp_rewrite
  *
  * @param int    $blog_id Optional. Blog ID. Default of null returns URL for current blog.
  * @param string $path    Optional. REST route. Default '/'.
@@ -373,7 +373,7 @@ function get_rest_url( $blog_id = null, $path = '/', $scheme = 'rest' ) {
 		$url = add_query_arg( 'rest_route', $path, $url );
 	}
 
-	if ( is_ssl() && isset( $_SERVER['SERVER_NAME'] ) ) {
+	if ( is_ssl() ) {
 		// If the current host is the same as the REST URL host, force the REST URL scheme to HTTPS.
 		if ( $_SERVER['SERVER_NAME'] === parse_url( get_home_url( $blog_id ), PHP_URL_HOST ) ) {
 			$url = set_url_scheme( $url, 'https' );
@@ -534,10 +534,10 @@ function rest_handle_deprecated_function( $function, $replacement, $version ) {
 		return;
 	}
 	if ( ! empty( $replacement ) ) {
-		/* translators: 1: Function name, 2: WordPress version number, 3: New function name. */
+		/* translators: 1: function name, 2: WordPress version number, 3: new function name */
 		$string = sprintf( __( '%1$s (since %2$s; use %3$s instead)' ), $function, $version, $replacement );
 	} else {
-		/* translators: 1: Function name, 2: WordPress version number. */
+		/* translators: 1: function name, 2: WordPress version number */
 		$string = sprintf( __( '%1$s (since %2$s; no alternative available)' ), $function, $version );
 	}
 
@@ -558,10 +558,10 @@ function rest_handle_deprecated_argument( $function, $message, $version ) {
 		return;
 	}
 	if ( ! empty( $message ) ) {
-		/* translators: 1: Function name, 2: WordPress version number, 3: Error message. */
+		/* translators: 1: function name, 2: WordPress version number, 3: error message */
 		$string = sprintf( __( '%1$s (since %2$s; %3$s)' ), $function, $version, $message );
 	} else {
-		/* translators: 1: Function name, 2: WordPress version number. */
+		/* translators: 1: function name, 2: WordPress version number */
 		$string = sprintf( __( '%1$s (since %2$s; no alternative available)' ), $function, $version );
 	}
 
@@ -615,25 +615,10 @@ function rest_handle_options_request( $response, $handler, $request ) {
 	$data     = array();
 
 	foreach ( $handler->get_routes() as $route => $endpoints ) {
-		$match = preg_match( '@^' . $route . '$@i', $request->get_route(), $matches );
+		$match = preg_match( '@^' . $route . '$@i', $request->get_route() );
 
 		if ( ! $match ) {
 			continue;
-		}
-
-		$args = array();
-		foreach ( $matches as $param => $value ) {
-			if ( ! is_int( $param ) ) {
-				$args[ $param ] = $value;
-			}
-		}
-
-		foreach ( $endpoints as $endpoint ) {
-			// Remove the redundant preg_match argument.
-			unset( $args[0] );
-
-			$request->set_url_params( $args );
-			$request->set_attributes( $endpoint );
 		}
 
 		$data = $handler->get_data_for_route( $route, $endpoints, 'help' );
@@ -924,10 +909,10 @@ function rest_get_date_with_gmt( $date, $is_utc = false ) {
 	// Timezone conversion needs to be handled differently between these two
 	// cases.
 	if ( ! $is_utc && ! $has_timezone ) {
-		$local = gmdate( 'Y-m-d H:i:s', $date );
+		$local = date( 'Y-m-d H:i:s', $date );
 		$utc   = get_gmt_from_date( $local );
 	} else {
-		$utc   = gmdate( 'Y-m-d H:i:s', $date );
+		$utc   = date( 'Y-m-d H:i:s', $date );
 		$local = get_date_from_gmt( $utc );
 	}
 
@@ -1085,22 +1070,21 @@ function rest_is_boolean( $maybe_bool ) {
 }
 
 /**
- * Retrieves the avatar urls in various sizes.
+ * Retrieves the avatar urls in various sizes based on a given email address.
  *
  * @since 4.7.0
  *
  * @see get_avatar_url()
  *
- * @param mixed $id_or_email The Gravatar to retrieve a URL for. Accepts a user_id, gravatar md5 hash,
- *                           user email, WP_User object, WP_Post object, or WP_Comment object.
+ * @param string $email Email address.
  * @return array $urls Gravatar url for each size.
  */
-function rest_get_avatar_urls( $id_or_email ) {
+function rest_get_avatar_urls( $email ) {
 	$avatar_sizes = rest_get_avatar_sizes();
 
 	$urls = array();
 	foreach ( $avatar_sizes as $size ) {
-		$urls[ $size ] = get_avatar_url( $id_or_email, array( 'size' => $size ) );
+		$urls[ $size ] = get_avatar_url( $email, array( 'size' => $size ) );
 	}
 
 	return $urls;
@@ -1144,7 +1128,7 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 			$value = wp_parse_list( $value );
 		}
 		if ( ! wp_is_numeric_array( $value ) ) {
-			/* translators: 1: Parameter, 2: Type name. */
+			/* translators: 1: parameter, 2: type name */
 			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, 'array' ) );
 		}
 		foreach ( $value as $index => $v ) {
@@ -1159,13 +1143,8 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 		if ( $value instanceof stdClass ) {
 			$value = (array) $value;
 		}
-
-		if ( $value instanceof JsonSerializable ) {
-			$value = $value->jsonSerialize();
-		}
-
 		if ( ! is_array( $value ) ) {
-			/* translators: 1: Parameter, 2: Type name. */
+			/* translators: 1: parameter, 2: type name */
 			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, 'object' ) );
 		}
 
@@ -1175,46 +1154,36 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 				if ( is_wp_error( $is_valid ) ) {
 					return $is_valid;
 				}
-			} elseif ( isset( $args['additionalProperties'] ) ) {
-				if ( false === $args['additionalProperties'] ) {
-					/* translators: %s: Property of an object. */
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not a valid property of Object.' ), $property ) );
-				}
-
-				if ( is_array( $args['additionalProperties'] ) ) {
-					$is_valid = rest_validate_value_from_schema( $v, $args['additionalProperties'], $param . '[' . $property . ']' );
-					if ( is_wp_error( $is_valid ) ) {
-						return $is_valid;
-					}
-				}
+			} elseif ( isset( $args['additionalProperties'] ) && false === $args['additionalProperties'] ) {
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not a valid property of Object.' ), $property ) );
 			}
 		}
 	}
 
 	if ( ! empty( $args['enum'] ) ) {
 		if ( ! in_array( $value, $args['enum'], true ) ) {
-			/* translators: 1: Parameter, 2: List of valid values. */
+			/* translators: 1: parameter, 2: list of valid values */
 			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not one of %2$s.' ), $param, implode( ', ', $args['enum'] ) ) );
 		}
 	}
 
 	if ( in_array( $args['type'], array( 'integer', 'number' ) ) && ! is_numeric( $value ) ) {
-		/* translators: 1: Parameter, 2: Type name. */
+		/* translators: 1: parameter, 2: type name */
 		return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, $args['type'] ) );
 	}
 
 	if ( 'integer' === $args['type'] && round( floatval( $value ) ) !== floatval( $value ) ) {
-		/* translators: 1: Parameter, 2: Type name. */
+		/* translators: 1: parameter, 2: type name */
 		return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, 'integer' ) );
 	}
 
 	if ( 'boolean' === $args['type'] && ! rest_is_boolean( $value ) ) {
-		/* translators: 1: Parameter, 2: Type name. */
+		/* translators: 1: parameter, 2: type name */
 		return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $value, 'boolean' ) );
 	}
 
 	if ( 'string' === $args['type'] && ! is_string( $value ) ) {
-		/* translators: 1: Parameter, 2: Type name. */
+		/* translators: 1: parameter, 2: type name */
 		return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, 'string' ) );
 	}
 
@@ -1233,7 +1202,7 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 				break;
 			case 'ip':
 				if ( ! rest_is_ip_address( $value ) ) {
-					/* translators: %s: IP address. */
+					/* translators: %s: IP address */
 					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not a valid IP address.' ), $value ) );
 				}
 				break;
@@ -1243,39 +1212,39 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 	if ( in_array( $args['type'], array( 'number', 'integer' ), true ) && ( isset( $args['minimum'] ) || isset( $args['maximum'] ) ) ) {
 		if ( isset( $args['minimum'] ) && ! isset( $args['maximum'] ) ) {
 			if ( ! empty( $args['exclusiveMinimum'] ) && $value <= $args['minimum'] ) {
-				/* translators: 1: Parameter, 2: Minimum number. */
+				/* translators: 1: parameter, 2: minimum number */
 				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than %2$d' ), $param, $args['minimum'] ) );
 			} elseif ( empty( $args['exclusiveMinimum'] ) && $value < $args['minimum'] ) {
-				/* translators: 1: Parameter, 2: Minimum number. */
+				/* translators: 1: parameter, 2: minimum number */
 				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than or equal to %2$d' ), $param, $args['minimum'] ) );
 			}
 		} elseif ( isset( $args['maximum'] ) && ! isset( $args['minimum'] ) ) {
 			if ( ! empty( $args['exclusiveMaximum'] ) && $value >= $args['maximum'] ) {
-				/* translators: 1: Parameter, 2: Maximum number. */
+				/* translators: 1: parameter, 2: maximum number */
 				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than %2$d' ), $param, $args['maximum'] ) );
 			} elseif ( empty( $args['exclusiveMaximum'] ) && $value > $args['maximum'] ) {
-				/* translators: 1: Parameter, 2: Maximum number. */
+				/* translators: 1: parameter, 2: maximum number */
 				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than or equal to %2$d' ), $param, $args['maximum'] ) );
 			}
 		} elseif ( isset( $args['maximum'] ) && isset( $args['minimum'] ) ) {
 			if ( ! empty( $args['exclusiveMinimum'] ) && ! empty( $args['exclusiveMaximum'] ) ) {
 				if ( $value >= $args['maximum'] || $value <= $args['minimum'] ) {
-					/* translators: 1: Parameter, 2: Minimum number, 3: Maximum number. */
+					/* translators: 1: parameter, 2: minimum number, 3: maximum number */
 					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$d (exclusive) and %3$d (exclusive)' ), $param, $args['minimum'], $args['maximum'] ) );
 				}
 			} elseif ( empty( $args['exclusiveMinimum'] ) && ! empty( $args['exclusiveMaximum'] ) ) {
 				if ( $value >= $args['maximum'] || $value < $args['minimum'] ) {
-					/* translators: 1: Parameter, 2: Minimum number, 3: Maximum number. */
+					/* translators: 1: parameter, 2: minimum number, 3: maximum number */
 					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$d (inclusive) and %3$d (exclusive)' ), $param, $args['minimum'], $args['maximum'] ) );
 				}
 			} elseif ( ! empty( $args['exclusiveMinimum'] ) && empty( $args['exclusiveMaximum'] ) ) {
 				if ( $value > $args['maximum'] || $value <= $args['minimum'] ) {
-					/* translators: 1: Parameter, 2: Minimum number, 3: Maximum number. */
+					/* translators: 1: parameter, 2: minimum number, 3: maximum number */
 					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$d (exclusive) and %3$d (inclusive)' ), $param, $args['minimum'], $args['maximum'] ) );
 				}
 			} elseif ( empty( $args['exclusiveMinimum'] ) && empty( $args['exclusiveMaximum'] ) ) {
 				if ( $value > $args['maximum'] || $value < $args['minimum'] ) {
-					/* translators: 1: Parameter, 2: Minimum number, 3: Maximum number. */
+					/* translators: 1: parameter, 2: minimum number, 3: maximum number */
 					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$d (inclusive) and %3$d (inclusive)' ), $param, $args['minimum'], $args['maximum'] ) );
 				}
 			}
@@ -1313,11 +1282,6 @@ function rest_sanitize_value_from_schema( $value, $args ) {
 		if ( $value instanceof stdClass ) {
 			$value = (array) $value;
 		}
-
-		if ( $value instanceof JsonSerializable ) {
-			$value = $value->jsonSerialize();
-		}
-
 		if ( ! is_array( $value ) ) {
 			return array();
 		}
@@ -1325,12 +1289,8 @@ function rest_sanitize_value_from_schema( $value, $args ) {
 		foreach ( $value as $property => $v ) {
 			if ( isset( $args['properties'][ $property ] ) ) {
 				$value[ $property ] = rest_sanitize_value_from_schema( $v, $args['properties'][ $property ] );
-			} elseif ( isset( $args['additionalProperties'] ) ) {
-				if ( false === $args['additionalProperties'] ) {
-					unset( $value[ $property ] );
-				} elseif ( is_array( $args['additionalProperties'] ) ) {
-					$value[ $property ] = rest_sanitize_value_from_schema( $v, $args['additionalProperties'] );
-				}
+			} elseif ( isset( $args['additionalProperties'] ) && false === $args['additionalProperties'] ) {
+				unset( $value[ $property ] );
 			}
 		}
 
@@ -1420,7 +1380,7 @@ function rest_preload_api_request( $memo, $path ) {
 	if ( 200 === $response->status ) {
 		$server = rest_get_server();
 		$data   = (array) $response->get_data();
-		$links  = $server::get_compact_response_links( $response );
+		$links  = $server->get_compact_response_links( $response );
 		if ( ! empty( $links ) ) {
 			$data['_links'] = $links;
 		}

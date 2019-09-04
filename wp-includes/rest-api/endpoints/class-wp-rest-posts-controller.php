@@ -343,7 +343,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
 		$request_params = $request->get_query_params();
-		$base           = add_query_arg( urlencode_deep( $request_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
+		$base           = add_query_arg( $request_params, rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
 
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
@@ -1219,7 +1219,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			return true;
 		}
 
-		/* translators: 1: Parameter, 2: List of valid values. */
+		/* translators: 1: parameter, 2: list of valid values */
 		return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not one of %2$s.' ), 'template', implode( ', ', array_keys( $allowed_templates ) ) ) );
 	}
 
@@ -1478,7 +1478,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			// based on the `post_modified` field with the site's timezone
 			// offset applied.
 			if ( '0000-00-00 00:00:00' === $post->post_modified_gmt ) {
-				$post_modified_gmt = gmdate( 'Y-m-d H:i:s', strtotime( $post->post_modified ) - ( get_option( 'gmt_offset' ) * 3600 ) );
+				$post_modified_gmt = date( 'Y-m-d H:i:s', strtotime( $post->post_modified ) - ( get_option( 'gmt_offset' ) * 3600 ) );
 			} else {
 				$post_modified_gmt = $post->post_modified_gmt;
 			}
@@ -1579,8 +1579,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		if ( in_array( 'template', $fields, true ) ) {
-			$template = get_page_template_slug( $post->ID );
-			if ( $template ) {
+			if ( $template = get_page_template_slug( $post->ID ) ) {
 				$data['template'] = $template;
 			} else {
 				$data['template'] = '';
@@ -1613,23 +1612,18 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 
 		$post_type_obj = get_post_type_object( $post->post_type );
 		if ( is_post_type_viewable( $post_type_obj ) && $post_type_obj->public ) {
-			$permalink_template_requested = in_array( 'permalink_template', $fields, true );
-			$generated_slug_requested     = in_array( 'generated_slug', $fields, true );
 
-			if ( $permalink_template_requested || $generated_slug_requested ) {
-				if ( ! function_exists( 'get_sample_permalink' ) ) {
-					require_once ABSPATH . 'wp-admin/includes/post.php';
-				}
+			if ( ! function_exists( 'get_sample_permalink' ) ) {
+				require_once ABSPATH . '/wp-admin/includes/post.php';
+			}
 
-				$sample_permalink = get_sample_permalink( $post->ID, $post->post_title, '' );
+			$sample_permalink = get_sample_permalink( $post->ID, $post->post_title, '' );
 
-				if ( $permalink_template_requested ) {
-					$data['permalink_template'] = $sample_permalink[0];
-				}
-
-				if ( $generated_slug_requested ) {
-					$data['generated_slug'] = $sample_permalink[1];
-				}
+			if ( in_array( 'permalink_template', $fields, true ) ) {
+				$data['permalink_template'] = $sample_permalink[0];
+			}
+			if ( in_array( 'generated_slug', $fields, true ) ) {
+				$data['generated_slug'] = $sample_permalink[1];
 			}
 		}
 
@@ -1753,8 +1747,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		// If we have a featured media, add that.
-		$featured_media = get_post_thumbnail_id( $post->ID );
-		if ( $featured_media ) {
+		if ( $featured_media = get_post_thumbnail_id( $post->ID ) ) {
 			$image_url = rest_url( 'wp/v2/media/' . $featured_media );
 
 			$links['https://api.w.org/featuredmedia'] = array(
@@ -1870,9 +1863,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
-		}
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
@@ -2216,7 +2206,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		foreach ( $taxonomies as $taxonomy ) {
 			$base                          = ! empty( $taxonomy->rest_base ) ? $taxonomy->rest_base : $taxonomy->name;
 			$schema['properties'][ $base ] = array(
-				/* translators: %s: Taxonomy name. */
+				/* translators: %s: taxonomy name */
 				'description' => sprintf( __( 'The terms assigned to the object in the %s taxonomy.' ), $taxonomy->name ),
 				'type'        => 'array',
 				'items'       => array(
@@ -2232,8 +2222,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			$schema['links'] = $schema_links;
 		}
 
-		$this->schema = $schema;
-		return $this->add_additional_fields_schema( $this->schema );
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**
@@ -2319,9 +2308,9 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		foreach ( $taxonomies as $tax ) {
 			$tax_base = ! empty( $tax->rest_base ) ? $tax->rest_base : $tax->name;
 
-			/* translators: %s: Taxonomy name. */
+			/* translators: %s: taxonomy name */
 			$assign_title = sprintf( __( 'The current user can assign terms in the %s taxonomy.' ), $tax->name );
-			/* translators: %s: Taxonomy name. */
+			/* translators: %s: taxonomy name */
 			$create_title = sprintf( __( 'The current user can create terms in the %s taxonomy.' ), $tax->name );
 
 			$links[] = array(
@@ -2511,7 +2500,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			$base = ! empty( $taxonomy->rest_base ) ? $taxonomy->rest_base : $taxonomy->name;
 
 			$query_params[ $base ] = array(
-				/* translators: %s: Taxonomy name. */
+				/* translators: %s: taxonomy name */
 				'description' => sprintf( __( 'Limit result set to all items that have the specified term assigned in the %s taxonomy.' ), $base ),
 				'type'        => 'array',
 				'items'       => array(
@@ -2521,7 +2510,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			);
 
 			$query_params[ $base . '_exclude' ] = array(
-				/* translators: %s: Taxonomy name. */
+				/* translators: %s: taxonomy name */
 				'description' => sprintf( __( 'Limit result set to all items except those that have the specified term assigned in the %s taxonomy.' ), $base ),
 				'type'        => 'array',
 				'items'       => array(

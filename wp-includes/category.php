@@ -27,6 +27,8 @@ function get_categories( $args = '' ) {
 	$defaults = array( 'taxonomy' => 'category' );
 	$args     = wp_parse_args( $args, $defaults );
 
+	$taxonomy = $args['taxonomy'];
+
 	/**
 	 * Filters the taxonomy used to retrieve terms when calling get_categories().
 	 *
@@ -35,24 +37,24 @@ function get_categories( $args = '' ) {
 	 * @param string $taxonomy Taxonomy to retrieve terms from.
 	 * @param array  $args     An array of arguments. See get_terms().
 	 */
-	$args['taxonomy'] = apply_filters( 'get_categories_taxonomy', $args['taxonomy'], $args );
+	$taxonomy = apply_filters( 'get_categories_taxonomy', $taxonomy, $args );
 
 	// Back compat
 	if ( isset( $args['type'] ) && 'link' == $args['type'] ) {
 		_deprecated_argument(
 			__FUNCTION__,
 			'3.0.0',
+			/* translators: 1: "type => link", 2: "taxonomy => link_category" */
 			sprintf(
-				/* translators: 1: "type => link", 2: "taxonomy => link_category" */
 				__( '%1$s is deprecated. Use %2$s instead.' ),
 				'<code>type => link</code>',
 				'<code>taxonomy => link_category</code>'
 			)
 		);
-		$args['taxonomy'] = 'link_category';
+		$taxonomy = $args['taxonomy'] = 'link_category';
 	}
 
-	$categories = get_terms( $args );
+	$categories = get_terms( $taxonomy, $args );
 
 	if ( is_wp_error( $categories ) ) {
 		$categories = array();
@@ -133,10 +135,10 @@ function get_category_by_path( $category_path, $full_match = true, $output = OBJ
 		$full_path .= ( $pathdir != '' ? '/' : '' ) . sanitize_title( $pathdir );
 	}
 	$categories = get_terms(
+		'category',
 		array(
-			'taxonomy' => 'category',
-			'get'      => 'all',
-			'slug'     => $leaf_path,
+			'get'  => 'all',
+			'slug' => $leaf_path,
 		)
 	);
 
@@ -195,7 +197,7 @@ function get_category_by_slug( $slug ) {
  * @param string $cat_name Category name.
  * @return int 0, if failure and ID of category on success.
  */
-function get_cat_ID( $cat_name ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
+function get_cat_ID( $cat_name ) {
 	$cat = get_term_by( 'name', $cat_name, 'category' );
 	if ( $cat ) {
 		return $cat->term_id;
@@ -276,10 +278,7 @@ function sanitize_category_field( $field, $value, $cat_id, $context ) {
  * @return WP_Term[]|int $tags Array of 'post_tag' term objects, or a count thereof.
  */
 function get_tags( $args = '' ) {
-	$defaults = array( 'taxonomy' => 'post_tag' );
-	$args     = wp_parse_args( $args, $defaults );
-
-	$tags = get_terms( $args );
+	$tags = get_terms( 'post_tag', $args );
 
 	if ( empty( $tags ) ) {
 		$return = array();

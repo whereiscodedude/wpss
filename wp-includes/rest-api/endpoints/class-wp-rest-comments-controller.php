@@ -157,12 +157,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 			}
 
 			if ( ! empty( $forbidden_params ) ) {
-				return new WP_Error(
-					'rest_forbidden_param',
-					/* translators: %s: List of forbidden parameters. */
-					sprintf( __( 'Query parameter not permitted: %s' ), implode( ', ', $forbidden_params ) ),
-					array( 'status' => rest_authorization_required_code() )
-				);
+				return new WP_Error( 'rest_forbidden_param', sprintf( __( 'Query parameter not permitted: %s' ), implode( ', ', $forbidden_params ) ), array( 'status' => rest_authorization_required_code() ) );
 			}
 		}
 
@@ -290,7 +285,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 		$response->header( 'X-WP-Total', $total_comments );
 		$response->header( 'X-WP-TotalPages', $max_pages );
 
-		$base = add_query_arg( urlencode_deep( $request->get_query_params() ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
 
 		if ( $request['page'] > 1 ) {
 			$prev_page = $request['page'] - 1;
@@ -430,7 +425,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 		if ( isset( $request['author'] ) && get_current_user_id() !== $request['author'] && ! current_user_can( 'moderate_comments' ) ) {
 			return new WP_Error(
 				'rest_comment_invalid_author',
-				/* translators: %s: Request parameter. */
+				/* translators: %s: request parameter */
 				sprintf( __( "Sorry, you are not allowed to edit '%s' for comments." ), 'author' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
@@ -440,7 +435,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 			if ( empty( $_SERVER['REMOTE_ADDR'] ) || $request['author_ip'] !== $_SERVER['REMOTE_ADDR'] ) {
 				return new WP_Error(
 					'rest_comment_invalid_author_ip',
-					/* translators: %s: Request parameter. */
+					/* translators: %s: request parameter */
 					sprintf( __( "Sorry, you are not allowed to edit '%s' for comments." ), 'author_ip' ),
 					array( 'status' => rest_authorization_required_code() )
 				);
@@ -450,7 +445,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 		if ( isset( $request['status'] ) && ! current_user_can( 'moderate_comments' ) ) {
 			return new WP_Error(
 				'rest_comment_invalid_status',
-				/* translators: %s: Request parameter. */
+				/* translators: %s: request parameter */
 				sprintf( __( "Sorry, you are not allowed to edit '%s' for comments." ), 'status' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
@@ -954,7 +949,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 		}
 
 		if ( in_array( 'author_avatar_urls', $fields, true ) ) {
-			$data['author_avatar_urls'] = rest_get_avatar_urls( $comment );
+			$data['author_avatar_urls'] = rest_get_avatar_urls( $comment->comment_author_email );
 		}
 
 		if ( in_array( 'meta', $fields, true ) ) {
@@ -1220,10 +1215,6 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
-		}
-
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'comment',
@@ -1354,7 +1345,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 			$avatar_sizes = rest_get_avatar_sizes();
 			foreach ( $avatar_sizes as $size ) {
 				$avatar_properties[ $size ] = array(
-					/* translators: %d: Avatar image size in pixels. */
+					/* translators: %d: avatar image size in pixels */
 					'description' => sprintf( __( 'Avatar URL with image size of %d pixels.' ), $size ),
 					'type'        => 'string',
 					'format'      => 'uri',
@@ -1373,8 +1364,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 
 		$schema['properties']['meta'] = $this->meta->get_field_schema();
 
-		$this->schema = $schema;
-		return $this->add_additional_fields_schema( $this->schema );
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**

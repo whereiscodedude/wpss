@@ -210,7 +210,7 @@ class WP_REST_Taxonomies_Controller extends WP_REST_Controller {
 		}
 
 		if ( in_array( 'types', $fields, true ) ) {
-			$data['types'] = array_values( $taxonomy->object_type );
+			$data['types'] = $taxonomy->object_type;
 		}
 
 		if ( in_array( 'show_cloud', $fields, true ) ) {
@@ -276,10 +276,6 @@ class WP_REST_Taxonomies_Controller extends WP_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
-		}
-
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'taxonomy',
@@ -377,9 +373,7 @@ class WP_REST_Taxonomies_Controller extends WP_REST_Controller {
 				),
 			),
 		);
-
-		$this->schema = $schema;
-		return $this->add_additional_fields_schema( $this->schema );
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**

@@ -64,7 +64,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 	 *
 	 * @global string $s
 	 * @global string $mode
-	 * @global wpdb   $wpdb WordPress database abstraction object.
+	 * @global wpdb   $wpdb
 	 */
 	public function prepare_items() {
 		global $s, $mode, $wpdb;
@@ -93,12 +93,10 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		 */
 		if ( ! $s && wp_is_large_network() ) {
 			if ( ! isset( $_REQUEST['orderby'] ) ) {
-				$_GET['orderby']     = '';
-				$_REQUEST['orderby'] = '';
+				$_GET['orderby'] = $_REQUEST['orderby'] = '';
 			}
 			if ( ! isset( $_REQUEST['order'] ) ) {
-				$_GET['order']     = 'DESC';
-				$_REQUEST['order'] = 'DESC';
+				$_GET['order'] = $_REQUEST['order'] = 'DESC';
 			}
 		}
 
@@ -280,10 +278,9 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 			$blogname = untrailingslashit( $blog['domain'] . $blog['path'] );
 			?>
 			<label class="screen-reader-text" for="blog_<?php echo $blog['blog_id']; ?>">
-				<?php
-				/* translators: %s: Site URL. */
-				printf( __( 'Select %s' ), $blogname );
-				?>
+																	<?php
+																	printf( __( 'Select %s' ), $blogname );
+																	?>
 			</label>
 			<input type="checkbox" id="blog_<?php echo $blog['blog_id']; ?>" name="allblogs[]" value="<?php echo esc_attr( $blog['blog_id'] ); ?>" />
 			<?php
@@ -344,7 +341,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 			switch_to_blog( $blog['blog_id'] );
 			echo '<p>';
 			printf(
-				/* translators: 1: Site title, 2: Site tagline. */
+				/* translators: 1: site name, 2: site tagline. */
 				__( '%1$s &#8211; %2$s' ),
 				get_option( 'blogname' ),
 				'<em>' . get_option( 'blogdescription ' ) . '</em>'

@@ -114,7 +114,7 @@ class WP_REST_Attachments_Controller extends WP_REST_Posts_Controller {
 			return $file;
 		}
 
-		$name       = wp_basename( $file['file'] );
+		$name       = basename( $file['file'] );
 		$name_parts = pathinfo( $name );
 		$name       = trim( substr( $name, 0, -( 1 + strlen( $name_parts['extension'] ) ) ) );
 
@@ -143,7 +143,7 @@ class WP_REST_Attachments_Controller extends WP_REST_Posts_Controller {
 		$attachment->guid           = $url;
 
 		if ( empty( $attachment->post_title ) ) {
-			$attachment->post_title = preg_replace( '/\.[^.]+$/', '', wp_basename( $file ) );
+			$attachment->post_title = preg_replace( '/\.[^.]+$/', '', basename( $file ) );
 		}
 
 		// $post_parent is inherited from $attachment['post_parent'].
@@ -417,9 +417,6 @@ class WP_REST_Attachments_Controller extends WP_REST_Posts_Controller {
 	 * @return array Item schema as an array.
 	 */
 	public function get_item_schema() {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
-		}
 
 		$schema = parent::get_item_schema();
 
@@ -516,8 +513,7 @@ class WP_REST_Attachments_Controller extends WP_REST_Posts_Controller {
 
 		unset( $schema['properties']['password'] );
 
-		$this->schema = $schema;
-		return $this->add_additional_fields_schema( $this->schema );
+		return $schema;
 	}
 
 	/**
@@ -704,6 +700,24 @@ class WP_REST_Attachments_Controller extends WP_REST_Posts_Controller {
 	}
 
 	/**
+	 * Validates whether the user can query private statuses.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param mixed           $value     Status value.
+	 * @param WP_REST_Request $request   Request object.
+	 * @param string          $parameter Additional parameter to pass for validation.
+	 * @return WP_Error|bool True if the user may query, WP_Error if not.
+	 */
+	public function validate_user_can_query_private_statuses( $value, $request, $parameter ) {
+		if ( 'inherit' === $value ) {
+			return true;
+		}
+
+		return parent::validate_user_can_query_private_statuses( $value, $request, $parameter );
+	}
+
+	/**
 	 * Handles an upload via multipart/form-data ($_FILES).
 	 *
 	 * @since 4.7.0
@@ -803,12 +817,12 @@ class WP_REST_Attachments_Controller extends WP_REST_Posts_Controller {
 
 		$file_size = filesize( $file['tmp_name'] );
 		if ( $space_left < $file_size ) {
-			/* translators: %s: Required disk space in kilobytes. */
+			/* translators: %s: required disk space in kilobytes */
 			return new WP_Error( 'rest_upload_limited_space', sprintf( __( 'Not enough space to upload. %s KB needed.' ), number_format( ( $file_size - $space_left ) / KB_IN_BYTES ) ), array( 'status' => 400 ) );
 		}
 
 		if ( $file_size > ( KB_IN_BYTES * get_site_option( 'fileupload_maxk', 1500 ) ) ) {
-			/* translators: %s: Maximum allowed file size in kilobytes. */
+			/* translators: %s: maximum allowed file size in kilobytes */
 			return new WP_Error( 'rest_upload_file_too_big', sprintf( __( 'This file is too big. Files must be less than %s KB in size.' ), get_site_option( 'fileupload_maxk', 1500 ) ), array( 'status' => 400 ) );
 		}
 

@@ -312,8 +312,7 @@ class WP_Meta_Query {
 	 * }
 	 */
 	public function get_sql( $type, $primary_table, $primary_id_column, $context = null ) {
-		$meta_table = _get_meta_table( $type );
-		if ( ! $meta_table ) {
+		if ( ! $meta_table = _get_meta_table( $type ) ) {
 			return false;
 		}
 
@@ -623,7 +622,8 @@ class WP_Meta_Query {
 
 				case 'BETWEEN':
 				case 'NOT BETWEEN':
-					$where = $wpdb->prepare( '%s AND %s', $meta_value[0], $meta_value[1] );
+					$meta_value = array_slice( $meta_value, 0, 2 );
+					$where      = $wpdb->prepare( '%s AND %s', $meta_value );
 					break;
 
 				case 'LIKE':

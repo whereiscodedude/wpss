@@ -25,7 +25,7 @@
 				return '<p>' + window.decodeURIComponent( $1 ) + '</p>';
 			}
 
-			if ( ! content || content.indexOf( ' data-wpview-' ) === -1 ) {
+			if ( ! content ) {
 				return content;
 			}
 
@@ -111,30 +111,10 @@
 			event.content = resetViews( event.content );
 		} );
 
-		// Prevent adding of undo levels when replacing wpview markers
-		// or when there are changes only in the (non-editable) previews.
+		// Replace views with their text inside undo levels.
+		// This also prevents that new levels are added when there are changes inside the views.
 		editor.on( 'beforeaddundo', function( event ) {
-			var lastContent;
-			var newContent = event.level.content || ( event.level.fragments && event.level.fragments.join( '' ) );
-
-			if ( ! event.lastLevel ) {
-				lastContent = editor.startContent;
-			} else {
-				lastContent = event.lastLevel.content || ( event.lastLevel.fragments && event.lastLevel.fragments.join( '' ) );
-			}
-
-			if (
-				! newContent ||
-				! lastContent ||
-				newContent.indexOf( ' data-wpview-' ) === -1 ||
-				lastContent.indexOf( ' data-wpview-' ) === -1
-			) {
-				return;
-			}
-
-			if ( resetViews( lastContent ) === resetViews( newContent ) ) {
-				event.preventDefault();
-			}
+			event.level.content = resetViews( event.level.content );
 		} );
 
 		// Make sure views are copied as their text.

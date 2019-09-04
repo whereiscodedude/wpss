@@ -32,10 +32,7 @@
 				}
 				?>
 				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'twentyeleven' ) ); ?>" class="imprint" title="<?php esc_attr_e( 'Semantic Personal Publishing Platform', 'twentyeleven' ); ?>">
-					<?php
-					/* translators: %s: WordPress */
-					printf( __( 'Proudly powered by %s', 'twentyeleven' ), 'WordPress' );
-					?>
+					<?php printf( __( 'Proudly powered by %s', 'twentyeleven' ), 'WordPress' ); ?>
 				</a>
 			</div>
 	</footer><!-- #colophon -->

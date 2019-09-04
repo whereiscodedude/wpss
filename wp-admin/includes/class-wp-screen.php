@@ -202,11 +202,9 @@ final class WP_Screen {
 			return $hook_name;
 		}
 
-		$post_type       = null;
-		$taxonomy        = null;
-		$in_admin        = false;
-		$action          = '';
-		$is_block_editor = false;
+		$post_type = $taxonomy = null;
+		$in_admin  = false;
+		$action    = '';
 
 		if ( $hook_name ) {
 			$id = $hook_name;
@@ -296,13 +294,6 @@ final class WP_Screen {
 						$post = get_post( $post_id );
 						if ( $post ) {
 							$post_type = $post->post_type;
-
-							/** This filter is documented in wp-admin/post.php */
-							$replace_editor = apply_filters( 'replace_editor', false, $post );
-
-							if ( ! $replace_editor ) {
-								$is_block_editor = use_block_editor_for_post( $post );
-							}
 						}
 					}
 					break;
@@ -323,12 +314,6 @@ final class WP_Screen {
 				if ( null === $post_type ) {
 					$post_type = 'post';
 				}
-
-				// When creating a new post, use the default block editor support value for the post type.
-				if ( empty( $post_id ) ) {
-					$is_block_editor = use_block_editor_for_post_type( $post_type );
-				}
-
 				$id = $post_type;
 				break;
 			case 'edit':
@@ -372,14 +357,13 @@ final class WP_Screen {
 			$screen->id = $id;
 		}
 
-		$screen->base            = $base;
-		$screen->action          = $action;
-		$screen->post_type       = (string) $post_type;
-		$screen->taxonomy        = (string) $taxonomy;
-		$screen->is_user         = ( 'user' == $in_admin );
-		$screen->is_network      = ( 'network' == $in_admin );
-		$screen->in_admin        = $in_admin;
-		$screen->is_block_editor = $is_block_editor;
+		$screen->base       = $base;
+		$screen->action     = $action;
+		$screen->post_type  = (string) $post_type;
+		$screen->taxonomy   = (string) $taxonomy;
+		$screen->is_user    = ( 'user' == $in_admin );
+		$screen->is_network = ( 'network' == $in_admin );
+		$screen->in_admin   = $in_admin;
 
 		self::$_registry[ $id ] = $screen;
 
@@ -392,7 +376,7 @@ final class WP_Screen {
 	 * @see set_current_screen()
 	 * @since 3.3.0
 	 *
-	 * @global WP_Screen $current_screen WordPress current screen object.
+	 * @global WP_Screen $current_screen
 	 * @global string    $taxnow
 	 * @global string    $typenow
 	 */
@@ -928,16 +912,16 @@ final class WP_Screen {
 		}
 		?>
 		<div id="screen-meta-links">
-		<?php if ( $this->show_screen_options() ) : ?>
-			<div id="screen-options-link-wrap" class="hide-if-no-js screen-meta-toggle">
-			<button type="button" id="show-settings-link" class="button show-settings" aria-controls="screen-options-wrap" aria-expanded="false"><?php _e( 'Screen Options' ); ?></button>
+		<?php if ( $this->get_help_tabs() ) : ?>
+			<div id="contextual-help-link-wrap" class="hide-if-no-js screen-meta-toggle">
+			<button type="button" id="contextual-help-link" class="button show-settings" aria-controls="contextual-help-wrap" aria-expanded="false"><?php _e( 'Help' ); ?></button>
 			</div>
 			<?php
 		endif;
-		if ( $this->get_help_tabs() ) :
+		if ( $this->show_screen_options() ) :
 			?>
-			<div id="contextual-help-link-wrap" class="hide-if-no-js screen-meta-toggle">
-			<button type="button" id="contextual-help-link" class="button show-settings" aria-controls="contextual-help-wrap" aria-expanded="false"><?php _e( 'Help' ); ?></button>
+			<div id="screen-options-link-wrap" class="hide-if-no-js screen-meta-toggle">
+			<button type="button" id="show-settings-link" class="button show-settings" aria-controls="screen-options-wrap" aria-expanded="false"><?php _e( 'Screen Options' ); ?></button>
 			</div>
 		<?php endif; ?>
 		</div>
@@ -1016,10 +1000,7 @@ final class WP_Screen {
 			)
 		);
 
-		$wrapper_start = '';
-		$wrapper_end   = '';
-		$form_start    = '';
-		$form_end      = '';
+		$wrapper_start = $wrapper_end = $form_start = $form_end = '';
 
 		// Output optional wrapper.
 		if ( $options['wrap'] ) {
@@ -1162,18 +1143,17 @@ final class WP_Screen {
 		?>
 		<fieldset class='columns-prefs'>
 		<legend class="screen-layout"><?php _e( 'Layout' ); ?></legend>
-		<?php for ( $i = 1; $i <= $num; ++$i ) : ?>
-			<label class="columns-prefs-<?php echo $i; ?>">
-			<input type='radio' name='screen_columns' value='<?php echo esc_attr( $i ); ?>' <?php checked( $screen_layout_columns, $i ); ?> />
-			<?php
-				printf(
-					/* translators: %s: Number of columns on the page. */
-					_n( '%s column', '%s columns', $i ),
-					number_format_i18n( $i )
-				);
-			?>
-			</label>
-		<?php endfor; ?>
+												<?php
+												for ( $i = 1; $i <= $num; ++$i ) :
+													?>
+													<label class="columns-prefs-<?php echo $i; ?>">
+				<input type='radio' name='screen_columns' value='<?php echo esc_attr( $i ); ?>'
+													<?php checked( $screen_layout_columns, $i ); ?> />
+													<?php printf( _n( '%s column', '%s columns', $i ), number_format_i18n( $i ) ); ?>
+				</label>
+													<?php
+			endfor;
+												?>
 		</fieldset>
 		<?php
 	}

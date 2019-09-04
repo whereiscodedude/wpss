@@ -10,7 +10,7 @@
  * servers with known pretty permalink capability.
  *
  * Note: Though Nginx is detected, WordPress does not currently
- * generate rewrite rules for it. See https://wordpress.org/support/article/nginx/
+ * generate rewrite rules for it. See https://codex.wordpress.org/Nginx
  *
  * @package WordPress
  */
@@ -51,16 +51,7 @@ if ( is_admin() ) {
 unset( $self_matches );
 
 // Simple browser detection
-$is_lynx   = false;
-$is_gecko  = false;
-$is_winIE  = false;
-$is_macIE  = false;
-$is_opera  = false;
-$is_NS4    = false;
-$is_safari = false;
-$is_chrome = false;
-$is_iphone = false;
-$is_edge   = false;
+$is_lynx = $is_gecko = $is_winIE = $is_macIE = $is_opera = $is_NS4 = $is_safari = $is_chrome = $is_iphone = $is_edge = false;
 
 if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
 	if ( strpos( $_SERVER['HTTP_USER_AGENT'], 'Lynx' ) !== false ) {
@@ -77,8 +68,7 @@ if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
 			 *
 			 * @param bool $is_admin Whether to use the Google Chrome Frame. Default is the value of is_admin().
 			 */
-			$is_chrome = apply_filters( 'use_google_chrome_frame', $is_admin );
-			if ( $is_chrome ) {
+			if ( $is_chrome = apply_filters( 'use_google_chrome_frame', $is_admin ) ) {
 				header( 'X-UA-Compatible: chrome=1' );
 			}
 			$is_winIE = ! $is_chrome;
