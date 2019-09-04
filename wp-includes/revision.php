@@ -113,8 +113,7 @@ function wp_save_post_revision( $post_id ) {
 		return;
 	}
 
-	$post = get_post( $post_id );
-	if ( ! $post ) {
+	if ( ! $post = get_post( $post_id ) ) {
 		return;
 	}
 
@@ -133,8 +132,7 @@ function wp_save_post_revision( $post_id ) {
 	// Compare the proposed update with the last stored revision verifying that
 	// they are different, unless a plugin tells us to always save regardless.
 	// If no previous revisions, save one
-	$revisions = wp_get_post_revisions( $post_id );
-	if ( $revisions ) {
+	if ( $revisions = wp_get_post_revisions( $post_id ) ) {
 		// grab the last revision, but not an autosave
 		foreach ( $revisions as $revision ) {
 			if ( false !== strpos( $revision->post_name, "{$revision->post_parent}-revision" ) ) {
@@ -156,7 +154,7 @@ function wp_save_post_revision( $post_id ) {
 		 * @param WP_Post $last_revision     The last revision post object.
 		 * @param WP_Post $post              The post object.
 		 */
-		if ( isset( $last_revision ) && apply_filters( 'wp_save_post_revision_check_for_changes', true, $last_revision, $post ) ) {
+		if ( isset( $last_revision ) && apply_filters( 'wp_save_post_revision_check_for_changes', $check_for_changes = true, $last_revision, $post ) ) {
 			$post_has_changed = false;
 
 			foreach ( array_keys( _wp_post_revision_fields( $post ) ) as $field ) {
@@ -256,8 +254,7 @@ function wp_get_post_autosave( $post_id, $user_id = 0 ) {
  * @return false|int False if not a revision, ID of revision's parent otherwise.
  */
 function wp_is_post_revision( $post ) {
-	$post = wp_get_post_revision( $post );
-	if ( ! $post ) {
+	if ( ! $post = wp_get_post_revision( $post ) ) {
 		return false;
 	}
 
@@ -273,8 +270,7 @@ function wp_is_post_revision( $post ) {
  * @return false|int False if not a revision, ID of autosave's parent otherwise
  */
 function wp_is_post_autosave( $post ) {
-	$post = wp_get_post_revision( $post );
-	if ( ! $post ) {
+	if ( ! $post = wp_get_post_revision( $post ) ) {
 		return false;
 	}
 
@@ -344,8 +340,7 @@ function _wp_put_post_revision( $post = null, $autosave = false ) {
  * @return WP_Post|array|null WP_Post (or array) on success, or null on failure.
  */
 function wp_get_post_revision( &$post, $output = OBJECT, $filter = 'raw' ) {
-	$revision = get_post( $post, OBJECT, $filter );
-	if ( ! $revision ) {
+	if ( ! $revision = get_post( $post, OBJECT, $filter ) ) {
 		return $revision;
 	}
 	if ( 'revision' !== $revision->post_type ) {
@@ -377,8 +372,7 @@ function wp_get_post_revision( &$post, $output = OBJECT, $filter = 'raw' ) {
  * @return int|false|null Null if error, false if no fields to restore, (int) post ID if success.
  */
 function wp_restore_post_revision( $revision_id, $fields = null ) {
-	$revision = wp_get_post_revision( $revision_id, ARRAY_A );
-	if ( ! $revision ) {
+	if ( ! $revision = wp_get_post_revision( $revision_id, ARRAY_A ) ) {
 		return $revision;
 	}
 
@@ -431,8 +425,7 @@ function wp_restore_post_revision( $revision_id, $fields = null ) {
  * @return array|false|WP_Post|WP_Error|null Null or WP_Error if error, deleted post if success.
  */
 function wp_delete_post_revision( $revision_id ) {
-	$revision = wp_get_post_revision( $revision_id );
-	if ( ! $revision ) {
+	if ( ! $revision = wp_get_post_revision( $revision_id ) ) {
 		return $revision;
 	}
 
@@ -489,8 +482,7 @@ function wp_get_post_revisions( $post_id = 0, $args = null ) {
 		)
 	);
 
-	$revisions = get_children( $args );
-	if ( ! $revisions ) {
+	if ( ! $revisions = get_children( $args ) ) {
 		return array();
 	}
 
@@ -609,8 +601,7 @@ function _show_post_preview() {
  * @return array
  */
 function _wp_preview_terms_filter( $terms, $post_id, $taxonomy ) {
-	$post = get_post();
-	if ( ! $post ) {
+	if ( ! $post = get_post() ) {
 		return $terms;
 	}
 
@@ -620,11 +611,8 @@ function _wp_preview_terms_filter( $terms, $post_id, $taxonomy ) {
 
 	if ( 'standard' == $_REQUEST['post_format'] ) {
 		$terms = array();
-	} else {
-		$term = get_term_by( 'slug', 'post-format-' . sanitize_key( $_REQUEST['post_format'] ), 'post_format' );
-		if ( $term ) {
-			$terms = array( $term ); // Can only have one post format
-		}
+	} elseif ( $term = get_term_by( 'slug', 'post-format-' . sanitize_key( $_REQUEST['post_format'] ), 'post_format' ) ) {
+		$terms = array( $term ); // Can only have one post format
 	}
 
 	return $terms;
@@ -642,8 +630,7 @@ function _wp_preview_terms_filter( $terms, $post_id, $taxonomy ) {
  * @return null|array The default return value or the post thumbnail meta array.
  */
 function _wp_preview_post_thumbnail_filter( $value, $post_id, $meta_key ) {
-	$post = get_post();
-	if ( ! $post ) {
+	if ( ! $post = get_post() ) {
 		return $value;
 	}
 

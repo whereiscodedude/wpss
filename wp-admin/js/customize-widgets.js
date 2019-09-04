@@ -191,10 +191,9 @@
 				}
 			} );
 
-			// Clear the search results and trigger a new search.
+			// Clear the search results and trigger a `keyup` event to fire a new search.
 			this.$clearResults.on( 'click', function() {
-				self.$search.val( '' ).focus();
-				self.collection.doSearch( '' );
+				self.$search.val( '' ).focus().trigger( 'keyup' );
 			} );
 
 			// Close the panel if the URL in the preview changes

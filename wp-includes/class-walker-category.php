@@ -165,7 +165,7 @@ class Walker_Category extends Walker {
 			$link .= '<a href="' . esc_url( get_term_feed_link( $category->term_id, $category->taxonomy, $args['feed_type'] ) ) . '"';
 
 			if ( empty( $args['feed'] ) ) {
-				/* translators: %s: Category name. */
+				/* translators: %s: category name */
 				$alt = ' alt="' . sprintf( __( 'Feed for all posts filed under %s' ), $cat_name ) . '"';
 			} else {
 				$alt   = ' alt="' . $args['feed'] . '"';
@@ -200,8 +200,8 @@ class Walker_Category extends Walker {
 			if ( ! empty( $args['current_category'] ) ) {
 				// 'current_category' can be an array, so we use `get_terms()`.
 				$_current_terms = get_terms(
+					$category->taxonomy,
 					array(
-						'taxonomy'   => $category->taxonomy,
 						'include'    => $args['current_category'],
 						'hide_empty' => false,
 					)

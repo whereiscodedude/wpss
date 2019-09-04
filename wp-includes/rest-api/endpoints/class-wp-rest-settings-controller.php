@@ -190,7 +190,6 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 				if ( is_wp_error( rest_validate_value_from_schema( get_option( $args['option_name'], false ), $args['schema'] ) ) ) {
 					return new WP_Error(
 						'rest_invalid_stored_value',
-						/* translators: %s: Property name. */
 						sprintf( __( 'The %s property has an invalid stored value, and cannot be updated to null.' ), $name ),
 						array( 'status' => 500 )
 					);
@@ -271,10 +270,6 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
-		}
-
 		$options = $this->get_registered_options();
 
 		$schema = array(
@@ -291,8 +286,7 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$this->schema = $schema;
-		return $this->add_additional_fields_schema( $this->schema );
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**

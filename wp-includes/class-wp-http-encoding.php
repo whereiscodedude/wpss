@@ -52,18 +52,15 @@ class WP_Http_Encoding {
 			return $compressed;
 		}
 
-		$decompressed = @gzinflate( $compressed );
-		if ( false !== $decompressed ) {
+		if ( false !== ( $decompressed = @gzinflate( $compressed ) ) ) {
 			return $decompressed;
 		}
 
-		$decompressed = self::compatible_gzinflate( $compressed );
-		if ( false !== $decompressed ) {
+		if ( false !== ( $decompressed = self::compatible_gzinflate( $compressed ) ) ) {
 			return $decompressed;
 		}
 
-		$decompressed = @gzuncompress( $compressed );
-		if ( false !== $decompressed ) {
+		if ( false !== ( $decompressed = @gzuncompress( $compressed ) ) ) {
 			return $decompressed;
 		}
 

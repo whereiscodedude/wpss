@@ -179,7 +179,7 @@ class WP_User_Query {
 	 *     @type int          $number              Number of users to limit the query for. Can be used in
 	 *                                             conjunction with pagination. Value -1 (all) is supported, but
 	 *                                             should be used with caution on larger sites.
-	 *                                             Default -1 (all users).
+	 *                                             Default empty (all users).
 	 *     @type int          $paged               When used with number, defines the page of results to return.
 	 *                                             Default 1.
 	 *     @type bool         $count_total         Whether to count the total number of users found. If pagination
@@ -327,8 +327,7 @@ class WP_User_Query {
 			);
 
 			// Prevent extra meta query.
-			$qv['blog_id'] = 0;
-			$blog_id       = 0;
+			$qv['blog_id'] = $blog_id = 0;
 
 			if ( empty( $this->meta_query->queries ) ) {
 				$this->meta_query->queries = array( $who_query );

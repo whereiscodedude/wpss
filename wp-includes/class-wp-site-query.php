@@ -361,8 +361,7 @@ class WP_Site_Query {
 		// Fetch full site objects from the primed cache.
 		$_sites = array();
 		foreach ( $site_ids as $site_id ) {
-			$_site = get_site( $site_id );
-			if ( $_site ) {
+			if ( $_site = get_site( $site_id ) ) {
 				$_sites[] = $_site;
 			}
 		}
@@ -690,7 +689,7 @@ class WP_Site_Query {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
+	 * @global wpdb  $wpdb WordPress database abstraction object.
 	 *
 	 * @param string   $string  Search string.
 	 * @param string[] $columns Array of columns to search.

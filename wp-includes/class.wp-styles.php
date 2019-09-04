@@ -144,8 +144,7 @@ class WP_Styles extends WP_Dependencies {
 		}
 
 		$src         = $obj->src;
-		$cond_before = '';
-		$cond_after  = '';
+		$cond_before = $cond_after = '';
 		$conditional = isset( $obj->extra['conditional'] ) ? $obj->extra['conditional'] : '';
 
 		if ( $conditional ) {

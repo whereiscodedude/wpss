@@ -131,8 +131,7 @@ endif;
  * @return boolean true if blog has more than 1 category
  */
 function twentyfourteen_categorized_blog() {
-	$all_the_cool_cats = get_transient( 'twentyfourteen_category_count' );
-	if ( false === $all_the_cool_cats ) {
+	if ( false === ( $all_the_cool_cats = get_transient( 'twentyfourteen_category_count' ) ) ) {
 		// Create an array of all the categories that are attached to posts
 		$all_the_cool_cats = get_categories(
 			array(
@@ -226,7 +225,7 @@ if ( ! function_exists( 'twentyfourteen_excerpt_more' ) && ! is_admin() ) :
 		$link = sprintf(
 			'<a href="%1$s" class="more-link">%2$s</a>',
 			esc_url( get_permalink( get_the_ID() ) ),
-			/* translators: %s: Post title. */
+			/* translators: %s: Name of current post */
 			sprintf( __( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'twentyfourteen' ), '<span class="screen-reader-text">' . get_the_title( get_the_ID() ) . '</span>' )
 		);
 		return ' &hellip; ' . $link;

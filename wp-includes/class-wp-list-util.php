@@ -48,8 +48,7 @@ class WP_List_Util {
 	 * @param array $input Array to perform operations on.
 	 */
 	public function __construct( $input ) {
-		$this->output = $input;
-		$this->input  = $input;
+		$this->output = $this->input = $input;
 	}
 
 	/**

@@ -268,8 +268,7 @@ class WP_Network_Query {
 		// Fetch full network objects from the primed cache.
 		$_networks = array();
 		foreach ( $network_ids as $network_id ) {
-			$_network = get_network( $network_id );
-			if ( $_network ) {
+			if ( $_network = get_network( $network_id ) ) {
 				$_networks[] = $_network;
 			}
 		}
@@ -499,7 +498,7 @@ class WP_Network_Query {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
+	 * @global wpdb  $wpdb WordPress database abstraction object.
 	 *
 	 * @param string   $string  Search string.
 	 * @param string[] $columns Array of columns to search.

@@ -84,7 +84,7 @@ get_header(); ?>
 						<?php
 						edit_post_link(
 							sprintf(
-								/* translators: %s: Post title. */
+								/* translators: %s: Name of current post */
 								__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'twentysixteen' ),
 								get_the_title()
 							),

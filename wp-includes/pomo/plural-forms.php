@@ -240,8 +240,7 @@ class Plural_Forms {
 		if ( isset( $this->cache[ $num ] ) ) {
 			return $this->cache[ $num ];
 		}
-		$this->cache[ $num ] = $this->execute( $num );
-		return $this->cache[ $num ];
+		return $this->cache[ $num ] = $this->execute( $num );
 	}
 
 	/**
