@@ -1,9 +1,8 @@
 === Twenty Fourteen ===
-Contributors: wordpressdotorg
+Contributors: the WordPress team
 Requires at least: WordPress 3.6
 Tested up to: WordPress 5.0
-Requires PHP: 5.2.4
-Stable tag: 2.7
+Stable tag: 2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: blog, news, two-columns, three-columns, left-sidebar, right-sidebar, custom-background, custom-header, custom-menu, editor-style, featured-images, flexible-header, footer-widgets, full-width-template, microformats, post-formats, rtl-language-support, sticky-post, theme-options, translation-ready, accessibility-ready
@@ -50,16 +49,6 @@ License: GNU GPL, Version 2 (or later)
 Source: http://www.genericons.com
 
 == Changelog ==
-
-= 2.7 =
-* Released: May 7, 2019
-
-https://codex.wordpress.org/Twenty_Fourteen_Theme_Changelog#Version_2.7
-
-= 2.6 =
-* Released: February 21, 2019
-
-https://codex.wordpress.org/Twenty_Fourteen_Theme_Changelog#Version_2.6
 
 = 2.5 =
 * Released: January 9, 2019

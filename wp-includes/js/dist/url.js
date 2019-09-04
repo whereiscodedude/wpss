@@ -82,19 +82,18 @@ this["wp"] = this["wp"] || {}; this["wp"]["url"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 340);
+/******/ 	return __webpack_require__(__webpack_require__.s = 299);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 195:
+/***/ 179:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var has = Object.prototype.hasOwnProperty;
-var isArray = Array.isArray;
 
 var hexTable = (function () {
     var array = [];
@@ -106,11 +105,13 @@ var hexTable = (function () {
 }());
 
 var compactQueue = function compactQueue(queue) {
-    while (queue.length > 1) {
-        var item = queue.pop();
-        var obj = item.obj[item.prop];
+    var obj;
 
-        if (isArray(obj)) {
+    while (queue.length) {
+        var item = queue.pop();
+        obj = item.obj[item.prop];
+
+        if (Array.isArray(obj)) {
             var compacted = [];
 
             for (var j = 0; j < obj.length; ++j) {
@@ -122,6 +123,8 @@ var compactQueue = function compactQueue(queue) {
             item.obj[item.prop] = compacted;
         }
     }
+
+    return obj;
 };
 
 var arrayToObject = function arrayToObject(source, options) {
@@ -141,10 +144,10 @@ var merge = function merge(target, source, options) {
     }
 
     if (typeof source !== 'object') {
-        if (isArray(target)) {
+        if (Array.isArray(target)) {
             target.push(source);
-        } else if (target && typeof target === 'object') {
-            if ((options && (options.plainObjects || options.allowPrototypes)) || !has.call(Object.prototype, source)) {
+        } else if (typeof target === 'object') {
+            if (options.plainObjects || options.allowPrototypes || !has.call(Object.prototype, source)) {
                 target[source] = true;
             }
         } else {
@@ -154,21 +157,20 @@ var merge = function merge(target, source, options) {
         return target;
     }
 
-    if (!target || typeof target !== 'object') {
+    if (typeof target !== 'object') {
         return [target].concat(source);
     }
 
     var mergeTarget = target;
-    if (isArray(target) && !isArray(source)) {
+    if (Array.isArray(target) && !Array.isArray(source)) {
         mergeTarget = arrayToObject(target, options);
     }
 
-    if (isArray(target) && isArray(source)) {
+    if (Array.isArray(target) && Array.isArray(source)) {
         source.forEach(function (item, i) {
             if (has.call(target, i)) {
-                var targetItem = target[i];
-                if (targetItem && typeof targetItem === 'object' && item && typeof item === 'object') {
-                    target[i] = merge(targetItem, item, options);
+                if (target[i] && typeof target[i] === 'object') {
+                    target[i] = merge(target[i], item, options);
                 } else {
                     target.push(item);
                 }
@@ -198,21 +200,15 @@ var assign = function assignSingleSource(target, source) {
     }, target);
 };
 
-var decode = function (str, decoder, charset) {
-    var strWithoutPlus = str.replace(/\+/g, ' ');
-    if (charset === 'iso-8859-1') {
-        // unescape never throws, no try...catch needed:
-        return strWithoutPlus.replace(/%[0-9a-f]{2}/gi, unescape);
-    }
-    // utf-8
+var decode = function (str) {
     try {
-        return decodeURIComponent(strWithoutPlus);
+        return decodeURIComponent(str.replace(/\+/g, ' '));
     } catch (e) {
-        return strWithoutPlus;
+        return str;
     }
 };
 
-var encode = function encode(str, defaultEncoder, charset) {
+var encode = function encode(str) {
     // This code was originally written by Brian White (mscdex) for the io.js core querystring library.
     // It has been adapted here for stricter adherence to RFC 3986
     if (str.length === 0) {
@@ -220,12 +216,6 @@ var encode = function encode(str, defaultEncoder, charset) {
     }
 
     var string = typeof str === 'string' ? str : String(str);
-
-    if (charset === 'iso-8859-1') {
-        return escape(string).replace(/%u[0-9a-f]{4}/gi, function ($0) {
-            return '%26%23' + parseInt($0.slice(2), 16) + '%3B';
-        });
-    }
 
     var out = '';
     for (var i = 0; i < string.length; ++i) {
@@ -289,9 +279,7 @@ var compact = function compact(value) {
         }
     }
 
-    compactQueue(queue);
-
-    return value;
+    return compactQueue(queue);
 };
 
 var isRegExp = function isRegExp(obj) {
@@ -299,21 +287,16 @@ var isRegExp = function isRegExp(obj) {
 };
 
 var isBuffer = function isBuffer(obj) {
-    if (!obj || typeof obj !== 'object') {
+    if (obj === null || typeof obj === 'undefined') {
         return false;
     }
 
     return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
 };
 
-var combine = function combine(a, b) {
-    return [].concat(a, b);
-};
-
 module.exports = {
     arrayToObject: arrayToObject,
     assign: assign,
-    combine: combine,
     compact: compact,
     decode: decode,
     encode: encode,
@@ -325,7 +308,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 196:
+/***/ 180:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -351,7 +334,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 340:
+/***/ 299:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -374,8 +357,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prependHTTP", function() { return prependHTTP; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "safeDecodeURI", function() { return safeDecodeURI; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filterURLForDisplay", function() { return filterURLForDisplay; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "safeDecodeURIComponent", function() { return safeDecodeURIComponent; });
-/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(85);
+/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(76);
 /* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(qs__WEBPACK_IMPORTED_MODULE_0__);
 /**
  * External dependencies
@@ -389,11 +371,6 @@ var USABLE_HREF_REGEXP = /^(?:[a-z]+:|#|\?|\.|\/)/i;
  *
  * @param {string} url The string to scrutinise.
  *
- * @example
- * ```js
- * const isURL = isURL( 'https://wordpress.org' ); // true
- * ```
- *
  * @return {boolean} Whether or not it looks like a URL.
  */
 
@@ -404,12 +381,6 @@ function isURL(url) {
  * Returns the protocol part of the URL.
  *
  * @param {string} url The full URL.
- *
- * @example
- * ```js
- * const protocol1 = getProtocol( 'tel:012345678' ); // 'tel:'
- * const protocol2 = getProtocol( 'https://wordpress.org' ); // 'https:'
- * ```
  *
  * @return {?string} The protocol part of the URL.
  */
@@ -426,12 +397,6 @@ function getProtocol(url) {
  *
  * @param {string} protocol The url protocol.
  *
- * @example
- * ```js
- * const isValid = isValidProtocol( 'https:' ); // true
- * const isNotValid = isValidProtocol( 'https :' ); // false
- * ```
- *
  * @return {boolean} True if the argument is a valid protocol (e.g. http:, tel:).
  */
 
@@ -446,12 +411,6 @@ function isValidProtocol(protocol) {
  * Returns the authority part of the URL.
  *
  * @param {string} url The full URL.
- *
- * @example
- * ```js
- * const authority1 = getAuthority( 'https://wordpress.org/help/' ); // 'wordpress.org'
- * const authority2 = getAuthority( 'https://localhost:8080/test/' ); // 'localhost:8080'
- * ```
  *
  * @return {?string} The authority part of the URL.
  */
@@ -468,12 +427,6 @@ function getAuthority(url) {
  *
  * @param {string} authority A string containing the URL authority.
  *
- * @example
- * ```js
- * const isValid = isValidAuthority( 'wordpress.org' ); // true
- * const isNotValid = isValidAuthority( 'wordpress#org' ); // false
- * ```
- *
  * @return {boolean} True if the argument contains a valid authority.
  */
 
@@ -488,12 +441,6 @@ function isValidAuthority(authority) {
  * Returns the path part of the URL.
  *
  * @param {string} url The full URL.
- *
- * @example
- * ```js
- * const path1 = getPath( 'http://localhost:8080/this/is/a/test?query=true' ); // 'this/is/a/test'
- * const path2 = getPath( 'https://wordpress.org/help/faq/' ); // 'help/faq'
- * ```
  *
  * @return {?string} The path part of the URL.
  */
@@ -510,12 +457,6 @@ function getPath(url) {
  *
  * @param {string} path The URL path.
  *
- * @example
- * ```js
- * const isValid = isValidPath( 'test/path/' ); // true
- * const isNotValid = isValidPath( '/invalid?test/path/' ); // false
- * ```
- *
  * @return {boolean} True if the argument contains a valid path
  */
 
@@ -530,12 +471,6 @@ function isValidPath(path) {
  * Returns the query string part of the URL.
  *
  * @param {string} url The full URL.
- *
- * @example
- * ```js
- * const queryString1 = getQueryString( 'http://localhost:8080/this/is/a/test?query=true#fragment' ); // 'query=true'
- * const queryString2 = getQueryString( 'https://wordpress.org#fragment?query=false&search=hello' ); // 'query=false&search=hello'
- * ```
  *
  * @return {?string} The query string part of the URL.
  */
@@ -552,12 +487,6 @@ function getQueryString(url) {
  *
  * @param {string} queryString The query string.
  *
- * @example
- * ```js
- * const isValid = isValidQueryString( 'query=true&another=false' ); // true
- * const isNotValid = isValidQueryString( 'query=true?another=false' ); // false
- * ```
- *
  * @return {boolean} True if the argument contains a valid query string.
  */
 
@@ -573,12 +502,6 @@ function isValidQueryString(queryString) {
  *
  * @param {string} url The full URL
  *
- * @example
- * ```js
- * const fragment1 = getFragment( 'http://localhost:8080/this/is/a/test?query=true#fragment' ); // '#fragment'
- * const fragment2 = getFragment( 'https://wordpress.org#another-fragment?query=true' ); // '#another-fragment'
- * ```
- *
  * @return {?string} The fragment part of the URL.
  */
 
@@ -593,12 +516,6 @@ function getFragment(url) {
  * Checks for invalid characters within the provided fragment.
  *
  * @param {string} fragment The url fragment.
- *
- * @example
- * ```js
- * const isValid = isValidFragment( '#valid-fragment' ); // true
- * const isNotValid = isValidFragment( '#invalid-#fragment' ); // false
- * ```
  *
  * @return {boolean} True if the argument contains a valid fragment.
  */
@@ -619,23 +536,12 @@ function isValidFragment(fragment) {
  *                       only the resulting querystring is returned.
  * @param {Object}  args Query arguments to apply to URL.
  *
- * @example
- * ```js
- * const newURL = addQueryArgs( 'https://google.com', { q: 'test' } ); // https://google.com/?q=test
- * ```
- *
  * @return {string} URL with arguments applied.
  */
 
 function addQueryArgs() {
   var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
   var args = arguments.length > 1 ? arguments[1] : undefined;
-
-  // If no arguments are to be appended, return original URL.
-  if (!args || !Object.keys(args).length) {
-    return url;
-  }
-
   var baseUrl = url; // Determine whether URL already had query arguments.
 
   var queryStringIndex = url.indexOf('?');
@@ -655,11 +561,6 @@ function addQueryArgs() {
  * @param {string} url URL
  * @param {string} arg Query arg name
  *
- * @example
- * ```js
- * const foo = getQueryArg( 'https://wordpress.org?foo=bar&bar=baz', 'foo' ); // bar
- * ```
- *
  * @return {Array|string} Query arg value.
  */
 
@@ -674,12 +575,7 @@ function getQueryArg(url, arg) {
  * @param {string} url URL
  * @param {string} arg Query arg name
  *
- * @example
- * ```js
- * const hasBar = hasQueryArg( 'https://wordpress.org?foo=bar&bar=baz', 'bar' ); // true
- * ```
- *
- * @return {boolean} Whether or not the URL contains the query arg.
+ * @return {boolean} Whether or not the URL contains the query aeg.
  */
 
 function hasQueryArg(url, arg) {
@@ -690,11 +586,6 @@ function hasQueryArg(url, arg) {
  *
  * @param {string} url  URL
  * @param {...string} args Query Args
- *
- * @example
- * ```js
- * const newUrl = removeQueryArgs( 'https://wordpress.org?foo=bar&bar=baz&baz=foobar', 'foo', 'bar' ); // https://wordpress.org?baz=foobar
- * ```
  *
  * @return {string} Updated URL
  */
@@ -718,11 +609,6 @@ function removeQueryArgs(url) {
  *
  * @param  {string} url The URL to test
  *
- * @example
- * ```js
- * const actualURL = prependHTTP( 'wordpress.org' ); // http://wordpress.org
- * ```
- *
  * @return {string}     The updated URL
  */
 
@@ -739,11 +625,6 @@ function prependHTTP(url) {
  *
  * @param {string} uri URI to decode.
  *
- * @example
- * ```js
- * const badUri = safeDecodeURI( '%z' ); // does not throw an Error, simply returns '%z'
- * ```
- *
  * @return {string} Decoded URI if possible.
  */
 
@@ -759,11 +640,6 @@ function safeDecodeURI(uri) {
  *
  * @param {string} url Original URL.
  *
- * @example
- * ```js
- * const displayUrl = filterURLForDisplay( 'https://www.wordpress.org/gutenberg/' ); // wordpress.org/gutenberg
- * ```
- *
  * @return {string} Displayed URL.
  */
 
@@ -777,41 +653,23 @@ function filterURLForDisplay(url) {
 
   return filteredURL;
 }
-/**
- * Safely decodes a URI component with `decodeURIComponent`. Returns the URI component unmodified if
- * `decodeURIComponent` throws an error.
- *
- * @param {string} uriComponent URI component to decode.
- *
- * @return {string} Decoded URI component if possible.
- */
-
-function safeDecodeURIComponent(uriComponent) {
-  try {
-    return decodeURIComponent(uriComponent);
-  } catch (uriComponentError) {
-    return uriComponent;
-  }
-}
 
 
 /***/ }),
 
-/***/ 341:
+/***/ 300:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(195);
-var formats = __webpack_require__(196);
-var has = Object.prototype.hasOwnProperty;
+var utils = __webpack_require__(179);
+var formats = __webpack_require__(180);
 
 var arrayPrefixGenerators = {
     brackets: function brackets(prefix) { // eslint-disable-line func-name-matching
         return prefix + '[]';
     },
-    comma: 'comma',
     indices: function indices(prefix, key) { // eslint-disable-line func-name-matching
         return prefix + '[' + key + ']';
     },
@@ -820,26 +678,13 @@ var arrayPrefixGenerators = {
     }
 };
 
-var isArray = Array.isArray;
-var push = Array.prototype.push;
-var pushToArray = function (arr, valueOrArray) {
-    push.apply(arr, isArray(valueOrArray) ? valueOrArray : [valueOrArray]);
-};
-
 var toISO = Date.prototype.toISOString;
 
 var defaults = {
-    addQueryPrefix: false,
-    allowDots: false,
-    charset: 'utf-8',
-    charsetSentinel: false,
     delimiter: '&',
     encode: true,
     encoder: utils.encode,
     encodeValuesOnly: false,
-    formatter: formats.formatters[formats['default']],
-    // deprecated
-    indices: false,
     serializeDate: function serializeDate(date) { // eslint-disable-line func-name-matching
         return toISO.call(date);
     },
@@ -859,21 +704,16 @@ var stringify = function stringify( // eslint-disable-line func-name-matching
     allowDots,
     serializeDate,
     formatter,
-    encodeValuesOnly,
-    charset
+    encodeValuesOnly
 ) {
     var obj = object;
     if (typeof filter === 'function') {
         obj = filter(prefix, obj);
     } else if (obj instanceof Date) {
         obj = serializeDate(obj);
-    } else if (generateArrayPrefix === 'comma' && isArray(obj)) {
-        obj = obj.join(',');
-    }
-
-    if (obj === null) {
+    } else if (obj === null) {
         if (strictNullHandling) {
-            return encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder, charset) : prefix;
+            return encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder) : prefix;
         }
 
         obj = '';
@@ -881,8 +721,8 @@ var stringify = function stringify( // eslint-disable-line func-name-matching
 
     if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean' || utils.isBuffer(obj)) {
         if (encoder) {
-            var keyValue = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset);
-            return [formatter(keyValue) + '=' + formatter(encoder(obj, defaults.encoder, charset))];
+            var keyValue = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder);
+            return [formatter(keyValue) + '=' + formatter(encoder(obj, defaults.encoder))];
         }
         return [formatter(prefix) + '=' + formatter(String(obj))];
     }
@@ -894,7 +734,7 @@ var stringify = function stringify( // eslint-disable-line func-name-matching
     }
 
     var objKeys;
-    if (isArray(filter)) {
+    if (Array.isArray(filter)) {
         objKeys = filter;
     } else {
         var keys = Object.keys(obj);
@@ -908,10 +748,10 @@ var stringify = function stringify( // eslint-disable-line func-name-matching
             continue;
         }
 
-        if (isArray(obj)) {
-            pushToArray(values, stringify(
+        if (Array.isArray(obj)) {
+            values = values.concat(stringify(
                 obj[key],
-                typeof generateArrayPrefix === 'function' ? generateArrayPrefix(prefix, key) : prefix,
+                generateArrayPrefix(prefix, key),
                 generateArrayPrefix,
                 strictNullHandling,
                 skipNulls,
@@ -921,11 +761,10 @@ var stringify = function stringify( // eslint-disable-line func-name-matching
                 allowDots,
                 serializeDate,
                 formatter,
-                encodeValuesOnly,
-                charset
+                encodeValuesOnly
             ));
         } else {
-            pushToArray(values, stringify(
+            values = values.concat(stringify(
                 obj[key],
                 prefix + (allowDots ? '.' + key : '[' + key + ']'),
                 generateArrayPrefix,
@@ -937,8 +776,7 @@ var stringify = function stringify( // eslint-disable-line func-name-matching
                 allowDots,
                 serializeDate,
                 formatter,
-                encodeValuesOnly,
-                charset
+                encodeValuesOnly
             ));
         }
     }
@@ -946,63 +784,36 @@ var stringify = function stringify( // eslint-disable-line func-name-matching
     return values;
 };
 
-var normalizeStringifyOptions = function normalizeStringifyOptions(opts) {
-    if (!opts) {
-        return defaults;
-    }
+module.exports = function (object, opts) {
+    var obj = object;
+    var options = opts ? utils.assign({}, opts) : {};
 
-    if (opts.encoder !== null && opts.encoder !== undefined && typeof opts.encoder !== 'function') {
+    if (options.encoder !== null && options.encoder !== undefined && typeof options.encoder !== 'function') {
         throw new TypeError('Encoder has to be a function.');
     }
 
-    var charset = opts.charset || defaults.charset;
-    if (typeof opts.charset !== 'undefined' && opts.charset !== 'utf-8' && opts.charset !== 'iso-8859-1') {
-        throw new TypeError('The charset option must be either utf-8, iso-8859-1, or undefined');
+    var delimiter = typeof options.delimiter === 'undefined' ? defaults.delimiter : options.delimiter;
+    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
+    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : defaults.skipNulls;
+    var encode = typeof options.encode === 'boolean' ? options.encode : defaults.encode;
+    var encoder = typeof options.encoder === 'function' ? options.encoder : defaults.encoder;
+    var sort = typeof options.sort === 'function' ? options.sort : null;
+    var allowDots = typeof options.allowDots === 'undefined' ? false : options.allowDots;
+    var serializeDate = typeof options.serializeDate === 'function' ? options.serializeDate : defaults.serializeDate;
+    var encodeValuesOnly = typeof options.encodeValuesOnly === 'boolean' ? options.encodeValuesOnly : defaults.encodeValuesOnly;
+    if (typeof options.format === 'undefined') {
+        options.format = formats['default'];
+    } else if (!Object.prototype.hasOwnProperty.call(formats.formatters, options.format)) {
+        throw new TypeError('Unknown format option provided.');
     }
-
-    var format = formats['default'];
-    if (typeof opts.format !== 'undefined') {
-        if (!has.call(formats.formatters, opts.format)) {
-            throw new TypeError('Unknown format option provided.');
-        }
-        format = opts.format;
-    }
-    var formatter = formats.formatters[format];
-
-    var filter = defaults.filter;
-    if (typeof opts.filter === 'function' || isArray(opts.filter)) {
-        filter = opts.filter;
-    }
-
-    return {
-        addQueryPrefix: typeof opts.addQueryPrefix === 'boolean' ? opts.addQueryPrefix : defaults.addQueryPrefix,
-        allowDots: typeof opts.allowDots === 'undefined' ? defaults.allowDots : !!opts.allowDots,
-        charset: charset,
-        charsetSentinel: typeof opts.charsetSentinel === 'boolean' ? opts.charsetSentinel : defaults.charsetSentinel,
-        delimiter: typeof opts.delimiter === 'undefined' ? defaults.delimiter : opts.delimiter,
-        encode: typeof opts.encode === 'boolean' ? opts.encode : defaults.encode,
-        encoder: typeof opts.encoder === 'function' ? opts.encoder : defaults.encoder,
-        encodeValuesOnly: typeof opts.encodeValuesOnly === 'boolean' ? opts.encodeValuesOnly : defaults.encodeValuesOnly,
-        filter: filter,
-        formatter: formatter,
-        serializeDate: typeof opts.serializeDate === 'function' ? opts.serializeDate : defaults.serializeDate,
-        skipNulls: typeof opts.skipNulls === 'boolean' ? opts.skipNulls : defaults.skipNulls,
-        sort: typeof opts.sort === 'function' ? opts.sort : null,
-        strictNullHandling: typeof opts.strictNullHandling === 'boolean' ? opts.strictNullHandling : defaults.strictNullHandling
-    };
-};
-
-module.exports = function (object, opts) {
-    var obj = object;
-    var options = normalizeStringifyOptions(opts);
-
+    var formatter = formats.formatters[options.format];
     var objKeys;
     var filter;
 
     if (typeof options.filter === 'function') {
         filter = options.filter;
         obj = filter('', obj);
-    } else if (isArray(options.filter)) {
+    } else if (Array.isArray(options.filter)) {
         filter = options.filter;
         objKeys = filter;
     }
@@ -1014,10 +825,10 @@ module.exports = function (object, opts) {
     }
 
     var arrayFormat;
-    if (opts && opts.arrayFormat in arrayPrefixGenerators) {
-        arrayFormat = opts.arrayFormat;
-    } else if (opts && 'indices' in opts) {
-        arrayFormat = opts.indices ? 'indices' : 'repeat';
+    if (options.arrayFormat in arrayPrefixGenerators) {
+        arrayFormat = options.arrayFormat;
+    } else if ('indices' in options) {
+        arrayFormat = options.indices ? 'indices' : 'repeat';
     } else {
         arrayFormat = 'indices';
     }
@@ -1028,45 +839,35 @@ module.exports = function (object, opts) {
         objKeys = Object.keys(obj);
     }
 
-    if (options.sort) {
-        objKeys.sort(options.sort);
+    if (sort) {
+        objKeys.sort(sort);
     }
 
     for (var i = 0; i < objKeys.length; ++i) {
         var key = objKeys[i];
 
-        if (options.skipNulls && obj[key] === null) {
+        if (skipNulls && obj[key] === null) {
             continue;
         }
-        pushToArray(keys, stringify(
+
+        keys = keys.concat(stringify(
             obj[key],
             key,
             generateArrayPrefix,
-            options.strictNullHandling,
-            options.skipNulls,
-            options.encode ? options.encoder : null,
-            options.filter,
-            options.sort,
-            options.allowDots,
-            options.serializeDate,
-            options.formatter,
-            options.encodeValuesOnly,
-            options.charset
+            strictNullHandling,
+            skipNulls,
+            encode ? encoder : null,
+            filter,
+            sort,
+            allowDots,
+            serializeDate,
+            formatter,
+            encodeValuesOnly
         ));
     }
 
-    var joined = keys.join(options.delimiter);
+    var joined = keys.join(delimiter);
     var prefix = options.addQueryPrefix === true ? '?' : '';
-
-    if (options.charsetSentinel) {
-        if (options.charset === 'iso-8859-1') {
-            // encodeURIComponent('&#10003;'), the "numeric entity" representation of a checkmark
-            prefix += 'utf8=%26%2310003%3B&';
-        } else {
-            // encodeURIComponent('✓')
-            prefix += 'utf8=%E2%9C%93&';
-        }
-    }
 
     return joined.length > 0 ? prefix + joined : '';
 };
@@ -1074,13 +875,13 @@ module.exports = function (object, opts) {
 
 /***/ }),
 
-/***/ 342:
+/***/ 301:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(195);
+var utils = __webpack_require__(179);
 
 var has = Object.prototype.hasOwnProperty;
 
@@ -1088,63 +889,21 @@ var defaults = {
     allowDots: false,
     allowPrototypes: false,
     arrayLimit: 20,
-    charset: 'utf-8',
-    charsetSentinel: false,
-    comma: false,
     decoder: utils.decode,
     delimiter: '&',
     depth: 5,
-    ignoreQueryPrefix: false,
-    interpretNumericEntities: false,
     parameterLimit: 1000,
-    parseArrays: true,
     plainObjects: false,
     strictNullHandling: false
 };
-
-var interpretNumericEntities = function (str) {
-    return str.replace(/&#(\d+);/g, function ($0, numberStr) {
-        return String.fromCharCode(parseInt(numberStr, 10));
-    });
-};
-
-// This is what browsers will submit when the ✓ character occurs in an
-// application/x-www-form-urlencoded body and the encoding of the page containing
-// the form is iso-8859-1, or when the submitted form has an accept-charset
-// attribute of iso-8859-1. Presumably also with other charsets that do not contain
-// the ✓ character, such as us-ascii.
-var isoSentinel = 'utf8=%26%2310003%3B'; // encodeURIComponent('&#10003;')
-
-// These are the percent-encoded utf-8 octets representing a checkmark, indicating that the request actually is utf-8 encoded.
-var charsetSentinel = 'utf8=%E2%9C%93'; // encodeURIComponent('✓')
 
 var parseValues = function parseQueryStringValues(str, options) {
     var obj = {};
     var cleanStr = options.ignoreQueryPrefix ? str.replace(/^\?/, '') : str;
     var limit = options.parameterLimit === Infinity ? undefined : options.parameterLimit;
     var parts = cleanStr.split(options.delimiter, limit);
-    var skipIndex = -1; // Keep track of where the utf8 sentinel was found
-    var i;
 
-    var charset = options.charset;
-    if (options.charsetSentinel) {
-        for (i = 0; i < parts.length; ++i) {
-            if (parts[i].indexOf('utf8=') === 0) {
-                if (parts[i] === charsetSentinel) {
-                    charset = 'utf-8';
-                } else if (parts[i] === isoSentinel) {
-                    charset = 'iso-8859-1';
-                }
-                skipIndex = i;
-                i = parts.length; // The eslint settings do not allow break;
-            }
-        }
-    }
-
-    for (i = 0; i < parts.length; ++i) {
-        if (i === skipIndex) {
-            continue;
-        }
+    for (var i = 0; i < parts.length; ++i) {
         var part = parts[i];
 
         var bracketEqualsPos = part.indexOf(']=');
@@ -1152,23 +911,14 @@ var parseValues = function parseQueryStringValues(str, options) {
 
         var key, val;
         if (pos === -1) {
-            key = options.decoder(part, defaults.decoder, charset);
+            key = options.decoder(part, defaults.decoder);
             val = options.strictNullHandling ? null : '';
         } else {
-            key = options.decoder(part.slice(0, pos), defaults.decoder, charset);
-            val = options.decoder(part.slice(pos + 1), defaults.decoder, charset);
+            key = options.decoder(part.slice(0, pos), defaults.decoder);
+            val = options.decoder(part.slice(pos + 1), defaults.decoder);
         }
-
-        if (val && options.interpretNumericEntities && charset === 'iso-8859-1') {
-            val = interpretNumericEntities(val);
-        }
-
-        if (val && options.comma && val.indexOf(',') > -1) {
-            val = val.split(',');
-        }
-
         if (has.call(obj, key)) {
-            obj[key] = utils.combine(obj[key], val);
+            obj[key] = [].concat(obj[key]).concat(val);
         } else {
             obj[key] = val;
         }
@@ -1184,15 +934,14 @@ var parseObject = function (chain, val, options) {
         var obj;
         var root = chain[i];
 
-        if (root === '[]' && options.parseArrays) {
-            obj = [].concat(leaf);
+        if (root === '[]') {
+            obj = [];
+            obj = obj.concat(leaf);
         } else {
             obj = options.plainObjects ? Object.create(null) : {};
             var cleanRoot = root.charAt(0) === '[' && root.charAt(root.length - 1) === ']' ? root.slice(1, -1) : root;
             var index = parseInt(cleanRoot, 10);
-            if (!options.parseArrays && cleanRoot === '') {
-                obj = { 0: leaf };
-            } else if (
+            if (
                 !isNaN(index)
                 && root !== cleanRoot
                 && String(index) === cleanRoot
@@ -1234,7 +983,8 @@ var parseKeys = function parseQueryStringKeys(givenKey, val, options) {
 
     var keys = [];
     if (parent) {
-        // If we aren't using plain objects, optionally prefix keys that would overwrite object prototype properties
+        // If we aren't using plain objects, optionally prefix keys
+        // that would overwrite object prototype properties
         if (!options.plainObjects && has.call(Object.prototype, parent)) {
             if (!options.allowPrototypes) {
                 return;
@@ -1266,41 +1016,24 @@ var parseKeys = function parseQueryStringKeys(givenKey, val, options) {
     return parseObject(keys, val, options);
 };
 
-var normalizeParseOptions = function normalizeParseOptions(opts) {
-    if (!opts) {
-        return defaults;
-    }
+module.exports = function (str, opts) {
+    var options = opts ? utils.assign({}, opts) : {};
 
-    if (opts.decoder !== null && opts.decoder !== undefined && typeof opts.decoder !== 'function') {
+    if (options.decoder !== null && options.decoder !== undefined && typeof options.decoder !== 'function') {
         throw new TypeError('Decoder has to be a function.');
     }
 
-    if (typeof opts.charset !== 'undefined' && opts.charset !== 'utf-8' && opts.charset !== 'iso-8859-1') {
-        throw new Error('The charset option must be either utf-8, iso-8859-1, or undefined');
-    }
-    var charset = typeof opts.charset === 'undefined' ? defaults.charset : opts.charset;
-
-    return {
-        allowDots: typeof opts.allowDots === 'undefined' ? defaults.allowDots : !!opts.allowDots,
-        allowPrototypes: typeof opts.allowPrototypes === 'boolean' ? opts.allowPrototypes : defaults.allowPrototypes,
-        arrayLimit: typeof opts.arrayLimit === 'number' ? opts.arrayLimit : defaults.arrayLimit,
-        charset: charset,
-        charsetSentinel: typeof opts.charsetSentinel === 'boolean' ? opts.charsetSentinel : defaults.charsetSentinel,
-        comma: typeof opts.comma === 'boolean' ? opts.comma : defaults.comma,
-        decoder: typeof opts.decoder === 'function' ? opts.decoder : defaults.decoder,
-        delimiter: typeof opts.delimiter === 'string' || utils.isRegExp(opts.delimiter) ? opts.delimiter : defaults.delimiter,
-        depth: typeof opts.depth === 'number' ? opts.depth : defaults.depth,
-        ignoreQueryPrefix: opts.ignoreQueryPrefix === true,
-        interpretNumericEntities: typeof opts.interpretNumericEntities === 'boolean' ? opts.interpretNumericEntities : defaults.interpretNumericEntities,
-        parameterLimit: typeof opts.parameterLimit === 'number' ? opts.parameterLimit : defaults.parameterLimit,
-        parseArrays: opts.parseArrays !== false,
-        plainObjects: typeof opts.plainObjects === 'boolean' ? opts.plainObjects : defaults.plainObjects,
-        strictNullHandling: typeof opts.strictNullHandling === 'boolean' ? opts.strictNullHandling : defaults.strictNullHandling
-    };
-};
-
-module.exports = function (str, opts) {
-    var options = normalizeParseOptions(opts);
+    options.ignoreQueryPrefix = options.ignoreQueryPrefix === true;
+    options.delimiter = typeof options.delimiter === 'string' || utils.isRegExp(options.delimiter) ? options.delimiter : defaults.delimiter;
+    options.depth = typeof options.depth === 'number' ? options.depth : defaults.depth;
+    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : defaults.arrayLimit;
+    options.parseArrays = options.parseArrays !== false;
+    options.decoder = typeof options.decoder === 'function' ? options.decoder : defaults.decoder;
+    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : defaults.allowDots;
+    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : defaults.plainObjects;
+    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : defaults.allowPrototypes;
+    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : defaults.parameterLimit;
+    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
 
     if (str === '' || str === null || typeof str === 'undefined') {
         return options.plainObjects ? Object.create(null) : {};
@@ -1324,15 +1057,15 @@ module.exports = function (str, opts) {
 
 /***/ }),
 
-/***/ 85:
+/***/ 76:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var stringify = __webpack_require__(341);
-var parse = __webpack_require__(342);
-var formats = __webpack_require__(196);
+var stringify = __webpack_require__(300);
+var parse = __webpack_require__(301);
+var formats = __webpack_require__(180);
 
 module.exports = {
     formats: formats,
