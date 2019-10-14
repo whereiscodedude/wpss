@@ -49,15 +49,11 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 	 */
 	public function __construct( $parent_post_type ) {
 		$this->parent_post_type  = $parent_post_type;
+		$this->parent_controller = new WP_REST_Posts_Controller( $parent_post_type );
 		$this->namespace         = 'wp/v2';
 		$this->rest_base         = 'revisions';
 		$post_type_object        = get_post_type_object( $parent_post_type );
 		$this->parent_base       = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
-		$this->parent_controller = $post_type_object->get_rest_controller();
-
-		if ( ! $this->parent_controller ) {
-			$this->parent_controller = new WP_REST_Posts_Controller( $parent_post_type );
-		}
 	}
 
 	/**
@@ -134,7 +130,7 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 	 *
 	 * @since 4.7.2
 	 *
-	 * @param int $parent Supplied ID.
+	 * @param int $id Supplied ID.
 	 * @return WP_Post|WP_Error Post object if ID is valid, WP_Error otherwise.
 	 */
 	protected function get_parent( $parent ) {
@@ -305,7 +301,7 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
 		$request_params = $request->get_query_params();
-		$base           = add_query_arg( urlencode_deep( $request_params ), rest_url( sprintf( '%s/%s/%d/%s', $this->namespace, $this->parent_base, $request['parent'], $this->rest_base ) ) );
+		$base           = add_query_arg( $request_params, rest_url( sprintf( '%s/%s/%d/%s', $this->namespace, $this->parent_base, $request['parent'], $this->rest_base ) ) );
 
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
@@ -353,11 +349,6 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 			return $parent;
 		}
 
-		$parent_post_type = get_post_type_object( $parent->post_type );
-		if ( ! current_user_can( $parent_post_type->cap->delete_post, $parent->ID ) ) {
-			return new WP_Error( 'rest_cannot_delete', __( 'Sorry, you are not allowed to delete revisions of this post.' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
 		$revision = $this->get_revision( $request['id'] );
 		if ( is_wp_error( $revision ) ) {
 			return $revision;
@@ -372,7 +363,7 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 	 *
 	 * @since 4.7.0
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error True if the request has access to delete the item, WP_Error object otherwise.
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -392,12 +383,7 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 		}
 
 		$post_type = get_post_type_object( 'revision' );
-
-		if ( ! current_user_can( $post_type->cap->delete_post, $revision->ID ) ) {
-			return new WP_Error( 'rest_cannot_delete', __( 'Sorry, you are not allowed to delete this revision.' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
+		return current_user_can( $post_type->cap->delete_post, $revision->ID );
 	}
 
 	/**
@@ -620,10 +606,6 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
-		}
-
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => "{$this->parent_post_type}-revision",
@@ -700,8 +682,7 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 			$schema['properties']['guid'] = $parent_schema['properties']['guid'];
 		}
 
-		$this->schema = $schema;
-		return $this->add_additional_fields_schema( $this->schema );
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**

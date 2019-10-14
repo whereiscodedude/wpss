@@ -104,8 +104,7 @@ function edit_comment() {
  * @return WP_Comment|false Comment if found. False on failure.
  */
 function get_comment_to_edit( $id ) {
-	$comment = get_comment( $id );
-	if ( ! $comment ) {
+	if ( ! $comment = get_comment( $id ) ) {
 		return false;
 	}
 

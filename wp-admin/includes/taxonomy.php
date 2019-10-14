@@ -53,8 +53,7 @@ function get_category_to_edit( $id ) {
  * @return int|WP_Error
  */
 function wp_create_category( $cat_name, $parent = 0 ) {
-	$id = category_exists( $cat_name, $parent );
-	if ( $id ) {
+	if ( $id = category_exists( $cat_name, $parent ) ) {
 		return $id;
 	}
 
@@ -78,14 +77,10 @@ function wp_create_category( $cat_name, $parent = 0 ) {
 function wp_create_categories( $categories, $post_id = '' ) {
 	$cat_ids = array();
 	foreach ( $categories as $category ) {
-		$id = category_exists( $category );
-		if ( $id ) {
+		if ( $id = category_exists( $category ) ) {
 			$cat_ids[] = $id;
-		} else {
-			$id = wp_create_category( $category );
-			if ( $id ) {
-				$cat_ids[] = $id;
-			}
+		} elseif ( $id = wp_create_category( $category ) ) {
+			$cat_ids[] = $id;
 		}
 	}
 
@@ -305,8 +300,7 @@ function get_terms_to_edit( $post_id, $taxonomy = 'post_tag' ) {
  * @return array|WP_Error
  */
 function wp_create_term( $tag_name, $taxonomy = 'post_tag' ) {
-	$id = term_exists( $tag_name, $taxonomy );
-	if ( $id ) {
+	if ( $id = term_exists( $tag_name, $taxonomy ) ) {
 		return $id;
 	}
 

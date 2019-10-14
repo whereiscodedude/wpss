@@ -152,9 +152,9 @@ class WP_HTTP_Proxy {
 	}
 
 	/**
-	 * Determines whether the request should be sent through a proxy.
+	 * Whether URL should be sent through the proxy server.
 	 *
-	 * We want to keep localhost and the site URL from being sent through the proxy, because
+	 * We want to keep localhost and the site URL from being sent through the proxy server, because
 	 * some proxies can not handle this. We also have the constant available for defining other
 	 * hosts that won't be sent through the proxy.
 	 *
@@ -181,17 +181,17 @@ class WP_HTTP_Proxy {
 		$home = parse_url( get_option( 'siteurl' ) );
 
 		/**
-		 * Filters whether to preempt sending the request through the proxy.
+		 * Filters whether to preempt sending the request through the proxy server.
 		 *
 		 * Returning false will bypass the proxy; returning true will send
 		 * the request through the proxy. Returning null bypasses the filter.
 		 *
 		 * @since 3.5.0
 		 *
-		 * @param bool|null $override Whether to override the request result. Default null.
-		 * @param string    $uri      URL to check.
-		 * @param array     $check    Associative array result of parsing the request URI.
-		 * @param array     $home     Associative array result of parsing the site URL.
+		 * @param null   $override Whether to override the request result. Default null.
+		 * @param string $uri      URL to check.
+		 * @param array  $check    Associative array result of parsing the URI.
+		 * @param array  $home     Associative array result of parsing the site URL.
 		 */
 		$result = apply_filters( 'pre_http_send_through_proxy', null, $uri, $check, $home );
 		if ( ! is_null( $result ) ) {

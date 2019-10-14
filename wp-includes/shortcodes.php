@@ -23,7 +23,7 @@
  *
  *     $out = do_shortcode( $content );
  *
- * @link https://developer.wordpress.org/plugins/shortcodes/
+ * @link https://codex.wordpress.org/Shortcode_API
  *
  * @package WordPress
  * @subpackage Shortcodes
@@ -70,7 +70,7 @@ function add_shortcode( $tag, $callback ) {
 	}
 
 	if ( 0 !== preg_match( '@[<>&/\[\]\x00-\x20=]@', $tag ) ) {
-		/* translators: 1: Shortcode name, 2: Space-separated list of reserved characters. */
+		/* translators: 1: shortcode name, 2: space separated list of reserved characters */
 		$message = sprintf( __( 'Invalid shortcode name: %1$s. Do not use spaces or reserved characters: %2$s' ), $tag, '& / < > [ ] =' );
 		_doing_it_wrong( __FUNCTION__, $message, '4.4.0' );
 		return;
@@ -296,7 +296,7 @@ function do_shortcode_tag( $m ) {
 	$attr = shortcode_parse_atts( $m[3] );
 
 	if ( ! is_callable( $shortcode_tags[ $tag ] ) ) {
-		/* translators: %s: Shortcode tag. */
+		/* translators: %s: shortcode tag */
 		$message = sprintf( __( 'Attempting to parse a shortcode without a valid callback: %s' ), $tag );
 		_doing_it_wrong( __FUNCTION__, $message, '4.3.0' );
 		return $m[0];
@@ -305,12 +305,12 @@ function do_shortcode_tag( $m ) {
 	/**
 	 * Filters whether to call a shortcode callback.
 	 *
-	 * Returning a non-false value from filter will short-circuit the
+	 * Passing a truthy value to the filter will effectively short-circuit the
 	 * shortcode generation process, returning that value instead.
 	 *
 	 * @since 4.7.0
 	 *
-	 * @param false|string $return      Short-circuit return value. Either false or the value to replace the shortcode with.
+	 * @param bool|string $return      Short-circuit return value. Either false or the value to replace the shortcode with.
 	 * @param string       $tag         Shortcode name.
 	 * @param array|string $attr        Shortcode attributes array or empty string.
 	 * @param array        $m           Regular expression match array.
@@ -488,9 +488,8 @@ function get_shortcode_atts_regex() {
  * retrieval of the attributes, since all attributes have to be known.
  *
  * @since 2.5.0
- * @since 5.3.0 Added support of a full shortcode input.
  *
- * @param string $text Any single shortcode of any format or key/value pair string.
+ * @param string $text
  * @return array|string List of attribute values.
  *                      Returns empty array if trim( $text ) == '""'.
  *                      Returns empty string if trim( $text ) == ''.
@@ -499,13 +498,7 @@ function get_shortcode_atts_regex() {
 function shortcode_parse_atts( $text ) {
 	$atts    = array();
 	$pattern = get_shortcode_atts_regex();
-	$text    = trim( preg_replace( "/[\x{00a0}\x{200b}]+/u", ' ', $text ) );
-
-	// Remove everything but attributes from shortcode.
-	if ( preg_match( '#^\[[\w-]+([^\]]*?)\/?\]#', $text, $matches ) ) {
-		$text = $matches[1];
-	}
-
+	$text    = preg_replace( "/[\x{00a0}\x{200b}]+/u", ' ', $text );
 	if ( preg_match_all( $pattern, $text, $match, PREG_SET_ORDER ) ) {
 		foreach ( $match as $m ) {
 			if ( ! empty( $m[1] ) ) {
@@ -523,7 +516,7 @@ function shortcode_parse_atts( $text ) {
 			}
 		}
 
-		// Reject any unclosed HTML elements.
+		// Reject any unclosed HTML elements
 		foreach ( $atts as &$value ) {
 			if ( false !== strpos( $value, '<' ) ) {
 				if ( 1 !== preg_match( '/^[^<]*+(?:<[^>]*+>[^<]*+)*+$/', $value ) ) {
@@ -534,7 +527,6 @@ function shortcode_parse_atts( $text ) {
 	} else {
 		$atts = ltrim( $text );
 	}
-
 	return $atts;
 }
 

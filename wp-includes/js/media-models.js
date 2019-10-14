@@ -817,8 +817,6 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		this.reset( [], { silent: true } );
 		this.observe( attachments );
 
-		// Used for the search results.
-		this.trigger( 'attachments:received', this );
 		return this;
 	},
 	/**
@@ -858,9 +856,6 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 			if ( this === attachments.mirroring ) {
 				deferred.resolveWith( this );
 			}
-
-			// Used for the search results.
-			attachments.trigger( 'attachments:received', this );
 		});
 
 		return deferred.promise();

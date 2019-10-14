@@ -206,12 +206,9 @@ function add_user_to_blog( $blog_id, $user_id, $role ) {
 	 * @param int    $blog_id Blog ID.
 	 */
 	do_action( 'add_user_to_blog', $user_id, $role, $blog_id );
-
-	clean_user_cache( $user_id );
+	wp_cache_delete( $user_id, 'users' );
 	wp_cache_delete( $blog_id . '_user_count', 'blog-details' );
-
 	restore_current_blog();
-
 	return true;
 }
 
@@ -522,7 +519,7 @@ function wpmu_validate_user_signup( $user_name, $user_email ) {
 	$signup = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->signups WHERE user_login = %s", $user_name ) );
 	if ( $signup != null ) {
 		$registered_at = mysql2date( 'U', $signup->registered );
-		$now           = time();
+		$now           = current_time( 'timestamp', true );
 		$diff          = $now - $registered_at;
 		// If registered more than two days ago, cancel registration and let this signup go through.
 		if ( $diff > 2 * DAY_IN_SECONDS ) {
@@ -534,7 +531,7 @@ function wpmu_validate_user_signup( $user_name, $user_email ) {
 
 	$signup = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->signups WHERE user_email = %s", $user_email ) );
 	if ( $signup != null ) {
-		$diff = time() - mysql2date( 'U', $signup->registered );
+		$diff = current_time( 'timestamp', true ) - mysql2date( 'U', $signup->registered );
 		// If registered more than two days ago, cancel registration and let this signup go through.
 		if ( $diff > 2 * DAY_IN_SECONDS ) {
 			$wpdb->delete( $wpdb->signups, array( 'user_email' => $user_email ) );
@@ -586,7 +583,7 @@ function wpmu_validate_user_signup( $user_name, $user_email ) {
  *
  * @since MU (3.0.0)
  *
- * @global wpdb   $wpdb   WordPress database abstraction object.
+ * @global wpdb   $wpdb
  * @global string $domain
  *
  * @param string         $blogname   The blog name provided by the user. Must be unique.
@@ -639,7 +636,7 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 	$minimum_site_name_length = apply_filters( 'minimum_site_name_length', 4 );
 
 	if ( strlen( $blogname ) < $minimum_site_name_length ) {
-		/* translators: %s: Minimum site name length. */
+		/* translators: %s: minimum site name length */
 		$errors->add( 'blogname', sprintf( _n( 'Site name must be at least %s character.', 'Site name must be at least %s characters.', $minimum_site_name_length ), number_format_i18n( $minimum_site_name_length ) ) );
 	}
 
@@ -692,7 +689,7 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 	// Has someone already signed up for this domain?
 	$signup = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->signups WHERE domain = %s AND path = %s", $mydomain, $path ) ); // TODO: Check email too?
 	if ( ! empty( $signup ) ) {
-		$diff = time() - mysql2date( 'U', $signup->registered );
+		$diff = current_time( 'timestamp', true ) - mysql2date( 'U', $signup->registered );
 		// If registered more than two days ago, cancel registration and let this signup go through.
 		if ( $diff > 2 * DAY_IN_SECONDS ) {
 			$wpdb->delete(
@@ -944,7 +941,6 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $us
 		 */
 		apply_filters(
 			'wpmu_signup_blog_notification_email',
-			/* translators: New site notification email. 1: Activation URL, 2: New site URL. */
 			__( "To activate your blog, please click the following link:\n\n%1\$s\n\nAfter you activate, you will receive *another email* with your login.\n\nAfter you activate, you can visit your site here:\n\n%2\$s" ),
 			$domain,
 			$path,
@@ -958,7 +954,7 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $us
 		esc_url( "http://{$domain}{$path}" ),
 		$key
 	);
-
+	// TODO: Don't hard code activation link.
 	$subject = sprintf(
 		/**
 		 * Filters the subject of the new blog notification email.
@@ -976,7 +972,7 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $us
 		 */
 		apply_filters(
 			'wpmu_signup_blog_notification_subject',
-			/* translators: New site notification email subject. 1: Network title, 2: New site URL. */
+			/* translators: New site notification email subject. 1: Network name, 2: New site URL */
 			_x( '[%1$s] Activate %2$s', 'New site notification email subject' ),
 			$domain,
 			$path,
@@ -989,7 +985,6 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user_login, $us
 		$from_name,
 		esc_url( 'http://' . $domain . $path )
 	);
-
 	wp_mail( $user_email, wp_specialchars_decode( $subject ), $message, $message_headers );
 
 	if ( $switched_locale ) {
@@ -1062,7 +1057,6 @@ function wpmu_signup_user_notification( $user_login, $user_email, $key, $meta = 
 		 */
 		apply_filters(
 			'wpmu_signup_user_notification_email',
-			/* translators: New user notification email. %s: Activation URL. */
 			__( "To activate your user, please click the following link:\n\n%s\n\nAfter you activate, you will receive *another email* with your login." ),
 			$user_login,
 			$user_email,
@@ -1071,7 +1065,7 @@ function wpmu_signup_user_notification( $user_login, $user_email, $key, $meta = 
 		),
 		site_url( "wp-activate.php?key=$key" )
 	);
-
+	// TODO: Don't hard code activation link.
 	$subject = sprintf(
 		/**
 		 * Filters the subject of the notification email of new user signup.
@@ -1086,7 +1080,7 @@ function wpmu_signup_user_notification( $user_login, $user_email, $key, $meta = 
 		 */
 		apply_filters(
 			'wpmu_signup_user_notification_subject',
-			/* translators: New user notification email subject. 1: Network title, 2: New user login. */
+			/* translators: New user notification email subject. 1: Network name, 2: New user login */
 			_x( '[%1$s] Activate %2$s', 'New user notification email subject' ),
 			$user_login,
 			$user_email,
@@ -1096,7 +1090,6 @@ function wpmu_signup_user_notification( $user_login, $user_email, $key, $meta = 
 		$from_name,
 		$user_login
 	);
-
 	wp_mail( $user_email, wp_specialchars_decode( $subject ), $message, $message_headers );
 
 	if ( $switched_locale ) {
@@ -1382,8 +1375,8 @@ function newblog_notify_siteadmin( $blog_id, $deprecated = '' ) {
 	$siteurl  = site_url();
 	restore_current_blog();
 
+	/* translators: New site notification email. 1: Site URL, 2: User IP address, 3: Settings screen URL */
 	$msg = sprintf(
-		/* translators: New site notification email. 1: Site URL, 2: User IP address, 3: URL to Network Settings screen. */
 		__(
 			'New Site: %1$s
 URL: %2$s
@@ -1406,9 +1399,7 @@ Disable these notifications: %4$s'
 	 */
 	$msg = apply_filters( 'newblog_notify_siteadmin', $msg );
 
-	/* translators: New site notification email subject. %s: New site URL. */
 	wp_mail( $email, sprintf( __( 'New Site Registration: %s' ), $siteurl ), $msg );
-
 	return true;
 }
 
@@ -1437,9 +1428,8 @@ function newuser_notify_siteadmin( $user_id ) {
 	$user = get_userdata( $user_id );
 
 	$options_site_url = esc_url( network_admin_url( 'settings.php' ) );
-
+	/* translators: New user notification email. 1: User login, 2: User IP address, 3: Settings screen URL */
 	$msg = sprintf(
-		/* translators: New user notification email. 1: User login, 2: User IP address, 3: URL to Network Settings screen. */
 		__(
 			'New User: %1$s
 Remote IP address: %2$s
@@ -1461,10 +1451,7 @@ Disable these notifications: %3$s'
 	 * @param WP_User $user WP_User instance of the new user.
 	 */
 	$msg = apply_filters( 'newuser_notify_siteadmin', $msg, $user );
-
-	/* translators: New user notification email subject. %s: User login. */
 	wp_mail( $email, sprintf( __( 'New User Registration: %s' ), $user->user_login ), $msg );
-
 	return true;
 }
 
@@ -1612,7 +1599,7 @@ We hope you enjoy your new site. Thanks!
 		$current_network->site_name = 'WordPress';
 	}
 
-	/* translators: New site notification email subject. 1: Network title, 2: New site title. */
+	/* translators: New site notification email subject. 1: Network name, 2: New site name */
 	$subject = __( 'New %1$s Site: %2$s' );
 
 	/**
@@ -1623,7 +1610,6 @@ We hope you enjoy your new site. Thanks!
 	 * @param string $subject Subject of the email.
 	 */
 	$subject = apply_filters( 'update_welcome_subject', sprintf( $subject, $current_network->site_name, wp_unslash( $title ) ) );
-
 	wp_mail( $user->user_email, wp_specialchars_decode( $subject ), $message, $message_headers );
 
 	if ( $switched_locale ) {
@@ -1704,7 +1690,7 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 		$current_network->site_name = 'WordPress';
 	}
 
-	/* translators: New user notification email subject. 1: Network title, 2: New user login. */
+	/* translators: New user notification email subject. 1: Network name, 2: New user login */
 	$subject = __( 'New %1$s User: %2$s' );
 
 	/**
@@ -1715,7 +1701,6 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 	 * @param string $subject Subject of the email.
 	 */
 	$subject = apply_filters( 'update_welcome_user_subject', sprintf( $subject, $current_network->site_name, $user->user_login ) );
-
 	wp_mail( $user->user_email, wp_specialchars_decode( $subject ), $message, $message_headers );
 
 	if ( $switched_locale ) {
@@ -1791,6 +1776,80 @@ function get_most_recent_post_of_user( $user_id ) {
 }
 
 // Misc functions
+
+/**
+ * Get the size of a directory.
+ *
+ * A helper function that is used primarily to check whether
+ * a blog has exceeded its allowed upload space.
+ *
+ * @since MU (3.0.0)
+ *
+ * @param string $directory Full path of a directory.
+ * @return int Size of the directory in MB.
+ */
+function get_dirsize( $directory ) {
+	$dirsize = get_transient( 'dirsize_cache' );
+	if ( is_array( $dirsize ) && isset( $dirsize[ $directory ]['size'] ) ) {
+		return $dirsize[ $directory ]['size'];
+	}
+
+	if ( ! is_array( $dirsize ) ) {
+		$dirsize = array();
+	}
+
+	// Exclude individual site directories from the total when checking the main site,
+	// as they are subdirectories and should not be counted.
+	if ( is_main_site() ) {
+		$dirsize[ $directory ]['size'] = recurse_dirsize( $directory, $directory . '/sites' );
+	} else {
+		$dirsize[ $directory ]['size'] = recurse_dirsize( $directory );
+	}
+
+	set_transient( 'dirsize_cache', $dirsize, HOUR_IN_SECONDS );
+	return $dirsize[ $directory ]['size'];
+}
+
+/**
+ * Get the size of a directory recursively.
+ *
+ * Used by get_dirsize() to get a directory's size when it contains
+ * other directories.
+ *
+ * @since MU (3.0.0)
+ * @since 4.3.0 $exclude parameter added.
+ *
+ * @param string $directory Full path of a directory.
+ * @param string $exclude   Optional. Full path of a subdirectory to exclude from the total.
+ * @return int|false Size in MB if a valid directory. False if not.
+ */
+function recurse_dirsize( $directory, $exclude = null ) {
+	$size = 0;
+
+	$directory = untrailingslashit( $directory );
+
+	if ( ! file_exists( $directory ) || ! is_dir( $directory ) || ! is_readable( $directory ) || $directory === $exclude ) {
+		return false;
+	}
+
+	if ( $handle = opendir( $directory ) ) {
+		while ( ( $file = readdir( $handle ) ) !== false ) {
+			$path = $directory . '/' . $file;
+			if ( $file != '.' && $file != '..' ) {
+				if ( is_file( $path ) ) {
+					$size += filesize( $path );
+				} elseif ( is_dir( $path ) ) {
+					$handlesize = recurse_dirsize( $path, $exclude );
+					if ( $handlesize > 0 ) {
+						$size += $handlesize;
+					}
+				}
+			}
+		}
+		closedir( $handle );
+	}
+	return $size;
+}
 
 /**
  * Check an array of MIME types against a whitelist.
@@ -1995,7 +2054,7 @@ function upload_is_file_too_big( $upload ) {
 	}
 
 	if ( strlen( $upload['bits'] ) > ( KB_IN_BYTES * get_site_option( 'fileupload_maxk', 1500 ) ) ) {
-		/* translators: %s: Maximum allowed file size in kilobytes. */
+		/* translators: %s: maximum allowed file size in kilobytes */
 		return sprintf( __( 'This file is too big. Files must be less than %s KB in size.' ) . '<br />', get_site_option( 'fileupload_maxk', 1500 ) );
 	}
 
@@ -2039,24 +2098,21 @@ function signup_nonce_check( $result ) {
  * @since MU (3.0.0)
  */
 function maybe_redirect_404() {
-	if ( is_main_site() && is_404() && defined( 'NOBLOGREDIRECT' ) ) {
-		/**
-		 * Filters the redirect URL for 404s on the main site.
-		 *
-		 * The filter is only evaluated if the NOBLOGREDIRECT constant is defined.
-		 *
-		 * @since 3.0.0
-		 *
-		 * @param string $no_blog_redirect The redirect URL defined in NOBLOGREDIRECT.
-		 */
-		$destination = apply_filters( 'blog_redirect_404', NOBLOGREDIRECT );
-		if ( $destination ) {
-			if ( $destination == '%siteurl%' ) {
-				$destination = network_home_url();
-			}
-			wp_redirect( $destination );
-			exit();
+	/**
+	 * Filters the redirect URL for 404s on the main site.
+	 *
+	 * The filter is only evaluated if the NOBLOGREDIRECT constant is defined.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param string $no_blog_redirect The redirect URL defined in NOBLOGREDIRECT.
+	 */
+	if ( is_main_site() && is_404() && defined( 'NOBLOGREDIRECT' ) && ( $destination = apply_filters( 'blog_redirect_404', NOBLOGREDIRECT ) ) ) {
+		if ( $destination == '%siteurl%' ) {
+			$destination = network_home_url();
 		}
+		wp_redirect( $destination );
+		exit();
 	}
 }
 
@@ -2087,25 +2143,10 @@ function maybe_add_existing_user_to_blog() {
 	}
 
 	if ( empty( $details ) || is_wp_error( add_existing_user_to_blog( $details ) ) ) {
-		wp_die(
-			sprintf(
-				/* translators: %s: Home URL. */
-				__( 'An error occurred adding you to this site. Back to the <a href="%s">homepage</a>.' ),
-				home_url()
-			)
-		);
+		wp_die( sprintf( __( 'An error occurred adding you to this site. Back to the <a href="%s">homepage</a>.' ), home_url() ) );
 	}
 
-	wp_die(
-		sprintf(
-			/* translators: 1: Home URL, 2: Admin URL. */
-			__( 'You have been added to this site. Please visit the <a href="%1$s">homepage</a> or <a href="%2$s">log in</a> using your username and password.' ),
-			home_url(),
-			admin_url()
-		),
-		__( 'WordPress &rsaquo; Success' ),
-		array( 'response' => 200 )
-	);
+	wp_die( sprintf( __( 'You have been added to this site. Please visit the <a href="%1$s">homepage</a> or <a href="%2$s">log in</a> using your username and password.' ), home_url(), admin_url() ), __( 'WordPress &rsaquo; Success' ), array( 'response' => 200 ) );
 }
 
 /**
@@ -2285,7 +2326,7 @@ function force_ssl_content( $force = '' ) {
  * @param string $url URL
  * @return string URL with https as the scheme
  */
-function filter_SSL( $url ) {  // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
+function filter_SSL( $url ) {
 	if ( ! is_string( $url ) ) {
 		return get_bloginfo( 'url' ); // Return home blog url with proper scheme
 	}
@@ -2424,19 +2465,19 @@ function wp_update_network_user_counts( $network_id = null ) {
 }
 
 /**
- * Returns the space used by the current site.
+ * Returns the space used by the current blog.
  *
  * @since 3.5.0
  *
- * @return int Used space in megabytes.
+ * @return int Used space in megabytes
  */
 function get_space_used() {
 	/**
-	 * Filters the amount of storage space used by the current site, in megabytes.
+	 * Filters the amount of storage space used by the current site.
 	 *
 	 * @since 3.5.0
 	 *
-	 * @param int|false $space_used The amount of used space, in megabytes. Default false.
+	 * @param int|bool $space_used The amount of used space, in megabytes. Default false.
 	 */
 	$space_used = apply_filters( 'pre_get_space_used', false );
 	if ( false === $space_used ) {
@@ -2678,15 +2719,7 @@ All at ###SITENAME###
 	$content      = str_replace( '###SITENAME###', wp_specialchars_decode( get_site_option( 'site_name' ), ENT_QUOTES ), $content );
 	$content      = str_replace( '###SITEURL###', network_home_url(), $content );
 
-	wp_mail(
-		$value,
-		sprintf(
-			/* translators: Email change notification email subject. %s: Network title. */
-			__( '[%s] Network Admin Email Change Request' ),
-			wp_specialchars_decode( get_site_option( 'site_name' ), ENT_QUOTES )
-		),
-		$content
-	);
+	wp_mail( $value, sprintf( __( '[%s] New Network Admin Email Address' ), wp_specialchars_decode( get_site_option( 'site_name' ), ENT_QUOTES ) ), $content );
 
 	if ( $switched_locale ) {
 		restore_previous_locale();
@@ -2744,8 +2777,8 @@ All at ###SITENAME###
 
 	$email_change_email = array(
 		'to'      => $old_email,
-		/* translators: Network admin email change notification email subject. %s: Network title. */
-		'subject' => __( '[%s] Network Admin Email Changed' ),
+		/* translators: Network admin email change notification email subject. %s: Network title */
+		'subject' => __( '[%s] Notice of Network Admin Email Change' ),
 		'message' => $email_change_text,
 		'headers' => '',
 	);

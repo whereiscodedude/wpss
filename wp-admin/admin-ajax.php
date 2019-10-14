@@ -24,9 +24,6 @@ require_once( dirname( dirname( __FILE__ ) ) . '/wp-load.php' );
 /** Allow for cross-domain requests (from the front end). */
 send_origin_headers();
 
-header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
-header( 'X-Robots-Tag: noindex' );
-
 // Require an action parameter
 if ( empty( $_REQUEST['action'] ) ) {
 	wp_die( '0', 400 );
@@ -37,6 +34,9 @@ require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 
 /** Load Ajax Handlers for WordPress Core */
 require_once( ABSPATH . 'wp-admin/includes/ajax-actions.php' );
+
+@header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+@header( 'X-Robots-Tag: noindex' );
 
 send_nosniff_header();
 nocache_headers();
@@ -53,7 +53,6 @@ $core_actions_get = array(
 	'autocomplete-user',
 	'dashboard-widgets',
 	'logged-in',
-	'rest-nonce',
 );
 
 $core_actions_post = array(
@@ -106,7 +105,6 @@ $core_actions_post = array(
 	'send-link-to-editor',
 	'send-attachment-to-editor',
 	'save-attachment-order',
-	'media-create-image-subsizes',
 	'heartbeat',
 	'get-revision-diffs',
 	'save-user-color-scheme',
@@ -133,12 +131,6 @@ $core_actions_post = array(
 	'edit-theme-plugin-file',
 	'wp-privacy-export-personal-data',
 	'wp-privacy-erase-personal-data',
-	'health-check-site-status-result',
-	'health-check-dotorg-communication',
-	'health-check-is-in-debug-mode',
-	'health-check-background-updates',
-	'health-check-loopback-requests',
-	'health-check-get-sizes',
 );
 
 // Deprecated

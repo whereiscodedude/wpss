@@ -15,12 +15,7 @@ if ( empty( $_REQUEST['tag_ID'] ) ) {
 	if ( ! empty( $taxnow ) ) {
 		$sendback = add_query_arg( array( 'taxonomy' => $taxnow ), $sendback );
 	}
-
-	if ( 'post' !== get_current_screen()->post_type ) {
-		$sendback = add_query_arg( 'post_type', get_current_screen()->post_type, $sendback );
-	}
-
-	wp_redirect( esc_url_raw( $sendback ) );
+	wp_redirect( esc_url( $sendback ) );
 	exit;
 }
 

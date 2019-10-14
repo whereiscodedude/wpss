@@ -1274,8 +1274,6 @@ $document.ready( function() {
 		init: function() {
 			var self = this;
 
-			this.maybeDisableSortables = this.maybeDisableSortables.bind( this );
-
 			// Modify functionality based on custom activate/deactivate event
 			$document.on( 'wp-responsive-activate.wp-responsive', function() {
 				self.activate();
@@ -1315,31 +1313,13 @@ $document.ready( function() {
 			$document.on( 'wp-window-resized.wp-responsive', $.proxy( this.trigger, this ) );
 
 			// This needs to run later as UI Sortable may be initialized later on $(document).ready().
-			$window.on( 'load.wp-responsive', this.maybeDisableSortables );
-			$document.on( 'postbox-toggled', this.maybeDisableSortables );
+			$window.on( 'load.wp-responsive', function() {
+				var width = navigator.userAgent.indexOf('AppleWebKit/') > -1 ? $window.width() : window.innerWidth;
 
-			// When the screen columns are changed, potentially disable sortables.
-			$( '#screen-options-wrap input' ).on( 'click', this.maybeDisableSortables );
-		},
-
-		/**
-		 * Disable sortables if there is only one metabox, or the screen is in one column mode. Otherwise, enable sortables.
-		 *
-		 * @since 5.3.0
-		 *
-		 * @returns {void}
-		 */
-		maybeDisableSortables: function() {
-			var width = navigator.userAgent.indexOf('AppleWebKit/') > -1 ? $window.width() : window.innerWidth;
-
-			if (
-				( width <= 782 ) ||
-				( 1 >= $sortables.find( '.ui-sortable-handle:visible' ).length && jQuery( '.columns-prefs-1 input' ).prop( 'checked' ) )
-			) {
-				this.disableSortables();
-			} else {
-				this.enableSortables();
-			}
+				if ( width <= 782 ) {
+					self.disableSortables();
+				}
+			});
 		},
 
 		/**
@@ -1376,8 +1356,7 @@ $document.ready( function() {
 		deactivate: function() {
 			setPinMenu();
 			$adminmenu.removeData('wp-responsive');
-
-			this.maybeDisableSortables();
+			this.enableSortables();
 		},
 
 		/**
@@ -1412,8 +1391,6 @@ $document.ready( function() {
 			} else {
 				this.disableOverlay();
 			}
-
-			this.maybeDisableSortables();
 		},
 
 		/**
@@ -1462,7 +1439,6 @@ $document.ready( function() {
 			if ( $sortables.length ) {
 				try {
 					$sortables.sortable( 'disable' );
-					$sortables.find( '.ui-sortable-handle' ).addClass( 'is-non-sortable' );
 				} catch ( e ) {}
 			}
 		},
@@ -1478,7 +1454,6 @@ $document.ready( function() {
 			if ( $sortables.length ) {
 				try {
 					$sortables.sortable( 'enable' );
-					$sortables.find( '.ui-sortable-handle' ).removeClass( 'is-non-sortable' );
 				} catch ( e ) {}
 			}
 		}

@@ -103,8 +103,7 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 	 *
 	 * @since 4.8.1
 	 *
-	 * @global WP_Post $post Global post object.
-	 *
+	 * @global WP_Post $post
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
 	 * @param array $instance Settings for the current Custom HTML widget instance.
@@ -143,9 +142,6 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-text.php */
 		$content = apply_filters( 'widget_text', $instance['content'], $simulated_text_widget_instance, $this );
-
-		// Adds noreferrer and noopener relationships, without duplicating values, to all HTML A elements that have a target.
-		$content = wp_targeted_link_rel( $content );
 
 		/**
 		 * Filters the content of the Custom HTML widget.
@@ -222,9 +218,9 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 
 		$l10n = array(
 			'errorNotice' => array(
-				/* translators: %d: Error count. */
+				/* translators: %d: error count */
 				'singular' => _n( 'There is %d error which must be fixed before you can save.', 'There are %d errors which must be fixed before you can save.', 1 ),
-				/* translators: %d: Error count. */
+				/* translators: %d: error count */
 				'plural'   => _n( 'There is %d error which must be fixed before you can save.', 'There are %d errors which must be fixed before you can save.', 2 ), // @todo This is lacking, as some languages have a dedicated dual form. For proper handling of plurals in JS, see #20491.
 			),
 		);
@@ -304,13 +300,13 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 		if ( 'false' !== wp_get_current_user()->syntax_highlighting ) {
 			$content .= '<p>';
 			$content .= sprintf(
-				/* translators: 1: Link to user profile, 2: Additional link attributes, 3: Accessibility text. */
+				/* translators: 1: link to user profile, 2: additional link attributes, 3: accessibility text */
 				__( 'The edit field automatically highlights code syntax. You can disable this in your <a href="%1$s" %2$s>user profile%3$s</a> to work in plain text mode.' ),
 				esc_url( get_edit_profile_url() ),
 				'class="external-link" target="_blank"',
 				sprintf(
 					'<span class="screen-reader-text"> %s</span>',
-					/* translators: Accessibility text. */
+					/* translators: accessibility text */
 					__( '(opens in a new tab)' )
 				)
 			);

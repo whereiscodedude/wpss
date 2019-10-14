@@ -45,7 +45,7 @@ class WP_Widget_Links extends WP_Widget {
 		$show_images      = isset( $instance['images'] ) ? $instance['images'] : true;
 		$category         = isset( $instance['category'] ) ? $instance['category'] : false;
 		$orderby          = isset( $instance['orderby'] ) ? $instance['orderby'] : 'name';
-		$order            = 'rating' === $orderby ? 'DESC' : 'ASC';
+		$order            = $orderby == 'rating' ? 'DESC' : 'ASC';
 		$limit            = isset( $instance['limit'] ) ? $instance['limit'] : -1;
 
 		$before_widget = preg_replace( '/id="[^"]*"/', 'id="%id"', $args['before_widget'] );
@@ -137,9 +137,8 @@ class WP_Widget_Links extends WP_Widget {
 				'limit'       => -1,
 			)
 		);
-		$link_cats = get_terms( array( 'taxonomy' => 'link_category' ) );
-		$limit     = intval( $instance['limit'] );
-		if ( ! $limit ) {
+		$link_cats = get_terms( 'link_category' );
+		if ( ! $limit = intval( $instance['limit'] ) ) {
 			$limit = -1;
 		}
 		?>
@@ -175,7 +174,7 @@ class WP_Widget_Links extends WP_Widget {
 		</p>
 		<p>
 		<label for="<?php echo $this->get_field_id( 'limit' ); ?>"><?php _e( 'Number of links to show:' ); ?></label>
-		<input id="<?php echo $this->get_field_id( 'limit' ); ?>" name="<?php echo $this->get_field_name( 'limit' ); ?>" type="text" value="<?php echo ( -1 !== $limit ) ? intval( $limit ) : ''; ?>" size="3" />
+		<input id="<?php echo $this->get_field_id( 'limit' ); ?>" name="<?php echo $this->get_field_name( 'limit' ); ?>" type="text" value="<?php echo $limit == -1 ? '' : intval( $limit ); ?>" size="3" />
 		</p>
 		<?php
 	}
