@@ -50,6 +50,7 @@ class Automatic_Upgrader_Skin extends WP_Upgrader_Skin {
 	}
 
 	/**
+	 *
 	 * @return array
 	 */
 	public function get_upgrade_messages() {
@@ -57,10 +58,10 @@ class Automatic_Upgrader_Skin extends WP_Upgrader_Skin {
 	}
 
 	/**
+	 *
 	 * @param string|array|WP_Error $data
-	 * @param mixed                 ...$args Optional text replacements.
 	 */
-	public function feedback( $data, ...$args ) {
+	public function feedback( $data ) {
 		if ( is_wp_error( $data ) ) {
 			$string = $data->get_error_message();
 		} elseif ( is_array( $data ) ) {
@@ -68,34 +69,30 @@ class Automatic_Upgrader_Skin extends WP_Upgrader_Skin {
 		} else {
 			$string = $data;
 		}
-		if ( ! empty( $this->upgrader->strings[ $string ] ) ) {
+		if ( ! empty( $this->upgrader->strings[ $string ] ) )
 			$string = $this->upgrader->strings[ $string ];
-		}
 
 		if ( strpos( $string, '%' ) !== false ) {
-			if ( ! empty( $args ) ) {
+			$args = func_get_args();
+			$args = array_splice( $args, 1 );
+			if ( ! empty( $args ) )
 				$string = vsprintf( $string, $args );
-			}
 		}
 
 		$string = trim( $string );
 
 		// Only allow basic HTML in the messages, as it'll be used in emails/logs rather than direct browser output.
-		$string = wp_kses(
-			$string,
-			array(
-				'a'      => array(
-					'href' => true,
-				),
-				'br'     => true,
-				'em'     => true,
-				'strong' => true,
-			)
-		);
+		$string = wp_kses( $string, array(
+			'a' => array(
+				'href' => true
+			),
+			'br' => true,
+			'em' => true,
+			'strong' => true,
+		) );
 
-		if ( empty( $string ) ) {
+		if ( empty( $string ) )
 			return;
-		}
 
 		$this->messages[] = $string;
 	}
@@ -110,8 +107,7 @@ class Automatic_Upgrader_Skin extends WP_Upgrader_Skin {
 	 */
 	public function footer() {
 		$output = ob_get_clean();
-		if ( ! empty( $output ) ) {
+		if ( ! empty( $output ) )
 			$this->feedback( $output );
-		}
 	}
 }
