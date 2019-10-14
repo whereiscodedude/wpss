@@ -10,32 +10,18 @@
 /** Load WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
-$action = ( isset( $_GET['action'] ) ) ? $_GET['action'] : '';
+if ( ! is_multisite() )
+	wp_die( __( 'Multisite support is not enabled.' ) );
 
-if ( empty( $action ) ) {
+if ( empty( $_GET['action'] ) ) {
 	wp_redirect( network_admin_url() );
 	exit;
 }
 
-/**
- * Fires just before the action handler in several Network Admin screens.
- *
- * This hook fires on multiple screens in the Multisite Network Admin,
- * including Users, Network Settings, and Site Settings.
- *
- * @since 3.0.0
- */
-do_action( 'wpmuadminedit' );
+do_action( 'wpmuadminedit' , '' );
 
-/**
- * Fires the requested handler action.
- *
- * The dynamic portion of the hook name, `$action`, refers to the name
- * of the requested action derived from the `GET` request.
- *
- * @since 3.1.0
- */
-do_action( "network_admin_edit_{$action}" );
+// Let plugins use us as a post handler easily
+do_action( 'network_admin_edit_' . $_GET['action'] );
 
 wp_redirect( network_admin_url() );
 exit();
