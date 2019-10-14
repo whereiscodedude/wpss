@@ -11,8 +11,6 @@
 
 jQuery(document).ready(function($) {
 
-	var addingTerm = false;
-
 	/**
 	 * Adds an event handler to the delete term link on the term overview page.
 	 *
@@ -104,14 +102,6 @@ jQuery(document).ready(function($) {
 		if ( ! validateForm( form ) )
 			return false;
 
-		if ( addingTerm ) {
-			// If we're adding a term, noop the button to avoid duplicate requests.
-			return false;
-		}
-
-		addingTerm = true;
-		form.find( '.submit .spinner' ).addClass( 'is-active' );
-
 		/**
 		 * Does a request to the server to add a new term to the database
 		 *
@@ -121,9 +111,6 @@ jQuery(document).ready(function($) {
 		 */
 		$.post(ajaxurl, $('#addtag').serialize(), function(r){
 			var res, parent, term, indent, i;
-
-			addingTerm = false;
-			form.find( '.submit .spinner' ).removeClass( 'is-active' );
 
 			$('#ajax-response').empty();
 			res = wpAjax.parseAjaxResponse( r, 'ajax-response' );

@@ -77,13 +77,10 @@ class WP_Ajax_Upgrader_Skin extends Automatic_Upgrader_Skin {
 	 * Stores a log entry for an error.
 	 *
 	 * @since 4.6.0
-	 * @since 5.3.0 Formalized the existing `...$args` parameter by adding it
-	 *              to the function signature.
 	 *
-	 * @param string|WP_Error $errors  Errors.
-	 * @param mixed           ...$args Optional text replacements.
+	 * @param string|WP_Error $errors Errors.
 	 */
-	public function error( $errors, ...$args ) {
+	public function error( $errors ) {
 		if ( is_string( $errors ) ) {
 			$string = $errors;
 			if ( ! empty( $this->upgrader->strings[ $string ] ) ) {
@@ -91,40 +88,41 @@ class WP_Ajax_Upgrader_Skin extends Automatic_Upgrader_Skin {
 			}
 
 			if ( false !== strpos( $string, '%' ) ) {
+				$args = func_get_args();
+				$args = array_splice( $args, 1 );
 				if ( ! empty( $args ) ) {
 					$string = vsprintf( $string, $args );
 				}
 			}
 
-			// Count existing errors to generate a unique error code.
+			// Count existing errors to generate an unique error code.
 			$errors_count = count( $this->errors->get_error_codes() );
-			$this->errors->add( 'unknown_upgrade_error_' . ( $errors_count + 1 ), $string );
+			$this->errors->add( 'unknown_upgrade_error_' . $errors_count + 1, $string );
 		} elseif ( is_wp_error( $errors ) ) {
 			foreach ( $errors->get_error_codes() as $error_code ) {
 				$this->errors->add( $error_code, $errors->get_error_message( $error_code ), $errors->get_error_data( $error_code ) );
 			}
 		}
 
-		parent::error( $errors, ...$args );
+		$args = func_get_args();
+		call_user_func_array( array( $this, 'parent::error' ), $args );
 	}
 
 	/**
 	 * Stores a log entry.
 	 *
 	 * @since 4.6.0
-	 * @since 5.3.0 Formalized the existing `...$args` parameter by adding it
-	 *              to the function signature.
 	 *
-	 * @param string|array|WP_Error $data    Log entry data.
-	 * @param mixed                 ...$args Optional text replacements.
+	 * @param string|array|WP_Error $data Log entry data.
 	 */
-	public function feedback( $data, ...$args ) {
+	public function feedback( $data ) {
 		if ( is_wp_error( $data ) ) {
 			foreach ( $data->get_error_codes() as $error_code ) {
 				$this->errors->add( $error_code, $data->get_error_message( $error_code ), $data->get_error_data( $error_code ) );
 			}
 		}
 
-		parent::feedback( $data, ...$args );
+		$args = func_get_args();
+		call_user_func_array( array( $this, 'parent::feedback' ), $args );
 	}
 }

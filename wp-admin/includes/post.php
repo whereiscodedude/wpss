@@ -170,10 +170,10 @@ function _wp_translate_postdata( $update = false, $post_data = null ) {
 		$hh                     = $post_data['hh'];
 		$mn                     = $post_data['mn'];
 		$ss                     = $post_data['ss'];
-		$aa                     = ( $aa <= 0 ) ? gmdate( 'Y' ) : $aa;
-		$mm                     = ( $mm <= 0 ) ? gmdate( 'n' ) : $mm;
+		$aa                     = ( $aa <= 0 ) ? date( 'Y' ) : $aa;
+		$mm                     = ( $mm <= 0 ) ? date( 'n' ) : $mm;
 		$jj                     = ( $jj > 31 ) ? 31 : $jj;
-		$jj                     = ( $jj <= 0 ) ? gmdate( 'j' ) : $jj;
+		$jj                     = ( $jj <= 0 ) ? date( 'j' ) : $jj;
 		$hh                     = ( $hh > 23 ) ? $hh - 24 : $hh;
 		$mn                     = ( $mn > 59 ) ? $mn - 60 : $mn;
 		$ss                     = ( $ss > 59 ) ? $ss - 60 : $ss;
@@ -339,8 +339,7 @@ function edit_post( $post_data = null ) {
 	// Meta Stuff
 	if ( isset( $post_data['meta'] ) && $post_data['meta'] ) {
 		foreach ( $post_data['meta'] as $key => $value ) {
-			$meta = get_post_meta_by_id( $key );
-			if ( ! $meta ) {
+			if ( ! $meta = get_post_meta_by_id( $key ) ) {
 				continue;
 			}
 			if ( $meta->post_id != $post_ID ) {
@@ -358,8 +357,7 @@ function edit_post( $post_data = null ) {
 
 	if ( isset( $post_data['deletemeta'] ) && $post_data['deletemeta'] ) {
 		foreach ( $post_data['deletemeta'] as $key => $value ) {
-			$meta = get_post_meta_by_id( $key );
-			if ( ! $meta ) {
+			if ( ! $meta = get_post_meta_by_id( $key ) ) {
 				continue;
 			}
 			if ( $meta->post_id != $post_ID ) {
@@ -533,8 +531,7 @@ function bulk_edit_posts( $post_data = null ) {
 		}
 	}
 
-	if ( isset( $post_data['post_parent'] ) && (int) $post_data['post_parent'] ) {
-		$parent   = (int) $post_data['post_parent'];
+	if ( isset( $post_data['post_parent'] ) && ( $parent = (int) $post_data['post_parent'] ) ) {
 		$pages    = $wpdb->get_results( "SELECT ID, post_parent FROM $wpdb->posts WHERE post_type = 'page'" );
 		$children = array();
 
@@ -550,9 +547,7 @@ function bulk_edit_posts( $post_data = null ) {
 		}
 	}
 
-	$updated          = array();
-	$skipped          = array();
-	$locked           = array();
+	$updated          = $skipped = $locked = array();
 	$shared_post_data = $post_data;
 
 	foreach ( $post_IDs as $post_ID ) {
@@ -1286,8 +1281,7 @@ function wp_edit_attachments_query( $q = false ) {
 function postbox_classes( $box_id, $screen_id ) {
 	if ( isset( $_GET['edit'] ) && $_GET['edit'] == $box_id ) {
 		$classes = array( '' );
-	} elseif ( get_user_option( 'closedpostboxes_' . $screen_id ) ) {
-		$closed = get_user_option( 'closedpostboxes_' . $screen_id );
+	} elseif ( $closed = get_user_option( 'closedpostboxes_' . $screen_id ) ) {
 		if ( ! is_array( $closed ) ) {
 			$classes = array( '' );
 		} else {
@@ -1562,13 +1556,11 @@ function _wp_post_thumbnail_html( $thumbnail_id = null, $post = null ) {
  *                   the user with lock does not exist, or the post is locked by current user.
  */
 function wp_check_post_lock( $post_id ) {
-	$post = get_post( $post_id );
-	if ( ! $post ) {
+	if ( ! $post = get_post( $post_id ) ) {
 		return false;
 	}
 
-	$lock = get_post_meta( $post->ID, '_edit_lock', true );
-	if ( ! $lock ) {
+	if ( ! $lock = get_post_meta( $post->ID, '_edit_lock', true ) ) {
 		return false;
 	}
 
@@ -1600,13 +1592,11 @@ function wp_check_post_lock( $post_id ) {
  *                     there is no current user.
  */
 function wp_set_post_lock( $post_id ) {
-	$post = get_post( $post_id );
-	if ( ! $post ) {
+	if ( ! $post = get_post( $post_id ) ) {
 		return false;
 	}
 
-	$user_id = get_current_user_id();
-	if ( 0 == $user_id ) {
+	if ( 0 == ( $user_id = get_current_user_id() ) ) {
 		return false;
 	}
 
@@ -1625,14 +1615,12 @@ function wp_set_post_lock( $post_id ) {
  * @return none
  */
 function _admin_notice_post_locked() {
-	$post = get_post();
-	if ( ! $post ) {
+	if ( ! $post = get_post() ) {
 		return;
 	}
 
-	$user    = null;
-	$user_id = wp_check_post_lock( $post->ID );
-	if ( $user_id ) {
+	$user = null;
+	if ( $user_id = wp_check_post_lock( $post->ID ) ) {
 		$user = get_userdata( $user_id );
 	}
 
@@ -1658,8 +1646,8 @@ function _admin_notice_post_locked() {
 		$locked = false;
 	}
 
-	$sendback = wp_get_referer();
-	if ( $locked && $sendback && false === strpos( $sendback, 'post.php' ) && false === strpos( $sendback, 'post-new.php' ) ) {
+	if ( $locked && ( $sendback = wp_get_referer() ) &&
+		false === strpos( $sendback, 'post.php' ) && false === strpos( $sendback, 'post-new.php' ) ) {
 
 		$sendback_text = __( 'Go back' );
 	} else {
@@ -1714,10 +1702,10 @@ function _admin_notice_post_locked() {
 		<p class="currently-editing wp-tab-first" tabindex="0">
 		<?php
 		if ( $override ) {
-			/* translators: %s: User's display name. */
+			/* translators: %s: user's display name */
 			printf( __( '%s is already editing this post. Do you want to take over?' ), esc_html( $user->display_name ) );
 		} else {
-			/* translators: %s: User's display name. */
+			/* translators: %s: user's display name */
 			printf( __( '%s is already editing this post.' ), esc_html( $user->display_name ) );
 		}
 		?>
@@ -1805,8 +1793,7 @@ function wp_create_post_autosave( $post_data ) {
 	$post_author = get_current_user_id();
 
 	// Store one autosave per author. If there is already an autosave, overwrite it.
-	$old_autosave = wp_get_post_autosave( $post_id, $post_author );
-	if ( $old_autosave ) {
+	if ( $old_autosave = wp_get_post_autosave( $post_id, $post_author ) ) {
 		$new_autosave                = _wp_post_revision_data( $post_data, true );
 		$new_autosave['ID']          = $old_autosave->ID;
 		$new_autosave['post_author'] = $post_author;
@@ -1857,8 +1844,7 @@ function post_preview() {
 	$post_ID     = (int) $_POST['post_ID'];
 	$_POST['ID'] = $post_ID;
 
-	$post = get_post( $post_ID );
-	if ( ! $post ) {
+	if ( ! $post = get_post( $post_ID ) ) {
 		wp_die( __( 'Sorry, you are not allowed to edit this post.' ) );
 	}
 
@@ -1919,9 +1905,8 @@ function wp_autosave( $post_data ) {
 		define( 'DOING_AUTOSAVE', true );
 	}
 
-	$post_id              = (int) $post_data['post_id'];
-	$post_data['ID']      = $post_id;
-	$post_data['post_ID'] = $post_id;
+	$post_id         = (int) $post_data['post_id'];
+	$post_data['ID'] = $post_data['post_ID'] = $post_id;
 
 	if ( false === wp_verify_nonce( $post_data['_wpnonce'], 'update-post_' . $post_id ) ) {
 		return new WP_Error( 'invalid_nonce', __( 'Error while saving.' ) );
@@ -2041,8 +2026,8 @@ function taxonomy_meta_box_sanitize_cb_input( $taxonomy, $terms ) {
 		}
 
 		$_term = get_terms(
+			$taxonomy,
 			array(
-				'taxonomy'   => $taxonomy,
 				'name'       => $term,
 				'fields'     => 'ids',
 				'hide_empty' => false,
@@ -2201,7 +2186,7 @@ function get_block_categories( $post ) {
 function get_block_editor_server_block_settings() {
 	$block_registry = WP_Block_Type_Registry::get_instance();
 	$blocks         = array();
-	$keys_to_pick   = array( 'title', 'description', 'icon', 'category', 'keywords', 'parent', 'supports', 'attributes', 'styles' );
+	$keys_to_pick   = array( 'title', 'description', 'icon', 'category', 'keywords', 'supports', 'attributes' );
 
 	foreach ( $block_registry->get_all_registered() as $block_name => $block_type ) {
 		foreach ( $keys_to_pick as $key ) {

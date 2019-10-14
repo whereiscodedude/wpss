@@ -2236,7 +2236,7 @@
 					wp.a11y.speak( wp.updates.l10n.pluginsFound.replace( '%d', response.count ) );
 				}
 			} );
-		}, 1000 ) );
+		}, 500 ) );
 
 		if ( $pluginSearch.length ) {
 			$pluginSearch.attr( 'aria-describedby', 'live-search-desc' );
@@ -2416,7 +2416,7 @@
 		 */
 		$( window ).on( 'message', function( event ) {
 			var originalEvent  = event.originalEvent,
-				expectedOrigin = document.location.protocol + '//' + document.location.host,
+				expectedOrigin = document.location.protocol + '//' + document.location.hostname,
 				message;
 
 			if ( originalEvent.origin !== expectedOrigin ) {

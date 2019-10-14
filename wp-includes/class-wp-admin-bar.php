@@ -115,8 +115,8 @@ class WP_Admin_Bar {
 	 */
 	public function add_node( $args ) {
 		// Shim for old method signature: add_node( $parent_id, $menu_obj, $args )
-		if ( func_num_args() >= 3 && is_string( $args ) ) {
-			$args = array_merge( array( 'parent' => $args ), func_get_arg( 2 ) );
+		if ( func_num_args() >= 3 && is_string( func_get_arg( 0 ) ) ) {
+			$args = array_merge( array( 'parent' => func_get_arg( 0 ) ), func_get_arg( 2 ) );
 		}
 
 		if ( is_object( $args ) ) {
@@ -144,8 +144,7 @@ class WP_Admin_Bar {
 		);
 
 		// If the node already exists, keep any data that isn't provided.
-		$maybe_defaults = $this->get_node( $args['id'] );
-		if ( $maybe_defaults ) {
+		if ( $maybe_defaults = $this->get_node( $args['id'] ) ) {
 			$defaults = get_object_vars( $maybe_defaults );
 		}
 
@@ -181,11 +180,10 @@ class WP_Admin_Bar {
 	 * Gets a node.
 	 *
 	 * @param string $id
-	 * @return object|void Node.
+	 * @return object Node.
 	 */
 	final public function get_node( $id ) {
-		$node = $this->_get_node( $id );
-		if ( $node ) {
+		if ( $node = $this->_get_node( $id ) ) {
 			return clone $node;
 		}
 	}
@@ -212,8 +210,7 @@ class WP_Admin_Bar {
 	 * @return array|void
 	 */
 	final public function get_nodes() {
-		$nodes = $this->_get_nodes();
-		if ( ! $nodes ) {
+		if ( ! $nodes = $this->_get_nodes() ) {
 			return;
 		}
 
@@ -315,8 +312,7 @@ class WP_Admin_Bar {
 			}
 
 			// Fetch the parent node. If it isn't registered, ignore the node.
-			$parent = $this->_get_node( $node->parent );
-			if ( ! $parent ) {
+			if ( ! $parent = $this->_get_node( $node->parent ) ) {
 				continue;
 			}
 

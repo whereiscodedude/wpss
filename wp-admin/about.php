@@ -19,18 +19,15 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 	<div class="wrap about-wrap full-width-layout">
 		<h1>
 			<?php
-			printf(
-				/* translators: %s: The current WordPress version number. */
-				__( 'Welcome to WordPress&nbsp;%s' ),
-				$display_version
-			);
+			/* translators: %s: The current WordPress version number */
+			printf( __( 'Welcome to WordPress&nbsp;%s' ), $display_version );
 			?>
 		</h1>
 
 		<p class="about-text">
 			<?php
 			printf(
-				/* translators: %s: The current WordPress version number. */
+				/* translators: %s: The current WordPress version number */
 				__( 'Congratulations on updating to WordPress %s! This update makes it easier than ever to fix your site if something goes wrong.' ),
 				$display_version
 			);
@@ -39,11 +36,8 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 
 		<div class="wp-badge">
 			<?php
-			printf(
-				/* translators: %s: The current WordPress version number. */
-				__( 'Version %s' ),
-				$display_version
-			);
+			/* translators: %s: The current WordPress version number */
+			printf( __( 'Version %s' ), $display_version );
 			?>
 		</div>
 
@@ -51,8 +45,107 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 			<a href="about.php" class="nav-tab nav-tab-active" aria-current="page"><?php _e( 'What&#8217;s New' ); ?></a>
 			<a href="credits.php" class="nav-tab"><?php _e( 'Credits' ); ?></a>
 			<a href="freedoms.php" class="nav-tab"><?php _e( 'Freedoms' ); ?></a>
-			<a href="privacy.php" class="nav-tab"><?php _e( 'Privacy' ); ?></a>
+			<a href="freedoms.php?privacy-notice" class="nav-tab"><?php _e( 'Privacy' ); ?></a>
 		</nav>
+
+		<div class="changelog point-releases">
+			<h3><?php _e( 'Maintenance and Security Releases' ); ?></h3>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: WordPress version number */
+					__( '<strong>Version %s</strong> addressed some security issues.' ),
+					'5.2.4'
+				);
+				?>
+				<?php
+				printf(
+				/* translators: %s: HelpHub URL */
+					__( 'For more information, see <a href="%s">the release notes</a>.' ),
+					sprintf(
+					/* translators: %s: WordPress version */
+						esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+						sanitize_title( '5.2.4' )
+					)
+				);
+				?>
+			</p>
+			<p>
+				<?php
+				printf(
+				/* translators: 1: WordPress version number, 2: plural number of bugs. More than one security issue. */
+					_n(
+						'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+						'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.',
+						29
+					),
+					'5.2.3',
+					number_format_i18n( 29 )
+				);
+				?>
+				<?php
+				printf(
+				/* translators: %s: HelpHub URL */
+					__( 'For more information, see <a href="%s">the release notes</a>.' ),
+					sprintf(
+					/* translators: %s: WordPress version */
+						esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+						sanitize_title( '5.2.3' )
+					)
+				);
+				?>
+			</p>
+			<p>
+				<?php
+				printf(
+					/* translators: 1: WordPress version number, 2: plural number of bugs. */
+					_n(
+						'<strong>Version %1$s</strong> addressed %2$s bug.',
+						'<strong>Version %1$s</strong> addressed %2$s bugs.',
+						13
+					),
+					'5.2.2',
+					number_format_i18n( 13 )
+				);
+				?>
+				<?php
+				printf(
+					/* translators: %s: HelpHub URL */
+					__( 'For more information, see <a href="%s">the release notes</a>.' ),
+					sprintf(
+						/* translators: %s: WordPress version */
+						esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+						sanitize_title( '5.2.2' )
+					)
+				);
+				?>
+			</p>
+			<p>
+				<?php
+				printf(
+					/* translators: 1: WordPress version number, 2: plural number of bugs. */
+					_n(
+						'<strong>Version %1$s</strong> addressed %2$s bug.',
+						'<strong>Version %1$s</strong> addressed %2$s bugs.',
+						33
+					),
+					'5.2.1',
+					number_format_i18n( 33 )
+				);
+				?>
+				<?php
+				printf(
+					/* translators: %s: HelpHub URL */
+					__( 'For more information, see <a href="%s">the release notes</a>.' ),
+					sprintf(
+						/* translators: %s: WordPress version */
+						esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+						sanitize_title( '5.2.1' )
+					)
+				);
+				?>
+			</p>
+		</div>
 
 		<div class="headline-feature">
 			<h2><?php _e( 'Keeping Your Site Safe' ); ?></h2>
@@ -70,14 +163,14 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 				<p>
 					<?php
 					printf(
-						/* translators: 1: Link to the WordPress 5.1 release post. */
+						/* translators: 1: link to the WordPress 5.1 release post */
 						__( 'Building on <a href="%1$s">the Site Health features introduced in 5.1</a>, this release adds two new pages to help debug common configuration issues. It also adds space where developers can include debugging information for site maintainers.' ),
 						__( 'https://wordpress.org/news/2019/02/betty/' )
 					);
 
 					if ( current_user_can( 'install_plugins' ) ) {
 						printf(
-							/* translators: 1: URL to Site Health Status screen, 2: URL to Site Health Info screen. */
+							/* translators: 1: link to /wp-admin/site-health.php 2: link to /wp-admin/site-health.php?tab=debug */
 							__( ' <a href="%1$s">Check your site status</a>, and <a href="%2$s">learn how to debug issues</a>.' ),
 							admin_url( 'site-health.php' ),
 							admin_url( 'site-health.php?tab=debug' )
@@ -142,7 +235,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 				<p>
 					<?php
 					printf(
-						/* translators: 1: wp_body_open, 2: <body> */
+						/* translators: 1: wp_body_open 2: <body> */
 						__( '5.2 introduces a %1$s hook, which lets themes support injecting code right at the beginning of the %2$s element.' ),
 						'<code>wp_body_open</code>',
 						'<code>&lt;body&gt;</code>'
@@ -183,28 +276,28 @@ __( 'Security Releases' );
 __( 'Maintenance and Security Release' );
 __( 'Maintenance and Security Releases' );
 
-/* translators: %s: WordPress version number. */
+/* translators: %s: WordPress version number */
 __( '<strong>Version %s</strong> addressed one security issue.' );
-/* translators: %s: WordPress version number. */
+/* translators: %s: WordPress version number */
 __( '<strong>Version %s</strong> addressed some security issues.' );
 
-/* translators: 1: WordPress version number, 2: Plural number of bugs. */
+/* translators: 1: WordPress version number, 2: plural number of bugs. */
 _n_noop(
 	'<strong>Version %1$s</strong> addressed %2$s bug.',
 	'<strong>Version %1$s</strong> addressed %2$s bugs.'
 );
 
-/* translators: 1: WordPress version number, 2: Plural number of bugs. Singular security issue. */
+/* translators: 1: WordPress version number, 2: plural number of bugs. Singular security issue. */
 _n_noop(
 	'<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bug.',
 	'<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bugs.'
 );
 
-/* translators: 1: WordPress version number, 2: Plural number of bugs. More than one security issue. */
+/* translators: 1: WordPress version number, 2: plural number of bugs. More than one security issue. */
 _n_noop(
 	'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
 	'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.'
 );
 
-/* translators: %s: Documentation URL. */
+/* translators: %s: Codex URL */
 __( 'For more information, see <a href="%s">the release notes</a>.' );

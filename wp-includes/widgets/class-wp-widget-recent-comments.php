@@ -53,13 +53,9 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 			|| ! apply_filters( 'show_recent_comments_widget_style', true, $this->id_base ) ) {
 			return;
 		}
-
-		$type_attr = current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"';
-
-		printf(
-			'<style%s>.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>',
-			$type_attr
-		);
+		?>
+		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		<?php
 	}
 
 	/**
@@ -124,8 +120,8 @@ class WP_Widget_Recent_Comments extends WP_Widget {
 
 			foreach ( (array) $comments as $comment ) {
 				$output .= '<li class="recentcomments">';
+				/* translators: comments widget: 1: comment author, 2: post link */
 				$output .= sprintf(
-					/* translators: Comments widget. 1: Comment author, 2: Post link. */
 					_x( '%1$s on %2$s', 'widgets' ),
 					'<span class="comment-author-link">' . get_comment_author_link( $comment ) . '</span>',
 					'<a href="' . esc_url( get_comment_link( $comment ) ) . '">' . get_the_title( $comment->comment_post_ID ) . '</a>'

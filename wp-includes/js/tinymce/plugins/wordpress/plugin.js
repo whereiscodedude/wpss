@@ -638,12 +638,12 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			}
 		} );
 
-		// Alt+Shift+Z removes a block in the block editor, don't add it to the Classic block.
+		// Alt+Shift+Z removes a block in the Block Editor, don't add it to the Classic Block.
 		if ( ! editor.settings.classic_block_editor ) {
 			editor.addShortcut( 'access+z', '', 'WP_Adv' );
 		}
 
-		// Workaround for not triggering the global help modal in the block editor by the Classic block shortcut.
+		// Workaround for not triggering the global help modal in the Block Editor by the Classic Block shortcut.
 		editor.on( 'keydown', function( event ) {
 			var match;
 
@@ -789,7 +789,7 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			mceToolbar,
 			mceStatusbar,
 			wpStatusbar,
-			cachedWinSize;
+			isChromeRtl = ( editor.rtl && /Chrome/.test( navigator.userAgent ) );
 
 			if ( container ) {
 				mceToolbar = tinymce.$( '.mce-toolbar-grp', container )[0];
@@ -1040,6 +1040,16 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 
 			toolbar.on( 'show', function() {
 				this.reposition();
+
+				if ( isChromeRtl ) {
+					tinymce.$( '.mce-widget.mce-tooltip' ).addClass( 'wp-hide-mce-tooltip' );
+				}
+			} );
+
+			toolbar.on( 'hide', function() {
+				if ( isChromeRtl ) {
+					tinymce.$( '.mce-widget.mce-tooltip' ).removeClass( 'wp-hide-mce-tooltip' );
+				}
 			} );
 
 			toolbar.on( 'keydown', function( event ) {
@@ -1105,9 +1115,6 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 		} );
 
 		function hide( event ) {
-			var win;
-			var size;
-
 			if ( activeToolbar ) {
 				if ( activeToolbar.tempHide || event.type === 'hide' || event.type === 'blur' ) {
 					activeToolbar.hide();
@@ -1118,34 +1125,6 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 					event.type === 'resize' ||
 					event.type === 'scroll'
 				) && ! activeToolbar.blockHide ) {
-					// Showing a tooltip may trigger a `resize` event in Chromium browsers.
-					// That results in a flicketing inline menu; tooltips are shown on hovering over a button,
-					// which then hides the toolbar on `resize`, then it repeats as soon as the toolbar is shown again.
-					if ( event.type === 'resize' || event.type === 'resizewindow' ) {
-						win = editor.getWin();
-						size = win.innerHeight + win.innerWidth;
-
-						// Reset old cached size.
-						if ( cachedWinSize && ( new Date() ).getTime() - cachedWinSize.timestamp > 2000 ) {
-							cachedWinSize = null;
-						}
-
-						if ( cachedWinSize ) {
-							if ( size && Math.abs( size - cachedWinSize.size ) < 2 ) {
-								// `resize` fired but the window hasn't been resized. Bail.
-								return;
-							}
-						} else {
-							// First of a new series of `resize` events. Store the cached size and bail.
-							cachedWinSize = {
-								timestamp: ( new Date() ).getTime(),
-								size: size,
-							};
-
-							return;
-						}
-					}
-
 					clearTimeout( timeout );
 
 					timeout = setTimeout( function() {
@@ -1161,15 +1140,15 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			}
 		}
 
-		if ( editor.inline ) {
-			editor.on( 'resizewindow', hide );
+		editor.dom.bind( editor.getWin(), 'resize', hide );
 
+		if ( editor.inline ) {
 			// Enable `capture` for the event.
 			// This will hide/reposition the toolbar on any scrolling in the document.
 			document.addEventListener( 'scroll', hide, true );
 		} else {
-			// Bind to the editor iframe and to the parent window.
-			editor.dom.bind( editor.getWin(), 'resize scroll', hide );
+			editor.dom.bind( editor.getWin(), 'scroll', hide );
+			// For full height iframe editor.
 			editor.on( 'resizewindow scrollwindow', hide );
 		}
 

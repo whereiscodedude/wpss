@@ -891,7 +891,7 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 	initialize: function() {
 		_.bindAll(this, 'success');
 		this.players = [];
-		this.listenTo( this.controller.states, 'close', wp.media.mixin.unsetPlayers );
+		this.listenTo( this.controller, 'close', wp.media.mixin.unsetPlayers );
 		this.on( 'ready', this.setPlayer );
 		this.on( 'media:setting:remove', wp.media.mixin.unsetPlayers, this );
 		this.on( 'media:setting:remove', this.render );
@@ -1001,7 +1001,7 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 		AttachmentDisplay.prototype.render.apply( this, arguments );
 
 		setTimeout( _.bind( function() {
-			this.scrollToTop();
+			this.resetFocus();
 		}, this ), 10 );
 
 		this.settings = _.defaults( {
@@ -1011,7 +1011,7 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 		return this.setMedia();
 	},
 
-	scrollToTop: function() {
+	resetFocus: function() {
 		this.$( '.embed-media-settings' ).scrollTop( 0 );
 	}
 },/** @lends wp.media.view.MediaDetails */{

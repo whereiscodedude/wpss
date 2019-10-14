@@ -224,8 +224,7 @@ class WP_Filesystem_Base {
 			$this->cache[ $folder ] = $folder;
 			return $folder;
 		}
-		$return = $this->search_for_folder( $folder );
-		if ( $return ) {
+		if ( $return = $this->search_for_folder( $folder ) ) {
 			$this->cache[ $folder ] = $return;
 		}
 		return $return;
@@ -251,7 +250,7 @@ class WP_Filesystem_Base {
 		$folder = untrailingslashit( $folder );
 
 		if ( $this->verbose ) {
-			/* translators: 1: Folder to locate, 2: Folder to start searching from. */
+			/* translators: 1: folder to locate, 2: folder to start searching from */
 			printf( "\n" . __( 'Looking for %1$s in %2$s' ) . "<br/>\n", $folder, $base );
 		}
 
@@ -279,14 +278,13 @@ class WP_Filesystem_Base {
 				// Let's try that folder:
 				$newdir = trailingslashit( path_join( $base, $key ) );
 				if ( $this->verbose ) {
-					/* translators: %s: Directory name. */
+					/* translators: %s: directory name */
 					printf( "\n" . __( 'Changing to %s' ) . "<br/>\n", $newdir );
 				}
 
 				// Only search for the remaining path tokens in the directory, not the full path again.
 				$newfolder = implode( '/', array_slice( $folder_parts, $index + 1 ) );
-				$ret       = $this->search_for_folder( $newfolder, $newdir, $loop );
-				if ( $ret ) {
+				if ( $ret = $this->search_for_folder( $newfolder, $newdir, $loop ) ) {
 					return $ret;
 				}
 			}
@@ -296,7 +294,7 @@ class WP_Filesystem_Base {
 		// All above procedures will fail quickly if this is the right branch to take.
 		if ( isset( $files[ $last_path ] ) ) {
 			if ( $this->verbose ) {
-				/* translators: %s: Directory name. */
+				/* translators: %s: directory name */
 				printf( "\n" . __( 'Found %s' ) . "<br/>\n", $base . $last_path );
 			}
 			return trailingslashit( $base . $last_path );
@@ -400,8 +398,7 @@ class WP_Filesystem_Base {
 		$attarray = preg_split( '//', $mode );
 
 		for ( $i = 0, $c = count( $attarray ); $i < $c; $i++ ) {
-			$key = array_search( $attarray[ $i ], $legal );
-			if ( $key ) {
+			if ( $key = array_search( $attarray[ $i ], $legal ) ) {
 				$realmode .= $legal[ $key ];
 			}
 		}
