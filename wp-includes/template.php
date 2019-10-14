@@ -23,9 +23,8 @@
 function get_query_template( $type, $templates = array() ) {
 	$type = preg_replace( '|[^a-z0-9-]+|', '', $type );
 
-	if ( empty( $templates ) ) {
-		$templates = array( "{$type}.php" );
-	}
+	if ( empty( $templates ) )
+		$templates = array("{$type}.php");
 
 	/**
 	 * Filters the list of template filenames that are searched for when retrieving a template to use.
@@ -33,7 +32,7 @@ function get_query_template( $type, $templates = array() ) {
 	 * The last element in the array should always be the fallback template for this query type.
 	 *
 	 * Possible values for `$type` include: 'index', '404', 'archive', 'author', 'category', 'tag', 'taxonomy', 'date',
-	 * 'embed', 'home', 'frontpage', 'privacypolicy', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
+	 * 'embed', home', 'frontpage', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
 	 *
 	 * @since 4.7.0
 	 *
@@ -51,13 +50,13 @@ function get_query_template( $type, $templates = array() ) {
 	 * This hook also applies to various types of files loaded as part of the Template Hierarchy.
 	 *
 	 * Possible values for `$type` include: 'index', '404', 'archive', 'author', 'category', 'tag', 'taxonomy', 'date',
-	 * 'embed', 'home', 'frontpage', 'privacypolicy', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
+	 * 'embed', home', 'frontpage', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
 	 *
 	 * @since 1.5.0
 	 * @since 4.8.0 The `$type` and `$templates` parameters were added.
 	 *
 	 * @param string $template  Path to the template. See locate_template().
-	 * @param string $type      Sanitized filename without extension.
+	 * @param string $type      Filename without extension.
 	 * @param array  $templates A list of template candidates, in descending order of priority.
 	 */
 	return apply_filters( "{$type}_template", $template, $type, $templates );
@@ -66,8 +65,8 @@ function get_query_template( $type, $templates = array() ) {
 /**
  * Retrieve path of index template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'index'.
+ * The template hierarchy is filterable via the {@see 'index_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'index_template'} hook.
  *
  * @since 3.0.0
  *
@@ -76,14 +75,14 @@ function get_query_template( $type, $templates = array() ) {
  * @return string Full path to index template file.
  */
 function get_index_template() {
-	return get_query_template( 'index' );
+	return get_query_template('index');
 }
 
 /**
  * Retrieve path of 404 template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is '404'.
+ * The template hierarchy is filterable via the {@see '404_template_hierarchy'} hook.
+ * The template path is filterable via the {@see '404_template'} hook.
  *
  * @since 1.5.0
  *
@@ -92,14 +91,14 @@ function get_index_template() {
  * @return string Full path to 404 template file.
  */
 function get_404_template() {
-	return get_query_template( '404' );
+	return get_query_template('404');
 }
 
 /**
  * Retrieve path of archive template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'archive'.
+ * The template hierarchy is filterable via the {@see 'archive_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'archive_template'} hook.
  *
  * @since 1.5.0
  *
@@ -113,7 +112,7 @@ function get_archive_template() {
 	$templates = array();
 
 	if ( count( $post_types ) == 1 ) {
-		$post_type   = reset( $post_types );
+		$post_type = reset( $post_types );
 		$templates[] = "archive-{$post_type}.php";
 	}
 	$templates[] = 'archive.php';
@@ -124,8 +123,8 @@ function get_archive_template() {
 /**
  * Retrieve path of post type archive template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'archive'.
+ * The template hierarchy is filterable via the {@see 'archive_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'archive_template'} hook.
  *
  * @since 3.7.0
  *
@@ -135,9 +134,8 @@ function get_archive_template() {
  */
 function get_post_type_archive_template() {
 	$post_type = get_query_var( 'post_type' );
-	if ( is_array( $post_type ) ) {
+	if ( is_array( $post_type ) )
 		$post_type = reset( $post_type );
-	}
 
 	$obj = get_post_type_object( $post_type );
 	if ( ! ( $obj instanceof WP_Post_Type ) || ! $obj->has_archive ) {
@@ -162,8 +160,8 @@ function get_post_type_archive_template() {
  * 2. author-1.php
  * 3. author.php
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'author'.
+ * The template hierarchy is filterable via the {@see 'author_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'author_template'} hook.
  *
  * @since 1.5.0
  *
@@ -200,8 +198,8 @@ function get_author_template() {
  * 2. category-2.php
  * 3. category.php
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'category'.
+ * The template hierarchy is filterable via the {@see 'category_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'category_template'} hook.
  *
  * @since 1.5.0
  * @since 4.7.0 The decoded form of `category-{slug}.php` was added to the top of the
@@ -246,8 +244,8 @@ function get_category_template() {
  * 2. tag-3.php
  * 3. tag.php
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'tag'.
+ * The template hierarchy is filterable via the {@see 'tag_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'tag_template'} hook.
  *
  * @since 2.3.0
  * @since 4.7.0 The decoded form of `tag-{slug}.php` was added to the top of the
@@ -292,8 +290,8 @@ function get_tag_template() {
  * 2. taxonomy-location.php
  * 3. taxonomy.php
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'taxonomy'.
+ * The template hierarchy is filterable via the {@see 'taxonomy_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'taxonomy_template'} hook.
  *
  * @since 2.5.0
  * @since 4.7.0 The decoded form of `taxonomy-{taxonomy_slug}-{term_slug}.php` was added to the top of the
@@ -327,8 +325,8 @@ function get_taxonomy_template() {
 /**
  * Retrieve path of date template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'date'.
+ * The template hierarchy is filterable via the {@see 'date_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'date_template'} hook.
  *
  * @since 1.5.0
  *
@@ -337,14 +335,14 @@ function get_taxonomy_template() {
  * @return string Full path to date template file.
  */
 function get_date_template() {
-	return get_query_template( 'date' );
+	return get_query_template('date');
 }
 
 /**
  * Retrieve path of home template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'home'.
+ * The template hierarchy is filterable via the {@see 'home_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'home_template'} hook.
  *
  * @since 1.5.0
  *
@@ -361,8 +359,8 @@ function get_home_template() {
 /**
  * Retrieve path of front page template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'frontpage'.
+ * The template hierarchy is filterable via the {@see 'frontpage_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'frontpage_template'} hook.
  *
  * @since 3.0.0
  *
@@ -371,27 +369,9 @@ function get_home_template() {
  * @return string Full path to front page template file.
  */
 function get_front_page_template() {
-	$templates = array( 'front-page.php' );
+	$templates = array('front-page.php');
 
-	return get_query_template( 'frontpage', $templates );
-}
-
-/**
- * Retrieve path of Privacy Policy page template in current or parent template.
- *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'privacypolicy'.
- *
- * @since 5.2.0
- *
- * @see get_query_template()
- *
- * @return string Full path to privacy policy template file.
- */
-function get_privacy_policy_template() {
-	$templates = array( 'privacy-policy.php' );
-
-	return get_query_template( 'privacypolicy', $templates );
+	return get_query_template( 'front_page', $templates );
 }
 
 /**
@@ -411,8 +391,8 @@ function get_privacy_policy_template() {
  * 3. page-4.php
  * 4. page.php
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'page'.
+ * The template hierarchy is filterable via the {@see 'page_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'page_template'} hook.
  *
  * @since 1.5.0
  * @since 4.7.0 The decoded form of `page-{page_name}.php` was added to the top of the
@@ -423,22 +403,20 @@ function get_privacy_policy_template() {
  * @return string Full path to page template file.
  */
 function get_page_template() {
-	$id       = get_queried_object_id();
+	$id = get_queried_object_id();
 	$template = get_page_template_slug();
-	$pagename = get_query_var( 'pagename' );
+	$pagename = get_query_var('pagename');
 
 	if ( ! $pagename && $id ) {
 		// If a static page is set as the front page, $pagename will not be set. Retrieve it from the queried object
 		$post = get_queried_object();
-		if ( $post ) {
+		if ( $post )
 			$pagename = $post->post_name;
-		}
 	}
 
 	$templates = array();
-	if ( $template && 0 === validate_file( $template ) ) {
+	if ( $template && 0 === validate_file( $template ) )
 		$templates[] = $template;
-	}
 	if ( $pagename ) {
 		$pagename_decoded = urldecode( $pagename );
 		if ( $pagename_decoded !== $pagename ) {
@@ -446,9 +424,8 @@ function get_page_template() {
 		}
 		$templates[] = "page-{$pagename}.php";
 	}
-	if ( $id ) {
+	if ( $id )
 		$templates[] = "page-{$id}.php";
-	}
 	$templates[] = 'page.php';
 
 	return get_query_template( 'page', $templates );
@@ -457,8 +434,8 @@ function get_page_template() {
 /**
  * Retrieve path of search template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'search'.
+ * The template hierarchy is filterable via the {@see 'search_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'search_template'} hook.
  *
  * @since 1.5.0
  *
@@ -467,7 +444,7 @@ function get_page_template() {
  * @return string Full path to search template file.
  */
 function get_search_template() {
-	return get_query_template( 'search' );
+	return get_query_template('search');
 }
 
 /**
@@ -488,14 +465,14 @@ function get_search_template() {
  * 3. single-post.php
  * 4. single.php
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'single'.
+ * The template hierarchy is filterable via the {@see 'single_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'single_template'} hook.
  *
  * @since 1.5.0
  * @since 4.4.0 `single-{post_type}-{post_name}.php` was added to the top of the template hierarchy.
  * @since 4.7.0 The decoded form of `single-{post_type}-{post_name}.php` was added to the top of the
  *              template hierarchy when the post name contains multibyte characters.
- * @since 4.7.0 `{Post Type Template}.php` was added to the top of the template hierarchy.
+ * @since 4.7.0 {Post Type Template}.php was added to the top of the template hierarchy.
  *
  * @see get_query_template()
  *
@@ -521,7 +498,7 @@ function get_single_template() {
 		$templates[] = "single-{$object->post_type}.php";
 	}
 
-	$templates[] = 'single.php';
+	$templates[] = "single.php";
 
 	return get_query_template( 'single', $templates );
 }
@@ -541,8 +518,8 @@ function get_single_template() {
  * 2. embed-post.php
  * 3. embed.php
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'embed'.
+ * The template hierarchy is filterable via the {@see 'embed_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'embed_template'} hook.
  *
  * @since 4.5.0
  *
@@ -563,7 +540,7 @@ function get_embed_template() {
 		$templates[] = "embed-{$object->post_type}.php";
 	}
 
-	$templates[] = 'embed.php';
+	$templates[] = "embed.php";
 
 	return get_query_template( 'embed', $templates );
 }
@@ -571,8 +548,8 @@ function get_embed_template() {
 /**
  * Retrieves the path of the singular template in current or parent template.
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'singular'.
+ * The template hierarchy is filterable via the {@see 'singular_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'singular_template'} hook.
  *
  * @since 4.3.0
  *
@@ -601,8 +578,8 @@ function get_singular_template() {
  * 3. image.php
  * 4. attachment.php
  *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'attachment'.
+ * The template hierarchy is filterable via the {@see 'attachment_template_hierarchy'} hook.
+ * The template path is filterable via the {@see 'attachment_template'} hook.
  *
  * @since 2.0.0
  * @since 4.3.0 The order of the mime type logic was reversed so the hierarchy is more logical.
@@ -649,16 +626,15 @@ function get_attachment_template() {
  * @param bool         $require_once   Whether to require_once or require. Default true. Has no effect if $load is false.
  * @return string The template filename if one is located.
  */
-function locate_template( $template_names, $load = false, $require_once = true ) {
+function locate_template($template_names, $load = false, $require_once = true ) {
 	$located = '';
 	foreach ( (array) $template_names as $template_name ) {
-		if ( ! $template_name ) {
+		if ( !$template_name )
 			continue;
-		}
-		if ( file_exists( STYLESHEETPATH . '/' . $template_name ) ) {
+		if ( file_exists(STYLESHEETPATH . '/' . $template_name)) {
 			$located = STYLESHEETPATH . '/' . $template_name;
 			break;
-		} elseif ( file_exists( TEMPLATEPATH . '/' . $template_name ) ) {
+		} elseif ( file_exists(TEMPLATEPATH . '/' . $template_name) ) {
 			$located = TEMPLATEPATH . '/' . $template_name;
 			break;
 		} elseif ( file_exists( ABSPATH . WPINC . '/theme-compat/' . $template_name ) ) {
@@ -667,9 +643,8 @@ function locate_template( $template_names, $load = false, $require_once = true )
 		}
 	}
 
-	if ( $load && '' != $located ) {
+	if ( $load && '' != $located )
 		load_template( $located, $require_once );
-	}
 
 	return $located;
 }
@@ -684,15 +659,15 @@ function locate_template( $template_names, $load = false, $require_once = true )
  * @since 1.5.0
  *
  * @global array      $posts
- * @global WP_Post    $post          Global post object.
+ * @global WP_Post    $post
  * @global bool       $wp_did_header
- * @global WP_Query   $wp_query      WordPress Query object.
- * @global WP_Rewrite $wp_rewrite    WordPress rewrite component.
- * @global wpdb       $wpdb          WordPress database abstraction object.
+ * @global WP_Query   $wp_query
+ * @global WP_Rewrite $wp_rewrite
+ * @global wpdb       $wpdb
  * @global string     $wp_version
- * @global WP         $wp            Current WordPress environment instance.
+ * @global WP         $wp
  * @global int        $id
- * @global WP_Comment $comment       Global comment object.
+ * @global WP_Comment $comment
  * @global int        $user_ID
  *
  * @param string $_template_file Path to template file.
@@ -702,15 +677,6 @@ function load_template( $_template_file, $require_once = true ) {
 	global $posts, $post, $wp_did_header, $wp_query, $wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment, $user_ID;
 
 	if ( is_array( $wp_query->query_vars ) ) {
-		/*
-		 * This use of extract() cannot be removed. There are many possible ways that
-		 * templates could depend on variables that it creates existing, and no way to
-		 * detect and deprecate it.
-		 *
-		 * Passing the EXTR_SKIP flag is the safest option, ensuring globals and
-		 * function variables cannot be overwritten.
-		 */
-		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 		extract( $wp_query->query_vars, EXTR_SKIP );
 	}
 

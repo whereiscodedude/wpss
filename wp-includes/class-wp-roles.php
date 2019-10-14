@@ -15,10 +15,10 @@
  * in the value of the 'capability' key.
  *
  *     array (
- *          'rolename' => array (
- *              'name' => 'rolename',
- *              'capabilities' => array()
- *          )
+ *    		'rolename' => array (
+ *    			'name' => 'rolename',
+ *    			'capabilities' => array()
+ *    		)
  *     )
  *
  * @since 2.0.0
@@ -28,7 +28,8 @@ class WP_Roles {
 	 * List of roles and capabilities.
 	 *
 	 * @since 2.0.0
-	 * @var array[]
+	 * @access public
+	 * @var array
 	 */
 	public $roles;
 
@@ -36,7 +37,8 @@ class WP_Roles {
 	 * List of the role objects.
 	 *
 	 * @since 2.0.0
-	 * @var WP_Role[]
+	 * @access public
+	 * @var array
 	 */
 	public $role_objects = array();
 
@@ -44,7 +46,8 @@ class WP_Roles {
 	 * List of role names.
 	 *
 	 * @since 2.0.0
-	 * @var string[]
+	 * @access public
+	 * @var array
 	 */
 	public $role_names = array();
 
@@ -52,6 +55,7 @@ class WP_Roles {
 	 * Option name for storing role list.
 	 *
 	 * @since 2.0.0
+	 * @access public
 	 * @var string
 	 */
 	public $role_key;
@@ -60,48 +64,33 @@ class WP_Roles {
 	 * Whether to use the database for retrieval and storage.
 	 *
 	 * @since 2.1.0
+	 * @access public
 	 * @var bool
 	 */
 	public $use_db = true;
 
 	/**
-	 * The site ID the roles are initialized for.
-	 *
-	 * @since 4.9.0
-	 * @var int
-	 */
-	protected $site_id = 0;
-
-	/**
 	 * Constructor
 	 *
 	 * @since 2.0.0
-	 * @since 4.9.0 The `$site_id` argument was added.
-	 *
-	 * @global array $wp_user_roles Used to set the 'roles' property value.
-	 *
-	 * @param int $site_id Site ID to initialize roles for. Default is the current site.
 	 */
-	public function __construct( $site_id = null ) {
-		global $wp_user_roles;
-
-		$this->use_db = empty( $wp_user_roles );
-
-		$this->for_site( $site_id );
+	public function __construct() {
+		$this->_init();
 	}
 
 	/**
 	 * Make private/protected methods readable for backward compatibility.
 	 *
 	 * @since 4.0.0
+	 * @access public
 	 *
-	 * @param string   $name      Method to call.
+	 * @param callable $name      Method to call.
 	 * @param array    $arguments Arguments to pass when calling.
 	 * @return mixed|false Return value of the callback, false otherwise.
 	 */
 	public function __call( $name, $arguments ) {
 		if ( '_init' === $name ) {
-			return $this->_init( ...$arguments );
+			return call_user_func_array( array( $this, $name ), $arguments );
 		}
 		return false;
 	}
@@ -114,179 +103,29 @@ class WP_Roles {
 	 * be used and the role option will not be updated or used.
 	 *
 	 * @since 2.1.0
-	 * @deprecated 4.9.0 Use WP_Roles::for_site()
+	 * @access protected
+	 *
+	 * @global array $wp_user_roles Used to set the 'roles' property value.
 	 */
 	protected function _init() {
-		_deprecated_function( __METHOD__, '4.9.0', 'WP_Roles::for_site()' );
+		global $wp_user_roles, $wpdb;
 
-		$this->for_site();
-	}
-
-	/**
-	 * Reinitialize the object
-	 *
-	 * Recreates the role objects. This is typically called only by switch_to_blog()
-	 * after switching wpdb to a new site ID.
-	 *
-	 * @since 3.5.0
-	 * @deprecated 4.7.0 Use WP_Roles::for_site()
-	 */
-	public function reinit() {
-		_deprecated_function( __METHOD__, '4.7.0', 'WP_Roles::for_site()' );
-
-		$this->for_site();
-	}
-
-	/**
-	 * Add role name with capabilities to list.
-	 *
-	 * Updates the list of roles, if the role doesn't already exist.
-	 *
-	 * The capabilities are defined in the following format `array( 'read' => true );`
-	 * To explicitly deny a role a capability you set the value for that capability to false.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param string $role Role name.
-	 * @param string $display_name Role display name.
-	 * @param array $capabilities List of role capabilities in the above format.
-	 * @return WP_Role|void WP_Role object, if role is added.
-	 */
-	public function add_role( $role, $display_name, $capabilities = array() ) {
-		if ( empty( $role ) || isset( $this->roles[ $role ] ) ) {
-			return;
-		}
-
-		$this->roles[ $role ] = array(
-			'name'         => $display_name,
-			'capabilities' => $capabilities,
-		);
-		if ( $this->use_db ) {
-			update_option( $this->role_key, $this->roles );
-		}
-		$this->role_objects[ $role ] = new WP_Role( $role, $capabilities );
-		$this->role_names[ $role ]   = $display_name;
-		return $this->role_objects[ $role ];
-	}
-
-	/**
-	 * Remove role by name.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param string $role Role name.
-	 */
-	public function remove_role( $role ) {
-		if ( ! isset( $this->role_objects[ $role ] ) ) {
-			return;
-		}
-
-		unset( $this->role_objects[ $role ] );
-		unset( $this->role_names[ $role ] );
-		unset( $this->roles[ $role ] );
-
-		if ( $this->use_db ) {
-			update_option( $this->role_key, $this->roles );
-		}
-
-		if ( get_option( 'default_role' ) == $role ) {
-			update_option( 'default_role', 'subscriber' );
-		}
-	}
-
-	/**
-	 * Add capability to role.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param string $role Role name.
-	 * @param string $cap Capability name.
-	 * @param bool $grant Optional, default is true. Whether role is capable of performing capability.
-	 */
-	public function add_cap( $role, $cap, $grant = true ) {
-		if ( ! isset( $this->roles[ $role ] ) ) {
-			return;
-		}
-
-		$this->roles[ $role ]['capabilities'][ $cap ] = $grant;
-		if ( $this->use_db ) {
-			update_option( $this->role_key, $this->roles );
-		}
-	}
-
-	/**
-	 * Remove capability from role.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param string $role Role name.
-	 * @param string $cap Capability name.
-	 */
-	public function remove_cap( $role, $cap ) {
-		if ( ! isset( $this->roles[ $role ] ) ) {
-			return;
-		}
-
-		unset( $this->roles[ $role ]['capabilities'][ $cap ] );
-		if ( $this->use_db ) {
-			update_option( $this->role_key, $this->roles );
-		}
-	}
-
-	/**
-	 * Retrieve role object by name.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param string $role Role name.
-	 * @return WP_Role|null WP_Role object if found, null if the role does not exist.
-	 */
-	public function get_role( $role ) {
-		if ( isset( $this->role_objects[ $role ] ) ) {
-			return $this->role_objects[ $role ];
+		$this->role_key = $wpdb->get_blog_prefix() . 'user_roles';
+		if ( ! empty( $wp_user_roles ) ) {
+			$this->roles = $wp_user_roles;
+			$this->use_db = false;
 		} else {
-			return null;
+			$this->roles = get_option( $this->role_key );
 		}
-	}
 
-	/**
-	 * Retrieve list of role names.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @return string[] List of role names.
-	 */
-	public function get_names() {
-		return $this->role_names;
-	}
-
-	/**
-	 * Whether role name is currently in the list of available roles.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param string $role Role name to look up.
-	 * @return bool
-	 */
-	public function is_role( $role ) {
-		return isset( $this->role_names[ $role ] );
-	}
-
-	/**
-	 * Initializes all of the available roles.
-	 *
-	 * @since 4.9.0
-	 */
-	public function init_roles() {
-		if ( empty( $this->roles ) ) {
+		if ( empty( $this->roles ) )
 			return;
-		}
 
 		$this->role_objects = array();
-		$this->role_names   = array();
+		$this->role_names =  array();
 		foreach ( array_keys( $this->roles ) as $role ) {
-			$this->role_objects[ $role ] = new WP_Role( $role, $this->roles[ $role ]['capabilities'] );
-			$this->role_names[ $role ]   = $this->roles[ $role ]['name'];
+			$this->role_objects[$role] = new WP_Role( $role, $this->roles[$role]['capabilities'] );
+			$this->role_names[$role] = $this->roles[$role]['name'];
 		}
 
 		/**
@@ -300,71 +139,150 @@ class WP_Roles {
 	}
 
 	/**
-	 * Sets the site to operate on. Defaults to the current site.
+	 * Reinitialize the object
 	 *
-	 * @since 4.9.0
+	 * Recreates the role objects. This is typically called only by switch_to_blog()
+	 * after switching wpdb to a new site ID.
 	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
-	 *
-	 * @param int $site_id Site ID to initialize roles for. Default is the current site.
+	 * @since 3.5.0
+	 * @deprecated 4.7.0 Use new WP_Roles()
+	 * @access public
 	 */
-	public function for_site( $site_id = null ) {
-		global $wpdb;
+	public function reinit() {
+		_deprecated_function( __METHOD__, '4.7.0', 'new WP_Roles()' );
+		$this->_init();
+	}
 
-		if ( ! empty( $site_id ) ) {
-			$this->site_id = absint( $site_id );
-		} else {
-			$this->site_id = get_current_blog_id();
-		}
-
-		$this->role_key = $wpdb->get_blog_prefix( $this->site_id ) . 'user_roles';
-
-		if ( ! empty( $this->roles ) && ! $this->use_db ) {
+	/**
+	 * Add role name with capabilities to list.
+	 *
+	 * Updates the list of roles, if the role doesn't already exist.
+	 *
+	 * The capabilities are defined in the following format `array( 'read' => true );`
+	 * To explicitly deny a role a capability you set the value for that capability to false.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @param string $role Role name.
+	 * @param string $display_name Role display name.
+	 * @param array $capabilities List of role capabilities in the above format.
+	 * @return WP_Role|void WP_Role object, if role is added.
+	 */
+	public function add_role( $role, $display_name, $capabilities = array() ) {
+		if ( empty( $role ) || isset( $this->roles[ $role ] ) ) {
 			return;
 		}
 
-		$this->roles = $this->get_roles_data();
-
-		$this->init_roles();
+		$this->roles[$role] = array(
+			'name' => $display_name,
+			'capabilities' => $capabilities
+			);
+		if ( $this->use_db )
+			update_option( $this->role_key, $this->roles );
+		$this->role_objects[$role] = new WP_Role( $role, $capabilities );
+		$this->role_names[$role] = $display_name;
+		return $this->role_objects[$role];
 	}
 
 	/**
-	 * Gets the ID of the site for which roles are currently initialized.
+	 * Remove role by name.
 	 *
-	 * @since 4.9.0
+	 * @since 2.0.0
+	 * @access public
 	 *
-	 * @return int Site ID.
+	 * @param string $role Role name.
 	 */
-	public function get_site_id() {
-		return $this->site_id;
+	public function remove_role( $role ) {
+		if ( ! isset( $this->role_objects[$role] ) )
+			return;
+
+		unset( $this->role_objects[$role] );
+		unset( $this->role_names[$role] );
+		unset( $this->roles[$role] );
+
+		if ( $this->use_db )
+			update_option( $this->role_key, $this->roles );
+
+		if ( get_option( 'default_role' ) == $role )
+			update_option( 'default_role', 'subscriber' );
 	}
 
 	/**
-	 * Gets the available roles data.
+	 * Add capability to role.
 	 *
-	 * @since 4.9.0
+	 * @since 2.0.0
+	 * @access public
 	 *
-	 * @global array $wp_user_roles Used to set the 'roles' property value.
-	 *
-	 * @return array Roles array.
+	 * @param string $role Role name.
+	 * @param string $cap Capability name.
+	 * @param bool $grant Optional, default is true. Whether role is capable of performing capability.
 	 */
-	protected function get_roles_data() {
-		global $wp_user_roles;
+	public function add_cap( $role, $cap, $grant = true ) {
+		if ( ! isset( $this->roles[$role] ) )
+			return;
 
-		if ( ! empty( $wp_user_roles ) ) {
-			return $wp_user_roles;
-		}
+		$this->roles[$role]['capabilities'][$cap] = $grant;
+		if ( $this->use_db )
+			update_option( $this->role_key, $this->roles );
+	}
 
-		if ( is_multisite() && $this->site_id != get_current_blog_id() ) {
-			remove_action( 'switch_blog', 'wp_switch_roles_and_user', 1 );
+	/**
+	 * Remove capability from role.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @param string $role Role name.
+	 * @param string $cap Capability name.
+	 */
+	public function remove_cap( $role, $cap ) {
+		if ( ! isset( $this->roles[$role] ) )
+			return;
 
-			$roles = get_blog_option( $this->site_id, $this->role_key, array() );
+		unset( $this->roles[$role]['capabilities'][$cap] );
+		if ( $this->use_db )
+			update_option( $this->role_key, $this->roles );
+	}
 
-			add_action( 'switch_blog', 'wp_switch_roles_and_user', 1, 2 );
+	/**
+	 * Retrieve role object by name.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @param string $role Role name.
+	 * @return WP_Role|null WP_Role object if found, null if the role does not exist.
+	 */
+	public function get_role( $role ) {
+		if ( isset( $this->role_objects[$role] ) )
+			return $this->role_objects[$role];
+		else
+			return null;
+	}
 
-			return $roles;
-		}
+	/**
+	 * Retrieve list of role names.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @return array List of role names.
+	 */
+	public function get_names() {
+		return $this->role_names;
+	}
 
-		return get_option( $this->role_key, array() );
+	/**
+	 * Whether role name is currently in the list of available roles.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @param string $role Role name to look up.
+	 * @return bool
+	 */
+	public function is_role( $role ) {
+		return isset( $this->role_names[$role] );
 	}
 }
