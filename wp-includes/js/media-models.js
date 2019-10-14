@@ -36,32 +36,12 @@
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
 /******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
@@ -79,42 +59,26 @@
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
-/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 22);
+/******/ 	return __webpack_require__(__webpack_require__.s = 20);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 22:
+/***/ 20:
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(23);
-
-
-/***/ }),
-
-/***/ 23:
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * @output wp-includes/js/media-models.js
- */
+/*globals wp, _, jQuery */
 
 var $ = jQuery,
 	Attachment, Attachments, l10n, media;
 
-/** @namespace wp */
 window.wp = window.wp || {};
 
 /**
  * Create and return a media frame.
  *
  * Handles the default media experience.
- *
- * @alias wp.media
- * @memberOf wp
- * @namespace
  *
  * @param  {object} attributes The properties passed to the main media controller.
  * @return {wp.media.view.MediaFrame} A media workflow.
@@ -154,10 +118,6 @@ media = wp.media = function( attributes ) {
 	return frame;
 };
 
-/** @namespace wp.media.model */
-/** @namespace wp.media.view */
-/** @namespace wp.media.controller */
-/** @namespace wp.media.frames */
 _.extend( media, { model: {}, view: {}, controller: {}, frames: {} });
 
 // Link any localized strings.
@@ -167,12 +127,12 @@ l10n = media.model.l10n = window._wpMediaModelsL10n || {};
 media.model.settings = l10n.settings || {};
 delete l10n.settings;
 
-Attachment = media.model.Attachment = __webpack_require__( 24 );
-Attachments = media.model.Attachments = __webpack_require__( 25 );
+Attachment = media.model.Attachment = __webpack_require__( 21 );
+Attachments = media.model.Attachments = __webpack_require__( 22 );
 
-media.model.Query = __webpack_require__( 26 );
-media.model.PostImage = __webpack_require__( 27 );
-media.model.Selection = __webpack_require__( 28 );
+media.model.Query = __webpack_require__( 23 );
+media.model.PostImage = __webpack_require__( 24 );
+media.model.Selection = __webpack_require__( 25 );
 
 /**
  * ========================================================================
@@ -201,7 +161,7 @@ media.compare = function( a, b, ac, bc ) {
 	}
 };
 
-_.extend( media, /** @lends wp.media */{
+_.extend( media, {
 	/**
 	 * media.template( id )
 	 *
@@ -343,21 +303,21 @@ $(window).on('unload', function(){
 
 /***/ }),
 
-/***/ 24:
+/***/ 21:
 /***/ (function(module, exports) {
 
-var $ = Backbone.$,
-	Attachment;
+/*globals wp, _, Backbone */
 
 /**
  * wp.media.model.Attachment
  *
- * @memberOf wp.media.model
- *
  * @class
  * @augments Backbone.Model
  */
-Attachment = Backbone.Model.extend(/** @lends wp.media.model.Attachment.prototype */{
+var $ = Backbone.$,
+	Attachment;
+
+Attachment = Backbone.Model.extend({
 	/**
 	 * Triggered when attachment details change
 	 * Overrides Backbone.Model.sync
@@ -484,12 +444,11 @@ Attachment = Backbone.Model.extend(/** @lends wp.media.model.Attachment.prototyp
 			model.set( model.parse( resp, xhr ), options );
 		});
 	}
-},/** @lends wp.media.model.Attachment */{
+}, {
 	/**
 	 * Create a new model on the static 'all' attachments collection and return it.
 	 *
 	 * @static
-	 *
 	 * @param {Object} attrs
 	 * @returns {wp.media.model.Attachment}
 	 */
@@ -519,8 +478,10 @@ module.exports = Attachment;
 
 /***/ }),
 
-/***/ 25:
+/***/ 22:
 /***/ (function(module, exports) {
+
+/*globals wp, _, Backbone */
 
 /**
  * wp.media.model.Attachments
@@ -530,8 +491,6 @@ module.exports = Attachment;
  * This collection has no persistence with the server without supplying
  * 'options.props.query = true', which will mirror the collection
  * to an Attachments Query collection - @see wp.media.model.Attachments.mirror().
- *
- * @memberOf wp.media.model
  *
  * @class
  * @augments Backbone.Collection
@@ -546,7 +505,7 @@ module.exports = Attachment;
  * @param {string} [options.filters]
  *
  */
-var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachments.prototype */{
+var Attachments = Backbone.Collection.extend({
 	/**
 	 * @type {wp.media.model.Attachment}
 	 */
@@ -675,15 +634,6 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	 * @returns {Boolean}
 	 */
 	validator: function( attachment ) {
-
-		// Filter out contextually created attachments (e.g. headers, logos, etc.).
-		if (
-			! _.isUndefined( attachment.attributes.context ) &&
-			'' !== attachment.attributes.context
-		) {
-			return false;
-		}
-
 		if ( ! this.validateDestroyed && attachment.destroyed ) {
 			return false;
 		}
@@ -817,8 +767,6 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		this.reset( [], { silent: true } );
 		this.observe( attachments );
 
-		// Used for the search results.
-		this.trigger( 'attachments:received', this );
 		return this;
 	},
 	/**
@@ -833,7 +781,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		delete this.mirroring;
 	},
 	/**
-	 * Retrieve more attachments from the server for the collection.
+	 * Retrive more attachments from the server for the collection.
 	 *
 	 * Only works if the collection is mirroring a Query Attachments collection,
 	 * and forwards to its `more` method. This collection class doesn't have
@@ -858,9 +806,6 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 			if ( this === attachments.mirroring ) {
 				deferred.resolveWith( this );
 			}
-
-			// Used for the search results.
-			attachments.trigger( 'attachments:received', this );
 		});
 
 		return deferred.promise();
@@ -958,12 +903,14 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 			attachments: attachments
 		});
 	}
-},/** @lends wp.media.model.Attachments */{
+}, {
 	/**
 	 * A function to compare two attachment models in an attachments collection.
 	 *
 	 * Used as the default comparator for instances of wp.media.model.Attachments
 	 * and its subclasses. @see wp.media.model.Attachments._changeOrderby().
+	 *
+	 * @static
 	 *
 	 * @param {Backbone.Model} a
 	 * @param {Backbone.Model} b
@@ -993,7 +940,9 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 
 		return ( 'DESC' === order ) ? wp.media.compare( a, b, ac, bc ) : wp.media.compare( b, a, bc, ac );
 	},
-	/** @namespace wp.media.model.Attachments.filters */
+	/**
+	 * @namespace
+	 */
 	filters: {
 		/**
 		 * @static
@@ -1025,23 +974,8 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		 * @returns {Boolean}
 		 */
 		type: function( attachment ) {
-			var type = this.props.get('type'), atts = attachment.toJSON(), mime, found;
-
-			if ( ! type || ( _.isArray( type ) && ! type.length ) ) {
-				return true;
-			}
-
-			mime = atts.mime || ( atts.file && atts.file.type ) || '';
-
-			if ( _.isArray( type ) ) {
-				found = _.find( type, function (t) {
-					return -1 !== mime.indexOf( t );
-				} );
-			} else {
-				found = -1 !== mime.indexOf( type );
-			}
-
-			return found;
+			var type = this.props.get('type');
+			return ! type || -1 !== type.indexOf( attachment.get('type') );
 		},
 		/**
 		 * @static
@@ -1083,11 +1017,10 @@ module.exports = Attachments;
 
 /***/ }),
 
-/***/ 26:
+/***/ 23:
 /***/ (function(module, exports) {
 
-var Attachments = wp.media.model.Attachments,
-	Query;
+/*globals wp, _ */
 
 /**
  * wp.media.model.Query
@@ -1096,8 +1029,6 @@ var Attachments = wp.media.model.Attachments,
  *
  * Note: Do NOT change this.args after the query has been initialized.
  *       Things will break.
- *
- * @memberOf wp.media.model
  *
  * @class
  * @augments wp.media.model.Attachments
@@ -1108,8 +1039,13 @@ var Attachments = wp.media.model.Attachments,
  * @param {object} [options.args]                Attachments query arguments.
  * @param {object} [options.args.posts_per_page]
  */
-Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
+var Attachments = wp.media.model.Attachments,
+	Query;
+
+Query = Attachments.extend({
 	/**
+	 * @global wp.Uploader
+	 *
 	 * @param {array}  [models=[]]  Array of initial models to populate the collection.
 	 * @param {object} [options={}]
 	 */
@@ -1159,7 +1095,7 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 		// Only observe when a limited number of query args are set. There
 		// are no filters for other properties, so observing will result in
 		// false positives in those queries.
-		allowed = [ 's', 'order', 'orderby', 'posts_per_page', 'post_mime_type', 'post_parent', 'author' ];
+		allowed = [ 's', 'order', 'orderby', 'posts_per_page', 'post_mime_type', 'post_parent' ];
 		if ( wp.Uploader && _( this.args ).chain().keys().difference( allowed ).isEmpty().value() ) {
 			this.observe( wp.Uploader.queue );
 		}
@@ -1241,7 +1177,7 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 			return fallback.sync.apply( this, arguments );
 		}
 	}
-}, /** @lends wp.media.model.Query */{
+}, {
 	/**
 	 * @readonly
 	 */
@@ -1276,15 +1212,14 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 	 * @readonly
 	 */
 	propmap: {
-		'search':		's',
-		'type':			'post_mime_type',
-		'perPage':		'posts_per_page',
-		'menuOrder':	'menu_order',
-		'uploadedTo':	'post_parent',
-		'status':		'post_status',
-		'include':		'post__in',
-		'exclude':		'post__not_in',
-		'author':		'author'
+		'search':    's',
+		'type':      'post_mime_type',
+		'perPage':   'posts_per_page',
+		'menuOrder': 'menu_order',
+		'uploadedTo': 'post_parent',
+		'status':     'post_status',
+		'include':    'post__in',
+		'exclude':    'post__not_in'
 	},
 	/**
 	 * Creates and returns an Attachments Query collection given the properties.
@@ -1306,7 +1241,6 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 	 * @param {Object} [props.menu_order]
 	 * @param {Object} [props.post_parent]
 	 * @param {Object} [props.post_status]
-	 * @param {Object} [props.author]
 	 * @param {Object} [options]
 	 *
 	 * @returns {wp.media.model.Query} A new Attachments Query collection.
@@ -1398,8 +1332,10 @@ module.exports = Query;
 
 /***/ }),
 
-/***/ 27:
+/***/ 24:
 /***/ (function(module, exports) {
+
+/*globals Backbone */
 
 /**
  * wp.media.model.PostImage
@@ -1408,15 +1344,13 @@ module.exports = Query;
  *
  * Used in the embedded image attachment display settings modal - @see wp.media.view.MediaFrame.ImageDetails.
  *
- * @memberOf wp.media.model
- *
  * @class
  * @augments Backbone.Model
  *
  * @param {int} [attributes]               Initial model attributes.
  * @param {int} [attributes.attachment_id] ID of the attachment.
  **/
-var PostImage = Backbone.Model.extend(/** @lends wp.media.model.PostImage.prototype */{
+var PostImage = Backbone.Model.extend({
 
 	initialize: function( attributes ) {
 		var Attachment = wp.media.model.Attachment;
@@ -1559,24 +1493,24 @@ module.exports = PostImage;
 
 /***/ }),
 
-/***/ 28:
+/***/ 25:
 /***/ (function(module, exports) {
 
-var Attachments = wp.media.model.Attachments,
-	Selection;
+/*globals wp, _ */
 
 /**
  * wp.media.model.Selection
  *
  * A selection of attachments.
  *
- * @memberOf wp.media.model
- *
  * @class
  * @augments wp.media.model.Attachments
  * @augments Backbone.Collection
  */
-Selection = Attachments.extend(/** @lends wp.media.model.Selection.prototype */{
+var Attachments = wp.media.model.Attachments,
+	Selection;
+
+Selection = Attachments.extend({
 	/**
 	 * Refresh the `single` model whenever the selection changes.
 	 * Binds `single` instead of using the context argument to ensure
