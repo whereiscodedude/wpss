@@ -24,6 +24,8 @@ class WP_Customize_Section {
 	 * Used when sorting two instances whose priorities are equal.
 	 *
 	 * @since 4.1.0
+	 *
+	 * @static
 	 * @var int
 	 */
 	protected static $instance_count = 0;
@@ -161,7 +163,7 @@ class WP_Customize_Section {
 		}
 
 		$this->manager = $manager;
-		$this->id      = $id;
+		$this->id = $id;
 		if ( empty( $this->active_callback ) ) {
 			$this->active_callback = array( $this, 'active_callback' );
 		}
@@ -180,7 +182,7 @@ class WP_Customize_Section {
 	 */
 	final public function active() {
 		$section = $this;
-		$active  = call_user_func( $this->active_callback, $this );
+		$active = call_user_func( $this->active_callback, $this );
 
 		/**
 		 * Filters response of WP_Customize_Section::active().
@@ -217,14 +219,14 @@ class WP_Customize_Section {
 	 * @return array The array to be exported to the client as JSON.
 	 */
 	public function json() {
-		$array                   = wp_array_slice_assoc( (array) $this, array( 'id', 'description', 'priority', 'panel', 'type', 'description_hidden' ) );
-		$array['title']          = html_entity_decode( $this->title, ENT_QUOTES, get_bloginfo( 'charset' ) );
-		$array['content']        = $this->get_content();
-		$array['active']         = $this->active();
+		$array = wp_array_slice_assoc( (array) $this, array( 'id', 'description', 'priority', 'panel', 'type', 'description_hidden' ) );
+		$array['title'] = html_entity_decode( $this->title, ENT_QUOTES, get_bloginfo( 'charset' ) );
+		$array['content'] = $this->get_content();
+		$array['active'] = $this->active();
 		$array['instanceNumber'] = $this->instance_number;
 
 		if ( $this->panel ) {
-			/* translators: &#9656; is the unicode right-pointing triangle. %s: Section title in the Customizer. */
+			/* translators: &#9656; is the unicode right-pointing triangle, and %s is the section title in the Customizer */
 			$array['customizeAction'] = sprintf( __( 'Customizing &#9656; %s' ), esc_html( $this->manager->get_panel( $this->panel )->title ) );
 		} else {
 			$array['customizeAction'] = __( 'Customizing' );
@@ -242,11 +244,11 @@ class WP_Customize_Section {
 	 * @return bool False if theme doesn't support the section or user doesn't have the capability.
 	 */
 	final public function check_capabilities() {
-		if ( $this->capability && ! current_user_can( $this->capability ) ) {
+		if ( $this->capability && ! call_user_func_array( 'current_user_can', (array) $this->capability ) ) {
 			return false;
 		}
 
-		if ( $this->theme_supports && ! current_theme_supports( ... (array) $this->theme_supports ) ) {
+		if ( $this->theme_supports && ! call_user_func_array( 'current_theme_supports', (array) $this->theme_supports ) ) {
 			return false;
 		}
 

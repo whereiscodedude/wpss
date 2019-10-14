@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -95,36 +95,24 @@
 /* 7 */,
 /* 8 */,
 /* 9 */,
-/* 10 */,
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(12);
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * @output wp-includes/js/media-grid.js
- */
 
 var media = wp.media;
 
-media.controller.EditAttachmentMetadata = __webpack_require__( 13 );
-media.view.MediaFrame.Manage = __webpack_require__( 14 );
-media.view.Attachment.Details.TwoColumn = __webpack_require__( 15 );
-media.view.MediaFrame.Manage.Router = __webpack_require__( 16 );
-media.view.EditImage.Details = __webpack_require__( 17 );
-media.view.MediaFrame.EditAttachments = __webpack_require__( 18 );
-media.view.SelectModeToggleButton = __webpack_require__( 19 );
-media.view.DeleteSelectedButton = __webpack_require__( 20 );
-media.view.DeleteSelectedPermanentlyButton = __webpack_require__( 21 );
+media.controller.EditAttachmentMetadata = __webpack_require__( 11 );
+media.view.MediaFrame.Manage = __webpack_require__( 12 );
+media.view.Attachment.Details.TwoColumn = __webpack_require__( 13 );
+media.view.MediaFrame.Manage.Router = __webpack_require__( 14 );
+media.view.EditImage.Details = __webpack_require__( 15 );
+media.view.MediaFrame.EditAttachments = __webpack_require__( 16 );
+media.view.SelectModeToggleButton = __webpack_require__( 17 );
+media.view.DeleteSelectedButton = __webpack_require__( 18 );
+media.view.DeleteSelectedPermanentlyButton = __webpack_require__( 19 );
 
 
 /***/ }),
-/* 13 */
+/* 11 */
 /***/ (function(module, exports) {
 
 var l10n = wp.media.view.l10n,
@@ -158,7 +146,7 @@ module.exports = EditAttachmentMetadata;
 
 
 /***/ }),
-/* 14 */
+/* 12 */
 /***/ (function(module, exports) {
 
 var MediaFrame = wp.media.view.MediaFrame,
@@ -451,7 +439,7 @@ module.exports = Manage;
 
 
 /***/ }),
-/* 15 */
+/* 13 */
 /***/ (function(module, exports) {
 
 var Details = wp.media.view.Attachment.Details,
@@ -508,7 +496,7 @@ module.exports = TwoColumn;
 
 
 /***/ }),
-/* 16 */
+/* 14 */
 /***/ (function(module, exports) {
 
 /**
@@ -581,7 +569,7 @@ module.exports = Router;
 
 
 /***/ }),
-/* 17 */
+/* 15 */
 /***/ (function(module, exports) {
 
 var View = wp.media.View,
@@ -622,7 +610,7 @@ module.exports = Details;
 
 
 /***/ }),
-/* 18 */
+/* 16 */
 /***/ (function(module, exports) {
 
 var Frame = wp.media.view.Frame,
@@ -707,9 +695,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 		// Initialize modal container view.
 		if ( this.options.modal ) {
 			this.modal = new wp.media.view.Modal({
-				controller:     this,
-				title:          this.options.title,
-				hasCloseButton: false
+				controller: this,
+				title:      this.options.title
 			});
 
 			this.modal.on( 'open', _.bind( function () {
@@ -718,9 +705,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 
 			// Completely destroy the modal DOM element when closing it.
 			this.modal.on( 'close', _.bind( function() {
-				// Remove the keydown event.
-				$( 'body' ).off( 'keydown.media-modal' );
-				// Move focus back to the original item in the grid if possible.
+				$( 'body' ).off( 'keydown.media-modal' ); /* remove the keydown event */
+				// Restore the original focus item if possible
 				$( 'li.attachment[data-id="' + this.model.get( 'id' ) +'"]' ).focus();
 				this.resetRoute();
 			}, this ) );
@@ -801,8 +787,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 	},
 
 	toggleNav: function() {
-		this.$( '.left' ).prop( 'disabled', ! this.hasPrevious() );
-		this.$( '.right' ).prop( 'disabled', ! this.hasNext() );
+		this.$('.left').toggleClass( 'disabled', ! this.hasPrevious() );
+		this.$('.right').toggleClass( 'disabled', ! this.hasNext() );
 	},
 
 	/**
@@ -832,10 +818,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 		if ( ! this.hasPrevious() ) {
 			return;
 		}
-
 		this.trigger( 'refresh', this.library.at( this.getCurrentIndex() - 1 ) );
-		// Move focus to the Previous button. When there are no more items, to the Next button.
-		this.focusNavButton( this.hasPrevious() ? '.left' : '.right' );
+		this.$( '.left' ).focus();
 	},
 
 	/**
@@ -845,21 +829,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 		if ( ! this.hasNext() ) {
 			return;
 		}
-
 		this.trigger( 'refresh', this.library.at( this.getCurrentIndex() + 1 ) );
-		// Move focus to the Next button. When there are no more items, to the Previous button.
-		this.focusNavButton( this.hasNext() ? '.right' : '.left' );
-	},
-
-	/**
-	 * Set focus to the navigation buttons depending on the browsing direction.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @param {string} which A CSS selector to target the button to focus.
-	 */
-	focusNavButton: function( which ) {
-		$( which ).focus();
+		this.$( '.right' ).focus();
 	},
 
 	getCurrentIndex: function() {
@@ -903,7 +874,7 @@ module.exports = EditAttachments;
 
 
 /***/ }),
-/* 19 */
+/* 17 */
 /***/ (function(module, exports) {
 
 
@@ -961,11 +932,10 @@ SelectModeToggle = Button.extend(/** @lends wp.media.view.SelectModeToggle.proto
 		if ( this.controller.isModeActive( 'select' ) ) {
 			this.model.set( {
 				size: 'large',
-				text: l10n.cancel
+				text: l10n.cancelSelection
 			} );
 			children.not( '.spinner, .media-button' ).hide();
 			this.$el.show();
-			toolbar.$el.addClass( 'media-toolbar-mode-select' );
 			toolbar.$( '.delete-selected-button' ).removeClass( 'hidden' );
 		} else {
 			this.model.set( {
@@ -974,7 +944,6 @@ SelectModeToggle = Button.extend(/** @lends wp.media.view.SelectModeToggle.proto
 			} );
 			this.controller.content.get().$el.removeClass( 'fixed' );
 			toolbar.$el.css( 'width', '' );
-			toolbar.$el.removeClass( 'media-toolbar-mode-select' );
 			toolbar.$( '.delete-selected-button' ).addClass( 'hidden' );
 			children.not( '.media-button' ).show();
 			this.controller.state().get( 'selection' ).reset();
@@ -986,7 +955,7 @@ module.exports = SelectModeToggle;
 
 
 /***/ }),
-/* 20 */
+/* 18 */
 /***/ (function(module, exports) {
 
 var Button = wp.media.view.Button,
@@ -1013,16 +982,15 @@ DeleteSelected = Button.extend(/** @lends wp.media.view.DeleteSelectedButton.pro
 			this.options.filters.model.on( 'change', this.filterChange, this );
 		}
 		this.controller.on( 'selection:toggle', this.toggleDisabled, this );
-		this.controller.on( 'select:activate', this.toggleDisabled, this );
 	},
 
 	filterChange: function( model ) {
 		if ( 'trash' === model.get( 'status' ) ) {
-			this.model.set( 'text', l10n.restoreSelected );
+			this.model.set( 'text', l10n.untrashSelected );
 		} else if ( wp.media.view.settings.mediaTrash ) {
 			this.model.set( 'text', l10n.trashSelected );
 		} else {
-			this.model.set( 'text', l10n.deletePermanently );
+			this.model.set( 'text', l10n.deleteSelected );
 		}
 	},
 
@@ -1046,7 +1014,7 @@ module.exports = DeleteSelected;
 
 
 /***/ }),
-/* 21 */
+/* 19 */
 /***/ (function(module, exports) {
 
 var Button = wp.media.view.Button,
