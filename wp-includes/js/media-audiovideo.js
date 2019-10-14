@@ -36,32 +36,12 @@
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
 /******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
@@ -79,7 +59,6 @@
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
-/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
@@ -88,39 +67,16 @@
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(1);
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * @output wp-includes/js/media-audiovideo.js
- */
-
 var media = wp.media,
 	baseSettings = window._wpmejsSettings || {},
 	l10n = window._wpMediaViewsL10n || {};
 
 /**
- *
- * Defines the wp.media.mixin object.
- *
  * @mixin
- *
- * @since 4.2.0
  */
 wp.media.mixin = {
 	mejsSettings: baseSettings,
 
-	/**
-	 * Pauses and removes all players.
-	 *
-	 * @since 4.2.0
-	 *
-	 * @return {void}
-	 */
 	removeAllPlayers: function() {
 		var p;
 
@@ -133,15 +89,9 @@ wp.media.mixin = {
 	},
 
 	/**
-	 * Removes the player.
-	 *
 	 * Override the MediaElement method for removing a player.
-	 * MediaElement tries to pull the audio/video tag out of
-	 * its container and re-add it to the DOM.
-	 *
-	 * @since 4.2.0
-	 *
-	 * @return {void}
+	 *	MediaElement tries to pull the audio/video tag out of
+	 *	its container and re-add it to the DOM.
 	 */
 	removePlayer: function(t) {
 		var featureIndex, feature;
@@ -161,32 +111,25 @@ wp.media.mixin = {
 		}
 
 		if ( ! t.isDynamic ) {
-			t.node.remove();
+			t.$node.remove();
 		}
 
-		if ( 'html5' !== t.media.rendererName ) {
-			t.media.remove();
+		if ( 'native' !== t.media.pluginType ) {
+			t.$media.remove();
 		}
 
 		delete window.mejs.players[t.id];
 
 		t.container.remove();
-		t.globalUnbind('resize', t.globalResizeCallback);
-		t.globalUnbind('keydown', t.globalKeydownCallback);
-		t.globalUnbind('click', t.globalClickCallback);
-		delete t.media.player;
+		t.globalUnbind();
+		delete t.node.player;
 	},
 
 	/**
-	 *
-	 * Removes and resets all players.
-	 *
 	 * Allows any class that has set 'player' to a MediaElementPlayer
-	 * instance to remove the player when listening to events.
+	 *  instance to remove the player when listening to events.
 	 *
-	 * Examples: modal closes, shortcode properties are removed, etc.
-	 *
-	 * @since 4.2.0
+	 *  Examples: modal closes, shortcode properties are removed, etc.
 	 */
 	unsetPlayers : function() {
 		if ( this.players && this.players.length ) {
@@ -200,9 +143,7 @@ wp.media.mixin = {
 };
 
 /**
- * Shortcode modeling for playlists.
- *
- * @since 4.2.0
+ * Autowire "collection"-type shortcodes
  */
 wp.media.playlist = new wp.media.collection({
 	tag: 'playlist',
@@ -219,14 +160,11 @@ wp.media.playlist = new wp.media.collection({
 });
 
 /**
- * Shortcode modeling for audio.
- *
- * `edit()` prepares the shortcode for the media modal.
- * `shortcode()` builds the new shortcode after an update.
+ * Shortcode modeling for audio
+ *  `edit()` prepares the shortcode for the media modal
+ *  `shortcode()` builds the new shortcode after update
  *
  * @namespace
- *
- * @since 4.2.0
  */
 wp.media.audio = {
 	coerce : wp.media.coerce,
@@ -240,14 +178,6 @@ wp.media.audio = {
 		width : 400
 	},
 
-	/**
-	 * Instantiates a new media object with the next matching shortcode.
-	 *
-	 * @since 4.2.0
-	 *
-	 * @param {string} data The text to apply the shortcode on.
-	 * @returns {wp.media} The media object.
-	 */
 	edit : function( data ) {
 		var frame, shortcode = wp.shortcode.next( 'audio', data ).shortcode;
 
@@ -260,14 +190,6 @@ wp.media.audio = {
 		return frame;
 	},
 
-	/**
-	 * Generates an audio shortcode.
-	 *
-	 * @since 4.2.0
-	 *
-	 * @param {Array} model Array with attributes for the shortcode.
-	 * @returns {wp.shortcode} The audio shortcode object.
-	 */
 	shortcode : function( model ) {
 		var content;
 
@@ -291,12 +213,9 @@ wp.media.audio = {
 };
 
 /**
- * Shortcode modeling for video.
- *
- *  `edit()` prepares the shortcode for the media modal.
- *  `shortcode()` builds the new shortcode after update.
- *
- * @since 4.2.0
+ * Shortcode modeling for video
+ *  `edit()` prepares the shortcode for the media modal
+ *  `shortcode()` builds the new shortcode after update
  *
  * @namespace
  */
@@ -315,14 +234,6 @@ wp.media.video = {
 		height : 360
 	},
 
-	/**
-	 * Instantiates a new media object with the next matching shortcode.
-	 *
-	 * @since 4.2.0
-	 *
-	 * @param {string} data The text to apply the shortcode on.
-	 * @returns {wp.media} The media object.
-	 */
 	edit : function( data ) {
 		var frame,
 			shortcode = wp.shortcode.next( 'video', data ).shortcode,
@@ -340,14 +251,6 @@ wp.media.video = {
 		return frame;
 	},
 
-	/**
-	 * Generates an video shortcode.
-	 *
-	 * @since 4.2.0
-	 *
-	 * @param {Array} model Array with attributes for the shortcode.
-	 * @returns {wp.shortcode} The video shortcode object.
-	 */
 	shortcode : function( model ) {
 		var content;
 
@@ -370,19 +273,19 @@ wp.media.video = {
 	}
 };
 
-media.model.PostMedia = __webpack_require__( 2 );
-media.controller.AudioDetails = __webpack_require__( 3 );
-media.controller.VideoDetails = __webpack_require__( 4 );
-media.view.MediaFrame.MediaDetails = __webpack_require__( 5 );
-media.view.MediaFrame.AudioDetails = __webpack_require__( 6 );
-media.view.MediaFrame.VideoDetails = __webpack_require__( 7 );
-media.view.MediaDetails = __webpack_require__( 8 );
-media.view.AudioDetails = __webpack_require__( 9 );
-media.view.VideoDetails = __webpack_require__( 10 );
+media.model.PostMedia = __webpack_require__( 1 );
+media.controller.AudioDetails = __webpack_require__( 2 );
+media.controller.VideoDetails = __webpack_require__( 3 );
+media.view.MediaFrame.MediaDetails = __webpack_require__( 4 );
+media.view.MediaFrame.AudioDetails = __webpack_require__( 5 );
+media.view.MediaFrame.VideoDetails = __webpack_require__( 6 );
+media.view.MediaDetails = __webpack_require__( 7 );
+media.view.AudioDetails = __webpack_require__( 8 );
+media.view.VideoDetails = __webpack_require__( 9 );
 
 
 /***/ }),
-/* 2 */
+/* 1 */
 /***/ (function(module, exports) {
 
 /**
@@ -391,12 +294,10 @@ media.view.VideoDetails = __webpack_require__( 10 );
  * Shared model class for audio and video. Updates the model after
  *   "Add Audio|Video Source" and "Replace Audio|Video" states return
  *
- * @memberOf wp.media.model
- *
  * @class
  * @augments Backbone.Model
  */
-var PostMedia = Backbone.Model.extend(/** @lends wp.media.model.PostMedia.prototype */{
+var PostMedia = Backbone.Model.extend({
 	initialize: function() {
 		this.attachment = false;
 	},
@@ -430,25 +331,23 @@ module.exports = PostMedia;
 
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, exports) {
-
-var State = wp.media.controller.State,
-	l10n = wp.media.view.l10n,
-	AudioDetails;
 
 /**
  * wp.media.controller.AudioDetails
  *
  * The controller for the Audio Details state
  *
- * @memberOf wp.media.controller
- *
  * @class
  * @augments wp.media.controller.State
  * @augments Backbone.Model
  */
-AudioDetails = State.extend(/** @lends wp.media.controller.AudioDetails.prototype */{
+var State = wp.media.controller.State,
+	l10n = wp.media.view.l10n,
+	AudioDetails;
+
+AudioDetails = State.extend({
 	defaults: {
 		id: 'audio-details',
 		toolbar: 'audio-details',
@@ -469,15 +368,13 @@ module.exports = AudioDetails;
 
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports) {
 
 /**
  * wp.media.controller.VideoDetails
  *
  * The controller for the Video Details state
- *
- * @memberOf wp.media.controller
  *
  * @class
  * @augments wp.media.controller.State
@@ -487,7 +384,7 @@ var State = wp.media.controller.State,
 	l10n = wp.media.view.l10n,
 	VideoDetails;
 
-VideoDetails = State.extend(/** @lends wp.media.controller.VideoDetails.prototype */{
+VideoDetails = State.extend({
 	defaults: {
 		id: 'video-details',
 		toolbar: 'video-details',
@@ -508,17 +405,11 @@ module.exports = VideoDetails;
 
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports) {
-
-var Select = wp.media.view.MediaFrame.Select,
-	l10n = wp.media.view.l10n,
-	MediaDetails;
 
 /**
  * wp.media.view.MediaFrame.MediaDetails
- *
- * @memberOf wp.media.view.MediaFrame
  *
  * @class
  * @augments wp.media.view.MediaFrame.Select
@@ -529,7 +420,11 @@ var Select = wp.media.view.MediaFrame.Select,
  * @augments Backbone.View
  * @mixes wp.media.controller.StateMachine
  */
-MediaDetails = Select.extend(/** @lends wp.media.view.MediaFrame.MediaDetails.prototype */{
+var Select = wp.media.view.MediaFrame.Select,
+	l10n = wp.media.view.l10n,
+	MediaDetails;
+
+MediaDetails = Select.extend({
 	defaults: {
 		id:      'media',
 		url:     '',
@@ -644,19 +539,11 @@ module.exports = MediaDetails;
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports) {
-
-var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
-	MediaLibrary = wp.media.controller.MediaLibrary,
-
-	l10n = wp.media.view.l10n,
-	AudioDetails;
 
 /**
  * wp.media.view.MediaFrame.AudioDetails
- *
- * @memberOf wp.media.view.MediaFrame
  *
  * @class
  * @augments wp.media.view.MediaFrame.MediaDetails
@@ -668,7 +555,13 @@ var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
  * @augments Backbone.View
  * @mixes wp.media.controller.StateMachine
  */
-AudioDetails = MediaDetails.extend(/** @lends wp.media.view.MediaFrame.AudioDetails.prototype */{
+var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
+	MediaLibrary = wp.media.controller.MediaLibrary,
+
+	l10n = wp.media.view.l10n,
+	AudioDetails;
+
+AudioDetails = MediaDetails.extend({
 	defaults: {
 		id:      'audio',
 		url:     '',
@@ -726,18 +619,11 @@ module.exports = AudioDetails;
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports) {
-
-var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
-	MediaLibrary = wp.media.controller.MediaLibrary,
-	l10n = wp.media.view.l10n,
-	VideoDetails;
 
 /**
  * wp.media.view.MediaFrame.VideoDetails
- *
- * @memberOf wp.media.view.MediaFrame
  *
  * @class
  * @augments wp.media.view.MediaFrame.MediaDetails
@@ -749,7 +635,12 @@ var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
  * @augments Backbone.View
  * @mixes wp.media.controller.StateMachine
  */
-VideoDetails = MediaDetails.extend(/** @lends wp.media.view.MediaFrame.VideoDetails.prototype */{
+var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
+	MediaLibrary = wp.media.controller.MediaLibrary,
+	l10n = wp.media.view.l10n,
+	VideoDetails;
+
+VideoDetails = MediaDetails.extend({
 	defaults: {
 		id:      'video',
 		url:     '',
@@ -867,18 +758,13 @@ module.exports = VideoDetails;
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports) {
 
 /* global MediaElementPlayer */
-var AttachmentDisplay = wp.media.view.Settings.AttachmentDisplay,
-	$ = jQuery,
-	MediaDetails;
 
 /**
  * wp.media.view.MediaDetails
- *
- * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.Settings.AttachmentDisplay
@@ -887,26 +773,27 @@ var AttachmentDisplay = wp.media.view.Settings.AttachmentDisplay,
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.prototype */{
+var AttachmentDisplay = wp.media.view.Settings.AttachmentDisplay,
+	$ = jQuery,
+	MediaDetails;
+
+MediaDetails = AttachmentDisplay.extend({
 	initialize: function() {
 		_.bindAll(this, 'success');
 		this.players = [];
-		this.listenTo( this.controller.states, 'close', wp.media.mixin.unsetPlayers );
+		this.listenTo( this.controller, 'close', wp.media.mixin.unsetPlayers );
 		this.on( 'ready', this.setPlayer );
 		this.on( 'media:setting:remove', wp.media.mixin.unsetPlayers, this );
 		this.on( 'media:setting:remove', this.render );
 		this.on( 'media:setting:remove', this.setPlayer );
-
-		AttachmentDisplay.prototype.initialize.apply( this, arguments );
-	},
-
-	events: function(){
-		return _.extend( {
+		this.events = _.extend( this.events, {
 			'click .remove-setting' : 'removeSetting',
 			'change .content-track' : 'setTracks',
 			'click .remove-track' : 'setTracks',
 			'click .add-media-source' : 'addSource'
-		}, AttachmentDisplay.prototype.events );
+		} );
+
+		AttachmentDisplay.prototype.initialize.apply( this, arguments );
 	},
 
 	prepare: function() {
@@ -959,17 +846,19 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 		this.scriptXhr = false;
 	},
 
+	/**
+	 * @global MediaElementPlayer
+	 */
 	setPlayer : function() {
-		var src;
+		var baseSettings;
 
 		if ( this.players.length || ! this.media || this.scriptXhr ) {
 			return;
 		}
 
-		src = this.model.get( 'src' );
-
-		if ( src && src.indexOf( 'vimeo' ) > -1 && ! ( 'Vimeo' in window ) ) {
-			this.scriptXhr = $.getScript( 'https://player.vimeo.com/api/player.js', _.bind( this.loadPlayer, this ) );
+		if ( this.model.get( 'src' ).indexOf( 'vimeo' ) > -1 && ! ( 'Froogaloop' in window ) ) {
+			baseSettings = wp.media.mixin.mejsSettings;
+			this.scriptXhr = $.getScript( baseSettings.pluginPath + 'froogaloop.min.js', _.bind( this.loadPlayer, this ) );
 		} else {
 			this.loadPlayer();
 		}
@@ -1001,7 +890,7 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 		AttachmentDisplay.prototype.render.apply( this, arguments );
 
 		setTimeout( _.bind( function() {
-			this.scrollToTop();
+			this.resetFocus();
 		}, this ), 10 );
 
 		this.settings = _.defaults( {
@@ -1011,10 +900,10 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 		return this.setMedia();
 	},
 
-	scrollToTop: function() {
+	resetFocus: function() {
 		this.$( '.embed-media-settings' ).scrollTop( 0 );
 	}
-},/** @lends wp.media.view.MediaDetails */{
+}, {
 	instances : 0,
 	/**
 	 * When multiple players in the DOM contain the same src, things get weird.
@@ -1041,16 +930,11 @@ module.exports = MediaDetails;
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports) {
-
-var MediaDetails = wp.media.view.MediaDetails,
-	AudioDetails;
 
 /**
  * wp.media.view.AudioDetails
- *
- * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.MediaDetails
@@ -1060,7 +944,10 @@ var MediaDetails = wp.media.view.MediaDetails,
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-AudioDetails = MediaDetails.extend(/** @lends wp.media.view.AudioDetails.prototype */{
+var MediaDetails = wp.media.view.MediaDetails,
+	AudioDetails;
+
+AudioDetails = MediaDetails.extend({
 	className: 'audio-details',
 	template:  wp.template('audio-details'),
 
@@ -1085,16 +972,11 @@ module.exports = AudioDetails;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports) {
-
-var MediaDetails = wp.media.view.MediaDetails,
-	VideoDetails;
 
 /**
  * wp.media.view.VideoDetails
- *
- * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.MediaDetails
@@ -1104,7 +986,10 @@ var MediaDetails = wp.media.view.MediaDetails,
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-VideoDetails = MediaDetails.extend(/** @lends wp.media.view.VideoDetails.prototype */{
+var MediaDetails = wp.media.view.MediaDetails,
+	VideoDetails;
+
+VideoDetails = MediaDetails.extend({
 	className: 'video-details',
 	template:  wp.template('video-details'),
 
