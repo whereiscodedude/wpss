@@ -9,162 +9,310 @@
 /** WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
-/* translators: Page title of the About WordPress page in the admin. */
-$title = _x( 'About', 'page title' );
+wp_enqueue_style( 'wp-mediaelement' );
+wp_enqueue_script( 'wp-mediaelement' );
+wp_localize_script( 'mediaelement', '_wpmejsSettings', array(
+	'pluginPath' => includes_url( 'js/mediaelement/', 'relative' ),
+	'pauseOtherPlayers' => ''
+) );
 
-list( $display_version ) = explode( '-', get_bloginfo( 'version' ) );
+$title = __( 'About' );
+
+list( $display_version ) = explode( '-', $wp_version );
 
 include( ABSPATH . 'wp-admin/admin-header.php' );
+
+$video_url = 'https://videopress.com/embed/T54Iy7Tw';
+$locale    = str_replace( '_', '-', get_locale() );
+if ( 'en-AU' !== $locale ) {
+	list( $locale ) = explode( '-', $locale );
+}
+if ( 'en' !== $locale ) {
+	$video_url = add_query_arg( 'defaultLangCode', $locale, $video_url );
+}
+
+$major_features = array(
+	array(
+		'src'         => array(
+			'mp4'  => '//s.w.org/images/core/4.3/formatting.mp4',
+			'ogv'  => '//s.w.org/images/core/4.3/formatting.ogv',
+			'webm' => '//s.w.org/images/core/4.3/formatting.webm',
+		),
+		'heading'     => __( 'Formatting Shortcuts' ),
+		/* Translators: 1: asterisks; 2: number sign; */
+		'description' => sprintf( __( 'Your writing flow just got faster with new formatting shortcuts in WordPress 4.3. Use asterisks to create lists and number signs to make a heading. No more breaking your flow; your text looks great with a %1$s and a %2$s.' ), '<code>*</code>', '<code>#</code>' ),
+	),
+	array(
+		'src'         => '//s.w.org/images/core/4.3/menu-customizer.png',
+		'heading'     => __( 'Menus in the Customizer' ),
+		'description' => __( 'Create your menu, update it, and assign it, all while live-previewing in the customizer. The streamlined customizer design provides a mobile-friendly and accessible interface. With every release, it becomes easier and faster to make your site just the way you want it.' ),
+	),
+	array(
+		'src'         => '//s.w.org/images/core/4.3/better-passwords.png',
+		'heading'     => __( 'Better Passwords' ),
+		'description' => __( 'Keep your site more secure with WordPress&#8217; improved approach to passwords. Instead of receiving passwords via email, you&#8217;ll get a password reset link. When you add new users to your site or edit a user profile, WordPress will automatically generate a secure password.' ),
+	),
+	array(
+		'src'         => '//s.w.org/images/core/4.3/site-icon-customizer.png',
+		'heading'     => __( 'Site Icons' ),
+		'description' => __( 'Site icons represent your site in browser tabs, bookmark menus, and on the home screen of mobile devices. Add your unique site icon in the customizer; it will even stay in place when you switch themes. Make your whole site reflect your brand.' ),
+	),
+);
+shuffle( $major_features );
+
+$minor_features = array(
+	array(
+		'src'         => 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cGF0aCBmaWxsPSIjMDBhMGQyIiBkPSJNNTAgMjE1aDI0MHYzMEg1MHpNNTAgMjc1aDI0MHYzMEg1MHpNNTAgMTU1aDI0MHYzMEg1MHpNNTAgOTVoMjQwdjMwSDUwek0zMTAuMSA5NWwxOS45IDMwIDIwLjEtMzAiLz48L3N2Zz4=',
+		'heading'     => __( 'A smoother admin experience' ),
+		'description' => __( 'Refinements to the list view across the admin make your WordPress more accessible and easier to work with on any device.' ),
+	),
+	array(
+		'src'         => 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PHBhdGggZmlsbD0iIzAwYTBkMiIgZD0iTTUgMmgxMHEuODIgMCAxLjQxLjU5VDE3IDR2OHEwIC44Mi0uNTkgMS40MVQxNSAxNGgtMmwtNSA1di01SDVxLS44MiAwLTEuNDEtLjU5VDMgMTJWNHEwLS44Mi41OS0xLjQxVDUgMnptOC41IDguNUwxMSA4bDIuNS0yLjUtMS0xTDEwIDcgNy41IDQuNWwtMSAxTDkgOGwtMi41IDIuNSAxIDFMMTAgOWwyLjUgMi41eiIvPjwvc3ZnPg==',
+		'heading'     => __( 'Comments turned off on pages' ),
+		'description' => __( 'All new pages that you create will have comments turned off. Keep discussions to your blog, right where they&#8217;re supposed to happen.' ),
+	),
+	array(
+		'src'         => 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZmlsbD0iIzAwYTBkMiIgZD0iTTI5LjMyOCA1LjcxMnEuMDQ4LS4xNDQuMDk2LS4zODR0LS4wNjQtLjgxNi0uNTI4LS45NzZxLS4zODQtLjM2OC0uODcyLS40NjR0LS43OTIgMGwtLjI4OC4wOHEtMS40NTYuNzItNS44OCAzLjczNnQtNi4zOTIgNS4xNzZxLS43MzYuODMyLTEuNDA4IDIuMzJ0LS44OCAzIC41NDQgMi4zOTJxLjgzMi43MzYgMi4zNDQuNTc2dDMuMDcyLS44MjQgMi4yNDgtMS4zNTJxMi4xNDQtMi4xNDQgNS4xNjgtNi42NTZ0My42MzItNS44MDh6TTIuMjQgMjguMjRxMS4wNTYtLjY4OCAxLjcxMi0xLjUyOHQuOTUyLTEuNjE2LjU0NC0xLjUyLjcyLTEuNDggMS4yNC0xLjI4cTEuMDg4LS44IDIuNTA0LS43MDR0Mi40MjQgMS4xNjhxLjgxNi44OC44MjQgMi42NHQtMS4wOCAyLjg5NnEtMS4yMTYgMS4xMi0yLjkwNCAxLjYyNHQtMy40MjQuNDI0LTMuNTEyLS42MjR6Ii8+PC9zdmc+',
+		'heading'     => __( 'Customize your site quickly' ),
+		'description' => __( 'Wherever you are on the front-end, you can click the customize link in the toolbar to swiftly make changes to your site.' ),
+	),
+);
+
+$tech_features = array(
+	array(
+		'heading'     => __( 'Taxonomy Roadmap' ),
+		'description' => __( 'Terms shared across multiple taxonomies are now split into separate terms.' ),
+	),
+	array(
+		'heading'     => __( 'Template Hierarchy' ),
+		/* Translators: 1: singular.php; 2: single.php; 3:page.php */
+		'description' => sprintf( __( 'Added %1$s as a fallback for %2$s and %3$s' ), '<code>singular.php</code>', '<code>single.php</code>', '<code>page.php</code>' ),
+	),
+	array(
+		'heading'     => '<code>WP_List_Table</code>',
+		'description' => __( 'List tables can and should designate a primary column.' ),
+	),
+);
+
 ?>
-	<div class="wrap about-wrap full-width-layout">
-		<h1>
-			<?php
-			printf(
-				/* translators: %s: The current WordPress version number. */
-				__( 'Welcome to WordPress&nbsp;%s' ),
-				$display_version
-			);
-			?>
-		</h1>
+	<div class="wrap about-wrap">
+		<h1><?php printf( __( 'Welcome to WordPress&nbsp;%s' ), $display_version ); ?></h1>
 
-		<p class="about-text">
-			<?php
-			printf(
-				/* translators: %s: The current WordPress version number. */
-				__( 'Congratulations on updating to WordPress %s! This update makes it easier than ever to fix your site if something goes wrong.' ),
-				$display_version
-			);
-			?>
-		</p>
+		<div class="about-text"><?php printf( __( 'Thank you for updating! WordPress %s makes it even easier to format your content and customize your site.' ), $display_version ); ?></div>
+		<div class="wp-badge"><?php printf( __( 'Version %s' ), $display_version ); ?></div>
 
-		<div class="wp-badge">
-			<?php
-			printf(
-				/* translators: %s: The current WordPress version number. */
-				__( 'Version %s' ),
-				$display_version
-			);
-			?>
-		</div>
-
-		<nav class="nav-tab-wrapper wp-clearfix" aria-label="<?php esc_attr_e( 'Secondary menu' ); ?>">
-			<a href="about.php" class="nav-tab nav-tab-active" aria-current="page"><?php _e( 'What&#8217;s New' ); ?></a>
+		<h2 class="nav-tab-wrapper">
+			<a href="about.php" class="nav-tab nav-tab-active"><?php _e( 'What&#8217;s New' ); ?></a>
 			<a href="credits.php" class="nav-tab"><?php _e( 'Credits' ); ?></a>
 			<a href="freedoms.php" class="nav-tab"><?php _e( 'Freedoms' ); ?></a>
-			<a href="privacy.php" class="nav-tab"><?php _e( 'Privacy' ); ?></a>
-		</nav>
+		</h2>
 
-		<div class="headline-feature">
-			<h2><?php _e( 'Keeping Your Site Safe' ); ?></h2>
-			<p class="lead-description"><?php _e( 'WordPress 5.2 gives you even more robust tools for identifying and fixing configuration issues and fatal errors. Whether you are a developer helping clients or you manage your site solo, these tools can help get you the right information when you need it.' ); ?></p>
-			<div class="inline-svg aligncenter">
-				<img src="https://s.w.org/images/core/5.2/about_maintain-wordpress-v2.svg" alt="">
-			</div>
+		<div class="changelog point-releases">
+			<h3><?php echo _n( 'Maintenance and Security Release', 'Maintenance and Security Releases', 21 ); ?></h3>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: WordPress version number */
+					__( '<strong>Version %s</strong> addressed some security issues.' ),
+					'4.3.21'
+				);
+				?>
+				<?php
+				printf(
+					/* translators: %s: HelpHub URL */
+					__( 'For more information, see <a href="%s">the release notes</a>.' ),
+					sprintf(
+						/* translators: %s: WordPress version */
+						esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+						sanitize_title( '4.3.21' )
+					)
+				);
+				?>
+			</p>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: WordPress version number */
+					__( '<strong>Version %s</strong> addressed some security issues.' ),
+					'4.3.20'
+				);
+				?>
+				<?php
+				printf(
+					/* translators: %s: HelpHub URL */
+					__( 'For more information, see <a href="%s">the release notes</a>.' ),
+					sprintf(
+						/* translators: %s: WordPress version */
+						esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+						sanitize_title( '4.3.20' )
+					)
+				);
+				?>
+			</p>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: WordPress version number */
+					__( '<strong>Version %s</strong> addressed a security issue.' ),
+					'4.3.19'
+				);
+				?>
+				<?php
+				printf(
+					/* translators: %s: HelpHub URL */
+					__( 'For more information, see <a href="%s">the release notes</a>.' ),
+					sprintf(
+						/* translators: %s: WordPress version */
+						esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+						sanitize_title( '4.3.19' )
+					)
+				);
+				?>
+			</p>
+			<p>
+				<?php
+				/* translators: %s: WordPress version number */
+				printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.3.18' );
+				?>
+				<?php
+				/* translators: %s: Codex URL */
+				printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.18' );
+				?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed one security issue.' ), '4.3.17' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.17' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.3.16' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.16' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed one security issue.' ), '4.3.15' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.15' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed some security issues.' ), '4.3.14' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.14' ); ?>
+			</p>
+			<p><?php printf( __( '<strong>Version %s</strong> addressed one security issue.' ), '4.3.13' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.13' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue.',
+					'<strong>Version %1$s</strong> addressed some security issues.', 8 ), '4.3.12' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.12' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue.',
+					'<strong>Version %1$s</strong> addressed some security issues.', 5 ), '4.3.11' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.11' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed %2$s bug.',
+					'<strong>Version %1$s</strong> addressed %2$s bugs.', 1 ), '4.3.10', number_format_i18n( 1 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.10' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue.',
+					'<strong>Version %1$s</strong> addressed some security issues.', 6 ), '4.3.9' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.9' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue.',
+					'<strong>Version %1$s</strong> addressed some security issues.', 3 ), '4.3.8' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.8' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue.',
+					'<strong>Version %1$s</strong> addressed some security issues.', 8 ), '4.3.7' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.7' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+		         '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.', 1 ), '4.3.6', number_format_i18n( 1 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.6' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue.',
+		         '<strong>Version %1$s</strong> addressed some security issues.', 7 ), '4.3.5' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.5' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue.',
+		         '<strong>Version %1$s</strong> addressed some security issues.', 7 ), '4.3.4' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.4' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue.',
+		         '<strong>Version %1$s</strong> addressed some security issues.', 2 ), '4.3.3' ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.3' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bug.',
+		         '<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bugs.', 5 ), '4.3.2', number_format_i18n( 5 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.2' ); ?>
+			</p>
+			<p><?php printf( _n( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+		         '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.', 26 ), '4.3.1', number_format_i18n( 26 ) ); ?>
+				<?php printf( __( 'For more information, see <a href="%s">the release notes</a>.' ), 'https://codex.wordpress.org/Version_4.3.1' ); ?>
+			</p>
 		</div>
 
-		<hr />
+		<div class="headline-feature feature-video">
+			<iframe width="1050" height="591" src="<?php echo esc_url( $video_url ); ?>" frameborder="0" allowfullscreen></iframe>
+			<script src="https://videopress.com/videopress-iframe.js"></script>
+		</div>
 
-		<div class="feature-section is-wide has-2-columns is-wider-left">
-			<div class="column is-vertically-aligned-center">
-				<h3><?php _e( 'Site Health Check' ); ?></h3>
-				<p>
+		<hr/>
+
+		<div class="feature-section two-col">
+			<?php foreach ( $major_features as $feature ) : ?>
+			<div class="col">
+				<div class="media-container">
 					<?php
-					printf(
-						/* translators: 1: Link to the WordPress 5.1 release post. */
-						__( 'Building on <a href="%1$s">the Site Health features introduced in 5.1</a>, this release adds two new pages to help debug common configuration issues. It also adds space where developers can include debugging information for site maintainers.' ),
-						__( 'https://wordpress.org/news/2019/02/betty/' )
-					);
+					// Video.
+					if ( is_array( $feature['src'] ) ) :
+						echo wp_video_shortcode( array(
+							'mp4'      => $feature['src']['mp4'],
+							'ogv'      => $feature['src']['ogv'],
+							'webm'     => $feature['src']['webm'],
+							'loop'     => true,
+							'autoplay' => true,
+							'width'    => 500,
+							'height'   => 284
+						) );
 
-					if ( current_user_can( 'install_plugins' ) ) {
-						printf(
-							/* translators: 1: URL to Site Health Status screen, 2: URL to Site Health Info screen. */
-							__( ' <a href="%1$s">Check your site status</a>, and <a href="%2$s">learn how to debug issues</a>.' ),
-							admin_url( 'site-health.php' ),
-							admin_url( 'site-health.php?tab=debug' )
-						);
-					}
+					// Image.
+					else:
 					?>
-				</p>
-			</div>
-			<div class="column">
-				<div class="inline-svg aligncenter">
-					<img src="https://s.w.org/images/core/5.2/about_site-health.svg" alt="">
+					<img src="<?php echo esc_url( $feature['src'] ); ?>" />
+					<?php endif; ?>
 				</div>
+				<h3><?php echo $feature['heading']; ?></h3>
+				<p><?php echo $feature['description']; ?></p>
 			</div>
+			<?php endforeach; ?>
 		</div>
 
-		<hr />
-
-		<div class="feature-section is-wide has-2-columns is-wider-right">
-			<div class="column">
-				<div class="inline-svg aligncenter">
-					<img src="https://s.w.org/images/core/5.2/about_error-protection.svg" alt="">
+		<div class="feature-section three-col">
+			<?php foreach ( $minor_features as $feature ) : ?>
+			<div class="col">
+				<div class="svg-container">
+					<img src="<?php echo esc_attr( $feature['src'] ); ?>" />
 				</div>
+				<h3><?php echo $feature['heading']; ?></h3>
+				<p><?php echo $feature['description']; ?></p>
 			</div>
-			<div class="column is-vertically-aligned-center">
-				<h3><?php _e( 'PHP Error Protection' ); ?></h3>
-				<p><?php _e( 'This administrator-focused update will let you safely fix or manage fatal errors without requiring a developer. It features better handling of the so-called “white screen of death”, and a way to enter recovery mode, which pauses error-causing plugins or themes.' ); ?></p>
-			</div>
+			<?php endforeach; ?>
 		</div>
 
-		<hr />
+		<div class="changelog">
+			<h3><?php _e( 'Under the Hood' ); ?></h3>
 
-		<h3 class="aligncenter"><?php _e( 'Improvements for Everyone' ); ?></h3>
-
-		<div class="has-2-columns">
-			<div class="column aligncenter">
-				<h4><?php _e( 'Accessibility Updates' ); ?></h4>
-				<p><?php _e( 'A number of changes work together to improve contextual awareness and keyboard navigation flow for those using screen readers and other assistive technologies.' ); ?></p>
+			<div class="feature-section under-the-hood three-col">
+				<?php foreach ( $tech_features as $feature ) : ?>
+				<div class="col">
+					<h4><?php echo $feature['heading']; ?></h4>
+					<p><?php echo $feature['description']; ?></p>
+				</div>
+				<?php endforeach; ?>
 			</div>
-			<div class="column aligncenter">
-				<h4><?php _e( 'New Dashboard Icons' ); ?></h4>
-				<p><?php _e( 'Thirteen new icons include Instagram, a suite of icons for BuddyPress, and rotated Earth icons for global inclusion. Find them in the Dashboard and have some fun!' ); ?></p>
-			</div>
-		</div>
 
-		<hr />
-
-		<h3 class="aligncenter"><?php _e( 'Developer Happiness' ); ?></h3>
-
-		<div class="has-2-columns is-fullwidth">
-			<div class="column">
-				<h4><a href="https://make.wordpress.org/core/2019/03/26/coding-standards-updates-for-php-5-6/"><?php _e( 'PHP Version Bump' ); ?></a></h4>
-				<p><?php _e( 'The minimum supported PHP version is now 5.6.20. As of WordPress 5.2, themes and plugins can safely take advantage of namespaces, anonymous functions, and more!' ); ?></p>
+			<div class="return-to-dashboard">
+				<?php if ( current_user_can( 'update_core' ) && isset( $_GET['updated'] ) ) : ?>
+					<a href="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>">
+						<?php is_multisite() ? _e( 'Return to Updates' ) : _e( 'Return to Dashboard &rarr; Updates' ); ?>
+					</a> |
+				<?php endif; ?>
+				<a href="<?php echo esc_url( self_admin_url() ); ?>"><?php is_blog_admin() ? _e( 'Go to Dashboard &rarr; Home' ) : _e( 'Go to Dashboard' ); ?></a>
 			</div>
-			<div class="column">
-				<h4><a href="https://make.wordpress.org/core/2019/04/24/developer-focused-privacy-updates-in-5-2/"><?php _e( 'Privacy Updates' ); ?></a></h4>
-				<p><?php _e( 'A new theme page template, a conditional function, and two CSS classes make designing and customizing the Privacy Policy page easier.' ); ?></p>
-			</div>
-		</div>
-		<div class="has-2-columns is-fullwidth">
-			<div class="column">
-				<h4><a href="https://make.wordpress.org/core/2019/04/24/miscellaneous-developer-updates-in-5-2/"><?php _e( 'New Body Tag Hook' ); ?></a></h4>
-				<p>
-					<?php
-					printf(
-						/* translators: 1: wp_body_open, 2: <body> */
-						__( '5.2 introduces a %1$s hook, which lets themes support injecting code right at the beginning of the %2$s element.' ),
-						'<code>wp_body_open</code>',
-						'<code>&lt;body&gt;</code>'
-					);
-					?>
-				</p>
-			</div>
-			<div class="column">
-				<h4><a href="https://make.wordpress.org/core/2019/03/25/building-javascript/"><?php _e( 'Building JavaScript' ); ?></a></h4>
-				<p><?php _e( 'With the addition of webpack and Babel configurations in the @wordpress/scripts package, developers won&#8217;t have to worry about setting up complex build tools to write modern JavaScript.' ); ?></p>
-			</div>
-		</div>
 
-		<hr />
-
-		<div class="return-to-dashboard">
-			<?php if ( current_user_can( 'update_core' ) && isset( $_GET['updated'] ) ) : ?>
-				<a href="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>">
-					<?php is_multisite() ? _e( 'Return to Updates' ) : _e( 'Return to Dashboard &rarr; Updates' ); ?>
-				</a> |
-			<?php endif; ?>
-			<a href="<?php echo esc_url( self_admin_url() ); ?>"><?php is_blog_admin() ? _e( 'Go to Dashboard &rarr; Home' ) : _e( 'Go to Dashboard' ); ?></a>
 		</div>
 	</div>
 <?php
@@ -174,37 +322,24 @@ include( ABSPATH . 'wp-admin/admin-footer.php' );
 // These are strings we may use to describe maintenance/security releases, where we aim for no new strings.
 return;
 
-__( 'Maintenance Release' );
-__( 'Maintenance Releases' );
+_n_noop( 'Maintenance Release', 'Maintenance Releases' );
+_n_noop( 'Security Release', 'Security Releases' );
+_n_noop( 'Maintenance and Security Release', 'Maintenance and Security Releases' );
 
-__( 'Security Release' );
-__( 'Security Releases' );
+/* translators: 1: WordPress version number. */
+_n_noop( '<strong>Version %1$s</strong> addressed a security issue.',
+         '<strong>Version %1$s</strong> addressed some security issues.' );
 
-__( 'Maintenance and Security Release' );
-__( 'Maintenance and Security Releases' );
+/* translators: 1: WordPress version number, 2: plural number of bugs. */
+_n_noop( '<strong>Version %1$s</strong> addressed %2$s bug.',
+         '<strong>Version %1$s</strong> addressed %2$s bugs.' );
 
-/* translators: %s: WordPress version number. */
-__( '<strong>Version %s</strong> addressed one security issue.' );
-/* translators: %s: WordPress version number. */
-__( '<strong>Version %s</strong> addressed some security issues.' );
+/* translators: 1: WordPress version number, 2: plural number of bugs. Singular security issue. */
+_n_noop( '<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bug.',
+         '<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bugs.' );
 
-/* translators: 1: WordPress version number, 2: Plural number of bugs. */
-_n_noop(
-	'<strong>Version %1$s</strong> addressed %2$s bug.',
-	'<strong>Version %1$s</strong> addressed %2$s bugs.'
-);
+/* translators: 1: WordPress version number, 2: plural number of bugs. More than one security issue. */
+_n_noop( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+         '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.' );
 
-/* translators: 1: WordPress version number, 2: Plural number of bugs. Singular security issue. */
-_n_noop(
-	'<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bug.',
-	'<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bugs.'
-);
-
-/* translators: 1: WordPress version number, 2: Plural number of bugs. More than one security issue. */
-_n_noop(
-	'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
-	'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.'
-);
-
-/* translators: %s: Documentation URL. */
 __( 'For more information, see <a href="%s">the release notes</a>.' );
