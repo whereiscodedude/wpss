@@ -13,7 +13,6 @@
  * Handles saving and sanitizing of settings.
  *
  * @since 3.4.0
- * @link https://developer.wordpress.org/themes/customize-api
  *
  * @see WP_Customize_Manager
  */
@@ -71,6 +70,8 @@ class WP_Customize_Setting {
 	 *
 	 * Set this value to 'postMessage' to enable a custom JavaScript handler to render changes to this setting
 	 * as opposed to reloading the whole page.
+	 *
+	 * @link https://developer.wordpress.org/themes/customize-api
 	 *
 	 * @since 3.4.0
 	 * @var string

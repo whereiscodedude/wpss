@@ -27,12 +27,6 @@ if ( force_ssl_admin() && ! is_ssl() ) {
  *
  * @since 2.1.0
  *
- * @global string      $error         Login error message set by deprecated pluggable wp_login() function
- *                                    or plugins replacing it.
- * @global bool|string $interim_login Whether interim login modal is being displayed. String 'success'
- *                                    upon successful login.
- * @global string      $action        The action that brought the visitor to the login page.
- *
  * @param string   $title    Optional. WordPress login Page title to display in the `<title>` element.
  *                           Default 'Log In'.
  * @param string   $message  Optional. Message to display in header. Default empty.
@@ -141,7 +135,7 @@ function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
 	 * Filters the title attribute of the header logo above login form.
 	 *
 	 * @since 2.1.0
-	 * @deprecated 5.2.0 Use {@see 'login_headertext'} instead.
+	 * @deprecated 5.2.0 Use login_headertext
 	 *
 	 * @param string $login_header_title Login header logo title attribute.
 	 */
@@ -275,9 +269,6 @@ function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
  *
  * @since 3.1.0
  *
- * @global bool|string $interim_login Whether interim login modal is being displayed. String 'success'
- *                                    upon successful login.
- *
  * @param string $input_id Which input to auto-focus.
  */
 function login_footer( $input_id = '' ) {
@@ -373,7 +364,7 @@ function retrieve_password() {
 			$errors->add( 'invalid_email', __( '<strong>ERROR</strong>: There is no account with that username or email address.' ) );
 		}
 	} else {
-		$login     = trim( wp_unslash( $_POST['user_login'] ) );
+		$login     = trim( $_POST['user_login'] );
 		$user_data = get_user_by( 'login', $login );
 	}
 
@@ -603,7 +594,7 @@ switch ( $action ) {
 			 *
 			 * @since 5.3.0
 			 *
-			 * @param int $interval Interval time (in seconds).
+			 * @param int Interval time (in seconds).
 			 */
 			$admin_email_check_interval = (int) apply_filters( 'admin_email_check_interval', 6 * MONTH_IN_SECONDS );
 
@@ -1032,7 +1023,7 @@ switch ( $action ) {
 
 		if ( $http_post ) {
 			if ( isset( $_POST['user_login'] ) && is_string( $_POST['user_login'] ) ) {
-				$user_login = wp_unslash( $_POST['user_login'] );
+				$user_login = $_POST['user_login'];
 			}
 
 			if ( isset( $_POST['user_email'] ) && is_string( $_POST['user_email'] ) ) {
@@ -1150,7 +1141,7 @@ switch ( $action ) {
 
 		// If the user wants SSL but the session is not SSL, force a secure cookie.
 		if ( ! empty( $_POST['log'] ) && ! force_ssl_admin() ) {
-			$user_name = sanitize_user( wp_unslash( $_POST['log'] ) );
+			$user_name = sanitize_user( $_POST['log'] );
 			$user      = get_user_by( 'login', $user_name );
 
 			if ( ! $user && strpos( $user_name, '@' ) ) {

@@ -1082,8 +1082,8 @@ function _fix_attachment_links( $post ) {
  *
  * @since 2.5.0
  *
- * @param string $type The post_type you want the statuses for. Default 'post'.
- * @return string[] An array of all the statuses for the supplied post type.
+ * @param string $type The post_type you want the statuses for
+ * @return array As array of all the statuses for the supplied post type
  */
 function get_available_post_statuses( $type = 'post' ) {
 	$stati = wp_count_posts( $type );
@@ -1319,12 +1319,7 @@ function postbox_classes( $box_id, $screen_id ) {
  * @param int    $id    Post ID or post object.
  * @param string $title Optional. Title to override the post's current title when generating the post name. Default null.
  * @param string $name  Optional. Name to override the post name. Default null.
- * @return array {
- *     Array containing the sample permalink with placeholder for the post name, and the post name.
- *
- *     @type string $0 The permalink with placeholder for the post name.
- *     @type string $1 The post name.
- * }
+ * @return array Array containing the sample permalink with placeholder for the post name, and the post name.
  */
 function get_sample_permalink( $id, $title = null, $name = null ) {
 	$post = get_post( $id );
@@ -1388,12 +1383,7 @@ function get_sample_permalink( $id, $title = null, $name = null ) {
 	 *
 	 * @since 4.4.0
 	 *
-	 * @param array   $permalink {
-	 *     Array containing the sample permalink with placeholder for the post name, and the post name.
-	 *
-	 *     @type string $0 The permalink with placeholder for the post name.
-	 *     @type string $1 The post name.
-	 * }
+	 * @param array   $permalink Array containing the sample permalink with placeholder for the post name, and the post name.
 	 * @param int     $post_id   Post ID.
 	 * @param string  $title     Post title.
 	 * @param string  $name      Post name (slug).
@@ -1492,7 +1482,7 @@ function get_sample_permalink_html( $id, $new_title = null, $new_slug = null ) {
  * @since 2.9.0
  *
  * @param int $thumbnail_id ID of the attachment used for thumbnail
- * @param int|WP_Post $post Optional. The post ID or object associated with the thumbnail, defaults to global $post.
+ * @param mixed $post The post ID or object associated with the thumbnail, defaults to global $post.
  * @return string html
  */
 function _wp_post_thumbnail_html( $thumbnail_id = null, $post = null ) {
@@ -1647,16 +1637,17 @@ function _admin_notice_post_locked() {
 	}
 
 	if ( $user ) {
+
 		/**
 		 * Filters whether to show the post locked dialog.
 		 *
-		 * Returning false from the filter will prevent the dialog from being displayed.
+		 * Returning a falsey value to the filter will short-circuit displaying the dialog.
 		 *
 		 * @since 3.6.0
 		 *
-		 * @param bool    $display Whether to display the dialog. Default true.
-		 * @param WP_Post $post    Post object.
-		 * @param WP_User $user    The user with the lock for the post.
+		 * @param bool         $display Whether to display the dialog. Default true.
+		 * @param WP_Post      $post    Post object.
+		 * @param WP_User|bool $user    WP_User object on success, false otherwise.
 		 */
 		if ( ! apply_filters( 'show_post_locked_dialog', true, $post, $user ) ) {
 			return;
@@ -1705,14 +1696,14 @@ function _admin_notice_post_locked() {
 		/**
 		 * Filters whether to allow the post lock to be overridden.
 		 *
-		 * Returning false from the filter will disable the ability
+		 * Returning a falsey value to the filter will disable the ability
 		 * to override the post lock.
 		 *
 		 * @since 3.6.0
 		 *
-		 * @param bool    $override Whether to allow the post lock to be overridden. Default true.
+		 * @param bool    $override Whether to allow overriding post locks. Default true.
 		 * @param WP_Post $post     Post object.
-		 * @param WP_User $user     The user with the lock for the post.
+		 * @param WP_User $user     User object.
 		 */
 		$override = apply_filters( 'override_post_lock', true, $post, $user );
 		$tab_last = $override ? '' : ' wp-tab-last';
@@ -2150,7 +2141,7 @@ function use_block_editor_for_post_type( $post_type ) {
  * @since 5.0.0
  *
  * @param WP_Post $post Post object.
- * @return array[] Array of block categories.
+ * @return array Array of block categories.
  */
 function get_block_categories( $post ) {
 	$default_categories = array(
@@ -2191,7 +2182,7 @@ function get_block_categories( $post ) {
 	 *
 	 * @since 5.0.0
 	 *
-	 * @param array[] $default_categories Array of block categories.
+	 * @param array   $default_categories Array of block categories.
 	 * @param WP_Post $post               Post being loaded.
 	 */
 	return apply_filters( 'block_categories', $default_categories, $post );
@@ -2428,7 +2419,7 @@ function the_block_editor_meta_box_post_form_hidden_fields( $post ) {
 	 *
 	 * @since 5.0.0
 	 *
-	 * @param WP_Post $post The post that is being edited.
+	 * @params WP_Post $post The post that is being edited.
 	 */
 	do_action( 'block_editor_meta_box_hidden_fields', $post );
 }

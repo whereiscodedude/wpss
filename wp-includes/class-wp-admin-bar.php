@@ -82,24 +82,14 @@ class WP_Admin_Bar {
 	}
 
 	/**
-	 * Add a node (menu item) to the Admin Bar menu.
-	 *
-	 * @since 3.3.0
-	 * @since 5.4.0 Deprecated in favor of {@see WP_Admin_Bar::add_node()}.
-	 *
-	 * @param array $node The attributes that define the node.
+	 * @param array $node
 	 */
 	public function add_menu( $node ) {
 		$this->add_node( $node );
 	}
 
 	/**
-	 * Remove a node from the admin bar.
-	 *
-	 * @since 3.1.0
-	 * @since 5.4.0 Deprecated in favor of {@see WP_Admin_Bar::remove_node()}.
-	 *
-	 * @param string $id The menu slug to remove.
+	 * @param string $id
 	 */
 	public function remove_menu( $id ) {
 		$this->remove_node( $id );

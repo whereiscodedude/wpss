@@ -635,7 +635,7 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 			 *
 			 * @since 2.7.0
 			 *
-			 * @param string[] $cookie_elements An array of data for the authentication cookie.
+			 * @param array $cookie_elements An array of data for the authentication cookie.
 			 */
 			do_action( 'auth_cookie_expired', $cookie_elements );
 			return false;
@@ -648,7 +648,7 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 			 *
 			 * @since 2.7.0
 			 *
-			 * @param string[] $cookie_elements An array of data for the authentication cookie.
+			 * @param array $cookie_elements An array of data for the authentication cookie.
 			 */
 			do_action( 'auth_cookie_bad_username', $cookie_elements );
 			return false;
@@ -668,7 +668,7 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 			 *
 			 * @since 2.7.0
 			 *
-			 * @param string[] $cookie_elements An array of data for the authentication cookie.
+			 * @param array $cookie_elements An array of data for the authentication cookie.
 			 */
 			do_action( 'auth_cookie_bad_hash', $cookie_elements );
 			return false;
@@ -676,13 +676,6 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 
 		$manager = WP_Session_Tokens::get_instance( $user->ID );
 		if ( ! $manager->verify( $token ) ) {
-			/**
-			 * Fires if a bad session token is encountered.
-			 *
-			 * @since 4.0.0
-			 *
-			 * @param string[] $cookie_elements An array of data for the authentication cookie.
-			 */
 			do_action( 'auth_cookie_bad_session_token', $cookie_elements );
 			return false;
 		}
@@ -697,8 +690,8 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 		 *
 		 * @since 2.7.0
 		 *
-		 * @param string[] $cookie_elements An array of data for the authentication cookie.
-		 * @param WP_User  $user            User object.
+		 * @param array   $cookie_elements An array of data for the authentication cookie.
+		 * @param WP_User $user            User object.
 		 */
 		do_action( 'auth_cookie_valid', $cookie_elements, $user );
 
@@ -765,7 +758,7 @@ if ( ! function_exists( 'wp_parse_auth_cookie' ) ) :
 	 *
 	 * @param string $cookie Authentication cookie.
 	 * @param string $scheme Optional. The cookie scheme to use: 'auth', 'secure_auth', or 'logged_in'.
-	 * @return string[]|false Authentication cookie components.
+	 * @return array|false Authentication cookie components.
 	 */
 	function wp_parse_auth_cookie( $cookie = '', $scheme = '' ) {
 		if ( empty( $cookie ) ) {
@@ -1215,7 +1208,6 @@ if ( ! function_exists( 'wp_redirect' ) ) :
 	 *
 	 * @since 1.5.1
 	 * @since 5.1.0 The `$x_redirect_by` parameter was added.
-	 * @since 5.4.0 On invalid status codes, wp_die() is called.
 	 *
 	 * @global bool $is_IIS
 	 *
@@ -1249,10 +1241,6 @@ if ( ! function_exists( 'wp_redirect' ) ) :
 
 		if ( ! $location ) {
 			return false;
-		}
-
-		if ( $status < 300 || 399 < $status ) {
-			wp_die( __( 'HTTP redirect status code must be a redirection code, 3xx.' ) );
 		}
 
 		$location = wp_sanitize_redirect( $location );
@@ -1454,8 +1442,8 @@ if ( ! function_exists( 'wp_validate_redirect' ) ) :
 		 *
 		 * @since 2.3.0
 		 *
-		 * @param string[] $hosts An array of allowed host names.
-		 * @param string   $host  The host name of the redirect destination; empty string if not set.
+		 * @param array       $hosts An array of allowed hosts.
+		 * @param bool|string $host  The parsed host; empty if not isset.
 		 */
 		$allowed_hosts = (array) apply_filters( 'allowed_redirect_hosts', array( $wpp['host'] ), isset( $lp['host'] ) ? $lp['host'] : '' );
 
@@ -1504,8 +1492,8 @@ if ( ! function_exists( 'wp_notify_postauthor' ) ) :
 		 *
 		 * @since 3.7.0
 		 *
-		 * @param string[] $emails     An array of email addresses to receive a comment notification.
-		 * @param int      $comment_id The comment ID.
+		 * @param array $emails     An array of email addresses to receive a comment notification.
+		 * @param int   $comment_id The comment ID.
 		 */
 		$emails = apply_filters( 'comment_notification_recipients', $emails, $comment->comment_ID );
 		$emails = array_filter( $emails );
@@ -1816,8 +1804,8 @@ if ( ! function_exists( 'wp_notify_moderator' ) ) :
 		 *
 		 * @since 3.7.0
 		 *
-		 * @param string[] $emails     List of email addresses to notify for comment moderation.
-		 * @param int      $comment_id Comment ID.
+		 * @param array $emails     List of email addresses to notify for comment moderation.
+		 * @param int   $comment_id Comment ID.
 		 */
 		$emails = apply_filters( 'comment_moderation_recipients', $emails, $comment_id );
 

@@ -11,7 +11,7 @@
  *
  * @since 2.5.0
  *
- * @return string[] Default tabs.
+ * @return array default tabs
  */
 function media_upload_tabs() {
 	$_default_tabs = array(
@@ -26,7 +26,7 @@ function media_upload_tabs() {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param string[] $_default_tabs An array of media tabs.
+	 * @param array $_default_tabs An array of media tabs.
 	 */
 	return apply_filters( 'media_upload_tabs', $_default_tabs );
 }
@@ -654,7 +654,7 @@ function media_buttons( $editor_id = 'content' ) {
 	 *
 	 * @param string $string Media buttons context. Default empty.
 	 */
-	$legacy_filter = apply_filters_deprecated( 'media_buttons_context', array( '' ), '3.5.0', 'media_buttons' );
+	$legacy_filter = apply_filters( 'media_buttons_context', '' );
 
 	if ( $legacy_filter ) {
 		// #WP22559. Close <a> if a plugin started by closing <a> to open their own <a> tag.
@@ -1128,8 +1128,8 @@ function image_size_input_fields( $post, $check = '' ) {
 	 *
 	 * @since 3.3.0
 	 *
-	 * @param string[] $size_names Array of image size labels keyed by their name. Default values
-	 *                             include 'Thumbnail', 'Medium', 'Large', and 'Full Size'.
+	 * @param array $size_names Array of image sizes and their names. Default values
+	 *                          include 'Thumbnail', 'Medium', 'Large', 'Full Size'.
 	 */
 	$size_names = apply_filters(
 		'image_size_names_choose',

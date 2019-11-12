@@ -12,12 +12,7 @@
  *
  * @since MU (3.0.0)
  *
- * @return int[] {
- *     Site and user count for the network.
- *
- *     @type int $blogs Number of sites on the network.
- *     @type int $users Number of users on the network.
- * }
+ * @return array Site and user count for the network.
  */
 function get_sitestats() {
 	$stats = array(
@@ -448,14 +443,7 @@ function is_email_address_unsafe( $user_email ) {
  *
  * @param string $user_name  The login name provided by the user.
  * @param string $user_email The email provided by the user.
- * @return array {
- *     The array of user name, email, and the error messages.
- *
- *     @type string   $user_name     Sanitized and unique username.
- *     @type string   $orig_username Original username.
- *     @type string   $user_email    User email address.
- *     @type WP_Error $errors        WP_Error object containing any errors found.
- * }
+ * @return array Contains username, email, and error messages.
  */
 function wpmu_validate_user_signup( $user_name, $user_email ) {
 	global $wpdb;
@@ -571,7 +559,7 @@ function wpmu_validate_user_signup( $user_name, $user_email ) {
 	 * @since MU (3.0.0)
 	 *
 	 * @param array $result {
-	 *     The array of user name, email, and the error messages.
+	 *     The array of user name, email and the error messages.
 	 *
 	 *     @type string   $user_name     Sanitized and unique username.
 	 *     @type string   $orig_username Original username.
@@ -604,16 +592,7 @@ function wpmu_validate_user_signup( $user_name, $user_email ) {
  * @param string         $blogname   The blog name provided by the user. Must be unique.
  * @param string         $blog_title The blog title provided by the user.
  * @param WP_User|string $user       Optional. The user object to check against the new site name.
- * @return array {
- *     Array of domain, path, blog name, blog title, user and error messages.
- *
- *     @type string         $domain     Domain for the site.
- *     @type string         $path       Path for the site. Used in subdirectory installations.
- *     @type string         $blogname   The unique site name (slug).
- *     @type string         $blog_title Blog title.
- *     @type string|WP_User $user       By default, an empty string. A user object if provided.
- *     @type WP_Error       $errors     WP_Error containing any errors found.
- * }
+ * @return array Contains the new site data and error messages.
  */
 function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 	global $wpdb, $domain;
@@ -1422,12 +1401,10 @@ Disable these notifications: %4$s'
 	 * to the network administrator.
 	 *
 	 * @since MU (3.0.0)
-	 * @since 5.4.0 The `$blog_id` parameter was added.
 	 *
-	 * @param string $msg     Email body.
-	 * @param int    $blog_id The new site's ID.
+	 * @param string $msg Email body.
 	 */
-	$msg = apply_filters( 'newblog_notify_siteadmin', $msg, $blog_id );
+	$msg = apply_filters( 'newblog_notify_siteadmin', $msg );
 
 	/* translators: New site notification email subject. %s: New site URL. */
 	wp_mail( $email, sprintf( __( 'New Site Registration: %s' ), $siteurl ), $msg );
@@ -1996,11 +1973,7 @@ function global_terms( $term_id, $deprecated = '' ) {
  * @since MU (3.0.0)
  *
  * @param array|string $deprecated Not used.
- * @return string[] {
- *     An array containing the current site's domain.
- *
- *     @type string $0 The current site's domain.
- * }
+ * @return array The current site's domain
  */
 function redirect_this_site( $deprecated = '' ) {
 	return array( get_network()->domain );
@@ -2604,7 +2577,7 @@ function wp_is_large_network( $using = 'sites', $network_id = null ) {
  *
  * @since 4.4.0
  *
- * @return string[] Array of reserved names.
+ * @return array $names Array of reserved subdirectory names.
  */
 function get_subdirectory_reserved_names() {
 	$names = array(
@@ -2627,7 +2600,7 @@ function get_subdirectory_reserved_names() {
 	 * @since 4.4.0 'wp-admin', 'wp-content', 'wp-includes', 'wp-json', and 'embed' were added
 	 *              to the reserved names list.
 	 *
-	 * @param string[] $subdirectory_reserved_names Array of reserved names.
+	 * @param array $subdirectory_reserved_names Array of reserved names.
 	 */
 	return apply_filters( 'subdirectory_reserved_names', $names );
 }

@@ -126,7 +126,7 @@ function determine_locale() {
 	 *
 	 * @since 5.0.0
 	 *
-	 * @param string|null $locale The locale to return and short-circuit. Default null.
+	 * @param string|null The locale to return and short-circuit, or null as default.
 	 */
 	$determined_locale = apply_filters( 'pre_determine_locale', null );
 	if ( ! empty( $determined_locale ) && is_string( $determined_locale ) ) {
@@ -169,7 +169,7 @@ function determine_locale() {
  * @param string $text   Text to translate.
  * @param string $domain Optional. Text domain. Unique identifier for retrieving translated strings.
  *                       Default 'default'.
- * @return string Translated text.
+ * @return string Translated text
  */
 function translate( $text, $domain = 'default' ) {
 	$translations = get_translations_for_domain( $domain );
@@ -210,7 +210,8 @@ function before_last_bar( $string ) {
 /**
  * Retrieve the translation of $text in the context defined in $context.
  *
- * If there is no translation, or the text domain isn't loaded, the original text is returned.
+ * If there is no translation, or the text domain isn't loaded the original
+ * text is returned.
  *
  * *Note:* Don't use translate_with_gettext_context() directly, use _x() or related functions.
  *
@@ -281,7 +282,7 @@ function esc_attr__( $text, $domain = 'default' ) {
  * @param string $text   Text to translate.
  * @param string $domain Optional. Text domain. Unique identifier for retrieving translated strings.
  *                       Default 'default'.
- * @return string Translated text.
+ * @return string Translated text
  */
 function esc_html__( $text, $domain = 'default' ) {
 	return esc_html( translate( $text, $domain ) );
@@ -303,11 +304,6 @@ function _e( $text, $domain = 'default' ) {
 /**
  * Display translated text that has been escaped for safe use in an attribute.
  *
- * Encodes `< > & " '` (less than, greater than, ampersand, double quote, single quote).
- * Will never double encode entities.
- *
- * If you need the value for use in PHP, use esc_attr__().
- *
  * @since 2.8.0
  *
  * @param string $text   Text to translate.
@@ -320,11 +316,6 @@ function esc_attr_e( $text, $domain = 'default' ) {
 
 /**
  * Display translated text that has been escaped for safe use in HTML output.
- *
- * If there is no translation, or the text domain isn't loaded, the original text
- * is escaped and displayed.
- *
- * If you need the value for use in PHP, use esc_html__().
  *
  * @since 2.8.0
  *
@@ -375,16 +366,13 @@ function _ex( $text, $context, $domain = 'default' ) {
 /**
  * Translate string with gettext context, and escapes it for safe use in an attribute.
  *
- * If there is no translation, or the text domain isn't loaded, the original text
- * is escaped and returned.
- *
  * @since 2.8.0
  *
  * @param string $text    Text to translate.
  * @param string $context Context information for the translators.
  * @param string $domain  Optional. Text domain. Unique identifier for retrieving translated strings.
  *                        Default 'default'.
- * @return string Translated text.
+ * @return string Translated text
  */
 function esc_attr_x( $text, $context, $domain = 'default' ) {
 	return esc_attr( translate_with_gettext_context( $text, $context, $domain ) );
@@ -392,9 +380,6 @@ function esc_attr_x( $text, $context, $domain = 'default' ) {
 
 /**
  * Translate string with gettext context, and escapes it for safe use in HTML output.
- *
- * If there is no translation, or the text domain isn't loaded, the original text
- * is escaped and returned.
  *
  * @since 2.9.0
  *
@@ -1297,7 +1282,7 @@ function translate_user_role( $name, $domain = 'default' ) {
  *
  * @param string $dir A directory to search for language files.
  *                    Default WP_LANG_DIR.
- * @return string[] An array of language codes or an empty array if no languages are present. Language codes are formed by stripping the .mo extension from the language file names.
+ * @return array An array of language codes or an empty array if no languages are present. Language codes are formed by stripping the .mo extension from the language file names.
  */
 function get_available_languages( $dir = null ) {
 	$languages = array();
@@ -1318,8 +1303,8 @@ function get_available_languages( $dir = null ) {
 	 *
 	 * @since 4.7.0
 	 *
-	 * @param string[] $languages An array of available language codes.
-	 * @param string   $dir       The directory where the language files were found.
+	 * @param array  $languages An array of available language codes.
+	 * @param string $dir       The directory where the language files were found.
 	 */
 	return apply_filters( 'get_available_languages', $languages, $dir );
 }
@@ -1386,7 +1371,7 @@ function wp_get_installed_translations( $type ) {
  * @since 3.7.0
  *
  * @param string $po_file Path to PO file.
- * @return string[] Array of PO file header values keyed by header name.
+ * @return array PO file headers.
  */
 function wp_get_pomo_file_data( $po_file ) {
 	$headers = get_file_data(

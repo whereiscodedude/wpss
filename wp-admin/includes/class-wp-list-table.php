@@ -501,13 +501,13 @@ class WP_List_Table {
 	}
 
 	/**
-	 * Generates the required HTML for a list of row action links.
+	 * Generate row actions div
 	 *
 	 * @since 3.1.0
 	 *
 	 * @param string[] $actions        An array of action links.
 	 * @param bool     $always_visible Whether the actions should be always visible.
-	 * @return string The HTML for the row actions.
+	 * @return string
 	 */
 	protected function row_actions( $actions, $always_visible = false ) {
 		$action_count = count( $actions );
@@ -531,14 +531,14 @@ class WP_List_Table {
 	}
 
 	/**
-	 * Displays a dropdown for filtering items in the list table by month.
+	 * Display a monthly dropdown for filtering items
 	 *
 	 * @since 3.1.0
 	 *
 	 * @global wpdb      $wpdb      WordPress database abstraction object.
 	 * @global WP_Locale $wp_locale WordPress date and time locale object.
 	 *
-	 * @param string $post_type The post type.
+	 * @param string $post_type
 	 */
 	protected function months_dropdown( $post_type ) {
 		global $wpdb, $wp_locale;
@@ -1217,7 +1217,7 @@ class WP_List_Table {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @return string[] Array of CSS classes for the table tag.
+	 * @return array List of CSS classes for the table tag.
 	 */
 	protected function get_table_classes() {
 		return array( 'widefat', 'fixed', 'striped', $this->_args['plural'] );

@@ -408,7 +408,7 @@ function is_taxonomy_hierarchical( $taxonomy ) {
  *     @type bool          $_builtin              This taxonomy is a "built-in" taxonomy. INTERNAL USE ONLY!
  *                                                Default false.
  * }
- * @return void|WP_Error Void on success, WP_Error object on failure.
+ * @return WP_Error|void WP_Error, if errors.
  */
 function register_taxonomy( $taxonomy, $object_type, $args = array() ) {
 	global $wp_taxonomies;
@@ -1132,8 +1132,8 @@ function get_term_to_edit( $id, $taxonomy ) {
  * @param array|string $deprecated Argument array, when using the legacy function parameter format. If present, this
  *                                 parameter will be interpreted as `$args`, and the first function parameter will
  *                                 be parsed as a taxonomy or array of taxonomies.
- * @return WP_Term[]|int|WP_Error List of WP_Term instances and their children. Will return WP_Error, if any of taxonomies
- *                                do not exist.
+ * @return array|int|WP_Error List of WP_Term instances and their children. Will return WP_Error, if any of taxonomies
+ *                            do not exist.
  */
 function get_terms( $args = array(), $deprecated = '' ) {
 	$term_query = new WP_Term_Query();
@@ -3219,9 +3219,9 @@ function clean_object_term_cache( $object_ids, $object_type ) {
  * @global wpdb $wpdb                           WordPress database abstraction object.
  * @global bool $_wp_suspend_cache_invalidation
  *
- * @param int|int[] $ids            Single or array of term IDs.
- * @param string    $taxonomy       Optional. Taxonomy slug. Can be empty, in which case the taxonomies of the passed
- *                                  term IDs will be used. Default empty.
+ * @param int|array $ids            Single or list of Term IDs.
+ * @param string    $taxonomy       Optional. Can be empty and will assume `tt_ids`, else will use for context.
+ *                                  Default empty.
  * @param bool      $clean_taxonomy Optional. Whether to clean taxonomy wide caches (true), or just individual
  *                                  term object caches (false). Default true.
  */
@@ -3436,8 +3436,8 @@ function update_object_term_cache( $object_ids, $object_type ) {
  *
  * @since 2.3.0
  *
- * @param WP_Term[] $terms    Array of term objects to change.
- * @param string    $taxonomy Not used.
+ * @param array  $terms    List of term objects to change.
+ * @param string $taxonomy Optional. Update Term to this taxonomy in cache. Default empty.
  */
 function update_term_cache( $terms, $taxonomy = '' ) {
 	foreach ( (array) $terms as $term ) {
@@ -4244,24 +4244,24 @@ function get_term_link( $term, $taxonomy = '' ) {
 		 * Filters the tag link.
 		 *
 		 * @since 2.3.0
-		 * @deprecated 2.5.0 Use {@see 'term_link'} instead.
+		 * @deprecated 2.5.0 Use 'term_link' instead.
 		 *
 		 * @param string $termlink Tag link URL.
 		 * @param int    $term_id  Term ID.
 		 */
-		$termlink = apply_filters_deprecated( 'tag_link', array( $termlink, $term->term_id ), '2.5.0', 'term_link' );
+		$termlink = apply_filters( 'tag_link', $termlink, $term->term_id );
 	} elseif ( 'category' === $taxonomy ) {
 
 		/**
 		 * Filters the category link.
 		 *
 		 * @since 1.5.0
-		 * @deprecated 2.5.0 Use {@see 'term_link'} instead.
+		 * @deprecated 2.5.0 Use 'term_link' instead.
 		 *
 		 * @param string $termlink Category link URL.
 		 * @param int    $term_id  Term ID.
 		 */
-		$termlink = apply_filters_deprecated( 'category_link', array( $termlink, $term->term_id ), '2.5.0', 'term_link' );
+		$termlink = apply_filters( 'category_link', $termlink, $term->term_id );
 	}
 
 	/**
@@ -4377,12 +4377,12 @@ function get_the_taxonomies( $post = 0, $args = array() ) {
 }
 
 /**
- * Retrieve all taxonomy names for the given post.
+ * Retrieve all taxonomies of a post with just the names.
  *
  * @since 2.5.0
  *
  * @param int|WP_Post $post Optional. Post ID or WP_Post object. Default is global $post.
- * @return string[] An array of all taxonomy names for the given post.
+ * @return array An array of all taxonomy names for the given post.
  */
 function get_post_taxonomies( $post = 0 ) {
 	$post = get_post( $post );
@@ -4492,7 +4492,7 @@ function is_object_in_taxonomy( $object_type, $taxonomy ) {
  *                              ancestors. Accepts a post type or a taxonomy name. Default empty.
  * @param string $resource_type Optional. Type of resource $object_type is. Accepts 'post_type'
  *                              or 'taxonomy'. Default empty.
- * @return int[] An array of IDs of ancestors from lowest to highest in the hierarchy.
+ * @return array An array of ancestors from lowest to highest in the hierarchy.
  */
 function get_ancestors( $object_id = 0, $object_type = '', $resource_type = '' ) {
 	$object_id = (int) $object_id;
@@ -4529,7 +4529,7 @@ function get_ancestors( $object_id = 0, $object_type = '', $resource_type = '' )
 	 * @since 3.1.0
 	 * @since 4.1.1 Introduced the `$resource_type` parameter.
 	 *
-	 * @param int[]  $ancestors     An array of IDs of object ancestors.
+	 * @param array  $ancestors     An array of object ancestors.
 	 * @param int    $object_id     Object ID.
 	 * @param string $object_type   Type of object.
 	 * @param string $resource_type Type of resource $object_type is.

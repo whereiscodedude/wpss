@@ -452,7 +452,7 @@ function comment_class( $class = '', $comment = null, $post_id = null, $echo = t
  * @param string|array   $class      Optional. One or more classes to add to the class list. Default empty.
  * @param int|WP_Comment $comment_id Comment ID or WP_Comment object. Default current comment.
  * @param int|WP_Post    $post_id    Post ID or WP_Post object. Default current post.
- * @return string[] An array of classes.
+ * @return array An array of classes.
  */
 function get_comment_class( $class = '', $comment_id = null, $post_id = null ) {
 	global $comment_alt, $comment_depth, $comment_thread_alt;
@@ -1991,7 +1991,7 @@ function comment_form_title( $noreplytext = false, $replytext = false, $linktopa
  *     @type bool   $short_ping        Whether to output short pings. Default false.
  *     @type bool   $echo              Whether to echo the output or return it. Default true.
  * }
- * @param WP_Comment[] $comments Optional. Array of WP_Comment objects.
+ * @param array $comments Optional. Array of WP_Comment objects.
  */
 function wp_list_comments( $args = array(), $comments = null ) {
 	global $wp_query, $comment_alt, $comment_depth, $comment_thread_alt, $overridden_cpage, $in_comment_loop;
@@ -2628,7 +2628,7 @@ function comment_form( $args = array(), $post_id = null ) {
 			echo apply_filters( 'comment_form_submit_field', $submit_field, $args );
 
 			/**
-			 * Fires at the bottom of the comment form, inside the closing form tag.
+			 * Fires at the bottom of the comment form, inside the closing </form> tag.
 			 *
 			 * @since 1.5.0
 			 *

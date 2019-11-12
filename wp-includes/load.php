@@ -625,7 +625,7 @@ function wp_not_installed() {
  * @since 3.0.0
  * @access private
  *
- * @return string[] Array of absolute paths of files to include.
+ * @return array Files to include.
  */
 function wp_get_mu_plugins() {
 	$mu_plugins = array();
@@ -704,8 +704,8 @@ function wp_get_active_and_valid_plugins() {
  *
  * @since 5.2.0
  *
- * @param string[] $plugins Array of absolute plugin main file paths.
- * @return string[] Filtered array of plugins, without any paused plugins.
+ * @param array $plugins List of absolute plugin main file paths.
+ * @return array Filtered value of $plugins, without any paused plugins.
  */
 function wp_skip_paused_plugins( array $plugins ) {
 	$paused_plugins = wp_paused_plugins()->get_all();
@@ -736,7 +736,7 @@ function wp_skip_paused_plugins( array $plugins ) {
  * @since 5.1.0
  * @access private
  *
- * @return string[] Array of absolute paths to theme directories.
+ * @return array Array of paths to theme directories.
  */
 function wp_get_active_and_valid_themes() {
 	global $pagenow;
@@ -774,8 +774,8 @@ function wp_get_active_and_valid_themes() {
  *
  * @since 5.2.0
  *
- * @param string[] $themes Array of absolute theme directory paths.
- * @return string[] Filtered array of absolute paths to themes, without any paused themes.
+ * @param array $themes List of absolute theme directory paths.
+ * @return array Filtered value of $themes, without any paused themes.
  */
 function wp_skip_paused_themes( array $themes ) {
 	$paused_themes = wp_paused_themes()->get_all();
@@ -882,7 +882,7 @@ function is_protected_ajax_action() {
 	 *
 	 * @since 5.2.0
 	 *
-	 * @param string[] $actions_to_protect Array of strings with AJAX actions to protect.
+	 * @param array $actions_to_protect Array of strings with AJAX actions to protect.
 	 */
 	$actions_to_protect = (array) apply_filters( 'wp_protected_ajax_actions', $actions_to_protect );
 

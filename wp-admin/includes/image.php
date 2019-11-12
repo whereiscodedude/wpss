@@ -256,12 +256,7 @@ function wp_create_image_subsizes( $file, $attachment_id ) {
 	 * @since 5.3.0
 	 *
 	 * @param int    $threshold     The threshold value in pixels. Default 2560.
-	 * @param array  $imagesize     {
-	 *     Indexed array of the image width and height in pixels.
-	 *
-	 *     @type int $0 The image width.
-	 *     @type int $1 The image height.
-	 * }
+	 * @param array  $imagesize     Indexed array of the image width and height (in that order).
 	 * @param string $file          Full path to the uploaded image file.
 	 * @param int    $attachment_id Attachment post ID.
 	 */
@@ -546,8 +541,8 @@ function wp_generate_attachment_metadata( $attachment_id, $file ) {
 		 *
 		 * @since 4.7.0
 		 *
-		 * @param string[] $fallback_sizes An array of image size names.
-		 * @param array    $metadata       Current attachment metadata.
+		 * @param array $fallback_sizes An array of image size names.
+		 * @param array $metadata       Current attachment metadata.
 		 */
 		$fallback_sizes = apply_filters( 'fallback_intermediate_image_sizes', $fallback_sizes, $metadata );
 

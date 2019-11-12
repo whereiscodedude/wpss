@@ -1731,8 +1731,8 @@ function wp_dashboard_php_nag() {
  *
  * @since 5.1.0
  *
- * @param string[] $classes Array of metabox classes.
- * @return string[] Modified array of metabox classes.
+ * @param array $classes Metabox classes.
+ * @return array Modified metabox classes.
  */
 function dashboard_php_nag_class( $classes ) {
 	$response = wp_check_php_version();

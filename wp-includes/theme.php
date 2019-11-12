@@ -79,8 +79,7 @@ function wp_get_themes( $args = array() ) {
 		if ( isset( $_themes[ $theme_root['theme_root'] . '/' . $theme ] ) ) {
 			$themes[ $theme ] = $_themes[ $theme_root['theme_root'] . '/' . $theme ];
 		} else {
-			$themes[ $theme ] = new WP_Theme( $theme, $theme_root['theme_root'] );
-
+			$themes[ $theme ]                                    = new WP_Theme( $theme, $theme_root['theme_root'] );
 			$_themes[ $theme_root['theme_root'] . '/' . $theme ] = $themes[ $theme ];
 		}
 	}
@@ -1974,13 +1973,13 @@ function remove_editor_styles() {
 }
 
 /**
- * Retrieve any registered editor stylesheet URLs.
+ * Retrieve any registered editor stylesheets
  *
  * @since 4.0.0
  *
  * @global array $editor_styles Registered editor stylesheets
  *
- * @return string[] If registered, a list of editor stylesheet URLs.
+ * @return array If registered, a list of editor stylesheet URLs.
  */
 function get_editor_stylesheets() {
 	$stylesheets = array();
@@ -2020,11 +2019,11 @@ function get_editor_stylesheets() {
 	}
 
 	/**
-	 * Filters the array of URLs of stylesheets applied to the editor.
+	 * Filters the array of stylesheets applied to the editor.
 	 *
 	 * @since 4.3.0
 	 *
-	 * @param string[] $stylesheets Array of URLs of stylesheets to be applied to the editor.
+	 * @param array $stylesheets Array of stylesheets to be applied to the editor.
 	 */
 	return apply_filters( 'editor_stylesheets', $stylesheets );
 }
@@ -2871,9 +2870,9 @@ function current_theme_supports( $feature, ...$args ) {
 	 *
 	 * @since 3.4.0
 	 *
-	 * @param bool   $supports Whether the current theme supports the given feature. Default true.
-	 * @param array  $args     Array of arguments for the feature.
-	 * @param string $feature  The theme feature.
+	 * @param bool   true     Whether the current theme supports the given feature. Default true.
+	 * @param array  $args    Array of arguments for the feature.
+	 * @param string $feature The theme feature.
 	 */
 	return apply_filters( "current_theme_supports-{$feature}", true, $args, $_wp_theme_features[ $feature ] ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 }
