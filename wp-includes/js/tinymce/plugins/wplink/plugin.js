@@ -1,5 +1,5 @@
 ( function( tinymce ) {
-	tinymce.ui.Factory.add( 'WPLinkPreview', tinymce.ui.Control.extend( {
+	tinymce.ui.WPLinkPreview = tinymce.ui.Control.extend( {
 		url: '#',
 		renderHtml: function() {
 			return (
@@ -50,9 +50,9 @@
 				tinymce.$( this.getEl().firstChild ).attr( 'href', this.url ).text( url );
 			}
 		}
-	} ) );
+	} );
 
-	tinymce.ui.Factory.add( 'WPLinkInput', tinymce.ui.Control.extend( {
+	tinymce.ui.WPLinkInput = tinymce.ui.Control.extend( {
 		renderHtml: function() {
 			return (
 				'<div id="' + this._id + '" class="wp-link-input">' +
@@ -82,7 +82,7 @@
 			urlInput.value = '';
 			urlInput.nextSibling.value = '';
 		}
-	} ) );
+	} );
 
 	tinymce.PluginManager.add( 'wplink', function( editor ) {
 		var toolbar;
@@ -101,7 +101,7 @@
 
 		function getSelectedLink() {
 			var href, html,
-				node = editor.selection.getStart(),
+				node = editor.selection.getNode(),
 				link = editor.dom.getParent( node, 'a[href]' );
 
 			if ( ! link ) {
@@ -226,15 +226,15 @@
 			linkNode = getSelectedLink();
 			editToolbar.tempHide = false;
 
-			if ( ! linkNode ) {
+			if ( linkNode ) {
+				editor.dom.setAttribs( linkNode, { 'data-wplink-edit': true } );
+			} else {
 				removePlaceholders();
 				editor.execCommand( 'mceInsertLink', false, { href: '_wp_link_placeholder' } );
 
 				linkNode = editor.$( 'a[href="_wp_link_placeholder"]' )[0];
 				editor.nodeChanged();
 			}
-
-			editor.dom.setAttribs( linkNode, { 'data-wplink-edit': true } );
 		} );
 
 		editor.addCommand( 'wp_link_apply', function() {
@@ -284,9 +284,8 @@
 		} );
 
 		editor.addCommand( 'wp_link_cancel', function() {
-			inputInstance.reset();
-
 			if ( ! editToolbar.tempHide ) {
+				inputInstance.reset();
 				removePlaceholders();
 			}
 		} );
@@ -469,11 +468,8 @@
 							}
 						}
 					} ).autocomplete( 'instance' )._renderItem = function( ul, item ) {
-						var fallbackTitle = ( typeof window.wpLinkL10n !== 'undefined' ) ? window.wpLinkL10n.noTitle : '',
-							title = item.title ? item.title : fallbackTitle;
-
 						return $( '<li role="option" id="mce-wp-autocomplete-' + item.ID + '">' )
-						.append( '<span>' + title + '</span>&nbsp;<span class="wp-editor-float-right">' + item.info + '</span>' )
+						.append( '<span>' + item.title + '</span>&nbsp;<span class="wp-editor-float-right">' + item.info + '</span>' )
 						.appendTo( ul );
 					};
 
@@ -565,14 +561,14 @@
 		} );
 
 		editor.addButton( 'wp_link_edit', {
-			tooltip: 'Edit|button', // '|button' is not displayed, only used for context
+			tooltip: 'Edit ', // trailing space is needed, used for context
 			icon: 'dashicon dashicons-edit',
 			cmd: 'WP_Link'
 		} );
 
 		editor.addButton( 'wp_link_remove', {
-			tooltip: 'Remove link',
-			icon: 'dashicon dashicons-editor-unlink',
+			tooltip: 'Remove',
+			icon: 'dashicon dashicons-no',
 			cmd: 'wp_unlink'
 		} );
 
@@ -584,10 +580,24 @@
 					var url = inputInstance.getURL() || null,
 						text = inputInstance.getLinkText() || null;
 
-					window.wpLink.open( editor.id, url, text );
+					/*
+					 * Accessibility note: moving focus back to the editor confuses
+					 * screen readers. They will announce again the Editor ARIA role
+					 * `application` and the iframe `title` attribute.
+					 *
+					 * Unfortunately IE looses the selection when the editor iframe
+					 * looses focus, so without returning focus to the editor, the code
+					 * in the modal will not be able to get the selection, place the caret
+					 * at the same location, etc.
+					 */
+					if ( tinymce.Env.ie ) {
+						editor.focus(); // Needed for IE
+					}
+
+					window.wpLink.open( editor.id, url, text, linkNode );
 
 					editToolbar.tempHide = true;
-					editToolbar.hide();
+					inputInstance.reset();
 				}
 			}
 		} );
