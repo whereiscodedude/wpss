@@ -15,7 +15,7 @@
 	 *
 	 * @since 4.0.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	$( function() {
 		var $wrap = $( '#postdivrich' ),
@@ -70,7 +70,7 @@
 		 *
 		 * @since 4.6.1
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		var shrinkTextarea = window._.throttle( function() {
 			var x = window.scrollX || document.documentElement.scrollLeft;
@@ -102,7 +102,7 @@
 		 *
 		 * @since 4.6.1
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function textEditorResize() {
 			var length = textEditor.value.length;
@@ -135,7 +135,7 @@
 		 *
 		 * @since 4.0.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function getHeights() {
 			var windowWidth = $window.width();
@@ -169,7 +169,7 @@
 		 * @param {event} event The TinyMCE editor init event.
 		 * @param {object} editor The editor to bind the vents on.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		$document.on( 'tinymce-editor-init.editor-expand', function( event, editor ) {
 			// VK contains the type of key pressed. VK = virtual keyboard.
@@ -177,7 +177,7 @@
 				/**
 				 * Hides any float panel with a hover state. Additionally hides tooltips.
 				 *
-				 * @return {void}
+				 * @returns {void}
 				 */
 				hideFloatPanels = _.debounce( function() {
 					! $( '.mce-floatpanel:hover' ).length && window.tinymce.ui.FloatPanel.hideAll();
@@ -204,7 +204,7 @@
 			/**
 			 * Gets the offset of the editor.
 			 *
-			 * @return {Number|Boolean} Returns the offset of the editor
+			 * @returns {Number|Boolean} Returns the offset of the editor
 			 * or false if there is no offset height.
 			 */
 			function mceGetCursorOffset() {
@@ -241,7 +241,7 @@
 			 *
 			 * @param {event} event The event to get the key code from.
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			function mceKeyup( event ) {
 				var key = event.keyCode;
@@ -270,7 +270,7 @@
 			 *
 			 * @param {string} key The key code of the pressed key.
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			function mceScroll( key ) {
 				var offset = mceGetCursorOffset(),
@@ -331,7 +331,7 @@
 			 *
 			 * @param {event} event The FullscreenStateChanged event.
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			function mceFullscreenToggled( event ) {
 				// event.state is true if the editor is fullscreen.
@@ -348,7 +348,7 @@
 			 *
 			 * @since 4.0.0
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			function mceShow() {
 				$window.on( 'scroll.mce-float-panels', hideFloatPanels );
@@ -367,7 +367,7 @@
 			 *
 			 * @since 4.0.0
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			function mceHide() {
 				$window.off( 'scroll.mce-float-panels' );
@@ -391,7 +391,7 @@
 			 *
 			 * @since 4.1.0
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			function toggleAdvanced() {
 				advanced = ! advanced;
@@ -402,7 +402,7 @@
 			 *
 			 * @since 4.0.0
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			mceBind = function() {
 				editor.on( 'keyup', mceKeyup );
@@ -427,7 +427,7 @@
 			 *
 			 * @since 4.0.0
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			mceUnbind = function() {
 				editor.off( 'keyup', mceKeyup );
@@ -460,7 +460,7 @@
 		 *
 		 * @param {event} event The event that calls this function.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function adjust( event ) {
 
@@ -503,7 +503,7 @@
 				topHeight = heights.textTopHeight;
 			}
 
-			// Return if TinyMCE is still initializing.
+			// Return if TinyMCE is still intializing.
 			if ( ! visual && ! $top.length ) {
 				return;
 			}
@@ -772,7 +772,7 @@
 		 *
 		 * @since 4.0.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function fullscreenHide() {
 			textEditorResize();
@@ -786,7 +786,7 @@
 		 *
 		 * @param {function} callback The function to run in the timeout.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function initialResize( callback ) {
 			for ( var i = 1; i < 6; i++ ) {
@@ -799,7 +799,7 @@
 		 *
 		 * @since 4.0.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function afterScroll() {
 			clearTimeout( scrollTimer );
@@ -811,7 +811,7 @@
 		 *
 		 * @since 4.0.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function on() {
 			/*
@@ -881,7 +881,7 @@
 		 *
 		 * @since 4.0.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function off() {
 			var height = parseInt( window.getUserSetting( 'ed_size', 300 ), 10 );
@@ -975,7 +975,7 @@
 	 *
 	 * @since 4.1.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	$( function() {
 		var $body = $( document.body ),
@@ -1025,7 +1025,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function recalcEditorRect() {
 			editorRect = $editor.offset();
@@ -1038,7 +1038,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function activate() {
 			if ( ! _isActive ) {
@@ -1054,7 +1054,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function deactivate() {
 			if ( _isActive ) {
@@ -1072,7 +1072,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {boolean} Returns true is _isActive is true.
+		 * @returns {boolean} Returns true is _isActive is true.
 		 */
 		function isActive() {
 			return _isActive;
@@ -1083,7 +1083,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function on() {
 			if ( ! _isOn && _isActive ) {
@@ -1106,7 +1106,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function off() {
 			if ( _isOn ) {
@@ -1129,7 +1129,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function toggle() {
 			if ( _isOn ) {
@@ -1144,7 +1144,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {boolean} Returns true if _isOn is true.
+		 * @returns {boolean} Returns true if _isOn is true.
 		 */
 		function isOn() {
 			return _isOn;
@@ -1161,7 +1161,7 @@
 		 *
 		 * @param event The event that triggers this function.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function fadeOut( event ) {
 			var isMac,
@@ -1300,7 +1300,7 @@
 		 *
 		 * @param event The event that triggers this function.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function fadeIn( event ) {
 			if ( faded ) {
@@ -1346,7 +1346,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function maybeFadeIn() {
 			setTimeout( function() {
@@ -1368,7 +1368,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function fadeOutAdminBar() {
 			if ( ! fadedAdminBar && faded ) {
@@ -1389,7 +1389,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function fadeInAdminBar() {
 			if ( fadedAdminBar ) {
@@ -1404,7 +1404,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function fadeOutSlug() {
 			if ( ! fadedSlug && faded && ! $slug.find( ':focus').length ) {
@@ -1421,7 +1421,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function fadeInSlug() {
 			if ( fadedSlug ) {
@@ -1442,7 +1442,7 @@
 		 *
 		 * @param {event} event The event to trigger the toggle.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function toggleViaKeyboard( event ) {
 			if ( event.altKey && event.shiftKey && 87 === event.keyCode ) {
@@ -1462,7 +1462,7 @@
 		 * @param {event} event The TinyMCE editor setup event.
 		 * @param {object} editor The editor to add the button to.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		$document.on( 'tinymce-editor-setup.focus', function( event, editor ) {
 			editor.addButton( 'dfw', {
@@ -1473,20 +1473,12 @@
 				onPostRender: function() {
 					var button = this;
 
-					editor.on( 'init', function() {
-						if ( button.disabled() ) {
-							button.hide();
-						}
-					} );
-
 					$document
 					.on( 'dfw-activate.focus', function() {
 						button.disabled( false );
-						button.show();
 					} )
 					.on( 'dfw-deactivate.focus', function() {
 						button.disabled( true );
-						button.hide();
 					} )
 					.on( 'dfw-on.focus', function() {
 						button.active( true );
@@ -1511,7 +1503,7 @@
 		 * @param {event} event The TinyMCE editor init event.
 		 * @param {object} editor The editor to bind events on.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		$document.on( 'tinymce-editor-init.focus', function( event, editor ) {
 			var mceBind, mceUnbind;
@@ -1568,7 +1560,7 @@
 		 * @param {event} event The quicktags init event.
 		 * @param {object} editor The editor to bind events on.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		$document.on( 'quicktags-init', function( event, editor ) {
 			var $button;

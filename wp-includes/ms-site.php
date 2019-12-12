@@ -30,14 +30,6 @@
  *     @type int    $spam         Whether the site is spam. Default 0.
  *     @type int    $deleted      Whether the site is deleted. Default 0.
  *     @type int    $lang_id      The site's language ID. Currently unused. Default 0.
- *     @type int    $user_id      User ID for the site administrator. Passed to the
- *                                `wp_initialize_site` hook.
- *     @type string $title        Site title. Default is 'Site %d' where %d is the site ID. Passed
- *                                to the `wp_initialize_site` hook.
- *     @type array  $options      Custom option $key => $value pairs to use. Default empty array. Passed
- *                                to the `wp_initialize_site` hook.
- *     @type array  $meta         Custom site metadata $key => $value pairs to use. Default empty array.
- *                                Passed to the `wp_initialize_site` hook.
  * }
  * @return int|WP_Error The new site's ID on success, or error object on failure.
  */
@@ -69,13 +61,13 @@ function wp_insert_site( array $data ) {
 		return new WP_Error( 'db_insert_error', __( 'Could not insert site into the database.' ), $wpdb->last_error );
 	}
 
-	clean_blog_cache( $wpdb->insert_id );
-
 	$new_site = get_site( $wpdb->insert_id );
 
 	if ( ! $new_site ) {
 		return new WP_Error( 'get_site_error', __( 'Could not retrieve site data.' ) );
 	}
+
+	clean_blog_cache( $new_site );
 
 	/**
 	 * Fires once a site has been inserted into the database.
@@ -121,7 +113,7 @@ function wp_insert_site( array $data ) {
 		 * Fires immediately after a new site is created.
 		 *
 		 * @since MU (3.0.0)
-		 * @deprecated 5.1.0 Use {@see 'wp_insert_site'} instead.
+		 * @deprecated 5.1.0 Use wp_insert_site
 		 *
 		 * @param int    $site_id    Site ID.
 		 * @param int    $user_id    User ID.
@@ -688,7 +680,7 @@ function wp_initialize_site( $site_id, array $args = array() ) {
 		$args,
 		array(
 			'user_id' => 0,
-			/* translators: %d: Site ID. */
+			/* translators: %d: site ID */
 			'title'   => sprintf( __( 'Site %d' ), $site->id ),
 			'options' => array(),
 			'meta'    => array(),
@@ -1026,7 +1018,7 @@ function clean_blog_cache( $blog ) {
 	 * Fires after the blog details cache is cleared.
 	 *
 	 * @since 3.4.0
-	 * @deprecated 4.9.0 Use {@see 'clean_site_cache'} instead.
+	 * @deprecated 4.9.0 Use clean_site_cache
 	 *
 	 * @param int $blog_id Blog ID.
 	 */
@@ -1319,7 +1311,7 @@ function wp_cache_set_sites_last_changed() {
  */
 function wp_check_site_meta_support_prefilter( $check ) {
 	if ( ! is_site_meta_supported() ) {
-		/* translators: %s: Database table name. */
+		/* translators: %s: database table name */
 		_doing_it_wrong( __FUNCTION__, sprintf( __( 'The %s table is not installed. Please run the network database upgrade.' ), $GLOBALS['wpdb']->blogmeta ), '5.1.0' );
 		return false;
 	}

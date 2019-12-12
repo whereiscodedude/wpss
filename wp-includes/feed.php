@@ -99,7 +99,7 @@ function get_default_feed() {
  */
 function get_wp_title_rss( $deprecated = '&#8211;' ) {
 	if ( '&#8211;' !== $deprecated ) {
-		/* translators: %s: 'document_title_separator' filter name. */
+		/* translators: %s: 'document_title_separator' filter name */
 		_deprecated_argument( __FUNCTION__, '4.4.0', sprintf( __( 'Use the %s filter instead.' ), '<code>document_title_separator</code>' ) );
 	}
 
@@ -125,7 +125,7 @@ function get_wp_title_rss( $deprecated = '&#8211;' ) {
  */
 function wp_title_rss( $deprecated = '&#8211;' ) {
 	if ( '&#8211;' !== $deprecated ) {
-		/* translators: %s: 'document_title_separator' filter name. */
+		/* translators: %s: 'document_title_separator' filter name */
 		_deprecated_argument( __FUNCTION__, '4.4.0', sprintf( __( 'Use the %s filter instead.' ), '<code>document_title_separator</code>' ) );
 	}
 
@@ -250,6 +250,7 @@ function the_permalink_rss() {
  * Outputs the link to the comments for the current post in an xml safe way
  *
  * @since 3.0.0
+ * @return none
  */
 function comments_link_feed() {
 	/**
@@ -406,7 +407,7 @@ function get_the_category_rss( $type = null ) {
 		} elseif ( 'atom' == $type ) {
 			$the_list .= sprintf( '<category scheme="%1$s" term="%2$s" />', esc_attr( get_bloginfo_rss( 'url' ) ), esc_attr( $cat_name ) );
 		} else {
-			$the_list .= "\t\t<category><![CDATA[" . html_entity_decode( $cat_name, ENT_COMPAT, get_option( 'blog_charset' ) ) . "]]></category>\n";
+			$the_list .= "\t\t<category><![CDATA[" . @html_entity_decode( $cat_name, ENT_COMPAT, get_option( 'blog_charset' ) ) . "]]></category>\n";
 		}
 	}
 
@@ -586,7 +587,7 @@ function prep_atom_text_construct( $data ) {
 function atom_site_icon() {
 	$url = get_site_icon_url( 32 );
 	if ( $url ) {
-		echo '<icon>' . convert_chars( $url ) . "</icon>\n";
+		echo "<icon>$url</icon>\n";
 	}
 }
 
@@ -615,18 +616,6 @@ function rss2_site_icon() {
 }
 
 /**
- * Returns the link for the currently displayed feed.
- *
- * @since 5.3.0
- *
- * @return string Correct link for the atom:self element.
- */
-function get_self_link() {
-	$host = @parse_url( home_url() );
-	return set_url_scheme( 'http://' . $host['host'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-}
-
-/**
  * Display the link for the currently displayed feed in a XSS safe way.
  *
  * Generate a correct link for the atom:self element.
@@ -634,6 +623,7 @@ function get_self_link() {
  * @since 2.5.0
  */
 function self_link() {
+	$host = @parse_url( home_url() );
 	/**
 	 * Filters the current feed URL.
 	 *
@@ -644,61 +634,7 @@ function self_link() {
 	 *
 	 * @param string $feed_link The link for the feed with set URL scheme.
 	 */
-	echo esc_url( apply_filters( 'self_link', get_self_link() ) );
-}
-
-/**
- * Get the timestamp of the most recently modified post from WP_Query.
- *
- * If viewing a comment feed, the timestamp of the most recently modified
- * comment will be returned.
- *
- * @global WP_Query $wp_query WordPress Query object.
- *
- * @since 5.2.0
- *
- * @param string $format Format of the timestamp to return, passed to mysql2date.
- *
- * @return string The timestamp.
- */
-function get_feed_build_date( $format ) {
-	global $wp_query;
-
-	if ( empty( $wp_query ) || ! $wp_query->have_posts() ) {
-		// Fallback to last time any post was modified or published.
-		return get_lastpostmodified( 'GMT' );
-	}
-
-	// Extract the post modified times from the posts.
-	$modified_times = wp_list_pluck( $wp_query->posts, 'post_modified_gmt' );
-
-	// If this is a comment feed, check those objects too.
-	if ( $wp_query->is_comment_feed() && $wp_query->comment_count ) {
-		// Extract the comment modified times from the comments.
-		$comment_times = wp_list_pluck( $wp_query->comments, 'comment_date_gmt' );
-
-		// Add the comment times to the post times for comparison.
-		$modified_times = array_merge( $modified_times, $comment_times );
-	}
-
-	// Determine the maximum modified time.
-	$datetime = date_create_immutable_from_format(
-		'Y-m-d H:i:s',
-		max( $modified_times ),
-		new DateTimeZone( 'UTC' )
-	);
-
-	$max_modified_time = $datetime->format( $format );
-
-	/**
-	 * Filters the date the last post or comment in the query was modified.
-	 *
-	 * @since 5.2.0
-	 *
-	 * @param string $max_modified_time Date the last post or comment was modified in the query.
-	 * @param string $format            The date format requested in get_feed_build_date.
-	 */
-	return apply_filters( 'get_feed_build_date', $max_modified_time, $format );
+	echo esc_url( apply_filters( 'self_link', set_url_scheme( 'http://' . $host['host'] . wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) );
 }
 
 /**
@@ -743,7 +679,7 @@ function feed_content_type( $type = '' ) {
  * using SimplePie's multifeed feature.
  * See also {@link http://simplepie.org/wiki/faq/typical_multifeed_gotchas}
  *
- * @return SimplePie|WP_Error SimplePie object on success or WP_Error object on failure.
+ * @return WP_Error|SimplePie WP_Error object on failure or SimplePie object on success
  */
 function fetch_feed( $url ) {
 	if ( ! class_exists( 'SimplePie', false ) ) {
@@ -773,8 +709,8 @@ function fetch_feed( $url ) {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param SimplePie $feed SimplePie feed object (passed by reference).
-	 * @param mixed     $url  URL of feed to retrieve. If an array of URLs, the feeds are merged.
+	 * @param object $feed SimplePie feed object (passed by reference).
+	 * @param mixed  $url  URL of feed to retrieve. If an array of URLs, the feeds are merged.
 	 */
 	do_action_ref_array( 'wp_feed_options', array( &$feed, $url ) );
 	$feed->init();

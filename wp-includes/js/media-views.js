@@ -146,7 +146,7 @@ media.events = _.extend( {}, Backbone.Events );
  *
  * @param {string} selector
  * @param {Number} sensitivity
- * @return {Promise}
+ * @returns {Promise}
  */
 media.transition = function( selector, sensitivity ) {
 	var deferred = $.Deferred();
@@ -248,7 +248,6 @@ media.view.SiteIconCropper = __webpack_require__( 101 );
 media.view.SiteIconPreview = __webpack_require__( 102 );
 media.view.EditImage = __webpack_require__( 103 );
 media.view.Spinner = __webpack_require__( 104 );
-media.view.Heading = __webpack_require__( 105 );
 
 
 /***/ }),
@@ -295,7 +294,7 @@ _.extend( Region.prototype,/** @lends wp.media.controller.Region.prototype */{
 	 * @fires Region#activate
 	 * @fires Region#deactivate
 	 *
-	 * @return {wp.media.controller.Region} Returns itself to allow chaining.
+	 * @returns {wp.media.controller.Region} Returns itself to allow chaining.
 	 */
 	mode: function( mode ) {
 		if ( ! mode ) {
@@ -334,7 +333,7 @@ _.extend( Region.prototype,/** @lends wp.media.controller.Region.prototype */{
 	 * @fires Region#create
 	 * @fires Region#render
 	 *
-	 * @return {wp.media.controller.Region} Returns itself to allow chaining.
+	 * @returns {wp.media.controller.Region} Returns itself to allow chaining
 	 */
 	render: function( mode ) {
 		// If the mode isn't active, activate it.
@@ -377,7 +376,7 @@ _.extend( Region.prototype,/** @lends wp.media.controller.Region.prototype */{
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {wp.media.View}
+	 * @returns {wp.media.View}
 	 */
 	get: function() {
 		return this.view.views.first( this.selector );
@@ -390,7 +389,7 @@ _.extend( Region.prototype,/** @lends wp.media.controller.Region.prototype */{
 	 *
 	 * @param {Array|Object} views
 	 * @param {Object} [options={}]
-	 * @return {wp.Backbone.Subviews} Subviews is returned to allow chaining.
+	 * @returns {wp.Backbone.Subviews} Subviews is returned to allow chaining
 	 */
 	set: function( views, options ) {
 		if ( options ) {
@@ -405,7 +404,7 @@ _.extend( Region.prototype,/** @lends wp.media.controller.Region.prototype */{
 	 * @since 3.5.0
 	 *
 	 * @param {string} event
-	 * @return {undefined|wp.media.controller.Region} Returns itself to allow chaining.
+	 * @returns {undefined|wp.media.controller.Region} Returns itself to allow chaining.
 	 */
 	trigger: function( event ) {
 		var base, args;
@@ -451,13 +450,16 @@ module.exports = Region;
  * @augments Backbone.Model
  * @mixin
  * @mixes Backbone.Events
+ *
+ * @param {Array} states
  */
-var StateMachine = function() {
-	return {
-		// Use Backbone's self-propagating `extend` inheritance method.
-		extend: Backbone.Model.extend
-	};
+var StateMachine = function( states ) {
+	// @todo This is dead code. The states collection gets created in media.view.Frame._createStates.
+	this.states = new Backbone.Collection( states );
 };
+
+// Use Backbone's self-propagating `extend` inheritance method.
+StateMachine.extend = Backbone.Model.extend;
 
 _.extend( StateMachine.prototype, Backbone.Events,/** @lends wp.media.controller.StateMachine.prototype */{
 	/**
@@ -468,13 +470,13 @@ _.extend( StateMachine.prototype, Backbone.Events,/** @lends wp.media.controller
 	 * Implicitly creates states.
 	 *
 	 * Ensure that the `states` collection exists so the `StateMachine`
-	 * can be used as a mixin.
+	 *   can be used as a mixin.
 	 *
 	 * @since 3.5.0
 	 *
 	 * @param {string} id
-	 * @return {wp.media.controller.State} Returns a State model from
-	 *                                     the StateMachine collection.
+	 * @returns {wp.media.controller.State} Returns a State model
+	 *   from the StateMachine collection
 	 */
 	state: function( id ) {
 		this.states = this.states || new Backbone.Collection();
@@ -502,7 +504,7 @@ _.extend( StateMachine.prototype, Backbone.Events,/** @lends wp.media.controller
 	 * @fires wp.media.controller.State#deactivate
 	 * @fires wp.media.controller.State#activate
 	 *
-	 * @return {wp.media.controller.StateMachine} Returns itself to allow chaining.
+	 * @returns {wp.media.controller.StateMachine} Returns itself to allow chaining
 	 */
 	setState: function( id ) {
 		var previous = this.state();
@@ -530,8 +532,8 @@ _.extend( StateMachine.prototype, Backbone.Events,/** @lends wp.media.controller
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {wp.media.controller.State} Returns a State model from
-	 *                                     the StateMachine collection.
+	 * @returns {wp.media.controller.State} Returns a State model
+	 *    from the StateMachine collection
 	 */
 	lastState: function() {
 		if ( this._lastState ) {
@@ -546,19 +548,19 @@ _.each([ 'on', 'off', 'trigger' ], function( method ) {
 	 * @function on
 	 * @memberOf wp.media.controller.StateMachine
 	 * @instance
-	 * @return {wp.media.controller.StateMachine} Returns itself to allow chaining.
+	 * @returns {wp.media.controller.StateMachine} Returns itself to allow chaining.
 	 */
 	/**
 	 * @function off
 	 * @memberOf wp.media.controller.StateMachine
 	 * @instance
-	 * @return {wp.media.controller.StateMachine} Returns itself to allow chaining.
+	 * @returns {wp.media.controller.StateMachine} Returns itself to allow chaining.
 	 */
 	/**
 	 * @function trigger
 	 * @memberOf wp.media.controller.StateMachine
 	 * @instance
-	 * @return {wp.media.controller.StateMachine} Returns itself to allow chaining.
+	 * @returns {wp.media.controller.StateMachine} Returns itself to allow chaining.
 	 */
 	StateMachine.prototype[ method ] = function() {
 		// Ensure that the `states` collection exists so the `StateMachine`
@@ -1051,7 +1053,7 @@ Library = wp.media.controller.State.extend(/** @lends wp.media.controller.Librar
 	 * @since 3.5.0
 	 *
 	 * @param {wp.media.model.Attachment} attachment
-	 * @return {Backbone.Model}
+	 * @returns {Backbone.Model}
 	 */
 	display: function( attachment ) {
 		var displays = this._displays;
@@ -1068,7 +1070,7 @@ Library = wp.media.controller.State.extend(/** @lends wp.media.controller.Librar
 	 * @since 3.6.0
 	 *
 	 * @param {wp.media.model.Attachment} attachment
-	 * @return {Object}
+	 * @returns {Object}
 	 */
 	defaultDisplaySettings: function( attachment ) {
 		var settings = _.clone( this._defaultDisplaySettings );
@@ -1088,7 +1090,7 @@ Library = wp.media.controller.State.extend(/** @lends wp.media.controller.Librar
 	 * @since 4.4.1
 	 *
 	 * @param {wp.media.model.Attachment} attachment
-	 * @return {Boolean}
+	 * @returns {Boolean}
 	 */
 	isImageAttachment: function( attachment ) {
 		// If uploading, we know the filename but not the mime type.
@@ -1105,7 +1107,7 @@ Library = wp.media.controller.State.extend(/** @lends wp.media.controller.Librar
 	 * @since 3.6.0
 	 *
 	 * @param {wp.media.model.Attachment} attachment
-	 * @return {Boolean}
+	 * @returns {Boolean}
 	 */
 	canEmbed: function( attachment ) {
 		// If uploading, we know the filename but not the mime type.
@@ -1496,7 +1498,7 @@ GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype 
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	initialize: function() {
 		if ( ! this.get('library') ) {
@@ -1514,7 +1516,7 @@ GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype 
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	activate: function() {
 		var library = this.get('library'),
@@ -2107,7 +2109,7 @@ EditImage = wp.media.controller.State.extend(/** @lends wp.media.controller.Edit
 	 *
 	 * @since 3.9.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	activate: function() {
 		this.frame.on( 'toolbar:render:edit-image', _.bind( this.toolbar, this ) );
@@ -2118,7 +2120,7 @@ EditImage = wp.media.controller.State.extend(/** @lends wp.media.controller.Edit
 	 *
 	 * @since 3.9.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	deactivate: function() {
 		this.frame.off( 'toolbar:render:edit-image' );
@@ -2133,7 +2135,7 @@ EditImage = wp.media.controller.State.extend(/** @lends wp.media.controller.Edit
 	 *
 	 * @since 3.9.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	toolbar: function() {
 		var frame = this.frame,
@@ -2398,7 +2400,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	 *
 	 * @since 4.2.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	activate: function() {
 		this.frame.on( 'content:create:crop', this.createCropContent, this );
@@ -2411,7 +2413,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	 *
 	 * @since 4.2.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	deactivate: function() {
 		this.frame.toolbar.mode('browse');
@@ -2426,7 +2428,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	 *
 	 * @fires crop window
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	createCropContent: function() {
 		this.cropperView = new wp.media.view.Cropper({
@@ -2443,7 +2445,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	 *
 	 * @since 4.2.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	removeCropper: function() {
 		this.imgSelect.cancelSelection();
@@ -2457,7 +2459,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	 *
 	 * @since 4.2.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	createCropToolbar: function() {
 		var canSkipCrop, toolbarOptions;
@@ -2519,7 +2521,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	 *
 	 * @since 4.2.0
 	 *
-	 * @return {$.promise} A jQuery promise with the custom header crop details.
+	 * @returns {$.promise} A jQuery promise with the custom header crop details.
 	 */
 	doCrop: function( attachment ) {
 		return wp.ajax.post( 'custom-header-crop', _.extend(
@@ -2565,7 +2567,7 @@ CustomizeImageCropper = Controller.Cropper.extend(/** @lends wp.media.controller
 	 *
 	 * @param {Object} attachment The attachment to crop.
 	 *
-	 * @return {$.promise} A jQuery promise that represents the crop image request.
+	 * @returns {$.promise} A jQuery promise that represents the crop image request.
 	 */
 	doCrop: function( attachment ) {
 		var cropDetails = attachment.get( 'cropDetails' ),
@@ -2685,7 +2687,7 @@ var View = wp.Backbone.View.extend(/** @lends wp.media.View.prototype */{
 	 *       before Backbone 0.9.8 came out. Figure out if Backbone core takes
 	 *       care of this in Backbone.View now.
 	 *
-	 * @return {wp.media.View} Returns itself to allow chaining.
+	 * @returns {wp.media.View} Returns itself to allow chaining
 	 */
 	dispose: function() {
 		// Undelegating events, removing events from the model, and
@@ -2709,7 +2711,7 @@ var View = wp.Backbone.View.extend(/** @lends wp.media.View.prototype */{
 		return this;
 	},
 	/**
-	 * @return {wp.media.View} Returns itself to allow chaining.
+	 * @returns {wp.media.View} Returns itself to allow chaining
 	 */
 	remove: function() {
 		this.dispose();
@@ -2809,7 +2811,7 @@ var Frame = wp.media.View.extend(/** @lends wp.media.view.Frame.prototype */{
 	/**
 	 * Reset all states on the frame to their defaults.
 	 *
-	 * @return {wp.media.view.Frame} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Frame} Returns itself to allow chaining
 	 */
 	reset: function() {
 		this.states.invoke( 'trigger', 'reset' );
@@ -2843,7 +2845,7 @@ var Frame = wp.media.View.extend(/** @lends wp.media.view.Frame.prototype */{
 	 * Activate a mode on the frame.
 	 *
 	 * @param string mode Mode ID.
-	 * @return {this} Returns itself to allow chaining.
+	 * @returns {this} Returns itself to allow chaining.
 	 */
 	activateMode: function( mode ) {
 		// Bail if the mode is already active.
@@ -2860,7 +2862,7 @@ var Frame = wp.media.View.extend(/** @lends wp.media.view.Frame.prototype */{
 	 * Deactivate a mode on the frame.
 	 *
 	 * @param string mode Mode ID.
-	 * @return {this} Returns itself to allow chaining.
+	 * @returns {this} Returns itself to allow chaining.
 	 */
 	deactivateMode: function( mode ) {
 		// Bail if the mode isn't active.
@@ -2900,7 +2902,6 @@ module.exports = Frame;
 /***/ (function(module, exports) {
 
 var Frame = wp.media.view.Frame,
-	l10n = wp.media.view.l10n,
 	$ = jQuery,
 	MediaFrame;
 
@@ -2924,7 +2925,7 @@ MediaFrame = Frame.extend(/** @lends wp.media.view.MediaFrame.prototype */{
 	regions:   ['menu','title','content','toolbar','router'],
 
 	events: {
-		'click .media-frame-menu-toggle': 'toggleMenu'
+		'click div.media-frame-title h1': 'toggleMenu'
 	},
 
 	/**
@@ -2934,7 +2935,7 @@ MediaFrame = Frame.extend(/** @lends wp.media.view.MediaFrame.prototype */{
 		Frame.prototype.initialize.apply( this, arguments );
 
 		_.defaults( this.options, {
-			title:    l10n.mediaFrameDefaultTitle,
+			title:    '',
 			modal:    true,
 			uploader: true
 		});
@@ -2976,75 +2977,15 @@ MediaFrame = Frame.extend(/** @lends wp.media.view.MediaFrame.prototype */{
 		this.on( 'title:create:default', this.createTitle, this );
 		this.title.mode('default');
 
+		this.on( 'title:render', function( view ) {
+			view.$el.append( '<span class="dashicons dashicons-arrow-down"></span>' );
+		});
+
 		// Bind default menu.
 		this.on( 'menu:create:default', this.createMenu, this );
-
-		// Set the menu ARIA tab panel attributes when the modal opens.
-		this.on( 'open', this.setMenuTabPanelAriaAttributes, this );
-		// Set the router ARIA tab panel attributes when the modal opens.
-		this.on( 'open', this.setRouterTabPanelAriaAttributes, this );
-
-		// Update the menu ARIA tab panel attributes when the content updates.
-		this.on( 'content:render', this.setMenuTabPanelAriaAttributes, this );
-		// Update the router ARIA tab panel attributes when the content updates.
-		this.on( 'content:render', this.setRouterTabPanelAriaAttributes, this );
 	},
-
 	/**
-	 * Sets the attributes to be used on the menu ARIA tab panel.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @return {void}
-	 */
-	setMenuTabPanelAriaAttributes: function() {
-		var stateId = this.state().get( 'id' ),
-			tabPanelEl = this.$el.find( '.media-frame-tab-panel' ),
-			ariaLabelledby;
-
-		tabPanelEl.removeAttr( 'role aria-labelledby tabindex' );
-
-		if ( this.state().get( 'menu' ) && this.menuView && this.menuView.isVisible ) {
-			ariaLabelledby = 'menu-item-' + stateId;
-
-			// Set the tab panel attributes only if the tabs are visible.
-			tabPanelEl
-				.attr( {
-					role: 'tabpanel',
-					'aria-labelledby': ariaLabelledby,
-					tabIndex: '0'
-				} );
-		}
-	},
-
-	/**
-	 * Sets the attributes to be used on the router ARIA tab panel.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @return {void}
-	 */
-	setRouterTabPanelAriaAttributes: function() {
-		var tabPanelEl = this.$el.find( '.media-frame-content' ),
-			ariaLabelledby;
-
-		tabPanelEl.removeAttr( 'role aria-labelledby tabindex' );
-
-		// Set the tab panel attributes only if the tabs are visible.
-		if ( this.state().get( 'router' ) && this.routerView && this.routerView.isVisible && this.content._mode ) {
-			ariaLabelledby = 'menu-item-' + this.content._mode;
-
-			tabPanelEl
-				.attr( {
-					role: 'tabpanel',
-					'aria-labelledby': ariaLabelledby,
-					tabIndex: '0'
-				} );
-		}
-	},
-
-	/**
-	 * @return {wp.media.view.MediaFrame} Returns itself to allow chaining.
+	 * @returns {wp.media.view.MediaFrame} Returns itself to allow chaining
 	 */
 	render: function() {
 		// Activate the default state if no active state exists.
@@ -3072,22 +3013,12 @@ MediaFrame = Frame.extend(/** @lends wp.media.view.MediaFrame.prototype */{
 	 */
 	createMenu: function( menu ) {
 		menu.view = new wp.media.view.Menu({
-			controller: this,
-
-			attributes: {
-				role:               'tablist',
-				'aria-orientation': 'vertical'
-			}
+			controller: this
 		});
-
-		this.menuView = menu.view;
 	},
 
-	toggleMenu: function( event ) {
-		var menu = this.$el.find( '.media-menu' );
-
-		menu.toggleClass( 'visible' );
-		$( event.target ).attr( 'aria-expanded', menu.hasClass( 'visible' ) );
+	toggleMenu: function() {
+		this.$el.find( '.media-menu' ).toggleClass( 'visible' );
 	},
 
 	/**
@@ -3105,15 +3036,8 @@ MediaFrame = Frame.extend(/** @lends wp.media.view.MediaFrame.prototype */{
 	 */
 	createRouter: function( router ) {
 		router.view = new wp.media.view.Router({
-			controller: this,
-
-			attributes: {
-				role:               'tablist',
-				'aria-orientation': 'horizontal'
-			}
+			controller: this
 		});
-
-		this.routerView = router.view;
 	},
 	/**
 	 * @param {Object} options
@@ -3217,35 +3141,35 @@ _.each(['open','close','attach','detach','escape'], function( method ) {
 	 * @memberOf wp.media.view.MediaFrame
 	 * @instance
 	 *
-	 * @return {wp.media.view.MediaFrame} Returns itself to allow chaining.
+	 * @returns {wp.media.view.MediaFrame} Returns itself to allow chaining
 	 */
 	/**
 	 * @function close
 	 * @memberOf wp.media.view.MediaFrame
 	 * @instance
 	 *
-	 * @return {wp.media.view.MediaFrame} Returns itself to allow chaining.
+	 * @returns {wp.media.view.MediaFrame} Returns itself to allow chaining
 	 */
 	/**
 	 * @function attach
 	 * @memberOf wp.media.view.MediaFrame
 	 * @instance
 	 *
-	 * @return {wp.media.view.MediaFrame} Returns itself to allow chaining.
+	 * @returns {wp.media.view.MediaFrame} Returns itself to allow chaining
 	 */
 	/**
 	 * @function detach
 	 * @memberOf wp.media.view.MediaFrame
 	 * @instance
 	 *
-	 * @return {wp.media.view.MediaFrame} Returns itself to allow chaining.
+	 * @returns {wp.media.view.MediaFrame} Returns itself to allow chaining
 	 */
 	/**
 	 * @function escape
 	 * @memberOf wp.media.view.MediaFrame
 	 * @instance
 	 *
-	 * @return {wp.media.view.MediaFrame} Returns itself to allow chaining.
+	 * @returns {wp.media.view.MediaFrame} Returns itself to allow chaining
 	 */
 	MediaFrame.prototype[ method ] = function() {
 		if ( this.modal ) {
@@ -3322,16 +3246,6 @@ Select = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Select.prototype 
 		};
 	},
 
-	editImageContent: function() {
-		var image = this.state().get('image'),
-			view = new wp.media.view.EditImage( { model: image, controller: this } ).render();
-
-		this.content.set( view );
-
-		// after creating the wrapper view, load the actual editor via an ajax call
-		view.loadEditor();
-	},
-
 	/**
 	 * Create the default states on the frame.
 	 */
@@ -3350,8 +3264,7 @@ Select = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Select.prototype 
 				multiple:  options.multiple,
 				title:     options.title,
 				priority:  20
-			}),
-			new wp.media.controller.EditImage( { model: options.editImage } )
+			})
 		]);
 	},
 
@@ -3366,7 +3279,6 @@ Select = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Select.prototype 
 		this.on( 'content:create:browse', this.browseContent, this );
 		this.on( 'content:render:upload', this.uploadContent, this );
 		this.on( 'toolbar:create:select', this.createSelectToolbar, this );
-		this.on( 'content:render:edit-image', this.editImageContent, this );
 	},
 
 	/**
@@ -3709,11 +3621,8 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 	mainMenu: function( view ) {
 		view.set({
 			'library-separator': new wp.media.View({
-				className:  'separator',
-				priority:   100,
-				attributes: {
-					role: 'presentation'
-				}
+				className: 'separator',
+				priority: 100
 			})
 		});
 	},
@@ -3745,7 +3654,8 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 						frame.close();
 					}
 
-					// Move focus to the modal after canceling a Gallery.
+					// Keep focus inside media modal
+					// after canceling a gallery
 					this.controller.modal.focusManager.focus();
 				}
 			},
@@ -3771,9 +3681,6 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 					} else {
 						frame.close();
 					}
-
-					// Move focus to the modal after canceling an Audio Playlist.
-					this.controller.modal.focusManager.focus();
 				}
 			},
 			separateCancel: new wp.media.View({
@@ -3798,9 +3705,6 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 					} else {
 						frame.close();
 					}
-
-					// Move focus to the modal after canceling a Video Playlist.
-					this.controller.modal.focusManager.focus();
 				}
 			},
 			separateCancel: new wp.media.View({
@@ -3818,6 +3722,10 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 		}).render();
 
 		this.content.set( view );
+
+		if ( ! wp.media.isTouchDevice ) {
+			view.url.focus();
+		}
 	},
 
 	editSelectionContent: function() {
@@ -3844,8 +3752,6 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 
 			click: function() {
 				this.controller.content.mode('browse');
-				// Move focus to the modal when jumping back from Edit Selection to Add Media view.
-				this.controller.modal.focusManager.focus();
 			}
 		});
 
@@ -3941,10 +3847,10 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 					multiple: true
 				}) );
 
-				// Jump to Edit Gallery view.
-				this.controller.setState( 'gallery-edit' );
+				this.controller.setState('gallery-edit');
 
-				// Move focus to the modal after jumping to Edit Gallery view.
+				// Keep focus inside media modal
+				// after jumping to gallery view
 				this.controller.modal.focusManager.focus();
 			}
 		});
@@ -3971,10 +3877,10 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 					multiple: true
 				}) );
 
-				// Jump to Edit Audio Playlist view.
-				this.controller.setState( 'playlist-edit' );
+				this.controller.setState('playlist-edit');
 
-				// Move focus to the modal after jumping to Edit Audio Playlist view.
+				// Keep focus inside media modal
+				// after jumping to playlist view
 				this.controller.modal.focusManager.focus();
 			}
 		});
@@ -4001,10 +3907,10 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 					multiple: true
 				}) );
 
-				// Jump to Edit Video Playlist view.
-				this.controller.setState( 'video-playlist-edit' );
+				this.controller.setState('video-playlist-edit');
 
-				// Move focus to the modal after jumping to Edit Video Playlist view.
+				// Keep focus inside media modal
+				// after jumping to video playlist view
 				this.controller.modal.focusManager.focus();
 			}
 		});
@@ -4074,8 +3980,6 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 						edit.get('library').add( state.get('selection').models );
 						state.trigger('reset');
 						controller.setState('gallery-edit');
-						// Move focus to the modal when jumping back from Add to Gallery to Edit Gallery view.
-						this.controller.modal.focusManager.focus();
 					}
 				}
 			}
@@ -4133,8 +4037,6 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 						edit.get('library').add( state.get('selection').models );
 						state.trigger('reset');
 						controller.setState('playlist-edit');
-						// Move focus to the modal when jumping back from Add to Audio Playlist to Edit Audio Playlist view.
-						this.controller.modal.focusManager.focus();
 					}
 				}
 			}
@@ -4189,8 +4091,6 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 						edit.get('library').add( state.get('selection').models );
 						state.trigger('reset');
 						controller.setState('video-playlist-edit');
-						// Move focus to the modal when jumping back from Add to Video Playlist to Edit Video Playlist view.
-						this.controller.modal.focusManager.focus();
 					}
 				}
 			}
@@ -4341,7 +4241,7 @@ ImageDetails = Select.extend(/** @lends wp.media.view.MediaFrame.ImageDetails.pr
 			items: {
 				back: {
 					text:     l10n.back,
-					priority: 80,
+					priority: 20,
 					click:    function() {
 						if ( previous ) {
 							frame.setState( previous );
@@ -4354,7 +4254,7 @@ ImageDetails = Select.extend(/** @lends wp.media.view.MediaFrame.ImageDetails.pr
 				replace: {
 					style:    'primary',
 					text:     l10n.replace,
-					priority: 20,
+					priority: 80,
 					requires: { selection: true },
 
 					click: function() {
@@ -4417,10 +4317,9 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 
 	initialize: function() {
 		_.defaults( this.options, {
-			container:      document.body,
-			title:          '',
-			propagate:      true,
-			hasCloseButton: true
+			container: document.body,
+			title:     '',
+			propagate: true
 		});
 
 		this.focusManager = new wp.media.view.FocusManager({
@@ -4428,17 +4327,16 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 		});
 	},
 	/**
-	 * @return {Object}
+	 * @returns {Object}
 	 */
 	prepare: function() {
 		return {
-			title:          this.options.title,
-			hasCloseButton: this.options.hasCloseButton
+			title: this.options.title
 		};
 	},
 
 	/**
-	 * @return {wp.media.view.Modal} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Modal} Returns itself to allow chaining
 	 */
 	attach: function() {
 		if ( this.views.attached ) {
@@ -4459,7 +4357,7 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 	},
 
 	/**
-	 * @return {wp.media.view.Modal} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Modal} Returns itself to allow chaining
 	 */
 	detach: function() {
 		if ( this.$el.is(':visible') ) {
@@ -4472,7 +4370,7 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 	},
 
 	/**
-	 * @return {wp.media.view.Modal} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Modal} Returns itself to allow chaining
 	 */
 	open: function() {
 		var $el = this.$el,
@@ -4508,15 +4406,12 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 		// Set initial focus on the content instead of this view element, to avoid page scrolling.
 		this.$( '.media-modal' ).focus();
 
-		// Hide the page content from assistive technologies.
-		this.focusManager.setAriaHiddenOnBodyChildren( $el );
-
 		return this.propagate('open');
 	},
 
 	/**
 	 * @param {Object} options
-	 * @return {wp.media.view.Modal} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Modal} Returns itself to allow chaining
 	 */
 	close: function( options ) {
 		if ( ! this.views.attached || ! this.$el.is(':visible') ) {
@@ -4529,18 +4424,10 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 		// Hide modal and remove restricted media modal tab focus once it's closed
 		this.$el.hide().undelegate( 'keydown' );
 
-		/*
-		 * Make visible again to assistive technologies all body children that
-		 * have been made hidden when the modal opened.
-		 */
-		this.focusManager.removeAriaHiddenFromBodyChildren();
-
-		// Move focus back in useful location once modal is closed.
+		// Put focus back in useful location once modal is closed.
 		if ( null !== this.clickedOpenerEl ) {
-			// Move focus back to the element that opened the modal.
 			this.clickedOpenerEl.focus();
 		} else {
-			// Fallback to the admin page main element.
 			$( '#wpbody-content' )
 				.attr( 'tabindex', '-1' )
 				.focus();
@@ -4555,7 +4442,7 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 		return this;
 	},
 	/**
-	 * @return {wp.media.view.Modal} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Modal} Returns itself to allow chaining
 	 */
 	escape: function() {
 		return this.close({ escape: true });
@@ -4570,7 +4457,7 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 
 	/**
 	 * @param {Array|Object} content Views to register to '.media-modal-content'
-	 * @return {wp.media.view.Modal} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Modal} Returns itself to allow chaining
 	 */
 	content: function( content ) {
 		this.views.set( '.media-modal-content', content );
@@ -4582,7 +4469,7 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 	 * forwards events to the modal's controller.
 	 *
 	 * @param {string} id
-	 * @return {wp.media.view.Modal} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Modal} Returns itself to allow chaining
 	 */
 	propagate: function( id ) {
 		this.trigger( id );
@@ -4612,8 +4499,6 @@ module.exports = Modal;
 /* 56 */
 /***/ (function(module, exports) {
 
-var $ = jQuery;
-
 /**
  * wp.media.view.FocusManager
  *
@@ -4627,73 +4512,14 @@ var $ = jQuery;
 var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.prototype */{
 
 	events: {
-		'keydown': 'focusManagementMode'
+		'keydown': 'constrainTabbing'
 	},
 
+	focus: function() { // Reset focus on first left menu item
+		this.$('.media-menu-item').first().focus();
+	},
 	/**
-	 * Initializes the Focus Manager.
-	 *
-	 * @param {object} options The Focus Manager options.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @return {void}
-	 */
-	initialize: function( options ) {
-		this.mode                    = options.mode || 'constrainTabbing';
-		this.tabsAutomaticActivation = options.tabsAutomaticActivation || false;
-	},
-
- 	/**
-	 * Determines which focus management mode to use.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @param {object} event jQuery event object.
-	 *
-	 * @return {void}
-	 */
-	focusManagementMode: function( event ) {
-		if ( this.mode === 'constrainTabbing' ) {
-			this.constrainTabbing( event );
-		}
-
-		if ( this.mode === 'tabsNavigation' ) {
-			this.tabsNavigation( event );
-		}
-	},
-
-	/**
-	 * Gets all the tabbable elements.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @return {object} A jQuery collection of tabbable elements.
-	 */
-	getTabbables: function() {
-		// Skip the file input added by Plupload.
-		return this.$( ':tabbable' ).not( '.moxie-shim input[type="file"]' );
-	},
-
-	/**
-	 * Moves focus to the modal dialog.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @return {void}
-	 */
-	focus: function() {
-		this.$( '.media-modal' ).focus();
-	},
-
-	/**
-	 * Constrains navigation with the Tab key within the media view element.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @param {Object} event A keydown jQuery event.
-	 *
-	 * @return {void}
+	 * @param {Object} event
 	 */
 	constrainTabbing: function( event ) {
 		var tabbables;
@@ -4703,7 +4529,8 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 			return;
 		}
 
-		tabbables = this.getTabbables();
+		// Skip the file input added by Plupload.
+		tabbables = this.$( ':tabbable' ).not( '.moxie-shim input[type="file"]' );
 
 		// Keep tab focus within media modal while it's open
 		if ( tabbables.last()[0] === event.target && ! event.shiftKey ) {
@@ -4713,263 +4540,8 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 			tabbables.last().focus();
 			return false;
 		}
-	},
+	}
 
-	/**
-	 * Hides from assistive technologies all the body children.
-	 *
-	 * Sets an `aria-hidden="true"` attribute on all the body children except
-	 * the provided element and other elements that should not be hidden.
-	 *
-	 * The reason why we use `aria-hidden` is that `aria-modal="true"` is buggy
-	 * in Safari 11.1 and support is spotty in other browsers. Also, `aria-modal="true"`
-	 * prevents the `wp.a11y.speak()` ARIA live regions to work as they're outside
-	 * of the modal dialog and get hidden from assistive technologies.
-	 *
-	 * @since 5.2.3
-	 *
-	 * @param {object} visibleElement The jQuery object representing the element that should not be hidden.
-	 *
-	 * @return {void}
-	 */
-	setAriaHiddenOnBodyChildren: function( visibleElement ) {
-		var bodyChildren,
-			self = this;
-
-		if ( this.isBodyAriaHidden ) {
-			return;
-		}
-
-		// Get all the body children.
-		bodyChildren = document.body.children;
-
-		// Loop through the body children and hide the ones that should be hidden.
-		_.each( bodyChildren, function( element ) {
-			// Don't hide the modal element.
-			if ( element === visibleElement[0] ) {
-				return;
-			}
-
-			// Determine the body children to hide.
-			if ( self.elementShouldBeHidden( element ) ) {
-				element.setAttribute( 'aria-hidden', 'true' );
-				// Store the hidden elements.
-				self.ariaHiddenElements.push( element );
-			}
-		} );
-
-		this.isBodyAriaHidden = true;
-	},
-
-	/**
-	 * Unhides from assistive technologies all the body children.
-	 *
-	 * Makes visible again to assistive technologies all the body children
-	 * previously hidden and stored in this.ariaHiddenElements.
-	 *
-	 * @since 5.2.3
-	 *
-	 * @return {void}
-	 */
-	removeAriaHiddenFromBodyChildren: function() {
-		_.each( this.ariaHiddenElements, function( element ) {
-			element.removeAttribute( 'aria-hidden' );
-		} );
-
-		this.ariaHiddenElements = [];
-		this.isBodyAriaHidden   = false;
-	},
-
-	/**
-	 * Determines if the passed element should not be hidden from assistive technologies.
-	 *
-	 * @since 5.2.3
-	 *
-	 * @param {object} element The DOM element that should be checked.
-	 *
-	 * @return {boolean} Whether the element should not be hidden from assistive technologies.
-	 */
-	elementShouldBeHidden: function( element ) {
-		var role = element.getAttribute( 'role' ),
-			liveRegionsRoles = [ 'alert', 'status', 'log', 'marquee', 'timer' ];
-
-		/*
-		 * Don't hide scripts, elements that already have `aria-hidden`, and
-		 * ARIA live regions.
-		 */
-		return ! (
-			element.tagName === 'SCRIPT' ||
-			element.hasAttribute( 'aria-hidden' ) ||
-			element.hasAttribute( 'aria-live' ) ||
-			liveRegionsRoles.indexOf( role ) !== -1
-		);
-	},
-
-	/**
-	 * Whether the body children are hidden from assistive technologies.
-	 *
-	 * @since 5.2.3
-	 */
-	isBodyAriaHidden: false,
-
-	/**
-	 * Stores an array of DOM elements that should be hidden from assistive
-	 * technologies, for example when the media modal dialog opens.
-	 *
-	 * @since 5.2.3
-	 */
-	ariaHiddenElements: [],
-
-	/**
-	 * Holds the jQuery collection of ARIA tabs.
-	 *
-	 * @since 5.3.0
-	 */
-	tabs: $(),
-
-	/**
-	 * Sets up tabs in an ARIA tabbed interface.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @param {object} event jQuery event object.
-	 *
-	 * @return {void}
-	 */
-	setupAriaTabs: function() {
-		this.tabs = this.$( '[role="tab"]' );
-
-		// Set up initial attributes.
-		this.tabs.attr( {
-			'aria-selected': 'false',
-			tabIndex: '-1'
-		} );
-
-		// Set up attributes on the initially active tab.
-		this.tabs.filter( '.active' )
-			.removeAttr( 'tabindex' )
-			.attr( 'aria-selected', 'true' );
-	},
-
-	/**
-	 * Enables arrows navigation within the ARIA tabbed interface.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @param {object} event jQuery event object.
-	 *
-	 * @return {void}
-	 */
-	tabsNavigation: function( event ) {
-		var orientation = 'horizontal',
-			keys = [ 32, 35, 36, 37, 38, 39, 40 ];
-
-		// Return if not Spacebar, End, Home, or Arrow keys.
-		if ( keys.indexOf( event.which ) === -1 ) {
-			return;
-		}
-
-		// Determine navigation direction.
-		if ( this.$el.attr( 'aria-orientation' ) === 'vertical' ) {
-			orientation = 'vertical';
-		}
-
-		// Make Up and Down arrow keys do nothing with horizontal tabs.
-		if ( orientation === 'horizontal' && [ 38, 40 ].indexOf( event.which ) !== -1 ) {
-			return;
-		}
-
-		// Make Left and Right arrow keys do nothing with vertical tabs.
-		if ( orientation === 'vertical' && [ 37, 39 ].indexOf( event.which ) !== -1 ) {
-			return;
-		}
-
-		this.switchTabs( event, this.tabs );
-	},
-
-	/**
-	 * Switches tabs in the ARIA tabbed interface.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @param {object} event jQuery event object.
-	 *
-	 * @return {void}
-	 */
-	switchTabs: function( event ) {
-		var key   = event.which,
-			index = this.tabs.index( $( event.target ) ),
-			newIndex;
-
-		switch ( key ) {
-			// Space bar: Activate current targeted tab.
-			case 32: {
-				this.activateTab( this.tabs[ index ] );
-				break;
-			}
-			// End key: Activate last tab.
-			case 35: {
-				event.preventDefault();
-				this.activateTab( this.tabs[ this.tabs.length - 1 ] );
-				break;
-			}
-			// Home key: Activate first tab.
-			case 36: {
-				event.preventDefault();
-				this.activateTab( this.tabs[ 0 ] );
-				break;
-			}
-			// Left and up keys: Activate previous tab.
-			case 37:
-			case 38: {
-				event.preventDefault();
-				newIndex = ( index - 1 ) < 0 ? this.tabs.length - 1 : index - 1;
-				this.activateTab( this.tabs[ newIndex ] );
-				break;
-			}
-			// Right and down keys: Activate next tab.
-			case 39:
-			case 40: {
-				event.preventDefault();
-				newIndex = ( index + 1 ) === this.tabs.length ? 0 : index + 1;
-				this.activateTab( this.tabs[ newIndex ] );
-				break;
-			}
-		}
-	},
-
-	/**
-	 * Sets a single tab to be focusable and semantically selected.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @param {object} tab The tab DOM element.
-	 *
-	 * @return {void}
-	 */
-	activateTab: function( tab ) {
-		if ( ! tab ) {
-			return;
-		}
-
-		// The tab is a DOM element: no need for jQuery methods.
-		tab.focus();
-
-		// Handle automatic activation.
-		if ( this.tabsAutomaticActivation ) {
-			tab.removeAttribute( 'tabindex' );
-			tab.setAttribute( 'aria-selected', 'true' );
-			tab.click();
-
-			return;
-		}
-
-		// Handle manual activation.
-		$( tab ).on( 'click', function() {
-			tab.removeAttribute( 'tabindex' );
-			tab.setAttribute( 'aria-selected', 'true' );
-		} );
- 	}
 });
 
 module.exports = FocusManager;
@@ -5162,7 +4734,7 @@ EditorUploader = View.extend(/** @lends wp.media.view.EditorUploader.prototype *
 	/**
 	 * Check browser support for drag'n'drop.
 	 *
-	 * @return {Boolean}
+	 * @return Boolean
 	 */
 	browserSupport: function() {
 		var supports = false, div = document.createElement('div');
@@ -5389,7 +4961,7 @@ UploaderInline = View.extend(/** @lends wp.media.view.UploaderInline.prototype *
 		return data;
 	},
 	/**
-	 * @return {wp.media.view.UploaderInline} Returns itself to allow chaining.
+	 * @returns {wp.media.view.UploaderInline} Returns itself to allow chaining
 	 */
 	dispose: function() {
 		if ( this.disposing ) {
@@ -5406,7 +4978,7 @@ UploaderInline = View.extend(/** @lends wp.media.view.UploaderInline.prototype *
 		return this.remove();
 	},
 	/**
-	 * @return {wp.media.view.UploaderInline} Returns itself to allow chaining.
+	 * @returns {wp.media.view.UploaderInline} Returns itself to allow chaining
 	 */
 	remove: function() {
 		/**
@@ -5426,7 +4998,7 @@ UploaderInline = View.extend(/** @lends wp.media.view.UploaderInline.prototype *
 		}
 	},
 	/**
-	 * @return {wp.media.view.UploaderInline}
+	 * @returns {wp.media.view.UploaderInline}
 	 */
 	ready: function() {
 		var $browser = this.options.$browser,
@@ -5508,7 +5080,7 @@ UploaderStatus = View.extend(/** @lends wp.media.view.UploaderStatus.prototype *
 		this.errors.on( 'add', this.error, this );
 	},
 	/**
-	 * @return {wp.media.view.UploaderStatus}
+	 * @returns {wp.media.view.UploaderStatus}
 	 */
 	dispose: function() {
 		wp.Uploader.queue.off( null, null, this );
@@ -5577,7 +5149,7 @@ UploaderStatus = View.extend(/** @lends wp.media.view.UploaderStatus.prototype *
 	},
 	/**
 	 * @param {string} filename
-	 * @return {string}
+	 * @returns {string}
 	 */
 	filename: function( filename ) {
 		return _.escape( filename );
@@ -5586,26 +5158,24 @@ UploaderStatus = View.extend(/** @lends wp.media.view.UploaderStatus.prototype *
 	 * @param {Backbone.Model} error
 	 */
 	error: function( error ) {
-		var statusError = new wp.media.view.UploaderStatusError( {
-			filename: this.filename( error.get( 'file' ).name ),
-			message:  error.get( 'message' )
-		} );
-
-		// Can show additional info here while retrying to create image sub-sizes.
-		this.views.add( '.upload-errors', statusError, { at: 0 } );
+		this.views.add( '.upload-errors', new wp.media.view.UploaderStatusError({
+			filename: this.filename( error.get('file').name ),
+			message:  error.get('message')
+		}), { at: 0 });
 	},
 
-	dismiss: function() {
+	/**
+	 * @param {Object} event
+	 */
+	dismiss: function( event ) {
 		var errors = this.views.get('.upload-errors');
+
+		event.preventDefault();
 
 		if ( errors ) {
 			_.invoke( errors, 'remove' );
 		}
 		wp.Uploader.errors.reset();
-		// Move focus to the modal after the dismiss button gets removed from the DOM.
-		if ( this.controller.modal ) {
-			this.controller.modal.focusManager.focus();
-		}
 	}
 });
 
@@ -5690,7 +5260,7 @@ Toolbar = View.extend(/** @lends wp.media.view.Toolbar.prototype */{
 		}
 	},
 	/**
-	 * @return {wp.media.view.Toolbar} Returns itsef to allow chaining
+	 * @returns {wp.media.view.Toolbar} Returns itsef to allow chaining
 	 */
 	dispose: function() {
 		if ( this.selection ) {
@@ -5714,7 +5284,7 @@ Toolbar = View.extend(/** @lends wp.media.view.Toolbar.prototype */{
 	 * @param {string} id
 	 * @param {Backbone.View|Object} view
 	 * @param {Object} [options={}]
-	 * @return {wp.media.view.Toolbar} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Toolbar} Returns itself to allow chaining
 	 */
 	set: function( id, view, options ) {
 		var list;
@@ -5748,7 +5318,7 @@ Toolbar = View.extend(/** @lends wp.media.view.Toolbar.prototype */{
 	},
 	/**
 	 * @param {string} id
-	 * @return {wp.media.view.Button}
+	 * @returns {wp.media.view.Button}
 	 */
 	get: function( id ) {
 		return this._views[ id ];
@@ -5756,7 +5326,7 @@ Toolbar = View.extend(/** @lends wp.media.view.Toolbar.prototype */{
 	/**
 	 * @param {string} id
 	 * @param {Object} options
-	 * @return {wp.media.view.Toolbar} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Toolbar} Returns itself to allow chaining
 	 */
 	unset: function( id, options ) {
 		delete this._views[ id ];
@@ -5974,7 +5544,7 @@ var Button = wp.media.View.extend(/** @lends wp.media.view.Button.prototype */{
 		this.listenTo( this.model, 'change', this.render );
 	},
 	/**
-	 * @return {wp.media.view.Button} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Button} Returns itself to allow chaining
 	 */
 	render: function() {
 		var classes = [ 'button', this.className ],
@@ -6054,7 +5624,7 @@ ButtonGroup = wp.media.View.extend(/** @lends wp.media.view.ButtonGroup.prototyp
 	},
 
 	/**
-	 * @return {wp.media.view.ButtonGroup}
+	 * @returns {wp.media.view.ButtonGroup}
 	 */
 	render: function() {
 		this.$el.html( $( _.pluck( this.buttons, 'el' ) ).detach() );
@@ -6096,7 +5666,7 @@ var PriorityList = wp.media.View.extend(/** @lends wp.media.view.PriorityList.pr
 	 * @param {string} id
 	 * @param {wp.media.View|Object} view
 	 * @param {Object} options
-	 * @return {wp.media.view.PriorityList} Returns itself to allow chaining.
+	 * @returns {wp.media.view.PriorityList} Returns itself to allow chaining
 	 */
 	set: function( id, view, options ) {
 		var priority, views, index;
@@ -6137,14 +5707,14 @@ var PriorityList = wp.media.View.extend(/** @lends wp.media.view.PriorityList.pr
 	},
 	/**
 	 * @param {string} id
-	 * @return {wp.media.View}
+	 * @returns {wp.media.View}
 	 */
 	get: function( id ) {
 		return this._views[ id ];
 	},
 	/**
 	 * @param {string} id
-	 * @return {wp.media.view.PriorityList}
+	 * @returns {wp.media.view.PriorityList}
 	 */
 	unset: function( id ) {
 		var view = this.get( id );
@@ -6158,7 +5728,7 @@ var PriorityList = wp.media.View.extend(/** @lends wp.media.view.PriorityList.pr
 	},
 	/**
 	 * @param {Object} options
-	 * @return {wp.media.View}
+	 * @returns {wp.media.View}
 	 */
 	toView: function( options ) {
 		return new wp.media.View( options );
@@ -6172,7 +5742,8 @@ module.exports = PriorityList;
 /* 68 */
 /***/ (function(module, exports) {
 
-var MenuItem;
+var $ = jQuery,
+	MenuItem;
 
 /**
  * wp.media.view.MenuItem
@@ -6185,28 +5756,36 @@ var MenuItem;
  * @augments Backbone.View
  */
 MenuItem = wp.media.View.extend(/** @lends wp.media.view.MenuItem.prototype */{
-	tagName:   'button',
+	tagName:   'a',
 	className: 'media-menu-item',
 
 	attributes: {
-		type: 'button',
-		role: 'tab'
+		href: '#'
 	},
 
 	events: {
 		'click': '_click'
 	},
-
 	/**
-	 * Allows to override the click event.
+	 * @param {Object} event
 	 */
-	_click: function() {
+	_click: function( event ) {
 		var clickOverride = this.options.click;
+
+		if ( event ) {
+			event.preventDefault();
+		}
 
 		if ( clickOverride ) {
 			clickOverride.call( this );
 		} else {
 			this.click();
+		}
+
+		// When selecting a tab along the left side,
+		// focus should be transferred into the main panel
+		if ( ! wp.media.isTouchDevice ) {
+			$('.media-frame-content input').first().focus();
 		}
 	},
 
@@ -6215,26 +5794,20 @@ MenuItem = wp.media.View.extend(/** @lends wp.media.view.MenuItem.prototype */{
 
 		if ( state ) {
 			this.controller.setState( state );
-			// Toggle the menu visibility in the responsive view.
 			this.views.parent.$el.removeClass( 'visible' ); // TODO: or hide on any click, see below
 		}
 	},
-
 	/**
-	 * @return {wp.media.view.MenuItem} returns itself to allow chaining.
+	 * @returns {wp.media.view.MenuItem} returns itself to allow chaining
 	 */
 	render: function() {
-		var options = this.options,
-			menuProperty = options.state || options.contentMode;
+		var options = this.options;
 
 		if ( options.text ) {
 			this.$el.text( options.text );
 		} else if ( options.html ) {
 			this.$el.html( options.html );
 		}
-
-		// Set the menu item ID based on the frame state associated to the menu item.
-		this.$el.attr( 'id', 'menu-item-' + menuProperty );
 
 		return this;
 	}
@@ -6269,35 +5842,20 @@ Menu = PriorityList.extend(/** @lends wp.media.view.Menu.prototype */{
 	ItemView:  MenuItem,
 	region:    'menu',
 
-	attributes: {
-		role:               'tablist',
-		'aria-orientation': 'horizontal'
+	/* TODO: alternatively hide on any click anywhere
+	events: {
+		'click': 'click'
 	},
 
-	initialize: function() {
-		this._views = {};
-
-		this.set( _.extend( {}, this._views, this.options.views ), { silent: true });
-		delete this.options.views;
-
-		if ( ! this.options.silent ) {
-			this.render();
-		}
-
-		// Initialize the Focus Manager.
-		this.focusManager = new wp.media.view.FocusManager( {
-			el:   this.el,
-			mode: 'tabsNavigation'
-		} );
-
-		// The menu is always rendered and can be visible or hidden on some frames.
-		this.isVisible = true;
+	click: function() {
+		this.$el.removeClass( 'visible' );
 	},
+	*/
 
 	/**
 	 * @param {Object} options
 	 * @param {string} id
-	 * @return {wp.media.View}
+	 * @returns {wp.media.View}
 	 */
 	toView: function( options, id ) {
 		options = options || {};
@@ -6311,9 +5869,6 @@ Menu = PriorityList.extend(/** @lends wp.media.view.Menu.prototype */{
 		 */
 		PriorityList.prototype.ready.apply( this, arguments );
 		this.visibility();
-
-		// Set up aria tabs initial attributes.
-		this.focusManager.setupAriaTabs();
 	},
 
 	set: function() {
@@ -6339,9 +5894,6 @@ Menu = PriorityList.extend(/** @lends wp.media.view.Menu.prototype */{
 			hide = ! views || views.length < 2;
 
 		if ( this === view ) {
-			// Flag this menu as hidden or visible.
-			this.isVisible = ! hide;
-			// Set or remove a CSS class to hide the menu.
 			this.controller.$el.toggleClass( 'hide-' + region, hide );
 		}
 	},
@@ -6357,9 +5909,6 @@ Menu = PriorityList.extend(/** @lends wp.media.view.Menu.prototype */{
 
 		this.deselect();
 		view.$el.addClass('active');
-
-		// Set up again the aria tabs initial attributes after the menu updates.
-		this.focusManager.setupAriaTabs();
 	},
 
 	deselect: function() {
@@ -6445,11 +5994,6 @@ Router = Menu.extend(/** @lends wp.media.view.Router.prototype */{
 	property:  'contentMode',
 	ItemView:  wp.media.view.RouterItem,
 	region:    'router',
-
-	attributes: {
-		role:               'tablist',
-		'aria-orientation': 'horizontal'
-	},
 
 	initialize: function() {
 		this.controller.on( 'content:render', this.update, this );
@@ -6562,10 +6106,10 @@ Attachment = View.extend(/** @lends wp.media.view.Attachment.prototype */{
 			this.details( this.model, this.controller.state().get('selection') );
 		}
 
-		this.listenTo( this.controller.states, 'attachment:compat:waiting attachment:compat:ready', this.updateSave );
+		this.listenTo( this.controller, 'attachment:compat:waiting attachment:compat:ready', this.updateSave );
 	},
 	/**
-	 * @return {wp.media.view.Attachment} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
 	 */
 	dispose: function() {
 		var selection = this.options.selection;
@@ -6583,7 +6127,7 @@ Attachment = View.extend(/** @lends wp.media.view.Attachment.prototype */{
 		return this;
 	},
 	/**
-	 * @return {wp.media.view.Attachment} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
 	 */
 	render: function() {
 		var options = _.defaults( this.model.toJSON(), {
@@ -6778,7 +6322,7 @@ Attachment = View.extend(/** @lends wp.media.view.Attachment.prototype */{
 		this[ this.selected() ? 'select' : 'deselect' ]();
 	},
 	/**
-	 * @return {unresolved|Boolean}
+	 * @returns {unresolved|Boolean}
 	 */
 	selected: function() {
 		var selection = this.options.selection;
@@ -6846,7 +6390,7 @@ Attachment = View.extend(/** @lends wp.media.view.Attachment.prototype */{
 	},
 	/**
 	 * @param {string} size
-	 * @return {Object}
+	 * @returns {Object}
 	 */
 	imageSize: function( size ) {
 		var sizes = this.model.get('sizes'), matched = false;
@@ -6930,7 +6474,7 @@ Attachment = View.extend(/** @lends wp.media.view.Attachment.prototype */{
 	},
 	/**
 	 * @param {string} status
-	 * @return {wp.media.view.Attachment} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
 	 */
 	updateSave: function( status ) {
 		var save = this._save = this._save || { status: 'ready' };
@@ -7025,7 +6569,7 @@ _.each({
 	 *
 	 * @param {Backbone.Model} model
 	 * @param {string} value
-	 * @return {wp.media.view.Attachment} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
 	 */
 	/**
 	 * @function _syncTitle
@@ -7034,7 +6578,7 @@ _.each({
 	 *
 	 * @param {Backbone.Model} model
 	 * @param {string} value
-	 * @return {wp.media.view.Attachment} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
 	 */
 	/**
 	 * @function _syncArtist
@@ -7043,7 +6587,7 @@ _.each({
 	 *
 	 * @param {Backbone.Model} model
 	 * @param {string} value
-	 * @return {wp.media.view.Attachment} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
 	 */
 	/**
 	 * @function _syncAlbum
@@ -7052,7 +6596,7 @@ _.each({
 	 *
 	 * @param {Backbone.Model} model
 	 * @param {string} value
-	 * @return {wp.media.view.Attachment} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
 	 */
 	Attachment.prototype[ method ] = function( model, value ) {
 		var $setting = this.$('[data-setting="' + setting + '"]');
@@ -7212,7 +6756,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 
 		this.collection.on( 'reset', this.render, this );
 
-		this.controller.on( 'library:selection:add', this.attachmentFocus, this );
+		this.listenTo( this.controller, 'library:selection:add',    this.attachmentFocus );
 
 		// Throttle the scroll handler and bind this.
 		this.scroll = _.chain( this.scroll ).bind( this ).throttle( this.options.refreshSensitivity ).value();
@@ -7246,7 +6790,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @listens window:resize
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	bindEvents: function() {
 		this.$window.off( this.resizeEvent ).on( this.resizeEvent, _.debounce( this.setColumns, 50 ) );
@@ -7257,34 +6801,18 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @since 4.0.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	attachmentFocus: function() {
-		/*
-		 * @todo: when uploading new attachments, this tries to move focus to the
-		 * attachmentz grid. Actually, a progress bar gets initially displayed
-		 * and then updated when uploading completes, so focus is lost.
-		 * Additionally: this view is used for both the attachments list and the
-		 * list of selected attachments in the bottom media toolbar. Thus, when
-		 * uploading attachments, it is called twice and returns two different `this`.
-		 * `this.columns` is truthy within the modal.
-		 */
-		if ( this.columns ) {
-			// Move focus to the grid list within the modal.
-			this.$el.focus();
-		}
+		this.$( 'li:first' ).focus();
 	},
 
 	/**
 	 * Restores focus to the selected item in the collection.
 	 *
-	 * Moves focus back to the first selected attachment in the grid. Used when
-	 * tabbing backwards from the attachment details sidebar.
-	 * See media.view.AttachmentsBrowser.
-	 *
 	 * @since 4.0.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	restoreFocus: function() {
 		this.$( 'li.selected:first' ).focus();
@@ -7299,7 +6827,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @param {KeyboardEvent} event The keyboard event that triggered this function.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	arrowEvent: function( event ) {
 		var attachments = this.$el.children( 'li' ),
@@ -7349,7 +6877,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	dispose: function() {
 		this.collection.props.off( null, null, this );
@@ -7369,7 +6897,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @since 4.0.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	setColumns: function() {
 		var prev = this.columns,
@@ -7394,7 +6922,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @fires collection:reset
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	initSortable: function() {
 		var collection = this.collection;
@@ -7468,7 +6996,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	refreshSortable: function() {
 		if ( ! this.options.sortable || ! $.fn.sortable ) {
@@ -7489,7 +7017,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @param {wp.media.model.Attachment} attachment
 	 *
-	 * @return {wp.media.View} The created view.
+	 * @returns {wp.media.View} The created view.
 	 */
 	createAttachmentView: function( attachment ) {
 		var view = new this.options.AttachmentView({
@@ -7510,7 +7038,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	prepare: function() {
 		if ( this.collection.length ) {
@@ -7527,7 +7055,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	ready: function() {
 		this.scroll();
@@ -7541,7 +7069,7 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	 *
 	 * @since 3.5.0
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	scroll: function() {
 		var view = this,
@@ -7585,7 +7113,8 @@ module.exports = Attachments;
 /* 77 */
 /***/ (function(module, exports) {
 
-var Search;
+var l10n = wp.media.view.l10n,
+	Search;
 
 /**
  * wp.media.view.Search
@@ -7603,15 +7132,17 @@ Search = wp.media.View.extend(/** @lends wp.media.view.Search.prototype */{
 	id:        'media-search-input',
 
 	attributes: {
-		type: 'search'
+		type:        'search',
+		placeholder: l10n.searchMediaPlaceholder
 	},
 
 	events: {
-		'input': 'search'
+		'input':  'search',
+		'keyup':  'search'
 	},
 
 	/**
-	 * @return {wp.media.view.Search} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Search} Returns itself to allow chaining
 	 */
 	render: function() {
 		this.el.value = this.model.escape('search');
@@ -7619,15 +7150,12 @@ Search = wp.media.View.extend(/** @lends wp.media.view.Search.prototype */{
 	},
 
 	search: _.debounce( function( event ) {
-		var searchTerm = event.target.value.trim();
-
-		// Trigger the search only after 2 ASCII characters.
-		if ( searchTerm && searchTerm.length > 1 ) {
-			this.model.set( 'search', searchTerm );
+		if ( event.target.value ) {
+			this.model.set( 'search', event.target.value );
 		} else {
-			this.model.unset( 'search' );
+			this.model.unset('search');
 		}
-	}, 500 )
+	}, 300 )
 });
 
 module.exports = Search;
@@ -8028,9 +7556,6 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 		 */
 		this.createToolbar();
 
-		// Add a heading before the attachments list.
-		this.createAttachmentsHeading();
-
 		// Create the list of attachments.
 		this.createAttachments();
 
@@ -8050,47 +7575,14 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 		}
 
 		this.collection.on( 'add remove reset', this.updateContent, this );
-
-		// The non-cached or cached attachments query has completed.
-		this.collection.on( 'attachments:received', this.announceSearchResults, this );
 	},
 
-	/**
-	 * Updates the `wp.a11y.speak()` ARIA live region with a message to communicate
-	 * the number of search results to screen reader users. This function is
-	 * debounced because the collection updates multiple times.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @return {void}
-	 */
-	announceSearchResults: _.debounce( function() {
-		var count;
-
-		if ( this.collection.mirroring.args.s ) {
-			count = this.collection.length;
-
-			if ( 0 === count ) {
-				wp.a11y.speak( l10n.noMediaTryNewSearch );
-				return;
-			}
-
-			if ( this.collection.hasMore() ) {
-				wp.a11y.speak( l10n.mediaFoundHasMoreResults.replace( '%d', count ) );
-				return;
-			}
-
-			wp.a11y.speak( l10n.mediaFound.replace( '%d', count ) );
-		}
-	}, 200 ),
-
 	editSelection: function( modal ) {
-		// When editing a selection, move focus to the "Return to library" button.
 		modal.$( '.media-button-backToLibrary' ).focus();
 	},
 
 	/**
-	 * @return {wp.media.view.AttachmentsBrowser} Returns itself to allow chaining.
+	 * @returns {wp.media.view.AttachmentsBrowser} Returns itself to allow chaining
 	 */
 	dispose: function() {
 		this.options.selection.off( null, null, this );
@@ -8099,8 +7591,7 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 	},
 
 	createToolbar: function() {
-		var LibraryViewSwitcher, Filters, toolbarOptions,
-			showFilterByType = -1 !== $.inArray( this.options.filters, [ 'uploaded', 'all' ] );
+		var LibraryViewSwitcher, Filters, toolbarOptions;
 
 		toolbarOptions = {
 			controller: this.controller
@@ -8118,24 +7609,12 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 		this.views.add( this.toolbar );
 
 		this.toolbar.set( 'spinner', new wp.media.view.Spinner({
-			priority: -20
+			priority: -60
 		}) );
 
-		if ( showFilterByType || this.options.date ) {
-			/*
-			 * Create a h2 heading before the select elements that filter attachments.
-			 * This heading is visible in the modal and visually hidden in the grid.
-			 */
-			this.toolbar.set( 'filters-heading', new wp.media.view.Heading( {
-				priority:   -100,
-				text:       l10n.filterAttachments,
-				level:      'h2',
-				className:  'media-attachments-filter-heading'
-			}).render() );
-		}
-
-		if ( showFilterByType ) {
-			// "Filters" is a <select>, a visually hidden label element needs to be rendered before.
+		if ( -1 !== $.inArray( this.options.filters, [ 'uploaded', 'all' ] ) ) {
+			// "Filters" will return a <select>, need to render
+			// screen reader text before
 			this.toolbar.set( 'filtersLabel', new wp.media.view.Label({
 				value: l10n.filterByType,
 				attributes: {
@@ -8175,7 +7654,7 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 				priority: -90
 			}).render() );
 
-			// DateFilter is a <select>, a visually hidden label element needs to be rendered before.
+			// DateFilter is a <select>, screen reader text needs to be rendered before
 			this.toolbar.set( 'dateFilterLabel', new wp.media.view.Label({
 				value: l10n.filterByDate,
 				attributes: {
@@ -8200,9 +7679,9 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 				filters: Filters,
 				style: 'primary',
 				disabled: true,
-				text: mediaTrash ? l10n.trashSelected : l10n.deletePermanently,
+				text: mediaTrash ? l10n.trashSelected : l10n.deleteSelected,
 				controller: this.controller,
-				priority: -80,
+				priority: -60,
 				click: function() {
 					var changed = [], removed = [],
 						selection = this.controller.state().get( 'selection' ),
@@ -8258,9 +7737,9 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 			if ( mediaTrash ) {
 				this.toolbar.set( 'deleteSelectedPermanentlyButton', new wp.media.view.DeleteSelectedPermanentlyButton({
 					filters: Filters,
-					style: 'link button-link-delete',
+					style: 'primary',
 					disabled: true,
-					text: l10n.deletePermanently,
+					text: l10n.deleteSelected,
 					controller: this.controller,
 					priority: -55,
 					click: function() {
@@ -8297,7 +7776,7 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 			}
 
 		} else if ( this.options.date ) {
-			// DateFilter is a <select>, a visually hidden label element needs to be rendered before.
+			// DateFilter is a <select>, screen reader text needs to be rendered before
 			this.toolbar.set( 'dateFilterLabel', new wp.media.view.Label({
 				value: l10n.filterByDate,
 				attributes: {
@@ -8313,10 +7792,9 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 		}
 
 		if ( this.options.search ) {
-			// Search is an input, a visually hidden label element needs to be rendered before.
+			// Search is an input, screen reader text needs to be rendered before
 			this.toolbar.set( 'searchLabel', new wp.media.view.Label({
-				value: l10n.searchLabel,
-				className: 'media-search-input-label',
+				value: l10n.searchMediaLabel,
 				attributes: {
 					'for': 'media-search-input'
 				},
@@ -8424,15 +7902,6 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 		}
 	},
 
-	createAttachmentsHeading: function() {
-		this.attachmentsHeading = new wp.media.view.Heading( {
-			text: l10n.attachmentsList,
-			level: 'h2',
-			className: 'media-views-heading screen-reader-text'
-		} );
-		this.views.add( this.attachmentsHeading );
-	},
-
 	createSidebar: function() {
 		var options = this.options,
 			selection = options.selection,
@@ -8506,8 +7975,7 @@ module.exports = AttachmentsBrowser;
 /* 83 */
 /***/ (function(module, exports) {
 
-var _n = wp.i18n._n,
-	sprintf = wp.i18n.sprintf,
+var l10n = wp.media.view.l10n,
 	Selection;
 
 /**
@@ -8569,10 +8037,7 @@ Selection = wp.media.View.extend(/** @lends wp.media.view.Selection.prototype */
 		this.$el.toggleClass( 'one', 1 === collection.length );
 		this.$el.toggleClass( 'editing', editing );
 
-		this.$( '.count' ).text(
-			/* translators: %s: Number of selected media attachments. */
-			sprintf( _n( '%s item selected', '%s items selected', collection.length ), collection.length )
-		);
+		this.$('.count').text( l10n.selected.replace('%d', collection.length) );
 	},
 
 	edit: function( event ) {
@@ -8586,7 +8051,8 @@ Selection = wp.media.View.extend(/** @lends wp.media.view.Selection.prototype */
 		event.preventDefault();
 		this.collection.reset();
 
-		// Move focus to the modal.
+		// Keep focus inside media modal
+		// after clear link is selected
 		this.controller.modal.focusManager.focus();
 	}
 });
@@ -8720,7 +8186,7 @@ Settings = View.extend(/** @lends wp.media.view.Settings.prototype */{
 		}, this.options );
 	},
 	/**
-	 * @return {wp.media.view.Settings} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Settings} Returns itself to allow chaining
 	 */
 	render: function() {
 		View.prototype.render.apply( this, arguments );
@@ -8758,12 +8224,8 @@ Settings = View.extend(/** @lends wp.media.view.Settings.prototype */{
 
 		// Handle button groups.
 		} else if ( $setting.hasClass('button-group') ) {
-			$buttons = $setting.find( 'button' )
-				.removeClass( 'active' )
-				.attr( 'aria-pressed', 'false' );
-			$buttons.filter( '[value="' + value + '"]' )
-				.addClass( 'active' )
-				.attr( 'aria-pressed', 'true' );
+			$buttons = $setting.find('button').removeClass('active');
+			$buttons.filter( '[value="' + value + '"]' ).addClass('active');
 
 		// Handle text inputs and textareas.
 		} else if ( $setting.is('input[type="text"], textarea') ) {
@@ -8862,7 +8324,7 @@ AttachmentDisplay = Settings.extend(/** @lends wp.media.view.Settings.Attachment
 		Settings.prototype.dispose.apply( this, arguments );
 	},
 	/**
-	 * @return {wp.media.view.AttachmentDisplay} Returns itself to allow chaining.
+	 * @returns {wp.media.view.AttachmentDisplay} Returns itself to allow chaining
 	 */
 	render: function() {
 		var attachment = this.options.attachment;
@@ -8886,7 +8348,7 @@ AttachmentDisplay = Settings.extend(/** @lends wp.media.view.Settings.Attachment
 			attachment = this.options.attachment;
 
 		if ( 'none' === linkTo || 'embed' === linkTo || ( ! attachment && 'custom' !== linkTo ) ) {
-			$input.closest( '.setting' ).addClass( 'hidden' );
+			$input.addClass( 'hidden' );
 			return;
 		}
 
@@ -8902,7 +8364,12 @@ AttachmentDisplay = Settings.extend(/** @lends wp.media.view.Settings.Attachment
 			$input.prop( 'readonly', 'custom' !== linkTo );
 		}
 
-		$input.closest( '.setting' ).removeClass( 'hidden' );
+		$input.removeClass( 'hidden' );
+
+		// If the input is visible, focus and select its contents.
+		if ( ! wp.media.isTouchDevice && $input.is(':visible') ) {
+			$input.focus()[0].select();
+		}
 	}
 });
 
@@ -8961,19 +8428,30 @@ module.exports = Playlist;
 
 var Attachment = wp.media.view.Attachment,
 	l10n = wp.media.view.l10n,
-	$ = jQuery,
 	Details;
 
+/**
+ * wp.media.view.Attachment.Details
+ *
+ * @memberOf wp.media.view.Attachment
+ *
+ * @class
+ * @augments wp.media.view.Attachment
+ * @augments wp.media.View
+ * @augments wp.Backbone.View
+ * @augments Backbone.View
+ */
 Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototype */{
 	tagName:   'div',
 	className: 'attachment-details',
 	template:  wp.template('attachment-details'),
 
-	/*
-	 * Reset all the attributes inherited from Attachment including role=checkbox,
-	 * tabindex, etc., as they are inappropriate for this view. See #47458 and [30483] / #30390.
-	 */
-	attributes: {},
+	attributes: function() {
+		return {
+			'tabIndex':     0,
+			'data-id':      this.model.get( 'id' )
+		};
+	},
 
 	events: {
 		'change [data-setting]':          'updateSetting',
@@ -8987,146 +8465,61 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		'keydown':                        'toggleSelectionHandler'
 	},
 
-	/**
-	 * Shows the details of an attachment.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @constructs wp.media.view.Attachment.Details
-	 * @augments wp.media.view.Attachment
-	 *
-	 * @return {void}
-	 */
 	initialize: function() {
 		this.options = _.defaults( this.options, {
 			rerenderOnModelChange: false
 		});
 
+		this.on( 'ready', this.initialFocus );
 		// Call 'initialize' directly on the parent class.
 		Attachment.prototype.initialize.apply( this, arguments );
 	},
 
-	/**
-	 * Gets the focusable elements to move focus to.
-	 *
-	 * @since 5.3.0
-	 */
-	getFocusableElements: function() {
-		var editedAttachment = $( 'li[data-id="' + this.model.id + '"]' );
-
-		this.previousAttachment = editedAttachment.prev();
-		this.nextAttachment = editedAttachment.next();
-	},
-
-	/**
-	 * Moves focus to the previous or next attachment in the grid.
-	 * Fallbacks to the upload button or media frame when there are no attachments.
-	 *
-	 * @since 5.3.0
-	 */
-	moveFocus: function() {
-		if ( this.previousAttachment.length ) {
-			this.previousAttachment.focus();
-			return;
+	initialFocus: function() {
+		if ( ! wp.media.isTouchDevice ) {
+			/*
+			Previously focused the first ':input' (the readonly URL text field).
+			Since the first ':input' is now a button (delete/trash): when pressing
+			spacebar on an attachment, Firefox fires deleteAttachment/trashAttachment
+			as soon as focus is moved. Explicitly target the first text field for now.
+			@todo change initial focus logic, also for accessibility.
+			*/
+			this.$( 'input[type="text"]' ).eq( 0 ).focus();
 		}
-
-		if ( this.nextAttachment.length ) {
-			this.nextAttachment.focus();
-			return;
-		}
-
-		// Fallback: move focus to the "Select Files" button in the media modal.
-		if ( this.controller.uploader && this.controller.uploader.$browser ) {
-			this.controller.uploader.$browser.focus();
-			return;
-		}
-
-		// Last fallback.
-		this.moveFocusToLastFallback();
 	},
-
 	/**
-	 * Moves focus to the media frame as last fallback.
-	 *
-	 * @since 5.3.0
-	 */
-	moveFocusToLastFallback: function() {
-		// Last fallback: make the frame focusable and move focus to it.
-		$( '.media-frame' )
-			.attr( 'tabindex', '-1' )
-			.focus();
-	},
-
-	/**
-	 * Deletes an attachment.
-	 *
-	 * Deletes an attachment after asking for confirmation. After deletion,
-	 * keeps focus in the modal.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @param {MouseEvent} event A click event.
-	 *
-	 * @return {void}
+	 * @param {Object} event
 	 */
 	deleteAttachment: function( event ) {
 		event.preventDefault();
 
-		this.getFocusableElements();
-
 		if ( window.confirm( l10n.warnDelete ) ) {
 			this.model.destroy();
-			this.moveFocus();
+			// Keep focus inside media modal
+			// after image is deleted
+			this.controller.modal.focusManager.focus();
 		}
 	},
-
 	/**
-	 * Sets the trash state on an attachment, or destroys the model itself.
-	 *
-	 * If the mediaTrash setting is set to true, trashes the attachment.
-	 * Otherwise, the model itself is destroyed.
-	 *
-	 * @since 3.9.0
-	 *
-	 * @param {MouseEvent} event A click event.
-	 *
-	 * @return {void}
+	 * @param {Object} event
 	 */
 	trashAttachment: function( event ) {
-		var library = this.controller.library,
-			self = this;
+		var library = this.controller.library;
 		event.preventDefault();
 
-		this.getFocusableElements();
-
-		// When in the Media Library and the Media trash is enabled.
 		if ( wp.media.view.settings.mediaTrash &&
 			'edit-metadata' === this.controller.content.mode() ) {
 
 			this.model.set( 'status', 'trash' );
 			this.model.save().done( function() {
 				library._requery( true );
-				/*
-				 * @todo: We need to move focus back to the previous, next, or first
-				 * attachment but the library gets re-queried and refreshed. Thus,
-				 * the references to the previous attachments are lost. We need an
-				 * alternate method.
-				 */
-				self.moveFocusToLastFallback();
 			} );
-		} else {
+		}  else {
 			this.model.destroy();
-			this.moveFocus();
 		}
 	},
 	/**
-	 * Untrashes an attachment.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @param {MouseEvent} event A click event.
-	 *
-	 * @return {void}
+	 * @param {Object} event
 	 */
 	untrashAttachment: function( event ) {
 		var library = this.controller.library;
@@ -9137,15 +8530,8 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 			library._requery( true );
 		} );
 	},
-
 	/**
-	 * Opens the edit page for a specific attachment.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @param {MouseEvent} event A click event.
-	 *
-	 * @return {void}
+	 * @param {Object} event
 	 */
 	editAttachment: function( event ) {
 		var editState = this.controller.states.get( 'edit-image' );
@@ -9158,25 +8544,21 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 			this.$el.addClass('needs-refresh');
 		}
 	},
-
 	/**
-	 * Triggers an event on the controller when reverse tabbing (shift+tab).
+	 * When reverse tabbing(shift+tab) out of the right details panel, deliver
+	 * the focus to the item in the list that was being edited.
 	 *
-	 * This event can be used to make sure to move the focus correctly.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @fires wp.media.controller.MediaLibrary#attachment:details:shift-tab
-	 * @fires wp.media.controller.MediaLibrary#attachment:keydown:arrow
-	 *
-	 * @param {KeyboardEvent} event A keyboard event.
-	 *
-	 * @return {boolean|void} Returns false or undefined.
+	 * @param {Object} event
 	 */
 	toggleSelectionHandler: function( event ) {
 		if ( 'keydown' === event.type && 9 === event.keyCode && event.shiftKey && event.target === this.$( ':tabbable' ).get( 0 ) ) {
 			this.controller.trigger( 'attachment:details:shift-tab', event );
 			return false;
+		}
+
+		if ( 37 === event.keyCode || 38 === event.keyCode || 39 === event.keyCode || 40 === event.keyCode ) {
+			this.controller.trigger( 'attachment:keydown:arrow', event );
+			return;
 		}
 	}
 });
@@ -9218,7 +8600,7 @@ AttachmentCompat = View.extend(/** @lends wp.media.view.AttachmentCompat.prototy
 		this.listenTo( this.model, 'change:compat', this.render );
 	},
 	/**
-	 * @return {wp.media.view.AttachmentCompat} Returns itself to allow chaining.
+	 * @returns {wp.media.view.AttachmentCompat} Returns itself to allow chaining
 	 */
 	dispose: function() {
 		if ( this.$(':focus').length ) {
@@ -9230,7 +8612,7 @@ AttachmentCompat = View.extend(/** @lends wp.media.view.AttachmentCompat.prototy
 		return View.prototype.dispose.apply( this, arguments );
 	},
 	/**
-	 * @return {wp.media.view.AttachmentCompat} Returns itself to allow chaining.
+	 * @returns {wp.media.view.AttachmentCompat} Returns itself to allow chaining
 	 */
 	render: function() {
 		var compat = this.model.get('compat');
@@ -9292,7 +8674,7 @@ module.exports = AttachmentCompat;
 var Iframe = wp.media.View.extend(/** @lends wp.media.view.Iframe.prototype */{
 	className: 'media-iframe',
 	/**
-	 * @return {wp.media.view.Iframe} Returns itself to allow chaining.
+	 * @returns {wp.media.view.Iframe} Returns itself to allow chaining
 	 */
 	render: function() {
 		this.views.detach();
@@ -9413,7 +8795,6 @@ module.exports = Label;
 
 var View = wp.media.View,
 	$ = jQuery,
-	l10n = wp.media.view.l10n,
 	EmbedUrl;
 
 /**
@@ -9427,17 +8808,17 @@ var View = wp.media.View,
  * @augments Backbone.View
  */
 EmbedUrl = View.extend(/** @lends wp.media.view.EmbedUrl.prototype */{
-	tagName:   'span',
+	tagName:   'label',
 	className: 'embed-url',
 
 	events: {
-		'input': 'url'
+		'input':  'url',
+		'keyup':  'url',
+		'change': 'url'
 	},
 
 	initialize: function() {
-		this.$input = $( '<input id="embed-url-field" type="url" />' )
-			.attr( 'aria-label', l10n.insertFromUrlTitle )
-			.val( this.model.get('url') );
+		this.$input = $('<input id="embed-url-field" type="url" />').val( this.model.get('url') );
 		this.input = this.$input[0];
 
 		this.spinner = $('<span class="spinner" />')[0];
@@ -9452,7 +8833,7 @@ EmbedUrl = View.extend(/** @lends wp.media.view.EmbedUrl.prototype */{
 		}
 	},
 	/**
-	 * @return {wp.media.view.EmbedUrl} Returns itself to allow chaining.
+	 * @returns {wp.media.view.EmbedUrl} Returns itself to allow chaining
 	 */
 	render: function() {
 		var $input = this.$input;
@@ -9469,8 +8850,24 @@ EmbedUrl = View.extend(/** @lends wp.media.view.EmbedUrl.prototype */{
 		return this;
 	},
 
+	ready: function() {
+		if ( ! wp.media.isTouchDevice ) {
+			this.focus();
+		}
+	},
+
 	url: function( event ) {
 		this.model.set( 'url', $.trim( event.target.value ) );
+	},
+
+	/**
+	 * If the input is visible, focus and select its contents.
+	 */
+	focus: function() {
+		var $input = this.$input;
+		if ( $input.is(':visible') ) {
+			$input.focus()[0].select();
+		}
 	}
 });
 
@@ -9696,7 +9093,7 @@ ImageDetails = AttachmentDisplay.extend(/** @lends wp.media.view.ImageDetails.pr
 	},
 
 	postRender: function() {
-		setTimeout( _.bind( this.scrollToTop, this ), 10 );
+		setTimeout( _.bind( this.resetFocus, this ), 10 );
 		this.toggleLinkSettings();
 		if ( window.getUserSetting( 'advImgDetails' ) === 'show' ) {
 			this.toggleAdvanced( true );
@@ -9704,7 +9101,8 @@ ImageDetails = AttachmentDisplay.extend(/** @lends wp.media.view.ImageDetails.pr
 		this.trigger( 'post-render' );
 	},
 
-	scrollToTop: function() {
+	resetFocus: function() {
+		this.$( '.link-to-custom' ).blur();
 		this.$( '.embed-media-settings' ).scrollTop( 0 );
 	},
 
@@ -10036,7 +9434,12 @@ EditImage = View.extend(/** @lends wp.media.view.EditImage.prototype */{
 	},
 
 	loadEditor: function() {
-		this.editor.open( this.model.get( 'id' ), this.model.get( 'nonces' ).edit, this );
+		var dfd = this.editor.open( this.model.get('id'), this.model.get('nonces').edit, this );
+		dfd.done( _.bind( this.focus, this ) );
+	},
+
+	focus: function() {
+		this.$( '.imgedit-submit .button' ).eq( 0 ).focus();
 	},
 
 	back: function() {
@@ -10118,46 +9521,6 @@ var Spinner = wp.media.View.extend(/** @lends wp.media.view.Spinner.prototype */
 });
 
 module.exports = Spinner;
-
-
-/***/ }),
-/* 105 */
-/***/ (function(module, exports) {
-
-/**
- * wp.media.view.Heading
- *
- * A reusable heading component for the media library
- *
- * Used to add accessibility friendly headers in the media library/modal.
- *
- * @class
- * @augments wp.media.View
- * @augments wp.Backbone.View
- * @augments Backbone.View
- */
-var Heading = wp.media.View.extend( {
-	tagName: function() {
-		return this.options.level || 'h1';
-	},
-	className: 'media-views-heading',
-
-	initialize: function() {
-
-		if ( this.options.className ) {
-			this.$el.addClass( this.options.className );
-		}
-
-		this.text = this.options.text;
-	},
-
-	render: function() {
-		this.$el.html( this.text );
-		return this;
-	}
-} );
-
-module.exports = Heading;
 
 
 /***/ })

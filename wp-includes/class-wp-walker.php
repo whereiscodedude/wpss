@@ -141,7 +141,8 @@ class Walker {
 			$args[0]['has_children'] = $this->has_children; // Back-compat.
 		}
 
-		$this->start_el( $output, $element, $depth, ...array_values( $args ) );
+		$cb_args = array_merge( array( &$output, $element, $depth ), $args );
+		call_user_func_array( array( $this, 'start_el' ), $cb_args );
 
 		// descend only when the depth is right and there are childrens for this element
 		if ( ( $max_depth == 0 || $max_depth > $depth + 1 ) && isset( $children_elements[ $id ] ) ) {
@@ -151,7 +152,8 @@ class Walker {
 				if ( ! isset( $newlevel ) ) {
 					$newlevel = true;
 					//start the child delimiter
-					$this->start_lvl( $output, $depth, ...array_values( $args ) );
+					$cb_args = array_merge( array( &$output, $depth ), $args );
+					call_user_func_array( array( $this, 'start_lvl' ), $cb_args );
 				}
 				$this->display_element( $child, $children_elements, $max_depth, $depth + 1, $args, $output );
 			}
@@ -160,11 +162,13 @@ class Walker {
 
 		if ( isset( $newlevel ) && $newlevel ) {
 			//end the child delimiter
-			$this->end_lvl( $output, $depth, ...array_values( $args ) );
+			$cb_args = array_merge( array( &$output, $depth ), $args );
+			call_user_func_array( array( $this, 'end_lvl' ), $cb_args );
 		}
 
 		//end this element
-		$this->end_el( $output, $element, $depth, ...array_values( $args ) );
+		$cb_args = array_merge( array( &$output, $element, $depth ), $args );
+		call_user_func_array( array( $this, 'end_el' ), $cb_args );
 	}
 
 	/**
@@ -177,15 +181,13 @@ class Walker {
 	 * $max_depth > 0 specifies the number of display levels.
 	 *
 	 * @since 2.1.0
-	 * @since 5.3.0 Formalized the existing `...$args` parameter by adding it
-	 *              to the function signature.
 	 *
 	 * @param array $elements  An array of elements.
 	 * @param int   $max_depth The maximum hierarchical depth.
-	 * @param mixed ...$args   Optional additional arguments.
 	 * @return string The hierarchical item output.
 	 */
-	public function walk( $elements, $max_depth, ...$args ) {
+	public function walk( $elements, $max_depth ) {
+		$args   = array_slice( func_get_args(), 2 );
 		$output = '';
 
 		//invalid parameter or nothing to walk
@@ -271,21 +273,19 @@ class Walker {
 	 * $max_depth > 0 specifies the number of display levels.
 	 *
 	 * @since 2.7.0
-	 * @since 5.3.0 Formalized the existing `...$args` parameter by adding it
-	 *              to the function signature.
 	 *
 	 * @param array $elements
 	 * @param int   $max_depth The maximum hierarchical depth.
-	 * @param int   $page_num  The specific page number, beginning with 1.
+	 * @param int   $page_num The specific page number, beginning with 1.
 	 * @param int   $per_page
-	 * @param mixed ...$args   Optional additional arguments.
 	 * @return string XHTML of the specified page of elements
 	 */
-	public function paged_walk( $elements, $max_depth, $page_num, $per_page, ...$args ) {
+	public function paged_walk( $elements, $max_depth, $page_num, $per_page ) {
 		if ( empty( $elements ) || $max_depth < -1 ) {
 			return '';
 		}
 
+		$args   = array_slice( func_get_args(), 4 );
 		$output = '';
 
 		$parent_field = $this->db_fields['parent'];

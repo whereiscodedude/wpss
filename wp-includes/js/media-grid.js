@@ -707,9 +707,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 		// Initialize modal container view.
 		if ( this.options.modal ) {
 			this.modal = new wp.media.view.Modal({
-				controller:     this,
-				title:          this.options.title,
-				hasCloseButton: false
+				controller: this,
+				title:      this.options.title
 			});
 
 			this.modal.on( 'open', _.bind( function () {
@@ -718,9 +717,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 
 			// Completely destroy the modal DOM element when closing it.
 			this.modal.on( 'close', _.bind( function() {
-				// Remove the keydown event.
-				$( 'body' ).off( 'keydown.media-modal' );
-				// Move focus back to the original item in the grid if possible.
+				$( 'body' ).off( 'keydown.media-modal' ); /* remove the keydown event */
+				// Restore the original focus item if possible
 				$( 'li.attachment[data-id="' + this.model.get( 'id' ) +'"]' ).focus();
 				this.resetRoute();
 			}, this ) );
@@ -801,8 +799,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 	},
 
 	toggleNav: function() {
-		this.$( '.left' ).prop( 'disabled', ! this.hasPrevious() );
-		this.$( '.right' ).prop( 'disabled', ! this.hasNext() );
+		this.$('.left').toggleClass( 'disabled', ! this.hasPrevious() );
+		this.$('.right').toggleClass( 'disabled', ! this.hasNext() );
 	},
 
 	/**
@@ -832,10 +830,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 		if ( ! this.hasPrevious() ) {
 			return;
 		}
-
 		this.trigger( 'refresh', this.library.at( this.getCurrentIndex() - 1 ) );
-		// Move focus to the Previous button. When there are no more items, to the Next button.
-		this.focusNavButton( this.hasPrevious() ? '.left' : '.right' );
+		this.$( '.left' ).focus();
 	},
 
 	/**
@@ -845,21 +841,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 		if ( ! this.hasNext() ) {
 			return;
 		}
-
 		this.trigger( 'refresh', this.library.at( this.getCurrentIndex() + 1 ) );
-		// Move focus to the Next button. When there are no more items, to the Previous button.
-		this.focusNavButton( this.hasNext() ? '.right' : '.left' );
-	},
-
-	/**
-	 * Set focus to the navigation buttons depending on the browsing direction.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @param {string} which A CSS selector to target the button to focus.
-	 */
-	focusNavButton: function( which ) {
-		$( which ).focus();
+		this.$( '.right' ).focus();
 	},
 
 	getCurrentIndex: function() {
@@ -961,11 +944,10 @@ SelectModeToggle = Button.extend(/** @lends wp.media.view.SelectModeToggle.proto
 		if ( this.controller.isModeActive( 'select' ) ) {
 			this.model.set( {
 				size: 'large',
-				text: l10n.cancel
+				text: l10n.cancelSelection
 			} );
 			children.not( '.spinner, .media-button' ).hide();
 			this.$el.show();
-			toolbar.$el.addClass( 'media-toolbar-mode-select' );
 			toolbar.$( '.delete-selected-button' ).removeClass( 'hidden' );
 		} else {
 			this.model.set( {
@@ -974,7 +956,6 @@ SelectModeToggle = Button.extend(/** @lends wp.media.view.SelectModeToggle.proto
 			} );
 			this.controller.content.get().$el.removeClass( 'fixed' );
 			toolbar.$el.css( 'width', '' );
-			toolbar.$el.removeClass( 'media-toolbar-mode-select' );
 			toolbar.$( '.delete-selected-button' ).addClass( 'hidden' );
 			children.not( '.media-button' ).show();
 			this.controller.state().get( 'selection' ).reset();
@@ -1013,16 +994,15 @@ DeleteSelected = Button.extend(/** @lends wp.media.view.DeleteSelectedButton.pro
 			this.options.filters.model.on( 'change', this.filterChange, this );
 		}
 		this.controller.on( 'selection:toggle', this.toggleDisabled, this );
-		this.controller.on( 'select:activate', this.toggleDisabled, this );
 	},
 
 	filterChange: function( model ) {
 		if ( 'trash' === model.get( 'status' ) ) {
-			this.model.set( 'text', l10n.restoreSelected );
+			this.model.set( 'text', l10n.untrashSelected );
 		} else if ( wp.media.view.settings.mediaTrash ) {
 			this.model.set( 'text', l10n.trashSelected );
 		} else {
-			this.model.set( 'text', l10n.deletePermanently );
+			this.model.set( 'text', l10n.deleteSelected );
 		}
 	},
 

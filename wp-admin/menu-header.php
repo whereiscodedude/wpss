@@ -108,8 +108,7 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 
 		$class     = $class ? ' class="' . join( ' ', $class ) . '"' : '';
 		$id        = ! empty( $item[5] ) ? ' id="' . preg_replace( '|[^a-zA-Z0-9_:.]|', '-', $item[5] ) . '"' : '';
-		$img       = '';
-		$img_style = '';
+		$img       = $img_style = '';
 		$img_class = ' dashicons-before';
 
 		if ( false !== strpos( $class, 'wp-menu-separator' ) ) {
@@ -153,8 +152,7 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 			$submenu_items = array_values( $submenu_items );  // Re-index.
 			$menu_hook     = get_plugin_page_hook( $submenu_items[0][2], $item[2] );
 			$menu_file     = $submenu_items[0][2];
-			$pos           = strpos( $menu_file, '?' );
-			if ( false !== $pos ) {
+			if ( false !== ( $pos = strpos( $menu_file, '?' ) ) ) {
 				$menu_file = substr( $menu_file, 0, $pos );
 			}
 			if ( ! empty( $menu_hook ) || ( ( 'index.php' != $submenu_items[0][2] ) && file_exists( WP_PLUGIN_DIR . "/$menu_file" ) && ! file_exists( ABSPATH . "/wp-admin/$menu_file" ) ) ) {
@@ -166,8 +164,7 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 		} elseif ( ! empty( $item[2] ) && current_user_can( $item[1] ) ) {
 			$menu_hook = get_plugin_page_hook( $item[2], 'admin.php' );
 			$menu_file = $item[2];
-			$pos       = strpos( $menu_file, '?' );
-			if ( false !== $pos ) {
+			if ( false !== ( $pos = strpos( $menu_file, '?' ) ) ) {
 				$menu_file = substr( $menu_file, 0, $pos );
 			}
 			if ( ! empty( $menu_hook ) || ( ( 'index.php' != $item[2] ) && file_exists( WP_PLUGIN_DIR . "/$menu_file" ) && ! file_exists( ABSPATH . "/wp-admin/$menu_file" ) ) ) {
@@ -199,8 +196,7 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 
 				$menu_file = $item[2];
 
-				$pos = strpos( $menu_file, '?' );
-				if ( false !== $pos ) {
+				if ( false !== ( $pos = strpos( $menu_file, '?' ) ) ) {
 					$menu_file = substr( $menu_file, 0, $pos );
 				}
 
@@ -230,8 +226,7 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 
 				$menu_hook = get_plugin_page_hook( $sub_item[2], $item[2] );
 				$sub_file  = $sub_item[2];
-				$pos       = strpos( $sub_file, '?' );
-				if ( false !== $pos ) {
+				if ( false !== ( $pos = strpos( $sub_file, '?' ) ) ) {
 					$sub_file = substr( $sub_file, 0, $pos );
 				}
 

@@ -191,10 +191,9 @@
 				}
 			} );
 
-			// Clear the search results and trigger a new search.
+			// Clear the search results and trigger a `keyup` event to fire a new search.
 			this.$clearResults.on( 'click', function() {
-				self.$search.val( '' ).focus();
-				self.collection.doSearch( '' );
+				self.$search.val( '' ).focus().trigger( 'keyup' );
 			} );
 
 			// Close the panel if the URL in the preview changes
@@ -204,7 +203,7 @@
 		/**
 		 * Performs a search and handles selected widget.
 		 */
-		search: _.debounce( function( event ) {
+		search: function( event ) {
 			var firstVisible;
 
 			this.collection.doSearch( event.target.value );
@@ -246,7 +245,7 @@
 			} else {
 				this.$el.removeClass( 'no-widgets-found' );
 			}
-		}, 500 ),
+		},
 
 		/**
 		 * Updates the count of the available widgets that have the `search_matched` attribute.
@@ -258,7 +257,7 @@
 		/**
 		 * Sends a message to the aria-live region to announce how many search results.
 		 */
-		announceSearchMatches: function() {
+		announceSearchMatches: _.debounce( function() {
 			var message = l10n.widgetsFound.replace( '%d', this.searchMatchesCount ) ;
 
 			if ( ! this.searchMatchesCount ) {
@@ -266,7 +265,7 @@
 			}
 
 			wp.a11y.speak( message );
-		},
+		}, 500 ),
 
 		/**
 		 * Changes visibility of available widgets.
@@ -709,7 +708,8 @@
 			} );
 
 			$closeBtn = this.container.find( '.widget-control-close' );
-			$closeBtn.on( 'click', function() {
+			$closeBtn.on( 'click', function( e ) {
+				e.preventDefault();
 				self.collapse();
 				self.container.find( '.widget-top .widget-action:first' ).focus(); // keyboard accessibility
 			} );
@@ -987,7 +987,9 @@
 
 			// Configure remove button
 			$removeBtn = this.container.find( '.widget-control-remove' );
-			$removeBtn.on( 'click', function() {
+			$removeBtn.on( 'click', function( e ) {
+				e.preventDefault();
+
 				// Find an adjacent element to add focus to when this widget goes away
 				var $adjacentFocusTarget;
 				if ( self.container.next().is( '.customize-control-widget_form' ) ) {
@@ -1039,7 +1041,7 @@
 		 * over when copying sanitized values over to the form loaded.
 		 *
 		 * @param {jQuery} container element in which to look for inputs
-		 * @return {jQuery} inputs
+		 * @returns {jQuery} inputs
 		 * @private
 		 */
 		_getInputs: function( container ) {
@@ -1051,7 +1053,7 @@
 		 * This string can be used to compare whether or not the form has all of the same fields.
 		 *
 		 * @param {jQuery} inputs
-		 * @return {string}
+		 * @returns {string}
 		 * @private
 		 */
 		_getInputsSignature: function( inputs ) {
@@ -1074,7 +1076,7 @@
 		 * Get the state for an input depending on its type.
 		 *
 		 * @param {jQuery|Element} input
-		 * @return {string|boolean|array|*}
+		 * @returns {string|boolean|array|*}
 		 * @private
 		 */
 		_getInputState: function( input ) {
@@ -1340,7 +1342,7 @@
 		 *
 		 * @param {Boolean} expanded
 		 * @param {Object} [params]
-		 * @return {Boolean} False if state already applied.
+		 * @returns {Boolean} false if state already applied
 		 */
 		_toggleExpanded: api.Section.prototype._toggleExpanded,
 
@@ -1348,7 +1350,7 @@
 		 * @since 4.1.0
 		 *
 		 * @param {Object} [params]
-		 * @return {Boolean} False if already expanded.
+		 * @returns {Boolean} false if already expanded
 		 */
 		expand: api.Section.prototype.expand,
 
@@ -1365,7 +1367,7 @@
 		 * @since 4.1.0
 		 *
 		 * @param {Object} [params]
-		 * @return {Boolean} False if already collapsed.
+		 * @returns {Boolean} false if already collapsed
 		 */
 		collapse: api.Section.prototype.collapse,
 
@@ -1495,7 +1497,7 @@
 		/**
 		 * Get the position (index) of the widget in the containing sidebar
 		 *
-		 * @return {Number}
+		 * @returns {Number}
 		 */
 		getWidgetSidebarPosition: function() {
 			var sidebarWidgetIds, position;
@@ -1652,7 +1654,7 @@
 				/**
 				 * Update the notice.
 				 *
-				 * @return {void}
+				 * @returns {void}
 				 */
 				updateNotice = function() {
 					var activeSectionCount = getActiveSectionCount(), someRenderedMessage, nonRenderedAreaCount, registeredAreaCount;
@@ -1708,7 +1710,7 @@
 		 *
 		 * @since 4.4.0
 		 *
-		 * @return {boolean}
+		 * @returns {boolean}
 		 */
 		isContextuallyActive: function() {
 			var panel = this;
@@ -2060,8 +2062,8 @@
 		},
 
 		/**
-		 * @param {string} widgetId or an id_base for adding a previously non-existing widget.
-		 * @return {object|false} widget_form control instance, or false on error.
+		 * @param {string} widgetId or an id_base for adding a previously non-existing widget
+		 * @returns {object|false} widget_form control instance, or false on error
 		 */
 		addWidget: function( widgetId ) {
 			var self = this, controlHtml, $widget, controlType = 'widget_form', controlContainer, controlConstructor,
@@ -2330,7 +2332,7 @@
 
 	/**
 	 * @param {String} widgetId
-	 * @return {Object}
+	 * @returns {Object}
 	 */
 	function parseWidgetId( widgetId ) {
 		var matches, parsed = {
@@ -2352,7 +2354,7 @@
 
 	/**
 	 * @param {String} widgetId
-	 * @return {String} settingId
+	 * @returns {String} settingId
 	 */
 	function widgetIdToSettingId( widgetId ) {
 		var parsed = parseWidgetId( widgetId ), settingId;

@@ -58,7 +58,7 @@ class WP_Widget_Archives extends WP_Widget {
 			$dropdown_id = "{$this->id_base}-dropdown-{$this->number}";
 			?>
 		<label class="screen-reader-text" for="<?php echo esc_attr( $dropdown_id ); ?>"><?php echo $title; ?></label>
-		<select id="<?php echo esc_attr( $dropdown_id ); ?>" name="archive-dropdown">
+		<select id="<?php echo esc_attr( $dropdown_id ); ?>" name="archive-dropdown" onchange='document.location.href=this.options[this.selectedIndex].value;'>
 			<?php
 			/**
 			 * Filters the arguments for the Archives widget drop-down.
@@ -98,44 +98,27 @@ class WP_Widget_Archives extends WP_Widget {
 					$label = __( 'Select Post' );
 					break;
 			}
-
-			$type_attr = current_theme_supports( 'html5', 'script' ) ? '' : ' type="text/javascript"';
 			?>
 
 			<option value=""><?php echo esc_attr( $label ); ?></option>
 			<?php wp_get_archives( $dropdown_args ); ?>
 
 		</select>
-
-<script<?php echo $type_attr; ?>>
-/* <![CDATA[ */
-(function() {
-	var dropdown = document.getElementById( "<?php echo esc_js( $dropdown_id ); ?>" );
-	function onSelectChange() {
-		if ( dropdown.options[ dropdown.selectedIndex ].value !== '' ) {
-			document.location.href = this.options[ this.selectedIndex ].value;
-		}
-	}
-	dropdown.onchange = onSelectChange;
-})();
-/* ]]> */
-</script>
-
 		<?php } else { ?>
 		<ul>
 			<?php
+			/**
+			 * Filters the arguments for the Archives widget.
+			 *
+			 * @since 2.8.0
+			 * @since 4.9.0 Added the `$instance` parameter.
+			 *
+			 * @see wp_get_archives()
+			 *
+			 * @param array $args     An array of Archives option arguments.
+			 * @param array $instance Array of settings for the current widget.
+			 */
 			wp_get_archives(
-				/**
-				 * Filters the arguments for the Archives widget.
-				 *
-				 * @since 2.8.0
-				 * @since 4.9.0 Added the `$instance` parameter.
-				 *
-				 * @see wp_get_archives()
-				 *
-				 * @param array $args     An array of Archives option arguments.
-				 * @param array $instance Array of settings for the current widget.
-				 */
 				apply_filters(
 					'widget_archives_args',
 					array(

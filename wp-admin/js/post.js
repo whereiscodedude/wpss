@@ -35,7 +35,7 @@ window.wp = window.wp || {};
 		 *
 		 * @param {int} total Total number of comments for this post.
 		 * @param {int} num   Optional. Number of comments to fetch, defaults to 20.
-		 * @return {boolean} Always returns false.
+		 * @returns {boolean} Always returns false.
 		 */
 		get : function(total, num) {
 			var st = this.st, data;
@@ -599,7 +599,7 @@ jQuery(document).ready( function($) {
 		 *
 		 * @param {Object} s Taxonomy object which will be added.
 		 *
-		 * @return {Object}
+		 * @returns {Object}
 		 */
 		catAddBefore = function( s ) {
 			if ( !$('#new'+taxonomy).val() ) {
@@ -620,7 +620,7 @@ jQuery(document).ready( function($) {
 		 * @param {Object} r Response.
 		 * @param {Object} s Taxonomy data.
 		 *
-		 * @return {void}
+		 * @returns void
 		 */
 		catAddAfter = function( r, s ) {
 			var sup, drop = $('#new'+taxonomy+'_parent');
@@ -666,7 +666,7 @@ jQuery(document).ready( function($) {
 			 *
 			 * @param {Object} s Request object.
 			 *
-			 * @return {Object} Data modified with post_ID attached.
+			 * @returns {Object} Data modified with post_ID attached.
 			 */
 			addBefore: function( s ) {
 				s.data += '&post_id=' + $('#post_ID').val();
@@ -695,7 +695,7 @@ jQuery(document).ready( function($) {
 		 *
 		 * @ignore
 		 *
-		 * @return {void}
+		 * @returns void
 		 */
 		updateVisibility = function() {
 			// Show sticky for public posts.
@@ -719,7 +719,7 @@ jQuery(document).ready( function($) {
 		 *
 		 * @ignore
 		 *
-		 * @return {boolean} False when an invalid timestamp has been selected, otherwise True.
+		 * @returns {boolean} False when an invalid timestamp has been selected, otherwise True.
 		 */
 		updateText = function() {
 
@@ -795,9 +795,7 @@ jQuery(document).ready( function($) {
 			}
 
 			// Update "Status:" to currently selected status.
-			$('#post-status-display').text(
-				wp.sanitize.stripTagsAndEncodeText( $('option:selected', postStatus).text() ) // Remove any potential tags from post status text.
-			);
+			$('#post-status-display').html($('option:selected', postStatus).text());
 
 			// Show or hide the "Save Draft" button.
 			if ( $('option:selected', postStatus).val() == 'private' || $('option:selected', postStatus).val() == 'publish' ) {
@@ -941,7 +939,7 @@ jQuery(document).ready( function($) {
 	 *
 	 * @global
 	 *
-	 * @return {void}
+	 * @returns void
 	 */
 	function editPermalink() {
 		var i, slug_value,
@@ -1042,34 +1040,36 @@ jQuery(document).ready( function($) {
 	});
 
 	/**
-	 * Adds screen reader text to the title label when needed.
-	 *
-	 * Use the 'screen-reader-text' class to emulate a placeholder attribute
-	 * and hide the label when entering a value.
+	 * Adds screen reader text to the title prompt when needed.
 	 *
 	 * @param {string} id Optional. HTML ID to add the screen reader helper text to.
 	 *
 	 * @global
 	 *
-	 * @return {void}
+	 * @returns void
 	 */
-	window.wptitlehint = function( id ) {
+	window.wptitlehint = function(id) {
 		id = id || 'title';
 
-		var title = $( '#' + id ), titleprompt = $( '#' + id + '-prompt-text' );
+		var title = $('#' + id), titleprompt = $('#' + id + '-prompt-text');
 
-		if ( '' === title.val() ) {
-			titleprompt.removeClass( 'screen-reader-text' );
-		}
+		if ( '' === title.val() )
+			titleprompt.removeClass('screen-reader-text');
 
-		title.on( 'input', function() {
-			if ( '' === this.value ) {
-				titleprompt.removeClass( 'screen-reader-text' );
-				return;
-			}
+		titleprompt.click(function(){
+			$(this).addClass('screen-reader-text');
+			title.focus();
+		});
 
-			titleprompt.addClass( 'screen-reader-text' );
-		} );
+		title.blur(function(){
+			if ( '' === this.value )
+				titleprompt.removeClass('screen-reader-text');
+		}).focus(function(){
+			titleprompt.addClass('screen-reader-text');
+		}).keydown(function(e){
+			titleprompt.addClass('screen-reader-text');
+			$(this).unbind(e);
+		});
 	};
 
 	wptitlehint();

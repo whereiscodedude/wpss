@@ -253,11 +253,6 @@
 
 					return ''.concat( options.base, icon, options.ext );
 				},
-				attributes: function() {
-					return {
-						role: 'img'
-					};
-				},
 				onerror: function() {
 					if ( twemoji.parentNode ) {
 						this.setAttribute( 'data-error', 'load-failed' );

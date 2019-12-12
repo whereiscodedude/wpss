@@ -75,8 +75,7 @@ final class _WP_Editors {
 		 * @see _WP_Editors::parse_settings()
 		 *
 		 * @param array  $settings  Array of editor arguments.
-		 * @param string $editor_id ID for the current editor instance. Accepts 'classic-block'
-		 *                          when called from block editor's Classic block.
+		 * @param string $editor_id ID for the current editor instance.
 		 */
 		$settings = apply_filters( 'wp_editor_settings', $settings, $editor_id );
 
@@ -159,8 +158,7 @@ final class _WP_Editors {
 		$editor_class   = ' class="' . trim( esc_attr( $set['editor_class'] ) . ' wp-editor-area' ) . '"';
 		$tabindex       = $set['tabindex'] ? ' tabindex="' . (int) $set['tabindex'] . '"' : '';
 		$default_editor = 'html';
-		$buttons        = '';
-		$autocomplete   = '';
+		$buttons        = $autocomplete = '';
 		$editor_id_attr = esc_attr( $editor_id );
 
 		if ( $set['drag_drop_upload'] ) {
@@ -376,24 +374,11 @@ final class _WP_Editors {
 					 * Filters the list of teenyMCE plugins.
 					 *
 					 * @since 2.7.0
-					 * @since 3.3.0 The `$editor_id` parameter was added.
 					 *
 					 * @param array  $plugins   An array of teenyMCE plugins.
 					 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 					 */
-					$plugins = apply_filters(
-						'teeny_mce_plugins',
-						array(
-							'colorpicker',
-							'lists',
-							'fullscreen',
-							'image',
-							'wordpress',
-							'wpeditimage',
-							'wplink',
-						),
-						$editor_id
-					);
+					$plugins = apply_filters( 'teeny_mce_plugins', array( 'colorpicker', 'lists', 'fullscreen', 'image', 'wordpress', 'wpeditimage', 'wplink' ), $editor_id );
 				} else {
 
 					/**
@@ -410,13 +395,10 @@ final class _WP_Editors {
 					 * one of the 'mce_buttons' filters.
 					 *
 					 * @since 2.5.0
-					 * @since 5.3.0 The `$editor_id` parameter was added.
 					 *
-					 * @param array  $external_plugins An array of external TinyMCE plugins.
-					 * @param string $editor_id        Unique editor identifier, e.g. 'content'. Accepts 'classic-block'
-					 *                                 when called from block editor's Classic block.
+					 * @param array $external_plugins An array of external TinyMCE plugins.
 					 */
-					$mce_external_plugins = apply_filters( 'mce_external_plugins', array(), $editor_id );
+					$mce_external_plugins = apply_filters( 'mce_external_plugins', array() );
 
 					$plugins = array(
 						'charmap',
@@ -450,16 +432,12 @@ final class _WP_Editors {
 					 * in WordPress should be added to the TinyMCE instance.
 					 *
 					 * @since 3.3.0
-					 * @since 5.3.0 The `$editor_id` parameter was added.
 					 *
-					 * @param array  $plugins   An array of default TinyMCE plugins.
-					 * @param string $editor_id Unique editor identifier, e.g. 'content'. Accepts 'classic-block'
-					 *                          when called from block editor's Classic block.
+					 * @param array $plugins An array of default TinyMCE plugins.
 					 */
-					$plugins = array_unique( apply_filters( 'tiny_mce_plugins', $plugins, $editor_id ) );
+					$plugins = array_unique( apply_filters( 'tiny_mce_plugins', $plugins ) );
 
-					$key = array_search( 'spellchecker', $plugins );
-					if ( false !== $key ) {
+					if ( ( $key = array_search( 'spellchecker', $plugins ) ) !== false ) {
 						// Remove 'spellchecker' from the internal plugins if added with 'tiny_mce_plugins' filter to prevent errors.
 						// It can be added with 'mce_external_plugins'.
 						unset( $plugins[ $key ] );
@@ -477,12 +455,10 @@ final class _WP_Editors {
 						 * and should define a variable ($strings) that holds all translated strings.
 						 *
 						 * @since 2.5.0
-						 * @since 5.3.0 The `$editor_id` parameter was added.
 						 *
-						 * @param array  $translations Translations for external TinyMCE plugins.
-						 * @param string $editor_id    Unique editor identifier, e.g. 'content'.
+						 * @param array $translations Translations for external TinyMCE plugins.
 						 */
-						$mce_external_languages = apply_filters( 'mce_external_languages', array(), $editor_id );
+						$mce_external_languages = apply_filters( 'mce_external_languages', array() );
 
 						$loaded_langs = array();
 						$strings      = '';
@@ -513,7 +489,9 @@ final class _WP_Editors {
 								$path = str_replace( content_url(), '', $plugurl );
 								$path = WP_CONTENT_DIR . $path . '/langs/';
 
-								$path = trailingslashit( realpath( $path ) );
+								if ( function_exists( 'realpath' ) ) {
+									$path = trailingslashit( realpath( $path ) );
+								}
 
 								if ( @is_file( $path . $mce_locale . '.js' ) ) {
 									$strings .= @file_get_contents( $path . $mce_locale . '.js' ) . "\n";
@@ -560,24 +538,18 @@ final class _WP_Editors {
 					$settings['wpeditimage_disable_captions'] = true;
 				}
 
-				$mce_css = $settings['content_css'];
+				$mce_css       = $settings['content_css'];
+				$editor_styles = get_editor_stylesheets();
 
-				// The `editor-style.css` added by the theme is generally intended for the editor instance on the Edit Post screen.
-				// Plugins that use wp_editor() on the front-end can decide whether to add the theme stylesheet
-				// by using `get_editor_stylesheets()` and the `mce_css` or `tiny_mce_before_init` filters, see below.
-				if ( is_admin() ) {
-					$editor_styles = get_editor_stylesheets();
-
-					if ( ! empty( $editor_styles ) ) {
-						// Force urlencoding of commas.
-						foreach ( $editor_styles as $key => $url ) {
-							if ( strpos( $url, ',' ) !== false ) {
-								$editor_styles[ $key ] = str_replace( ',', '%2C', $url );
-							}
+				if ( ! empty( $editor_styles ) ) {
+					// Force urlencoding of commas.
+					foreach ( $editor_styles as $key => $url ) {
+						if ( strpos( $url, ',' ) !== false ) {
+							$editor_styles[ $key ] = str_replace( ',', '%2C', $url );
 						}
-
-						$mce_css .= ',' . implode( ',', $editor_styles );
 					}
+
+					$mce_css .= ',' . implode( ',', $editor_styles );
 				}
 
 				/**
@@ -599,88 +571,41 @@ final class _WP_Editors {
 			}
 
 			if ( $set['teeny'] ) {
-				$mce_buttons = array(
-					'bold',
-					'italic',
-					'underline',
-					'blockquote',
-					'strikethrough',
-					'bullist',
-					'numlist',
-					'alignleft',
-					'aligncenter',
-					'alignright',
-					'undo',
-					'redo',
-					'link',
-					'fullscreen',
-				);
 
 				/**
 				 * Filters the list of teenyMCE buttons (Text tab).
 				 *
 				 * @since 2.7.0
-				 * @since 3.3.0 The `$editor_id` parameter was added.
 				 *
-				 * @param array  $mce_buttons An array of teenyMCE buttons.
-				 * @param string $editor_id   Unique editor identifier, e.g. 'content'.
+				 * @param array  $buttons   An array of teenyMCE buttons.
+				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 				 */
-				$mce_buttons   = apply_filters( 'teeny_mce_buttons', $mce_buttons, $editor_id );
-				$mce_buttons_2 = array();
-				$mce_buttons_3 = array();
-				$mce_buttons_4 = array();
+				$mce_buttons   = apply_filters( 'teeny_mce_buttons', array( 'bold', 'italic', 'underline', 'blockquote', 'strikethrough', 'bullist', 'numlist', 'alignleft', 'aligncenter', 'alignright', 'undo', 'redo', 'link', 'fullscreen' ), $editor_id );
+				$mce_buttons_2 = $mce_buttons_3 = $mce_buttons_4 = array();
 			} else {
-				$mce_buttons = array(
-					'formatselect',
-					'bold',
-					'italic',
-					'bullist',
-					'numlist',
-					'blockquote',
-					'alignleft',
-					'aligncenter',
-					'alignright',
-					'link',
-					'wp_more',
-					'spellchecker',
-				);
+				$mce_buttons = array( 'formatselect', 'bold', 'italic', 'bullist', 'numlist', 'blockquote', 'alignleft', 'aligncenter', 'alignright', 'link', 'wp_more', 'spellchecker' );
 
 				if ( ! wp_is_mobile() ) {
 					if ( $set['_content_editor_dfw'] ) {
-						$mce_buttons[] = 'wp_adv';
 						$mce_buttons[] = 'dfw';
 					} else {
 						$mce_buttons[] = 'fullscreen';
-						$mce_buttons[] = 'wp_adv';
 					}
-				} else {
-					$mce_buttons[] = 'wp_adv';
 				}
+
+				$mce_buttons[] = 'wp_adv';
 
 				/**
 				 * Filters the first-row list of TinyMCE buttons (Visual tab).
 				 *
 				 * @since 2.0.0
-				 * @since 3.3.0 The `$editor_id` parameter was added.
 				 *
-				 * @param array  $mce_buttons First-row list of buttons.
-				 * @param string $editor_id   Unique editor identifier, e.g. 'content'. Accepts 'classic-block'
-				 *                            when called from block editor's Classic block.
+				 * @param array  $buttons   First-row list of buttons.
+				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 				 */
 				$mce_buttons = apply_filters( 'mce_buttons', $mce_buttons, $editor_id );
 
-				$mce_buttons_2 = array(
-					'strikethrough',
-					'hr',
-					'forecolor',
-					'pastetext',
-					'removeformat',
-					'charmap',
-					'outdent',
-					'indent',
-					'undo',
-					'redo',
-				);
+				$mce_buttons_2 = array( 'strikethrough', 'hr', 'forecolor', 'pastetext', 'removeformat', 'charmap', 'outdent', 'indent', 'undo', 'redo' );
 
 				if ( ! wp_is_mobile() ) {
 					$mce_buttons_2[] = 'wp_help';
@@ -690,11 +615,9 @@ final class _WP_Editors {
 				 * Filters the second-row list of TinyMCE buttons (Visual tab).
 				 *
 				 * @since 2.0.0
-				 * @since 3.3.0 The `$editor_id` parameter was added.
 				 *
-				 * @param array  $mce_buttons_2 Second-row list of buttons.
-				 * @param string $editor_id     Unique editor identifier, e.g. 'content'. Accepts 'classic-block'
-				 *                              when called from block editor's Classic block.
+				 * @param array  $buttons   Second-row list of buttons.
+				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 				 */
 				$mce_buttons_2 = apply_filters( 'mce_buttons_2', $mce_buttons_2, $editor_id );
 
@@ -702,11 +625,9 @@ final class _WP_Editors {
 				 * Filters the third-row list of TinyMCE buttons (Visual tab).
 				 *
 				 * @since 2.0.0
-				 * @since 3.3.0 The `$editor_id` parameter was added.
 				 *
-				 * @param array  $mce_buttons_3 Third-row list of buttons.
-				 * @param string $editor_id     Unique editor identifier, e.g. 'content'. Accepts 'classic-block'
-				 *                              when called from block editor's Classic block.
+				 * @param array  $buttons   Third-row list of buttons.
+				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 				 */
 				$mce_buttons_3 = apply_filters( 'mce_buttons_3', array(), $editor_id );
 
@@ -714,19 +635,16 @@ final class _WP_Editors {
 				 * Filters the fourth-row list of TinyMCE buttons (Visual tab).
 				 *
 				 * @since 2.5.0
-				 * @since 3.3.0 The `$editor_id` parameter was added.
 				 *
-				 * @param array  $mce_buttons_4 Fourth-row list of buttons.
-				 * @param string $editor_id     Unique editor identifier, e.g. 'content'. Accepts 'classic-block'
-				 *                              when called from block editor's Classic block.
+				 * @param array  $buttons   Fourth-row list of buttons.
+				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 				 */
 				$mce_buttons_4 = apply_filters( 'mce_buttons_4', array(), $editor_id );
 			}
 
 			$body_class = $editor_id;
 
-			$post = get_post();
-			if ( $post ) {
+			if ( $post = get_post() ) {
 				$body_class .= ' post-type-' . sanitize_html_class( $post->post_type ) . ' post-status-' . sanitize_html_class( $post->post_status );
 
 				if ( post_type_supports( $post->post_type, 'post-formats' ) ) {
@@ -786,7 +704,6 @@ final class _WP_Editors {
 				 * Filters the teenyMCE config before init.
 				 *
 				 * @since 2.7.0
-				 * @since 3.3.0 The `$editor_id` parameter was added.
 				 *
 				 * @param array  $mceInit   An array with teenyMCE config.
 				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
@@ -798,11 +715,9 @@ final class _WP_Editors {
 				 * Filters the TinyMCE config before init.
 				 *
 				 * @since 2.5.0
-				 * @since 3.3.0 The `$editor_id` parameter was added.
 				 *
 				 * @param array  $mceInit   An array with TinyMCE config.
-				 * @param string $editor_id Unique editor identifier, e.g. 'content'. Accepts 'classic-block'
-				 *                          when called from block editor's Classic block.
+				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 				 */
 				$mceInit = apply_filters( 'tiny_mce_before_init', $mceInit, $editor_id );
 			}
@@ -829,8 +744,8 @@ final class _WP_Editors {
 				$options .= $key . ':' . $val . ',';
 				continue;
 			} elseif ( ! empty( $value ) && is_string( $value ) && (
-				( '{' == $value[0] && '}' == $value[ strlen( $value ) - 1 ] ) ||
-				( '[' == $value[0] && ']' == $value[ strlen( $value ) - 1 ] ) ||
+				( '{' == $value{0} && '}' == $value{strlen( $value ) - 1} ) ||
+				( '[' == $value{0} && ']' == $value{strlen( $value ) - 1} ) ||
 				preg_match( '/^\(?function ?\(/', $value ) ) ) {
 
 				$options .= $key . ':' . $value . ',';
@@ -1119,7 +1034,7 @@ final class _WP_Editors {
 				'Heading 5'                            => array( __( 'Heading 5' ), 'access5' ),
 				'Heading 6'                            => array( __( 'Heading 6' ), 'access6' ),
 
-				/* translators: Block tags. */
+				/* translators: block tags */
 				'Blocks'                               => _x( 'Blocks', 'TinyMCE' ),
 				'Paragraph'                            => array( __( 'Paragraph' ), 'access7' ),
 				'Blockquote'                           => array( __( 'Blockquote' ), 'accessQ' ),
@@ -1236,6 +1151,7 @@ final class _WP_Editors {
 				// Link plugin
 				'Link'                                 => __( 'Link' ),
 				'Insert link'                          => __( 'Insert link' ),
+				'Insert/edit link'                     => __( 'Insert/edit link' ),
 				'Target'                               => __( 'Target' ),
 				'New window'                           => __( 'New window' ),
 				'Text to display'                      => __( 'Text to display' ),
@@ -1257,7 +1173,7 @@ final class _WP_Editors {
 				'Could not find the specified string.' => __( 'Could not find the specified string.' ),
 				'Replace'                              => _x( 'Replace', 'find/replace' ),
 				'Next'                                 => _x( 'Next', 'find/replace' ),
-				/* translators: Previous. */
+				/* translators: previous */
 				'Prev'                                 => _x( 'Prev', 'find/replace' ),
 				'Whole words'                          => _x( 'Whole words', 'find/replace' ),
 				'Find and replace'                     => __( 'Find and replace' ),
@@ -1332,7 +1248,7 @@ final class _WP_Editors {
 				'Show blocks'                          => _x( 'Show blocks', 'editor button' ),
 				'Show invisible characters'            => __( 'Show invisible characters' ),
 
-				/* translators: Word count. */
+				/* translators: word count */
 				'Words: {0}'                           => sprintf( __( 'Words: %s' ), '{0}' ),
 				'Paste is now in plain text mode. Contents will now be pasted as plain text until you toggle this option off.' =>
 					__( 'Paste is now in plain text mode. Contents will now be pasted as plain text until you toggle this option off.' ) . "\n\n" .
@@ -1368,7 +1284,7 @@ final class _WP_Editors {
 				'Link options'                         => __( 'Link options' ), // Tooltip for the 'link options' button in the inline link dialog
 				'Visual'                               => _x( 'Visual', 'Name for the Visual editor tab' ), // Editor switch tab label
 				'Text'                                 => _x( 'Text', 'Name for the Text editor tab (formerly HTML)' ), // Editor switch tab label
-				'Add Media'                            => array( __( 'Add Media' ), 'accessM' ), // Tooltip for the 'Add Media' button in the block editor Classic block
+				'Add Media'                            => array( __( 'Add Media' ), 'accessM' ), // Tooltip for the 'Add Media' button in the Block Editor Classic block
 
 				// Shortcuts help modal
 				'Keyboard Shortcuts'                   => array( __( 'Keyboard Shortcuts' ), 'accessH' ),
@@ -1404,13 +1320,13 @@ final class _WP_Editors {
 			'Image options' => __( 'Image options' ),
 			'Back' => __( 'Back' ),
 			'Invert' => __( 'Invert' ),
-			'Flip horizontally' => __( 'Flip horizontal' ),
-			'Flip vertically' => __( 'Flip vertical' ),
+			'Flip horizontally' => __( 'Flip horizontally' ),
+			'Flip vertically' => __( 'Flip vertically' ),
 			'Crop' => __( 'Crop' ),
 			'Orientation' => __( 'Orientation' ),
 			'Resize' => __( 'Resize' ),
-			'Rotate clockwise' => __( 'Rotate right' ),
-			'Rotate counterclockwise' => __( 'Rotate left' ),
+			'Rotate clockwise' => __( 'Rotate clockwise' ),
+			'Rotate counterclockwise' => __( 'Rotate counterclockwise' ),
 			'Sharpen' => __( 'Sharpen' ),
 			'Brightness' => __( 'Brightness' ),
 			'Color levels' => __( 'Color levels' ),
@@ -1543,8 +1459,7 @@ final class _WP_Editors {
 		global $tinymce_version;
 
 		$tmce_on = ! empty( self::$mce_settings );
-		$mceInit = '';
-		$qtInit  = '';
+		$mceInit = $qtInit = '';
 
 		if ( $tmce_on ) {
 			foreach ( self::$mce_settings as $editor_id => $init ) {
@@ -1849,8 +1764,8 @@ final class _WP_Editors {
 					<div class="river-waiting">
 						<span class="spinner"></span>
 					</div>
-				</div>
-			</div>
+				 </div>
+			 </div>
 		</div>
 		<div class="submitbox">
 			<div id="wp-link-cancel">

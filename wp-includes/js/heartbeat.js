@@ -34,7 +34,7 @@
 	 *
 	 * @since 3.6.0
 	 *
-	 * @return {Object} An instance of the Heartbeat class.
+	 * @returns {Object} An instance of the Heartbeat class.
 	 * @constructor
 	 */
 	var Heartbeat = function() {
@@ -110,7 +110,7 @@
 		 *
 		 * @since 3.8.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function initialize() {
 			var options, hidden, visibilityState, visibilitychange;
@@ -249,7 +249,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @return {number} Returns the current time.
+		 * @returns {number} Returns the current time.
 		 */
 		function time() {
 			return (new Date()).getTime();
@@ -262,7 +262,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @return {boolean} Returns whether or not the iframe is from the same origin.
+		 * @returns {boolean} Returns whether or not the iframe is from the same origin.
 		 */
 		function isLocalFrame( frame ) {
 			var origin, src = frame.src;
@@ -295,7 +295,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function checkFocus() {
 			if ( settings.hasFocus && ! document.hasFocus() ) {
@@ -316,7 +316,7 @@
 		 * @param {number} status The HTTP status code passed from jqXHR
 		 *                        (200, 404, 500, etc.).
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function setErrorState( error, status ) {
 			var trigger;
@@ -363,7 +363,7 @@
 		 *
 		 * @since 3.8.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function clearErrorState() {
 			// Has connected successfully.
@@ -384,7 +384,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function connect() {
 			var ajaxData, heartbeatData;
@@ -484,7 +484,7 @@
 		 *
 		 * @since 3.8.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function scheduleNextTick() {
 			var delta = time() - settings.lastTick,
@@ -530,7 +530,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function blurred() {
 			settings.hasFocus = false;
@@ -543,7 +543,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function focused() {
 			settings.userActivity = time();
@@ -564,7 +564,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function userIsActive() {
 			settings.userActivityEvents = false;
@@ -590,7 +590,7 @@
 		 *
 		 * @since 3.8.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function checkUserActivity() {
 			var lastActive = settings.userActivity ? time() - settings.userActivity : 0;
@@ -632,7 +632,7 @@
 		 * @since 3.6.0
 		 * @memberOf wp.heartbeat.prototype
 		 *
-		 * @return {boolean} True if the window or the user is active.
+		 * @returns {boolean} True if the window or the user is active.
 		 */
 		function hasFocus() {
 			return settings.hasFocus;
@@ -645,7 +645,7 @@
 		 *
 		 * @memberOf wp.heartbeat.prototype
 		 *
-		 * @return {boolean} True if a connection error was found.
+		 * @returns {boolean} True if a connection error was found.
 		 */
 		function hasConnectionError() {
 			return settings.connectionError;
@@ -661,7 +661,7 @@
 		 *
 		 * @memberOf wp.heartbeat.prototype
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function connectNow() {
 			settings.lastTick = 0;
@@ -680,7 +680,7 @@
 		 *
 		 * @memberOf wp.heartbeat.prototype
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function disableSuspend() {
 			settings.suspendEnabled = false;
@@ -703,7 +703,7 @@
 		 * @param {string}        ticks Tells how many ticks before the interval reverts
 		 *                              back. Used with speed = 'fast' or 5.
 		 *
-		 * @return {number} Current interval in seconds.
+		 * @returns {number} Current interval in seconds.
 		 */
 		function interval( speed, ticks ) {
 			var newInterval,
@@ -784,7 +784,7 @@
 		 * @param {*}       data        The data to send.
 		 * @param {boolean} noOverwrite Whether to overwrite existing data in the queue.
 		 *
-		 * @return {boolean} True if the data was queued.
+		 * @returns {boolean} True if the data was queued.
 		 */
 		function enqueue( handle, data, noOverwrite ) {
 			if ( handle ) {
@@ -805,7 +805,7 @@
 		 *
 		 * @param {string} handle The handle for the data.
 		 *
-		 * @return {boolean} True if the data is queued with this handle.
+		 * @returns {boolean} True if the data is queued with this handle.
 		 */
 		function isQueued( handle ) {
 			if ( handle ) {
@@ -822,7 +822,7 @@
 		 *
 		 * @param {string} handle The handle for the data.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function dequeue( handle ) {
 			if ( handle ) {
@@ -839,7 +839,7 @@
 		 *
 		 * @param {string} handle The handle for the data.
 		 *
-		 * @return {*} The data or undefined.
+		 * @returns {*} The data or undefined.
 		 */
 		function getQueuedItem( handle ) {
 			if ( handle ) {

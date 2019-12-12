@@ -52,9 +52,9 @@
 	<?php else : ?>
 	<div class="entry-content">
 		<?php
+			/* translators: %s: Name of current post */
 			the_content(
 				sprintf(
-					/* translators: %s: Post title. */
 					__( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'twentyfourteen' ),
 					the_title( '<span class="screen-reader-text">', '</span>', false )
 				)
@@ -73,4 +73,4 @@
 	<?php endif; ?>
 
 	<?php the_tags( '<footer class="entry-meta"><span class="tag-links">', '', '</span></footer>' ); ?>
-</article><!-- #post-<?php the_ID(); ?> -->
+</article><!-- #post-## -->

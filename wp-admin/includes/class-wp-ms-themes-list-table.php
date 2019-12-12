@@ -115,8 +115,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 			$allowed_where   = 'network';
 		}
 
-		$current      = get_site_transient( 'update_themes' );
-		$maybe_update = current_user_can( 'update_themes' ) && ! $this->is_site_themes && $current;
+		$maybe_update = current_user_can( 'update_themes' ) && ! $this->is_site_themes && $current = get_site_transient( 'update_themes' );
 
 		foreach ( (array) $themes['all'] as $key => $theme ) {
 			if ( $this->is_site_themes && $theme->is_allowed( 'network' ) ) {
@@ -300,49 +299,19 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 
 			switch ( $type ) {
 				case 'all':
-					/* translators: %s: Number of themes. */
-					$text = _nx(
-						'All <span class="count">(%s)</span>',
-						'All <span class="count">(%s)</span>',
-						$count,
-						'themes'
-					);
+					$text = _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $count, 'themes' );
 					break;
 				case 'enabled':
-					/* translators: %s: Number of themes. */
-					$text = _nx(
-						'Enabled <span class="count">(%s)</span>',
-						'Enabled <span class="count">(%s)</span>',
-						$count,
-						'themes'
-					);
+					$text = _n( 'Enabled <span class="count">(%s)</span>', 'Enabled <span class="count">(%s)</span>', $count );
 					break;
 				case 'disabled':
-					/* translators: %s: Number of themes. */
-					$text = _nx(
-						'Disabled <span class="count">(%s)</span>',
-						'Disabled <span class="count">(%s)</span>',
-						$count,
-						'themes'
-					);
+					$text = _n( 'Disabled <span class="count">(%s)</span>', 'Disabled <span class="count">(%s)</span>', $count );
 					break;
 				case 'upgrade':
-					/* translators: %s: Number of themes. */
-					$text = _nx(
-						'Update Available <span class="count">(%s)</span>',
-						'Update Available <span class="count">(%s)</span>',
-						$count,
-						'themes'
-					);
+					$text = _n( 'Update Available <span class="count">(%s)</span>', 'Update Available <span class="count">(%s)</span>', $count );
 					break;
 				case 'broken':
-					/* translators: %s: Number of themes. */
-					$text = _nx(
-						'Broken <span class="count">(%s)</span>',
-						'Broken <span class="count">(%s)</span>',
-						$count,
-						'themes'
-					);
+					$text = _n( 'Broken <span class="count">(%s)</span>', 'Broken <span class="count">(%s)</span>', $count );
 					break;
 			}
 
@@ -461,10 +430,10 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 				);
 
 				if ( $this->is_site_themes ) {
-					/* translators: %s: Theme name. */
+					/* translators: %s: theme name */
 					$aria_label = sprintf( __( 'Enable %s' ), $theme->display( 'Name' ) );
 				} else {
-					/* translators: %s: Theme name. */
+					/* translators: %s: theme name */
 					$aria_label = sprintf( __( 'Network Enable %s' ), $theme->display( 'Name' ) );
 				}
 
@@ -487,10 +456,10 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 			);
 
 			if ( $this->is_site_themes ) {
-				/* translators: %s: Theme name. */
+				/* translators: %s: theme name */
 				$aria_label = sprintf( __( 'Disable %s' ), $theme->display( 'Name' ) );
 			} else {
-				/* translators: %s: Theme name. */
+				/* translators: %s: theme name */
 				$aria_label = sprintf( __( 'Network Disable %s' ), $theme->display( 'Name' ) );
 			}
 
@@ -514,7 +483,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 				'themes.php'
 			);
 
-			/* translators: %s: Theme name. */
+			/* translators: %s: theme name */
 			$aria_label = sprintf( _x( 'Delete %s', 'theme' ), $theme->display( 'Name' ) );
 
 			$actions['delete'] = sprintf(
@@ -602,15 +571,12 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 		$theme_meta = array();
 
 		if ( $theme->get( 'Version' ) ) {
-			/* translators: %s: Theme version. */
 			$theme_meta[] = sprintf( __( 'Version %s' ), $theme->display( 'Version' ) );
 		}
-
-		/* translators: %s: Theme author. */
 		$theme_meta[] = sprintf( __( 'By %s' ), $theme->display( 'Author' ) );
 
 		if ( $theme->get( 'ThemeURI' ) ) {
-			/* translators: %s: Theme name. */
+			/* translators: %s: theme name */
 			$aria_label = sprintf( __( 'Visit %s homepage' ), $theme->display( 'Name' ) );
 
 			$theme_meta[] = sprintf(

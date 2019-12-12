@@ -262,8 +262,7 @@
 
 		if ( 'undefined' !== typeof response.debug && window.console && window.console.log ) {
 			_.map( response.debug, function( message ) {
-				// Remove all HTML tags and write a message to the console.
-				window.console.log( wp.sanitize.stripTagsAndEncodeText( message ) );
+				window.console.log( $( '<p />' ).html( message ).text() );
 			} );
 		}
 	};
@@ -1598,7 +1597,7 @@
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.
 	 * @param {string} action                The type of request to perform.
-	 * @return {boolean} Whether there is an error that needs to be handled or not.
+	 * @returns {boolean} Whether there is an error that needs to be handled or not.
 	 */
 	wp.updates.maybeHandleCredentialError = function( response, action ) {
 		if ( wp.updates.shouldRequestFilesystemCredentials && response.errorCode && 'unable_to_connect_to_filesystem' === response.errorCode ) {
@@ -2236,7 +2235,7 @@
 					wp.a11y.speak( wp.updates.l10n.pluginsFound.replace( '%d', response.count ) );
 				}
 			} );
-		}, 1000 ) );
+		}, 500 ) );
 
 		if ( $pluginSearch.length ) {
 			$pluginSearch.attr( 'aria-describedby', 'live-search-desc' );
@@ -2416,7 +2415,7 @@
 		 */
 		$( window ).on( 'message', function( event ) {
 			var originalEvent  = event.originalEvent,
-				expectedOrigin = document.location.protocol + '//' + document.location.host,
+				expectedOrigin = document.location.protocol + '//' + document.location.hostname,
 				message;
 
 			if ( originalEvent.origin !== expectedOrigin ) {
