@@ -18,6 +18,7 @@ class WP_List_Util {
 	 * The input array.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 * @var array
 	 */
 	private $input = array();
@@ -26,6 +27,7 @@ class WP_List_Util {
 	 * The output array.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 * @var array
 	 */
 	private $output = array();
@@ -34,6 +36,7 @@ class WP_List_Util {
 	 * Temporary arguments for sorting.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 * @var array
 	 */
 	private $orderby = array();
@@ -48,14 +51,14 @@ class WP_List_Util {
 	 * @param array $input Array to perform operations on.
 	 */
 	public function __construct( $input ) {
-		$this->output = $input;
-		$this->input  = $input;
+		$this->output = $this->input = $input;
 	}
 
 	/**
 	 * Returns the original input array.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @return array The input array.
 	 */
@@ -67,6 +70,7 @@ class WP_List_Util {
 	 * Returns the output array.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @return array The output array.
 	 */
@@ -98,7 +102,7 @@ class WP_List_Util {
 			return array();
 		}
 
-		$count    = count( $args );
+		$count = count( $args );
 		$filtered = array();
 
 		foreach ( $this->output as $key => $obj ) {
@@ -116,7 +120,7 @@ class WP_List_Util {
 				( 'OR' == $operator && $matched > 0 ) ||
 				( 'NOT' == $operator && 0 == $matched )
 			) {
-				$filtered[ $key ] = $obj;
+				$filtered[$key] = $obj;
 			}
 		}
 
@@ -141,8 +145,6 @@ class WP_List_Util {
 	 *               `$list` will be preserved in the results.
 	 */
 	public function pluck( $field, $index_key = null ) {
-		$newlist = array();
-
 		if ( ! $index_key ) {
 			/*
 			 * This is simple. Could at some point wrap array_column()
@@ -150,14 +152,11 @@ class WP_List_Util {
 			 */
 			foreach ( $this->output as $key => $value ) {
 				if ( is_object( $value ) ) {
-					$newlist[ $key ] = $value->$field;
+					$this->output[ $key ] = $value->$field;
 				} else {
-					$newlist[ $key ] = $value[ $field ];
+					$this->output[ $key ] = $value[ $field ];
 				}
 			}
-
-			$this->output = $newlist;
-
 			return $this->output;
 		}
 
@@ -165,6 +164,7 @@ class WP_List_Util {
 		 * When index_key is not set for a particular item, push the value
 		 * to the end of the stack. This is how array_column() behaves.
 		 */
+		$newlist = array();
 		foreach ( $this->output as $value ) {
 			if ( is_object( $value ) ) {
 				if ( isset( $value->$index_key ) ) {
@@ -228,6 +228,7 @@ class WP_List_Util {
 	 * Callback to sort the list by specific fields.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 *
 	 * @see WP_List_Util::sort()
 	 *
