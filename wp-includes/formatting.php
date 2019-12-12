@@ -8,10 +8,7 @@
  */
 
 /**
- * Replaces common plain text characters with formatted entities.
- *
- * Returns given text with transformations of quotes into smart quotes, apostrophes,
- * dashes, ellipses, the trademark symbol, and the multiplication symbol.
+ * Replaces common plain text characters into formatted entities
  *
  * As an example,
  *
@@ -21,13 +18,13 @@
  *
  *     &#8217;cause today&#8217;s effort makes it worth tomorrow&#8217;s &#8220;holiday&#8221; &#8230;
  *
- * Code within certain HTML blocks are skipped.
+ * Code within certain html blocks are skipped.
  *
  * Do not use this function before the {@see 'init'} action hook; everything will break.
  *
  * @since 0.71
  *
- * @global array $wp_cockneyreplace Array of formatted entities for certain common phrases.
+ * @global array $wp_cockneyreplace Array of formatted entities for certain common phrases
  * @global array $shortcode_tags
  * @staticvar array  $static_characters
  * @staticvar array  $static_replacements
@@ -47,9 +44,9 @@
  * @staticvar string $open_sq_flag
  * @staticvar string $apos_flag
  *
- * @param string $text  The text to be formatted.
+ * @param string $text The text to be formatted
  * @param bool   $reset Set to true for unit testing. Translated patterns will reset.
- * @return string The string replaced with HTML entities.
+ * @return string The string replaced with html entities
  */
 function wptexturize( $text, $reset = false ) {
 	global $wp_cockneyreplace, $shortcode_tags;
@@ -230,7 +227,7 @@ function wptexturize( $text, $reset = false ) {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param string[] $default_no_texturize_tags An array of HTML element names.
+	 * @param array $default_no_texturize_tags An array of HTML element names.
 	 */
 	$no_texturize_tags = apply_filters( 'no_texturize_tags', $default_no_texturize_tags );
 	/**
@@ -238,7 +235,7 @@ function wptexturize( $text, $reset = false ) {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param string[] $default_no_texturize_shortcodes An array of shortcode names.
+	 * @param array $default_no_texturize_shortcodes An array of shortcode names.
 	 */
 	$no_texturize_shortcodes = apply_filters( 'no_texturize_shortcodes', $default_no_texturize_shortcodes );
 
@@ -397,9 +394,9 @@ function wptexturize_primes( $haystack, $needle, $prime, $open_quote, $close_quo
  * @since 2.9.0
  * @access private
  *
- * @param string   $text              Text to check. Must be a tag like `<html>` or `[shortcode]`.
- * @param string[] $stack             Array of open tag elements.
- * @param string[] $disabled_elements Array of tag names to match against. Spaces are not allowed in tag names.
+ * @param string $text Text to check. Must be a tag like `<html>` or `[shortcode]`.
+ * @param array  $stack List of open tag elements.
+ * @param array  $disabled_elements The tag names to match against. Spaces are not allowed in tag names.
  */
 function _wptexturize_pushpop_element( $text, &$stack, $disabled_elements ) {
 	// Is it an opening tag or closing tag?
@@ -622,7 +619,7 @@ function wpautop( $pee, $br = true ) {
  * @since 4.2.4
  *
  * @param string $input The text which has to be formatted.
- * @return string[] Array of the formatted text.
+ * @return array The formatted text.
  */
 function wp_html_split( $input ) {
 	return preg_split( get_html_split_regex(), $input, -1, PREG_SPLIT_DELIM_CAPTURE );
@@ -736,9 +733,10 @@ function _get_wptexturize_split_regex( $shortcode_regex = '' ) {
  *
  * @access private
  * @ignore
+ * @internal This function will be removed in 4.5.0 per Shortcode API Roadmap.
  * @since 4.4.0
  *
- * @param string[] $tagnames Array of shortcodes to find.
+ * @param array $tagnames List of shortcodes to find.
  * @return string The regular expression
  */
 function _get_wptexturize_shortcode_regex( $tagnames ) {
@@ -1999,8 +1997,8 @@ function remove_accents( $string ) {
  *
  * @since 2.1.0
  *
- * @param string $filename The filename to be sanitized.
- * @return string The sanitized filename.
+ * @param string $filename The filename to be sanitized
+ * @return string The sanitized filename
  */
 function sanitize_file_name( $filename ) {
 	$filename_raw  = $filename;
@@ -2010,8 +2008,8 @@ function sanitize_file_name( $filename ) {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param string[] $special_chars Array of characters to remove.
-	 * @param string   $filename_raw  The original filename to be sanitized.
+	 * @param array  $special_chars Characters to remove.
+	 * @param string $filename_raw  Filename as it was passed into sanitize_file_name().
 	 */
 	$special_chars = apply_filters( 'sanitize_file_name_chars', $special_chars, $filename_raw );
 	$filename      = preg_replace( "#\x{00a0}#siu", ' ', $filename );
@@ -4278,10 +4276,10 @@ function esc_sql( $data ) {
  *
  * @since 2.8.0
  *
- * @param string   $url       The URL to be cleaned.
- * @param string[] $protocols Optional. An array of acceptable protocols.
- *                            Defaults to return value of wp_allowed_protocols()
- * @param string   $_context  Private. Use esc_url_raw() for database usage.
+ * @param string $url       The URL to be cleaned.
+ * @param array  $protocols Optional. An array of acceptable protocols.
+ *                          Defaults to return value of wp_allowed_protocols()
+ * @param string $_context  Private. Use esc_url_raw() for database usage.
  * @return string The cleaned $url after the {@see 'clean_url'} filter is applied.
  */
 function esc_url( $url, $protocols = null, $_context = 'display' ) {
@@ -4386,8 +4384,8 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
  *
  * @since 2.8.0
  *
- * @param string   $url       The URL to be cleaned.
- * @param string[] $protocols An array of acceptable protocols.
+ * @param string $url       The URL to be cleaned.
+ * @param array  $protocols An array of acceptable protocols.
  * @return string The cleaned URL.
  */
 function esc_url_raw( $url, $protocols = null ) {
@@ -5155,9 +5153,9 @@ function _links_add_base( $m ) {
  *
  * @global string $_links_add_target
  *
- * @param string   $content String to search for links in.
- * @param string   $target  The Target to add to the links.
- * @param string[] $tags    An array of tags to apply to.
+ * @param string $content String to search for links in.
+ * @param string $target  The Target to add to the links.
+ * @param array  $tags    An array of tags to apply to.
  * @return string The processed content.
  */
 function links_add_target( $content, $target = '_blank', $tags = array( 'a' ) ) {
@@ -5620,7 +5618,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @since 4.2.0
 		 *
-		 * @param string $url The emoji base URL for png images.
+		 * @param string The emoji base URL for png images.
 		 */
 		'baseUrl' => apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/12.0.0-1/72x72/' ),
 
@@ -5629,7 +5627,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @since 4.2.0
 		 *
-		 * @param string $extension The emoji extension for png files. Default .png.
+		 * @param string The emoji extension for png files. Default .png.
 		 */
 		'ext'     => apply_filters( 'emoji_ext', '.png' ),
 
@@ -5638,7 +5636,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @since 4.6.0
 		 *
-		 * @param string $url The emoji base URL for svg images.
+		 * @param string The emoji base URL for svg images.
 		 */
 		'svgUrl'  => apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/12.0.0-1/svg/' ),
 
@@ -5647,7 +5645,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @since 4.6.0
 		 *
-		 * @param string $extension The emoji extension for svg files. Default .svg.
+		 * @param string The emoji extension for svg files. Default .svg.
 		 */
 		'svgExt'  => apply_filters( 'emoji_svg_ext', '.svg' ),
 	);
@@ -5688,7 +5686,6 @@ function _print_emoji_detection_script() {
 		?>
 		<script<?php echo $type_attr; ?>>
 			window._wpemojiSettings = <?php echo wp_json_encode( $settings ); ?>;
-			/*! This file is auto-generated */
 			!function(e,a,t){var r,n,o,i,p=a.createElement("canvas"),s=p.getContext&&p.getContext("2d");function c(e,t){var a=String.fromCharCode;s.clearRect(0,0,p.width,p.height),s.fillText(a.apply(this,e),0,0);var r=p.toDataURL();return s.clearRect(0,0,p.width,p.height),s.fillText(a.apply(this,t),0,0),r===p.toDataURL()}function l(e){if(!s||!s.fillText)return!1;switch(s.textBaseline="top",s.font="600 32px Arial",e){case"flag":return!c([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])&&(!c([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!c([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]));case"emoji":return!c([55357,56424,55356,57342,8205,55358,56605,8205,55357,56424,55356,57340],[55357,56424,55356,57342,8203,55358,56605,8203,55357,56424,55356,57340])}return!1}function d(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(i=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},o=0;o<i.length;o++)t.supports[i[o]]=l(i[o]),t.supports.everything=t.supports.everything&&t.supports[i[o]],"flag"!==i[o]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[i[o]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(r=t.source||{}).concatemoji?d(r.concatemoji):r.wpemoji&&r.twemoji&&(d(r.twemoji),d(r.wpemoji)))}(window,document,window._wpemojiSettings);
 		</script>
 		<?php

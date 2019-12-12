@@ -91,7 +91,7 @@ function set_query_var( $var, $value ) {
  * @global WP_Query $wp_query WordPress Query object.
  *
  * @param array|string $query Array or string of WP_Query arguments.
- * @return WP_Post[]|int[] Array of post objects or post IDs.
+ * @return array List of post objects.
  */
 function query_posts( $query ) {
 	$GLOBALS['wp_query'] = new WP_Query();

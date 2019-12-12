@@ -1402,7 +1402,7 @@ class WP_Query {
 	 * @since 3.7.0
 	 *
 	 * @param string[] $terms Array of terms to check.
-	 * @return string[] Terms that are not stopwords.
+	 * @return array Terms that are not stopwords.
 	 */
 	protected function parse_search_terms( $terms ) {
 		$strtolower = function_exists( 'mb_strtolower' ) ? 'mb_strtolower' : 'strtolower';
@@ -1438,7 +1438,7 @@ class WP_Query {
 	 *
 	 * @since 3.7.0
 	 *
-	 * @return string[] Stopwords.
+	 * @return array Stopwords.
 	 */
 	protected function get_search_stopwords() {
 		if ( isset( $this->stopwords ) ) {
@@ -3585,7 +3585,7 @@ class WP_Query {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param string|string[] $post_types Optional. Post type or array of posts types to check against.
+	 * @param mixed $post_types Optional. Post type or array of posts types to check against.
 	 * @return bool
 	 */
 	public function is_post_type_archive( $post_types = '' ) {

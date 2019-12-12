@@ -5,7 +5,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Twenty
- * @since Twenty Twenty 1.0
+ * @since 1.0.0
  */
 
 $has_footer_menu = has_nav_menu( 'footer' );

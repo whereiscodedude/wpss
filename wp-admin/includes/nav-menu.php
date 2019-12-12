@@ -219,8 +219,8 @@ function wp_nav_menu_post_type_meta_boxes() {
 		 *
 		 * @since 3.0.0
 		 *
-		 * @param WP_Post_Type|false $post_type The current object to add a menu items
-		 *                                      meta box for.
+		 * @param object $meta_box_object The current object to add a menu items
+		 *                                meta box for.
 		 */
 		$post_type = apply_filters( 'nav_menu_meta_box_object', $post_type );
 		if ( $post_type ) {
@@ -972,7 +972,7 @@ function wp_save_nav_menu_items( $menu_id = 0, $menu_data = array() ) {
  * @access private
  *
  * @param object $object The post type or taxonomy meta-object.
- * @return object The post type or taxonomy object.
+ * @return object The post type of taxonomy object.
  */
 function _wp_nav_menu_meta_box_object( $object = null ) {
 	if ( isset( $object->name ) ) {
@@ -1087,7 +1087,7 @@ function wp_get_nav_menu_to_edit( $menu_id = 0 ) {
  *
  * @since 3.0.0
  *
- * @return string[] Array of column titles keyed by their column name.
+ * @return array Columns.
  */
 function wp_nav_menu_manage_columns() {
 	return array(
@@ -1128,7 +1128,7 @@ function _wp_delete_orphaned_draft_menu_items() {
  *
  * @param int|string $nav_menu_selected_id (id, slug, or name ) of the currently-selected menu
  * @param string $nav_menu_selected_title Title of the currently-selected menu
- * @return array The menu updated message
+ * @return array $messages The menu updated message
  */
 function wp_nav_menu_update_menu_items( $nav_menu_selected_id, $nav_menu_selected_title ) {
 	$unsorted_menu_items = wp_get_nav_menu_items(

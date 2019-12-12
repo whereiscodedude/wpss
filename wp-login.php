@@ -27,12 +27,6 @@ if ( force_ssl_admin() && ! is_ssl() ) {
  *
  * @since 2.1.0
  *
- * @global string      $error         Login error message set by deprecated pluggable wp_login() function
- *                                    or plugins replacing it.
- * @global bool|string $interim_login Whether interim login modal is being displayed. String 'success'
- *                                    upon successful login.
- * @global string      $action        The action that brought the visitor to the login page.
- *
  * @param string   $title    Optional. WordPress login Page title to display in the `<title>` element.
  *                           Default 'Log In'.
  * @param string   $message  Optional. Message to display in header. Default empty.
@@ -141,7 +135,7 @@ function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
 	 * Filters the title attribute of the header logo above login form.
 	 *
 	 * @since 2.1.0
-	 * @deprecated 5.2.0 Use {@see 'login_headertext'} instead.
+	 * @deprecated 5.2.0 Use login_headertext
 	 *
 	 * @param string $login_header_title Login header logo title attribute.
 	 */
@@ -275,9 +269,6 @@ function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
  *
  * @since 3.1.0
  *
- * @global bool|string $interim_login Whether interim login modal is being displayed. String 'success'
- *                                    upon successful login.
- *
  * @param string $input_id Which input to auto-focus.
  */
 function login_footer( $input_id = '' ) {
@@ -363,8 +354,7 @@ function wp_login_viewport_meta() {
  * @return bool|WP_Error True: when finish. WP_Error on error
  */
 function retrieve_password() {
-	$errors    = new WP_Error();
-	$user_data = false;
+	$errors = new WP_Error();
 
 	if ( empty( $_POST['user_login'] ) || ! is_string( $_POST['user_login'] ) ) {
 		$errors->add( 'empty_username', __( '<strong>ERROR</strong>: Enter a username or email address.' ) );
@@ -374,7 +364,7 @@ function retrieve_password() {
 			$errors->add( 'invalid_email', __( '<strong>ERROR</strong>: There is no account with that username or email address.' ) );
 		}
 	} else {
-		$login     = trim( wp_unslash( $_POST['user_login'] ) );
+		$login     = trim( $_POST['user_login'] );
 		$user_data = get_user_by( 'login', $login );
 	}
 
@@ -383,13 +373,11 @@ function retrieve_password() {
 	 *
 	 * @since 2.1.0
 	 * @since 4.4.0 Added the `$errors` parameter.
-	 * @since 5.4.0 Added the `$user_data` parameter.
 	 *
 	 * @param WP_Error $errors A WP_Error object containing any errors generated
 	 *                         by using invalid credentials.
-	 * @param WP_User|false    WP_User object if found, false if the user does not exist.
 	 */
-	do_action( 'lostpassword_post', $errors, $user_data );
+	do_action( 'lostpassword_post', $errors );
 
 	if ( $errors->has_errors() ) {
 		return $errors;
@@ -941,7 +929,7 @@ switch ( $action ) {
 		 *
 		 * @since 3.5.0
 		 *
-		 * @param WP_Error         $errors WP Error object.
+		 * @param object           $errors WP Error object.
 		 * @param WP_User|WP_Error $user   WP_User object if the login and reset key match. WP_Error object otherwise.
 		 */
 		do_action( 'validate_password_reset', $errors, $user );
@@ -1051,7 +1039,7 @@ switch ( $action ) {
 
 		if ( $http_post ) {
 			if ( isset( $_POST['user_login'] ) && is_string( $_POST['user_login'] ) ) {
-				$user_login = wp_unslash( $_POST['user_login'] );
+				$user_login = $_POST['user_login'];
 			}
 
 			if ( isset( $_POST['user_email'] ) && is_string( $_POST['user_email'] ) ) {
@@ -1169,7 +1157,7 @@ switch ( $action ) {
 
 		// If the user wants SSL but the session is not SSL, force a secure cookie.
 		if ( ! empty( $_POST['log'] ) && ! force_ssl_admin() ) {
-			$user_name = sanitize_user( wp_unslash( $_POST['log'] ) );
+			$user_name = sanitize_user( $_POST['log'] );
 			$user      = get_user_by( 'login', $user_name );
 
 			if ( ! $user && strpos( $user_name, '@' ) ) {
@@ -1336,8 +1324,8 @@ switch ( $action ) {
 		 *
 		 * @since 3.6.0
 		 *
-		 * @param WP_Error $errors      WP Error object.
-		 * @param string   $redirect_to Redirect destination URL.
+		 * @param object $errors      WP Error object.
+		 * @param string $redirect_to Redirect destination URL.
 		 */
 		$errors = apply_filters( 'wp_login_errors', $errors, $redirect_to );
 

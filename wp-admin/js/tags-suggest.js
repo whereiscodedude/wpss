@@ -31,7 +31,7 @@
 	 * @since 4.7.0
 	 *
 	 * @param {object} options Options that are passed to UI Autocomplete. Can be used to override the default settings.
-	 * @return {object} jQuery instance.
+	 * @returns {object} jQuery instance.
 	 */
 	$.fn.wpTagsSuggest = function( options ) {
 		var cache;
