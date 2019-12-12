@@ -88,8 +88,8 @@ class WP_REST_Server {
 			// Meta endpoints.
 			'/' => array(
 				'callback' => array( $this, 'get_index' ),
-				'methods'  => 'GET',
-				'args'     => array(
+				'methods' => 'GET',
+				'args' => array(
 					'context' => array(
 						'default' => 'view',
 					),
@@ -129,8 +129,8 @@ class WP_REST_Server {
 		 *
 		 * @since 4.4.0
 		 *
-		 * @param WP_Error|null|true $errors WP_Error if authentication error, null if authentication
-		 *                                   method wasn't used, true if authentication succeeded.
+		 * @param WP_Error|null|bool WP_Error if authentication error, null if authentication
+		 *                              method wasn't used, true if authentication succeeded.
 		 */
 		return apply_filters( 'rest_authentication_errors', null );
 	}
@@ -160,11 +160,7 @@ class WP_REST_Server {
 
 		foreach ( (array) $error->errors as $code => $messages ) {
 			foreach ( (array) $messages as $message ) {
-				$errors[] = array(
-					'code'    => $code,
-					'message' => $message,
-					'data'    => $error->get_error_data( $code ),
-				);
+				$errors[] = array( 'code' => $code, 'message' => $message, 'data' => $error->get_error_data( $code ) );
 			}
 		}
 
@@ -260,16 +256,11 @@ class WP_REST_Server {
 		 * Filters whether the REST API is enabled.
 		 *
 		 * @since 4.4.0
-		 * @deprecated 4.7.0 Use the {@see 'rest_authentication_errors'} filter to
-		 *                   restrict access to the API.
+		 * @deprecated 4.7.0 Use the rest_authentication_errors filter to restrict access to the API
 		 *
 		 * @param bool $rest_enabled Whether the REST API is enabled. Default true.
 		 */
-		apply_filters_deprecated(
-			'rest_enabled',
-			array( true ),
-			'4.7.0',
-			'rest_authentication_errors',
+		apply_filters_deprecated( 'rest_enabled', array( true ), '4.7.0', 'rest_authentication_errors',
 			__( 'The REST API can no longer be completely disabled, the rest_authentication_errors filter can be used to restrict access to the API, instead.' )
 		);
 
@@ -311,7 +302,7 @@ class WP_REST_Server {
 		$request->set_body_params( wp_unslash( $_POST ) );
 		$request->set_file_params( $_FILES );
 		$request->set_headers( $this->get_headers( wp_unslash( $_SERVER ) ) );
-		$request->set_body( self::get_raw_data() );
+		$request->set_body( $this->get_raw_data() );
 
 		/*
 		 * HTTP method override for clients that can't use PUT/PATCH/DELETE. First, we check
@@ -402,18 +393,13 @@ class WP_REST_Server {
 			 */
 			$result = apply_filters( 'rest_pre_echo_response', $result, $this, $request );
 
-			// The 204 response shouldn't have a body.
-			if ( 204 === $code || null === $result ) {
-				return null;
-			}
-
 			$result = wp_json_encode( $result );
 
 			$json_error_message = $this->get_json_last_error();
 			if ( $json_error_message ) {
 				$json_error_obj = new WP_Error( 'rest_encode_error', $json_error_message, array( 'status' => 500 ) );
-				$result         = $this->error_to_response( $json_error_obj );
-				$result         = wp_json_encode( $result->data[0] );
+				$result = $this->error_to_response( $json_error_obj );
+				$result = wp_json_encode( $result->data[0] );
 			}
 
 			if ( $jsonp_callback ) {
@@ -443,7 +429,7 @@ class WP_REST_Server {
 	 */
 	public function response_to_data( $response, $embed ) {
 		$data  = $response->get_data();
-		$links = self::get_compact_response_links( $response );
+		$links = $this->get_compact_response_links( $response );
 
 		if ( ! empty( $links ) ) {
 			// Convert links to part of the data.
@@ -468,6 +454,7 @@ class WP_REST_Server {
 	 * direct output.
 	 *
 	 * @since 4.4.0
+	 * @static
 	 *
 	 * @param WP_REST_Response $response Response to extract links from.
 	 * @return array Map of link relation to list of link hashes.
@@ -484,9 +471,9 @@ class WP_REST_Server {
 			$data[ $rel ] = array();
 
 			foreach ( $items as $item ) {
-				$attributes         = $item['attributes'];
+				$attributes = $item['attributes'];
 				$attributes['href'] = $item['href'];
-				$data[ $rel ][]     = $attributes;
+				$data[ $rel ][] = $attributes;
 			}
 		}
 
@@ -500,6 +487,7 @@ class WP_REST_Server {
 	 * direct output.
 	 *
 	 * @since 4.5.0
+	 * @static
 	 *
 	 * @param WP_REST_Response $response Response to extract links from.
 	 * @return array Map of link relation to list of link hashes.
@@ -511,7 +499,7 @@ class WP_REST_Server {
 			return array();
 		}
 
-		$curies      = $response->get_curies();
+		$curies = $response->get_curies();
 		$used_curies = array();
 
 		foreach ( $links as $rel => $items ) {
@@ -527,9 +515,9 @@ class WP_REST_Server {
 				$rel_regex = str_replace( '\{rel\}', '(.+)', preg_quote( $curie['href'], '!' ) );
 				preg_match( '!' . $rel_regex . '!', $rel, $matches );
 				if ( $matches ) {
-					$new_rel                       = $curie['name'] . ':' . $matches[1];
+					$new_rel = $curie['name'] . ':' . $matches[1];
 					$used_curies[ $curie['name'] ] = $curie;
-					$links[ $new_rel ]             = $items;
+					$links[ $new_rel ] = $items;
 					unset( $links[ $rel ] );
 					break;
 				}
@@ -565,6 +553,11 @@ class WP_REST_Server {
 		$embedded = array();
 
 		foreach ( $data['_links'] as $rel => $links ) {
+			// Ignore links to self, for obvious reasons.
+			if ( 'self' === $rel ) {
+				continue;
+			}
+
 			$embeds = array();
 
 			foreach ( $links as $item ) {
@@ -659,29 +652,25 @@ class WP_REST_Server {
 		if ( ! isset( $this->namespaces[ $namespace ] ) ) {
 			$this->namespaces[ $namespace ] = array();
 
-			$this->register_route(
-				$namespace,
-				'/' . $namespace,
+			$this->register_route( $namespace, '/' . $namespace, array(
 				array(
-					array(
-						'methods'  => self::READABLE,
-						'callback' => array( $this, 'get_namespace_index' ),
-						'args'     => array(
-							'namespace' => array(
-								'default' => $namespace,
-							),
-							'context'   => array(
-								'default' => 'view',
-							),
+					'methods' => self::READABLE,
+					'callback' => array( $this, 'get_namespace_index' ),
+					'args' => array(
+						'namespace' => array(
+							'default' => $namespace,
+						),
+						'context' => array(
+							'default' => 'view',
 						),
 					),
-				)
-			);
+				),
+			) );
 		}
 
 		// Associative to avoid double-registration.
 		$this->namespaces[ $namespace ][ $route ] = true;
-		$route_args['namespace']                  = $namespace;
+		$route_args['namespace'] = $namespace;
 
 		if ( $override || empty( $this->endpoints[ $route ] ) ) {
 			$this->endpoints[ $route ] = $route_args;
@@ -767,7 +756,7 @@ class WP_REST_Server {
 				$handler['methods'] = array();
 
 				foreach ( $methods as $method ) {
-					$method                        = strtoupper( trim( $method ) );
+					$method = strtoupper( trim( $method ) );
 					$handler['methods'][ $method ] = true;
 				}
 			}
@@ -781,7 +770,7 @@ class WP_REST_Server {
 	 *
 	 * @since 4.4.0
 	 *
-	 * @return string[] List of registered namespaces.
+	 * @return array List of registered namespaces.
 	 */
 	public function get_namespaces() {
 		return array_keys( $this->namespaces );
@@ -849,7 +838,7 @@ class WP_REST_Server {
 			}
 
 			foreach ( $handlers as $handler ) {
-				$callback = $handler['callback'];
+				$callback  = $handler['callback'];
 				$response = null;
 
 				// Fallback to GET method if no HEAD method is registered.
@@ -905,9 +894,9 @@ class WP_REST_Server {
 				 *
 				 * @since 4.7.0
 				 *
-				 * @param WP_HTTP_Response|WP_Error $response Result to send to the client. Usually a WP_REST_Response or WP_Error.
-				 * @param array                     $handler  Route handler used for the request.
-				 * @param WP_REST_Request           $request  Request used to generate the response.
+				 * @param WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
+				 * @param WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
+				 * @param WP_REST_Request  $request  Request used to generate the response.
 				 */
 				$response = apply_filters( 'rest_request_before_callbacks', $response, $handler, $request );
 
@@ -933,7 +922,7 @@ class WP_REST_Server {
 					 * @since 4.4.0
 					 * @since 4.5.0 Added `$route` and `$handler` parameters.
 					 *
-					 * @param mixed           $dispatch_result Dispatch result, will be used if not empty.
+					 * @param bool            $dispatch_result Dispatch result, will be used if not empty.
 					 * @param WP_REST_Request $request         Request used to generate the response.
 					 * @param string          $route           Route matched for the request.
 					 * @param array           $handler         Route handler used for the request.
@@ -964,9 +953,9 @@ class WP_REST_Server {
 				 *
 				 * @since 4.7.0
 				 *
-				 * @param WP_HTTP_Response|WP_Error $response Result to send to the client. Usually a WP_REST_Response or WP_Error.
-				 * @param array                     $handler  Route handler used for the request.
-				 * @param WP_REST_Request           $request  Request used to generate the response.
+				 * @param WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
+				 * @param WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
+				 * @param WP_REST_Request  $request  Request used to generate the response.
 				 */
 				$response = apply_filters( 'rest_request_after_callbacks', $response, $handler, $request );
 
@@ -997,9 +986,14 @@ class WP_REST_Server {
 	 * @return bool|string Boolean false or string error message.
 	 */
 	protected function get_json_last_error() {
+		// See https://core.trac.wordpress.org/ticket/27799.
+		if ( ! function_exists( 'json_last_error' ) ) {
+			return false;
+		}
+
 		$last_error_code = json_last_error();
 
-		if ( JSON_ERROR_NONE === $last_error_code || empty( $last_error_code ) ) {
+		if ( ( defined( 'JSON_ERROR_NONE' ) && JSON_ERROR_NONE === $last_error_code ) || empty( $last_error_code ) ) {
 			return false;
 		}
 
@@ -1018,7 +1012,7 @@ class WP_REST_Server {
 	 *
 	 *     @type string $context Context.
 	 * }
-	 * @return WP_REST_Response The API root index data.
+	 * @return array Index entity
 	 */
 	public function get_index( $request ) {
 		// General site data.
@@ -1068,12 +1062,12 @@ class WP_REST_Server {
 			return new WP_Error( 'rest_invalid_namespace', __( 'The specified namespace could not be found.' ), array( 'status' => 404 ) );
 		}
 
-		$routes    = $this->namespaces[ $namespace ];
+		$routes = $this->namespaces[ $namespace ];
 		$endpoints = array_intersect_key( $this->get_routes(), $routes );
 
-		$data     = array(
+		$data = array(
 			'namespace' => $namespace,
-			'routes'    => $this->get_data_for_routes( $endpoints, $request['context'] ),
+			'routes' => $this->get_data_for_routes( $endpoints, $request['context'] ),
 		);
 		$response = rest_ensure_response( $data );
 
@@ -1101,7 +1095,7 @@ class WP_REST_Server {
 	 *
 	 * @param array  $routes  Routes to get data for.
 	 * @param string $context Optional. Context for data. Accepts 'view' or 'help'. Default 'view'.
-	 * @return array[] Route data to expose in indexes, keyed by route.
+	 * @return array Route data to expose in indexes.
 	 */
 	public function get_data_for_routes( $routes, $context = 'view' ) {
 		$available = array();
@@ -1132,8 +1126,8 @@ class WP_REST_Server {
 		 *
 		 * @since 4.4.0
 		 *
-		 * @param array[] $available Route data to expose in indexes, keyed by route.
-		 * @param array   $routes    Internal route data as an associative array.
+		 * @param array $available Map of route to route data.
+		 * @param array $routes    Internal route data as an associative array.
 		 */
 		return apply_filters( 'rest_route_data', $available, $routes );
 	}
@@ -1151,7 +1145,7 @@ class WP_REST_Server {
 	public function get_data_for_route( $route, $callbacks, $context = 'view' ) {
 		$data = array(
 			'namespace' => '',
-			'methods'   => array(),
+			'methods' => array(),
 			'endpoints' => array(),
 		);
 
@@ -1176,7 +1170,7 @@ class WP_REST_Server {
 			}
 
 			$data['methods'] = array_merge( $data['methods'], array_keys( $callback['methods'] ) );
-			$endpoint_data   = array(
+			$endpoint_data = array(
 				'methods' => array_keys( $callback['methods'] ),
 			);
 
@@ -1275,7 +1269,19 @@ class WP_REST_Server {
 	 * @param string $key Header key.
 	 */
 	public function remove_header( $key ) {
-		header_remove( $key );
+		if ( function_exists( 'header_remove' ) ) {
+			// In PHP 5.3+ there is a way to remove an already set header.
+			header_remove( $key );
+		} else {
+			// In PHP 5.2, send an empty header, but only as a last resort to
+			// override a header already sent.
+			foreach ( headers_list() as $header ) {
+				if ( 0 === stripos( $header, "$key:" ) ) {
+					$this->send_header( $key, '' );
+					break;
+				}
+			}
+		}
 	}
 
 	/**
@@ -1313,11 +1319,7 @@ class WP_REST_Server {
 		$headers = array();
 
 		// CONTENT_* headers are not prefixed with HTTP_.
-		$additional = array(
-			'CONTENT_LENGTH' => true,
-			'CONTENT_MD5'    => true,
-			'CONTENT_TYPE'   => true,
-		);
+		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
 
 		foreach ( $server as $key => $value ) {
 			if ( strpos( $key, 'HTTP_' ) === 0 ) {

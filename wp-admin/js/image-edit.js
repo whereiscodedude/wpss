@@ -1,11 +1,9 @@
+/* global imageEditL10n, ajaxurl, confirm */
 /**
- * The functions necessary for editing images.
+ * @summary   The functions necessary for editing images.
  *
- * @since 2.9.0
- * @output wp-admin/js/image-edit.js
+ * @since     2.9.0
  */
-
- /* global imageEditL10n, ajaxurl, confirm */
 
 (function($) {
 
@@ -21,32 +19,7 @@
 	_view : false,
 
 	/**
-	 * Handle crop tool clicks.
-	 */
-	handleCropToolClick: function( postid, nonce, cropButton ) {
-		var img = $( '#image-preview-' + postid ),
-			selection = this.iasapi.getSelection();
-
-		// Ensure selection is available, otherwise reset to full image.
-		if ( isNaN( selection.x1 ) ) {
-			this.setCropSelection( postid, { 'x1': 0, 'y1': 0, 'x2': img.innerWidth(), 'y2': img.innerHeight(), 'width': img.innerWidth(), 'height': img.innerHeight() } );
-			selection = this.iasapi.getSelection();
-		}
-
-		// If we don't already have a selection, select the entire image.
-		if ( 0 === selection.x1 && 0 === selection.y1 && 0 === selection.x2 && 0 === selection.y2 ) {
-			this.iasapi.setSelection( 0, 0, img.innerWidth(), img.innerHeight(), true );
-			this.iasapi.setOptions( { show: true } );
-			this.iasapi.update();
-		} else {
-
-			// Otherwise, perform the crop.
-			imageEdit.crop( postid, nonce , cropButton );
-		}
-	},
-
-	/**
-	 * Converts a value to an integer.
+	 * @summary Converts a value to an integer.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -64,7 +37,8 @@
 	},
 
 	/**
-	 * Adds the disabled attribute and class to a single form element or a field set.
+	 * @summary Adds the disabled attribute and class to a single form element
+	 *          or a field set.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -76,7 +50,7 @@
 	 *                            The function is sometimes called with a 0 or 1
 	 *                            instead of true or false.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	setDisabled : function( el, s ) {
 		/*
@@ -93,14 +67,14 @@
 	},
 
 	/**
-	 * Initializes the image editor.
+	 * @summary Initializes the image editor.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
 	 *
 	 * @param {number} postid The post id.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	init : function(postid) {
 		var t = this, old = $('#image-editor-' + t.postid),
@@ -136,7 +110,7 @@
 	},
 
 	/**
-	 * Toggles the wait/load icon in the editor.
+	 * @summary Toggles the wait/load icon in the editor.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -144,7 +118,7 @@
 	 * @param {number} postid The post id.
 	 * @param {number} toggle Is 0 or 1, fades the icon in then 1 and out when 0.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	toggleEditor : function(postid, toggle) {
 		var wait = $('#imgedit-wait-' + postid);
@@ -157,14 +131,14 @@
 	},
 
 	/**
-	 * Shows or hides the image edit help box.
+	 * @summary Shows or hides the image edit help box.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
 	 *
 	 * @param {HTMLElement} el The element to create the help window in.
 	 *
-	 * @return {boolean} Always returns false.
+	 * @returns {boolean} Always returns false.
 	 */
 	toggleHelp : function(el) {
 		var $el = $( el );
@@ -176,7 +150,7 @@
 	},
 
 	/**
-	 * Gets the value from the image edit target.
+	 * @summary Gets the value from the image edit target.
 	 *
 	 * The image edit target contains the image sizes where the (possible) changes
 	 * have to be applied to.
@@ -186,15 +160,15 @@
 	 *
 	 * @param {number} postid The post id.
 	 *
-	 * @return {string} The value from the imagedit-save-target input field when available,
-	 *                  or 'full' when not available.
+	 * @returns {string} The value from the imagedit-save-target input field when available,
+	 *                   or 'full' when not available.
 	 */
 	getTarget : function(postid) {
 		return $('input[name="imgedit-target-' + postid + '"]:checked', '#imgedit-save-target-' + postid).val() || 'full';
 	},
 
 	/**
-	 * Recalculates the height or width and keeps the original aspect ratio.
+	 * @summary Recalculates the height or width and keeps the original aspect ratio.
 	 *
 	 * If the original image size is exceeded a red exclamation mark is shown.
 	 *
@@ -206,7 +180,7 @@
 	 *                                and 1 when applicable for the x-axis.
 	 * @param {jQuery}         el     Element.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	scaleChanged : function( postid, x, el ) {
 		var w = $('#imgedit-scale-width-' + postid), h = $('#imgedit-scale-height-' + postid),
@@ -232,14 +206,14 @@
 	},
 
 	/**
-	 * Gets the selected aspect ratio.
+	 * @summary Gets the selected aspect ratio.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
 	 *
 	 * @param {number} postid The post id.
 	 *
-	 * @return {string} The aspect ratio.
+	 * @returns {string} The aspect ratio.
 	 */
 	getSelRatio : function(postid) {
 		var x = this.hold.w, y = this.hold.h,
@@ -258,7 +232,7 @@
 	},
 
 	/**
-	 * Removes the last action from the image edit history.
+	 * @summary Removes the last action from the image edit history
 	 * The history consist of (edit) actions performed on the image.
 	 *
 	 * @memberof imageEdit
@@ -267,7 +241,7 @@
 	 * @param {number} postid  The post id.
 	 * @param {number} setSize 0 or 1, when 1 the image resets to its original size.
 	 *
-	 * @return {string} JSON string containing the history or an empty string if no history exists.
+	 * @returns {string} JSON string containing the history or an empty string if no history exists.
 	 */
 	filterHistory : function(postid, setSize) {
 		// Apply undo state to history.
@@ -322,7 +296,7 @@
 		return '';
 	},
 	/**
-	 * Binds the necessary events to the image.
+	 * @summary Binds the necessary events to the image.
 	 *
 	 * When the image source is reloaded the image will be reloaded.
 	 *
@@ -333,7 +307,7 @@
 	 * @param {string}   nonce    The nonce to verify the request.
 	 * @param {function} callback Function to execute when the image is loaded.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	refreshEditor : function(postid, nonce, callback) {
 		var t = this, data, img;
@@ -377,6 +351,7 @@
 				t.hold.sizer = max1 > max2 ? max2 / max1 : 1;
 
 				t.initCrop(postid, img, parent);
+				t.setCropSelection(postid, 0);
 
 				if ( (typeof callback !== 'undefined') && callback !== null ) {
 					callback();
@@ -397,7 +372,7 @@
 			.attr('src', ajaxurl + '?' + $.param(data));
 	},
 	/**
-	 * Performs an image edit action.
+	 * @summary Performs an image edit action.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -407,10 +382,10 @@
 	 * @param  {string}  action The action to perform on the image.
 	 *                          The possible actions are: "scale" and "restore".
 	 *
-	 * @return {boolean|void} Executes a post request that refreshes the page
-	 *                        when the action is performed.
-	 *                        Returns false if a invalid action is given,
-	 *                        or when the action cannot be performed.
+	 * @returns {boolean|void} Executes a post request that refreshes the page
+	 *                         when the action is performed.
+	 *                         Returns false if a invalid action is given,
+	 *                         or when the action cannot be performed.
 	 */
 	action : function(postid, nonce, action) {
 		var t = this, data, w, h, fw, fh;
@@ -464,7 +439,7 @@
 	},
 
 	/**
-	 * Stores the changes that are made to the image.
+	 * @summary Stores the changes that are made to the image.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -472,9 +447,9 @@
 	 * @param {number}  postid   The post id to get the image from the database.
 	 * @param {string}  nonce    The nonce to verify the request.
 	 *
-	 * @return {boolean|void}  If the actions are successfully saved a response message is shown.
-	 *                         Returns false if there is no image editing history,
-	 *                         thus there are not edit-actions performed on the image.
+	 * @returns {boolean|void}  If the actions are successfully saved a response message is shown.
+	 *                          Returns false if there is no image editing history,
+	 *                          thus there are not edit-actions performed on the image.
 	 */
 	save : function(postid, nonce) {
 		var data,
@@ -529,7 +504,7 @@
 	},
 
 	/**
-	 * Creates the image edit window.
+	 * @summary Creates the image edit window.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -538,8 +513,8 @@
 	 * @param {string} nonce    The nonce to verify the request.
 	 * @param {object} view     The image editor view to be used for the editing.
 	 *
-	 * @return {void|promise} Either returns void if the button was already activated
-	 *                        or returns an instance of the image editor, wrapped in a promise.
+	 * @returns {void|promise} Either returns void if the button was already activated
+	 *                         or returns an instance of the image editor, wrapped in a promise.
 	 */
 	open : function( postid, nonce, view ) {
 		this._view = view;
@@ -586,14 +561,14 @@
 	},
 
 	/**
-	 * Initializes the cropping tool and sets a default cropping selection.
+	 * @summary Initializes the cropping tool and sets a default cropping selection.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
 	 *
 	 * @param {number} postid The post id.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	imgLoaded : function(postid) {
 		var img = $('#image-preview-' + postid), parent = $('#imgedit-crop-' + postid);
@@ -604,15 +579,14 @@
 		}
 
 		this.initCrop(postid, img, parent);
-		this.setCropSelection( postid, { 'x1': 0, 'y1': 0, 'x2': 0, 'y2': 0, 'width': img.innerWidth(), 'height': img.innerHeight() } );
-
+		this.setCropSelection(postid, 0);
 		this.toggleEditor(postid, 0);
 		// Editor is ready, move focus to the first focusable element.
 		$( '.imgedit-wrap .imgedit-help-toggle' ).eq( 0 ).focus();
 	},
 
 	/**
-	 * Initializes the cropping tool.
+	 * @summary Initializes the cropping tool.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -621,7 +595,7 @@
 	 * @param {HTMLElement} image  The preview image.
 	 * @param {HTMLElement} parent The preview image container.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	initCrop : function(postid, image, parent) {
 		var t = this,
@@ -638,9 +612,7 @@
 			minHeight: 3,
 
 			/**
-			 * Sets the CSS styles and binds events for locking the aspect ratio.
-			 *
-			 * @ignore
+			 * @summary Sets the CSS styles and binds events for locking the aspect ratio.
 			 *
 			 * @param {jQuery} img The preview image.
 			 */
@@ -651,9 +623,9 @@
 				$img.next().css( 'position', 'absolute' )
 					.nextAll( '.imgareaselect-outer' ).css( 'position', 'absolute' );
 				/**
-				 * Binds mouse down event to the cropping container.
+				 * @summary Binds mouse down event to the cropping container.
 				 *
-				 * @return {void}
+				 * @returns {void}
 				 */
 				parent.children().on( 'mousedown, touchstart', function(e){
 					var ratio = false, sel, defRatio;
@@ -671,38 +643,32 @@
 			},
 
 			/**
-			 * Event triggered when starting a selection.
+			 * @summary Event triggered when starting a selection.
 			 *
-			 * @ignore
-			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			onSelectStart: function() {
 				imageEdit.setDisabled($('#imgedit-crop-sel-' + postid), 1);
 			},
 			/**
-			 * Event triggered when the selection is ended.
-			 *
-			 * @ignore
+			 * @summary Event triggered when the selection is ended.
 			 *
 			 * @param {object} img jQuery object representing the image.
 			 * @param {object} c   The selection.
 			 *
-			 * @return {object}
+			 * @returns {object}
 			 */
 			onSelectEnd: function(img, c) {
 				imageEdit.setCropSelection(postid, c);
 			},
 
 			/**
-			 * Event triggered when the selection changes.
-			 *
-			 * @ignore
+			 * @summary Event triggered when the selection changes.
 			 *
 			 * @param {object} img jQuery object representing the image.
 			 * @param {object} c   The selection.
 			 *
-			 * @return {void}
+			 * @returns {void}
 			 */
 			onSelectChange: function(img, c) {
 				var sizer = imageEdit.hold.sizer;
@@ -713,7 +679,7 @@
 	},
 
 	/**
-	 * Stores the current crop selection.
+	 * @summary Stores the current crop selection.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -721,7 +687,7 @@
 	 * @param {number} postid The post id.
 	 * @param {object} c      The selection.
 	 *
-	 * @return {boolean}
+	 * @returns {boolean}
 	 */
 	setCropSelection : function(postid, c) {
 		var sel;
@@ -729,8 +695,8 @@
 		c = c || 0;
 
 		if ( !c || ( c.width < 3 && c.height < 3 ) ) {
-			this.setDisabled( $( '.imgedit-crop', '#imgedit-panel-' + postid ), 1 );
-			this.setDisabled( $( '#imgedit-crop-sel-' + postid ), 1 );
+			this.setDisabled($('.imgedit-crop', '#imgedit-panel-' + postid), 0);
+			this.setDisabled($('#imgedit-crop-sel-' + postid), 0);
 			$('#imgedit-sel-width-' + postid).val('');
 			$('#imgedit-sel-height-' + postid).val('');
 			$('#imgedit-selection-' + postid).val('');
@@ -744,7 +710,7 @@
 
 
 	/**
-	 * Closes the image editor.
+	 * @summary Closes the image editor.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -752,7 +718,7 @@
 	 * @param {number}  postid The post id.
 	 * @param {bool}    warn   Warning message.
 	 *
-	 * @return {void|bool} Returns false if there is a warning.
+	 * @returns {void|bool} Returns false if there is a warning.
 	 */
 	close : function(postid, warn) {
 		warn = warn || false;
@@ -785,14 +751,14 @@
 	},
 
 	/**
-	 * Checks if the image edit history is saved.
+	 * @summary Checks if the image edit history is saved.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
 	 *
 	 * @param {number} postid The post id.
 	 *
-	 * @return {boolean} Returns true if the history is not saved.
+	 * @returns {boolean} Returns true if the history is not saved.
 	 */
 	notsaved : function(postid) {
 		var h = $('#imgedit-history-' + postid).val(),
@@ -809,7 +775,7 @@
 	},
 
 	/**
-	 * Adds an image edit action to the history.
+	 * @summary Adds an image edit action to the history.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -818,7 +784,7 @@
 	 * @param {number} postid The post id.
 	 * @param {string} nonce  The nonce.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	addStep : function(op, postid, nonce) {
 		var t = this, elem = $('#imgedit-history-' + postid),
@@ -842,7 +808,7 @@
 	},
 
 	/**
-	 * Rotates the image.
+	 * @summary Rotates the image.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -852,7 +818,7 @@
 	 * @param {string} nonce  The nonce.
 	 * @param {object} t      The target element.
 	 *
-	 * @return {boolean}
+	 * @returns {boolean}
 	 */
 	rotate : function(angle, postid, nonce, t) {
 		if ( $(t).hasClass('disabled') ) {
@@ -863,7 +829,7 @@
 	},
 
 	/**
-	 * Flips the image.
+	 * @summary Flips the image.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -873,7 +839,7 @@
 	 * @param {string} nonce  The nonce.
 	 * @param {object} t      The target element.
 	 *
-	 * @return {boolean}
+	 * @returns {boolean}
 	 */
 	flip : function (axis, postid, nonce, t) {
 		if ( $(t).hasClass('disabled') ) {
@@ -884,7 +850,7 @@
 	},
 
 	/**
-	 * Crops the image.
+	 * @summary Crops the image.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -893,7 +859,7 @@
 	 * @param {string} nonce  The nonce.
 	 * @param {object} t      The target object.
 	 *
-	 * @return {void|boolean} Returns false if the crop button is disabled.
+	 * @returns {void|boolean} Returns false if the crop button is disabled.
 	 */
 	crop : function (postid, nonce, t) {
 		var sel = $('#imgedit-selection-' + postid).val(),
@@ -913,7 +879,7 @@
 	},
 
 	/**
-	 * Undoes an image edit action.
+	 * @summary Undoes an image edit action.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -921,7 +887,7 @@
 	 * @param {number} postid   The post id.
 	 * @param {string} nonce    The nonce.
 	 *
-	 * @return {void|false} Returns false if the undo button is disabled.
+	 * @returns {void|false} Returns false if the undo button is disabled.
 	 */
 	undo : function (postid, nonce) {
 		var t = this, button = $('#image-undo-' + postid), elem = $('#imgedit-undone-' + postid),
@@ -954,7 +920,7 @@
 	 * @param {number} postid The post id.
 	 * @param {string} nonce  The nonce.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	redo : function(postid, nonce) {
 		var t = this, button = $('#image-redo-' + postid), elem = $('#imgedit-undone-' + postid),
@@ -976,7 +942,7 @@
 	},
 
 	/**
-	 * Sets the selection for the height and width in pixels.
+	 * @summary Sets the selection for the height and width in pixels.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -984,9 +950,9 @@
 	 * @param {number} postid The post id.
 	 * @param {jQuery} el     The element containing the values.
 	 *
-	 * @return {void|boolean} Returns false when the x or y value is lower than 1,
-	 *                        void when the value is not numeric or when the operation
-	 *                        is successful.
+	 * @returns {void|boolean} Returns false when the x or y value is lower than 1,
+	 *                         void when the value is not numeric or when the operation
+	 *                         is successful.
 	 */
 	setNumSelection : function( postid, el ) {
 		var sel, elX = $('#imgedit-sel-width-' + postid), elY = $('#imgedit-sel-height-' + postid),
@@ -1040,7 +1006,7 @@
 	 *
 	 * @param {number} num The number.
 	 *
-	 * @return {number} The number rounded to a whole number.
+	 * @returns {number} The number rounded to a whole number.
 	 */
 	round : function(num) {
 		var s;
@@ -1071,7 +1037,7 @@
 	 * @param {number} n          The ratio to set.
 	 * @param {jQuery} el         The element containing the values.
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	setRatioSelection : function(postid, n, el) {
 		var sel, r, x = this.intval( $('#imgedit-crop-width-' + postid).val() ),
@@ -1113,8 +1079,8 @@
 	 *
 	 * @param {jQuery} el The html element.
 	 *
-	 * @return {void|boolean} Returns false if the value is not numeric,
-	 *                        void when it is.
+	 * @returns {void|boolean} Returns false if the value is not numeric,
+	 *                         void when it is.
 	 */
 	validateNumeric: function( el ) {
 		if ( ! this.intval( $( el ).val() ) ) {
