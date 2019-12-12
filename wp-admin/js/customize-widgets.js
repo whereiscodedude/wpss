@@ -1,7 +1,3 @@
-/**
- * @output wp-admin/js/customize-widgets.js
- */
-
 /* global _wpCustomizeWidgetsSettings */
 (function( wp, $ ){
 
@@ -11,9 +7,6 @@
 	var api = wp.customize,
 		l10n;
 
-	/**
-	 * @namespace wp.customize.Widgets
-	 */
 	api.Widgets = api.Widgets || {};
 	api.Widgets.savedWidgetIds = {};
 
@@ -26,10 +19,10 @@
 	 *
 	 * A single widget model.
 	 *
-	 * @class    wp.customize.Widgets.WidgetModel
+	 * @constructor
 	 * @augments Backbone.Model
 	 */
-	api.Widgets.WidgetModel = Backbone.Model.extend(/** @lends wp.customize.Widgets.WidgetModel.prototype */{
+	api.Widgets.WidgetModel = Backbone.Model.extend({
 		id: null,
 		temp_id: null,
 		classname: null,
@@ -52,10 +45,10 @@
 	 *
 	 * Collection for widget models.
 	 *
-	 * @class    wp.customize.Widgets.WidgetCollection
-	 * @augments Backbone.Collection
+	 * @constructor
+	 * @augments Backbone.Model
 	 */
-	api.Widgets.WidgetCollection = Backbone.Collection.extend(/** @lends wp.customize.Widgets.WidgetCollection.prototype */{
+	api.Widgets.WidgetCollection = Backbone.Collection.extend({
 		model: api.Widgets.WidgetModel,
 
 		// Controls searching on the current widget collection
@@ -110,10 +103,10 @@
 	 *
 	 * A single sidebar model.
 	 *
-	 * @class    wp.customize.Widgets.SidebarModel
+	 * @constructor
 	 * @augments Backbone.Model
 	 */
-	api.Widgets.SidebarModel = Backbone.Model.extend(/** @lends wp.customize.Widgets.SidebarModel.prototype */{
+	api.Widgets.SidebarModel = Backbone.Model.extend({
 		after_title: null,
 		after_widget: null,
 		before_title: null,
@@ -130,20 +123,30 @@
 	 *
 	 * Collection for sidebar models.
 	 *
-	 * @class    wp.customize.Widgets.SidebarCollection
+	 * @constructor
 	 * @augments Backbone.Collection
 	 */
-	api.Widgets.SidebarCollection = Backbone.Collection.extend(/** @lends wp.customize.Widgets.SidebarCollection.prototype */{
+	api.Widgets.SidebarCollection = Backbone.Collection.extend({
 		model: api.Widgets.SidebarModel
 	});
 	api.Widgets.registeredSidebars = new api.Widgets.SidebarCollection( api.Widgets.data.registeredSidebars );
 
-	api.Widgets.AvailableWidgetsPanelView = wp.Backbone.View.extend(/** @lends wp.customize.Widgets.AvailableWidgetsPanelView.prototype */{
+	/**
+	 * wp.customize.Widgets.AvailableWidgetsPanelView
+	 *
+	 * View class for the available widgets panel.
+	 *
+	 * @constructor
+	 * @augments wp.Backbone.View
+	 * @augments Backbone.View
+	 */
+	api.Widgets.AvailableWidgetsPanelView = wp.Backbone.View.extend({
 
 		el: '#available-widgets',
 
 		events: {
 			'input #widgets-search': 'search',
+			'keyup #widgets-search': 'search',
 			'focus .widget-tpl' : 'focus',
 			'click .widget-tpl' : '_submit',
 			'keypress .widget-tpl' : '_submit',
@@ -159,12 +162,6 @@
 		$clearResults: null,
 		searchMatchesCount: null,
 
-		/**
-		 * View class for the available widgets panel.
-		 *
-		 * @constructs wp.customize.Widgets.AvailableWidgetsPanelView
-		 * @augments   wp.Backbone.View
-		 */
 		initialize: function() {
 			var self = this;
 
@@ -191,20 +188,17 @@
 				}
 			} );
 
-			// Clear the search results and trigger a new search.
+			// Clear the search results and trigger a `keyup` event to fire a new search.
 			this.$clearResults.on( 'click', function() {
-				self.$search.val( '' ).focus();
-				self.collection.doSearch( '' );
+				self.$search.val( '' ).focus().trigger( 'keyup' );
 			} );
 
 			// Close the panel if the URL in the preview changes
 			api.previewer.bind( 'url', this.close );
 		},
 
-		/**
-		 * Performs a search and handles selected widget.
-		 */
-		search: _.debounce( function( event ) {
+		// Performs a search and handles selected widget
+		search: function( event ) {
 			var firstVisible;
 
 			this.collection.doSearch( event.target.value );
@@ -246,19 +240,15 @@
 			} else {
 				this.$el.removeClass( 'no-widgets-found' );
 			}
-		}, 500 ),
+		},
 
-		/**
-		 * Updates the count of the available widgets that have the `search_matched` attribute.
- 		 */
+		// Update the count of the available widgets that have the `search_matched` attribute.
 		updateSearchMatchesCount: function() {
 			this.searchMatchesCount = this.collection.where({ search_matched: true }).length;
 		},
 
-		/**
-		 * Sends a message to the aria-live region to announce how many search results.
-		 */
-		announceSearchMatches: function() {
+		// Send a message to the aria-live region to announce how many search results.
+		announceSearchMatches: _.debounce( function() {
 			var message = l10n.widgetsFound.replace( '%d', this.searchMatchesCount ) ;
 
 			if ( ! this.searchMatchesCount ) {
@@ -266,11 +256,9 @@
 			}
 
 			wp.a11y.speak( message );
-		},
+		}, 500 ),
 
-		/**
-		 * Changes visibility of available widgets.
- 		 */
+		// Changes visibility of available widgets
 		updateList: function() {
 			this.collection.each( function( widget ) {
 				var widgetTpl = $( '#widget-tpl-' + widget.id );
@@ -281,25 +269,19 @@
 			} );
 		},
 
-		/**
-		 * Highlights a widget.
- 		 */
+		// Highlights a widget
 		select: function( widgetTpl ) {
 			this.selected = $( widgetTpl );
 			this.selected.siblings( '.widget-tpl' ).removeClass( 'selected' );
 			this.selected.addClass( 'selected' );
 		},
 
-		/**
-		 * Highlights a widget on focus.
-		 */
+		// Highlights a widget on focus
 		focus: function( event ) {
 			this.select( $( event.currentTarget ) );
 		},
 
-		/**
-		 * Handles submit for keypress and click on widget.
-		 */
+		// Submit handler for keypress and click on widget
 		_submit: function( event ) {
 			// Only proceed with keypress if it is Enter or Spacebar
 			if ( event.type === 'keypress' && ( event.which !== 13 && event.which !== 32 ) ) {
@@ -309,9 +291,7 @@
 			this.submit( $( event.currentTarget ) );
 		},
 
-		/**
-		 * Adds a selected widget to the sidebar.
- 		 */
+		// Adds a selected widget to the sidebar
 		submit: function( widgetTpl ) {
 			var widgetId, widget, widgetFormControl;
 
@@ -339,9 +319,7 @@
 			this.close();
 		},
 
-		/**
-		 * Opens the panel.
-		 */
+		// Opens the panel
 		open: function( sidebarControl ) {
 			this.currentSidebarControl = sidebarControl;
 
@@ -368,9 +346,7 @@
 			}
 		},
 
-		/**
-		 * Closes the panel.
-		 */
+		// Closes the panel
 		close: function( options ) {
 			options = options || {};
 
@@ -386,9 +362,7 @@
 			this.$search.val( '' );
 		},
 
-		/**
-		 * Adds keyboard accessiblity to the panel.
-		 */
+		// Add keyboard accessiblity to the panel
 		keyboardAccessible: function( event ) {
 			var isEnter = ( event.which === 13 ),
 				isEsc = ( event.which === 27 ),
@@ -450,8 +424,6 @@
 	 * Handlers for the widget-synced event, organized by widget ID base.
 	 * Other widgets may provide their own update handlers by adding
 	 * listeners for the widget-synced event.
-	 *
-	 * @alias    wp.customize.Widgets.formSyncHandlers
 	 */
 	api.Widgets.formSyncHandlers = {
 
@@ -474,22 +446,23 @@
 		}
 	};
 
-	api.Widgets.WidgetControl = api.Control.extend(/** @lends wp.customize.Widgets.WidgetControl.prototype */{
+	/**
+	 * wp.customize.Widgets.WidgetControl
+	 *
+	 * Customizer control for widgets.
+	 * Note that 'widget_form' must match the WP_Widget_Form_Customize_Control::$type
+	 *
+	 * @constructor
+	 * @augments wp.customize.Control
+	 */
+	api.Widgets.WidgetControl = api.Control.extend({
 		defaultExpandedArguments: {
 			duration: 'fast',
 			completeCallback: $.noop
 		},
 
 		/**
-		 * wp.customize.Widgets.WidgetControl
-		 *
-		 * Customizer control for widgets.
-		 * Note that 'widget_form' must match the WP_Widget_Form_Customize_Control::$type
-		 *
 		 * @since 4.1.0
-		 *
-		 * @constructs wp.customize.Widgets.WidgetControl
-		 * @augments   wp.customize.Control
 		 */
 		initialize: function( id, options ) {
 			var control = this;
@@ -709,7 +682,8 @@
 			} );
 
 			$closeBtn = this.container.find( '.widget-control-close' );
-			$closeBtn.on( 'click', function() {
+			$closeBtn.on( 'click', function( e ) {
+				e.preventDefault();
 				self.collapse();
 				self.container.find( '.widget-top .widget-action:first' ).focus(); // keyboard accessibility
 			} );
@@ -969,7 +943,7 @@
 		 *
 		 * @param {Boolean}   active
 		 * @param {Object}    args
-		 * @param {function}  args.completeCallback
+		 * @param {Callback}  args.completeCallback
 		 */
 		onChangeActive: function ( active, args ) {
 			// Note: there is a second 'args' parameter being passed, merged on top of this.defaultActiveArguments
@@ -987,7 +961,9 @@
 
 			// Configure remove button
 			$removeBtn = this.container.find( '.widget-control-remove' );
-			$removeBtn.on( 'click', function() {
+			$removeBtn.on( 'click', function( e ) {
+				e.preventDefault();
+
 				// Find an adjacent element to add focus to when this widget goes away
 				var $adjacentFocusTarget;
 				if ( self.container.next().is( '.customize-control-widget_form' ) ) {
@@ -1039,7 +1015,7 @@
 		 * over when copying sanitized values over to the form loaded.
 		 *
 		 * @param {jQuery} container element in which to look for inputs
-		 * @return {jQuery} inputs
+		 * @returns {jQuery} inputs
 		 * @private
 		 */
 		_getInputs: function( container ) {
@@ -1051,7 +1027,7 @@
 		 * This string can be used to compare whether or not the form has all of the same fields.
 		 *
 		 * @param {jQuery} inputs
-		 * @return {string}
+		 * @returns {string}
 		 * @private
 		 */
 		_getInputsSignature: function( inputs ) {
@@ -1074,7 +1050,7 @@
 		 * Get the state for an input depending on its type.
 		 *
 		 * @param {jQuery|Element} input
-		 * @return {string|boolean|array|*}
+		 * @returns {string|boolean|array|*}
 		 * @private
 		 */
 		_getInputState: function( input ) {
@@ -1340,7 +1316,7 @@
 		 *
 		 * @param {Boolean} expanded
 		 * @param {Object} [params]
-		 * @return {Boolean} False if state already applied.
+		 * @returns {Boolean} false if state already applied
 		 */
 		_toggleExpanded: api.Section.prototype._toggleExpanded,
 
@@ -1348,7 +1324,7 @@
 		 * @since 4.1.0
 		 *
 		 * @param {Object} [params]
-		 * @return {Boolean} False if already expanded.
+		 * @returns {Boolean} false if already expanded
 		 */
 		expand: api.Section.prototype.expand,
 
@@ -1365,7 +1341,7 @@
 		 * @since 4.1.0
 		 *
 		 * @param {Object} [params]
-		 * @return {Boolean} False if already collapsed.
+		 * @returns {Boolean} false if already collapsed
 		 */
 		collapse: api.Section.prototype.collapse,
 
@@ -1495,7 +1471,7 @@
 		/**
 		 * Get the position (index) of the widget in the containing sidebar
 		 *
-		 * @return {Number}
+		 * @returns {Number}
 		 */
 		getWidgetSidebarPosition: function() {
 			var sidebarWidgetIds, position;
@@ -1598,11 +1574,8 @@
 	 * Customizer panel containing the widget area sections.
 	 *
 	 * @since 4.4.0
-	 *
-	 * @class    wp.customize.Widgets.WidgetsPanel
-	 * @augments wp.customize.Panel
 	 */
-	api.Widgets.WidgetsPanel = api.Panel.extend(/** @lends wp.customize.Widgets.WigetsPanel.prototype */{
+	api.Widgets.WidgetsPanel = api.Panel.extend({
 
 		/**
 		 * Add and manage the display of the no-rendered-areas notice.
@@ -1631,7 +1604,7 @@
 				 */
 				getActiveSectionCount = function() {
 					return _.filter( panel.sections(), function( section ) {
-						return 'sidebar' === section.params.type && section.active();
+						return section.active();
 					} ).length;
 				};
 
@@ -1652,7 +1625,7 @@
 				/**
 				 * Update the notice.
 				 *
-				 * @return {void}
+				 * @returns {void}
 				 */
 				updateNotice = function() {
 					var activeSectionCount = getActiveSectionCount(), someRenderedMessage, nonRenderedAreaCount, registeredAreaCount;
@@ -1708,7 +1681,7 @@
 		 *
 		 * @since 4.4.0
 		 *
-		 * @return {boolean}
+		 * @returns {boolean}
 		 */
 		isContextuallyActive: function() {
 			var panel = this;
@@ -1722,11 +1695,8 @@
 	 * Customizer section representing a widget area widget
 	 *
 	 * @since 4.1.0
-	 *
-	 * @class    wp.customize.Widgets.SidebarSection
-	 * @augments wp.customize.Section
 	 */
-	api.Widgets.SidebarSection = api.Section.extend(/** @lends wp.customize.Widgets.SidebarSection.prototype */{
+	api.Widgets.SidebarSection = api.Section.extend({
 
 		/**
 		 * Sync the section's active state back to the Backbone model's is_rendered attribute
@@ -1752,10 +1722,10 @@
 	 *
 	 * @since 3.9.0
 	 *
-	 * @class    wp.customize.Widgets.SidebarControl
+	 * @constructor
 	 * @augments wp.customize.Control
 	 */
-	api.Widgets.SidebarControl = api.Control.extend(/** @lends wp.customize.Widgets.SidebarControl.prototype */{
+	api.Widgets.SidebarControl = api.Control.extend({
 
 		/**
 		 * Set up the control
@@ -2060,8 +2030,8 @@
 		},
 
 		/**
-		 * @param {string} widgetId or an id_base for adding a previously non-existing widget.
-		 * @return {object|false} widget_form control instance, or false on error.
+		 * @param {string} widgetId or an id_base for adding a previously non-existing widget
+		 * @returns {object|false} widget_form control instance, or false on error
 		 */
 		addWidget: function( widgetId ) {
 			var self = this, controlHtml, $widget, controlType = 'widget_form', controlContainer, controlConstructor,
@@ -2330,7 +2300,7 @@
 
 	/**
 	 * @param {String} widgetId
-	 * @return {Object}
+	 * @returns {Object}
 	 */
 	function parseWidgetId( widgetId ) {
 		var matches, parsed = {
@@ -2352,7 +2322,7 @@
 
 	/**
 	 * @param {String} widgetId
-	 * @return {String} settingId
+	 * @returns {String} settingId
 	 */
 	function widgetIdToSettingId( widgetId ) {
 		var parsed = parseWidgetId( widgetId ), settingId;

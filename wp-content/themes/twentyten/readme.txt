@@ -1,7 +1,8 @@
 === Twenty Ten ===
-Contributors: wordpressdotorg
-Tested up to: 5.0
-Stable tag: 2.9
+Contributors: the WordPress team
+Requires at least: WordPress 3.0
+Tested up to: WordPress 5.0
+Stable tag: 2.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: blog, two-columns, custom-header, custom-background, threaded-comments, sticky-post, translation-ready, microformats, rtl-language-support, editor-style, custom-menu, flexible-header, featured-images, footer-widgets, featured-image-header
@@ -21,7 +22,7 @@ For more information about Twenty Ten theme please go to https://codex.wordpress
 
 == Copyright ==
 
-Twenty Ten WordPress Theme, Copyright 2010-2019 WordPress.org & Automattic.com
+Twenty Ten WordPress Theme, Copyright 2010-2018 WordPress.org & Automattic.com
 Twenty Ten is Distributed under the terms of the GNU GPL
 
 This program is free software: you can redistribute it and/or modify
@@ -35,16 +36,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 == Changelog ==
-
-= 2.9 =
-* Released: May 7, 2019
-
-https://codex.wordpress.org/Twenty_Ten_Theme_Changelog#Version_2.9
-
-= 2.8 =
-* Released: February 21, 2019
-
-https://codex.wordpress.org/Twenty_Ten_Theme_Changelog#Version_2.8
 
 = 2.7 =
 * Released: December 19, 2018

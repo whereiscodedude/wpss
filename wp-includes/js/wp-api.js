@@ -1,7 +1,3 @@
-/**
- * @output wp-includes/js/wp-api.js
- */
-
 (function( window, undefined ) {
 
 	'use strict';
@@ -835,7 +831,7 @@
 			 * @param {string} method.
 			 * @param {Backbone.Model} model.
 			 * @param {{beforeSend}, *} options.
-			 * @return {*}.
+			 * @returns {*}.
 			 */
 			sync: function( method, model, options ) {
 				var beforeSend;
@@ -988,7 +984,7 @@
 			 * @param {string} method.
 			 * @param {Backbone.Model} model.
 			 * @param {{success}, *} options.
-			 * @return {*}.
+			 * @returns {*}.
 			 */
 			sync: function( method, model, options ) {
 				var beforeSend, success,
@@ -1063,7 +1059,7 @@
 			 * Fetches the next page of objects if a new page exists.
 			 *
 			 * @param {data: {page}} options.
-			 * @return {*}.
+			 * @returns {*}.
 			 */
 			more: function( options ) {
 				options = options || {};
@@ -1089,7 +1085,7 @@
 			/**
 			 * Returns true if there are more pages of objects available.
 			 *
-			 * @return {null|boolean}
+			 * @returns null|boolean.
 			 */
 			hasMore: function() {
 				if ( null === this.state.totalPages ||
@@ -1175,7 +1171,7 @@
 					 * have to retrieve it again for this session. Then, construct the models and collections based
 					 * on the schema model data.
 					 *
-					 * @ignore
+					 * @callback
 					 */
 					success: function( newSchemaModel ) {
 

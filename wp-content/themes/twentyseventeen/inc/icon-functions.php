@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Seventeen
- * @since Twenty Seventeen 1.0
+ * @since 1.0
  */
 
 /**
@@ -46,10 +46,10 @@ function twentyseventeen_get_svg( $args = array() ) {
 
 	// Set defaults.
 	$defaults = array(
-		'icon'     => '',
-		'title'    => '',
-		'desc'     => '',
-		'fallback' => false,
+		'icon'        => '',
+		'title'       => '',
+		'desc'        => '',
+		'fallback'    => false,
 	);
 
 	// Parse args.
