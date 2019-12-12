@@ -42,7 +42,7 @@ get_header(); ?>
 					</div>
 
 					<?php
-					/* translators: %1$s: Smilie. */
+					/* translators: %1$s: smilie */
 					$archive_content = '<p>' . sprintf( __( 'Try looking in the monthly archives. %1$s', 'twentyeleven' ), convert_smilies( ':)' ) ) . '</p>';
 					the_widget(
 						'WP_Widget_Archives',

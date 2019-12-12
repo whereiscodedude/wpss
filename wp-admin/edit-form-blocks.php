@@ -1,6 +1,6 @@
 <?php
 /**
- * The block editor page.
+ * The Block Editor page.
  *
  * @since 5.0.0
  *
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * @global string       $post_type
  * @global WP_Post_Type $post_type_object
- * @global WP_Post      $post             Global post object.
+ * @global WP_Post      $post
  * @global string       $title
  * @global array        $editor_styles
  * @global array        $wp_meta_boxes
@@ -49,7 +49,6 @@ $preload_paths = array(
 	sprintf( '/wp/v2/users/me?post_type=%s&context=edit', $post_type ),
 	array( '/wp/v2/media', 'OPTIONS' ),
 	array( '/wp/v2/blocks', 'OPTIONS' ),
-	sprintf( '/wp/v2/%s/%d/autosaves?context=edit', $rest_base, $post->ID ),
 );
 
 /**
@@ -59,8 +58,8 @@ $preload_paths = array(
  *
  * @since 5.0.0
  *
- * @param string[] $preload_paths Array of paths to preload.
- * @param WP_Post  $post          Post being edited.
+ * @param array  $preload_paths Array of paths to preload.
+ * @param object $post          The post resource data.
  */
 $preload_paths = apply_filters( 'block_editor_preload_paths', $preload_paths, $post );
 
@@ -144,7 +143,7 @@ $font_sizes    = current( (array) get_theme_support( 'editor-font-sizes' ) );
  *
  * @param bool|array $allowed_block_types Array of block type slugs, or
  *                                        boolean to enable/disable all.
- * @param WP_Post    $post                The post resource data.
+ * @param object $post                    The post resource data.
  */
 $allowed_block_types = apply_filters( 'allowed_block_types', true, $post );
 
@@ -176,7 +175,7 @@ $styles = array(
 	),
 );
 
-/* translators: Use this to specify the CSS font family for the default font. */
+/* Translators: Use this to specify the CSS font family for the default font */
 $locale_font_family = esc_html_x( 'Noto Serif', 'CSS Font Family for Editor Font' );
 $styles[]           = array(
 	'css' => "body { font-family: '$locale_font_family' }",
@@ -250,13 +249,9 @@ if ( $user_id ) {
 } else {
 	// Lock the post.
 	$active_post_lock = wp_set_post_lock( $post->ID );
-	if ( $active_post_lock ) {
-		$active_post_lock = esc_attr( implode( ':', $active_post_lock ) );
-	}
-
-	$lock_details = array(
+	$lock_details     = array(
 		'isLocked'       => false,
-		'activePostLock' => $active_post_lock,
+		'activePostLock' => esc_attr( implode( ':', $active_post_lock ) ),
 	);
 }
 
@@ -416,9 +411,9 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 			<p>
 				<?php
 					$message = sprintf(
-						/* translators: %s: A link to install the Classic Editor plugin. */
+						/* translators: %s: Classic Editor plugin URL */
 						__( 'The block editor requires JavaScript. Please enable JavaScript in your browser settings, or try the <a href="%s">Classic Editor plugin</a>.' ),
-						esc_url( wp_nonce_url( self_admin_url( 'plugin-install.php?tab=favorites&user=wordpressdotorg&save=0' ), 'save_wporg_username_' . get_current_user_id() ) )
+						__( 'https://wordpress.org/plugins/classic-editor/' )
 					);
 
 					/**

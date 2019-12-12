@@ -482,7 +482,7 @@ window.wp = window.wp || {};
 		 * For example:
 		 *     when( id1, id2, id3, function( value1, value2, value3 ) {} );
 		 *
-		 * @return $.Deferred.promise();
+		 * @returns $.Deferred.promise();
 		 */
 		when: function() {
 			var self = this,
@@ -876,7 +876,7 @@ window.wp = window.wp || {};
 		 *
 		 * @since 4.9.0
 		 *
-		 * @return {jQuery} Notification container element.
+		 * @returns {jQuery} Notification container element.
 		 */
 		render: function() {
 			var notification = this, container, data;
@@ -942,7 +942,7 @@ window.wp = window.wp || {};
 	 * @alias wp.customize.utils.parseQueryString
 	 *
 	 * @param {string} queryString Query string.
-	 * @return {object} Parsed query string.
+	 * @returns {object} Parsed query string.
 	 */
 	api.utils.parseQueryString = function parseQueryString( queryString ) {
 		var queryParams = {};

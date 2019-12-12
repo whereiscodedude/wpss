@@ -684,15 +684,15 @@ function locate_template( $template_names, $load = false, $require_once = true )
  * @since 1.5.0
  *
  * @global array      $posts
- * @global WP_Post    $post          Global post object.
+ * @global WP_Post    $post
  * @global bool       $wp_did_header
- * @global WP_Query   $wp_query      WordPress Query object.
- * @global WP_Rewrite $wp_rewrite    WordPress rewrite component.
- * @global wpdb       $wpdb          WordPress database abstraction object.
+ * @global WP_Query   $wp_query
+ * @global WP_Rewrite $wp_rewrite
+ * @global wpdb       $wpdb
  * @global string     $wp_version
- * @global WP         $wp            Current WordPress environment instance.
+ * @global WP         $wp
  * @global int        $id
- * @global WP_Comment $comment       Global comment object.
+ * @global WP_Comment $comment
  * @global int        $user_ID
  *
  * @param string $_template_file Path to template file.

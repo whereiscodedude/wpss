@@ -82,24 +82,14 @@ class WP_Admin_Bar {
 	}
 
 	/**
-	 * Add a node (menu item) to the Admin Bar menu.
-	 *
-	 * @since 3.3.0
-	 * @since 5.4.0 Deprecated in favor of {@see WP_Admin_Bar::add_node()}.
-	 *
-	 * @param array $node The attributes that define the node.
+	 * @param array $node
 	 */
 	public function add_menu( $node ) {
 		$this->add_node( $node );
 	}
 
 	/**
-	 * Remove a node from the admin bar.
-	 *
-	 * @since 3.1.0
-	 * @since 5.4.0 Deprecated in favor of {@see WP_Admin_Bar::remove_node()}.
-	 *
-	 * @param string $id The menu slug to remove.
+	 * @param string $id
 	 */
 	public function remove_menu( $id ) {
 		$this->remove_node( $id );
@@ -125,8 +115,8 @@ class WP_Admin_Bar {
 	 */
 	public function add_node( $args ) {
 		// Shim for old method signature: add_node( $parent_id, $menu_obj, $args )
-		if ( func_num_args() >= 3 && is_string( $args ) ) {
-			$args = array_merge( array( 'parent' => $args ), func_get_arg( 2 ) );
+		if ( func_num_args() >= 3 && is_string( func_get_arg( 0 ) ) ) {
+			$args = array_merge( array( 'parent' => func_get_arg( 0 ) ), func_get_arg( 2 ) );
 		}
 
 		if ( is_object( $args ) ) {
@@ -154,8 +144,7 @@ class WP_Admin_Bar {
 		);
 
 		// If the node already exists, keep any data that isn't provided.
-		$maybe_defaults = $this->get_node( $args['id'] );
-		if ( $maybe_defaults ) {
+		if ( $maybe_defaults = $this->get_node( $args['id'] ) ) {
 			$defaults = get_object_vars( $maybe_defaults );
 		}
 
@@ -191,11 +180,10 @@ class WP_Admin_Bar {
 	 * Gets a node.
 	 *
 	 * @param string $id
-	 * @return object|void Node.
+	 * @return object Node.
 	 */
 	final public function get_node( $id ) {
-		$node = $this->_get_node( $id );
-		if ( $node ) {
+		if ( $node = $this->_get_node( $id ) ) {
 			return clone $node;
 		}
 	}
@@ -222,8 +210,7 @@ class WP_Admin_Bar {
 	 * @return array|void
 	 */
 	final public function get_nodes() {
-		$nodes = $this->_get_nodes();
-		if ( ! $nodes ) {
+		if ( ! $nodes = $this->_get_nodes() ) {
 			return;
 		}
 
@@ -325,8 +312,7 @@ class WP_Admin_Bar {
 			}
 
 			// Fetch the parent node. If it isn't registered, ignore the node.
-			$parent = $this->_get_node( $node->parent );
-			if ( ! $parent ) {
+			if ( ! $parent = $this->_get_node( $node->parent ) ) {
 				continue;
 			}
 
@@ -550,19 +536,16 @@ class WP_Admin_Bar {
 		if ( $has_link ) {
 			$attributes = array( 'onclick', 'target', 'title', 'rel', 'lang', 'dir' );
 			echo "<a class='ab-item'$aria_attributes href='" . esc_url( $node->href ) . "'";
+			if ( ! empty( $node->meta['onclick'] ) ) {
+				echo ' onclick="' . esc_js( $node->meta['onclick'] ) . '"';
+			}
 		} else {
 			$attributes = array( 'onclick', 'target', 'title', 'rel', 'lang', 'dir' );
 			echo '<div class="ab-item ab-empty-item"' . $aria_attributes;
 		}
 
 		foreach ( $attributes as $attribute ) {
-			if ( empty( $node->meta[ $attribute ] ) ) {
-				continue;
-			}
-
-			if ( 'onclick' === $attribute ) {
-				echo " $attribute='" . esc_js( $node->meta[ $attribute ] ) . "'";
-			} else {
+			if ( ! empty( $node->meta[ $attribute ] ) ) {
 				echo " $attribute='" . esc_attr( $node->meta[ $attribute ] ) . "'";
 			}
 		}

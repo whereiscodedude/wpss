@@ -73,14 +73,14 @@ class WP_Ajax_Response {
 			'supplemental' => array(),
 		);
 
-		$parsed_args = wp_parse_args( $args, $defaults );
+		$r = wp_parse_args( $args, $defaults );
 
-		$position = preg_replace( '/[^a-z0-9:_-]/i', '', $parsed_args['position'] );
-		$id       = $parsed_args['id'];
-		$what     = $parsed_args['what'];
-		$action   = $parsed_args['action'];
-		$old_id   = $parsed_args['old_id'];
-		$data     = $parsed_args['data'];
+		$position = preg_replace( '/[^a-z0-9:_-]/i', '', $r['position'] );
+		$id       = $r['id'];
+		$what     = $r['what'];
+		$action   = $r['action'];
+		$old_id   = $r['old_id'];
+		$data     = $r['data'];
 
 		if ( is_wp_error( $id ) ) {
 			$data = $id;
@@ -90,9 +90,8 @@ class WP_Ajax_Response {
 		$response = '';
 		if ( is_wp_error( $data ) ) {
 			foreach ( (array) $data->get_error_codes() as $code ) {
-				$response  .= "<wp_error code='$code'><![CDATA[" . $data->get_error_message( $code ) . ']]></wp_error>';
-				$error_data = $data->get_error_data( $code );
-				if ( ! $error_data ) {
+				$response .= "<wp_error code='$code'><![CDATA[" . $data->get_error_message( $code ) . ']]></wp_error>';
+				if ( ! $error_data = $data->get_error_data( $code ) ) {
 					continue;
 				}
 				$class = '';
@@ -118,8 +117,8 @@ class WP_Ajax_Response {
 		}
 
 		$s = '';
-		if ( is_array( $parsed_args['supplemental'] ) ) {
-			foreach ( $parsed_args['supplemental'] as $k => $v ) {
+		if ( is_array( $r['supplemental'] ) ) {
+			foreach ( $r['supplemental'] as $k => $v ) {
 				$s .= "<$k><![CDATA[$v]]></$k>";
 			}
 			$s = "<supplemental>$s</supplemental>";

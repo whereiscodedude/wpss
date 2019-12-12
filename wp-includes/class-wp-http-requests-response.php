@@ -60,6 +60,8 @@ class WP_HTTP_Requests_Response extends WP_HTTP_Response {
 	 *
 	 * @since 4.6.0
 	 *
+	 * @see \Requests_Utility_CaseInsensitiveDictionary
+	 *
 	 * @return \Requests_Utility_CaseInsensitiveDictionary Map of header name to header value.
 	 */
 	public function get_headers() {
@@ -133,7 +135,7 @@ class WP_HTTP_Requests_Response extends WP_HTTP_Response {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @return string Response data.
+	 * @return mixed Response data.
 	 */
 	public function get_data() {
 		return $this->response->body;
@@ -144,7 +146,7 @@ class WP_HTTP_Requests_Response extends WP_HTTP_Response {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param string $data Response data.
+	 * @param mixed $data Response data.
 	 */
 	public function set_data( $data ) {
 		$this->response->body = $data;

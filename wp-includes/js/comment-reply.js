@@ -95,21 +95,6 @@ window.addComment = ( function( window ) {
 		cancelElement.addEventListener( 'touchstart', cancelEvent );
 		cancelElement.addEventListener( 'click',      cancelEvent );
 
-		// Submit the comment form when the user types CTRL or CMD + 'Enter'.
-		var submitFormHandler = function( e ) {
-			if ( ( e.metaKey || e.ctrlKey ) && e.keyCode === 13 ) {
-				commentFormElement.removeEventListener( 'keydown', submitFormHandler );
-				e.preventDefault();
-				// The submit button ID is 'submit' so we can't call commentFormElement.submit(). Click it instead.
-				commentFormElement.submit.click();
-				return false;
-			}
-		};
-
-		if ( commentFormElement ) {
-			commentFormElement.addEventListener( 'keydown', submitFormHandler );
-		}
-
 		var links = replyLinks( context );
 		var element;
 
@@ -221,7 +206,7 @@ window.addComment = ( function( window ) {
 
 		var observerOptions = {
 			childList: true,
-			subtree: true
+			subTree: true
 		};
 
 		observer = new MutationObserver( handleChanges );
@@ -324,7 +309,7 @@ window.addComment = ( function( window ) {
 		 * This is for backward compatibility with third party commenting systems
 		 * hooking into the event using older techniques.
 		 */
-		cancelElement.onclick = function() {
+		cancelElement.onclick = function(){
 			return false;
 		};
 

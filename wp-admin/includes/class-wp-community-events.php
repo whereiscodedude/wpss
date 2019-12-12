@@ -113,7 +113,7 @@ class WP_Community_Events {
 		} elseif ( 200 !== $response_code ) {
 			$response_error = new WP_Error(
 				'api-error',
-				/* translators: %d: Numeric HTTP status code, e.g. 400, 403, 500, 504, etc. */
+				/* translators: %d: numeric HTTP status code, e.g. 400, 403, 500, 504, etc. */
 				sprintf( __( 'Invalid API response code (%d)' ), $response_code )
 			);
 		} elseif ( ! isset( $response_body['location'], $response_body['events'] ) ) {
@@ -375,7 +375,7 @@ class WP_Community_Events {
 				 * so that users can tell at a glance if the event is on a day they
 				 * are available, without having to open the link.
 				 */
-				/* translators: Date format for upcoming events on the dashboard. Include the day of the week. See https://secure.php.net/date */
+				/* translators: Date format for upcoming events on the dashboard. Include the day of the week. See https://secure.php.net/date. */
 				$response_body['events'][ $key ]['formatted_date'] = date_i18n( __( 'l, M j, Y' ), $timestamp );
 				$response_body['events'][ $key ]['formatted_time'] = date_i18n( get_option( 'time_format' ), $timestamp );
 			}
@@ -402,8 +402,8 @@ class WP_Community_Events {
 	 */
 	protected function trim_events( $response_body ) {
 		if ( isset( $response_body['events'] ) ) {
-			$wordcamps = array();
-			$today     = current_time( 'Y-m-d' );
+			$wordcamps         = array();
+			$current_timestamp = current_time( 'timestamp' );
 
 			foreach ( $response_body['events'] as $key => $event ) {
 				/*
@@ -415,10 +415,9 @@ class WP_Community_Events {
 					continue;
 				}
 
-				// We don't get accurate time with timezone from API, so we only take the date part (Y-m-d).
-				$event_date = substr( $event['date'], 0, 10 );
+				$event_timestamp = strtotime( $event['date'] );
 
-				if ( $today > $event_date ) {
+				if ( $current_timestamp > $event_timestamp && ( $current_timestamp - $event_timestamp ) > DAY_IN_SECONDS ) {
 					unset( $response_body['events'][ $key ] );
 				}
 			}

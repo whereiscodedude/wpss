@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["blocks"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 347);
+/******/ 	return __webpack_require__(__webpack_require__.s = 362);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -105,6 +105,26 @@ this["wp"] = this["wp"] || {}; this["wp"]["blocks"] =
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _classCallCheck; });
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+/***/ }),
+
+/***/ 134:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["shortcode"]; }());
+
+/***/ }),
+
+/***/ 15:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _defineProperty; });
 function _defineProperty(obj, key, value) {
   if (key in obj) {
@@ -120,49 +140,6 @@ function _defineProperty(obj, key, value) {
 
   return obj;
 }
-
-/***/ }),
-
-/***/ 11:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _createClass; });
-function _defineProperties(target, props) {
-  for (var i = 0; i < props.length; i++) {
-    var descriptor = props[i];
-    descriptor.enumerable = descriptor.enumerable || false;
-    descriptor.configurable = true;
-    if ("value" in descriptor) descriptor.writable = true;
-    Object.defineProperty(target, descriptor.key, descriptor);
-  }
-}
-
-function _createClass(Constructor, protoProps, staticProps) {
-  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-  if (staticProps) _defineProperties(Constructor, staticProps);
-  return Constructor;
-}
-
-/***/ }),
-
-/***/ 12:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _classCallCheck; });
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-}
-
-/***/ }),
-
-/***/ 144:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["shortcode"]; }());
 
 /***/ }),
 
@@ -182,7 +159,7 @@ function _arrayWithoutHoles(arr) {
   }
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArray.js
-var iterableToArray = __webpack_require__(30);
+var iterableToArray = __webpack_require__(34);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableSpread.js
 function _nonIterableSpread() {
@@ -199,7 +176,7 @@ function _toConsumableArray(arr) {
 
 /***/ }),
 
-/***/ 18:
+/***/ 19:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -231,14 +208,14 @@ function _extends() {
 
 /***/ }),
 
-/***/ 222:
+/***/ 205:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["wp"]["blockSerializationDefaultParser"]; }());
 
 /***/ }),
 
-/***/ 223:
+/***/ 206:
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;;/*! showdown v 1.9.0 - 10-11-2018 */
@@ -5382,13 +5359,27 @@ if (true) {
 
 /***/ }),
 
-/***/ 23:
+/***/ 24:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["dom"]; }());
+
+/***/ }),
+
+/***/ 26:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["hooks"]; }());
+
+/***/ }),
+
+/***/ 28:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithHoles.js
-var arrayWithHoles = __webpack_require__(38);
+var arrayWithHoles = __webpack_require__(37);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
 function _iterableToArrayLimit(arr, i) {
@@ -5417,7 +5408,7 @@ function _iterableToArrayLimit(arr, i) {
   return _arr;
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableRest.js
-var nonIterableRest = __webpack_require__(39);
+var nonIterableRest = __webpack_require__(38);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _slicedToArray; });
@@ -5430,21 +5421,289 @@ function _slicedToArray(arr, i) {
 
 /***/ }),
 
-/***/ 25:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["dom"]; }());
-
-/***/ }),
-
-/***/ 27:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["hooks"]; }());
-
-/***/ }),
-
 /***/ 30:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+
+var LEAF_KEY, hasWeakMap;
+
+/**
+ * Arbitrary value used as key for referencing cache object in WeakMap tree.
+ *
+ * @type {Object}
+ */
+LEAF_KEY = {};
+
+/**
+ * Whether environment supports WeakMap.
+ *
+ * @type {boolean}
+ */
+hasWeakMap = typeof WeakMap !== 'undefined';
+
+/**
+ * Returns the first argument as the sole entry in an array.
+ *
+ * @param {*} value Value to return.
+ *
+ * @return {Array} Value returned as entry in array.
+ */
+function arrayOf( value ) {
+	return [ value ];
+}
+
+/**
+ * Returns true if the value passed is object-like, or false otherwise. A value
+ * is object-like if it can support property assignment, e.g. object or array.
+ *
+ * @param {*} value Value to test.
+ *
+ * @return {boolean} Whether value is object-like.
+ */
+function isObjectLike( value ) {
+	return !! value && 'object' === typeof value;
+}
+
+/**
+ * Creates and returns a new cache object.
+ *
+ * @return {Object} Cache object.
+ */
+function createCache() {
+	var cache = {
+		clear: function() {
+			cache.head = null;
+		},
+	};
+
+	return cache;
+}
+
+/**
+ * Returns true if entries within the two arrays are strictly equal by
+ * reference from a starting index.
+ *
+ * @param {Array}  a         First array.
+ * @param {Array}  b         Second array.
+ * @param {number} fromIndex Index from which to start comparison.
+ *
+ * @return {boolean} Whether arrays are shallowly equal.
+ */
+function isShallowEqual( a, b, fromIndex ) {
+	var i;
+
+	if ( a.length !== b.length ) {
+		return false;
+	}
+
+	for ( i = fromIndex; i < a.length; i++ ) {
+		if ( a[ i ] !== b[ i ] ) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Returns a memoized selector function. The getDependants function argument is
+ * called before the memoized selector and is expected to return an immutable
+ * reference or array of references on which the selector depends for computing
+ * its own return value. The memoize cache is preserved only as long as those
+ * dependant references remain the same. If getDependants returns a different
+ * reference(s), the cache is cleared and the selector value regenerated.
+ *
+ * @param {Function} selector      Selector function.
+ * @param {Function} getDependants Dependant getter returning an immutable
+ *                                 reference or array of reference used in
+ *                                 cache bust consideration.
+ *
+ * @return {Function} Memoized selector.
+ */
+/* harmony default export */ __webpack_exports__["a"] = (function( selector, getDependants ) {
+	var rootCache, getCache;
+
+	// Use object source as dependant if getter not provided
+	if ( ! getDependants ) {
+		getDependants = arrayOf;
+	}
+
+	/**
+	 * Returns the root cache. If WeakMap is supported, this is assigned to the
+	 * root WeakMap cache set, otherwise it is a shared instance of the default
+	 * cache object.
+	 *
+	 * @return {(WeakMap|Object)} Root cache object.
+	 */
+	function getRootCache() {
+		return rootCache;
+	}
+
+	/**
+	 * Returns the cache for a given dependants array. When possible, a WeakMap
+	 * will be used to create a unique cache for each set of dependants. This
+	 * is feasible due to the nature of WeakMap in allowing garbage collection
+	 * to occur on entries where the key object is no longer referenced. Since
+	 * WeakMap requires the key to be an object, this is only possible when the
+	 * dependant is object-like. The root cache is created as a hierarchy where
+	 * each top-level key is the first entry in a dependants set, the value a
+	 * WeakMap where each key is the next dependant, and so on. This continues
+	 * so long as the dependants are object-like. If no dependants are object-
+	 * like, then the cache is shared across all invocations.
+	 *
+	 * @see isObjectLike
+	 *
+	 * @param {Array} dependants Selector dependants.
+	 *
+	 * @return {Object} Cache object.
+	 */
+	function getWeakMapCache( dependants ) {
+		var caches = rootCache,
+			isUniqueByDependants = true,
+			i, dependant, map, cache;
+
+		for ( i = 0; i < dependants.length; i++ ) {
+			dependant = dependants[ i ];
+
+			// Can only compose WeakMap from object-like key.
+			if ( ! isObjectLike( dependant ) ) {
+				isUniqueByDependants = false;
+				break;
+			}
+
+			// Does current segment of cache already have a WeakMap?
+			if ( caches.has( dependant ) ) {
+				// Traverse into nested WeakMap.
+				caches = caches.get( dependant );
+			} else {
+				// Create, set, and traverse into a new one.
+				map = new WeakMap();
+				caches.set( dependant, map );
+				caches = map;
+			}
+		}
+
+		// We use an arbitrary (but consistent) object as key for the last item
+		// in the WeakMap to serve as our running cache.
+		if ( ! caches.has( LEAF_KEY ) ) {
+			cache = createCache();
+			cache.isUniqueByDependants = isUniqueByDependants;
+			caches.set( LEAF_KEY, cache );
+		}
+
+		return caches.get( LEAF_KEY );
+	}
+
+	// Assign cache handler by availability of WeakMap
+	getCache = hasWeakMap ? getWeakMapCache : getRootCache;
+
+	/**
+	 * Resets root memoization cache.
+	 */
+	function clear() {
+		rootCache = hasWeakMap ? new WeakMap() : createCache();
+	}
+
+	// eslint-disable-next-line jsdoc/check-param-names
+	/**
+	 * The augmented selector call, considering first whether dependants have
+	 * changed before passing it to underlying memoize function.
+	 *
+	 * @param {Object} source    Source object for derivation.
+	 * @param {...*}   extraArgs Additional arguments to pass to selector.
+	 *
+	 * @return {*} Selector result.
+	 */
+	function callSelector( /* source, ...extraArgs */ ) {
+		var len = arguments.length,
+			cache, node, i, args, dependants;
+
+		// Create copy of arguments (avoid leaking deoptimization).
+		args = new Array( len );
+		for ( i = 0; i < len; i++ ) {
+			args[ i ] = arguments[ i ];
+		}
+
+		dependants = getDependants.apply( null, args );
+		cache = getCache( dependants );
+
+		// If not guaranteed uniqueness by dependants (primitive type or lack
+		// of WeakMap support), shallow compare against last dependants and, if
+		// references have changed, destroy cache to recalculate result.
+		if ( ! cache.isUniqueByDependants ) {
+			if ( cache.lastDependants && ! isShallowEqual( dependants, cache.lastDependants, 0 ) ) {
+				cache.clear();
+			}
+
+			cache.lastDependants = dependants;
+		}
+
+		node = cache.head;
+		while ( node ) {
+			// Check whether node arguments match arguments
+			if ( ! isShallowEqual( node.args, args, 1 ) ) {
+				node = node.next;
+				continue;
+			}
+
+			// At this point we can assume we've found a match
+
+			// Surface matched node to head if not already
+			if ( node !== cache.head ) {
+				// Adjust siblings to point to each other.
+				node.prev.next = node.next;
+				if ( node.next ) {
+					node.next.prev = node.prev;
+				}
+
+				node.next = cache.head;
+				node.prev = null;
+				cache.head.prev = node;
+				cache.head = node;
+			}
+
+			// Return immediately
+			return node.val;
+		}
+
+		// No cached value found. Continue to insertion phase:
+
+		node = {
+			// Generate the result from original function
+			val: selector.apply( null, args ),
+		};
+
+		// Avoid including the source object in the cache.
+		args[ 0 ] = null;
+		node.args = args;
+
+		// Don't need to check whether node is already head, since it would
+		// have been returned above already if it was
+
+		// Shift existing head down list
+		if ( cache.head ) {
+			cache.head.prev = node;
+			node.next = cache.head;
+		}
+
+		cache.head = node;
+
+		return node.val;
+	}
+
+	callSelector.getDependants = getDependants;
+	callSelector.clear = clear;
+	clear();
+
+	return callSelector;
+});
+
+
+/***/ }),
+
+/***/ 34:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5455,7 +5714,14 @@ function _iterableToArray(iter) {
 
 /***/ }),
 
-/***/ 347:
+/***/ 35:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["blob"]; }());
+
+/***/ }),
+
+/***/ 362:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5469,7 +5735,6 @@ __webpack_require__.d(selectors_namespaceObject, "getCategories", function() { r
 __webpack_require__.d(selectors_namespaceObject, "getDefaultBlockName", function() { return getDefaultBlockName; });
 __webpack_require__.d(selectors_namespaceObject, "getFreeformFallbackBlockName", function() { return getFreeformFallbackBlockName; });
 __webpack_require__.d(selectors_namespaceObject, "getUnregisteredFallbackBlockName", function() { return getUnregisteredFallbackBlockName; });
-__webpack_require__.d(selectors_namespaceObject, "getGroupingBlockName", function() { return getGroupingBlockName; });
 __webpack_require__.d(selectors_namespaceObject, "getChildBlockNames", function() { return selectors_getChildBlockNames; });
 __webpack_require__.d(selectors_namespaceObject, "getBlockSupport", function() { return selectors_getBlockSupport; });
 __webpack_require__.d(selectors_namespaceObject, "hasBlockSupport", function() { return hasBlockSupport; });
@@ -5485,15 +5750,14 @@ __webpack_require__.d(actions_namespaceObject, "removeBlockStyles", function() {
 __webpack_require__.d(actions_namespaceObject, "setDefaultBlockName", function() { return setDefaultBlockName; });
 __webpack_require__.d(actions_namespaceObject, "setFreeformFallbackBlockName", function() { return setFreeformFallbackBlockName; });
 __webpack_require__.d(actions_namespaceObject, "setUnregisteredFallbackBlockName", function() { return setUnregisteredFallbackBlockName; });
-__webpack_require__.d(actions_namespaceObject, "setGroupingBlockName", function() { return setGroupingBlockName; });
 __webpack_require__.d(actions_namespaceObject, "setCategories", function() { return setCategories; });
 __webpack_require__.d(actions_namespaceObject, "updateCategory", function() { return updateCategory; });
 
 // EXTERNAL MODULE: external {"this":["wp","data"]}
-var external_this_wp_data_ = __webpack_require__(4);
+var external_this_wp_data_ = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
-var defineProperty = __webpack_require__(10);
+var defineProperty = __webpack_require__(15);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 2 modules
 var toConsumableArray = __webpack_require__(17);
@@ -5609,7 +5873,7 @@ function blockStyles() {
  *
  * @param {string} setActionType  Action type.
  *
- * @return {Function} Reducer.
+ * @return {function} Reducer.
  */
 
 function createBlockNameSetterReducer(setActionType) {
@@ -5635,7 +5899,6 @@ function createBlockNameSetterReducer(setActionType) {
 var reducer_defaultBlockName = createBlockNameSetterReducer('SET_DEFAULT_BLOCK_NAME');
 var freeformFallbackBlockName = createBlockNameSetterReducer('SET_FREEFORM_FALLBACK_BLOCK_NAME');
 var unregisteredFallbackBlockName = createBlockNameSetterReducer('SET_UNREGISTERED_FALLBACK_BLOCK_NAME');
-var groupingBlockName = createBlockNameSetterReducer('SET_GROUPING_BLOCK_NAME');
 /**
  * Reducer managing the categories
  *
@@ -5681,12 +5944,11 @@ function reducer_categories() {
   defaultBlockName: reducer_defaultBlockName,
   freeformFallbackBlockName: freeformFallbackBlockName,
   unregisteredFallbackBlockName: unregisteredFallbackBlockName,
-  groupingBlockName: groupingBlockName,
   categories: reducer_categories
 }));
 
 // EXTERNAL MODULE: ./node_modules/rememo/es/rememo.js
-var rememo = __webpack_require__(36);
+var rememo = __webpack_require__(30);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/store/selectors.js
 /**
@@ -5790,17 +6052,6 @@ function getUnregisteredFallbackBlockName(state) {
   return state.unregisteredFallbackBlockName;
 }
 /**
- * Returns the name of the block for handling unregistered blocks.
- *
- * @param {Object} state Data state.
- *
- * @return {string?} Name of the block for handling unregistered blocks.
- */
-
-function getGroupingBlockName(state) {
-  return state.groupingBlockName;
-}
-/**
  * Returns an array with the child blocks of a given block.
  *
  * @param {Object} state     Data state.
@@ -5858,7 +6109,7 @@ function hasBlockSupport(state, nameOrType, feature, defaultSupports) {
  * @param {(string|Object)} nameOrType Block name or type object.
  * @param {string}          searchTerm Search term by which to filter.
  *
- * @return {Object[]} Whether block type matches search term.
+ * @return {Object[]} Wheter block type matches search term.
  */
 
 function isMatchingSearchTerm(state, nameOrType, searchTerm) {
@@ -6018,22 +6269,6 @@ function setUnregisteredFallbackBlockName(name) {
   };
 }
 /**
- * Returns an action object used to set the name of the block used
- * when grouping other blocks
- * eg: in "Group/Ungroup" interactions
- *
- * @param {string} name Block name.
- *
- * @return {Object} Action object.
- */
-
-function setGroupingBlockName(name) {
-  return {
-    type: 'SET_GROUPING_BLOCK_NAME',
-    name: name
-  };
-}
-/**
  * Returns an action object used to set block categories.
  *
  * @param {Object[]} categories Block categories.
@@ -6083,14 +6318,14 @@ Object(external_this_wp_data_["registerStore"])('core/blocks', {
 });
 
 // EXTERNAL MODULE: ./node_modules/uuid/v4.js
-var v4 = __webpack_require__(67);
+var v4 = __webpack_require__(65);
 var v4_default = /*#__PURE__*/__webpack_require__.n(v4);
 
 // EXTERNAL MODULE: external {"this":["wp","hooks"]}
-var external_this_wp_hooks_ = __webpack_require__(27);
+var external_this_wp_hooks_ = __webpack_require__(26);
 
 // EXTERNAL MODULE: ./node_modules/tinycolor2/tinycolor.js
-var tinycolor = __webpack_require__(48);
+var tinycolor = __webpack_require__(45);
 var tinycolor_default = /*#__PURE__*/__webpack_require__.n(tinycolor);
 
 // EXTERNAL MODULE: external {"this":["wp","element"]}
@@ -6168,14 +6403,18 @@ function isValidIcon(icon) {
  * and returns a new icon object that is normalized so we can rely on just on possible icon structure
  * in the codebase.
  *
- * @param {WPBlockTypeIconRender} icon Render behavior of a block type icon;
- *                                     one of a Dashicon slug, an element, or a
- *                                     component.
+ * @param {(Object|string|WPElement)} icon  Slug of the Dashicon to be shown
+ *                                          as the icon for the block in the
+ *                                          inserter, or element or an object describing the icon.
  *
- * @return {WPBlockTypeIconDescriptor} Object describing the icon.
+ * @return {Object} Object describing the icon.
  */
 
 function normalizeIconObject(icon) {
+  if (!icon) {
+    icon = 'block-default';
+  }
+
   if (isValidIcon(icon)) {
     return {
       src: icon
@@ -6214,14 +6453,6 @@ function normalizeBlockType(blockTypeOrName) {
   return blockTypeOrName;
 }
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/api/constants.js
-/**
- * Array of valid keys in a block type settings deprecation object.
- *
- * @type {string[]}
- */
-var DEPRECATED_ENTRY_KEYS = ['attributes', 'supports', 'save', 'migrate', 'isEligible'];
-
 // CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/api/registration.js
 
 
@@ -6242,86 +6473,41 @@ var DEPRECATED_ENTRY_KEYS = ['attributes', 'supports', 'save', 'migrate', 'isEli
  */
 
 
-
-/**
- * Render behavior of a block type icon; one of a Dashicon slug, an element,
- * or a component.
- *
- * @typedef {(string|WPElement|WPComponent)} WPBlockTypeIconRender
- *
- * @see https://developer.wordpress.org/resource/dashicons/
- */
-
-/**
- * An object describing a normalized block type icon.
- *
- * @typedef {Object} WPBlockTypeIconDescriptor
- *
- * @property {WPBlockTypeIconRender} src         Render behavior of the icon,
- *                                               one of a Dashicon slug, an
- *                                               element, or a component.
- * @property {string}                background  Optimal background hex string
- *                                               color when displaying icon.
- * @property {string}                foreground  Optimal foreground hex string
- *                                               color when displaying icon.
- * @property {string}                shadowColor Optimal shadow hex string
- *                                               color when displaying icon.
- */
-
-/**
- * Value to use to render the icon for a block type in an editor interface,
- * either a Dashicon slug, an element, a component, or an object describing
- * the icon.
- *
- * @typedef {(WPBlockTypeIconDescriptor|WPBlockTypeIconRender)} WPBlockTypeIcon
- */
-
 /**
  * Defined behavior of a block type.
  *
- * @typedef {Object} WPBlockType
+ * @typedef {WPBlockType}
  *
- * @property {string}           name        Block type's namespaced name.
- * @property {string}           title       Human-readable block type label.
- * @property {string}           category    Block type category classification,
- *                                          used in search interfaces to arrange
- *                                          block types by category.
- * @property {WPBlockTypeIcon} [icon]       Block type icon.
- * @property {string[]}        [keywords]   Additional keywords to produce block
- *                                          type as result in search interfaces.
- * @property {Object}          [attributes] Block type attributes.
- * @property {WPComponent}     [save]       Optional component describing
- *                                          serialized markup structure of a
- *                                          block type.
- * @property {WPComponent}      edit        Component rendering an element to
- *                                          manipulate the attributes of a block
- *                                          in the context of an editor.
+ * @property {string}                    name       Block's namespaced name.
+ * @property {string}                    title      Human-readable label for a block.
+ *                                                  Shown in the block inserter.
+ * @property {string}                    category   Category classification of block,
+ *                                                  impacting where block is shown in
+ *                                                  inserter results.
+ * @property {(Object|string|WPElement)} icon       Slug of the Dashicon to be shown
+ *                                                  as the icon for the block in the
+ *                                                  inserter, or element or an object describing the icon.
+ * @property {?string[]}                 keywords   Additional keywords to produce
+ *                                                  block as inserter search result.
+ * @property {?Object}                   attributes Block attributes.
+ * @property {Function}                  save       Serialize behavior of a block,
+ *                                                  returning an element describing
+ *                                                  structure of the block's post
+ *                                                  content markup.
+ * @property {WPComponent}               edit       Component rendering element to be
+ *                                                  interacted with in an editor.
  */
 
-/**
- * Default values to assign for omitted optional block type settings.
- *
- * @type {Object}
- */
-
-var DEFAULT_BLOCK_TYPE_SETTINGS = {
-  icon: 'block-default',
-  attributes: {},
-  keywords: [],
-  save: function save() {
-    return null;
-  }
-};
 var serverSideBlockDefinitions = {};
 /**
- * Sets the server side block definition of blocks.
+ * Set the server side block definition of blocks.
  *
  * @param {Object} definitions Server-side block definitions
  */
 
 function unstable__bootstrapServerSideBlockDefinitions(definitions) {
   // eslint-disable-line camelcase
-  serverSideBlockDefinitions = Object(objectSpread["a" /* default */])({}, serverSideBlockDefinitions, definitions);
+  serverSideBlockDefinitions = definitions;
 }
 /**
  * Registers a new block provided a unique name and an object defining its
@@ -6338,7 +6524,7 @@ function unstable__bootstrapServerSideBlockDefinitions(definitions) {
 function registerBlockType(name, settings) {
   settings = Object(objectSpread["a" /* default */])({
     name: name
-  }, DEFAULT_BLOCK_TYPE_SETTINGS, Object(external_lodash_["get"])(serverSideBlockDefinitions, name), settings);
+  }, Object(external_lodash_["get"])(serverSideBlockDefinitions, name), settings);
 
   if (typeof name !== 'string') {
     console.error('Block names must be strings.');
@@ -6355,27 +6541,10 @@ function registerBlockType(name, settings) {
     return;
   }
 
-  var preFilterSettings = Object(objectSpread["a" /* default */])({}, settings);
-
   settings = Object(external_this_wp_hooks_["applyFilters"])('blocks.registerBlockType', settings, name);
 
-  if (settings.deprecated) {
-    settings.deprecated = settings.deprecated.map(function (deprecation) {
-      return Object(external_lodash_["pick"])( // Only keep valid deprecation keys.
-      Object(external_this_wp_hooks_["applyFilters"])('blocks.registerBlockType', // Merge deprecation keys with pre-filter settings
-      // so that filters that depend on specific keys being
-      // present don't fail.
-      Object(objectSpread["a" /* default */])({}, Object(external_lodash_["omit"])(preFilterSettings, DEPRECATED_ENTRY_KEYS), deprecation), name), DEPRECATED_ENTRY_KEYS);
-    });
-  }
-
-  if (!Object(external_lodash_["isPlainObject"])(settings)) {
-    console.error('Block settings must be a valid object.');
-    return;
-  }
-
-  if (!Object(external_lodash_["isFunction"])(settings.save)) {
-    console.error('The "save" property must be a valid function.');
+  if (!settings || !Object(external_lodash_["isFunction"])(settings.save)) {
+    console.error('The "save" property must be specified and must be a valid function.');
     return;
   }
 
@@ -6409,7 +6578,7 @@ function registerBlockType(name, settings) {
   settings.icon = normalizeIconObject(settings.icon);
 
   if (!isValidIcon(settings.icon.src)) {
-    console.error('The icon passed is invalid. ' + 'The icon should be a string, an element, a function, or an object following the specifications documented in https://developer.wordpress.org/block-editor/developers/block-api/block-registration/#icon-optional');
+    console.error('The icon passed is invalid. ' + 'The icon should be a string, an element, a function, or an object following the specifications documented in https://wordpress.org/gutenberg/handbook/designers-developers/developers/block-api/block-registration/#icon-optional');
     return;
   }
 
@@ -6449,20 +6618,11 @@ function setFreeformContentHandlerName(blockName) {
  * Retrieves name of block handling non-block content, or undefined if no
  * handler has been defined.
  *
- * @return {?string} Block name.
+ * @return {?string} Blog name.
  */
 
 function getFreeformContentHandlerName() {
   return Object(external_this_wp_data_["select"])('core/blocks').getFreeformFallbackBlockName();
-}
-/**
- * Retrieves name of block used for handling grouping interactions.
- *
- * @return {?string} Block name.
- */
-
-function registration_getGroupingBlockName() {
-  return Object(external_this_wp_data_["select"])('core/blocks').getGroupingBlockName();
 }
 /**
  * Assigns name of block handling unregistered block types.
@@ -6477,7 +6637,7 @@ function setUnregisteredTypeHandlerName(blockName) {
  * Retrieves name of block handling unregistered block types, or undefined if no
  * handler has been defined.
  *
- * @return {?string} Block name.
+ * @return {?string} Blog name.
  */
 
 function getUnregisteredTypeHandlerName() {
@@ -6491,15 +6651,6 @@ function getUnregisteredTypeHandlerName() {
 
 function registration_setDefaultBlockName(name) {
   Object(external_this_wp_data_["dispatch"])('core/blocks').setDefaultBlockName(name);
-}
-/**
- * Assigns name of block for handling block grouping interactions.
- *
- * @param {string} name Block name.
- */
-
-function registration_setGroupingBlockName(name) {
-  Object(external_this_wp_data_["dispatch"])('core/blocks').setGroupingBlockName(name);
 }
 /**
  * Retrieves the default block name.
@@ -6732,23 +6883,13 @@ function cloneBlock(block) {
 var factory_isPossibleTransformForSource = function isPossibleTransformForSource(transform, direction, blocks) {
   if (Object(external_lodash_["isEmpty"])(blocks)) {
     return false;
-  } // If multiple blocks are selected, only multi block transforms
-  // or wildcard transforms are allowed.
+  } // If multiple blocks are selected, only multi block transforms are allowed.
 
 
   var isMultiBlock = blocks.length > 1;
-  var firstBlockName = Object(external_lodash_["first"])(blocks).name;
-  var isValidForMultiBlocks = isWildcardBlockTransform(transform) || !isMultiBlock || transform.isMultiBlock;
+  var isValidForMultiBlocks = !isMultiBlock || transform.isMultiBlock;
 
   if (!isValidForMultiBlocks) {
-    return false;
-  } // Check non-wildcard transforms to ensure that transform is valid
-  // for a block selection of multiple blocks of different types
-
-
-  if (!isWildcardBlockTransform(transform) && !Object(external_lodash_["every"])(blocks, {
-    name: firstBlockName
-  })) {
     return false;
   } // Only consider 'block' type transforms as valid.
 
@@ -6757,20 +6898,13 @@ var factory_isPossibleTransformForSource = function isPossibleTransformForSource
 
   if (!isBlockType) {
     return false;
-  } // Check if the transform's block name matches the source block (or is a wildcard)
-  // only if this is a transform 'from'.
+  } // Check if the transform's block name matches the source block only if this is a transform 'from'.
 
 
   var sourceBlock = Object(external_lodash_["first"])(blocks);
-  var hasMatchingName = direction !== 'from' || transform.blocks.indexOf(sourceBlock.name) !== -1 || isWildcardBlockTransform(transform);
+  var hasMatchingName = direction !== 'from' || transform.blocks.indexOf(sourceBlock.name) !== -1;
 
   if (!hasMatchingName) {
-    return false;
-  } // Don't allow single Grouping blocks to be transformed into
-  // a Grouping block.
-
-
-  if (!isMultiBlock && factory_isContainerGroupBlock(sourceBlock.name) && factory_isContainerGroupBlock(transform.blockName)) {
     return false;
   } // If the transform has a `isMatch` function specified, check that it returns true.
 
@@ -6832,7 +6966,7 @@ var factory_getBlockTypesForPossibleToTransforms = function getBlockTypesForPoss
   var transformsTo = getBlockTransforms('to', blockType.name); // filter all 'to' transforms to find those that are possible.
 
   var possibleTransforms = Object(external_lodash_["filter"])(transformsTo, function (transform) {
-    return transform && factory_isPossibleTransformForSource(transform, 'to', blocks);
+    return factory_isPossibleTransformForSource(transform, 'to', blocks);
   }); // Build a list of block names using the possible 'to' transforms.
 
   var blockNames = Object(external_lodash_["flatMap"])(possibleTransforms, function (transformation) {
@@ -6844,52 +6978,6 @@ var factory_getBlockTypesForPossibleToTransforms = function getBlockTypesForPoss
   });
 };
 /**
- * Determines whether transform is a "block" type
- * and if so whether it is a "wildcard" transform
- * ie: targets "any" block type
- *
- * @param {Object} t the Block transform object
- *
- * @return {boolean} whether transform is a wildcard transform
- */
-
-
-var isWildcardBlockTransform = function isWildcardBlockTransform(t) {
-  return t && t.type === 'block' && Array.isArray(t.blocks) && t.blocks.includes('*');
-};
-/**
- * Determines whether the given Block is the core Block which
- * acts as a container Block for other Blocks as part of the
- * Grouping mechanics
- *
- * @param  {string} name the name of the Block to test against
- *
- * @return {boolean} whether or not the Block is the container Block type
- */
-
-var factory_isContainerGroupBlock = function isContainerGroupBlock(name) {
-  return name === registration_getGroupingBlockName();
-};
-/**
- * Determines whether the provided Blocks are of the same type
- * (eg: all `core/paragraph`).
- *
- * @param  {Array}  blocksArray the Block definitions
- *
- * @return {boolean} whether or not the given Blocks pass the criteria
- */
-
-var factory_isBlockSelectionOfSameType = function isBlockSelectionOfSameType() {
-  var blocksArray = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
-  if (!blocksArray.length) {
-    return false;
-  }
-
-  var sourceName = blocksArray[0].name;
-  return Object(external_lodash_["every"])(blocksArray, ['name', sourceName]);
-};
-/**
  * Returns an array of block types that the set of blocks received as argument
  * can be transformed into.
  *
@@ -6898,8 +6986,18 @@ var factory_isBlockSelectionOfSameType = function isBlockSelectionOfSameType() {
  * @return {Array} Block types that the blocks argument can be transformed to.
  */
 
+
 function getPossibleBlockTransformations(blocks) {
   if (Object(external_lodash_["isEmpty"])(blocks)) {
+    return [];
+  }
+
+  var sourceBlock = Object(external_lodash_["first"])(blocks);
+  var isMultiBlock = blocks.length > 1;
+
+  if (isMultiBlock && !Object(external_lodash_["every"])(blocks, {
+    name: sourceBlock.name
+  })) {
     return [];
   }
 
@@ -6987,18 +7085,18 @@ function getBlockTransforms(direction, blockTypeOrName) {
  * @param {Array|Object} blocks Blocks array or block object.
  * @param {string}       name   Block name.
  *
- * @return {?Array} Array of blocks or null.
+ * @return {Array} Array of blocks.
  */
 
 function switchToBlockType(blocks, name) {
   var blocksArray = Object(external_lodash_["castArray"])(blocks);
   var isMultiBlock = blocksArray.length > 1;
   var firstBlock = blocksArray[0];
-  var sourceName = firstBlock.name; // Unless it's a Grouping Block then for multi block selections
-  // check that all Blocks are of the same type otherwise
-  // we can't run a conversion
+  var sourceName = firstBlock.name;
 
-  if (!factory_isContainerGroupBlock(name) && isMultiBlock && !factory_isBlockSelectionOfSameType(blocksArray)) {
+  if (isMultiBlock && !Object(external_lodash_["every"])(blocksArray, function (block) {
+    return block.name === sourceName;
+  })) {
     return null;
   } // Find the right transformation by giving priority to the "to"
   // transformation.
@@ -7007,9 +7105,9 @@ function switchToBlockType(blocks, name) {
   var transformationsFrom = getBlockTransforms('from', name);
   var transformationsTo = getBlockTransforms('to', sourceName);
   var transformation = findTransform(transformationsTo, function (t) {
-    return t.type === 'block' && (isWildcardBlockTransform(t) || t.blocks.indexOf(name) !== -1) && (!isMultiBlock || t.isMultiBlock);
+    return t.type === 'block' && t.blocks.indexOf(name) !== -1 && (!isMultiBlock || t.isMultiBlock);
   }) || findTransform(transformationsFrom, function (t) {
-    return t.type === 'block' && (isWildcardBlockTransform(t) || t.blocks.indexOf(sourceName) !== -1) && (!isMultiBlock || t.isMultiBlock);
+    return t.type === 'block' && t.blocks.indexOf(sourceName) !== -1 && (!isMultiBlock || t.isMultiBlock);
   }); // Stop if there is no valid transformation.
 
   if (!transformation) {
@@ -7019,17 +7117,11 @@ function switchToBlockType(blocks, name) {
   var transformationResults;
 
   if (transformation.isMultiBlock) {
-    if (Object(external_lodash_["has"])(transformation, '__experimentalConvert')) {
-      transformationResults = transformation.__experimentalConvert(blocksArray);
-    } else {
-      transformationResults = transformation.transform(blocksArray.map(function (currentBlock) {
-        return currentBlock.attributes;
-      }), blocksArray.map(function (currentBlock) {
-        return currentBlock.innerBlocks;
-      }));
-    }
-  } else if (Object(external_lodash_["has"])(transformation, '__experimentalConvert')) {
-    transformationResults = transformation.__experimentalConvert(firstBlock);
+    transformationResults = transformation.transform(blocksArray.map(function (currentBlock) {
+      return currentBlock.attributes;
+    }), blocksArray.map(function (currentBlock) {
+      return currentBlock.innerBlocks;
+    }));
   } else {
     transformationResults = transformation.transform(firstBlock.attributes, firstBlock.innerBlocks);
   } // Ensure that the transformation function returned an object or an array
@@ -7079,23 +7171,9 @@ function switchToBlockType(blocks, name) {
     return Object(external_this_wp_hooks_["applyFilters"])('blocks.switchToBlockType.transformedBlock', transformedBlock, blocks);
   });
 }
-/**
- * Create a block object from the example API.
- *
- * @param {string} name
- * @param {Object} example
- *
- * @return {Object} block.
- */
-
-var factory_getBlockFromExample = function getBlockFromExample(name, example) {
-  return createBlock(name, example.attributes, Object(external_lodash_["map"])(example.innerBlocks, function (innerBlock) {
-    return getBlockFromExample(innerBlock.name, innerBlock);
-  }));
-};
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js + 1 modules
-var slicedToArray = __webpack_require__(23);
+var slicedToArray = __webpack_require__(28);
 
 // CONCATENATED MODULE: ./node_modules/hpq/es/get-path.js
 /**
@@ -7277,19 +7355,19 @@ function query(selector, matchers) {
   };
 }
 // EXTERNAL MODULE: external {"this":["wp","autop"]}
-var external_this_wp_autop_ = __webpack_require__(69);
+var external_this_wp_autop_ = __webpack_require__(66);
 
 // EXTERNAL MODULE: external {"this":["wp","blockSerializationDefaultParser"]}
-var external_this_wp_blockSerializationDefaultParser_ = __webpack_require__(222);
+var external_this_wp_blockSerializationDefaultParser_ = __webpack_require__(205);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithHoles.js
-var arrayWithHoles = __webpack_require__(38);
+var arrayWithHoles = __webpack_require__(37);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArray.js
-var iterableToArray = __webpack_require__(30);
+var iterableToArray = __webpack_require__(34);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableRest.js
-var nonIterableRest = __webpack_require__(39);
+var nonIterableRest = __webpack_require__(38);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/toArray.js
 
@@ -7299,47 +7377,12 @@ function _toArray(arr) {
   return Object(arrayWithHoles["a" /* default */])(arr) || Object(iterableToArray["a" /* default */])(arr) || Object(nonIterableRest["a" /* default */])();
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/classCallCheck.js
-var classCallCheck = __webpack_require__(12);
+var classCallCheck = __webpack_require__(10);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/createClass.js
-var createClass = __webpack_require__(11);
+var createClass = __webpack_require__(9);
 
-// CONCATENATED MODULE: ./node_modules/simple-html-tokenizer/dist/es6/index.js
-/**
- * generated from https://raw.githubusercontent.com/w3c/html/26b5126f96f736f796b9e29718138919dd513744/entities.json
- * do not edit
- */
-var namedCharRefs = {
-    Aacute: "Á", aacute: "á", Abreve: "Ă", abreve: "ă", ac: "∾", acd: "∿", acE: "∾̳", Acirc: "Â", acirc: "â", acute: "´", Acy: "А", acy: "а", AElig: "Æ", aelig: "æ", af: "\u2061", Afr: "𝔄", afr: "𝔞", Agrave: "À", agrave: "à", alefsym: "ℵ", aleph: "ℵ", Alpha: "Α", alpha: "α", Amacr: "Ā", amacr: "ā", amalg: "⨿", amp: "&", AMP: "&", andand: "⩕", And: "⩓", and: "∧", andd: "⩜", andslope: "⩘", andv: "⩚", ang: "∠", ange: "⦤", angle: "∠", angmsdaa: "⦨", angmsdab: "⦩", angmsdac: "⦪", angmsdad: "⦫", angmsdae: "⦬", angmsdaf: "⦭", angmsdag: "⦮", angmsdah: "⦯", angmsd: "∡", angrt: "∟", angrtvb: "⊾", angrtvbd: "⦝", angsph: "∢", angst: "Å", angzarr: "⍼", Aogon: "Ą", aogon: "ą", Aopf: "𝔸", aopf: "𝕒", apacir: "⩯", ap: "≈", apE: "⩰", ape: "≊", apid: "≋", apos: "'", ApplyFunction: "\u2061", approx: "≈", approxeq: "≊", Aring: "Å", aring: "å", Ascr: "𝒜", ascr: "𝒶", Assign: "≔", ast: "*", asymp: "≈", asympeq: "≍", Atilde: "Ã", atilde: "ã", Auml: "Ä", auml: "ä", awconint: "∳", awint: "⨑", backcong: "≌", backepsilon: "϶", backprime: "‵", backsim: "∽", backsimeq: "⋍", Backslash: "∖", Barv: "⫧", barvee: "⊽", barwed: "⌅", Barwed: "⌆", barwedge: "⌅", bbrk: "⎵", bbrktbrk: "⎶", bcong: "≌", Bcy: "Б", bcy: "б", bdquo: "„", becaus: "∵", because: "∵", Because: "∵", bemptyv: "⦰", bepsi: "϶", bernou: "ℬ", Bernoullis: "ℬ", Beta: "Β", beta: "β", beth: "ℶ", between: "≬", Bfr: "𝔅", bfr: "𝔟", bigcap: "⋂", bigcirc: "◯", bigcup: "⋃", bigodot: "⨀", bigoplus: "⨁", bigotimes: "⨂", bigsqcup: "⨆", bigstar: "★", bigtriangledown: "▽", bigtriangleup: "△", biguplus: "⨄", bigvee: "⋁", bigwedge: "⋀", bkarow: "⤍", blacklozenge: "⧫", blacksquare: "▪", blacktriangle: "▴", blacktriangledown: "▾", blacktriangleleft: "◂", blacktriangleright: "▸", blank: "␣", blk12: "▒", blk14: "░", blk34: "▓", block: "█", bne: "=⃥", bnequiv: "≡⃥", bNot: "⫭", bnot: "⌐", Bopf: "𝔹", bopf: "𝕓", bot: "⊥", bottom: "⊥", bowtie: "⋈", boxbox: "⧉", boxdl: "┐", boxdL: "╕", boxDl: "╖", boxDL: "╗", boxdr: "┌", boxdR: "╒", boxDr: "╓", boxDR: "╔", boxh: "─", boxH: "═", boxhd: "┬", boxHd: "╤", boxhD: "╥", boxHD: "╦", boxhu: "┴", boxHu: "╧", boxhU: "╨", boxHU: "╩", boxminus: "⊟", boxplus: "⊞", boxtimes: "⊠", boxul: "┘", boxuL: "╛", boxUl: "╜", boxUL: "╝", boxur: "└", boxuR: "╘", boxUr: "╙", boxUR: "╚", boxv: "│", boxV: "║", boxvh: "┼", boxvH: "╪", boxVh: "╫", boxVH: "╬", boxvl: "┤", boxvL: "╡", boxVl: "╢", boxVL: "╣", boxvr: "├", boxvR: "╞", boxVr: "╟", boxVR: "╠", bprime: "‵", breve: "˘", Breve: "˘", brvbar: "¦", bscr: "𝒷", Bscr: "ℬ", bsemi: "⁏", bsim: "∽", bsime: "⋍", bsolb: "⧅", bsol: "\\", bsolhsub: "⟈", bull: "•", bullet: "•", bump: "≎", bumpE: "⪮", bumpe: "≏", Bumpeq: "≎", bumpeq: "≏", Cacute: "Ć", cacute: "ć", capand: "⩄", capbrcup: "⩉", capcap: "⩋", cap: "∩", Cap: "⋒", capcup: "⩇", capdot: "⩀", CapitalDifferentialD: "ⅅ", caps: "∩︀", caret: "⁁", caron: "ˇ", Cayleys: "ℭ", ccaps: "⩍", Ccaron: "Č", ccaron: "č", Ccedil: "Ç", ccedil: "ç", Ccirc: "Ĉ", ccirc: "ĉ", Cconint: "∰", ccups: "⩌", ccupssm: "⩐", Cdot: "Ċ", cdot: "ċ", cedil: "¸", Cedilla: "¸", cemptyv: "⦲", cent: "¢", centerdot: "·", CenterDot: "·", cfr: "𝔠", Cfr: "ℭ", CHcy: "Ч", chcy: "ч", check: "✓", checkmark: "✓", Chi: "Χ", chi: "χ", circ: "ˆ", circeq: "≗", circlearrowleft: "↺", circlearrowright: "↻", circledast: "⊛", circledcirc: "⊚", circleddash: "⊝", CircleDot: "⊙", circledR: "®", circledS: "Ⓢ", CircleMinus: "⊖", CirclePlus: "⊕", CircleTimes: "⊗", cir: "○", cirE: "⧃", cire: "≗", cirfnint: "⨐", cirmid: "⫯", cirscir: "⧂", ClockwiseContourIntegral: "∲", CloseCurlyDoubleQuote: "”", CloseCurlyQuote: "’", clubs: "♣", clubsuit: "♣", colon: ":", Colon: "∷", Colone: "⩴", colone: "≔", coloneq: "≔", comma: ",", commat: "@", comp: "∁", compfn: "∘", complement: "∁", complexes: "ℂ", cong: "≅", congdot: "⩭", Congruent: "≡", conint: "∮", Conint: "∯", ContourIntegral: "∮", copf: "𝕔", Copf: "ℂ", coprod: "∐", Coproduct: "∐", copy: "©", COPY: "©", copysr: "℗", CounterClockwiseContourIntegral: "∳", crarr: "↵", cross: "✗", Cross: "⨯", Cscr: "𝒞", cscr: "𝒸", csub: "⫏", csube: "⫑", csup: "⫐", csupe: "⫒", ctdot: "⋯", cudarrl: "⤸", cudarrr: "⤵", cuepr: "⋞", cuesc: "⋟", cularr: "↶", cularrp: "⤽", cupbrcap: "⩈", cupcap: "⩆", CupCap: "≍", cup: "∪", Cup: "⋓", cupcup: "⩊", cupdot: "⊍", cupor: "⩅", cups: "∪︀", curarr: "↷", curarrm: "⤼", curlyeqprec: "⋞", curlyeqsucc: "⋟", curlyvee: "⋎", curlywedge: "⋏", curren: "¤", curvearrowleft: "↶", curvearrowright: "↷", cuvee: "⋎", cuwed: "⋏", cwconint: "∲", cwint: "∱", cylcty: "⌭", dagger: "†", Dagger: "‡", daleth: "ℸ", darr: "↓", Darr: "↡", dArr: "⇓", dash: "‐", Dashv: "⫤", dashv: "⊣", dbkarow: "⤏", dblac: "˝", Dcaron: "Ď", dcaron: "ď", Dcy: "Д", dcy: "д", ddagger: "‡", ddarr: "⇊", DD: "ⅅ", dd: "ⅆ", DDotrahd: "⤑", ddotseq: "⩷", deg: "°", Del: "∇", Delta: "Δ", delta: "δ", demptyv: "⦱", dfisht: "⥿", Dfr: "𝔇", dfr: "𝔡", dHar: "⥥", dharl: "⇃", dharr: "⇂", DiacriticalAcute: "´", DiacriticalDot: "˙", DiacriticalDoubleAcute: "˝", DiacriticalGrave: "`", DiacriticalTilde: "˜", diam: "⋄", diamond: "⋄", Diamond: "⋄", diamondsuit: "♦", diams: "♦", die: "¨", DifferentialD: "ⅆ", digamma: "ϝ", disin: "⋲", div: "÷", divide: "÷", divideontimes: "⋇", divonx: "⋇", DJcy: "Ђ", djcy: "ђ", dlcorn: "⌞", dlcrop: "⌍", dollar: "$", Dopf: "𝔻", dopf: "𝕕", Dot: "¨", dot: "˙", DotDot: "⃜", doteq: "≐", doteqdot: "≑", DotEqual: "≐", dotminus: "∸", dotplus: "∔", dotsquare: "⊡", doublebarwedge: "⌆", DoubleContourIntegral: "∯", DoubleDot: "¨", DoubleDownArrow: "⇓", DoubleLeftArrow: "⇐", DoubleLeftRightArrow: "⇔", DoubleLeftTee: "⫤", DoubleLongLeftArrow: "⟸", DoubleLongLeftRightArrow: "⟺", DoubleLongRightArrow: "⟹", DoubleRightArrow: "⇒", DoubleRightTee: "⊨", DoubleUpArrow: "⇑", DoubleUpDownArrow: "⇕", DoubleVerticalBar: "∥", DownArrowBar: "⤓", downarrow: "↓", DownArrow: "↓", Downarrow: "⇓", DownArrowUpArrow: "⇵", DownBreve: "̑", downdownarrows: "⇊", downharpoonleft: "⇃", downharpoonright: "⇂", DownLeftRightVector: "⥐", DownLeftTeeVector: "⥞", DownLeftVectorBar: "⥖", DownLeftVector: "↽", DownRightTeeVector: "⥟", DownRightVectorBar: "⥗", DownRightVector: "⇁", DownTeeArrow: "↧", DownTee: "⊤", drbkarow: "⤐", drcorn: "⌟", drcrop: "⌌", Dscr: "𝒟", dscr: "𝒹", DScy: "Ѕ", dscy: "ѕ", dsol: "⧶", Dstrok: "Đ", dstrok: "đ", dtdot: "⋱", dtri: "▿", dtrif: "▾", duarr: "⇵", duhar: "⥯", dwangle: "⦦", DZcy: "Џ", dzcy: "џ", dzigrarr: "⟿", Eacute: "É", eacute: "é", easter: "⩮", Ecaron: "Ě", ecaron: "ě", Ecirc: "Ê", ecirc: "ê", ecir: "≖", ecolon: "≕", Ecy: "Э", ecy: "э", eDDot: "⩷", Edot: "Ė", edot: "ė", eDot: "≑", ee: "ⅇ", efDot: "≒", Efr: "𝔈", efr: "𝔢", eg: "⪚", Egrave: "È", egrave: "è", egs: "⪖", egsdot: "⪘", el: "⪙", Element: "∈", elinters: "⏧", ell: "ℓ", els: "⪕", elsdot: "⪗", Emacr: "Ē", emacr: "ē", empty: "∅", emptyset: "∅", EmptySmallSquare: "◻", emptyv: "∅", EmptyVerySmallSquare: "▫", emsp13: " ", emsp14: " ", emsp: " ", ENG: "Ŋ", eng: "ŋ", ensp: " ", Eogon: "Ę", eogon: "ę", Eopf: "𝔼", eopf: "𝕖", epar: "⋕", eparsl: "⧣", eplus: "⩱", epsi: "ε", Epsilon: "Ε", epsilon: "ε", epsiv: "ϵ", eqcirc: "≖", eqcolon: "≕", eqsim: "≂", eqslantgtr: "⪖", eqslantless: "⪕", Equal: "⩵", equals: "=", EqualTilde: "≂", equest: "≟", Equilibrium: "⇌", equiv: "≡", equivDD: "⩸", eqvparsl: "⧥", erarr: "⥱", erDot: "≓", escr: "ℯ", Escr: "ℰ", esdot: "≐", Esim: "⩳", esim: "≂", Eta: "Η", eta: "η", ETH: "Ð", eth: "ð", Euml: "Ë", euml: "ë", euro: "€", excl: "!", exist: "∃", Exists: "∃", expectation: "ℰ", exponentiale: "ⅇ", ExponentialE: "ⅇ", fallingdotseq: "≒", Fcy: "Ф", fcy: "ф", female: "♀", ffilig: "ﬃ", fflig: "ﬀ", ffllig: "ﬄ", Ffr: "𝔉", ffr: "𝔣", filig: "ﬁ", FilledSmallSquare: "◼", FilledVerySmallSquare: "▪", fjlig: "fj", flat: "♭", fllig: "ﬂ", fltns: "▱", fnof: "ƒ", Fopf: "𝔽", fopf: "𝕗", forall: "∀", ForAll: "∀", fork: "⋔", forkv: "⫙", Fouriertrf: "ℱ", fpartint: "⨍", frac12: "½", frac13: "⅓", frac14: "¼", frac15: "⅕", frac16: "⅙", frac18: "⅛", frac23: "⅔", frac25: "⅖", frac34: "¾", frac35: "⅗", frac38: "⅜", frac45: "⅘", frac56: "⅚", frac58: "⅝", frac78: "⅞", frasl: "⁄", frown: "⌢", fscr: "𝒻", Fscr: "ℱ", gacute: "ǵ", Gamma: "Γ", gamma: "γ", Gammad: "Ϝ", gammad: "ϝ", gap: "⪆", Gbreve: "Ğ", gbreve: "ğ", Gcedil: "Ģ", Gcirc: "Ĝ", gcirc: "ĝ", Gcy: "Г", gcy: "г", Gdot: "Ġ", gdot: "ġ", ge: "≥", gE: "≧", gEl: "⪌", gel: "⋛", geq: "≥", geqq: "≧", geqslant: "⩾", gescc: "⪩", ges: "⩾", gesdot: "⪀", gesdoto: "⪂", gesdotol: "⪄", gesl: "⋛︀", gesles: "⪔", Gfr: "𝔊", gfr: "𝔤", gg: "≫", Gg: "⋙", ggg: "⋙", gimel: "ℷ", GJcy: "Ѓ", gjcy: "ѓ", gla: "⪥", gl: "≷", glE: "⪒", glj: "⪤", gnap: "⪊", gnapprox: "⪊", gne: "⪈", gnE: "≩", gneq: "⪈", gneqq: "≩", gnsim: "⋧", Gopf: "𝔾", gopf: "𝕘", grave: "`", GreaterEqual: "≥", GreaterEqualLess: "⋛", GreaterFullEqual: "≧", GreaterGreater: "⪢", GreaterLess: "≷", GreaterSlantEqual: "⩾", GreaterTilde: "≳", Gscr: "𝒢", gscr: "ℊ", gsim: "≳", gsime: "⪎", gsiml: "⪐", gtcc: "⪧", gtcir: "⩺", gt: ">", GT: ">", Gt: "≫", gtdot: "⋗", gtlPar: "⦕", gtquest: "⩼", gtrapprox: "⪆", gtrarr: "⥸", gtrdot: "⋗", gtreqless: "⋛", gtreqqless: "⪌", gtrless: "≷", gtrsim: "≳", gvertneqq: "≩︀", gvnE: "≩︀", Hacek: "ˇ", hairsp: " ", half: "½", hamilt: "ℋ", HARDcy: "Ъ", hardcy: "ъ", harrcir: "⥈", harr: "↔", hArr: "⇔", harrw: "↭", Hat: "^", hbar: "ℏ", Hcirc: "Ĥ", hcirc: "ĥ", hearts: "♥", heartsuit: "♥", hellip: "…", hercon: "⊹", hfr: "𝔥", Hfr: "ℌ", HilbertSpace: "ℋ", hksearow: "⤥", hkswarow: "⤦", hoarr: "⇿", homtht: "∻", hookleftarrow: "↩", hookrightarrow: "↪", hopf: "𝕙", Hopf: "ℍ", horbar: "―", HorizontalLine: "─", hscr: "𝒽", Hscr: "ℋ", hslash: "ℏ", Hstrok: "Ħ", hstrok: "ħ", HumpDownHump: "≎", HumpEqual: "≏", hybull: "⁃", hyphen: "‐", Iacute: "Í", iacute: "í", ic: "\u2063", Icirc: "Î", icirc: "î", Icy: "И", icy: "и", Idot: "İ", IEcy: "Е", iecy: "е", iexcl: "¡", iff: "⇔", ifr: "𝔦", Ifr: "ℑ", Igrave: "Ì", igrave: "ì", ii: "ⅈ", iiiint: "⨌", iiint: "∭", iinfin: "⧜", iiota: "℩", IJlig: "Ĳ", ijlig: "ĳ", Imacr: "Ī", imacr: "ī", image: "ℑ", ImaginaryI: "ⅈ", imagline: "ℐ", imagpart: "ℑ", imath: "ı", Im: "ℑ", imof: "⊷", imped: "Ƶ", Implies: "⇒", incare: "℅", in: "∈", infin: "∞", infintie: "⧝", inodot: "ı", intcal: "⊺", int: "∫", Int: "∬", integers: "ℤ", Integral: "∫", intercal: "⊺", Intersection: "⋂", intlarhk: "⨗", intprod: "⨼", InvisibleComma: "\u2063", InvisibleTimes: "\u2062", IOcy: "Ё", iocy: "ё", Iogon: "Į", iogon: "į", Iopf: "𝕀", iopf: "𝕚", Iota: "Ι", iota: "ι", iprod: "⨼", iquest: "¿", iscr: "𝒾", Iscr: "ℐ", isin: "∈", isindot: "⋵", isinE: "⋹", isins: "⋴", isinsv: "⋳", isinv: "∈", it: "\u2062", Itilde: "Ĩ", itilde: "ĩ", Iukcy: "І", iukcy: "і", Iuml: "Ï", iuml: "ï", Jcirc: "Ĵ", jcirc: "ĵ", Jcy: "Й", jcy: "й", Jfr: "𝔍", jfr: "𝔧", jmath: "ȷ", Jopf: "𝕁", jopf: "𝕛", Jscr: "𝒥", jscr: "𝒿", Jsercy: "Ј", jsercy: "ј", Jukcy: "Є", jukcy: "є", Kappa: "Κ", kappa: "κ", kappav: "ϰ", Kcedil: "Ķ", kcedil: "ķ", Kcy: "К", kcy: "к", Kfr: "𝔎", kfr: "𝔨", kgreen: "ĸ", KHcy: "Х", khcy: "х", KJcy: "Ќ", kjcy: "ќ", Kopf: "𝕂", kopf: "𝕜", Kscr: "𝒦", kscr: "𝓀", lAarr: "⇚", Lacute: "Ĺ", lacute: "ĺ", laemptyv: "⦴", lagran: "ℒ", Lambda: "Λ", lambda: "λ", lang: "⟨", Lang: "⟪", langd: "⦑", langle: "⟨", lap: "⪅", Laplacetrf: "ℒ", laquo: "«", larrb: "⇤", larrbfs: "⤟", larr: "←", Larr: "↞", lArr: "⇐", larrfs: "⤝", larrhk: "↩", larrlp: "↫", larrpl: "⤹", larrsim: "⥳", larrtl: "↢", latail: "⤙", lAtail: "⤛", lat: "⪫", late: "⪭", lates: "⪭︀", lbarr: "⤌", lBarr: "⤎", lbbrk: "❲", lbrace: "{", lbrack: "[", lbrke: "⦋", lbrksld: "⦏", lbrkslu: "⦍", Lcaron: "Ľ", lcaron: "ľ", Lcedil: "Ļ", lcedil: "ļ", lceil: "⌈", lcub: "{", Lcy: "Л", lcy: "л", ldca: "⤶", ldquo: "“", ldquor: "„", ldrdhar: "⥧", ldrushar: "⥋", ldsh: "↲", le: "≤", lE: "≦", LeftAngleBracket: "⟨", LeftArrowBar: "⇤", leftarrow: "←", LeftArrow: "←", Leftarrow: "⇐", LeftArrowRightArrow: "⇆", leftarrowtail: "↢", LeftCeiling: "⌈", LeftDoubleBracket: "⟦", LeftDownTeeVector: "⥡", LeftDownVectorBar: "⥙", LeftDownVector: "⇃", LeftFloor: "⌊", leftharpoondown: "↽", leftharpoonup: "↼", leftleftarrows: "⇇", leftrightarrow: "↔", LeftRightArrow: "↔", Leftrightarrow: "⇔", leftrightarrows: "⇆", leftrightharpoons: "⇋", leftrightsquigarrow: "↭", LeftRightVector: "⥎", LeftTeeArrow: "↤", LeftTee: "⊣", LeftTeeVector: "⥚", leftthreetimes: "⋋", LeftTriangleBar: "⧏", LeftTriangle: "⊲", LeftTriangleEqual: "⊴", LeftUpDownVector: "⥑", LeftUpTeeVector: "⥠", LeftUpVectorBar: "⥘", LeftUpVector: "↿", LeftVectorBar: "⥒", LeftVector: "↼", lEg: "⪋", leg: "⋚", leq: "≤", leqq: "≦", leqslant: "⩽", lescc: "⪨", les: "⩽", lesdot: "⩿", lesdoto: "⪁", lesdotor: "⪃", lesg: "⋚︀", lesges: "⪓", lessapprox: "⪅", lessdot: "⋖", lesseqgtr: "⋚", lesseqqgtr: "⪋", LessEqualGreater: "⋚", LessFullEqual: "≦", LessGreater: "≶", lessgtr: "≶", LessLess: "⪡", lesssim: "≲", LessSlantEqual: "⩽", LessTilde: "≲", lfisht: "⥼", lfloor: "⌊", Lfr: "𝔏", lfr: "𝔩", lg: "≶", lgE: "⪑", lHar: "⥢", lhard: "↽", lharu: "↼", lharul: "⥪", lhblk: "▄", LJcy: "Љ", ljcy: "љ", llarr: "⇇", ll: "≪", Ll: "⋘", llcorner: "⌞", Lleftarrow: "⇚", llhard: "⥫", lltri: "◺", Lmidot: "Ŀ", lmidot: "ŀ", lmoustache: "⎰", lmoust: "⎰", lnap: "⪉", lnapprox: "⪉", lne: "⪇", lnE: "≨", lneq: "⪇", lneqq: "≨", lnsim: "⋦", loang: "⟬", loarr: "⇽", lobrk: "⟦", longleftarrow: "⟵", LongLeftArrow: "⟵", Longleftarrow: "⟸", longleftrightarrow: "⟷", LongLeftRightArrow: "⟷", Longleftrightarrow: "⟺", longmapsto: "⟼", longrightarrow: "⟶", LongRightArrow: "⟶", Longrightarrow: "⟹", looparrowleft: "↫", looparrowright: "↬", lopar: "⦅", Lopf: "𝕃", lopf: "𝕝", loplus: "⨭", lotimes: "⨴", lowast: "∗", lowbar: "_", LowerLeftArrow: "↙", LowerRightArrow: "↘", loz: "◊", lozenge: "◊", lozf: "⧫", lpar: "(", lparlt: "⦓", lrarr: "⇆", lrcorner: "⌟", lrhar: "⇋", lrhard: "⥭", lrm: "\u200e", lrtri: "⊿", lsaquo: "‹", lscr: "𝓁", Lscr: "ℒ", lsh: "↰", Lsh: "↰", lsim: "≲", lsime: "⪍", lsimg: "⪏", lsqb: "[", lsquo: "‘", lsquor: "‚", Lstrok: "Ł", lstrok: "ł", ltcc: "⪦", ltcir: "⩹", lt: "<", LT: "<", Lt: "≪", ltdot: "⋖", lthree: "⋋", ltimes: "⋉", ltlarr: "⥶", ltquest: "⩻", ltri: "◃", ltrie: "⊴", ltrif: "◂", ltrPar: "⦖", lurdshar: "⥊", luruhar: "⥦", lvertneqq: "≨︀", lvnE: "≨︀", macr: "¯", male: "♂", malt: "✠", maltese: "✠", Map: "⤅", map: "↦", mapsto: "↦", mapstodown: "↧", mapstoleft: "↤", mapstoup: "↥", marker: "▮", mcomma: "⨩", Mcy: "М", mcy: "м", mdash: "—", mDDot: "∺", measuredangle: "∡", MediumSpace: " ", Mellintrf: "ℳ", Mfr: "𝔐", mfr: "𝔪", mho: "℧", micro: "µ", midast: "*", midcir: "⫰", mid: "∣", middot: "·", minusb: "⊟", minus: "−", minusd: "∸", minusdu: "⨪", MinusPlus: "∓", mlcp: "⫛", mldr: "…", mnplus: "∓", models: "⊧", Mopf: "𝕄", mopf: "𝕞", mp: "∓", mscr: "𝓂", Mscr: "ℳ", mstpos: "∾", Mu: "Μ", mu: "μ", multimap: "⊸", mumap: "⊸", nabla: "∇", Nacute: "Ń", nacute: "ń", nang: "∠⃒", nap: "≉", napE: "⩰̸", napid: "≋̸", napos: "ŉ", napprox: "≉", natural: "♮", naturals: "ℕ", natur: "♮", nbsp: " ", nbump: "≎̸", nbumpe: "≏̸", ncap: "⩃", Ncaron: "Ň", ncaron: "ň", Ncedil: "Ņ", ncedil: "ņ", ncong: "≇", ncongdot: "⩭̸", ncup: "⩂", Ncy: "Н", ncy: "н", ndash: "–", nearhk: "⤤", nearr: "↗", neArr: "⇗", nearrow: "↗", ne: "≠", nedot: "≐̸", NegativeMediumSpace: "​", NegativeThickSpace: "​", NegativeThinSpace: "​", NegativeVeryThinSpace: "​", nequiv: "≢", nesear: "⤨", nesim: "≂̸", NestedGreaterGreater: "≫", NestedLessLess: "≪", NewLine: "\u000a", nexist: "∄", nexists: "∄", Nfr: "𝔑", nfr: "𝔫", ngE: "≧̸", nge: "≱", ngeq: "≱", ngeqq: "≧̸", ngeqslant: "⩾̸", nges: "⩾̸", nGg: "⋙̸", ngsim: "≵", nGt: "≫⃒", ngt: "≯", ngtr: "≯", nGtv: "≫̸", nharr: "↮", nhArr: "⇎", nhpar: "⫲", ni: "∋", nis: "⋼", nisd: "⋺", niv: "∋", NJcy: "Њ", njcy: "њ", nlarr: "↚", nlArr: "⇍", nldr: "‥", nlE: "≦̸", nle: "≰", nleftarrow: "↚", nLeftarrow: "⇍", nleftrightarrow: "↮", nLeftrightarrow: "⇎", nleq: "≰", nleqq: "≦̸", nleqslant: "⩽̸", nles: "⩽̸", nless: "≮", nLl: "⋘̸", nlsim: "≴", nLt: "≪⃒", nlt: "≮", nltri: "⋪", nltrie: "⋬", nLtv: "≪̸", nmid: "∤", NoBreak: "\u2060", NonBreakingSpace: " ", nopf: "𝕟", Nopf: "ℕ", Not: "⫬", not: "¬", NotCongruent: "≢", NotCupCap: "≭", NotDoubleVerticalBar: "∦", NotElement: "∉", NotEqual: "≠", NotEqualTilde: "≂̸", NotExists: "∄", NotGreater: "≯", NotGreaterEqual: "≱", NotGreaterFullEqual: "≧̸", NotGreaterGreater: "≫̸", NotGreaterLess: "≹", NotGreaterSlantEqual: "⩾̸", NotGreaterTilde: "≵", NotHumpDownHump: "≎̸", NotHumpEqual: "≏̸", notin: "∉", notindot: "⋵̸", notinE: "⋹̸", notinva: "∉", notinvb: "⋷", notinvc: "⋶", NotLeftTriangleBar: "⧏̸", NotLeftTriangle: "⋪", NotLeftTriangleEqual: "⋬", NotLess: "≮", NotLessEqual: "≰", NotLessGreater: "≸", NotLessLess: "≪̸", NotLessSlantEqual: "⩽̸", NotLessTilde: "≴", NotNestedGreaterGreater: "⪢̸", NotNestedLessLess: "⪡̸", notni: "∌", notniva: "∌", notnivb: "⋾", notnivc: "⋽", NotPrecedes: "⊀", NotPrecedesEqual: "⪯̸", NotPrecedesSlantEqual: "⋠", NotReverseElement: "∌", NotRightTriangleBar: "⧐̸", NotRightTriangle: "⋫", NotRightTriangleEqual: "⋭", NotSquareSubset: "⊏̸", NotSquareSubsetEqual: "⋢", NotSquareSuperset: "⊐̸", NotSquareSupersetEqual: "⋣", NotSubset: "⊂⃒", NotSubsetEqual: "⊈", NotSucceeds: "⊁", NotSucceedsEqual: "⪰̸", NotSucceedsSlantEqual: "⋡", NotSucceedsTilde: "≿̸", NotSuperset: "⊃⃒", NotSupersetEqual: "⊉", NotTilde: "≁", NotTildeEqual: "≄", NotTildeFullEqual: "≇", NotTildeTilde: "≉", NotVerticalBar: "∤", nparallel: "∦", npar: "∦", nparsl: "⫽⃥", npart: "∂̸", npolint: "⨔", npr: "⊀", nprcue: "⋠", nprec: "⊀", npreceq: "⪯̸", npre: "⪯̸", nrarrc: "⤳̸", nrarr: "↛", nrArr: "⇏", nrarrw: "↝̸", nrightarrow: "↛", nRightarrow: "⇏", nrtri: "⋫", nrtrie: "⋭", nsc: "⊁", nsccue: "⋡", nsce: "⪰̸", Nscr: "𝒩", nscr: "𝓃", nshortmid: "∤", nshortparallel: "∦", nsim: "≁", nsime: "≄", nsimeq: "≄", nsmid: "∤", nspar: "∦", nsqsube: "⋢", nsqsupe: "⋣", nsub: "⊄", nsubE: "⫅̸", nsube: "⊈", nsubset: "⊂⃒", nsubseteq: "⊈", nsubseteqq: "⫅̸", nsucc: "⊁", nsucceq: "⪰̸", nsup: "⊅", nsupE: "⫆̸", nsupe: "⊉", nsupset: "⊃⃒", nsupseteq: "⊉", nsupseteqq: "⫆̸", ntgl: "≹", Ntilde: "Ñ", ntilde: "ñ", ntlg: "≸", ntriangleleft: "⋪", ntrianglelefteq: "⋬", ntriangleright: "⋫", ntrianglerighteq: "⋭", Nu: "Ν", nu: "ν", num: "#", numero: "№", numsp: " ", nvap: "≍⃒", nvdash: "⊬", nvDash: "⊭", nVdash: "⊮", nVDash: "⊯", nvge: "≥⃒", nvgt: ">⃒", nvHarr: "⤄", nvinfin: "⧞", nvlArr: "⤂", nvle: "≤⃒", nvlt: "<⃒", nvltrie: "⊴⃒", nvrArr: "⤃", nvrtrie: "⊵⃒", nvsim: "∼⃒", nwarhk: "⤣", nwarr: "↖", nwArr: "⇖", nwarrow: "↖", nwnear: "⤧", Oacute: "Ó", oacute: "ó", oast: "⊛", Ocirc: "Ô", ocirc: "ô", ocir: "⊚", Ocy: "О", ocy: "о", odash: "⊝", Odblac: "Ő", odblac: "ő", odiv: "⨸", odot: "⊙", odsold: "⦼", OElig: "Œ", oelig: "œ", ofcir: "⦿", Ofr: "𝔒", ofr: "𝔬", ogon: "˛", Ograve: "Ò", ograve: "ò", ogt: "⧁", ohbar: "⦵", ohm: "Ω", oint: "∮", olarr: "↺", olcir: "⦾", olcross: "⦻", oline: "‾", olt: "⧀", Omacr: "Ō", omacr: "ō", Omega: "Ω", omega: "ω", Omicron: "Ο", omicron: "ο", omid: "⦶", ominus: "⊖", Oopf: "𝕆", oopf: "𝕠", opar: "⦷", OpenCurlyDoubleQuote: "“", OpenCurlyQuote: "‘", operp: "⦹", oplus: "⊕", orarr: "↻", Or: "⩔", or: "∨", ord: "⩝", order: "ℴ", orderof: "ℴ", ordf: "ª", ordm: "º", origof: "⊶", oror: "⩖", orslope: "⩗", orv: "⩛", oS: "Ⓢ", Oscr: "𝒪", oscr: "ℴ", Oslash: "Ø", oslash: "ø", osol: "⊘", Otilde: "Õ", otilde: "õ", otimesas: "⨶", Otimes: "⨷", otimes: "⊗", Ouml: "Ö", ouml: "ö", ovbar: "⌽", OverBar: "‾", OverBrace: "⏞", OverBracket: "⎴", OverParenthesis: "⏜", para: "¶", parallel: "∥", par: "∥", parsim: "⫳", parsl: "⫽", part: "∂", PartialD: "∂", Pcy: "П", pcy: "п", percnt: "%", period: ".", permil: "‰", perp: "⊥", pertenk: "‱", Pfr: "𝔓", pfr: "𝔭", Phi: "Φ", phi: "φ", phiv: "ϕ", phmmat: "ℳ", phone: "☎", Pi: "Π", pi: "π", pitchfork: "⋔", piv: "ϖ", planck: "ℏ", planckh: "ℎ", plankv: "ℏ", plusacir: "⨣", plusb: "⊞", pluscir: "⨢", plus: "+", plusdo: "∔", plusdu: "⨥", pluse: "⩲", PlusMinus: "±", plusmn: "±", plussim: "⨦", plustwo: "⨧", pm: "±", Poincareplane: "ℌ", pointint: "⨕", popf: "𝕡", Popf: "ℙ", pound: "£", prap: "⪷", Pr: "⪻", pr: "≺", prcue: "≼", precapprox: "⪷", prec: "≺", preccurlyeq: "≼", Precedes: "≺", PrecedesEqual: "⪯", PrecedesSlantEqual: "≼", PrecedesTilde: "≾", preceq: "⪯", precnapprox: "⪹", precneqq: "⪵", precnsim: "⋨", pre: "⪯", prE: "⪳", precsim: "≾", prime: "′", Prime: "″", primes: "ℙ", prnap: "⪹", prnE: "⪵", prnsim: "⋨", prod: "∏", Product: "∏", profalar: "⌮", profline: "⌒", profsurf: "⌓", prop: "∝", Proportional: "∝", Proportion: "∷", propto: "∝", prsim: "≾", prurel: "⊰", Pscr: "𝒫", pscr: "𝓅", Psi: "Ψ", psi: "ψ", puncsp: " ", Qfr: "𝔔", qfr: "𝔮", qint: "⨌", qopf: "𝕢", Qopf: "ℚ", qprime: "⁗", Qscr: "𝒬", qscr: "𝓆", quaternions: "ℍ", quatint: "⨖", quest: "?", questeq: "≟", quot: "\"", QUOT: "\"", rAarr: "⇛", race: "∽̱", Racute: "Ŕ", racute: "ŕ", radic: "√", raemptyv: "⦳", rang: "⟩", Rang: "⟫", rangd: "⦒", range: "⦥", rangle: "⟩", raquo: "»", rarrap: "⥵", rarrb: "⇥", rarrbfs: "⤠", rarrc: "⤳", rarr: "→", Rarr: "↠", rArr: "⇒", rarrfs: "⤞", rarrhk: "↪", rarrlp: "↬", rarrpl: "⥅", rarrsim: "⥴", Rarrtl: "⤖", rarrtl: "↣", rarrw: "↝", ratail: "⤚", rAtail: "⤜", ratio: "∶", rationals: "ℚ", rbarr: "⤍", rBarr: "⤏", RBarr: "⤐", rbbrk: "❳", rbrace: "}", rbrack: "]", rbrke: "⦌", rbrksld: "⦎", rbrkslu: "⦐", Rcaron: "Ř", rcaron: "ř", Rcedil: "Ŗ", rcedil: "ŗ", rceil: "⌉", rcub: "}", Rcy: "Р", rcy: "р", rdca: "⤷", rdldhar: "⥩", rdquo: "”", rdquor: "”", rdsh: "↳", real: "ℜ", realine: "ℛ", realpart: "ℜ", reals: "ℝ", Re: "ℜ", rect: "▭", reg: "®", REG: "®", ReverseElement: "∋", ReverseEquilibrium: "⇋", ReverseUpEquilibrium: "⥯", rfisht: "⥽", rfloor: "⌋", rfr: "𝔯", Rfr: "ℜ", rHar: "⥤", rhard: "⇁", rharu: "⇀", rharul: "⥬", Rho: "Ρ", rho: "ρ", rhov: "ϱ", RightAngleBracket: "⟩", RightArrowBar: "⇥", rightarrow: "→", RightArrow: "→", Rightarrow: "⇒", RightArrowLeftArrow: "⇄", rightarrowtail: "↣", RightCeiling: "⌉", RightDoubleBracket: "⟧", RightDownTeeVector: "⥝", RightDownVectorBar: "⥕", RightDownVector: "⇂", RightFloor: "⌋", rightharpoondown: "⇁", rightharpoonup: "⇀", rightleftarrows: "⇄", rightleftharpoons: "⇌", rightrightarrows: "⇉", rightsquigarrow: "↝", RightTeeArrow: "↦", RightTee: "⊢", RightTeeVector: "⥛", rightthreetimes: "⋌", RightTriangleBar: "⧐", RightTriangle: "⊳", RightTriangleEqual: "⊵", RightUpDownVector: "⥏", RightUpTeeVector: "⥜", RightUpVectorBar: "⥔", RightUpVector: "↾", RightVectorBar: "⥓", RightVector: "⇀", ring: "˚", risingdotseq: "≓", rlarr: "⇄", rlhar: "⇌", rlm: "\u200f", rmoustache: "⎱", rmoust: "⎱", rnmid: "⫮", roang: "⟭", roarr: "⇾", robrk: "⟧", ropar: "⦆", ropf: "𝕣", Ropf: "ℝ", roplus: "⨮", rotimes: "⨵", RoundImplies: "⥰", rpar: ")", rpargt: "⦔", rppolint: "⨒", rrarr: "⇉", Rrightarrow: "⇛", rsaquo: "›", rscr: "𝓇", Rscr: "ℛ", rsh: "↱", Rsh: "↱", rsqb: "]", rsquo: "’", rsquor: "’", rthree: "⋌", rtimes: "⋊", rtri: "▹", rtrie: "⊵", rtrif: "▸", rtriltri: "⧎", RuleDelayed: "⧴", ruluhar: "⥨", rx: "℞", Sacute: "Ś", sacute: "ś", sbquo: "‚", scap: "⪸", Scaron: "Š", scaron: "š", Sc: "⪼", sc: "≻", sccue: "≽", sce: "⪰", scE: "⪴", Scedil: "Ş", scedil: "ş", Scirc: "Ŝ", scirc: "ŝ", scnap: "⪺", scnE: "⪶", scnsim: "⋩", scpolint: "⨓", scsim: "≿", Scy: "С", scy: "с", sdotb: "⊡", sdot: "⋅", sdote: "⩦", searhk: "⤥", searr: "↘", seArr: "⇘", searrow: "↘", sect: "§", semi: ";", seswar: "⤩", setminus: "∖", setmn: "∖", sext: "✶", Sfr: "𝔖", sfr: "𝔰", sfrown: "⌢", sharp: "♯", SHCHcy: "Щ", shchcy: "щ", SHcy: "Ш", shcy: "ш", ShortDownArrow: "↓", ShortLeftArrow: "←", shortmid: "∣", shortparallel: "∥", ShortRightArrow: "→", ShortUpArrow: "↑", shy: "\u00ad", Sigma: "Σ", sigma: "σ", sigmaf: "ς", sigmav: "ς", sim: "∼", simdot: "⩪", sime: "≃", simeq: "≃", simg: "⪞", simgE: "⪠", siml: "⪝", simlE: "⪟", simne: "≆", simplus: "⨤", simrarr: "⥲", slarr: "←", SmallCircle: "∘", smallsetminus: "∖", smashp: "⨳", smeparsl: "⧤", smid: "∣", smile: "⌣", smt: "⪪", smte: "⪬", smtes: "⪬︀", SOFTcy: "Ь", softcy: "ь", solbar: "⌿", solb: "⧄", sol: "/", Sopf: "𝕊", sopf: "𝕤", spades: "♠", spadesuit: "♠", spar: "∥", sqcap: "⊓", sqcaps: "⊓︀", sqcup: "⊔", sqcups: "⊔︀", Sqrt: "√", sqsub: "⊏", sqsube: "⊑", sqsubset: "⊏", sqsubseteq: "⊑", sqsup: "⊐", sqsupe: "⊒", sqsupset: "⊐", sqsupseteq: "⊒", square: "□", Square: "□", SquareIntersection: "⊓", SquareSubset: "⊏", SquareSubsetEqual: "⊑", SquareSuperset: "⊐", SquareSupersetEqual: "⊒", SquareUnion: "⊔", squarf: "▪", squ: "□", squf: "▪", srarr: "→", Sscr: "𝒮", sscr: "𝓈", ssetmn: "∖", ssmile: "⌣", sstarf: "⋆", Star: "⋆", star: "☆", starf: "★", straightepsilon: "ϵ", straightphi: "ϕ", strns: "¯", sub: "⊂", Sub: "⋐", subdot: "⪽", subE: "⫅", sube: "⊆", subedot: "⫃", submult: "⫁", subnE: "⫋", subne: "⊊", subplus: "⪿", subrarr: "⥹", subset: "⊂", Subset: "⋐", subseteq: "⊆", subseteqq: "⫅", SubsetEqual: "⊆", subsetneq: "⊊", subsetneqq: "⫋", subsim: "⫇", subsub: "⫕", subsup: "⫓", succapprox: "⪸", succ: "≻", succcurlyeq: "≽", Succeeds: "≻", SucceedsEqual: "⪰", SucceedsSlantEqual: "≽", SucceedsTilde: "≿", succeq: "⪰", succnapprox: "⪺", succneqq: "⪶", succnsim: "⋩", succsim: "≿", SuchThat: "∋", sum: "∑", Sum: "∑", sung: "♪", sup1: "¹", sup2: "²", sup3: "³", sup: "⊃", Sup: "⋑", supdot: "⪾", supdsub: "⫘", supE: "⫆", supe: "⊇", supedot: "⫄", Superset: "⊃", SupersetEqual: "⊇", suphsol: "⟉", suphsub: "⫗", suplarr: "⥻", supmult: "⫂", supnE: "⫌", supne: "⊋", supplus: "⫀", supset: "⊃", Supset: "⋑", supseteq: "⊇", supseteqq: "⫆", supsetneq: "⊋", supsetneqq: "⫌", supsim: "⫈", supsub: "⫔", supsup: "⫖", swarhk: "⤦", swarr: "↙", swArr: "⇙", swarrow: "↙", swnwar: "⤪", szlig: "ß", Tab: "\u0009", target: "⌖", Tau: "Τ", tau: "τ", tbrk: "⎴", Tcaron: "Ť", tcaron: "ť", Tcedil: "Ţ", tcedil: "ţ", Tcy: "Т", tcy: "т", tdot: "⃛", telrec: "⌕", Tfr: "𝔗", tfr: "𝔱", there4: "∴", therefore: "∴", Therefore: "∴", Theta: "Θ", theta: "θ", thetasym: "ϑ", thetav: "ϑ", thickapprox: "≈", thicksim: "∼", ThickSpace: "  ", ThinSpace: " ", thinsp: " ", thkap: "≈", thksim: "∼", THORN: "Þ", thorn: "þ", tilde: "˜", Tilde: "∼", TildeEqual: "≃", TildeFullEqual: "≅", TildeTilde: "≈", timesbar: "⨱", timesb: "⊠", times: "×", timesd: "⨰", tint: "∭", toea: "⤨", topbot: "⌶", topcir: "⫱", top: "⊤", Topf: "𝕋", topf: "𝕥", topfork: "⫚", tosa: "⤩", tprime: "‴", trade: "™", TRADE: "™", triangle: "▵", triangledown: "▿", triangleleft: "◃", trianglelefteq: "⊴", triangleq: "≜", triangleright: "▹", trianglerighteq: "⊵", tridot: "◬", trie: "≜", triminus: "⨺", TripleDot: "⃛", triplus: "⨹", trisb: "⧍", tritime: "⨻", trpezium: "⏢", Tscr: "𝒯", tscr: "𝓉", TScy: "Ц", tscy: "ц", TSHcy: "Ћ", tshcy: "ћ", Tstrok: "Ŧ", tstrok: "ŧ", twixt: "≬", twoheadleftarrow: "↞", twoheadrightarrow: "↠", Uacute: "Ú", uacute: "ú", uarr: "↑", Uarr: "↟", uArr: "⇑", Uarrocir: "⥉", Ubrcy: "Ў", ubrcy: "ў", Ubreve: "Ŭ", ubreve: "ŭ", Ucirc: "Û", ucirc: "û", Ucy: "У", ucy: "у", udarr: "⇅", Udblac: "Ű", udblac: "ű", udhar: "⥮", ufisht: "⥾", Ufr: "𝔘", ufr: "𝔲", Ugrave: "Ù", ugrave: "ù", uHar: "⥣", uharl: "↿", uharr: "↾", uhblk: "▀", ulcorn: "⌜", ulcorner: "⌜", ulcrop: "⌏", ultri: "◸", Umacr: "Ū", umacr: "ū", uml: "¨", UnderBar: "_", UnderBrace: "⏟", UnderBracket: "⎵", UnderParenthesis: "⏝", Union: "⋃", UnionPlus: "⊎", Uogon: "Ų", uogon: "ų", Uopf: "𝕌", uopf: "𝕦", UpArrowBar: "⤒", uparrow: "↑", UpArrow: "↑", Uparrow: "⇑", UpArrowDownArrow: "⇅", updownarrow: "↕", UpDownArrow: "↕", Updownarrow: "⇕", UpEquilibrium: "⥮", upharpoonleft: "↿", upharpoonright: "↾", uplus: "⊎", UpperLeftArrow: "↖", UpperRightArrow: "↗", upsi: "υ", Upsi: "ϒ", upsih: "ϒ", Upsilon: "Υ", upsilon: "υ", UpTeeArrow: "↥", UpTee: "⊥", upuparrows: "⇈", urcorn: "⌝", urcorner: "⌝", urcrop: "⌎", Uring: "Ů", uring: "ů", urtri: "◹", Uscr: "𝒰", uscr: "𝓊", utdot: "⋰", Utilde: "Ũ", utilde: "ũ", utri: "▵", utrif: "▴", uuarr: "⇈", Uuml: "Ü", uuml: "ü", uwangle: "⦧", vangrt: "⦜", varepsilon: "ϵ", varkappa: "ϰ", varnothing: "∅", varphi: "ϕ", varpi: "ϖ", varpropto: "∝", varr: "↕", vArr: "⇕", varrho: "ϱ", varsigma: "ς", varsubsetneq: "⊊︀", varsubsetneqq: "⫋︀", varsupsetneq: "⊋︀", varsupsetneqq: "⫌︀", vartheta: "ϑ", vartriangleleft: "⊲", vartriangleright: "⊳", vBar: "⫨", Vbar: "⫫", vBarv: "⫩", Vcy: "В", vcy: "в", vdash: "⊢", vDash: "⊨", Vdash: "⊩", VDash: "⊫", Vdashl: "⫦", veebar: "⊻", vee: "∨", Vee: "⋁", veeeq: "≚", vellip: "⋮", verbar: "|", Verbar: "‖", vert: "|", Vert: "‖", VerticalBar: "∣", VerticalLine: "|", VerticalSeparator: "❘", VerticalTilde: "≀", VeryThinSpace: " ", Vfr: "𝔙", vfr: "𝔳", vltri: "⊲", vnsub: "⊂⃒", vnsup: "⊃⃒", Vopf: "𝕍", vopf: "𝕧", vprop: "∝", vrtri: "⊳", Vscr: "𝒱", vscr: "𝓋", vsubnE: "⫋︀", vsubne: "⊊︀", vsupnE: "⫌︀", vsupne: "⊋︀", Vvdash: "⊪", vzigzag: "⦚", Wcirc: "Ŵ", wcirc: "ŵ", wedbar: "⩟", wedge: "∧", Wedge: "⋀", wedgeq: "≙", weierp: "℘", Wfr: "𝔚", wfr: "𝔴", Wopf: "𝕎", wopf: "𝕨", wp: "℘", wr: "≀", wreath: "≀", Wscr: "𝒲", wscr: "𝓌", xcap: "⋂", xcirc: "◯", xcup: "⋃", xdtri: "▽", Xfr: "𝔛", xfr: "𝔵", xharr: "⟷", xhArr: "⟺", Xi: "Ξ", xi: "ξ", xlarr: "⟵", xlArr: "⟸", xmap: "⟼", xnis: "⋻", xodot: "⨀", Xopf: "𝕏", xopf: "𝕩", xoplus: "⨁", xotime: "⨂", xrarr: "⟶", xrArr: "⟹", Xscr: "𝒳", xscr: "𝓍", xsqcup: "⨆", xuplus: "⨄", xutri: "△", xvee: "⋁", xwedge: "⋀", Yacute: "Ý", yacute: "ý", YAcy: "Я", yacy: "я", Ycirc: "Ŷ", ycirc: "ŷ", Ycy: "Ы", ycy: "ы", yen: "¥", Yfr: "𝔜", yfr: "𝔶", YIcy: "Ї", yicy: "ї", Yopf: "𝕐", yopf: "𝕪", Yscr: "𝒴", yscr: "𝓎", YUcy: "Ю", yucy: "ю", yuml: "ÿ", Yuml: "Ÿ", Zacute: "Ź", zacute: "ź", Zcaron: "Ž", zcaron: "ž", Zcy: "З", zcy: "з", Zdot: "Ż", zdot: "ż", zeetrf: "ℨ", ZeroWidthSpace: "​", Zeta: "Ζ", zeta: "ζ", zfr: "𝔷", Zfr: "ℨ", ZHcy: "Ж", zhcy: "ж", zigrarr: "⇝", zopf: "𝕫", Zopf: "ℤ", Zscr: "𝒵", zscr: "𝓏", zwj: "\u200d", zwnj: "\u200c"
-};
-
-var HEXCHARCODE = /^#[xX]([A-Fa-f0-9]+)$/;
-var CHARCODE = /^#([0-9]+)$/;
-var NAMED = /^([A-Za-z0-9]+)$/;
-var EntityParser = /** @class */ (function () {
-    function EntityParser(named) {
-        this.named = named;
-    }
-    EntityParser.prototype.parse = function (entity) {
-        if (!entity) {
-            return;
-        }
-        var matches = entity.match(HEXCHARCODE);
-        if (matches) {
-            return String.fromCharCode(parseInt(matches[1], 16));
-        }
-        matches = entity.match(CHARCODE);
-        if (matches) {
-            return String.fromCharCode(parseInt(matches[1], 10));
-        }
-        matches = entity.match(NAMED);
-        if (matches) {
-            return this.named[matches[1]];
-        }
-    };
-    return EntityParser;
-}());
-
+// CONCATENATED MODULE: ./node_modules/simple-html-tokenizer/dist/es6/utils.js
 var WSP = /[\t\n\f ]/;
 var ALPHA = /[A-Za-z]/;
 var CRLF = /\r\n?/g;
@@ -7350,50 +7393,54 @@ function isAlpha(char) {
     return ALPHA.test(char);
 }
 function preprocessInput(input) {
-    return input.replace(CRLF, '\n');
+    return input.replace(CRLF, "\n");
+}
+function unwrap(maybe, msg) {
+    if (!maybe)
+        throw new Error((msg || 'value') + " was null");
+    return maybe;
+}
+function or(maybe, otherwise) {
+    return maybe || otherwise;
 }
 
-var EventedTokenizer = /** @class */ (function () {
+// CONCATENATED MODULE: ./node_modules/simple-html-tokenizer/dist/es6/evented-tokenizer.js
+
+var evented_tokenizer_EventedTokenizer = /** @class */ (function () {
     function EventedTokenizer(delegate, entityParser) {
         this.delegate = delegate;
         this.entityParser = entityParser;
-        this.state = "beforeData" /* beforeData */;
+        this.state = null;
+        this.input = null;
+        this.index = -1;
+        this.tagLine = -1;
+        this.tagColumn = -1;
         this.line = -1;
         this.column = -1;
-        this.input = '';
-        this.index = -1;
-        this.tagNameBuffer = '';
         this.states = {
             beforeData: function () {
                 var char = this.peek();
-                if (char === '<' && !this.isIgnoredEndTag()) {
-                    this.transitionTo("tagOpen" /* tagOpen */);
+                if (char === "<") {
+                    this.state = 'tagOpen';
                     this.markTagStart();
                     this.consume();
                 }
                 else {
-                    if (char === '\n') {
-                        var tag = this.tagNameBuffer.toLowerCase();
-                        if (tag === 'pre' || tag === 'textarea') {
-                            this.consume();
-                        }
-                    }
-                    this.transitionTo("data" /* data */);
+                    this.state = 'data';
                     this.delegate.beginData();
                 }
             },
             data: function () {
                 var char = this.peek();
-                var tag = this.tagNameBuffer.toLowerCase();
-                if (char === '<' && !this.isIgnoredEndTag()) {
+                if (char === "<") {
                     this.delegate.finishData();
-                    this.transitionTo("tagOpen" /* tagOpen */);
+                    this.state = 'tagOpen';
                     this.markTagStart();
                     this.consume();
                 }
-                else if (char === '&' && tag !== 'script' && tag !== 'style') {
+                else if (char === "&") {
                     this.consume();
-                    this.delegate.appendToData(this.consumeCharRef() || '&');
+                    this.delegate.appendToData(this.consumeCharRef() || "&");
                 }
                 else {
                     this.consume();
@@ -7402,59 +7449,58 @@ var EventedTokenizer = /** @class */ (function () {
             },
             tagOpen: function () {
                 var char = this.consume();
-                if (char === '!') {
-                    this.transitionTo("markupDeclarationOpen" /* markupDeclarationOpen */);
+                if (char === "!") {
+                    this.state = 'markupDeclaration';
                 }
-                else if (char === '/') {
-                    this.transitionTo("endTagOpen" /* endTagOpen */);
+                else if (char === "/") {
+                    this.state = 'endTagOpen';
                 }
-                else if (char === '@' || char === ':' || isAlpha(char)) {
-                    this.transitionTo("tagName" /* tagName */);
-                    this.tagNameBuffer = '';
+                else if (isAlpha(char)) {
+                    this.state = 'tagName';
                     this.delegate.beginStartTag();
-                    this.appendToTagName(char);
+                    this.delegate.appendToTagName(char.toLowerCase());
                 }
             },
-            markupDeclarationOpen: function () {
+            markupDeclaration: function () {
                 var char = this.consume();
-                if (char === '-' && this.peek() === '-') {
+                if (char === "-" && this.input.charAt(this.index) === "-") {
                     this.consume();
-                    this.transitionTo("commentStart" /* commentStart */);
+                    this.state = 'commentStart';
                     this.delegate.beginComment();
                 }
             },
             commentStart: function () {
                 var char = this.consume();
-                if (char === '-') {
-                    this.transitionTo("commentStartDash" /* commentStartDash */);
+                if (char === "-") {
+                    this.state = 'commentStartDash';
                 }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.delegate.finishComment();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
                     this.delegate.appendToCommentData(char);
-                    this.transitionTo("comment" /* comment */);
+                    this.state = 'comment';
                 }
             },
             commentStartDash: function () {
                 var char = this.consume();
-                if (char === '-') {
-                    this.transitionTo("commentEnd" /* commentEnd */);
+                if (char === "-") {
+                    this.state = 'commentEnd';
                 }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.delegate.finishComment();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
-                    this.delegate.appendToCommentData('-');
-                    this.transitionTo("comment" /* comment */);
+                    this.delegate.appendToCommentData("-");
+                    this.state = 'comment';
                 }
             },
             comment: function () {
                 var char = this.consume();
-                if (char === '-') {
-                    this.transitionTo("commentEndDash" /* commentEndDash */);
+                if (char === "-") {
+                    this.state = 'commentEndDash';
                 }
                 else {
                     this.delegate.appendToCommentData(char);
@@ -7462,58 +7508,39 @@ var EventedTokenizer = /** @class */ (function () {
             },
             commentEndDash: function () {
                 var char = this.consume();
-                if (char === '-') {
-                    this.transitionTo("commentEnd" /* commentEnd */);
+                if (char === "-") {
+                    this.state = 'commentEnd';
                 }
                 else {
-                    this.delegate.appendToCommentData('-' + char);
-                    this.transitionTo("comment" /* comment */);
+                    this.delegate.appendToCommentData("-" + char);
+                    this.state = 'comment';
                 }
             },
             commentEnd: function () {
                 var char = this.consume();
-                if (char === '>') {
+                if (char === ">") {
                     this.delegate.finishComment();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
-                    this.delegate.appendToCommentData('--' + char);
-                    this.transitionTo("comment" /* comment */);
+                    this.delegate.appendToCommentData("--" + char);
+                    this.state = 'comment';
                 }
             },
             tagName: function () {
                 var char = this.consume();
                 if (isSpace(char)) {
-                    this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
+                    this.state = 'beforeAttributeName';
                 }
-                else if (char === '/') {
-                    this.transitionTo("selfClosingStartTag" /* selfClosingStartTag */);
+                else if (char === "/") {
+                    this.state = 'selfClosingStartTag';
                 }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
-                    this.appendToTagName(char);
-                }
-            },
-            endTagName: function () {
-                var char = this.consume();
-                if (isSpace(char)) {
-                    this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
-                    this.tagNameBuffer = '';
-                }
-                else if (char === '/') {
-                    this.transitionTo("selfClosingStartTag" /* selfClosingStartTag */);
-                    this.tagNameBuffer = '';
-                }
-                else if (char === '>') {
-                    this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
-                    this.tagNameBuffer = '';
-                }
-                else {
-                    this.appendToTagName(char);
+                    this.delegate.appendToTagName(char);
                 }
             },
             beforeAttributeName: function () {
@@ -7522,52 +7549,52 @@ var EventedTokenizer = /** @class */ (function () {
                     this.consume();
                     return;
                 }
-                else if (char === '/') {
-                    this.transitionTo("selfClosingStartTag" /* selfClosingStartTag */);
+                else if (char === "/") {
+                    this.state = 'selfClosingStartTag';
                     this.consume();
                 }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.consume();
                     this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else if (char === '=') {
-                    this.delegate.reportSyntaxError('attribute name cannot start with equals sign');
-                    this.transitionTo("attributeName" /* attributeName */);
+                    this.delegate.reportSyntaxError("attribute name cannot start with equals sign");
+                    this.state = 'attributeName';
                     this.delegate.beginAttribute();
                     this.consume();
                     this.delegate.appendToAttributeName(char);
                 }
                 else {
-                    this.transitionTo("attributeName" /* attributeName */);
+                    this.state = 'attributeName';
                     this.delegate.beginAttribute();
                 }
             },
             attributeName: function () {
                 var char = this.peek();
                 if (isSpace(char)) {
-                    this.transitionTo("afterAttributeName" /* afterAttributeName */);
+                    this.state = 'afterAttributeName';
                     this.consume();
                 }
-                else if (char === '/') {
+                else if (char === "/") {
                     this.delegate.beginAttributeValue(false);
                     this.delegate.finishAttributeValue();
                     this.consume();
-                    this.transitionTo("selfClosingStartTag" /* selfClosingStartTag */);
+                    this.state = 'selfClosingStartTag';
                 }
-                else if (char === '=') {
-                    this.transitionTo("beforeAttributeValue" /* beforeAttributeValue */);
+                else if (char === "=") {
+                    this.state = 'beforeAttributeValue';
                     this.consume();
                 }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.delegate.beginAttributeValue(false);
                     this.delegate.finishAttributeValue();
                     this.consume();
                     this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else if (char === '"' || char === "'" || char === '<') {
-                    this.delegate.reportSyntaxError(char + ' is not a valid character within attribute names');
+                    this.delegate.reportSyntaxError(char + " is not a valid character within attribute names");
                     this.consume();
                     this.delegate.appendToAttributeName(char);
                 }
@@ -7582,29 +7609,29 @@ var EventedTokenizer = /** @class */ (function () {
                     this.consume();
                     return;
                 }
-                else if (char === '/') {
+                else if (char === "/") {
                     this.delegate.beginAttributeValue(false);
                     this.delegate.finishAttributeValue();
                     this.consume();
-                    this.transitionTo("selfClosingStartTag" /* selfClosingStartTag */);
+                    this.state = 'selfClosingStartTag';
                 }
-                else if (char === '=') {
+                else if (char === "=") {
                     this.consume();
-                    this.transitionTo("beforeAttributeValue" /* beforeAttributeValue */);
+                    this.state = 'beforeAttributeValue';
                 }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.delegate.beginAttributeValue(false);
                     this.delegate.finishAttributeValue();
                     this.consume();
                     this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
                     this.delegate.beginAttributeValue(false);
                     this.delegate.finishAttributeValue();
-                    this.transitionTo("attributeName" /* attributeName */);
-                    this.delegate.beginAttribute();
                     this.consume();
+                    this.state = 'attributeName';
+                    this.delegate.beginAttribute();
                     this.delegate.appendToAttributeName(char);
                 }
             },
@@ -7614,24 +7641,24 @@ var EventedTokenizer = /** @class */ (function () {
                     this.consume();
                 }
                 else if (char === '"') {
-                    this.transitionTo("attributeValueDoubleQuoted" /* attributeValueDoubleQuoted */);
+                    this.state = 'attributeValueDoubleQuoted';
                     this.delegate.beginAttributeValue(true);
                     this.consume();
                 }
                 else if (char === "'") {
-                    this.transitionTo("attributeValueSingleQuoted" /* attributeValueSingleQuoted */);
+                    this.state = 'attributeValueSingleQuoted';
                     this.delegate.beginAttributeValue(true);
                     this.consume();
                 }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.delegate.beginAttributeValue(false);
                     this.delegate.finishAttributeValue();
                     this.consume();
                     this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
-                    this.transitionTo("attributeValueUnquoted" /* attributeValueUnquoted */);
+                    this.state = 'attributeValueUnquoted';
                     this.delegate.beginAttributeValue(false);
                     this.consume();
                     this.delegate.appendToAttributeValue(char);
@@ -7641,10 +7668,10 @@ var EventedTokenizer = /** @class */ (function () {
                 var char = this.consume();
                 if (char === '"') {
                     this.delegate.finishAttributeValue();
-                    this.transitionTo("afterAttributeValueQuoted" /* afterAttributeValueQuoted */);
+                    this.state = 'afterAttributeValueQuoted';
                 }
-                else if (char === '&') {
-                    this.delegate.appendToAttributeValue(this.consumeCharRef() || '&');
+                else if (char === "&") {
+                    this.delegate.appendToAttributeValue(this.consumeCharRef('"') || "&");
                 }
                 else {
                     this.delegate.appendToAttributeValue(char);
@@ -7654,10 +7681,10 @@ var EventedTokenizer = /** @class */ (function () {
                 var char = this.consume();
                 if (char === "'") {
                     this.delegate.finishAttributeValue();
-                    this.transitionTo("afterAttributeValueQuoted" /* afterAttributeValueQuoted */);
+                    this.state = 'afterAttributeValueQuoted';
                 }
-                else if (char === '&') {
-                    this.delegate.appendToAttributeValue(this.consumeCharRef() || '&');
+                else if (char === "&") {
+                    this.delegate.appendToAttributeValue(this.consumeCharRef("'") || "&");
                 }
                 else {
                     this.delegate.appendToAttributeValue(char);
@@ -7668,22 +7695,17 @@ var EventedTokenizer = /** @class */ (function () {
                 if (isSpace(char)) {
                     this.delegate.finishAttributeValue();
                     this.consume();
-                    this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
+                    this.state = 'beforeAttributeName';
                 }
-                else if (char === '/') {
-                    this.delegate.finishAttributeValue();
+                else if (char === "&") {
                     this.consume();
-                    this.transitionTo("selfClosingStartTag" /* selfClosingStartTag */);
+                    this.delegate.appendToAttributeValue(this.consumeCharRef(">") || "&");
                 }
-                else if (char === '&') {
-                    this.consume();
-                    this.delegate.appendToAttributeValue(this.consumeCharRef() || '&');
-                }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.delegate.finishAttributeValue();
                     this.consume();
                     this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
                     this.consume();
@@ -7694,56 +7716,53 @@ var EventedTokenizer = /** @class */ (function () {
                 var char = this.peek();
                 if (isSpace(char)) {
                     this.consume();
-                    this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
+                    this.state = 'beforeAttributeName';
                 }
-                else if (char === '/') {
+                else if (char === "/") {
                     this.consume();
-                    this.transitionTo("selfClosingStartTag" /* selfClosingStartTag */);
+                    this.state = 'selfClosingStartTag';
                 }
-                else if (char === '>') {
+                else if (char === ">") {
                     this.consume();
                     this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
-                    this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
+                    this.state = 'beforeAttributeName';
                 }
             },
             selfClosingStartTag: function () {
                 var char = this.peek();
-                if (char === '>') {
+                if (char === ">") {
                     this.consume();
                     this.delegate.markTagAsSelfClosing();
                     this.delegate.finishTag();
-                    this.transitionTo("beforeData" /* beforeData */);
+                    this.state = 'beforeData';
                 }
                 else {
-                    this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
+                    this.state = 'beforeAttributeName';
                 }
             },
             endTagOpen: function () {
                 var char = this.consume();
-                if (char === '@' || char === ':' || isAlpha(char)) {
-                    this.transitionTo("endTagName" /* endTagName */);
-                    this.tagNameBuffer = '';
+                if (isAlpha(char)) {
+                    this.state = 'tagName';
                     this.delegate.beginEndTag();
-                    this.appendToTagName(char);
+                    this.delegate.appendToTagName(char.toLowerCase());
                 }
             }
         };
         this.reset();
     }
     EventedTokenizer.prototype.reset = function () {
-        this.transitionTo("beforeData" /* beforeData */);
+        this.state = 'beforeData';
         this.input = '';
-        this.tagNameBuffer = '';
         this.index = 0;
         this.line = 1;
         this.column = 0;
+        this.tagLine = -1;
+        this.tagColumn = -1;
         this.delegate.reset();
-    };
-    EventedTokenizer.prototype.transitionTo = function (state) {
-        this.state = state;
     };
     EventedTokenizer.prototype.tokenize = function (input) {
         this.reset();
@@ -7753,13 +7772,7 @@ var EventedTokenizer = /** @class */ (function () {
     EventedTokenizer.prototype.tokenizePart = function (input) {
         this.input += preprocessInput(input);
         while (this.index < this.input.length) {
-            var handler = this.states[this.state];
-            if (handler !== undefined) {
-                handler.call(this);
-            }
-            else {
-                throw new Error("unhandled state " + this.state);
-            }
+            this.states[this.state].call(this);
         }
     };
     EventedTokenizer.prototype.tokenizeEOF = function () {
@@ -7768,7 +7781,7 @@ var EventedTokenizer = /** @class */ (function () {
     EventedTokenizer.prototype.flushData = function () {
         if (this.state === 'data') {
             this.delegate.finishData();
-            this.transitionTo("beforeData" /* beforeData */);
+            this.state = 'beforeData';
         }
     };
     EventedTokenizer.prototype.peek = function () {
@@ -7777,7 +7790,7 @@ var EventedTokenizer = /** @class */ (function () {
     EventedTokenizer.prototype.consume = function () {
         var char = this.peek();
         this.index++;
-        if (char === '\n') {
+        if (char === "\n") {
             this.line++;
             this.column = 0;
         }
@@ -7806,32 +7819,42 @@ var EventedTokenizer = /** @class */ (function () {
         }
     };
     EventedTokenizer.prototype.markTagStart = function () {
-        this.delegate.tagOpen();
-    };
-    EventedTokenizer.prototype.appendToTagName = function (char) {
-        this.tagNameBuffer += char;
-        this.delegate.appendToTagName(char);
-    };
-    EventedTokenizer.prototype.isIgnoredEndTag = function () {
-        var tag = this.tagNameBuffer.toLowerCase();
-        return (tag === 'title' && this.input.substring(this.index, this.index + 8) !== '</title>') ||
-            (tag === 'style' && this.input.substring(this.index, this.index + 8) !== '</style>') ||
-            (tag === 'script' && this.input.substring(this.index, this.index + 9) !== '</script>');
+        // these properties to be removed in next major bump
+        this.tagLine = this.line;
+        this.tagColumn = this.column;
+        if (this.delegate.tagOpen) {
+            this.delegate.tagOpen();
+        }
     };
     return EventedTokenizer;
 }());
+/* harmony default export */ var evented_tokenizer = (evented_tokenizer_EventedTokenizer);
 
-var Tokenizer = /** @class */ (function () {
+// CONCATENATED MODULE: ./node_modules/simple-html-tokenizer/dist/es6/tokenizer.js
+
+
+;
+var tokenizer_Tokenizer = /** @class */ (function () {
     function Tokenizer(entityParser, options) {
         if (options === void 0) { options = {}; }
         this.options = options;
-        this.token = null;
+        this._token = null;
         this.startLine = 1;
         this.startColumn = 0;
         this.tokens = [];
-        this.tokenizer = new EventedTokenizer(this, entityParser);
-        this._currentAttribute = undefined;
+        this.currentAttribute = null;
+        this.tokenizer = new evented_tokenizer(this, entityParser);
     }
+    Object.defineProperty(Tokenizer.prototype, "token", {
+        get: function () {
+            return unwrap(this._token);
+        },
+        set: function (value) {
+            this._token = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Tokenizer.prototype.tokenize = function (input) {
         this.tokens = [];
         this.tokenizer.tokenize(input);
@@ -7848,35 +7871,13 @@ var Tokenizer = /** @class */ (function () {
         return this.tokens[0];
     };
     Tokenizer.prototype.reset = function () {
-        this.token = null;
+        this._token = null;
         this.startLine = 1;
         this.startColumn = 0;
     };
-    Tokenizer.prototype.current = function () {
-        var token = this.token;
-        if (token === null) {
-            throw new Error('token was unexpectedly null');
-        }
-        if (arguments.length === 0) {
-            return token;
-        }
-        for (var i = 0; i < arguments.length; i++) {
-            if (token.type === arguments[i]) {
-                return token;
-            }
-        }
-        throw new Error("token type was unexpectedly " + token.type);
-    };
-    Tokenizer.prototype.push = function (token) {
-        this.token = token;
-        this.tokens.push(token);
-    };
-    Tokenizer.prototype.currentAttribute = function () {
-        return this._currentAttribute;
-    };
     Tokenizer.prototype.addLocInfo = function () {
         if (this.options.loc) {
-            this.current().loc = {
+            this.token.loc = {
                 start: {
                     line: this.startLine,
                     column: this.startColumn
@@ -7892,169 +7893,99 @@ var Tokenizer = /** @class */ (function () {
     };
     // Data
     Tokenizer.prototype.beginData = function () {
-        this.push({
-            type: "Chars" /* Chars */,
+        this.token = {
+            type: 'Chars',
             chars: ''
-        });
+        };
+        this.tokens.push(this.token);
     };
     Tokenizer.prototype.appendToData = function (char) {
-        this.current("Chars" /* Chars */).chars += char;
+        this.token.chars += char;
     };
     Tokenizer.prototype.finishData = function () {
         this.addLocInfo();
     };
     // Comment
     Tokenizer.prototype.beginComment = function () {
-        this.push({
-            type: "Comment" /* Comment */,
+        this.token = {
+            type: 'Comment',
             chars: ''
-        });
+        };
+        this.tokens.push(this.token);
     };
     Tokenizer.prototype.appendToCommentData = function (char) {
-        this.current("Comment" /* Comment */).chars += char;
+        this.token.chars += char;
     };
     Tokenizer.prototype.finishComment = function () {
         this.addLocInfo();
     };
     // Tags - basic
-    Tokenizer.prototype.tagOpen = function () { };
     Tokenizer.prototype.beginStartTag = function () {
-        this.push({
-            type: "StartTag" /* StartTag */,
+        this.token = {
+            type: 'StartTag',
             tagName: '',
             attributes: [],
             selfClosing: false
-        });
+        };
+        this.tokens.push(this.token);
     };
     Tokenizer.prototype.beginEndTag = function () {
-        this.push({
-            type: "EndTag" /* EndTag */,
+        this.token = {
+            type: 'EndTag',
             tagName: ''
-        });
+        };
+        this.tokens.push(this.token);
     };
     Tokenizer.prototype.finishTag = function () {
         this.addLocInfo();
     };
     Tokenizer.prototype.markTagAsSelfClosing = function () {
-        this.current("StartTag" /* StartTag */).selfClosing = true;
+        this.token.selfClosing = true;
     };
     // Tags - name
     Tokenizer.prototype.appendToTagName = function (char) {
-        this.current("StartTag" /* StartTag */, "EndTag" /* EndTag */).tagName += char;
+        this.token.tagName += char;
     };
     // Tags - attributes
     Tokenizer.prototype.beginAttribute = function () {
-        this._currentAttribute = ['', '', false];
+        var attributes = unwrap(this.token.attributes, "current token's attributs");
+        this.currentAttribute = ["", "", false];
+        attributes.push(this.currentAttribute);
     };
     Tokenizer.prototype.appendToAttributeName = function (char) {
-        this.currentAttribute()[0] += char;
+        var currentAttribute = unwrap(this.currentAttribute);
+        currentAttribute[0] += char;
     };
     Tokenizer.prototype.beginAttributeValue = function (isQuoted) {
-        this.currentAttribute()[2] = isQuoted;
+        var currentAttribute = unwrap(this.currentAttribute);
+        currentAttribute[2] = isQuoted;
     };
     Tokenizer.prototype.appendToAttributeValue = function (char) {
-        this.currentAttribute()[1] += char;
+        var currentAttribute = unwrap(this.currentAttribute);
+        currentAttribute[1] = currentAttribute[1] || "";
+        currentAttribute[1] += char;
     };
     Tokenizer.prototype.finishAttributeValue = function () {
-        this.current("StartTag" /* StartTag */).attributes.push(this._currentAttribute);
     };
     Tokenizer.prototype.reportSyntaxError = function (message) {
-        this.current().syntaxError = message;
+        this.token.syntaxError = message;
     };
     return Tokenizer;
 }());
-
-function tokenize(input, options) {
-    var tokenizer = new Tokenizer(new EntityParser(namedCharRefs), options);
-    return tokenizer.tokenize(input);
-}
-
-
+/* harmony default export */ var tokenizer = (tokenizer_Tokenizer);
 
 // EXTERNAL MODULE: external {"this":["wp","htmlEntities"]}
-var external_this_wp_htmlEntities_ = __webpack_require__(52);
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/api/validation/logger.js
-function createLogger() {
-  /**
-   * Creates a log handler with block validation prefix.
-   *
-   * @param {Function} logger Original logger function.
-   *
-   * @return {Function} Augmented logger function.
-   */
-  function createLogHandler(logger) {
-    var log = function log(message) {
-      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        args[_key - 1] = arguments[_key];
-      }
-
-      return logger.apply(void 0, ['Block validation: ' + message].concat(args));
-    }; // In test environments, pre-process the sprintf message to improve
-    // readability of error messages. We'd prefer to avoid pulling in this
-    // dependency in runtime environments, and it can be dropped by a combo
-    // of Webpack env substitution + UglifyJS dead code elimination.
-
-
-    if (false) {}
-
-    return log;
-  }
-
-  return {
-    // eslint-disable-next-line no-console
-    error: createLogHandler(console.error),
-    // eslint-disable-next-line no-console
-    warning: createLogHandler(console.warn),
-    getItems: function getItems() {
-      return [];
-    }
-  };
-}
-function createQueuedLogger() {
-  /**
-   * The list of enqueued log actions to print.
-   *
-   * @type {Array}
-   */
-  var queue = [];
-  var logger = createLogger();
-  return {
-    error: function error() {
-      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
-      }
-
-      queue.push({
-        log: logger.error,
-        args: args
-      });
-    },
-    warning: function warning() {
-      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-
-      queue.push({
-        log: logger.warning,
-        args: args
-      });
-    },
-    getItems: function getItems() {
-      return queue;
-    }
-  };
-}
+var external_this_wp_htmlEntities_ = __webpack_require__(57);
 
 // EXTERNAL MODULE: external {"this":["wp","isShallowEqual"]}
-var external_this_wp_isShallowEqual_ = __webpack_require__(41);
+var external_this_wp_isShallowEqual_ = __webpack_require__(42);
 var external_this_wp_isShallowEqual_default = /*#__PURE__*/__webpack_require__.n(external_this_wp_isShallowEqual_);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/extends.js
-var esm_extends = __webpack_require__(18);
+var esm_extends = __webpack_require__(19);
 
 // EXTERNAL MODULE: external {"this":["wp","compose"]}
-var external_this_wp_compose_ = __webpack_require__(8);
+var external_this_wp_compose_ = __webpack_require__(6);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/block-content-provider/index.js
 
@@ -8099,9 +8030,7 @@ var block_content_provider_BlockContentProvider = function BlockContentProvider(
 
   var BlockContent = function BlockContent() {
     // Value is an array of blocks, so defer to block serializer
-    var html = serialize(innerBlocks, {
-      isInnerBlocks: true
-    }); // Use special-cased raw HTML tag to avoid default escaping
+    var html = serialize(innerBlocks); // Use special-cased raw HTML tag to avoid default escaping
 
     return Object(external_this_wp_element_["createElement"])(external_this_wp_element_["RawHTML"], null, html);
   };
@@ -8150,12 +8079,6 @@ var withBlockContentContext = Object(external_this_wp_compose_["createHigherOrde
 
 
 
-
-/**
- * @typedef {Object} WPBlockSerializationOptions Serialization Options.
- *
- * @property {boolean} isInnerBlocks Whether we are serializing inner blocks.
- */
 
 /**
  * Returns the block's default classname from its name.
@@ -8367,44 +8290,41 @@ function getCommentDelimitedContent(rawBlockName, attributes, content) {
  * Returns the content of a block, including comment delimiters, determining
  * serialized attributes and content form from the current state of the block.
  *
- * @param {Object}                      block   Block instance.
- * @param {WPBlockSerializationOptions} options Serialization options.
+ * @param {Object} block Block instance.
  *
  * @return {string} Serialized block.
  */
 
 function serializeBlock(block) {
-  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      _ref$isInnerBlocks = _ref.isInnerBlocks,
-      isInnerBlocks = _ref$isInnerBlocks === void 0 ? false : _ref$isInnerBlocks;
-
   var blockName = block.name;
   var saveContent = getBlockContent(block);
 
-  if (blockName === getUnregisteredTypeHandlerName() || !isInnerBlocks && blockName === getFreeformContentHandlerName()) {
-    return saveContent;
-  }
+  switch (blockName) {
+    case getFreeformContentHandlerName():
+    case getUnregisteredTypeHandlerName():
+      return saveContent;
 
-  var blockType = registration_getBlockType(blockName);
-  var saveAttributes = getCommentAttributes(blockType, block.attributes);
-  return getCommentDelimitedContent(blockName, saveAttributes, saveContent);
+    default:
+      {
+        var blockType = registration_getBlockType(blockName);
+        var saveAttributes = getCommentAttributes(blockType, block.attributes);
+        return getCommentDelimitedContent(blockName, saveAttributes, saveContent);
+      }
+  }
 }
 /**
  * Takes a block or set of blocks and returns the serialized post content.
  *
- * @param {Array}                       blocks  Block(s) to serialize.
- * @param {WPBlockSerializationOptions} options Serialization options.
+ * @param {Array} blocks Block(s) to serialize.
  *
  * @return {string} The post content.
  */
 
-function serialize(blocks, options) {
-  return Object(external_lodash_["castArray"])(blocks).map(function (block) {
-    return serializeBlock(block, options);
-  }).join('\n\n');
+function serialize(blocks) {
+  return Object(external_lodash_["castArray"])(blocks).map(serializeBlock).join('\n\n');
 }
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/api/validation/index.js
+// CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/api/validation.js
 
 
 
@@ -8425,7 +8345,6 @@ function serialize(blocks, options) {
 /**
  * Internal dependencies
  */
-
 
 
 
@@ -8519,8 +8438,8 @@ var TEXT_NORMALIZATIONS = [external_lodash_["identity"], getTextWithCollapsedWhi
  * references.every( ( reference ) => /^[\da-z]+$/i.test( reference ) )
  * ```
  *
- * @see https://html.spec.whatwg.org/multipage/syntax.html#character-references
- * @see https://html.spec.whatwg.org/multipage/named-characters.html#named-character-references
+ * @link https://html.spec.whatwg.org/multipage/syntax.html#character-references
+ * @link https://html.spec.whatwg.org/multipage/named-characters.html#named-character-references
  *
  * @type {RegExp}
  */
@@ -8532,7 +8451,7 @@ var REGEXP_NAMED_CHARACTER_REFERENCE = /^[\da-z]+$/i;
  * "The ampersand must be followed by a U+0023 NUMBER SIGN character (#),
  * followed by one or more ASCII digits, representing a base-ten integer"
  *
- * @see https://html.spec.whatwg.org/multipage/syntax.html#character-references
+ * @link https://html.spec.whatwg.org/multipage/syntax.html#character-references
  *
  * @type {RegExp}
  */
@@ -8546,7 +8465,7 @@ var REGEXP_DECIMAL_CHARACTER_REFERENCE = /^#\d+$/;
  * U+0058 LATIN CAPITAL LETTER X character (X), which must then be followed by
  * one or more ASCII hex digits, representing a hexadecimal integer"
  *
- * @see https://html.spec.whatwg.org/multipage/syntax.html#character-references
+ * @link https://html.spec.whatwg.org/multipage/syntax.html#character-references
  *
  * @type {RegExp}
  */
@@ -8600,6 +8519,42 @@ function () {
   return DecodeEntityParser;
 }();
 /**
+ * Object of logger functions.
+ */
+
+var log = function () {
+  /**
+   * Creates a logger with block validation prefix.
+   *
+   * @param {Function} logger Original logger function.
+   *
+   * @return {Function} Augmented logger function.
+   */
+  function createLogger(logger) {
+    // In test environments, pre-process the sprintf message to improve
+    // readability of error messages. We'd prefer to avoid pulling in this
+    // dependency in runtime environments, and it can be dropped by a combo
+    // of Webpack env substitution + UglifyJS dead code elimination.
+    if (false) {}
+
+    return function (message) {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      return logger.apply(void 0, ['Block validation: ' + message].concat(args));
+    };
+  }
+
+  return {
+    /* eslint-disable no-console */
+    error: createLogger(console.error),
+    warning: createLogger(console.warn)
+    /* eslint-enable no-console */
+
+  };
+}();
+/**
  * Given a specified string, returns an array of strings split by consecutive
  * whitespace, ignoring leading or trailing whitespace.
  *
@@ -8607,6 +8562,7 @@ function () {
  *
  * @return {string[]} Text pieces split on whitespace.
  */
+
 
 function getTextPiecesSplitOnWhitespace(text) {
   return text.trim().split(REGEXP_WHITESPACE);
@@ -8654,13 +8610,11 @@ function getMeaningfulAttributePairs(token) {
  *
  * @param {Object} actual   Actual token.
  * @param {Object} expected Expected token.
- * @param {Object} logger   Validation logger object.
  *
  * @return {boolean} Whether two text tokens are equivalent.
  */
 
 function isEquivalentTextTokens(actual, expected) {
-  var logger = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : createLogger();
   // This function is intentionally written as syntactically "ugly" as a hot
   // path optimization. Text is progressively normalized in order from least-
   // to-most operationally expensive, until the earliest point at which text
@@ -8678,7 +8632,7 @@ function isEquivalentTextTokens(actual, expected) {
     }
   }
 
-  logger.warning('Expected text `%s`, saw `%s`.', expected.chars, actual.chars);
+  log.warning('Expected text `%s`, saw `%s`.', expected.chars, actual.chars);
   return false;
 }
 /**
@@ -8742,19 +8696,16 @@ var isEqualAttributesOfName = Object(objectSpread["a" /* default */])({
  *
  * @param {Array[]} actual   Actual attributes tuples.
  * @param {Array[]} expected Expected attributes tuples.
- * @param {Object}  logger   Validation logger object.
  *
  * @return {boolean} Whether attributes are equivalent.
  */
 
 function isEqualTagAttributePairs(actual, expected) {
-  var logger = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : createLogger();
-
   // Attributes is tokenized as tuples. Their lengths should match. This also
   // avoids us needing to check both attributes sets, since if A has any keys
   // which do not exist in B, we know the sets to be different.
   if (actual.length !== expected.length) {
-    logger.warning('Expected attributes %o, instead saw %o.', expected, actual);
+    log.warning('Expected attributes %o, instead saw %o.', expected, actual);
     return false;
   } // Convert tuples to object for ease of lookup
 
@@ -8767,7 +8718,7 @@ function isEqualTagAttributePairs(actual, expected) {
   for (var name in actualAttributes) {
     // As noted above, if missing member in B, assume different
     if (!expectedAttributes.hasOwnProperty(name)) {
-      logger.warning('Encountered unexpected attribute `%s`.', name);
+      log.warning('Encountered unexpected attribute `%s`.', name);
       return false;
     }
 
@@ -8778,12 +8729,12 @@ function isEqualTagAttributePairs(actual, expected) {
     if (isEqualAttributes) {
       // Defer custom attribute equality handling
       if (!isEqualAttributes(actualValue, expectedValue)) {
-        logger.warning('Expected attribute `%s` of value `%s`, saw `%s`.', name, expectedValue, actualValue);
+        log.warning('Expected attribute `%s` of value `%s`, saw `%s`.', name, expectedValue, actualValue);
         return false;
       }
     } else if (actualValue !== expectedValue) {
       // Otherwise strict inequality should bail
-      logger.warning('Expected attribute `%s` of value `%s`, saw `%s`.', name, expectedValue, actualValue);
+      log.warning('Expected attribute `%s` of value `%s`, saw `%s`.', name, expectedValue, actualValue);
       return false;
     }
   }
@@ -8798,14 +8749,12 @@ function isEqualTagAttributePairs(actual, expected) {
 
 var isEqualTokensOfType = {
   StartTag: function StartTag(actual, expected) {
-    var logger = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : createLogger();
-
     if (actual.tagName !== expected.tagName) {
-      logger.warning('Expected tag name `%s`, instead saw `%s`.', expected.tagName, actual.tagName);
+      log.warning('Expected tag name `%s`, instead saw `%s`.', expected.tagName, actual.tagName);
       return false;
     }
 
-    return isEqualTagAttributePairs.apply(void 0, Object(toConsumableArray["a" /* default */])([actual, expected].map(getMeaningfulAttributePairs)).concat([logger]));
+    return isEqualTagAttributePairs.apply(void 0, Object(toConsumableArray["a" /* default */])([actual, expected].map(getMeaningfulAttributePairs)));
   },
   Chars: isEquivalentTextTokens,
   Comment: isEquivalentTextTokens
@@ -8838,19 +8787,16 @@ function getNextNonWhitespaceToken(tokens) {
  * Tokenize an HTML string, gracefully handling any errors thrown during
  * underlying tokenization.
  *
- * @param {string} html   HTML string to tokenize.
- * @param {Object} logger Validation logger object.
+ * @param {string} html HTML string to tokenize.
  *
  * @return {Object[]|null} Array of valid tokenized HTML elements, or null on error
  */
 
 function getHTMLTokens(html) {
-  var logger = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : createLogger();
-
   try {
-    return new Tokenizer(new validation_DecodeEntityParser()).tokenize(html);
+    return new tokenizer(new validation_DecodeEntityParser()).tokenize(html);
   } catch (e) {
-    logger.warning('Malformed HTML detected: %s', html);
+    log.warning('Malformed HTML detected: %s', html);
   }
 
   return null;
@@ -8883,20 +8829,15 @@ function isClosedByToken(currentToken, nextToken) {
  * false otherwise. Invalid HTML is not considered equivalent, even if the
  * strings directly match.
  *
- * @param {string} actual   Actual HTML string.
+ * @param {string} actual Actual HTML string.
  * @param {string} expected Expected HTML string.
- * @param {Object} logger   Validation logger object.
  *
  * @return {boolean} Whether HTML strings are equivalent.
  */
 
 function isEquivalentHTML(actual, expected) {
-  var logger = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : createLogger();
-
   // Tokenize input content and reserialized save content
-  var _map3 = [actual, expected].map(function (html) {
-    return getHTMLTokens(html, logger);
-  }),
+  var _map3 = [actual, expected].map(getHTMLTokens),
       _map4 = Object(slicedToArray["a" /* default */])(_map3, 2),
       actualTokens = _map4[0],
       expectedTokens = _map4[1]; // If either is malformed then stop comparing - the strings are not equivalent
@@ -8912,13 +8853,13 @@ function isEquivalentHTML(actual, expected) {
     expectedToken = getNextNonWhitespaceToken(expectedTokens); // Inequal if exhausted all expected tokens
 
     if (!expectedToken) {
-      logger.warning('Expected end of content, instead saw %o.', actualToken);
+      log.warning('Expected end of content, instead saw %o.', actualToken);
       return false;
     } // Inequal if next non-whitespace token of each set are not same type
 
 
     if (actualToken.type !== expectedToken.type) {
-      logger.warning('Expected token of type `%s` (%o), instead saw `%s` (%o).', expectedToken.type, expectedToken, actualToken.type, actualToken);
+      log.warning('Expected token of type `%s` (%o), instead saw `%s` (%o).', expectedToken.type, expectedToken, actualToken.type, actualToken);
       return false;
     } // Defer custom token type equality handling, otherwise continue and
     // assume as equal
@@ -8926,7 +8867,7 @@ function isEquivalentHTML(actual, expected) {
 
     var isEqualTokens = isEqualTokensOfType[actualToken.type];
 
-    if (isEqualTokens && !isEqualTokens(actualToken, expectedToken, logger)) {
+    if (isEqualTokens && !isEqualTokens(actualToken, expectedToken)) {
       return false;
     } // Peek at the next tokens (actual and expected) to see if they close
     // a self-closing tag
@@ -8946,51 +8887,11 @@ function isEquivalentHTML(actual, expected) {
   if (expectedToken = getNextNonWhitespaceToken(expectedTokens)) {
     // If any non-whitespace tokens remain in expected token set, this
     // indicates inequality
-    logger.warning('Expected %o, instead saw end of content.', expectedToken);
+    log.warning('Expected %o, instead saw end of content.', expectedToken);
     return false;
   }
 
   return true;
-}
-/**
- * Returns an object with `isValid` property set to `true` if the parsed block
- * is valid given the input content. A block is considered valid if, when serialized
- * with assumed attributes, the content matches the original value. If block is
- * invalid, this function returns all validations issues as well.
- *
- * @param {string|Object} blockTypeOrName      Block type.
- * @param {Object}        attributes           Parsed block attributes.
- * @param {string}        originalBlockContent Original block content.
- * @param {Object}        logger           	   Validation logger object.
- *
- * @return {Object} Whether block is valid and contains validation messages.
- */
-
-function getBlockContentValidationResult(blockTypeOrName, attributes, originalBlockContent) {
-  var logger = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : createQueuedLogger();
-  var blockType = normalizeBlockType(blockTypeOrName);
-  var generatedBlockContent;
-
-  try {
-    generatedBlockContent = getSaveContent(blockType, attributes);
-  } catch (error) {
-    logger.error('Block validation failed because an error occurred while generating block content:\n\n%s', error.toString());
-    return {
-      isValid: false,
-      validationIssues: logger.getItems()
-    };
-  }
-
-  var isValid = isEquivalentHTML(originalBlockContent, generatedBlockContent, logger);
-
-  if (!isValid) {
-    logger.error('Block validation failed for `%s` (%o).\n\nContent generated by `save` function:\n\n%s\n\nContent retrieved from post body:\n\n%s', blockType.name, blockType, generatedBlockContent, originalBlockContent);
-  }
-
-  return {
-    isValid: isValid,
-    validationIssues: logger.getItems()
-  };
 }
 /**
  * Returns true if the parsed block is valid given the input content. A block
@@ -9007,8 +8908,21 @@ function getBlockContentValidationResult(blockTypeOrName, attributes, originalBl
  */
 
 function isValidBlockContent(blockTypeOrName, attributes, originalBlockContent) {
-  var _getBlockContentValid = getBlockContentValidationResult(blockTypeOrName, attributes, originalBlockContent, createLogger()),
-      isValid = _getBlockContentValid.isValid;
+  var blockType = normalizeBlockType(blockTypeOrName);
+  var generatedBlockContent;
+
+  try {
+    generatedBlockContent = getSaveContent(blockType, attributes);
+  } catch (error) {
+    log.error('Block validation failed because an error occurred while generating block content:\n\n%s', error.toString());
+    return false;
+  }
+
+  var isValid = isEquivalentHTML(originalBlockContent, generatedBlockContent);
+
+  if (!isValid) {
+    log.error('Block validation failed for `%s` (%o).\n\nContent generated by `save` function:\n\n%s\n\nContent retrieved from post body:\n\n%s', blockType.name, blockType, generatedBlockContent, originalBlockContent);
+  }
 
   return isValid;
 }
@@ -9152,18 +9066,6 @@ function children_matcher(selector) {
     return [];
   };
 }
-/**
- * Object of utility functions used in managing block attribute values of
- * source `children`.
- *
- * @see https://github.com/WordPress/gutenberg/pull/10439
- *
- * @deprecated since 4.0. The `children` source should not be used, and can be
- *             replaced by the `html` source.
- *
- * @private
- */
-
 /* harmony default export */ var api_children = ({
   concat: concat,
   getChildrenArray: getChildrenArray,
@@ -9296,18 +9198,6 @@ function node_matcher(selector) {
     }
   };
 }
-/**
- * Object of utility functions used in managing block attribute values of
- * source `node`.
- *
- * @see https://github.com/WordPress/gutenberg/pull/10439
- *
- * @deprecated since 4.0. The `node` source should not be used, and can be
- *             replaced by the `html` source.
- *
- * @private
- */
-
 /* harmony default export */ var api_node = ({
   isNodeOfType: isNodeOfType,
   fromDOM: node_fromDOM,
@@ -9363,7 +9253,6 @@ function matchers_html(selector, multilineTag) {
 
 
 
-
 /**
  * External dependencies
  */
@@ -9379,7 +9268,6 @@ function matchers_html(selector, multilineTag) {
 /**
  * Internal dependencies
  */
-
 
 
 
@@ -9477,36 +9365,6 @@ function isOfTypes(value, types) {
   });
 }
 /**
- * Returns true if value is valid per the given block attribute schema type
- * definition, or false otherwise.
- *
- * @see https://json-schema.org/latest/json-schema-validation.html#rfc.section.6.1.1
- *
- * @param {*}                       value Value to test.
- * @param {?(Array<string>|string)} type  Block attribute schema type.
- *
- * @return {boolean} Whether value is valid.
- */
-
-function isValidByType(value, type) {
-  return type === undefined || isOfTypes(value, Object(external_lodash_["castArray"])(type));
-}
-/**
- * Returns true if value is valid per the given block attribute schema enum
- * definition, or false otherwise.
- *
- * @see https://json-schema.org/latest/json-schema-validation.html#rfc.section.6.1.2
- *
- * @param {*}      value   Value to test.
- * @param {?Array} enumSet Block attribute schema enum.
- *
- * @return {boolean} Whether value is valid.
- */
-
-function isValidByEnum(value, enumSet) {
-  return !Array.isArray(enumSet) || enumSet.includes(value);
-}
-/**
  * Returns true if the given attribute schema describes a value which may be
  * an ambiguous string.
  *
@@ -9527,6 +9385,45 @@ function isAmbiguousStringSource(attributeSchema) {
   var isStringSource = STRING_SOURCES.has(source);
   var isSingleType = typeof type === 'string';
   return isStringSource && isSingleType;
+}
+/**
+ * Returns value coerced to the specified JSON schema type string.
+ *
+ * @see http://json-schema.org/latest/json-schema-validation.html#rfc.section.6.25
+ *
+ * @param {*}      value Original value.
+ * @param {string} type  Type to coerce.
+ *
+ * @return {*} Coerced value.
+ */
+
+function asType(value, type) {
+  switch (type) {
+    case 'string':
+      return String(value);
+
+    case 'boolean':
+      return Boolean(value);
+
+    case 'object':
+      return Object(value);
+
+    case 'null':
+      return null;
+
+    case 'array':
+      if (Array.isArray(value)) {
+        return value;
+      }
+
+      return Array.from(value);
+
+    case 'integer':
+    case 'number':
+      return Number(value);
+  }
+
+  return value;
 }
 /**
  * Returns an hpq matcher given a source object.
@@ -9564,8 +9461,8 @@ function matcherFromSource(sourceConfig) {
       return query(sourceConfig.selector, subMatchers);
 
     case 'tag':
-      return Object(external_lodash_["flow"])([prop(sourceConfig.selector, 'nodeName'), function (nodeName) {
-        return nodeName ? nodeName.toLowerCase() : undefined;
+      return Object(external_lodash_["flow"])([prop(sourceConfig.selector, 'nodeName'), function (value) {
+        return value.toLowerCase();
       }]);
 
     default:
@@ -9600,8 +9497,7 @@ function parseWithAttributeSchema(innerHTML, attributeSchema) {
  */
 
 function getBlockAttribute(attributeKey, attributeSchema, innerHTML, commentAttributes) {
-  var type = attributeSchema.type,
-      enumSet = attributeSchema.enum;
+  var type = attributeSchema.type;
   var value;
 
   switch (attributeSchema.source) {
@@ -9622,9 +9518,9 @@ function getBlockAttribute(attributeKey, attributeSchema, innerHTML, commentAttr
       break;
   }
 
-  if (!isValidByType(value, type) || !isValidByEnum(value, enumSet)) {
-    // Reject the value if it is not valid. Reverting to the undefined
-    // value ensures the default is respected, if applicable.
+  if (type !== undefined && !isOfTypes(value, Object(external_lodash_["castArray"])(type))) {
+    // Reject the value if it is not valid of type. Reverting to the
+    // undefined value ensures the default is restored, if applicable.
     value = undefined;
   }
 
@@ -9690,20 +9586,18 @@ function getMigratedBlock(block, parsedAttributes) {
     // and must be explicitly provided.
 
 
-    var deprecatedBlockType = Object.assign(Object(external_lodash_["omit"])(blockType, DEPRECATED_ENTRY_KEYS), deprecatedDefinitions[i]);
+    var deprecatedBlockType = Object.assign(Object(external_lodash_["omit"])(blockType, ['attributes', 'save', 'supports']), deprecatedDefinitions[i]);
     var migratedAttributes = getBlockAttributes(deprecatedBlockType, originalContent, parsedAttributes); // Ignore the deprecation if it produces a block which is not valid.
 
-    var _getBlockContentValid = getBlockContentValidationResult(deprecatedBlockType, migratedAttributes, originalContent),
-        isValid = _getBlockContentValid.isValid,
-        validationIssues = _getBlockContentValid.validationIssues;
+    var isValid = isValidBlockContent(deprecatedBlockType, migratedAttributes, originalContent);
 
     if (!isValid) {
-      block = Object(objectSpread["a" /* default */])({}, block, {
-        validationIssues: [].concat(Object(toConsumableArray["a" /* default */])(Object(external_lodash_["get"])(block, 'validationIssues', [])), Object(toConsumableArray["a" /* default */])(validationIssues))
-      });
       continue;
     }
 
+    block = Object(objectSpread["a" /* default */])({}, block, {
+      isValid: true
+    });
     var migratedInnerBlocks = innerBlocks; // A block may provide custom behavior to assign new attributes and/or
     // inner blocks.
 
@@ -9720,11 +9614,8 @@ function getMigratedBlock(block, parsedAttributes) {
       migratedInnerBlocks = _castArray2$2 === void 0 ? innerBlocks : _castArray2$2;
     }
 
-    block = Object(objectSpread["a" /* default */])({}, block, {
-      attributes: migratedAttributes,
-      innerBlocks: migratedInnerBlocks,
-      isValid: true
-    });
+    block.attributes = migratedAttributes;
+    block.innerBlocks = migratedInnerBlocks;
   }
 
   return block;
@@ -9743,7 +9634,6 @@ function createBlockWithFallback(blockNode) {
       _blockNode$innerBlock = blockNode.innerBlocks,
       innerBlocks = _blockNode$innerBlock === void 0 ? [] : _blockNode$innerBlock,
       innerHTML = blockNode.innerHTML;
-  var innerContent = blockNode.innerContent;
   var freeformContentFallbackBlock = getFreeformContentHandlerName();
   var unregisteredFallbackBlock = getUnregisteredTypeHandlerName() || freeformContentFallbackBlock;
   attributes = attributes || {}; // Trim content to avoid creation of intermediary freeform segments.
@@ -9773,50 +9663,24 @@ function createBlockWithFallback(blockNode) {
   var blockType = registration_getBlockType(name);
 
   if (!blockType) {
-    // Since the constituents of the block node are extracted at the start
-    // of the present function, construct a new object rather than reuse
-    // `blockNode`.
-    var reconstitutedBlockNode = {
-      attrs: attributes,
-      blockName: originalName,
-      innerBlocks: innerBlocks,
-      innerContent: innerContent
-    }; // Preserve undelimited content for use by the unregistered type
-    // handler. A block node's `innerHTML` isn't enough, as that field only
-    // carries the block's own HTML and not its nested blocks'.
-
-    var originalUndelimitedContent = serializeBlockNode(reconstitutedBlockNode, {
-      isCommentDelimited: false
-    }); // Preserve full block content for use by the unregistered type
-    // handler, block boundaries included.
-
-    var originalContent = serializeBlockNode(reconstitutedBlockNode, {
-      isCommentDelimited: true
-    }); // If detected as a block which is not registered, preserve comment
+    // Preserve undelimited content for use by the unregistered type handler.
+    var originalUndelimitedContent = innerHTML; // If detected as a block which is not registered, preserve comment
     // delimiters in content of unregistered type handler.
 
     if (name) {
-      innerHTML = originalContent;
+      innerHTML = getCommentDelimitedContent(name, attributes, innerHTML);
     }
 
     name = unregisteredFallbackBlock;
     attributes = {
       originalName: originalName,
-      originalContent: originalContent,
       originalUndelimitedContent: originalUndelimitedContent
     };
     blockType = registration_getBlockType(name);
   } // Coerce inner blocks from parsed form to canonical form.
 
 
-  innerBlocks = innerBlocks.map(createBlockWithFallback); // Remove `undefined` innerBlocks.
-  //
-  // This is a temporary fix to prevent unrecoverable TypeErrors when handling unexpectedly
-  // empty freeform block nodes. See https://github.com/WordPress/gutenberg/pull/17164.
-
-  innerBlocks = innerBlocks.filter(function (innerBlock) {
-    return innerBlock;
-  });
+  innerBlocks = innerBlocks.map(createBlockWithFallback);
   var isFallbackBlock = name === freeformContentFallbackBlock || name === unregisteredFallbackBlock; // Include in set only if type was determined.
 
   if (!blockType || !innerHTML && isFallbackBlock) {
@@ -9829,74 +9693,14 @@ function createBlockWithFallback(blockNode) {
   // the block. When both match, the block is marked as valid.
 
   if (!isFallbackBlock) {
-    var _getBlockContentValid2 = getBlockContentValidationResult(blockType, block.attributes, innerHTML),
-        isValid = _getBlockContentValid2.isValid,
-        validationIssues = _getBlockContentValid2.validationIssues;
-
-    block.isValid = isValid;
-    block.validationIssues = validationIssues;
-  } // Preserve original content for future use in case the block is parsed
-  // as invalid, or future serialization attempt results in an error.
+    block.isValid = isValidBlockContent(blockType, block.attributes, innerHTML);
+  } // Preserve original content for future use in case the block is parsed as
+  // invalid, or future serialization attempt results in an error.
 
 
-  block.originalContent = block.originalContent || innerHTML;
+  block.originalContent = innerHTML;
   block = getMigratedBlock(block, attributes);
-
-  if (block.validationIssues && block.validationIssues.length > 0) {
-    if (block.isValid) {
-      // eslint-disable-next-line no-console
-      console.info('Block successfully updated for `%s` (%o).\n\nNew content generated by `save` function:\n\n%s\n\nContent retrieved from post body:\n\n%s', blockType.name, blockType, getSaveContent(blockType, block.attributes), block.originalContent);
-    } else {
-      block.validationIssues.forEach(function (_ref) {
-        var log = _ref.log,
-            args = _ref.args;
-        return log.apply(void 0, Object(toConsumableArray["a" /* default */])(args));
-      });
-    }
-  }
-
   return block;
-}
-/**
- * Serializes a block node into the native HTML-comment-powered block format.
- * CAVEAT: This function is intended for reserializing blocks as parsed by
- * valid parsers and skips any validation steps. This is NOT a generic
- * serialization function for in-memory blocks. For most purposes, see the
- * following functions available in the `@wordpress/blocks` package:
- *
- * @see serializeBlock
- * @see serialize
- *
- * For more on the format of block nodes as returned by valid parsers:
- *
- * @see `@wordpress/block-serialization-default-parser` package
- * @see `@wordpress/block-serialization-spec-parser` package
- *
- * @param {Object}   blockNode                  A block node as returned by a valid parser.
- * @param {?Object}  options                    Serialization options.
- * @param {?boolean} options.isCommentDelimited Whether to output HTML comments around blocks.
- *
- * @return {string} An HTML string representing a block.
- */
-
-function serializeBlockNode(blockNode) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var _options$isCommentDel = options.isCommentDelimited,
-      isCommentDelimited = _options$isCommentDel === void 0 ? true : _options$isCommentDel;
-  var blockName = blockNode.blockName,
-      _blockNode$attrs = blockNode.attrs,
-      attrs = _blockNode$attrs === void 0 ? {} : _blockNode$attrs,
-      _blockNode$innerBlock2 = blockNode.innerBlocks,
-      innerBlocks = _blockNode$innerBlock2 === void 0 ? [] : _blockNode$innerBlock2,
-      _blockNode$innerConte = blockNode.innerContent,
-      innerContent = _blockNode$innerConte === void 0 ? [] : _blockNode$innerConte;
-  var childIndex = 0;
-  var content = innerContent.map(function (item) {
-    return (// `null` denotes a nested block, otherwise we have an HTML fragment
-      item !== null ? item : serializeBlockNode(innerBlocks[childIndex++], options)
-    );
-  }).join('\n').replace(/\n+/g, '\n').trim();
-  return isCommentDelimited ? getCommentDelimitedContent(blockName, attrs, content) : content;
 }
 /**
  * Creates a parse implementation for the post content which returns a list of blocks.
@@ -9932,7 +9736,7 @@ var parseWithGrammar = createParse(external_this_wp_blockSerializationDefaultPar
 /* harmony default export */ var parser = (parseWithGrammar);
 
 // EXTERNAL MODULE: external {"this":["wp","dom"]}
-var external_this_wp_dom_ = __webpack_require__(25);
+var external_this_wp_dom_ = __webpack_require__(24);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/api/raw-handling/phrasing-content.js
 /**
@@ -10627,7 +10431,7 @@ function canHaveAnchor(node, schema) {
 });
 
 // EXTERNAL MODULE: external {"this":["wp","shortcode"]}
-var external_this_wp_shortcode_ = __webpack_require__(144);
+var external_this_wp_shortcode_ = __webpack_require__(134);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/api/raw-handling/shortcode-converter.js
 
@@ -10983,7 +10787,7 @@ var image_corrector_window = window,
 });
 
 // EXTERNAL MODULE: ./node_modules/showdown/dist/showdown.js
-var showdown = __webpack_require__(223);
+var showdown = __webpack_require__(206);
 var showdown_default = /*#__PURE__*/__webpack_require__.n(showdown);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/blocks/build-module/api/raw-handling/markdown-converter.js
@@ -11170,7 +10974,6 @@ function htmlToBlocks(_ref) {
 /**
  * Converts an HTML string to known blocks. Strips everything else.
  *
- * @param {Object}  options
  * @param {string}  [options.HTML]                     The HTML to convert.
  * @param {string}  [options.plainText]                Plain text version.
  * @param {string}  [options.mode]                     Handle content as blocks or inline content.
@@ -11366,7 +11169,6 @@ function raw_handling_htmlToBlocks(_ref) {
 /**
  * Converts an HTML string to known blocks.
  *
- * @param {Object} $1
  * @param {string} $1.HTML The HTML to convert.
  *
  * @return {Array} A list of blocks.
@@ -11583,7 +11385,6 @@ function synchronizeBlocksWithTemplate() {
 /* concated harmony reexport switchToBlockType */__webpack_require__.d(__webpack_exports__, "switchToBlockType", function() { return switchToBlockType; });
 /* concated harmony reexport getBlockTransforms */__webpack_require__.d(__webpack_exports__, "getBlockTransforms", function() { return getBlockTransforms; });
 /* concated harmony reexport findTransform */__webpack_require__.d(__webpack_exports__, "findTransform", function() { return findTransform; });
-/* concated harmony reexport getBlockFromExample */__webpack_require__.d(__webpack_exports__, "getBlockFromExample", function() { return factory_getBlockFromExample; });
 /* concated harmony reexport parse */__webpack_require__.d(__webpack_exports__, "parse", function() { return parser; });
 /* concated harmony reexport getBlockAttributes */__webpack_require__.d(__webpack_exports__, "getBlockAttributes", function() { return getBlockAttributes; });
 /* concated harmony reexport parseWithAttributeSchema */__webpack_require__.d(__webpack_exports__, "parseWithAttributeSchema", function() { return parseWithAttributeSchema; });
@@ -11608,8 +11409,6 @@ function synchronizeBlocksWithTemplate() {
 /* concated harmony reexport getUnregisteredTypeHandlerName */__webpack_require__.d(__webpack_exports__, "getUnregisteredTypeHandlerName", function() { return getUnregisteredTypeHandlerName; });
 /* concated harmony reexport setDefaultBlockName */__webpack_require__.d(__webpack_exports__, "setDefaultBlockName", function() { return registration_setDefaultBlockName; });
 /* concated harmony reexport getDefaultBlockName */__webpack_require__.d(__webpack_exports__, "getDefaultBlockName", function() { return registration_getDefaultBlockName; });
-/* concated harmony reexport setGroupingBlockName */__webpack_require__.d(__webpack_exports__, "setGroupingBlockName", function() { return registration_setGroupingBlockName; });
-/* concated harmony reexport getGroupingBlockName */__webpack_require__.d(__webpack_exports__, "getGroupingBlockName", function() { return registration_getGroupingBlockName; });
 /* concated harmony reexport getBlockType */__webpack_require__.d(__webpack_exports__, "getBlockType", function() { return registration_getBlockType; });
 /* concated harmony reexport getBlockTypes */__webpack_require__.d(__webpack_exports__, "getBlockTypes", function() { return registration_getBlockTypes; });
 /* concated harmony reexport getBlockSupport */__webpack_require__.d(__webpack_exports__, "getBlockSupport", function() { return registration_getBlockSupport; });
@@ -11649,296 +11448,7 @@ function synchronizeBlocksWithTemplate() {
 
 /***/ }),
 
-/***/ 35:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["blob"]; }());
-
-/***/ }),
-
-/***/ 36:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-
-var LEAF_KEY, hasWeakMap;
-
-/**
- * Arbitrary value used as key for referencing cache object in WeakMap tree.
- *
- * @type {Object}
- */
-LEAF_KEY = {};
-
-/**
- * Whether environment supports WeakMap.
- *
- * @type {boolean}
- */
-hasWeakMap = typeof WeakMap !== 'undefined';
-
-/**
- * Returns the first argument as the sole entry in an array.
- *
- * @param {*} value Value to return.
- *
- * @return {Array} Value returned as entry in array.
- */
-function arrayOf( value ) {
-	return [ value ];
-}
-
-/**
- * Returns true if the value passed is object-like, or false otherwise. A value
- * is object-like if it can support property assignment, e.g. object or array.
- *
- * @param {*} value Value to test.
- *
- * @return {boolean} Whether value is object-like.
- */
-function isObjectLike( value ) {
-	return !! value && 'object' === typeof value;
-}
-
-/**
- * Creates and returns a new cache object.
- *
- * @return {Object} Cache object.
- */
-function createCache() {
-	var cache = {
-		clear: function() {
-			cache.head = null;
-		},
-	};
-
-	return cache;
-}
-
-/**
- * Returns true if entries within the two arrays are strictly equal by
- * reference from a starting index.
- *
- * @param {Array}  a         First array.
- * @param {Array}  b         Second array.
- * @param {number} fromIndex Index from which to start comparison.
- *
- * @return {boolean} Whether arrays are shallowly equal.
- */
-function isShallowEqual( a, b, fromIndex ) {
-	var i;
-
-	if ( a.length !== b.length ) {
-		return false;
-	}
-
-	for ( i = fromIndex; i < a.length; i++ ) {
-		if ( a[ i ] !== b[ i ] ) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-/**
- * Returns a memoized selector function. The getDependants function argument is
- * called before the memoized selector and is expected to return an immutable
- * reference or array of references on which the selector depends for computing
- * its own return value. The memoize cache is preserved only as long as those
- * dependant references remain the same. If getDependants returns a different
- * reference(s), the cache is cleared and the selector value regenerated.
- *
- * @param {Function} selector      Selector function.
- * @param {Function} getDependants Dependant getter returning an immutable
- *                                 reference or array of reference used in
- *                                 cache bust consideration.
- *
- * @return {Function} Memoized selector.
- */
-/* harmony default export */ __webpack_exports__["a"] = (function( selector, getDependants ) {
-	var rootCache, getCache;
-
-	// Use object source as dependant if getter not provided
-	if ( ! getDependants ) {
-		getDependants = arrayOf;
-	}
-
-	/**
-	 * Returns the root cache. If WeakMap is supported, this is assigned to the
-	 * root WeakMap cache set, otherwise it is a shared instance of the default
-	 * cache object.
-	 *
-	 * @return {(WeakMap|Object)} Root cache object.
-	 */
-	function getRootCache() {
-		return rootCache;
-	}
-
-	/**
-	 * Returns the cache for a given dependants array. When possible, a WeakMap
-	 * will be used to create a unique cache for each set of dependants. This
-	 * is feasible due to the nature of WeakMap in allowing garbage collection
-	 * to occur on entries where the key object is no longer referenced. Since
-	 * WeakMap requires the key to be an object, this is only possible when the
-	 * dependant is object-like. The root cache is created as a hierarchy where
-	 * each top-level key is the first entry in a dependants set, the value a
-	 * WeakMap where each key is the next dependant, and so on. This continues
-	 * so long as the dependants are object-like. If no dependants are object-
-	 * like, then the cache is shared across all invocations.
-	 *
-	 * @see isObjectLike
-	 *
-	 * @param {Array} dependants Selector dependants.
-	 *
-	 * @return {Object} Cache object.
-	 */
-	function getWeakMapCache( dependants ) {
-		var caches = rootCache,
-			isUniqueByDependants = true,
-			i, dependant, map, cache;
-
-		for ( i = 0; i < dependants.length; i++ ) {
-			dependant = dependants[ i ];
-
-			// Can only compose WeakMap from object-like key.
-			if ( ! isObjectLike( dependant ) ) {
-				isUniqueByDependants = false;
-				break;
-			}
-
-			// Does current segment of cache already have a WeakMap?
-			if ( caches.has( dependant ) ) {
-				// Traverse into nested WeakMap.
-				caches = caches.get( dependant );
-			} else {
-				// Create, set, and traverse into a new one.
-				map = new WeakMap();
-				caches.set( dependant, map );
-				caches = map;
-			}
-		}
-
-		// We use an arbitrary (but consistent) object as key for the last item
-		// in the WeakMap to serve as our running cache.
-		if ( ! caches.has( LEAF_KEY ) ) {
-			cache = createCache();
-			cache.isUniqueByDependants = isUniqueByDependants;
-			caches.set( LEAF_KEY, cache );
-		}
-
-		return caches.get( LEAF_KEY );
-	}
-
-	// Assign cache handler by availability of WeakMap
-	getCache = hasWeakMap ? getWeakMapCache : getRootCache;
-
-	/**
-	 * Resets root memoization cache.
-	 */
-	function clear() {
-		rootCache = hasWeakMap ? new WeakMap() : createCache();
-	}
-
-	// eslint-disable-next-line jsdoc/check-param-names
-	/**
-	 * The augmented selector call, considering first whether dependants have
-	 * changed before passing it to underlying memoize function.
-	 *
-	 * @param {Object} source    Source object for derivation.
-	 * @param {...*}   extraArgs Additional arguments to pass to selector.
-	 *
-	 * @return {*} Selector result.
-	 */
-	function callSelector( /* source, ...extraArgs */ ) {
-		var len = arguments.length,
-			cache, node, i, args, dependants;
-
-		// Create copy of arguments (avoid leaking deoptimization).
-		args = new Array( len );
-		for ( i = 0; i < len; i++ ) {
-			args[ i ] = arguments[ i ];
-		}
-
-		dependants = getDependants.apply( null, args );
-		cache = getCache( dependants );
-
-		// If not guaranteed uniqueness by dependants (primitive type or lack
-		// of WeakMap support), shallow compare against last dependants and, if
-		// references have changed, destroy cache to recalculate result.
-		if ( ! cache.isUniqueByDependants ) {
-			if ( cache.lastDependants && ! isShallowEqual( dependants, cache.lastDependants, 0 ) ) {
-				cache.clear();
-			}
-
-			cache.lastDependants = dependants;
-		}
-
-		node = cache.head;
-		while ( node ) {
-			// Check whether node arguments match arguments
-			if ( ! isShallowEqual( node.args, args, 1 ) ) {
-				node = node.next;
-				continue;
-			}
-
-			// At this point we can assume we've found a match
-
-			// Surface matched node to head if not already
-			if ( node !== cache.head ) {
-				// Adjust siblings to point to each other.
-				node.prev.next = node.next;
-				if ( node.next ) {
-					node.next.prev = node.prev;
-				}
-
-				node.next = cache.head;
-				node.prev = null;
-				cache.head.prev = node;
-				cache.head = node;
-			}
-
-			// Return immediately
-			return node.val;
-		}
-
-		// No cached value found. Continue to insertion phase:
-
-		node = {
-			// Generate the result from original function
-			val: selector.apply( null, args ),
-		};
-
-		// Avoid including the source object in the cache.
-		args[ 0 ] = null;
-		node.args = args;
-
-		// Don't need to check whether node is already head, since it would
-		// have been returned above already if it was
-
-		// Shift existing head down list
-		if ( cache.head ) {
-			cache.head.prev = node;
-			node.next = cache.head;
-		}
-
-		cache.head = node;
-
-		return node.val;
-	}
-
-	callSelector.getDependants = getDependants;
-	callSelector.clear = clear;
-	clear();
-
-	return callSelector;
-});
-
-
-/***/ }),
-
-/***/ 38:
+/***/ 37:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11949,7 +11459,7 @@ function _arrayWithHoles(arr) {
 
 /***/ }),
 
-/***/ 39:
+/***/ 38:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11960,21 +11470,14 @@ function _nonIterableRest() {
 
 /***/ }),
 
-/***/ 4:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["data"]; }());
-
-/***/ }),
-
-/***/ 41:
+/***/ 42:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["wp"]["isShallowEqual"]; }());
 
 /***/ }),
 
-/***/ 48:
+/***/ 45:
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;// TinyColor v1.4.1
@@ -13175,18 +12678,32 @@ else {}
 
 /***/ }),
 
-/***/ 52:
+/***/ 5:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["data"]; }());
+
+/***/ }),
+
+/***/ 57:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["wp"]["htmlEntities"]; }());
 
 /***/ }),
 
-/***/ 67:
+/***/ 6:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["compose"]; }());
+
+/***/ }),
+
+/***/ 65:
 /***/ (function(module, exports, __webpack_require__) {
 
-var rng = __webpack_require__(85);
-var bytesToUuid = __webpack_require__(86);
+var rng = __webpack_require__(87);
+var bytesToUuid = __webpack_require__(88);
 
 function v4(options, buf, offset) {
   var i = buf && offset || 0;
@@ -13218,7 +12735,7 @@ module.exports = v4;
 
 /***/ }),
 
-/***/ 69:
+/***/ 66:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["wp"]["autop"]; }());
@@ -13230,7 +12747,7 @@ module.exports = v4;
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _objectSpread; });
-/* harmony import */ var _defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(10);
+/* harmony import */ var _defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(15);
 
 function _objectSpread(target) {
   for (var i = 1; i < arguments.length; i++) {
@@ -13253,14 +12770,7 @@ function _objectSpread(target) {
 
 /***/ }),
 
-/***/ 8:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["wp"]["compose"]; }());
-
-/***/ }),
-
-/***/ 85:
+/***/ 87:
 /***/ (function(module, exports) {
 
 // Unique ID creation requires a high quality random # generator.  In the
@@ -13301,7 +12811,7 @@ if (getRandomValues) {
 
 /***/ }),
 
-/***/ 86:
+/***/ 88:
 /***/ (function(module, exports) {
 
 /**
@@ -13329,6 +12839,29 @@ function bytesToUuid(buf, offset) {
 
 module.exports = bytesToUuid;
 
+
+/***/ }),
+
+/***/ 9:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _createClass; });
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
 
 /***/ })
 

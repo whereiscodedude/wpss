@@ -224,8 +224,7 @@ class WP_Filesystem_Base {
 			$this->cache[ $folder ] = $folder;
 			return $folder;
 		}
-		$return = $this->search_for_folder( $folder );
-		if ( $return ) {
+		if ( $return = $this->search_for_folder( $folder ) ) {
 			$this->cache[ $folder ] = $return;
 		}
 		return $return;
@@ -251,7 +250,7 @@ class WP_Filesystem_Base {
 		$folder = untrailingslashit( $folder );
 
 		if ( $this->verbose ) {
-			/* translators: 1: Folder to locate, 2: Folder to start searching from. */
+			/* translators: 1: folder to locate, 2: folder to start searching from */
 			printf( "\n" . __( 'Looking for %1$s in %2$s' ) . "<br/>\n", $folder, $base );
 		}
 
@@ -279,14 +278,13 @@ class WP_Filesystem_Base {
 				// Let's try that folder:
 				$newdir = trailingslashit( path_join( $base, $key ) );
 				if ( $this->verbose ) {
-					/* translators: %s: Directory name. */
+					/* translators: %s: directory name */
 					printf( "\n" . __( 'Changing to %s' ) . "<br/>\n", $newdir );
 				}
 
 				// Only search for the remaining path tokens in the directory, not the full path again.
 				$newfolder = implode( '/', array_slice( $folder_parts, $index + 1 ) );
-				$ret       = $this->search_for_folder( $newfolder, $newdir, $loop );
-				if ( $ret ) {
+				if ( $ret = $this->search_for_folder( $newfolder, $newdir, $loop ) ) {
 					return $ret;
 				}
 			}
@@ -296,7 +294,7 @@ class WP_Filesystem_Base {
 		// All above procedures will fail quickly if this is the right branch to take.
 		if ( isset( $files[ $last_path ] ) ) {
 			if ( $this->verbose ) {
-				/* translators: %s: Directory name. */
+				/* translators: %s: directory name */
 				printf( "\n" . __( 'Found %s' ) . "<br/>\n", $base . $last_path );
 			}
 			return trailingslashit( $base . $last_path );
@@ -400,8 +398,7 @@ class WP_Filesystem_Base {
 		$attarray = preg_split( '//', $mode );
 
 		for ( $i = 0, $c = count( $attarray ); $i < $c; $i++ ) {
-			$key = array_search( $attarray[ $i ], $legal );
-			if ( $key ) {
+			if ( $key = array_search( $attarray[ $i ], $legal ) ) {
 				$realmode .= $legal[ $key ];
 			}
 		}
@@ -555,7 +552,7 @@ class WP_Filesystem_Base {
 	 * @param string    $file      Path to the file.
 	 * @param int|false $mode      Optional. The permissions as octal number, usually 0644 for files,
 	 *                             0755 for directories. Default false.
-	 * @param bool      $recursive Optional. If set to true, changes file permissions recursively.
+	 * @param bool      $recursive Optional. If set to true, changes file group recursively.
 	 *                             Default false.
 	 * @return bool True on success, false on failure.
 	 */
@@ -630,7 +627,7 @@ class WP_Filesystem_Base {
 	 * @abstract
 	 *
 	 * @param string       $file      Path to the file or directory.
-	 * @param bool         $recursive Optional. If set to true, deletes files and folders recursively.
+	 * @param bool         $recursive Optional. If set to true, changes file group recursively.
 	 *                                Default false.
 	 * @param string|false $type      Type of resource. 'f' for file, 'd' for directory.
 	 *                                Default false.

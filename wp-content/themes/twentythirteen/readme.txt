@@ -1,6 +1,8 @@
 === Twenty Thirteen ===
 Contributors: wordpressdotorg
-Tested up to: 5.0
+Requires at least: WordPress 3.6
+Tested up to: WordPress 5.0
+Requires PHP: 5.2.4
 Stable tag: 2.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -21,7 +23,7 @@ For more information about Twenty Thirteen please go to https://codex.wordpress.
 
 == Copyright ==
 
-Twenty Thirteen WordPress Theme, Copyright 2013-2019 WordPress.org & Automattic.com
+Twenty Thirteen WordPress Theme, Copyright 2013-2018 WordPress.org & Automattic.com
 Twenty Thirteen is Distributed under the terms of the GNU GPL
 
 This program is free software: you can redistribute it and/or modify

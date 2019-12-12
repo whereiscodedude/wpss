@@ -16,7 +16,7 @@
 		 *
 		 * @since 4.4.0
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		function initialize() {
 			if ( typeof _wpmejsSettings !== 'undefined' ) {
@@ -54,7 +54,7 @@
 			 *
 			 * @param {object} media The wrapper that mimics all the native events/properties/methods for all renderers.
 			 * @param {object} node  The original HTML video, audio, or iframe tag where the media was loaded.
-			 * @return {string}
+			 * @returns {string}
 			 */
 			settings.customError = function ( media, node ) {
 				// Make sure we only fall back to a download link for flash files.

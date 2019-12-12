@@ -101,7 +101,7 @@ class WP_Roles {
 	 */
 	public function __call( $name, $arguments ) {
 		if ( '_init' === $name ) {
-			return $this->_init( ...$arguments );
+			return call_user_func_array( array( $this, $name ), $arguments );
 		}
 		return false;
 	}
@@ -147,10 +147,9 @@ class WP_Roles {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string $role         Role name.
+	 * @param string $role Role name.
 	 * @param string $display_name Role display name.
-	 * @param bool[] $capabilities List of capabilities keyed by the capability name,
-	 *                             e.g. array( 'edit_posts' => true, 'delete_posts' => false ).
+	 * @param array $capabilities List of role capabilities in the above format.
 	 * @return WP_Role|void WP_Role object, if role is added.
 	 */
 	public function add_role( $role, $display_name, $capabilities = array() ) {

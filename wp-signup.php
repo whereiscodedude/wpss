@@ -95,7 +95,7 @@ do_action( 'before_signup_form' );
  *
  * @param string          $blogname   The new site name.
  * @param string          $blog_title The new site title.
- * @param string|WP_Error $errors     A WP_Error object containing existing errors. Defaults to empty string.
+ * @param WP_Error|string $errors     A WP_Error object containing existing errors. Defaults to empty string.
  */
 function show_blog_form( $blogname = '', $blog_title = '', $errors = '' ) {
 	if ( ! is_wp_error( $errors ) ) {
@@ -131,12 +131,8 @@ function show_blog_form( $blogname = '', $blog_title = '', $errors = '' ) {
 			$site = __( 'domain' ) . '.' . $site_domain . $current_network->path;
 		}
 
-		printf(
-			'<p>(<strong>%s</strong>) %s</p>',
-			/* translators: %s: Site address. */
-			sprintf( __( 'Your address will be %s.' ), $site ),
-			__( 'Must be at least 4 characters, letters and numbers only. It cannot be changed, so choose carefully!' )
-		);
+		/* translators: %s: site address */
+		echo '<p>(<strong>' . sprintf( __( 'Your address will be %s.' ), $site ) . '</strong>) ' . __( 'Must be at least 4 characters, letters and numbers only. It cannot be changed, so choose carefully!' ) . '</p>';
 	}
 
 	// Blog Title
@@ -246,7 +242,7 @@ function validate_blog_form() {
  *
  * @param string          $user_name  The entered username.
  * @param string          $user_email The entered email address.
- * @param string|WP_Error $errors     A WP_Error object containing existing errors. Defaults to empty string.
+ * @param WP_Error|string $errors     A WP_Error object containing existing errors. Defaults to empty string.
  */
 function show_user_form( $user_name = '', $user_email = '', $errors = '' ) {
 	if ( ! is_wp_error( $errors ) ) {
@@ -304,7 +300,7 @@ function validate_user_form() {
  *
  * @param string          $blogname   The new site name
  * @param string          $blog_title The new site title.
- * @param string|WP_Error $errors     A WP_Error object containing existing errors. Defaults to empty string.
+ * @param WP_Error|string $errors     A WP_Error object containing existing errors. Defaults to empty string.
  */
 function signup_another_blog( $blogname = '', $blog_title = '', $errors = '' ) {
 	$current_user = wp_get_current_user();
@@ -338,7 +334,7 @@ function signup_another_blog( $blogname = '', $blog_title = '', $errors = '' ) {
 	$blog_title = $filtered_results['blog_title'];
 	$errors     = $filtered_results['errors'];
 
-	/* translators: %s: Network title. */
+	/* translators: %s: Network's site name. */
 	echo '<h2>' . sprintf( __( 'Get <em>another</em> %s site in seconds' ), get_network()->site_name ) . '</h2>';
 
 	if ( $errors->has_errors() ) {
@@ -457,7 +453,7 @@ function validate_another_blog_signup() {
 	 *
 	 * @param array $blog_meta_defaults An array of default blog meta variables.
 	 */
-	$meta_defaults = apply_filters_deprecated( 'signup_create_blog_meta', array( $blog_meta_defaults ), '3.0.0', 'add_signup_meta' );
+	$meta_defaults = apply_filters( 'signup_create_blog_meta', $blog_meta_defaults );
 
 	/**
 	 * Filters the new default site meta variables.
@@ -518,14 +514,14 @@ function confirm_another_blog_signup( $domain, $path, $blog_title, $user_name, $
 	?>
 	<h2>
 	<?php
-		/* translators: %s: Site title. */
+		/* translators: %s: site name */
 		printf( __( 'The site %s is yours.' ), $site );
 	?>
 	</h2>
 	<p>
 		<?php
 		printf(
-			/* translators: 1: Link to new site, 2: Login URL, 3: Username. */
+			/* translators: 1: link to new site, 2: login URL, 3: username */
 			__( '%1$s is your new site. <a href="%2$s">Log in</a> as &#8220;%3$s&#8221; using your existing password.' ),
 			sprintf(
 				'<a href="%s">%s</a>',
@@ -553,7 +549,7 @@ function confirm_another_blog_signup( $domain, $path, $blog_title, $user_name, $
  *
  * @param string          $user_name  The username.
  * @param string          $user_email The user's email.
- * @param string|WP_Error $errors     A WP_Error object containing existing errors. Defaults to empty string.
+ * @param WP_Error|string $errors     A WP_Error object containing existing errors. Defaults to empty string.
  */
 function signup_user( $user_name = '', $user_email = '', $errors = '' ) {
 	global $active_signup;
@@ -592,7 +588,7 @@ function signup_user( $user_name = '', $user_email = '', $errors = '' ) {
 
 	<h2>
 	<?php
-		/* translators: %s: Name of the network. */
+		/* translators: %s: name of the network */
 		printf( __( 'Get your own %s account in seconds' ), get_network()->site_name );
 	?>
 	</h2>
@@ -665,14 +661,14 @@ function confirm_user_signup( $user_name, $user_email ) {
 	?>
 	<h2>
 	<?php
-	/* translators: %s: Username. */
+	/* translators: %s: username */
 	printf( __( '%s is your new username' ), $user_name )
 	?>
 	</h2>
 	<p><?php _e( 'But, before you can start using your new username, <strong>you must activate it</strong>.' ); ?></p>
 	<p>
 	<?php
-	/* translators: %s: Email address. */
+	/* translators: %s: email address */
 	printf( __( 'Check your inbox at %s and click the link given.' ), '<strong>' . $user_email . '</strong>' );
 	?>
 	</p>
@@ -691,7 +687,7 @@ function confirm_user_signup( $user_name, $user_email ) {
  * @param string          $user_email The user's email address.
  * @param string          $blogname   The site name.
  * @param string          $blog_title The site title.
- * @param string|WP_Error $errors     A WP_Error object containing existing errors. Defaults to empty string.
+ * @param WP_Error|string $errors     A WP_Error object containing existing errors. Defaults to empty string.
  */
 function signup_blog( $user_name = '', $user_email = '', $blogname = '', $blog_title = '', $errors = '' ) {
 	if ( ! is_wp_error( $errors ) ) {
@@ -822,7 +818,7 @@ function confirm_blog_signup( $domain, $path, $blog_title, $user_name = '', $use
 	?>
 	<h2>
 	<?php
-	/* translators: %s: Site address. */
+	/* translators: %s: site address */
 	printf( __( 'Congratulations! Your new site, %s, is almost ready.' ), "<a href='http://{$domain}{$path}'>{$blog_title}</a>" )
 	?>
 	</h2>
@@ -830,7 +826,7 @@ function confirm_blog_signup( $domain, $path, $blog_title, $user_name = '', $use
 	<p><?php _e( 'But, before you can start using your site, <strong>you must activate it</strong>.' ); ?></p>
 	<p>
 	<?php
-	/* translators: %s: Email address. */
+	/* translators: %s: email address */
 	printf( __( 'Check your inbox at %s and click the link given.' ), '<strong>' . $user_email . '</strong>' );
 	?>
 	</p>
@@ -843,7 +839,7 @@ function confirm_blog_signup( $domain, $path, $blog_title, $user_name = '', $use
 			<li><p><?php _e( 'Check the junk or spam folder of your email client. Sometime emails wind up there by mistake.' ); ?></p></li>
 			<li>
 			<?php
-				/* translators: %s: Email address. */
+				/* translators: %s: email address */
 				printf( __( 'Have you entered your email correctly? You have entered %s, if it&#8217;s incorrect, you will not receive your email.' ), $user_email );
 			?>
 			</li>
@@ -922,7 +918,7 @@ if ( current_user_can( 'manage_network' ) ) {
 
 	echo ' ';
 
-	/* translators: %s: URL to Network Settings screen. */
+	/* translators: %s: network settings URL */
 	printf( __( 'To change or disable registration go to your <a href="%s">Options page</a>.' ), esc_url( network_admin_url( 'settings.php' ) ) );
 	echo '</div>';
 }
@@ -934,7 +930,7 @@ if ( 'none' === $active_signup ) {
 	_e( 'Registration has been disabled.' );
 } elseif ( 'blog' === $active_signup && ! is_user_logged_in() ) {
 	$login_url = wp_login_url( network_site_url( 'wp-signup.php' ) );
-	/* translators: %s: Login URL. */
+	/* translators: %s: login URL */
 	printf( __( 'You must first <a href="%s">log in</a>, and then you can create a new site.' ), $login_url );
 } else {
 	$stage = isset( $_POST['stage'] ) ? $_POST['stage'] : 'default';
@@ -983,13 +979,13 @@ if ( 'none' === $active_signup ) {
 
 				if ( 'blog' === $active_signup || 'all' === $active_signup ) {
 					printf(
-						/* translators: %s: Site address. */
+						/* translators: %s: site address */
 						'<p><em>' . __( 'The site you were looking for, %s, does not exist, but you can create it now!' ) . '</em></p>',
 						'<strong>' . $newblog . '</strong>'
 					);
 				} else {
 					printf(
-						/* translators: %s: Site address. */
+						/* translators: %s: site address */
 						'<p><em>' . __( 'The site you were looking for, %s, does not exist.' ) . '</em></p>',
 						'<strong>' . $newblog . '</strong>'
 					);

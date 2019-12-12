@@ -12,13 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! empty( $link_id ) ) {
-	/* translators: %s: URL to Links screen. */
 	$heading      = sprintf( __( '<a href="%s">Links</a> / Edit Link' ), 'link-manager.php' );
 	$submit_text  = __( 'Update Link' );
 	$form_name    = 'editlink';
 	$nonce_action = 'update-bookmark_' . $link_id;
 } else {
-	/* translators: %s: URL to Links screen. */
 	$heading      = sprintf( __( '<a href="%s">Links</a> / Add New Link' ), 'link-manager.php' );
 	$submit_text  = __( 'Add Link' );
 	$form_name    = 'addlink';
