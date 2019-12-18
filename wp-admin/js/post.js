@@ -35,7 +35,7 @@ window.wp = window.wp || {};
 		 *
 		 * @param {int} total Total number of comments for this post.
 		 * @param {int} num   Optional. Number of comments to fetch, defaults to 20.
-		 * @return {boolean} Always returns false.
+		 * @returns {boolean} Always returns false.
 		 */
 		get : function(total, num) {
 			var st = this.st, data;
@@ -599,7 +599,7 @@ jQuery(document).ready( function($) {
 		 *
 		 * @param {Object} s Taxonomy object which will be added.
 		 *
-		 * @return {Object}
+		 * @returns {Object}
 		 */
 		catAddBefore = function( s ) {
 			if ( !$('#new'+taxonomy).val() ) {
@@ -620,7 +620,7 @@ jQuery(document).ready( function($) {
 		 * @param {Object} r Response.
 		 * @param {Object} s Taxonomy data.
 		 *
-		 * @return {void}
+		 * @returns void
 		 */
 		catAddAfter = function( r, s ) {
 			var sup, drop = $('#new'+taxonomy+'_parent');
@@ -666,7 +666,7 @@ jQuery(document).ready( function($) {
 			 *
 			 * @param {Object} s Request object.
 			 *
-			 * @return {Object} Data modified with post_ID attached.
+			 * @returns {Object} Data modified with post_ID attached.
 			 */
 			addBefore: function( s ) {
 				s.data += '&post_id=' + $('#post_ID').val();
@@ -695,7 +695,7 @@ jQuery(document).ready( function($) {
 		 *
 		 * @ignore
 		 *
-		 * @return {void}
+		 * @returns void
 		 */
 		updateVisibility = function() {
 			// Show sticky for public posts.
@@ -719,7 +719,7 @@ jQuery(document).ready( function($) {
 		 *
 		 * @ignore
 		 *
-		 * @return {boolean} False when an invalid timestamp has been selected, otherwise True.
+		 * @returns {boolean} False when an invalid timestamp has been selected, otherwise True.
 		 */
 		updateText = function() {
 
@@ -941,7 +941,7 @@ jQuery(document).ready( function($) {
 	 *
 	 * @global
 	 *
-	 * @return {void}
+	 * @returns void
 	 */
 	function editPermalink() {
 		var i, slug_value,
@@ -1051,7 +1051,7 @@ jQuery(document).ready( function($) {
 	 *
 	 * @global
 	 *
-	 * @return {void}
+	 * @returns void
 	 */
 	window.wptitlehint = function( id ) {
 		id = id || 'title';

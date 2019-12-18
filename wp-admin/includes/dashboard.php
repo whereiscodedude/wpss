@@ -1471,7 +1471,7 @@ function wp_dashboard_primary() {
 }
 
 /**
- * Displays the WordPress events and news feeds.
+ * Display the WordPress events and news feeds.
  *
  * @since 3.8.0
  * @since 4.8.0 Removed popular plugins feed.
@@ -1489,7 +1489,7 @@ function wp_dashboard_primary_output( $widget_id, $feeds ) {
 }
 
 /**
- * Displays file upload quota on dashboard.
+ * Display file upload quota on dashboard.
  *
  * Runs on the {@see 'activity_box_end'} hook in wp_dashboard_right_now().
  *
@@ -1553,11 +1553,7 @@ function wp_dashboard_quota() {
 	<?php
 }
 
-/**
- * Displays the browser update nag.
- *
- * @since 3.2.0
- */
+// Display Browser Nag Meta Box
 function wp_dashboard_browser_nag() {
 	$notice   = '';
 	$response = wp_check_browser_version();
@@ -1615,12 +1611,10 @@ function wp_dashboard_browser_nag() {
 }
 
 /**
- * Adds an additional class to the browser nag if the current version is insecure.
- *
  * @since 3.2.0
  *
- * @param string[] $classes Array of meta box classes.
- * @return string[] Modified array of meta box classes.
+ * @param array $classes
+ * @return array
  */
 function dashboard_browser_nag_class( $classes ) {
 	$response = wp_check_browser_version();
@@ -1633,11 +1627,11 @@ function dashboard_browser_nag_class( $classes ) {
 }
 
 /**
- * Checks if the user needs a browser update.
+ * Check if the user needs a browser update
  *
  * @since 3.2.0
  *
- * @return array|bool Array of browser data on success, false on failure.
+ * @return array|bool False on failure, array of browser data on success.
  */
 function wp_check_browser_version() {
 	if ( empty( $_SERVER['HTTP_USER_AGENT'] ) ) {
@@ -1737,8 +1731,8 @@ function wp_dashboard_php_nag() {
  *
  * @since 5.1.0
  *
- * @param string[] $classes Array of meta box classes.
- * @return string[] Modified array of meta box classes.
+ * @param array $classes Metabox classes.
+ * @return array Modified metabox classes.
  */
 function dashboard_php_nag_class( $classes ) {
 	$response = wp_check_php_version();
@@ -1752,8 +1746,6 @@ function dashboard_php_nag_class( $classes ) {
 
 /**
  * Empty function usable by plugins to output empty dashboard widget (to be populated later by JS).
- *
- * @since 2.5.0
  */
 function wp_dashboard_empty() {}
 

@@ -1280,7 +1280,7 @@ function wp_title( $sep = '&raquo;', $display = true, $seplocation = '' ) {
 	 *
 	 * @since 4.0.0
 	 *
-	 * @param string[] $title_array Array of parts of the page title.
+	 * @param array $title_array Parts of the page title.
 	 */
 	$title_array = apply_filters( 'wp_title_parts', explode( $t_sep, $title ) );
 
@@ -1339,8 +1339,8 @@ function single_post_title( $prefix = '', $display = true ) {
 	 *
 	 * @since 0.71
 	 *
-	 * @param string  $_post_title The single post page title.
-	 * @param WP_Post $_post       The current post.
+	 * @param string $_post_title The single post page title.
+	 * @param object $_post       The current queried object as returned by get_queried_object().
 	 */
 	$title = apply_filters( 'single_post_title', $_post->post_title, $_post );
 	if ( $display ) {
@@ -2898,13 +2898,13 @@ function wp_footer() {
 /**
  * Fire the wp_body_open action.
  *
- * See {@see 'wp_body_open'}.
+ * * See {@see 'wp_body_open'}.
  *
  * @since 5.2.0
  */
 function wp_body_open() {
 	/**
-	 * Triggered after the opening body tag.
+	 * Triggered after the opening <body> tag.
 	 *
 	 * @since 5.2.0
 	 */
@@ -3150,7 +3150,7 @@ function wp_site_icon() {
 	}
 	$icon_180 = get_site_icon_url( 180 );
 	if ( $icon_180 ) {
-		$meta_tags[] = sprintf( '<link rel="apple-touch-icon" href="%s" />', esc_url( $icon_180 ) );
+		$meta_tags[] = sprintf( '<link rel="apple-touch-icon-precomposed" href="%s" />', esc_url( $icon_180 ) );
 	}
 	$icon_270 = get_site_icon_url( 270 );
 	if ( $icon_270 ) {
@@ -3286,7 +3286,7 @@ function wp_resource_hints() {
  *
  * @since 4.6.0
  *
- * @return string[] A list of unique hosts of enqueued scripts and styles.
+ * @return array A list of unique hosts of enqueued scripts and styles.
  */
 function wp_dependencies_unique_hosts() {
 	global $wp_scripts, $wp_styles;

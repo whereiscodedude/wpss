@@ -312,7 +312,7 @@ function wp_debug_mode() {
 	 *
 	 * This filter runs before it can be used by plugins. It is designed for
 	 * non-web run-times. Returning false causes the `WP_DEBUG` and related
-	 * constants to not be checked and the default PHP values for errors
+	 * constants to not be checked and the default php values for errors
 	 * will be used unless you take care to update them yourself.
 	 *
 	 * @since 4.6.0
@@ -625,7 +625,7 @@ function wp_not_installed() {
  * @since 3.0.0
  * @access private
  *
- * @return string[] Array of absolute paths of files to include.
+ * @return array Files to include.
  */
 function wp_get_mu_plugins() {
 	$mu_plugins = array();
@@ -704,8 +704,8 @@ function wp_get_active_and_valid_plugins() {
  *
  * @since 5.2.0
  *
- * @param string[] $plugins Array of absolute plugin main file paths.
- * @return string[] Filtered array of plugins, without any paused plugins.
+ * @param array $plugins List of absolute plugin main file paths.
+ * @return array Filtered value of $plugins, without any paused plugins.
  */
 function wp_skip_paused_plugins( array $plugins ) {
 	$paused_plugins = wp_paused_plugins()->get_all();
@@ -736,7 +736,7 @@ function wp_skip_paused_plugins( array $plugins ) {
  * @since 5.1.0
  * @access private
  *
- * @return string[] Array of absolute paths to theme directories.
+ * @return array Array of paths to theme directories.
  */
 function wp_get_active_and_valid_themes() {
 	global $pagenow;
@@ -774,8 +774,8 @@ function wp_get_active_and_valid_themes() {
  *
  * @since 5.2.0
  *
- * @param string[] $themes Array of absolute theme directory paths.
- * @return string[] Filtered array of absolute paths to themes, without any paused themes.
+ * @param array $themes List of absolute theme directory paths.
+ * @return array Filtered value of $themes, without any paused themes.
  */
 function wp_skip_paused_themes( array $themes ) {
 	$paused_themes = wp_paused_themes()->get_all();
@@ -882,7 +882,7 @@ function is_protected_ajax_action() {
 	 *
 	 * @since 5.2.0
 	 *
-	 * @param string[] $actions_to_protect Array of strings with AJAX actions to protect.
+	 * @param array $actions_to_protect Array of strings with AJAX actions to protect.
 	 */
 	$actions_to_protect = (array) apply_filters( 'wp_protected_ajax_actions', $actions_to_protect );
 
@@ -990,7 +990,7 @@ function is_admin() {
 }
 
 /**
- * Whether the current request is for a site's administrative interface.
+ * Whether the current request is for a site's admininstrative interface.
  *
  * e.g. `/wp-admin/`
  *
@@ -1478,8 +1478,7 @@ function wp_finalize_scraping_edited_file_errors( $scrape_key ) {
  *
  * @since 5.0.0
  *
- * @return bool True if `Accepts` or `Content-Type` headers contain `application/json`.
- *              False otherwise.
+ * @return bool True if Accepts or Content-Type headers contain application/json, false otherwise.
  */
 function wp_is_json_request() {
 
@@ -1528,8 +1527,7 @@ function wp_is_jsonp_request() {
  *
  * @since 5.2.0
  *
- * @return bool True if `Accepts` or `Content-Type` headers contain `text/xml`
- *              or one of the related MIME types. False otherwise.
+ * @return bool True if Accepts or Content-Type headers contain xml, false otherwise.
  */
 function wp_is_xml_request() {
 	$accepted = array(

@@ -59,8 +59,8 @@ $preload_paths = array(
  *
  * @since 5.0.0
  *
- * @param string[] $preload_paths Array of paths to preload.
- * @param WP_Post  $post          Post being edited.
+ * @param array  $preload_paths Array of paths to preload.
+ * @param object $post          The post resource data.
  */
 $preload_paths = apply_filters( 'block_editor_preload_paths', $preload_paths, $post );
 
@@ -144,7 +144,7 @@ $font_sizes    = current( (array) get_theme_support( 'editor-font-sizes' ) );
  *
  * @param bool|array $allowed_block_types Array of block type slugs, or
  *                                        boolean to enable/disable all.
- * @param WP_Post    $post                The post resource data.
+ * @param object $post                    The post resource data.
  */
 $allowed_block_types = apply_filters( 'allowed_block_types', true, $post );
 

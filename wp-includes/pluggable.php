@@ -547,19 +547,15 @@ if ( ! function_exists( 'wp_authenticate' ) ) :
 		$ignore_codes = array( 'empty_username', 'empty_password' );
 
 		if ( is_wp_error( $user ) && ! in_array( $user->get_error_code(), $ignore_codes ) ) {
-			$error = $user;
-
 			/**
 			 * Fires after a user login has failed.
 			 *
 			 * @since 2.5.0
 			 * @since 4.5.0 The value of `$username` can now be an email address.
-			 * @since 5.4.0 The `$error` parameter was added.
 			 *
-			 * @param string   $username Username or email address.
-			 * @param WP_Error $error    A WP_Error object with the authentication failure details.
+			 * @param string $username Username or email address.
 			 */
-			do_action( 'wp_login_failed', $username, $error );
+			do_action( 'wp_login_failed', $username );
 		}
 
 		return $user;
@@ -639,7 +635,7 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 			 *
 			 * @since 2.7.0
 			 *
-			 * @param string[] $cookie_elements An array of data for the authentication cookie.
+			 * @param array $cookie_elements An array of data for the authentication cookie.
 			 */
 			do_action( 'auth_cookie_expired', $cookie_elements );
 			return false;
@@ -652,7 +648,7 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 			 *
 			 * @since 2.7.0
 			 *
-			 * @param string[] $cookie_elements An array of data for the authentication cookie.
+			 * @param array $cookie_elements An array of data for the authentication cookie.
 			 */
 			do_action( 'auth_cookie_bad_username', $cookie_elements );
 			return false;
@@ -672,7 +668,7 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 			 *
 			 * @since 2.7.0
 			 *
-			 * @param string[] $cookie_elements An array of data for the authentication cookie.
+			 * @param array $cookie_elements An array of data for the authentication cookie.
 			 */
 			do_action( 'auth_cookie_bad_hash', $cookie_elements );
 			return false;
@@ -680,13 +676,6 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 
 		$manager = WP_Session_Tokens::get_instance( $user->ID );
 		if ( ! $manager->verify( $token ) ) {
-			/**
-			 * Fires if a bad session token is encountered.
-			 *
-			 * @since 4.0.0
-			 *
-			 * @param string[] $cookie_elements An array of data for the authentication cookie.
-			 */
 			do_action( 'auth_cookie_bad_session_token', $cookie_elements );
 			return false;
 		}
@@ -701,8 +690,8 @@ if ( ! function_exists( 'wp_validate_auth_cookie' ) ) :
 		 *
 		 * @since 2.7.0
 		 *
-		 * @param string[] $cookie_elements An array of data for the authentication cookie.
-		 * @param WP_User  $user            User object.
+		 * @param array   $cookie_elements An array of data for the authentication cookie.
+		 * @param WP_User $user            User object.
 		 */
 		do_action( 'auth_cookie_valid', $cookie_elements, $user );
 
@@ -769,7 +758,7 @@ if ( ! function_exists( 'wp_parse_auth_cookie' ) ) :
 	 *
 	 * @param string $cookie Authentication cookie.
 	 * @param string $scheme Optional. The cookie scheme to use: 'auth', 'secure_auth', or 'logged_in'.
-	 * @return string[]|false Authentication cookie components.
+	 * @return array|false Authentication cookie components.
 	 */
 	function wp_parse_auth_cookie( $cookie = '', $scheme = '' ) {
 		if ( empty( $cookie ) ) {
@@ -1219,7 +1208,6 @@ if ( ! function_exists( 'wp_redirect' ) ) :
 	 *
 	 * @since 1.5.1
 	 * @since 5.1.0 The `$x_redirect_by` parameter was added.
-	 * @since 5.4.0 On invalid status codes, wp_die() is called.
 	 *
 	 * @global bool $is_IIS
 	 *
@@ -1253,10 +1241,6 @@ if ( ! function_exists( 'wp_redirect' ) ) :
 
 		if ( ! $location ) {
 			return false;
-		}
-
-		if ( $status < 300 || 399 < $status ) {
-			wp_die( __( 'HTTP redirect status code must be a redirection code, 3xx.' ) );
 		}
 
 		$location = wp_sanitize_redirect( $location );
@@ -1458,8 +1442,8 @@ if ( ! function_exists( 'wp_validate_redirect' ) ) :
 		 *
 		 * @since 2.3.0
 		 *
-		 * @param string[] $hosts An array of allowed host names.
-		 * @param string   $host  The host name of the redirect destination; empty string if not set.
+		 * @param array       $hosts An array of allowed hosts.
+		 * @param bool|string $host  The parsed host; empty if not isset.
 		 */
 		$allowed_hosts = (array) apply_filters( 'allowed_redirect_hosts', array( $wpp['host'] ), isset( $lp['host'] ) ? $lp['host'] : '' );
 
@@ -1508,8 +1492,8 @@ if ( ! function_exists( 'wp_notify_postauthor' ) ) :
 		 *
 		 * @since 3.7.0
 		 *
-		 * @param string[] $emails     An array of email addresses to receive a comment notification.
-		 * @param int      $comment_id The comment ID.
+		 * @param array $emails     An array of email addresses to receive a comment notification.
+		 * @param int   $comment_id The comment ID.
 		 */
 		$emails = apply_filters( 'comment_notification_recipients', $emails, $comment->comment_ID );
 		$emails = array_filter( $emails );
@@ -1743,7 +1727,7 @@ if ( ! function_exists( 'wp_notify_moderator' ) ) :
 			$comment_author_domain = gethostbyaddr( $comment->comment_author_IP );
 		}
 
-		$comments_waiting = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '0'" );
+		$comments_waiting = $wpdb->get_var( "SELECT count(comment_ID) FROM $wpdb->comments WHERE comment_approved = '0'" );
 
 		// The blogname option is escaped with esc_html on the way into the database in sanitize_option
 		// we want to reverse this for the plain text arena of emails.
@@ -1820,8 +1804,8 @@ if ( ! function_exists( 'wp_notify_moderator' ) ) :
 		 *
 		 * @since 3.7.0
 		 *
-		 * @param string[] $emails     List of email addresses to notify for comment moderation.
-		 * @param int      $comment_id Comment ID.
+		 * @param array $emails     List of email addresses to notify for comment moderation.
+		 * @param int   $comment_id Comment ID.
 		 */
 		$emails = apply_filters( 'comment_moderation_recipients', $emails, $comment_id );
 

@@ -24,10 +24,6 @@ if ( ! current_user_can( 'update_core' ) && ! current_user_can( 'update_themes' 
 }
 
 /**
- * Lists available core updates.
- *
- * @since 2.7.0
- *
  * @global string $wp_local_package
  * @global wpdb   $wpdb             WordPress database abstraction object.
  *

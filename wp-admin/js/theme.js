@@ -1399,7 +1399,7 @@ themes.view.Search = wp.Backbone.View.extend({
  *
  * @param {string} url - URL to navigate to.
  * @param {object} state - State.
- * @return {void}
+ * @returns {void}
  */
 function navigateRouter( url, state ) {
 	var router = this;

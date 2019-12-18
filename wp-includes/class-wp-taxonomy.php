@@ -30,17 +30,12 @@ final class WP_Taxonomy {
 	public $label;
 
 	/**
-	 * Labels object for this taxonomy.
-	 *
-	 * If not set, tag labels are inherited for non-hierarchical types
-	 * and category labels for hierarchical ones.
-	 *
-	 * @see get_taxonomy_labels()
+	 * An array of labels for this taxonomy.
 	 *
 	 * @since 4.7.0
 	 * @var object
 	 */
-	public $labels;
+	public $labels = array();
 
 	/**
 	 * A short descriptive summary of what the taxonomy is for.

@@ -35,7 +35,7 @@ abstract class WP_Privacy_Requests_Table extends WP_List_Table {
 	 *
 	 * @since 4.9.6
 	 *
-	 * @return string[] Array of column titles keyed by their column name.
+	 * @return array Array of columns.
 	 */
 	public function get_columns() {
 		$columns = array(
@@ -137,7 +137,7 @@ abstract class WP_Privacy_Requests_Table extends WP_List_Table {
 	 *
 	 * @since 4.9.6
 	 *
-	 * @return string[] An array of HTML links keyed by their view.
+	 * @return array Associative array of views in the format of $view_name => $view_markup.
 	 */
 	protected function get_views() {
 		$current_status = isset( $_REQUEST['filter-status'] ) ? sanitize_text_field( $_REQUEST['filter-status'] ) : '';
@@ -200,7 +200,7 @@ abstract class WP_Privacy_Requests_Table extends WP_List_Table {
 	 *
 	 * @since 4.9.6
 	 *
-	 * @return string[] Array of bulk action labels keyed by their action.
+	 * @return array List of bulk actions.
 	 */
 	protected function get_bulk_actions() {
 		return array(

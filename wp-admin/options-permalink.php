@@ -151,24 +151,12 @@ if ( isset( $_POST['permalink_structure'] ) || isset( $_POST['category_base'] ) 
 
 	if ( $iis7_permalinks ) {
 		if ( $permalink_structure && ! $using_index_permalinks && ! $writable ) {
-			$message = sprintf(
-				/* translators: %s: web.config */
-				__( 'You should update your %s file now.' ),
-				'<code>web.config</code>'
-			);
+			$message = __( 'You should update your web.config now.' );
 		} elseif ( $permalink_structure && ! $using_index_permalinks && $writable ) {
-			$message = sprintf(
-				/* translators: %s: web.config */
-				__( 'Permalink structure updated. Remove write access on %s file now!' ),
-				'<code>web.config</code>'
-			);
+			$message = __( 'Permalink structure updated. Remove write access on web.config file now!' );
 		}
 	} elseif ( ! $is_nginx && $permalink_structure && ! $using_index_permalinks && ! $writable && $update_required ) {
-		$message = sprintf(
-			/* translators: %s: .htaccess */
-			__( 'You should update your %s file now.' ),
-			'<code>.htaccess</code>'
-		);
+		$message = __( 'You should update your .htaccess now.' );
 	}
 
 	if ( ! get_settings_errors() ) {

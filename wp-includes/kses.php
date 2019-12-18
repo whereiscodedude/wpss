@@ -948,7 +948,7 @@ function wp_kses_split( $string, $allowed_html, $allowed_protocols ) {
 }
 
 /**
- * Returns an array of HTML attribute names whose value contains a URL.
+ * Helper function listing HTML attributes containing a URL.
  *
  * This function returns a list of all HTML attributes that must contain
  * a URL according to the HTML specification.
@@ -959,7 +959,7 @@ function wp_kses_split( $string, $allowed_html, $allowed_protocols ) {
  *
  * @since 5.0.1
  *
- * @return string[] HTML attribute names whose value contains a URL.
+ * @return array HTML attributes that must include a URL.
  */
 function wp_kses_uri_attributes() {
 	$uri_attributes = array(
@@ -990,7 +990,7 @@ function wp_kses_uri_attributes() {
 	 *
 	 * @since 5.0.1
 	 *
-	 * @param string[] $uri_attributes HTML attribute names whose value contains a URL.
+	 * @param array $uri_attributes HTML attributes requiring validation as a URL.
 	 */
 	$uri_attributes = apply_filters( 'wp_kses_uri_attributes', $uri_attributes );
 
@@ -1152,18 +1152,9 @@ function wp_kses_attr( $element, $attr, $allowed_html, $allowed_protocols ) {
  * @return bool Whether or not the attribute is allowed.
  */
 function wp_kses_attr_check( &$name, &$value, &$whole, $vless, $element, $allowed_html ) {
-	$name_low    = strtolower( $name );
-	$element_low = strtolower( $element );
+	$allowed_attr = $allowed_html[ strtolower( $element ) ];
 
-	if ( ! isset( $allowed_html[ $element_low ] ) ) {
-		$name  = '';
-		$value = '';
-		$whole = '';
-		return false;
-	}
-
-	$allowed_attr = $allowed_html[ $element_low ];
-
+	$name_low = strtolower( $name );
 	if ( ! isset( $allowed_attr[ $name_low ] ) || '' == $allowed_attr[ $name_low ] ) {
 		/*
 		 * Allow `data-*` attributes.
