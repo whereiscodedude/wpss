@@ -9,14 +9,13 @@
 /**
  * Constructs the admin menu.
  *
- * The elements in the array are:
- *     0: Menu item name.
+ * The elements in the array are :
+ *     0: Menu item name
  *     1: Minimum level or capability required.
- *     2: The URL of the item's file.
- *     3: Page title.
- *     4: Classes.
- *     5: ID.
- *     6: Icon for top level menu.
+ *     2: The URL of the item's file
+ *     3: Class
+ *     4: ID
+ *     5: Icon for top level menu
  *
  * @global array $menu
  */

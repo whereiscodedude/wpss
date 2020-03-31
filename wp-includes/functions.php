@@ -582,44 +582,18 @@ function get_weekstartend( $mysqlstring, $start_of_week = '' ) {
 }
 
 /**
- * Serialize data, if needed.
- *
- * @since 2.0.5
- *
- * @param string|array|object $data Data that might be serialized.
- * @return mixed A scalar data.
- */
-function maybe_serialize( $data ) {
-	if ( is_array( $data ) || is_object( $data ) ) {
-		return serialize( $data );
-	}
-
-	/*
-	 * Double serialization is required for backward compatibility.
-	 * See https://core.trac.wordpress.org/ticket/12930
-	 * Also the world will end. See WP 3.6.1.
-	 */
-	if ( is_serialized( $data, false ) ) {
-		return serialize( $data );
-	}
-
-	return $data;
-}
-
-/**
- * Unserialize data only if it was serialized.
+ * Unserialize value only if it was serialized.
  *
  * @since 2.0.0
  *
- * @param string $data Data that might be unserialized.
+ * @param string $original Maybe unserialized original, if is needed.
  * @return mixed Unserialized data can be any type.
  */
-function maybe_unserialize( $data ) {
-	if ( is_serialized( $data ) ) { // Don't attempt to unserialize data that wasn't serialized going in.
-		return @unserialize( trim( $data ) );
+function maybe_unserialize( $original ) {
+	if ( is_serialized( $original ) ) { // Don't attempt to unserialize data that wasn't serialized going in.
+		return @unserialize( $original );
 	}
-
-	return $data;
+	return $original;
 }
 
 /**
@@ -719,6 +693,31 @@ function is_serialized_string( $data ) {
 	} else {
 		return true;
 	}
+}
+
+/**
+ * Serialize data, if needed.
+ *
+ * @since 2.0.5
+ *
+ * @param string|array|object $data Data that might be serialized.
+ * @return mixed A scalar data
+ */
+function maybe_serialize( $data ) {
+	if ( is_array( $data ) || is_object( $data ) ) {
+		return serialize( $data );
+	}
+
+	/*
+	 * Double serialization is required for backward compatibility.
+	 * See https://core.trac.wordpress.org/ticket/12930
+	 * Also the world will end. See WP 3.6.1.
+	 */
+	if ( is_serialized( $data, false ) ) {
+		return serialize( $data );
+	}
+
+	return $data;
 }
 
 /**
@@ -2616,14 +2615,7 @@ function _wp_check_existing_file_names( $filename, $files ) {
  * @param null|string  $deprecated Never used. Set to null.
  * @param string       $bits       File content
  * @param string       $time       Optional. Time formatted in 'yyyy/mm'. Default null.
- * @return array {
- *     Information about the newly-uploaded file.
- *
- *     @type string       $file  Filename of the newly-uploaded file.
- *     @type string       $url   URL of the uploaded file.
- *     @type string       $type  File type.
- *     @type string|false $error Error message, if there has been an error.
- * }
+ * @return array
  */
 function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
 	if ( ! empty( $deprecated ) ) {
@@ -3907,8 +3899,6 @@ function wp_json_encode( $data, $options = 0, $depth = 512 ) {
  *
  * @see wp_json_encode()
  *
- * @throws Exception If depth limit is reached.
- *
  * @param mixed $data  Variable (usually an array or object) to encode as JSON.
  * @param int   $depth Maximum depth to walk through $data. Must be greater than 0.
  * @return mixed The sanitized data that shall be encoded to JSON.
@@ -4357,11 +4347,10 @@ function smilies_init() {
  * @since 2.3.0 `$args` can now also be an object.
  *
  * @param string|array|object $args     Value to merge with $defaults.
- * @param array               $defaults Optional. Array that serves as the defaults.
- *                                      Default empty array.
+ * @param array               $defaults Optional. Array that serves as the defaults. Default empty.
  * @return array Merged user defined values with defaults.
  */
-function wp_parse_args( $args, $defaults = array() ) {
+function wp_parse_args( $args, $defaults = '' ) {
 	if ( is_object( $args ) ) {
 		$parsed_args = get_object_vars( $args );
 	} elseif ( is_array( $args ) ) {
@@ -4370,7 +4359,7 @@ function wp_parse_args( $args, $defaults = array() ) {
 		wp_parse_str( $args, $parsed_args );
 	}
 
-	if ( is_array( $defaults ) && $defaults ) {
+	if ( is_array( $defaults ) ) {
 		return array_merge( $defaults, $parsed_args );
 	}
 	return $parsed_args;
@@ -6556,7 +6545,7 @@ function wp_auth_check( $response ) {
  */
 function get_tag_regex( $tag ) {
 	if ( empty( $tag ) ) {
-		return '';
+		return;
 	}
 	return sprintf( '<%1$s[^<]*(?:>[\s\S]*<\/%1$s>|\s*\/>)', tag_escape( $tag ) );
 }

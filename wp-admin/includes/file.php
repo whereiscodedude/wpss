@@ -550,13 +550,6 @@ function wp_edit_theme_plugin_file( $args ) {
 		} else {
 			$url = admin_url();
 		}
-
-		if ( PHP_SESSION_ACTIVE === session_status() ) {
-			// Close any active session to prevent HTTP requests from timing out
-			// when attempting to connect back to the site.
-			session_write_close();
-		}
-
 		$url                    = add_query_arg( $scrape_params, $url );
 		$r                      = wp_remote_get( $url, compact( 'cookies', 'headers', 'timeout', 'sslverify' ) );
 		$body                   = wp_remote_retrieve_body( $r );
@@ -2094,7 +2087,7 @@ function request_filesystem_credentials( $form_post, $type = '', $error = false,
 	$connection_type = isset( $credentials['connection_type'] ) ? $credentials['connection_type'] : '';
 
 	if ( $error ) {
-		$error_string = __( '<strong>Error</strong>: There was an error connecting to the server. Please verify the settings are correct.' );
+		$error_string = __( '<strong>Error</strong>: There was an error connecting to the server, Please verify the settings are correct.' );
 		if ( is_wp_error( $error ) ) {
 			$error_string = esc_html( $error->get_error_message() );
 		}

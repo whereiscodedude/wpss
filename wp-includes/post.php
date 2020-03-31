@@ -515,8 +515,8 @@ function get_attached_file( $attachment_id, $unfiltered = false ) {
 	 *
 	 * @since 2.1.0
 	 *
-	 * @param string|false $file          The file path to where the attached file should be, false otherwise.
-	 * @param int          $attachment_id Attachment ID.
+	 * @param string $file          Path to attached file.
+	 * @param int    $attachment_id Attachment ID.
 	 */
 	return apply_filters( 'get_attached_file', $file, $attachment_id );
 }
@@ -5618,20 +5618,6 @@ function wp_delete_attachment( $post_id, $force_delete = false ) {
 
 	if ( ! $force_delete && EMPTY_TRASH_DAYS && MEDIA_TRASH && 'trash' !== $post->post_status ) {
 		return wp_trash_post( $post_id );
-	}
-
-	/**
-	 * Filters whether an attachment deletion should take place.
-	 *
-	 * @since 5.5.0
-	 *
-	 * @param bool|null $delete       Whether to go forward with deletion.
-	 * @param WP_Post   $post         Post object.
-	 * @param bool      $force_delete Whether to bypass the Trash.
-	 */
-	$check = apply_filters( 'pre_delete_attachment', null, $post, $force_delete );
-	if ( null !== $check ) {
-		return $check;
 	}
 
 	delete_post_meta( $post_id, '_wp_trash_meta_status' );
