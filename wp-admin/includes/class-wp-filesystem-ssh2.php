@@ -6,10 +6,10 @@
  *
  * @contrib http://kevin.vanzonneveld.net/techblog/article/make_ssh_connections_with_php/ - Installation Notes
  *
- * Compile libssh2 (Note: Only 0.14 is officaly working with PHP 5.2.6+ right now, But many users have found the latest versions work)
+ * Complie libssh2 (Note: Only 0.14 is officaly working with PHP 5.2.6+ right now, But many users have found the latest versions work)
  *
  * cd /usr/src
- * wget https://www.libssh2.org/download/libssh2-0.14.tar.gz
+ * wget http://surfnet.dl.sourceforge.net/sourceforge/libssh2/libssh2-0.14.tar.gz
  * tar -zxvf libssh2-0.14.tar.gz
  * cd libssh2-0.14/
  * ./configure
@@ -26,7 +26,7 @@
  * Restart Apache!
  * Check phpinfo() streams to confirm that: ssh2.shell, ssh2.exec, ssh2.tunnel, ssh2.scp, ssh2.sftp  exist.
  *
- * Note: As of WordPress 2.8, this utilises the PHP5+ function `stream_get_contents()`.
+ * Note: as of WordPress 2.8, This utilises the PHP5+ function 'stream_get_contents'
  *
  * @since 2.7.0
  *
@@ -64,9 +64,20 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 		$this->method = 'ssh2';
 		$this->errors = new WP_Error();
 
-		// Check if possible to use ssh2 functions.
+		//Check if possible to use ssh2 functions.
 		if ( ! extension_loaded( 'ssh2' ) ) {
 			$this->errors->add( 'no_ssh2_ext', __( 'The ssh2 PHP extension is not available' ) );
+			return;
+		}
+		if ( ! function_exists( 'stream_get_contents' ) ) {
+			$this->errors->add(
+				'ssh2_php_requirement',
+				sprintf(
+					/* translators: %s: stream_get_contents() */
+					__( 'The ssh2 PHP extension is available, however, we require the PHP5 function %s' ),
+					'<code>stream_get_contents()</code>'
+				)
+			);
 			return;
 		}
 
@@ -227,7 +238,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 			fclose( $stream );
 
 			if ( $returnbool ) {
-				return ( false === $data ) ? false : '' != trim( $data );
+				return ( $data === false ) ? false : '' != trim( $data );
 			} else {
 				return $data;
 			}
@@ -274,7 +285,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	public function put_contents( $file, $contents, $mode = false ) {
 		$ret = file_put_contents( $this->sftp_path( $file ), $contents );
 
-		if ( strlen( $contents ) !== $ret ) {
+		if ( $ret !== strlen( $contents ) ) {
 			return false;
 		}
 
@@ -339,7 +350,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	 * @param string    $file      Path to the file.
 	 * @param int|false $mode      Optional. The permissions as octal number, usually 0644 for files,
 	 *                             0755 for directories. Default false.
-	 * @param bool      $recursive Optional. If set to true, changes file permissions recursively.
+	 * @param bool      $recursive Optional. If set to true, changes file group recursively.
 	 *                             Default false.
 	 * @return bool True on success, false on failure.
 	 */
@@ -492,7 +503,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	 * @since 2.7.0
 	 *
 	 * @param string       $file      Path to the file or directory.
-	 * @param bool         $recursive Optional. If set to true, deletes files and folders recursively.
+	 * @param bool         $recursive Optional. If set to true, changes file group recursively.
 	 *                                Default false.
 	 * @param string|false $type      Type of resource. 'f' for file, 'd' for directory.
 	 *                                Default false.
@@ -571,7 +582,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	 * @return bool Whether $file is writable.
 	 */
 	public function is_writable( $file ) {
-		// PHP will base its writable checks on system_user === file_owner, not ssh_user === file_owner.
+		// PHP will base it's writable checks on system_user === file_owner, not ssh_user === file_owner
 		return true;
 	}
 
@@ -726,7 +737,7 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 			$struc['name'] = $entry;
 
 			if ( '.' == $struc['name'] || '..' == $struc['name'] ) {
-				continue; // Do not care about these folders.
+				continue; //Do not care about these folders.
 			}
 
 			if ( ! $include_hidden && '.' == $struc['name'][0] ) {

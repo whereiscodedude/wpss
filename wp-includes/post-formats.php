@@ -41,8 +41,8 @@ function get_post_format( $post = null ) {
  *
  * @since 3.1.0
  *
- * @param string|array     $format Optional. The format or formats to check.
- * @param WP_Post|int|null $post   Optional. The post to check. If not supplied, defaults to the current post if used in the loop.
+ * @param string|array    $format Optional. The format or formats to check.
+ * @param object|int|null $post   Optional. The post to check. If not supplied, defaults to the current post if used in the loop.
  * @return bool True if the post has any of the given formats (or any format, if no format specified), false otherwise.
  */
 function has_post_format( $format = array(), $post = null ) {
@@ -75,7 +75,7 @@ function set_post_format( $post, $format ) {
 
 	if ( ! empty( $format ) ) {
 		$format = sanitize_key( $format );
-		if ( 'standard' === $format || ! in_array( $format, get_post_format_slugs(), true ) ) {
+		if ( 'standard' === $format || ! in_array( $format, get_post_format_slugs() ) ) {
 			$format = '';
 		} else {
 			$format = 'post-format-' . $format;
@@ -90,11 +90,11 @@ function set_post_format( $post, $format ) {
  *
  * @since 3.1.0
  *
- * @return string[] Array of post format labels keyed by format slug.
+ * @return array The array of translated post format names.
  */
 function get_post_format_strings() {
 	$strings = array(
-		'standard' => _x( 'Standard', 'Post format' ), // Special case. Any value that evals to false will be considered standard.
+		'standard' => _x( 'Standard', 'Post format' ), // Special case. any value that evals to false will be considered standard
 		'aside'    => _x( 'Aside', 'Post format' ),
 		'chat'     => _x( 'Chat', 'Post format' ),
 		'gallery'  => _x( 'Gallery', 'Post format' ),
@@ -113,7 +113,7 @@ function get_post_format_strings() {
  *
  * @since 3.1.0
  *
- * @return string[] The array of post format slugs as both keys and values.
+ * @return array The array of post format slugs as both keys and values.
  */
 function get_post_format_slugs() {
 	$slugs = array_keys( get_post_format_strings() );
@@ -231,7 +231,7 @@ function _post_format_get_term( $term ) {
  * @return array
  */
 function _post_format_get_terms( $terms, $taxonomies, $args ) {
-	if ( in_array( 'post_format', (array) $taxonomies, true ) ) {
+	if ( in_array( 'post_format', (array) $taxonomies ) ) {
 		if ( isset( $args['fields'] ) && 'names' == $args['fields'] ) {
 			foreach ( $terms as $order => $name ) {
 				$terms[ $order ] = get_post_format_string( str_replace( 'post-format-', '', $name ) );

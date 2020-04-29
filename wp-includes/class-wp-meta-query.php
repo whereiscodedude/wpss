@@ -311,7 +311,7 @@ class WP_Meta_Query {
 	 * @param string $primary_table     Database table where the object being filtered is stored (eg wp_users).
 	 * @param string $primary_id_column ID column for the filtered object in $primary_table.
 	 * @param object $context           Optional. The main query object.
-	 * @return array|false {
+	 * @return false|array {
 	 *     Array containing JOIN and WHERE SQL clauses to append to the main query.
 	 *
 	 *     @type string $join  SQL fragment to append to the main JOIN clause.
@@ -687,7 +687,7 @@ class WP_Meta_Query {
 		if ( array_key_exists( 'value', $clause ) ) {
 			$meta_value = $clause['value'];
 
-			if ( in_array( $meta_compare, array( 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' ), true ) ) {
+			if ( in_array( $meta_compare, array( 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' ) ) ) {
 				if ( ! is_array( $meta_value ) ) {
 					$meta_value = preg_split( '/[,\s]+/', $meta_value );
 				}
@@ -811,7 +811,7 @@ class WP_Meta_Query {
 
 			$clause_compare  = strtoupper( $clause['compare'] );
 			$sibling_compare = strtoupper( $sibling['compare'] );
-			if ( in_array( $clause_compare, $compatible_compares, true ) && in_array( $sibling_compare, $compatible_compares, true ) ) {
+			if ( in_array( $clause_compare, $compatible_compares ) && in_array( $sibling_compare, $compatible_compares ) ) {
 				$alias = $sibling['alias'];
 				break;
 			}
@@ -822,10 +822,10 @@ class WP_Meta_Query {
 		 *
 		 * @since 4.1.0
 		 *
-		 * @param string|bool   $alias        Table alias, or false if none was found.
-		 * @param array         $clause       First-order query clause.
-		 * @param array         $parent_query Parent of $clause.
-		 * @param WP_Meta_Query $this         WP_Meta_Query object.
+		 * @param string|bool $alias        Table alias, or false if none was found.
+		 * @param array       $clause       First-order query clause.
+		 * @param array       $parent_query Parent of $clause.
+		 * @param object      $this         WP_Meta_Query object.
 		 */
 		return apply_filters( 'meta_query_find_compatible_table_alias', $alias, $clause, $parent_query, $this );
 	}

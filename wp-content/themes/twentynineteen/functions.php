@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
 /**
@@ -305,19 +305,14 @@ require get_template_directory() . '/classes/class-twentynineteen-svg-icons.php'
 require get_template_directory() . '/classes/class-twentynineteen-walker-comment.php';
 
 /**
- * Common theme functions.
+ * Enhance the theme by hooking into WordPress.
  */
-require get_template_directory() . '/inc/helper-functions.php';
+require get_template_directory() . '/inc/template-functions.php';
 
 /**
  * SVG Icons related functions.
  */
 require get_template_directory() . '/inc/icon-functions.php';
-
-/**
- * Enhance the theme by hooking into WordPress.
- */
-require get_template_directory() . '/inc/template-functions.php';
 
 /**
  * Custom template tags for the theme.

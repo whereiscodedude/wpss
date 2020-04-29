@@ -55,15 +55,6 @@ class WP_Comments_List_Table extends WP_List_Table {
 		);
 	}
 
-	/**
-	 * Adds avatars to comment author names.
-	 *
-	 * @since 3.1.0
-	 *
-	 * @param string $name       Comment author name.
-	 * @param int    $comment_ID Comment ID.
-	 * @return string Avatar with the user name.
-	 */
 	public function floated_admin_avatar( $name, $comment_ID ) {
 		$comment = get_comment( $comment_ID );
 		$avatar  = get_avatar( $comment, 32, 'mystery' );
@@ -87,7 +78,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		global $post_id, $comment_status, $search, $comment_type;
 
 		$comment_status = isset( $_REQUEST['comment_status'] ) ? $_REQUEST['comment_status'] : 'all';
-		if ( ! in_array( $comment_status, array( 'all', 'mine', 'moderated', 'approved', 'spam', 'trash' ), true ) ) {
+		if ( ! in_array( $comment_status, array( 'all', 'mine', 'moderated', 'approved', 'spam', 'trash' ) ) ) {
 			$comment_status = 'all';
 		}
 
@@ -109,7 +100,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		if ( isset( $_REQUEST['number'] ) ) {
 			$number = (int) $_REQUEST['number'];
 		} else {
-			$number = $comments_per_page + min( 8, $comments_per_page ); // Grab a few extra.
+			$number = $comments_per_page + min( 8, $comments_per_page ); // Grab a few extra
 		}
 
 		$page = $this->get_pagenum();
@@ -209,8 +200,6 @@ class WP_Comments_List_Table extends WP_List_Table {
 
 		if ( 'moderated' === $comment_status ) {
 			_e( 'No comments awaiting moderation.' );
-		} elseif ( 'trash' === $comment_status ) {
-			_e( 'No comments found in Trash.' );
 		} else {
 			_e( 'No comments found.' );
 		}
@@ -233,7 +222,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 				'All <span class="count">(%s)</span>',
 				'All <span class="count">(%s)</span>',
 				'comments'
-			), // Singular not used.
+			), // singular not used
 
 			/* translators: %s: Number of comments. */
 			'mine'      => _nx_noop(
@@ -344,13 +333,13 @@ class WP_Comments_List_Table extends WP_List_Table {
 		global $comment_status;
 
 		$actions = array();
-		if ( in_array( $comment_status, array( 'all', 'approved' ), true ) ) {
+		if ( in_array( $comment_status, array( 'all', 'approved' ) ) ) {
 			$actions['unapprove'] = __( 'Unapprove' );
 		}
-		if ( in_array( $comment_status, array( 'all', 'moderated' ), true ) ) {
+		if ( in_array( $comment_status, array( 'all', 'moderated' ) ) ) {
 			$actions['approve'] = __( 'Approve' );
 		}
-		if ( in_array( $comment_status, array( 'all', 'moderated', 'approved', 'trash' ), true ) ) {
+		if ( in_array( $comment_status, array( 'all', 'moderated', 'approved', 'trash' ) ) ) {
 			$actions['spam'] = _x( 'Mark as Spam', 'comment' );
 		}
 
@@ -360,7 +349,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 			$actions['unspam'] = _x( 'Not Spam', 'comment' );
 		}
 
-		if ( in_array( $comment_status, array( 'trash', 'spam' ), true ) || ! EMPTY_TRASH_DAYS ) {
+		if ( in_array( $comment_status, array( 'trash', 'spam' ) ) || ! EMPTY_TRASH_DAYS ) {
 			$actions['delete'] = __( 'Delete Permanently' );
 		} else {
 			$actions['trash'] = __( 'Move to Trash' );
@@ -587,9 +576,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 	 * @param WP_Comment $comment     The comment object.
 	 * @param string     $column_name Current column name.
 	 * @param string     $primary     Primary column name.
-	 * @return string Row actions output for comments. An empty string
-	 *                if the current column is not the primary column,
-	 *                or if the current user cannot edit the comment.
+	 * @return string|void Comment row actions output.
 	 */
 	protected function handle_row_actions( $comment, $column_name, $primary ) {
 		global $comment_status;
@@ -599,7 +586,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		}
 
 		if ( ! $this->user_can ) {
-			return '';
+			return;
 		}
 
 		$the_comment_status = wp_get_comment_status( $comment );
@@ -757,10 +744,10 @@ class WP_Comments_List_Table extends WP_List_Table {
 			++$i;
 			( ( ( 'approve' === $action || 'unapprove' === $action ) && 2 === $i ) || 1 === $i ) ? $sep = '' : $sep = ' | ';
 
-			// Reply and quickedit need a hide-if-no-js span when not added with ajax.
+			// Reply and quickedit need a hide-if-no-js span when not added with ajax
 			if ( ( 'reply' === $action || 'quickedit' === $action ) && ! wp_doing_ajax() ) {
 				$action .= ' hide-if-no-js';
-			} elseif ( ( 'untrash' === $action && 'trash' === $the_comment_status ) || ( 'unspam' === $action && 'spam' === $the_comment_status ) ) {
+			} elseif ( ( $action === 'untrash' && $the_comment_status === 'trash' ) || ( $action === 'unspam' && $the_comment_status === 'spam' ) ) {
 				if ( '1' == get_comment_meta( $comment->comment_ID, '_wp_trash_meta_status', true ) ) {
 					$action .= ' approve';
 				} else {
@@ -883,9 +870,9 @@ class WP_Comments_List_Table extends WP_List_Table {
 		$submitted = sprintf(
 			/* translators: 1: Comment date, 2: Comment time. */
 			__( '%1$s at %2$s' ),
-			/* translators: Comment date format. See https://www.php.net/date */
+			/* translators: Comment date format. See https://secure.php.net/date */
 			get_comment_date( __( 'Y/m/d' ), $comment ),
-			/* translators: Comment time format. See https://www.php.net/date */
+			/* translators: Comment time format. See https://secure.php.net/date */
 			get_comment_date( __( 'g:i a' ), $comment )
 		);
 

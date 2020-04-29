@@ -597,6 +597,7 @@ class AMFReader
 			// null
 			case 6:
 				return null;
+				break;
 
 			// Mixed array
 			case 8:

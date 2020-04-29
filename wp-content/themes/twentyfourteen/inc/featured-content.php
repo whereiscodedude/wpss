@@ -292,7 +292,7 @@ class Featured_Content {
 		}
 
 		// We only want to hide the featured tag.
-		if ( ! in_array( 'post_tag', $taxonomies, true ) ) {
+		if ( ! in_array( 'post_tag', $taxonomies ) ) {
 			return $terms;
 		}
 
