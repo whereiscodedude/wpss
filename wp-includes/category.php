@@ -9,8 +9,9 @@
 /**
  * Retrieve list of category objects.
  *
- * If you set the 'taxonomy' argument to 'link_category', the link categories
- * will be returned instead.
+ * If you change the type to 'link' in the arguments, then the link categories
+ * will be returned instead. Also all categories will be updated to be backward
+ * compatible with pre-2.3 plugins and themes.
  *
  * @since 2.1.0
  * @see get_terms() Type of arguments that can be changed.
@@ -18,13 +19,15 @@
  * @param string|array $args {
  *     Optional. Arguments to retrieve categories. See get_terms() for additional options.
  *
- *     @type string $taxonomy Taxonomy to retrieve terms for. Default 'category'.
+ *     @type string $taxonomy Taxonomy to retrieve terms for. In this case, default 'category'.
  * }
- * @return array List of category objects.
+ * @return array List of categories.
  */
 function get_categories( $args = '' ) {
 	$defaults = array( 'taxonomy' => 'category' );
 	$args     = wp_parse_args( $args, $defaults );
+
+	$taxonomy = $args['taxonomy'];
 
 	/**
 	 * Filters the taxonomy used to retrieve terms when calling get_categories().
@@ -34,24 +37,24 @@ function get_categories( $args = '' ) {
 	 * @param string $taxonomy Taxonomy to retrieve terms from.
 	 * @param array  $args     An array of arguments. See get_terms().
 	 */
-	$args['taxonomy'] = apply_filters( 'get_categories_taxonomy', $args['taxonomy'], $args );
+	$taxonomy = apply_filters( 'get_categories_taxonomy', $taxonomy, $args );
 
-	// Back compat.
+	// Back compat
 	if ( isset( $args['type'] ) && 'link' == $args['type'] ) {
 		_deprecated_argument(
 			__FUNCTION__,
 			'3.0.0',
+			/* translators: 1: "type => link", 2: "taxonomy => link_category" */
 			sprintf(
-				/* translators: 1: "type => link", 2: "taxonomy => link_category" */
 				__( '%1$s is deprecated. Use %2$s instead.' ),
 				'<code>type => link</code>',
 				'<code>taxonomy => link_category</code>'
 			)
 		);
-		$args['taxonomy'] = 'link_category';
+		$taxonomy = $args['taxonomy'] = 'link_category';
 	}
 
-	$categories = get_terms( $args );
+	$categories = get_terms( $taxonomy, $args );
 
 	if ( is_wp_error( $categories ) ) {
 		$categories = array();
@@ -76,6 +79,8 @@ function get_categories( $args = '' ) {
  *
  * If you look at get_term(), then both types will be passed through several
  * filters and finally sanitized based on the $filter parameter value.
+ *
+ * The category will converted to maintain backward compatibility.
  *
  * @since 1.5.1
  *
@@ -127,13 +132,13 @@ function get_category_by_path( $category_path, $full_match = true, $output = OBJ
 	$category_paths = explode( '/', $category_paths );
 	$full_path      = '';
 	foreach ( (array) $category_paths as $pathdir ) {
-		$full_path .= ( '' != $pathdir ? '/' : '' ) . sanitize_title( $pathdir );
+		$full_path .= ( $pathdir != '' ? '/' : '' ) . sanitize_title( $pathdir );
 	}
 	$categories = get_terms(
+		'category',
 		array(
-			'taxonomy' => 'category',
-			'get'      => 'all',
-			'slug'     => $leaf_path,
+			'get'  => 'all',
+			'slug' => $leaf_path,
 		)
 	);
 
@@ -144,7 +149,7 @@ function get_category_by_path( $category_path, $full_match = true, $output = OBJ
 	foreach ( $categories as $category ) {
 		$path        = '/' . $leaf_path;
 		$curcategory = $category;
-		while ( ( 0 != $curcategory->parent ) && ( $curcategory->parent != $curcategory->term_id ) ) {
+		while ( ( $curcategory->parent != 0 ) && ( $curcategory->parent != $curcategory->term_id ) ) {
 			$curcategory = get_term( $curcategory->parent, 'category' );
 			if ( is_wp_error( $curcategory ) ) {
 				return $curcategory;
@@ -192,7 +197,7 @@ function get_category_by_slug( $slug ) {
  * @param string $cat_name Category name.
  * @return int 0, if failure and ID of category on success.
  */
-function get_cat_ID( $cat_name ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
+function get_cat_ID( $cat_name ) {
 	$cat = get_term_by( 'name', $cat_name, 'category' );
 	if ( $cat ) {
 		return $cat->term_id;
@@ -273,10 +278,7 @@ function sanitize_category_field( $field, $value, $cat_id, $context ) {
  * @return WP_Term[]|int $tags Array of 'post_tag' term objects, or a count thereof.
  */
 function get_tags( $args = '' ) {
-	$defaults = array( 'taxonomy' => 'post_tag' );
-	$args     = wp_parse_args( $args, $defaults );
-
-	$tags = get_terms( $args );
+	$tags = get_terms( 'post_tag', $args );
 
 	if ( empty( $tags ) ) {
 		$return = array();
@@ -333,7 +335,7 @@ function clean_category_cache( $id ) {
 }
 
 /**
- * Update category structure to old pre-2.3 from new taxonomy structure.
+ * Update category structure to old pre 2.3 from new taxonomy structure.
  *
  * This function was added for the taxonomy support to update the new category
  * structure with the old category one. This will maintain compatibility with

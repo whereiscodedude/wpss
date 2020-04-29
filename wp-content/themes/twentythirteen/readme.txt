@@ -1,7 +1,9 @@
 === Twenty Thirteen ===
 Contributors: wordpressdotorg
-Tested up to: 5.0
-Stable tag: 3.0
+Requires at least: WordPress 3.6
+Tested up to: WordPress 5.0
+Requires PHP: 5.2.4
+Stable tag: 2.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: blog, one-column, two-columns, right-sidebar, custom-header, custom-menu, editor-style, featured-images, footer-widgets, microformats, post-formats, rtl-language-support, sticky-post, translation-ready, accessibility-ready
@@ -21,7 +23,7 @@ For more information about Twenty Thirteen please go to https://codex.wordpress.
 
 == Copyright ==
 
-Twenty Thirteen WordPress Theme, Copyright 2013-2020 WordPress.org & Automattic.com
+Twenty Thirteen WordPress Theme, Copyright 2013-2018 WordPress.org & Automattic.com
 Twenty Thirteen is Distributed under the terms of the GNU GPL
 
 This program is free software: you can redistribute it and/or modify
@@ -45,11 +47,6 @@ License: GNU GPL, Version 2 (or later)
 Source: http://www.genericons.com
 
 == Changelog ==
-
-= 3.0 =
-* Released: March, 2020
-
-https://codex.wordpress.org/Twenty_Thirteen_Theme_Changelog#Version_3.0
 
 = 2.9 =
 * Released: May 7, 2019

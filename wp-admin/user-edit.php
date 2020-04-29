@@ -7,7 +7,7 @@
  */
 
 /** WordPress Administration Bootstrap */
-require_once __DIR__ . '/admin.php';
+require_once( dirname( __FILE__ ) . '/admin.php' );
 
 wp_reset_vars( array( 'action', 'user_id', 'wp_http_referer' ) );
 
@@ -30,7 +30,7 @@ wp_enqueue_script( 'user-profile' );
 if ( IS_PROFILE_PAGE ) {
 	$title = __( 'Profile' );
 } else {
-	/* translators: %s: User's display name. */
+	/* translators: %s: user's display name */
 	$title = __( 'Edit User %s' );
 }
 
@@ -64,7 +64,7 @@ get_current_screen()->add_help_tab(
 
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/article/users-your-profile-screen/">Documentation on User Profiles</a>' ) . '</p>' .
+	'<p>' . __( '<a href="https://codex.wordpress.org/Users_Your_Profile_Screen">Documentation on User Profiles</a>' ) . '</p>' .
 	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
@@ -127,7 +127,7 @@ switch ( $action ) {
 
 		if ( IS_PROFILE_PAGE ) {
 			/**
-			 * Fires before the page loads on the 'Profile' editing screen.
+			 * Fires before the page loads on the 'Your Profile' editing screen.
 			 *
 			 * The action only fires if the current user is editing their own profile.
 			 *
@@ -184,7 +184,7 @@ switch ( $action ) {
 		$title    = sprintf( $title, $profileuser->display_name );
 		$sessions = WP_Session_Tokens::get_instance( $profileuser->ID );
 
-		require_once ABSPATH . 'wp-admin/admin-header.php';
+		include( ABSPATH . 'wp-admin/admin-header.php' );
 		?>
 
 		<?php if ( ! IS_PROFILE_PAGE && is_super_admin( $profileuser->ID ) && current_user_can( 'manage_network_options' ) ) { ?>
@@ -235,14 +235,14 @@ switch ( $action ) {
 <hr class="wp-header-end">
 
 <form id="your-profile" action="<?php echo esc_url( self_admin_url( IS_PROFILE_PAGE ? 'profile.php' : 'user-edit.php' ) ); ?>" method="post" novalidate="novalidate"
-		<?php
-		/**
-		 * Fires inside the your-profile form tag on the user editing screen.
-		 *
-		 * @since 3.0.0
-		 */
-		do_action( 'user_edit_form_tag' );
-		?>
+											<?php
+											/**
+											 * Fires inside the your-profile form tag on the user editing screen.
+											 *
+											 * @since 3.0.0
+											 */
+											do_action( 'user_edit_form_tag' );
+											?>
 	>
 		<?php wp_nonce_field( 'update-user_' . $user_id ); ?>
 		<?php if ( $wp_http_referer ) : ?>
@@ -259,11 +259,7 @@ switch ( $action ) {
 		<?php if ( ! ( IS_PROFILE_PAGE && ! $user_can_edit ) ) : ?>
 	<tr class="user-rich-editing-wrap">
 		<th scope="row"><?php _e( 'Visual Editor' ); ?></th>
-		<td>
-			<label for="rich_editing"><input name="rich_editing" type="checkbox" id="rich_editing" value="false" <?php checked( 'false', $profileuser->rich_editing ); ?> />
-				<?php _e( 'Disable the visual editor when writing' ); ?>
-			</label>
-		</td>
+		<td><label for="rich_editing"><input name="rich_editing" type="checkbox" id="rich_editing" value="false" <?php checked( 'false', $profileuser->rich_editing ); ?> /> <?php _e( 'Disable the visual editor when writing' ); ?></label></td>
 	</tr>
 		<?php endif; ?>
 		<?php
@@ -278,22 +274,18 @@ switch ( $action ) {
 		user_can( $profileuser, 'edit_themes' )
 		);
 		?>
-
 		<?php if ( $show_syntax_highlighting_preference ) : ?>
 	<tr class="user-syntax-highlighting-wrap">
 		<th scope="row"><?php _e( 'Syntax Highlighting' ); ?></th>
 		<td>
-			<label for="syntax_highlighting"><input name="syntax_highlighting" type="checkbox" id="syntax_highlighting" value="false" <?php checked( 'false', $profileuser->syntax_highlighting ); ?> />
-				<?php _e( 'Disable syntax highlighting when editing code' ); ?>
-			</label>
+			<label for="syntax_highlighting"><input name="syntax_highlighting" type="checkbox" id="syntax_highlighting" value="false" <?php checked( 'false', $profileuser->syntax_highlighting ); ?> /> <?php _e( 'Disable syntax highlighting when editing code' ); ?></label>
 		</td>
 	</tr>
-		<?php endif; ?>
-
+<?php endif; ?>
 		<?php if ( count( $_wp_admin_css_colors ) > 1 && has_action( 'admin_color_scheme_picker' ) ) : ?>
-	<tr class="user-admin-color-wrap">
-		<th scope="row"><?php _e( 'Admin Color Scheme' ); ?></th>
-		<td>
+<tr class="user-admin-color-wrap">
+<th scope="row"><?php _e( 'Admin Color Scheme' ); ?></th>
+<td>
 			<?php
 			/**
 			 * Fires in the 'Admin Color Scheme' section of the user editing screen.
@@ -308,43 +300,36 @@ switch ( $action ) {
 			 */
 			do_action( 'admin_color_scheme_picker', $user_id );
 			?>
-		</td>
-	</tr>
-		<?php endif; // End if count ( $_wp_admin_css_colors ) > 1 ?>
-
-		<?php if ( ! ( IS_PROFILE_PAGE && ! $user_can_edit ) ) : ?>
-	<tr class="user-comment-shortcuts-wrap">
-		<th scope="row"><?php _e( 'Keyboard Shortcuts' ); ?></th>
-		<td>
-			<label for="comment_shortcuts">
-				<input type="checkbox" name="comment_shortcuts" id="comment_shortcuts" value="true" <?php checked( 'true', $profileuser->comment_shortcuts ); ?> />
-				<?php _e( 'Enable keyboard shortcuts for comment moderation.' ); ?>
-			</label>
-			<?php _e( '<a href="https://wordpress.org/support/article/keyboard-shortcuts/" target="_blank">More information</a>' ); ?>
-		</td>
-	</tr>
+</td>
+</tr>
+			<?php
+endif; // $_wp_admin_css_colors
+		if ( ! ( IS_PROFILE_PAGE && ! $user_can_edit ) ) :
+			?>
+<tr class="user-comment-shortcuts-wrap">
+<th scope="row"><?php _e( 'Keyboard Shortcuts' ); ?></th>
+<td><label for="comment_shortcuts"><input type="checkbox" name="comment_shortcuts" id="comment_shortcuts" value="true" <?php checked( 'true', $profileuser->comment_shortcuts ); ?> /> <?php _e( 'Enable keyboard shortcuts for comment moderation.' ); ?></label> <?php _e( '<a href="https://codex.wordpress.org/Keyboard_Shortcuts" target="_blank">More information</a>' ); ?></td>
+</tr>
 		<?php endif; ?>
-
-	<tr class="show-admin-bar user-admin-bar-front-wrap">
-		<th scope="row"><?php _e( 'Toolbar' ); ?></th>
-		<td>
-			<label for="admin_bar_front">
-				<input name="admin_bar_front" type="checkbox" id="admin_bar_front" value="1"<?php checked( _get_admin_bar_pref( 'front', $profileuser->ID ) ); ?> />
-				<?php _e( 'Show Toolbar when viewing site' ); ?>
-			</label><br />
-		</td>
-	</tr>
+<tr class="show-admin-bar user-admin-bar-front-wrap">
+<th scope="row"><?php _e( 'Toolbar' ); ?></th>
+<td>
+<label for="admin_bar_front">
+<input name="admin_bar_front" type="checkbox" id="admin_bar_front" value="1"<?php checked( _get_admin_bar_pref( 'front', $profileuser->ID ) ); ?> />
+		<?php _e( 'Show Toolbar when viewing site' ); ?></label><br />
+</td>
+</tr>
 
 		<?php
 		$languages = get_available_languages();
 		if ( $languages ) :
 			?>
-	<tr class="user-language-wrap">
-		<th scope="row">
-			<?php /* translators: The user language selection field label. */ ?>
-			<label for="locale"><?php _e( 'Language' ); ?><span class="dashicons dashicons-translation" aria-hidden="true"></span></label>
-		</th>
-		<td>
+<tr class="user-language-wrap">
+	<th scope="row">
+			<?php /* translators: The user language selection field label */ ?>
+		<label for="locale"><?php _e( 'Language' ); ?></label>
+	</th>
+	<td>
 			<?php
 				$user_locale = $profileuser->locale;
 
@@ -365,8 +350,8 @@ switch ( $action ) {
 				)
 			);
 			?>
-		</td>
-	</tr>
+	</td>
+</tr>
 			<?php
 endif;
 		?>
@@ -386,7 +371,7 @@ endif;
 		<?php
 		if ( IS_PROFILE_PAGE ) {
 			/**
-			 * Fires after the 'Personal Options' settings table on the 'Profile' editing screen.
+			 * Fires after the 'Personal Options' settings table on the 'Your Profile' editing screen.
 			 *
 			 * The action only fires if the current user is editing their own profile.
 			 *
@@ -410,14 +395,14 @@ endif;
 <tr class="user-role-wrap"><th><label for="role"><?php _e( 'Role' ); ?></label></th>
 <td><select name="role" id="role">
 			<?php
-			// Compare user role against currently editable roles.
+			// Compare user role against currently editable roles
 			$user_roles = array_intersect( array_values( $profileuser->roles ), array_keys( get_editable_roles() ) );
 			$user_role  = reset( $user_roles );
 
-			// Print the full list of roles with the primary one selected.
+			// print the full list of roles with the primary one selected.
 			wp_dropdown_roles( $user_role );
 
-			// Print the 'no role' option. Make it selected if the user has no role yet.
+			// print the 'no role' option. Make it selected if the user has no role yet.
 			if ( $user_role ) {
 				echo '<option value="">' . __( '&mdash; No role for this site &mdash;' ) . '</option>';
 			} else {
@@ -426,13 +411,13 @@ endif;
 			?>
 </select></td></tr>
 			<?php
-		endif; // End if ! IS_PROFILE_PAGE.
+endif; //!IS_PROFILE_PAGE
 
 		if ( is_multisite() && is_network_admin() && ! IS_PROFILE_PAGE && current_user_can( 'manage_network_options' ) && ! isset( $super_admins ) ) {
 			?>
 <tr class="user-super-admin-wrap"><th><?php _e( 'Super Admin' ); ?></th>
 <td>
-			<?php if ( 0 !== strcasecmp( $profileuser->user_email, get_site_option( 'admin_email' ) ) || ! is_super_admin( $profileuser->ID ) ) : ?>
+			<?php if ( $profileuser->user_email != get_site_option( 'admin_email' ) || ! is_super_admin( $profileuser->ID ) ) : ?>
 <p><label><input type="checkbox" id="super_admin" name="super_admin"<?php checked( is_super_admin( $profileuser->ID ) ); ?> /> <?php _e( 'Grant this user super admin privileges for the Network.' ); ?></label></p>
 <?php else : ?>
 <p><?php _e( 'Super admin privileges cannot be removed because this user has the network admin email.' ); ?></p>
@@ -477,7 +462,7 @@ endif;
 			$public_display['display_lastfirst'] = $profileuser->last_name . ' ' . $profileuser->first_name;
 		}
 
-		if ( ! in_array( $profileuser->display_name, $public_display, true ) ) { // Only add this if it isn't duplicated elsewhere.
+		if ( ! in_array( $profileuser->display_name, $public_display ) ) { // Only add this if it isn't duplicated elsewhere
 			$public_display = array( 'display_displayname' => $profileuser->display_name ) + $public_display;
 		}
 
@@ -505,7 +490,7 @@ endif;
 		if ( $profileuser->ID == $current_user->ID ) :
 			?>
 		<p class="description" id="email-description">
-			<?php _e( 'If you change this, we will send you an email at your new address to confirm it. <strong>The new address will not become active until confirmed.</strong>' ); ?>
+			<?php _e( 'If you change this we will send you an email at your new address to confirm it. <strong>The new address will not become active until confirmed.</strong>' ); ?>
 		</p>
 			<?php
 		endif;
@@ -517,7 +502,7 @@ endif;
 		<p>
 			<?php
 			printf(
-				/* translators: %s: New email. */
+				/* translators: %s: new email */
 				__( 'There is a pending change of your email to %s.' ),
 				'<code>' . esc_html( $new_email['newemail'] ) . '</code>'
 			);
@@ -581,8 +566,8 @@ endif;
 		<p class="description">
 			<?php
 			if ( IS_PROFILE_PAGE ) {
+				/* translators: %s: Gravatar URL */
 				$description = sprintf(
-					/* translators: %s: Gravatar URL. */
 					__( '<a href="%s">You can change your profile picture on Gravatar</a>.' ),
 					__( 'https://en.gravatar.com/' )
 				);
@@ -617,8 +602,7 @@ endif;
 		 * @param bool    $show        Whether to show the password fields. Default true.
 		 * @param WP_User $profileuser User object for the current user to edit.
 		 */
-		$show_password_fields = apply_filters( 'show_password_fields', true, $profileuser );
-		if ( $show_password_fields ) :
+		if ( $show_password_fields = apply_filters( 'show_password_fields', true, $profileuser ) ) :
 			?>
 	</table>
 
@@ -692,7 +676,7 @@ endif;
 			<p><button type="button" class="button" id="destroy-sessions"><?php _e( 'Log Out Everywhere' ); ?></button></p>
 			<p class="description">
 				<?php
-				/* translators: %s: User's display name. */
+				/* translators: %s: user's display name */
 				printf( __( 'Log %s out of all locations.' ), $profileuser->display_name );
 				?>
 			</p>
@@ -705,7 +689,7 @@ endif;
 		<?php
 		if ( IS_PROFILE_PAGE ) {
 			/**
-			 * Fires after the 'About Yourself' settings table on the 'Profile' editing screen.
+			 * Fires after the 'About Yourself' settings table on the 'Your Profile' editing screen.
 			 *
 			 * The action only fires if the current user is editing their own profile.
 			 *
@@ -755,13 +739,7 @@ endif;
 					if ( '' != $output ) {
 						$output .= ', ';
 					}
-
-					if ( $value ) {
-						$output .= $cap;
-					} else {
-						/* translators: %s: Capability name. */
-						$output .= sprintf( __( 'Denied: %s' ), $cap );
-					}
+					$output .= $value ? $cap : sprintf( __( 'Denied: %s' ), $cap );
 				}
 			}
 			echo $output;
@@ -788,4 +766,4 @@ endif;
 	}
 </script>
 <?php
-require_once ABSPATH . 'wp-admin/admin-footer.php';
+include( ABSPATH . 'wp-admin/admin-footer.php' );

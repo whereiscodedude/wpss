@@ -23,15 +23,13 @@ if ( ! function_exists( 'twentyfifteen_comment_nav' ) ) :
 		<h2 class="screen-reader-text"><?php _e( 'Comment navigation', 'twentyfifteen' ); ?></h2>
 		<div class="nav-links">
 			<?php
-			$prev_link = get_previous_comments_link( __( 'Older Comments', 'twentyfifteen' ) );
-			if ( $prev_link ) {
+			if ( $prev_link = get_previous_comments_link( __( 'Older Comments', 'twentyfifteen' ) ) ) :
 				printf( '<div class="nav-previous">%s</div>', $prev_link );
-			}
+				endif;
 
-			$next_link = get_next_comments_link( __( 'Newer Comments', 'twentyfifteen' ) );
-			if ( $next_link ) {
+			if ( $next_link = get_next_comments_link( __( 'Newer Comments', 'twentyfifteen' ) ) ) :
 				printf( '<div class="nav-next">%s</div>', $next_link );
-			}
+				endif;
 			?>
 			</div><!-- .nav-links -->
 		</nav><!-- .comment-navigation -->
@@ -61,7 +59,7 @@ if ( ! function_exists( 'twentyfifteen_entry_meta' ) ) :
 			);
 		}
 
-		if ( in_array( get_post_type(), array( 'post', 'attachment' ), true ) ) {
+		if ( in_array( get_post_type(), array( 'post', 'attachment' ) ) ) {
 			$time_string = '<time class="entry-date published updated" datetime="%1$s">%2$s</time>';
 
 			if ( get_the_time( 'U' ) !== get_the_modified_time( 'U' ) ) {
@@ -128,7 +126,7 @@ if ( ! function_exists( 'twentyfifteen_entry_meta' ) ) :
 
 		if ( ! is_single() && ! post_password_required() && ( comments_open() || get_comments_number() ) ) {
 			echo '<span class="comments-link">';
-			/* translators: %s: Post title. */
+			/* translators: %s: post title */
 			comments_popup_link( sprintf( __( 'Leave a comment<span class="screen-reader-text"> on %s</span>', 'twentyfifteen' ), get_the_title() ) );
 			echo '</span>';
 		}
@@ -143,8 +141,7 @@ endif;
  * @return bool True of there is more than one category, false otherwise.
  */
 function twentyfifteen_categorized_blog() {
-	$all_the_cool_cats = get_transient( 'twentyfifteen_categories' );
-	if ( false === $all_the_cool_cats ) {
+	if ( false === ( $all_the_cool_cats = get_transient( 'twentyfifteen_categories' ) ) ) {
 		// Create an array of all the categories that are attached to posts.
 		$all_the_cool_cats = get_categories(
 			array(
@@ -163,10 +160,10 @@ function twentyfifteen_categorized_blog() {
 	}
 
 	if ( $all_the_cool_cats > 1 || is_preview() ) {
-		// This blog has more than 1 category so twentyfifteen_categorized_blog() should return true.
+		// This blog has more than 1 category so twentyfifteen_categorized_blog should return true.
 		return true;
 	} else {
-		// This blog has only 1 category so twentyfifteen_categorized_blog() should return false.
+		// This blog has only 1 category so twentyfifteen_categorized_blog should return false.
 		return false;
 	}
 }
@@ -213,7 +210,7 @@ if ( ! function_exists( 'twentyfifteen_post_thumbnail' ) ) :
 	</a>
 
 		<?php
-	endif; // End is_singular().
+	endif; // End is_singular()
 	}
 endif;
 
@@ -248,7 +245,7 @@ if ( ! function_exists( 'twentyfifteen_excerpt_more' ) && ! is_admin() ) :
 		$link = sprintf(
 			'<a href="%1$s" class="more-link">%2$s</a>',
 			esc_url( get_permalink( get_the_ID() ) ),
-			/* translators: %s: Post title. */
+			/* translators: %s: Name of current post */
 			sprintf( __( 'Continue reading %s', 'twentyfifteen' ), '<span class="screen-reader-text">' . get_the_title( get_the_ID() ) . '</span>' )
 		);
 		return ' &hellip; ' . $link;
@@ -275,7 +272,7 @@ if ( ! function_exists( 'wp_body_open' ) ) :
 	/**
 	 * Fire the wp_body_open action.
 	 *
-	 * Added for backward compatibility to support pre-5.2.0 WordPress versions.
+	 * Added for backwards compatibility to support pre 5.2.0 WordPress versions.
 	 *
 	 * @since Twenty Fifteen 2.5
 	 */

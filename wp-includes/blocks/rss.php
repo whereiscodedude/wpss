@@ -20,6 +20,10 @@ function render_block_core_rss( $attributes ) {
 	}
 
 	if ( ! $rss->get_item_quantity() ) {
+		// PHP 5.2 compatibility. See: http://simplepie.org/wiki/faq/i_m_getting_memory_leaks.
+		$rss->__destruct();
+		unset( $rss );
+
 		return '<div class="components-placeholder"><div class="notice notice-error">' . __( 'An error has occurred, which probably means the feed is down. Try again later.' ) . '</div></div>';
 	}
 
@@ -28,7 +32,7 @@ function render_block_core_rss( $attributes ) {
 	foreach ( $rss_items as $item ) {
 		$title = esc_html( trim( strip_tags( $item->get_title() ) ) );
 		if ( empty( $title ) ) {
-			$title = __( '(no title)' );
+			$title = __( '(Untitled)' );
 		}
 		$link = $item->get_link();
 		$link = esc_url( $link );
@@ -65,7 +69,7 @@ function render_block_core_rss( $attributes ) {
 			$excerpt = esc_attr( wp_trim_words( $excerpt, $attributes['excerptLength'], ' [&hellip;]' ) );
 
 			// Change existing [...] to [&hellip;].
-			if ( '[...]' === substr( $excerpt, -5 ) ) {
+			if ( '[...]' == substr( $excerpt, -5 ) ) {
 				$excerpt = substr( $excerpt, 0, -5 ) . '[&hellip;]';
 			}
 
@@ -75,41 +79,23 @@ function render_block_core_rss( $attributes ) {
 		$list_items .= "<li class='wp-block-rss__item'>{$title}{$date}{$author}{$excerpt}</li>";
 	}
 
-	$class = 'wp-block-rss';
-	if ( isset( $attributes['align'] ) ) {
-		$class .= ' align' . $attributes['align'];
-	}
+	$classes           = 'grid' === $attributes['blockLayout'] ? ' is-grid columns-' . $attributes['columns'] : '';
+	$list_items_markup = "<ul class='wp-block-rss{$classes}'>{$list_items}</ul>";
 
-	if ( isset( $attributes['blockLayout'] ) && 'grid' === $attributes['blockLayout'] ) {
-		$class .= ' is-grid';
-	}
+	// PHP 5.2 compatibility. See: http://simplepie.org/wiki/faq/i_m_getting_memory_leaks.
+	$rss->__destruct();
+	unset( $rss );
 
-	if ( isset( $attributes['columns'] ) && 'grid' === $attributes['blockLayout'] ) {
-		$class .= ' columns-' . $attributes['columns'];
-	}
-
-	if ( isset( $attributes['className'] ) ) {
-		$class .= ' ' . $attributes['className'];
-	}
-
-	return "<ul class='{$class}'>{$list_items}</ul>";
+	return $list_items_markup;
 }
 
 /**
  * Registers the `core/rss` block on server.
  */
 function register_block_core_rss() {
-	register_block_type(
-		'core/rss',
+	register_block_type( 'core/rss',
 		array(
 			'attributes'      => array(
-				'align'          => array(
-					'type' => 'string',
-					'enum' => array( 'left', 'center', 'right', 'wide', 'full' ),
-				),
-				'className'      => array(
-					'type' => 'string',
-				),
 				'columns'        => array(
 					'type'    => 'number',
 					'default' => 2,
@@ -147,4 +133,5 @@ function register_block_core_rss() {
 		)
 	);
 }
+
 add_action( 'init', 'register_block_core_rss' );
