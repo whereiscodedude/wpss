@@ -24,7 +24,7 @@ class WP_REST_Blocks_Controller extends WP_REST_Posts_Controller {
 	 *
 	 * @since 5.0.0
 	 *
-	 * @param WP_Post $post Post object that backs the block.
+	 * @param object $post Post object that backs the block.
 	 * @return bool Whether the block can be read.
 	 */
 	public function check_read_permission( $post ) {
@@ -68,7 +68,6 @@ class WP_REST_Blocks_Controller extends WP_REST_Posts_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		// Do not cache this schema because all properties are derived from parent controller.
 		$schema = parent::get_item_schema();
 
 		/*

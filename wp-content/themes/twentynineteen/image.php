@@ -4,17 +4,17 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
 get_header();
 ?>
 
-	<div id="primary" class="content-area">
+	<section id="primary" class="content-area">
 		<main id="main" class="site-main">
 
 			<?php
-			// Start the Loop.
+				// Start the loop.
 			while ( have_posts() ) :
 				the_post();
 				?>
@@ -78,7 +78,7 @@ get_header();
 						<?php twentynineteen_entry_footer(); ?>
 
 					</footer><!-- .entry-footer -->
-				</article><!-- #post-<?php the_ID(); ?> -->
+				</article><!-- #post-## -->
 
 				<?php
 				// Parent post navigation.
@@ -98,7 +98,7 @@ get_header();
 			?>
 
 		</main><!-- .site-main -->
-	</div><!-- .content-area -->
+	</section><!-- .content-area -->
 
 <?php
 get_footer();

@@ -58,7 +58,7 @@ class WP_User_Query {
 
 	private $compat_fields = array( 'results', 'total_users' );
 
-	// SQL clauses.
+	// SQL clauses
 	public $query_fields;
 	public $query_from;
 	public $query_where;
@@ -159,9 +159,8 @@ class WP_User_Query {
 	 *     @type string       $search              Search keyword. Searches for possible string matches on columns.
 	 *                                             When `$search_columns` is left empty, it tries to determine which
 	 *                                             column to search in based on search string. Default empty.
-	 *     @type array        $search_columns      Array of column names to be searched. Accepts 'ID', 'user_login',
-	 *                                             'user_email', 'user_url', 'user_nicename', 'display_name'.
-	 *                                             Default empty array.
+	 *     @type array        $search_columns      Array of column names to be searched. Accepts 'ID', 'login',
+	 *                                             'nicename', 'email', 'url'. Default empty array.
 	 *     @type string|array $orderby             Field(s) to sort the retrieved users by. May be a single value,
 	 *                                             an array of values, or a multi-dimensional array with fields as
 	 *                                             keys and orders ('ASC' or 'DESC') as values. Accepted values are
@@ -180,7 +179,7 @@ class WP_User_Query {
 	 *     @type int          $number              Number of users to limit the query for. Can be used in
 	 *                                             conjunction with pagination. Value -1 (all) is supported, but
 	 *                                             should be used with caution on larger sites.
-	 *                                             Default -1 (all users).
+	 *                                             Default empty (all users).
 	 *     @type int          $paged               When used with number, defines the page of results to return.
 	 *                                             Default 1.
 	 *     @type bool         $count_total         Whether to count the total number of users found. If pagination
@@ -328,8 +327,7 @@ class WP_User_Query {
 			);
 
 			// Prevent extra meta query.
-			$qv['blog_id'] = 0;
-			$blog_id       = 0;
+			$qv['blog_id'] = $blog_id = 0;
 
 			if ( empty( $this->meta_query->queries ) ) {
 				$this->meta_query->queries = array( $who_query );
@@ -439,7 +437,7 @@ class WP_User_Query {
 			}
 		}
 
-		// Sorting.
+		// sorting
 		$qv['order'] = isset( $qv['order'] ) ? strtoupper( $qv['order'] ) : '';
 		$order       = $this->parse_order( $qv['order'] );
 
@@ -489,7 +487,7 @@ class WP_User_Query {
 
 		$this->query_orderby = 'ORDER BY ' . implode( ', ', $orderby_array );
 
-		// Limit.
+		// limit
 		if ( isset( $qv['number'] ) && $qv['number'] > 0 ) {
 			if ( $qv['offset'] ) {
 				$this->query_limit = $wpdb->prepare( 'LIMIT %d, %d', $qv['offset'], $qv['number'] );
@@ -538,8 +536,8 @@ class WP_User_Query {
 			/**
 			 * Filters the columns to search in a WP_User_Query search.
 			 *
-			 * The default columns depend on the search term, and include 'ID', 'user_login',
-			 * 'user_email', 'user_url', 'user_nicename', and 'display_name'.
+			 * The default columns depend on the search term, and include 'user_email',
+			 * 'user_login', 'ID', 'user_url', 'display_name', and 'user_nicename'.
 			 *
 			 * @since 3.6.0
 			 *
@@ -756,14 +754,14 @@ class WP_User_Query {
 		$meta_query_clauses = $this->meta_query->get_clauses();
 
 		$_orderby = '';
-		if ( in_array( $orderby, array( 'login', 'nicename', 'email', 'url', 'registered' ), true ) ) {
+		if ( in_array( $orderby, array( 'login', 'nicename', 'email', 'url', 'registered' ) ) ) {
 			$_orderby = 'user_' . $orderby;
-		} elseif ( in_array( $orderby, array( 'user_login', 'user_nicename', 'user_email', 'user_url', 'user_registered' ), true ) ) {
+		} elseif ( in_array( $orderby, array( 'user_login', 'user_nicename', 'user_email', 'user_url', 'user_registered' ) ) ) {
 			$_orderby = $orderby;
 		} elseif ( 'name' == $orderby || 'display_name' == $orderby ) {
 			$_orderby = 'display_name';
 		} elseif ( 'post_count' == $orderby ) {
-			// @todo Avoid the JOIN.
+			// todo: avoid the JOIN
 			$where             = get_posts_by_author_sql( 'post' );
 			$this->query_from .= " LEFT OUTER JOIN (
 				SELECT post_author, COUNT(*) as post_count
@@ -828,7 +826,7 @@ class WP_User_Query {
 	 * @return mixed Property.
 	 */
 	public function __get( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return $this->$name;
 		}
 	}
@@ -843,7 +841,7 @@ class WP_User_Query {
 	 * @return mixed Newly-set property.
 	 */
 	public function __set( $name, $value ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return $this->$name = $value;
 		}
 	}
@@ -857,7 +855,7 @@ class WP_User_Query {
 	 * @return bool Whether the property is set.
 	 */
 	public function __isset( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return isset( $this->$name );
 		}
 	}
@@ -870,7 +868,7 @@ class WP_User_Query {
 	 * @param string $name Property to unset.
 	 */
 	public function __unset( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			unset( $this->$name );
 		}
 	}
@@ -886,7 +884,7 @@ class WP_User_Query {
 	 */
 	public function __call( $name, $arguments ) {
 		if ( 'get_search_sql' === $name ) {
-			return $this->get_search_sql( ...$arguments );
+			return call_user_func_array( array( $this, $name ), $arguments );
 		}
 		return false;
 	}

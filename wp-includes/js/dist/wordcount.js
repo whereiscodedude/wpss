@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["wordcount"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 432);
+/******/ 	return __webpack_require__(__webpack_require__.s = 311);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -94,14 +94,14 @@ this["wp"] = this["wp"] || {}; this["wp"]["wordcount"] =
 
 /***/ }),
 
-/***/ 432:
+/***/ 311:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: external {"this":"lodash"}
-var external_this_lodash_ = __webpack_require__(2);
+// EXTERNAL MODULE: external "lodash"
+var external_lodash_ = __webpack_require__(2);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/wordcount/build-module/defaultSettings.js
 var defaultSettings = {
@@ -317,13 +317,6 @@ var defaultSettings = {
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/wordcount/build-module/index.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "count", function() { return count; });
-/**
- * External dependencies
- */
-
-/**
- * Internal dependencies
- */
 
 
 
@@ -345,7 +338,7 @@ var defaultSettings = {
  */
 
 function loadSettings(type, userSettings) {
-  var settings = Object(external_this_lodash_["extend"])(defaultSettings, userSettings);
+  var settings = Object(external_lodash_["extend"])(defaultSettings, userSettings);
   settings.shortcodes = settings.l10n.shortcodes || {};
 
   if (settings.shortcodes && settings.shortcodes.length) {
@@ -372,7 +365,7 @@ function loadSettings(type, userSettings) {
 
 
 function matchWords(text, regex, settings) {
-  text = Object(external_this_lodash_["flow"])(stripTags.bind(this, settings), stripHTMLComments.bind(this, settings), stripShortcodes.bind(this, settings), stripSpaces.bind(this, settings), stripHTMLEntities.bind(this, settings), stripConnectors.bind(this, settings), stripRemovables.bind(this, settings))(text);
+  text = Object(external_lodash_["flow"])(stripTags.bind(this, settings), stripHTMLComments.bind(this, settings), stripShortcodes.bind(this, settings), stripSpaces.bind(this, settings), stripHTMLEntities.bind(this, settings), stripConnectors.bind(this, settings), stripRemovables.bind(this, settings))(text);
   text = text + '\n';
   return text.match(regex);
 }
@@ -388,24 +381,18 @@ function matchWords(text, regex, settings) {
 
 
 function matchCharacters(text, regex, settings) {
-  text = Object(external_this_lodash_["flow"])(stripTags.bind(this, settings), stripHTMLComments.bind(this, settings), stripShortcodes.bind(this, settings), stripSpaces.bind(this, settings), transposeAstralsToCountableChar.bind(this, settings), transposeHTMLEntitiesToCountableChars.bind(this, settings))(text);
+  text = Object(external_lodash_["flow"])(stripTags.bind(this, settings), stripHTMLComments.bind(this, settings), stripShortcodes.bind(this, settings), stripSpaces.bind(this, settings), transposeAstralsToCountableChar.bind(this, settings), transposeHTMLEntitiesToCountableChars.bind(this, settings))(text);
   text = text + '\n';
   return text.match(regex);
 }
 /**
  * Count some words.
  *
- * @param {string} text         The text being processed
- * @param {string} type         The type of count. Accepts ;words', 'characters_excluding_spaces', or 'characters_including_spaces'.
+ * @param {String} text         The text being processed
+ * @param {String} type         The type of count. Accepts ;words', 'characters_excluding_spaces', or 'characters_including_spaces'.
  * @param {Object} userSettings Custom settings object.
  *
- * @example
- * ```js
- * import { count } from '@wordpress/wordcount';
- * const numberOfWords = count( 'Words to count', 'words', {} )
- * ```
- *
- * @return {number} The word or character count.
+ * @return {Number} The word or character count.
  */
 
 

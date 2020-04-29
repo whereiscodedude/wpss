@@ -31,6 +31,6 @@ if ( 'content' != $current_layout ) :
 					</ul>
 				</aside>
 
-			<?php endif; // End sidebar widget area. ?>
+			<?php endif; // end sidebar widget area ?>
 		</div><!-- #secondary .widget-area -->
 <?php endif; ?>

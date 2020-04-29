@@ -8,7 +8,7 @@
  */
 
 /** Load WordPress Administration Bootstrap */
-require_once __DIR__ . '/admin.php';
+require_once( dirname( __FILE__ ) . '/admin.php' );
 
 if ( ! current_user_can( 'manage_network_themes' ) ) {
 	wp_die( __( 'Sorry, you are not allowed to manage network themes.' ) );
@@ -76,7 +76,7 @@ if ( $action ) {
 			$title       = __( 'Update Themes' );
 			$parent_file = 'themes.php';
 
-			require_once ABSPATH . 'wp-admin/admin-header.php';
+			require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
 			echo '<div class="wrap">';
 			echo '<h1>' . esc_html( $title ) . '</h1>';
@@ -86,7 +86,7 @@ if ( $action ) {
 
 			echo "<iframe src='$url' style='width: 100%; height:100%; min-height:850px;'></iframe>";
 			echo '</div>';
-			require_once ABSPATH . 'wp-admin/admin-footer.php';
+			require_once( ABSPATH . 'wp-admin/admin-footer.php' );
 			exit;
 		case 'delete-selected':
 			if ( ! current_user_can( 'delete_themes' ) ) {
@@ -114,13 +114,13 @@ if ( $action ) {
 				$theme_info[ $theme ] = wp_get_theme( $theme );
 			}
 
-			require ABSPATH . 'wp-admin/update.php';
+			include( ABSPATH . 'wp-admin/update.php' );
 
 			$parent_file = 'themes.php';
 
 			if ( ! isset( $_REQUEST['verify-delete'] ) ) {
 				wp_enqueue_script( 'jquery' );
-				require_once ABSPATH . 'wp-admin/admin-header.php';
+				require_once( ABSPATH . 'wp-admin/admin-header.php' );
 				$themes_to_delete = count( $themes );
 				?>
 			<div class="wrap">
@@ -137,7 +137,7 @@ if ( $action ) {
 					<?php
 					foreach ( $theme_info as $theme ) {
 						echo '<li>' . sprintf(
-							/* translators: 1: Theme name, 2: Theme author. */
+							/* translators: 1: theme name, 2: theme author */
 							_x( '%1$s by %2$s', 'theme' ),
 							'<strong>' . $theme->display( 'Name' ) . '</strong>',
 							'<em>' . $theme->display( 'Author' ) . '</em>'
@@ -146,9 +146,9 @@ if ( $action ) {
 					?>
 					</ul>
 				<?php if ( 1 == $themes_to_delete ) : ?>
-					<p><?php _e( 'Are you sure you want to delete this theme?' ); ?></p>
+					<p><?php _e( 'Are you sure you wish to delete this theme?' ); ?></p>
 				<?php else : ?>
-					<p><?php _e( 'Are you sure you want to delete these themes?' ); ?></p>
+					<p><?php _e( 'Are you sure you wish to delete these themes?' ); ?></p>
 				<?php endif; ?>
 				<form method="post" action="<?php echo esc_url( $_SERVER['REQUEST_URI'] ); ?>" style="display:inline;">
 					<input type="hidden" name="verify-delete" value="1" />
@@ -175,9 +175,9 @@ if ( $action ) {
 				</form>
 			</div>
 				<?php
-				require_once ABSPATH . 'wp-admin/admin-footer.php';
+				require_once( ABSPATH . 'wp-admin/admin-footer.php' );
 				exit;
-			} // End if verify-delete.
+			} // Endif verify-delete
 
 			foreach ( $themes as $theme ) {
 				$delete_result = delete_theme(
@@ -217,7 +217,7 @@ if ( $action ) {
 			check_admin_referer( 'bulk-themes' );
 
 			/** This action is documented in wp-admin/network/site-themes.php */
-			$referer = apply_filters( 'handle_network_bulk_actions-' . get_current_screen()->id, $referer, $action, $themes ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+			$referer = apply_filters( 'handle_network_bulk_actions-' . get_current_screen()->id, $referer, $action, $themes );
 
 			wp_safe_redirect( $referer );
 			exit;
@@ -244,7 +244,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Network_Admin_Themes_Screen">Documentation on Network Themes</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
 );
 
 get_current_screen()->set_screen_reader_content(
@@ -261,7 +261,7 @@ $parent_file = 'themes.php';
 wp_enqueue_script( 'updates' );
 wp_enqueue_script( 'theme-preview' );
 
-require_once ABSPATH . 'wp-admin/admin-header.php';
+require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
 ?>
 
@@ -274,7 +274,7 @@ require_once ABSPATH . 'wp-admin/admin-header.php';
 
 <?php
 if ( isset( $_REQUEST['s'] ) && strlen( $_REQUEST['s'] ) ) {
-	/* translators: %s: Search query. */
+	/* translators: %s: search keywords */
 	printf( '<span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', esc_html( $s ) );
 }
 ?>
@@ -287,7 +287,6 @@ if ( isset( $_GET['enabled'] ) ) {
 	if ( 1 == $enabled ) {
 		$message = __( 'Theme enabled.' );
 	} else {
-		/* translators: %s: Number of themes. */
 		$message = _n( '%s theme enabled.', '%s themes enabled.', $enabled );
 	}
 	echo '<div id="message" class="updated notice is-dismissible"><p>' . sprintf( $message, number_format_i18n( $enabled ) ) . '</p></div>';
@@ -296,7 +295,6 @@ if ( isset( $_GET['enabled'] ) ) {
 	if ( 1 == $disabled ) {
 		$message = __( 'Theme disabled.' );
 	} else {
-		/* translators: %s: Number of themes. */
 		$message = _n( '%s theme disabled.', '%s themes disabled.', $disabled );
 	}
 	echo '<div id="message" class="updated notice is-dismissible"><p>' . sprintf( $message, number_format_i18n( $disabled ) ) . '</p></div>';
@@ -305,7 +303,6 @@ if ( isset( $_GET['enabled'] ) ) {
 	if ( 1 == $deleted ) {
 		$message = __( 'Theme deleted.' );
 	} else {
-		/* translators: %s: Number of themes. */
 		$message = _n( '%s theme deleted.', '%s themes deleted.', $deleted );
 	}
 	echo '<div id="message" class="updated notice is-dismissible"><p>' . sprintf( $message, number_format_i18n( $deleted ) ) . '</p></div>';
@@ -343,4 +340,4 @@ wp_print_request_filesystem_credentials_modal();
 wp_print_admin_notice_templates();
 wp_print_update_row_templates();
 
-require_once ABSPATH . 'wp-admin/admin-footer.php';
+include( ABSPATH . 'wp-admin/admin-footer.php' );

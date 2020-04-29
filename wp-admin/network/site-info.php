@@ -8,7 +8,7 @@
  */
 
 /** Load WordPress Administration Bootstrap */
-require_once __DIR__ . '/admin.php';
+require_once( dirname( __FILE__ ) . '/admin.php' );
 
 if ( ! current_user_can( 'manage_sites' ) ) {
 	wp_die( __( 'Sorry, you are not allowed to edit this site.' ) );
@@ -72,9 +72,8 @@ if ( isset( $_REQUEST['action'] ) && 'update-site' == $_REQUEST['action'] ) {
 
 	$existing_details     = get_site( $id );
 	$blog_data_checkboxes = array( 'public', 'archived', 'spam', 'mature', 'deleted' );
-
 	foreach ( $blog_data_checkboxes as $c ) {
-		if ( ! in_array( (int) $existing_details->$c, array( 0, 1 ), true ) ) {
+		if ( ! in_array( $existing_details->$c, array( 0, 1 ) ) ) {
 			$blog_data[ $c ] = $existing_details->$c;
 		} else {
 			$blog_data[ $c ] = isset( $_POST['blog'][ $c ] ) ? 1 : 0;
@@ -122,13 +121,13 @@ if ( isset( $_GET['update'] ) ) {
 	}
 }
 
-/* translators: %s: Site title. */
+/* translators: %s: site name */
 $title = sprintf( __( 'Edit Site: %s' ), esc_html( $details->blogname ) );
 
 $parent_file  = 'sites.php';
 $submenu_file = 'sites.php';
 
-require_once ABSPATH . 'wp-admin/admin-header.php';
+require( ABSPATH . 'wp-admin/admin-header.php' );
 
 ?>
 
@@ -153,7 +152,7 @@ if ( ! empty( $messages ) ) {
 <form method="post" action="site-info.php?action=update-site">
 	<?php wp_nonce_field( 'edit-site' ); ?>
 	<input type="hidden" name="id" value="<?php echo esc_attr( $id ); ?>" />
-	<table class="form-table" role="presentation">
+	<table class="form-table">
 		<?php
 		// The main site of the network should not be updated on this page.
 		if ( $is_main_site ) :
@@ -167,7 +166,7 @@ if ( ! empty( $messages ) ) {
 		else :
 			?>
 		<tr class="form-field form-required">
-			<th scope="row"><label for="url"><?php _e( 'Site Address (URL)' ); ?></label></th>
+			<th scope="row"><?php _e( 'Site Address (URL)' ); ?></th>
 			<td><input name="blog[url]" type="text" id="url" value="<?php echo $parsed_scheme . '://' . esc_attr( $details->domain ) . esc_attr( $details->path ); ?>" /></td>
 		</tr>
 		<?php endif; ?>
@@ -195,7 +194,7 @@ if ( ! empty( $messages ) ) {
 			<fieldset>
 			<legend class="screen-reader-text"><?php _e( 'Set site attributes' ); ?></legend>
 			<?php foreach ( $attribute_fields as $field_key => $field_label ) : ?>
-				<label><input type="checkbox" name="blog[<?php echo $field_key; ?>]" value="1" <?php checked( (bool) $details->$field_key, true ); ?> <?php disabled( ! in_array( (int) $details->$field_key, array( 0, 1 ), true ) ); ?> />
+				<label><input type="checkbox" name="blog[<?php echo $field_key; ?>]" value="1" <?php checked( (bool) $details->$field_key, true ); ?> <?php disabled( ! in_array( $details->$field_key, array( 0, 1 ) ) ); ?> />
 				<?php echo $field_label; ?></label><br/>
 			<?php endforeach; ?>
 			<fieldset>
@@ -207,4 +206,4 @@ if ( ! empty( $messages ) ) {
 
 </div>
 <?php
-require_once ABSPATH . 'wp-admin/admin-footer.php';
+require( ABSPATH . 'wp-admin/admin-footer.php' );
