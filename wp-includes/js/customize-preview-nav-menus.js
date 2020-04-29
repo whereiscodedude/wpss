@@ -1,10 +1,4 @@
-/**
- * @output wp-includes/js/customize-preview-nav-menus.js
- */
-
 /* global _wpCustomizePreviewNavMenusExports */
-
-/** @namespace wp.customize.navMenusPreview */
 wp.customize.navMenusPreview = wp.customize.MenusCustomizerPreview = ( function( $, _, wp, api ) {
 	'use strict';
 
@@ -78,14 +72,11 @@ wp.customize.navMenusPreview = wp.customize.MenusCustomizerPreview = ( function(
 		/**
 		 * Partial representing an invocation of wp_nav_menu().
 		 *
-		 * @memberOf wp.customize.navMenusPreview
-		 * @alias wp.customize.navMenusPreview.NavMenuInstancePartial
-		 *
 		 * @class
 		 * @augments wp.customize.selectiveRefresh.Partial
 		 * @since 4.5.0
 		 */
-		self.NavMenuInstancePartial = api.selectiveRefresh.Partial.extend(/** @lends wp.customize.navMenusPreview.NavMenuInstancePartial.prototype */{
+		self.NavMenuInstancePartial = api.selectiveRefresh.Partial.extend({
 
 			/**
 			 * Constructor.
@@ -134,7 +125,7 @@ wp.customize.navMenusPreview = wp.customize.MenusCustomizerPreview = ( function(
 			 * @param {wp.customize.Value|string} setting  - Object or ID.
 			 * @param {number|object|false|null}  newValue - New value, or null if the setting was just removed.
 			 * @param {number|object|false|null}  oldValue - Old value, or null if the setting was just added.
-			 * @return {boolean}
+			 * @returns {boolean}
 			 */
 			isRelatedSetting: function( setting, newValue, oldValue ) {
 				var partial = this, navMenuLocationSetting, navMenuId, isNavMenuItemSetting, _newValue, _oldValue, urlParser;
@@ -210,7 +201,7 @@ wp.customize.navMenusPreview = wp.customize.MenusCustomizerPreview = ( function(
 			 *
 			 * @since 4.5.0
 			 *
-			 * @return {Promise}
+			 * @returns {Promise}
 			 */
 			refresh: function() {
 				var partial = this, menuId, deferred = $.Deferred();
