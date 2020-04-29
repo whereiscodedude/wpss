@@ -88,24 +88,13 @@
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(1);
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * @output wp-includes/js/media-audiovideo.js
- */
-
 var media = wp.media,
 	baseSettings = window._wpmejsSettings || {},
 	l10n = window._wpMediaViewsL10n || {};
 
 /**
  *
- * Defines the wp.media.mixin object.
+ * @summary Defines the wp.media.mixin object.
  *
  * @mixin
  *
@@ -115,7 +104,7 @@ wp.media.mixin = {
 	mejsSettings: baseSettings,
 
 	/**
-	 * Pauses and removes all players.
+	 * @summary Pauses and removes all players.
 	 *
 	 * @since 4.2.0
 	 *
@@ -133,7 +122,7 @@ wp.media.mixin = {
 	},
 
 	/**
-	 * Removes the player.
+	 * @summary Removes the player.
 	 *
 	 * Override the MediaElement method for removing a player.
 	 * MediaElement tries to pull the audio/video tag out of
@@ -150,7 +139,7 @@ wp.media.mixin = {
 			return;
 		}
 
-		// Invoke features cleanup.
+		// invoke features cleanup
 		for ( featureIndex in t.options.features ) {
 			feature = t.options.features[featureIndex];
 			if ( t['clean' + feature] ) {
@@ -179,7 +168,7 @@ wp.media.mixin = {
 
 	/**
 	 *
-	 * Removes and resets all players.
+	 * @summary Removes and resets all players.
 	 *
 	 * Allows any class that has set 'player' to a MediaElementPlayer
 	 * instance to remove the player when listening to events.
@@ -200,7 +189,7 @@ wp.media.mixin = {
 };
 
 /**
- * Shortcode modeling for playlists.
+ * @summary Shortcode modeling for playlists.
  *
  * @since 4.2.0
  */
@@ -219,7 +208,7 @@ wp.media.playlist = new wp.media.collection({
 });
 
 /**
- * Shortcode modeling for audio.
+ * @summary Shortcode modeling for audio.
  *
  * `edit()` prepares the shortcode for the media modal.
  * `shortcode()` builds the new shortcode after an update.
@@ -241,12 +230,12 @@ wp.media.audio = {
 	},
 
 	/**
-	 * Instantiates a new media object with the next matching shortcode.
+	 * @summary Instantiates a new media object with the next matching shortcode.
 	 *
 	 * @since 4.2.0
 	 *
 	 * @param {string} data The text to apply the shortcode on.
-	 * @return {wp.media} The media object.
+	 * @returns {wp.media} The media object.
 	 */
 	edit : function( data ) {
 		var frame, shortcode = wp.shortcode.next( 'audio', data ).shortcode;
@@ -261,12 +250,12 @@ wp.media.audio = {
 	},
 
 	/**
-	 * Generates an audio shortcode.
+	 * @summary Generates an audio shortcode.
 	 *
 	 * @since 4.2.0
 	 *
 	 * @param {Array} model Array with attributes for the shortcode.
-	 * @return {wp.shortcode} The audio shortcode object.
+	 * @returns {wp.shortcode} The audio shortcode object.
 	 */
 	shortcode : function( model ) {
 		var content;
@@ -291,7 +280,7 @@ wp.media.audio = {
 };
 
 /**
- * Shortcode modeling for video.
+ * @summary Shortcode modeling for video.
  *
  *  `edit()` prepares the shortcode for the media modal.
  *  `shortcode()` builds the new shortcode after update.
@@ -316,12 +305,12 @@ wp.media.video = {
 	},
 
 	/**
-	 * Instantiates a new media object with the next matching shortcode.
+	 * @summary Instantiates a new media object with the next matching shortcode.
 	 *
 	 * @since 4.2.0
 	 *
 	 * @param {string} data The text to apply the shortcode on.
-	 * @return {wp.media} The media object.
+	 * @returns {wp.media} The media object.
 	 */
 	edit : function( data ) {
 		var frame,
@@ -341,12 +330,12 @@ wp.media.video = {
 	},
 
 	/**
-	 * Generates an video shortcode.
+	 * @summary Generates an video shortcode.
 	 *
 	 * @since 4.2.0
 	 *
 	 * @param {Array} model Array with attributes for the shortcode.
-	 * @return {wp.shortcode} The video shortcode object.
+	 * @returns {wp.shortcode} The video shortcode object.
 	 */
 	shortcode : function( model ) {
 		var content;
@@ -370,19 +359,19 @@ wp.media.video = {
 	}
 };
 
-media.model.PostMedia = __webpack_require__( 2 );
-media.controller.AudioDetails = __webpack_require__( 3 );
-media.controller.VideoDetails = __webpack_require__( 4 );
-media.view.MediaFrame.MediaDetails = __webpack_require__( 5 );
-media.view.MediaFrame.AudioDetails = __webpack_require__( 6 );
-media.view.MediaFrame.VideoDetails = __webpack_require__( 7 );
-media.view.MediaDetails = __webpack_require__( 8 );
-media.view.AudioDetails = __webpack_require__( 9 );
-media.view.VideoDetails = __webpack_require__( 10 );
+media.model.PostMedia = __webpack_require__( 1 );
+media.controller.AudioDetails = __webpack_require__( 2 );
+media.controller.VideoDetails = __webpack_require__( 3 );
+media.view.MediaFrame.MediaDetails = __webpack_require__( 4 );
+media.view.MediaFrame.AudioDetails = __webpack_require__( 5 );
+media.view.MediaFrame.VideoDetails = __webpack_require__( 6 );
+media.view.MediaDetails = __webpack_require__( 7 );
+media.view.AudioDetails = __webpack_require__( 8 );
+media.view.VideoDetails = __webpack_require__( 9 );
 
 
 /***/ }),
-/* 2 */
+/* 1 */
 /***/ (function(module, exports) {
 
 /**
@@ -430,7 +419,7 @@ module.exports = PostMedia;
 
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, exports) {
 
 var State = wp.media.controller.State,
@@ -469,7 +458,7 @@ module.exports = AudioDetails;
 
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports) {
 
 /**
@@ -508,7 +497,7 @@ module.exports = VideoDetails;
 
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports) {
 
 var Select = wp.media.view.MediaFrame.Select,
@@ -644,7 +633,7 @@ module.exports = MediaDetails;
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports) {
 
 var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
@@ -726,7 +715,7 @@ module.exports = AudioDetails;
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports) {
 
 var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
@@ -867,7 +856,7 @@ module.exports = VideoDetails;
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports) {
 
 /* global MediaElementPlayer */
@@ -891,7 +880,7 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 	initialize: function() {
 		_.bindAll(this, 'success');
 		this.players = [];
-		this.listenTo( this.controller.states, 'close', wp.media.mixin.unsetPlayers );
+		this.listenTo( this.controller, 'close', wp.media.mixin.unsetPlayers );
 		this.on( 'ready', this.setPlayer );
 		this.on( 'media:setting:remove', wp.media.mixin.unsetPlayers, this );
 		this.on( 'media:setting:remove', this.render );
@@ -995,13 +984,13 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 	},
 
 	/**
-	 * @return {media.view.MediaDetails} Returns itself to allow chaining.
+	 * @returns {media.view.MediaDetails} Returns itself to allow chaining
 	 */
 	render: function() {
 		AttachmentDisplay.prototype.render.apply( this, arguments );
 
 		setTimeout( _.bind( function() {
-			this.scrollToTop();
+			this.resetFocus();
 		}, this ), 10 );
 
 		this.settings = _.defaults( {
@@ -1011,7 +1000,7 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 		return this.setMedia();
 	},
 
-	scrollToTop: function() {
+	resetFocus: function() {
 		this.$( '.embed-media-settings' ).scrollTop( 0 );
 	}
 },/** @lends wp.media.view.MediaDetails */{
@@ -1020,7 +1009,7 @@ MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.pr
 	 * When multiple players in the DOM contain the same src, things get weird.
 	 *
 	 * @param {HTMLElement} elem
-	 * @return {HTMLElement}
+	 * @returns {HTMLElement}
 	 */
 	prepareSrc : function( elem ) {
 		var i = MediaDetails.instances++;
@@ -1041,7 +1030,7 @@ module.exports = MediaDetails;
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports) {
 
 var MediaDetails = wp.media.view.MediaDetails,
@@ -1085,7 +1074,7 @@ module.exports = AudioDetails;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports) {
 
 var MediaDetails = wp.media.view.MediaDetails,
