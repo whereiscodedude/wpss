@@ -401,7 +401,7 @@ class WP_Filesystem_Base {
 		$attarray = preg_split( '//', $mode );
 
 		for ( $i = 0, $c = count( $attarray ); $i < $c; $i++ ) {
-			$key = array_search( $attarray[ $i ], $legal, true );
+			$key = array_search( $attarray[ $i ], $legal );
 			if ( $key ) {
 				$realmode .= $legal[ $key ];
 			}

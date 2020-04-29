@@ -756,9 +756,9 @@ class WP_User_Query {
 		$meta_query_clauses = $this->meta_query->get_clauses();
 
 		$_orderby = '';
-		if ( in_array( $orderby, array( 'login', 'nicename', 'email', 'url', 'registered' ), true ) ) {
+		if ( in_array( $orderby, array( 'login', 'nicename', 'email', 'url', 'registered' ) ) ) {
 			$_orderby = 'user_' . $orderby;
-		} elseif ( in_array( $orderby, array( 'user_login', 'user_nicename', 'user_email', 'user_url', 'user_registered' ), true ) ) {
+		} elseif ( in_array( $orderby, array( 'user_login', 'user_nicename', 'user_email', 'user_url', 'user_registered' ) ) ) {
 			$_orderby = $orderby;
 		} elseif ( 'name' == $orderby || 'display_name' == $orderby ) {
 			$_orderby = 'display_name';
@@ -828,7 +828,7 @@ class WP_User_Query {
 	 * @return mixed Property.
 	 */
 	public function __get( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return $this->$name;
 		}
 	}
@@ -843,7 +843,7 @@ class WP_User_Query {
 	 * @return mixed Newly-set property.
 	 */
 	public function __set( $name, $value ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return $this->$name = $value;
 		}
 	}
@@ -857,7 +857,7 @@ class WP_User_Query {
 	 * @return bool Whether the property is set.
 	 */
 	public function __isset( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return isset( $this->$name );
 		}
 	}
@@ -870,7 +870,7 @@ class WP_User_Query {
 	 * @param string $name Property to unset.
 	 */
 	public function __unset( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			unset( $this->$name );
 		}
 	}

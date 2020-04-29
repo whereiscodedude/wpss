@@ -551,7 +551,7 @@ class WP_Network_Query {
 		} elseif ( 'domain_length' === $orderby || 'path_length' === $orderby ) {
 			$field  = substr( $orderby, 0, -7 );
 			$parsed = "CHAR_LENGTH($wpdb->site.$field)";
-		} elseif ( in_array( $orderby, $allowed_keys, true ) ) {
+		} elseif ( in_array( $orderby, $allowed_keys ) ) {
 			$parsed = "$wpdb->site.$orderby";
 		}
 

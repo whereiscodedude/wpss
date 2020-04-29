@@ -8,7 +8,7 @@
  */
 
 /**
- * Retrieves category link URL.
+ * Retrieve category link URL.
  *
  * @since 1.0.0
  * @see get_term_link()
@@ -31,7 +31,7 @@ function get_category_link( $category ) {
 }
 
 /**
- * Retrieves category parents with separator.
+ * Retrieve category parents with separator.
  *
  * @since 1.2.0
  * @since 4.8.0 The `$visited` parameter was deprecated and renamed to `$deprecated`.
@@ -61,7 +61,7 @@ function get_category_parents( $id, $link = false, $separator = '/', $nicename =
 }
 
 /**
- * Retrieves post categories.
+ * Retrieve post categories.
  *
  * This tag may be used outside The Loop by passing a post id as the parameter.
  *
@@ -98,7 +98,7 @@ function get_the_category( $id = false ) {
 }
 
 /**
- * Retrieves category name based on category ID.
+ * Retrieve category name based on category ID.
  *
  * @since 0.71
  *
@@ -117,7 +117,7 @@ function get_the_category_by_ID( $cat_ID ) { // phpcs:ignore WordPress.NamingCon
 }
 
 /**
- * Retrieves category list for a post in either HTML list or custom format.
+ * Retrieve category list for a post in either HTML list or custom format.
  *
  * @since 1.5.1
  *
@@ -251,7 +251,7 @@ function in_category( $category, $post = null ) {
 }
 
 /**
- * Displays category list for a post in either HTML list or custom format.
+ * Display category list for a post in either HTML list or custom format.
  *
  * @since 0.71
  *
@@ -265,7 +265,7 @@ function the_category( $separator = '', $parents = '', $post_id = false ) {
 }
 
 /**
- * Retrieves category description.
+ * Retrieve category description.
  *
  * @since 1.0.0
  *
@@ -277,7 +277,7 @@ function category_description( $category = 0 ) {
 }
 
 /**
- * Displays or retrieves the HTML dropdown list of categories.
+ * Display or retrieve the HTML dropdown list of categories.
  *
  * The 'hierarchical' argument, which is disabled by default, will override the
  * depth argument, unless it is true. When the argument is false, it will
@@ -465,7 +465,7 @@ function wp_dropdown_categories( $args = '' ) {
 }
 
 /**
- * Displays or retrieves the HTML list of categories.
+ * Display or retrieve the HTML list of categories.
  *
  * @since 2.1.0
  * @since 4.4.0 Introduced the `hide_title_if_empty` and `separator` arguments.
@@ -590,7 +590,7 @@ function wp_list_categories( $args = '' ) {
 
 			// For taxonomies that belong only to custom post types, point to a valid archive.
 			$taxonomy_object = get_taxonomy( $parsed_args['taxonomy'] );
-			if ( ! in_array( 'post', $taxonomy_object->object_type, true ) && ! in_array( 'page', $taxonomy_object->object_type, true ) ) {
+			if ( ! in_array( 'post', $taxonomy_object->object_type ) && ! in_array( 'page', $taxonomy_object->object_type ) ) {
 				foreach ( $taxonomy_object->object_type as $object_type ) {
 					$_object_type = get_post_type_object( $object_type );
 
@@ -1058,7 +1058,7 @@ function _wp_object_count_sort_cb( $a, $b ) {
 //
 
 /**
- * Retrieves HTML list content for category list.
+ * Retrieve HTML list content for category list.
  *
  * @since 2.1.0
  * @since 5.3.0 Formalized the existing `...$args` parameter by adding it
@@ -1081,7 +1081,7 @@ function walk_category_tree( ...$args ) {
 }
 
 /**
- * Retrieves HTML dropdown (select) content for category list.
+ * Retrieve HTML dropdown (select) content for category list.
  *
  * @since 2.1.0
  * @since 5.3.0 Formalized the existing `...$args` parameter by adding it
@@ -1108,7 +1108,7 @@ function walk_category_dropdown_tree( ...$args ) {
 //
 
 /**
- * Retrieves the link to the tag.
+ * Retrieve the link to the tag.
  *
  * @since 2.3.0
  * @see get_term_link()
@@ -1121,7 +1121,7 @@ function get_tag_link( $tag ) {
 }
 
 /**
- * Retrieves the tags for a post.
+ * Retrieve the tags for a post.
  *
  * @since 2.3.0
  *
@@ -1143,7 +1143,7 @@ function get_the_tags( $id = 0 ) {
 }
 
 /**
- * Retrieves the tags for a post formatted as a string.
+ * Retrieve the tags for a post formatted as a string.
  *
  * @since 2.3.0
  *
@@ -1170,7 +1170,7 @@ function get_the_tag_list( $before = '', $sep = '', $after = '', $id = 0 ) {
 }
 
 /**
- * Retrieves the tags for a post.
+ * Retrieve the tags for a post.
  *
  * @since 2.3.0
  *
@@ -1191,7 +1191,7 @@ function the_tags( $before = null, $sep = ', ', $after = '' ) {
 }
 
 /**
- * Retrieves tag description.
+ * Retrieve tag description.
  *
  * @since 2.8.0
  *
@@ -1203,7 +1203,7 @@ function tag_description( $tag = 0 ) {
 }
 
 /**
- * Retrieves term description.
+ * Retrieve term description.
  *
  * @since 2.8.0
  * @since 4.9.2 The `$taxonomy` parameter was deprecated.
@@ -1224,7 +1224,7 @@ function term_description( $term = 0, $deprecated = null ) {
 }
 
 /**
- * Retrieves the terms of the taxonomy that are attached to the post.
+ * Retrieve the terms of the taxonomy that are attached to the post.
  *
  * @since 2.5.0
  *
@@ -1267,7 +1267,7 @@ function get_the_terms( $post, $taxonomy ) {
 }
 
 /**
- * Retrieves a post's terms as a list with specified format.
+ * Retrieve a post's terms as a list with specified format.
  *
  * @since 2.5.0
  *
@@ -1315,7 +1315,7 @@ function get_the_term_list( $id, $taxonomy, $before = '', $sep = '', $after = ''
 }
 
 /**
- * Retrieves term parents with separator.
+ * Retrieve term parents with separator.
  *
  * @since 4.8.0
  *
@@ -1380,7 +1380,7 @@ function get_term_parents_list( $term_id, $taxonomy, $args = array() ) {
 }
 
 /**
- * Displays the terms in a list.
+ * Display the terms in a list.
  *
  * @since 2.5.0
  *
@@ -1413,7 +1413,7 @@ function the_terms( $id, $taxonomy, $before = '', $sep = ', ', $after = '' ) {
 }
 
 /**
- * Checks if the current post has any of given category.
+ * Check if the current post has any of given category.
  *
  * @since 3.1.0
  *
@@ -1451,7 +1451,7 @@ function has_tag( $tag = '', $post = null ) {
 }
 
 /**
- * Checks if the current post has any of given terms.
+ * Check if the current post has any of given terms.
  *
  * The given terms are checked against the post's terms' term_ids, names and slugs.
  * Terms given as integers will only be checked against the post's terms' term_ids.

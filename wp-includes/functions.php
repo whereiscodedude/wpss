@@ -582,44 +582,18 @@ function get_weekstartend( $mysqlstring, $start_of_week = '' ) {
 }
 
 /**
- * Serialize data, if needed.
- *
- * @since 2.0.5
- *
- * @param string|array|object $data Data that might be serialized.
- * @return mixed A scalar data.
- */
-function maybe_serialize( $data ) {
-	if ( is_array( $data ) || is_object( $data ) ) {
-		return serialize( $data );
-	}
-
-	/*
-	 * Double serialization is required for backward compatibility.
-	 * See https://core.trac.wordpress.org/ticket/12930
-	 * Also the world will end. See WP 3.6.1.
-	 */
-	if ( is_serialized( $data, false ) ) {
-		return serialize( $data );
-	}
-
-	return $data;
-}
-
-/**
- * Unserialize data only if it was serialized.
+ * Unserialize value only if it was serialized.
  *
  * @since 2.0.0
  *
- * @param string $data Data that might be unserialized.
+ * @param string $original Maybe unserialized original, if is needed.
  * @return mixed Unserialized data can be any type.
  */
-function maybe_unserialize( $data ) {
-	if ( is_serialized( $data ) ) { // Don't attempt to unserialize data that wasn't serialized going in.
-		return @unserialize( trim( $data ) );
+function maybe_unserialize( $original ) {
+	if ( is_serialized( $original ) ) { // Don't attempt to unserialize data that wasn't serialized going in.
+		return @unserialize( $original );
 	}
-
-	return $data;
+	return $original;
 }
 
 /**
@@ -719,6 +693,31 @@ function is_serialized_string( $data ) {
 	} else {
 		return true;
 	}
+}
+
+/**
+ * Serialize data, if needed.
+ *
+ * @since 2.0.5
+ *
+ * @param string|array|object $data Data that might be serialized.
+ * @return mixed A scalar data
+ */
+function maybe_serialize( $data ) {
+	if ( is_array( $data ) || is_object( $data ) ) {
+		return serialize( $data );
+	}
+
+	/*
+	 * Double serialization is required for backward compatibility.
+	 * See https://core.trac.wordpress.org/ticket/12930
+	 * Also the world will end. See WP 3.6.1.
+	 */
+	if ( is_serialized( $data, false ) ) {
+		return serialize( $data );
+	}
+
+	return $data;
 }
 
 /**
@@ -866,7 +865,7 @@ function do_enclose( $content = null, $post ) {
 	foreach ( (array) $post_links_temp as $link_test ) {
 		// If we haven't pung it already.
 		if ( ! in_array( $link_test, $pung, true ) ) {
-			$test = parse_url( $link_test );
+			$test = @parse_url( $link_test );
 			if ( false === $test ) {
 				continue;
 			}
@@ -901,7 +900,7 @@ function do_enclose( $content = null, $post ) {
 				$allowed_types = array( 'video', 'audio' );
 
 				// Check to see if we can figure out the mime type from the extension.
-				$url_parts = parse_url( $url );
+				$url_parts = @parse_url( $url );
 				if ( false !== $url_parts ) {
 					$extension = pathinfo( $url_parts['path'], PATHINFO_EXTENSION );
 					if ( ! empty( $extension ) ) {
@@ -1240,7 +1239,7 @@ function add_magic_quotes( $array ) {
  * @return string|false HTTP content. False on failure.
  */
 function wp_remote_fopen( $uri ) {
-	$parsed_url = parse_url( $uri );
+	$parsed_url = @parse_url( $uri );
 
 	if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
 		return false;
@@ -2616,14 +2615,7 @@ function _wp_check_existing_file_names( $filename, $files ) {
  * @param null|string  $deprecated Never used. Set to null.
  * @param string       $bits       File content
  * @param string       $time       Optional. Time formatted in 'yyyy/mm'. Default null.
- * @return array {
- *     Information about the newly-uploaded file.
- *
- *     @type string       $file  Filename of the newly-uploaded file.
- *     @type string       $url   URL of the uploaded file.
- *     @type string       $type  File type.
- *     @type string|false $error Error message, if there has been an error.
- * }
+ * @return array
  */
 function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
 	if ( ! empty( $deprecated ) ) {
@@ -2734,7 +2726,7 @@ function wp_ext2type( $ext ) {
 
 	$ext2type = wp_get_ext_types();
 	foreach ( $ext2type as $type => $exts ) {
-		if ( in_array( $ext, $exts, true ) ) {
+		if ( in_array( $ext, $exts ) ) {
 			return $type;
 		}
 	}
@@ -2881,7 +2873,7 @@ function wp_check_filetype_and_ext( $file, $filename, $mimes = null ) {
 		 */
 		if ( in_array( $real_mime, $nonspecific_types, true ) ) {
 			// File is a non-specific binary type. That's ok if it's a type that generally tends to be binary.
-			if ( ! in_array( substr( $type, 0, strcspn( $type, '/' ) ), array( 'application', 'video', 'audio' ), true ) ) {
+			if ( ! in_array( substr( $type, 0, strcspn( $type, '/' ) ), array( 'application', 'video', 'audio' ) ) ) {
 				$type = false;
 				$ext  = false;
 			}
@@ -2905,8 +2897,7 @@ function wp_check_filetype_and_ext( $file, $filename, $mimes = null ) {
 					'text/richtext',
 					'text/tsv',
 					'text/vtt',
-				),
-				true
+				)
 			)
 			) {
 				$type = false;
@@ -2920,8 +2911,7 @@ function wp_check_filetype_and_ext( $file, $filename, $mimes = null ) {
 					'text/rtf',
 					'text/plain',
 					'application/rtf',
-				),
-				true
+				)
 			)
 			) {
 				$type = false;
@@ -2943,7 +2933,7 @@ function wp_check_filetype_and_ext( $file, $filename, $mimes = null ) {
 	if ( $type ) {
 		$allowed = get_allowed_mime_types();
 
-		if ( ! in_array( $type, $allowed, true ) ) {
+		if ( ! in_array( $type, $allowed ) ) {
 			$type = false;
 			$ext  = false;
 		}
@@ -3909,8 +3899,6 @@ function wp_json_encode( $data, $options = 0, $depth = 512 ) {
  *
  * @see wp_json_encode()
  *
- * @throws Exception If depth limit is reached.
- *
  * @param mixed $data  Variable (usually an array or object) to encode as JSON.
  * @param int   $depth Maximum depth to walk through $data. Must be greater than 0.
  * @return mixed The sanitized data that shall be encoded to JSON.
@@ -4359,11 +4347,10 @@ function smilies_init() {
  * @since 2.3.0 `$args` can now also be an object.
  *
  * @param string|array|object $args     Value to merge with $defaults.
- * @param array               $defaults Optional. Array that serves as the defaults.
- *                                      Default empty array.
+ * @param array               $defaults Optional. Array that serves as the defaults. Default empty.
  * @return array Merged user defined values with defaults.
  */
-function wp_parse_args( $args, $defaults = array() ) {
+function wp_parse_args( $args, $defaults = '' ) {
 	if ( is_object( $args ) ) {
 		$parsed_args = get_object_vars( $args );
 	} elseif ( is_array( $args ) ) {
@@ -4372,7 +4359,7 @@ function wp_parse_args( $args, $defaults = array() ) {
 		wp_parse_str( $args, $parsed_args );
 	}
 
-	if ( is_array( $defaults ) && $defaults ) {
+	if ( is_array( $defaults ) ) {
 		return array_merge( $defaults, $parsed_args );
 	}
 	return $parsed_args;
@@ -5237,7 +5224,7 @@ function apache_mod_loaded( $mod, $default = false ) {
 
 	if ( function_exists( 'apache_get_modules' ) ) {
 		$mods = apache_get_modules();
-		if ( in_array( $mod, $mods, true ) ) {
+		if ( in_array( $mod, $mods ) ) {
 			return true;
 		}
 	} elseif ( function_exists( 'phpinfo' ) && false === strpos( ini_get( 'disable_functions' ), 'phpinfo' ) ) {
@@ -5319,7 +5306,7 @@ function validate_file( $file, $allowed_files = array() ) {
 	}
 
 	// Files not in the allowed file list are not allowed:
-	if ( ! empty( $allowed_files ) && ! in_array( $file, $allowed_files, true ) ) {
+	if ( ! empty( $allowed_files ) && ! in_array( $file, $allowed_files ) ) {
 		return 3;
 	}
 
@@ -5730,7 +5717,7 @@ function wp_timezone_choice( $selected_zone, $locale = null ) {
 	$zonen = array();
 	foreach ( timezone_identifiers_list() as $zone ) {
 		$zone = explode( '/', $zone );
-		if ( ! in_array( $zone[0], $continents, true ) ) {
+		if ( ! in_array( $zone[0], $continents ) ) {
 			continue;
 		}
 
@@ -6318,9 +6305,9 @@ function wp_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
 
 			$caller[] = "{$call['class']}{$call['type']}{$call['function']}";
 		} else {
-			if ( in_array( $call['function'], array( 'do_action', 'apply_filters', 'do_action_ref_array', 'apply_filters_ref_array' ), true ) ) {
+			if ( in_array( $call['function'], array( 'do_action', 'apply_filters', 'do_action_ref_array', 'apply_filters_ref_array' ) ) ) {
 				$caller[] = "{$call['function']}('{$call['args'][0]}')";
-			} elseif ( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ), true ) ) {
+			} elseif ( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ) ) ) {
 				$filename = isset( $call['args'][0] ) ? $call['args'][0] : '';
 				$caller[] = $call['function'] . "('" . str_replace( $truncate_paths, '', wp_normalize_path( $filename ) ) . "')";
 			} else {
@@ -6449,7 +6436,7 @@ function wp_auth_check_load() {
 
 	$screen = get_current_screen();
 	$hidden = array( 'update', 'update-network', 'update-core', 'update-core-network', 'upgrade', 'upgrade-network', 'network' );
-	$show   = ! in_array( $screen->id, $hidden, true );
+	$show   = ! in_array( $screen->id, $hidden );
 
 	/**
 	 * Filters whether to load the authentication check.
@@ -6558,7 +6545,7 @@ function wp_auth_check( $response ) {
  */
 function get_tag_regex( $tag ) {
 	if ( empty( $tag ) ) {
-		return '';
+		return;
 	}
 	return sprintf( '<%1$s[^<]*(?:>[\s\S]*<\/%1$s>|\s*\/>)', tag_escape( $tag ) );
 }

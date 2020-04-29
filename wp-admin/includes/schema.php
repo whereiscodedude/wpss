@@ -111,7 +111,7 @@ CREATE TABLE $wpdb->comments (
 	comment_karma int(11) NOT NULL default '0',
 	comment_approved varchar(20) NOT NULL default '1',
 	comment_agent varchar(255) NOT NULL default '',
-	comment_type varchar(20) NOT NULL default 'comment',
+	comment_type varchar(20) NOT NULL default '',
 	comment_parent bigint(20) unsigned NOT NULL default '0',
 	user_id bigint(20) unsigned NOT NULL default '0',
 	PRIMARY KEY  (comment_ID),
@@ -400,7 +400,7 @@ function populate_options( array $options = array() ) {
 	$offset_or_tz = _x( '0', 'default GMT offset or timezone string' ); // phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
 	if ( is_numeric( $offset_or_tz ) ) {
 		$gmt_offset = $offset_or_tz;
-	} elseif ( $offset_or_tz && in_array( $offset_or_tz, timezone_identifiers_list(), true ) ) {
+	} elseif ( $offset_or_tz && in_array( $offset_or_tz, timezone_identifiers_list() ) ) {
 			$timezone_string = $offset_or_tz;
 	}
 
@@ -563,13 +563,11 @@ function populate_options( array $options = array() ) {
 	$existing_options = $wpdb->get_col( "SELECT option_name FROM $wpdb->options WHERE option_name in ( $keys )" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 	$insert = '';
-
 	foreach ( $options as $option => $value ) {
-		if ( in_array( $option, $existing_options, true ) ) {
+		if ( in_array( $option, $existing_options ) ) {
 			continue;
 		}
-
-		if ( in_array( $option, $fat_options, true ) ) {
+		if ( in_array( $option, $fat_options ) ) {
 			$autoload = 'no';
 		} else {
 			$autoload = 'yes';
@@ -578,11 +576,9 @@ function populate_options( array $options = array() ) {
 		if ( is_array( $value ) ) {
 			$value = serialize( $value );
 		}
-
 		if ( ! empty( $insert ) ) {
 			$insert .= ', ';
 		}
-
 		$insert .= $wpdb->prepare( '(%s, %s, %s)', $option, $value, $autoload );
 	}
 

@@ -559,7 +559,7 @@ class WP_User {
 	 * @param string $role Role name.
 	 */
 	public function remove_role( $role ) {
-		if ( ! in_array( $role, $this->roles, true ) ) {
+		if ( ! in_array( $role, $this->roles ) ) {
 			return;
 		}
 		unset( $this->caps[ $role ] );
@@ -750,7 +750,7 @@ class WP_User {
 
 		// Multisite super admin has all caps by definition, Unless specifically denied.
 		if ( is_multisite() && is_super_admin( $this->ID ) ) {
-			if ( in_array( 'do_not_allow', $caps, true ) ) {
+			if ( in_array( 'do_not_allow', $caps ) ) {
 				return false;
 			}
 			return true;

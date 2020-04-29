@@ -620,7 +620,7 @@ function register_taxonomy_for_object_type( $taxonomy, $object_type ) {
 		return false;
 	}
 
-	if ( ! in_array( $object_type, $wp_taxonomies[ $taxonomy ]->object_type, true ) ) {
+	if ( ! in_array( $object_type, $wp_taxonomies[ $taxonomy ]->object_type ) ) {
 		$wp_taxonomies[ $taxonomy ]->object_type[] = $object_type;
 	}
 
@@ -1211,11 +1211,11 @@ function get_terms( $args = array(), $deprecated = '' ) {
  *
  * @param int    $term_id    Term ID.
  * @param string $meta_key   Metadata name.
- * @param mixed  $meta_value Metadata value. Must be serializable if non-scalar.
- * @param bool   $unique     Optional. Whether the same key should not be added.
+ * @param mixed  $meta_value Metadata value.
+ * @param bool   $unique     Optional. Whether to bail if an entry with the same key is found for the term.
  *                           Default false.
- * @return int|false|WP_Error Meta ID on success, false on failure.
- *                            WP_Error when term_id is ambiguous between taxonomies.
+ * @return int|WP_Error|bool Meta ID on success. WP_Error when term_id is ambiguous between taxonomies.
+ *                           False on failure.
  */
 function add_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
 	if ( wp_term_is_shared( $term_id ) ) {
@@ -1232,9 +1232,7 @@ function add_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
  *
  * @param int    $term_id    Term ID.
  * @param string $meta_key   Metadata name.
- * @param mixed  $meta_value Optional. Metadata value. If provided,
- *                           rows will only be removed that match the value.
- *                           Must be serializable if non-scalar. Default empty.
+ * @param mixed  $meta_value Optional. Metadata value. If provided, rows will only be removed that match the value.
  * @return bool True on success, false on failure.
  */
 function delete_term_meta( $term_id, $meta_key, $meta_value = '' ) {
@@ -1247,13 +1245,10 @@ function delete_term_meta( $term_id, $meta_key, $meta_value = '' ) {
  * @since 4.4.0
  *
  * @param int    $term_id Term ID.
- * @param string $key     Optional. The meta key to retrieve. By default,
- *                        returns data for all keys. Default empty.
- * @param bool   $single  Optional. Whether to return a single value.
- *                        This parameter has no effect if $key is not specified.
- *                        Default false.
- * @return mixed An array if $single is false. The value of the meta field
- *               if $single is true.
+ * @param string $key     Optional. The meta key to retrieve. If no key is provided, fetches all metadata for the term.
+ * @param bool   $single  Whether to return a single value. If false, an array of all values matching the
+ *                        `$term_id`/`$key` pair will be returned. Default: false.
+ * @return mixed If `$single` is false, an array of metadata values. If `$single` is true, a single metadata value.
  */
 function get_term_meta( $term_id, $key = '', $single = false ) {
 	return get_metadata( 'term', $term_id, $key, $single );
@@ -1270,12 +1265,10 @@ function get_term_meta( $term_id, $key = '', $single = false ) {
  *
  * @param int    $term_id    Term ID.
  * @param string $meta_key   Metadata key.
- * @param mixed  $meta_value Metadata value. Must be serializable if non-scalar.
- * @param mixed  $prev_value Optional. Previous value to check before updating.
- *                           Default empty.
- * @return int|bool|WP_Error Meta ID if the key didn't exist. true on successful update,
- *                           false on failure. WP_Error when term_id is ambiguous
- *                           between taxonomies.
+ * @param mixed  $meta_value Metadata value.
+ * @param mixed  $prev_value Optional. Previous value to check before removing.
+ * @return int|WP_Error|bool Meta ID if the key didn't previously exist. True on successful update.
+ *                           WP_Error when term_id is ambiguous between taxonomies. False on failure.
  */
 function update_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
 	if ( wp_term_is_shared( $term_id ) ) {
@@ -1294,7 +1287,7 @@ function update_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) 
  * @since 4.4.0
  *
  * @param array $term_ids List of term IDs.
- * @return array|false An array of metadata on success, false if there is nothing to update.
+ * @return array|false Returns false if there is nothing to update. Returns an array of metadata on success.
  */
 function update_termmeta_cache( $term_ids ) {
 	return update_meta_cache( 'term', $term_ids );
@@ -1533,7 +1526,7 @@ function sanitize_term( $term, $taxonomy, $context = 'display' ) {
  */
 function sanitize_term_field( $field, $value, $term_id, $taxonomy, $context ) {
 	$int_fields = array( 'parent', 'term_id', 'count', 'term_group', 'term_taxonomy_id', 'object_id' );
-	if ( in_array( $field, $int_fields, true ) ) {
+	if ( in_array( $field, $int_fields ) ) {
 		$value = (int) $value;
 		if ( $value < 0 ) {
 			$value = 0;
@@ -2243,12 +2236,9 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 				);
 
 				$existing_term = null;
-				$sibling_names = wp_list_pluck( $siblings, 'name' );
-				$sibling_slugs = wp_list_pluck( $siblings, 'slug' );
-
-				if ( ( ! $slug_provided || $name_match->slug === $slug ) && in_array( $name, $sibling_names, true ) ) {
+				if ( ( ! $slug_provided || $name_match->slug === $slug ) && in_array( $name, wp_list_pluck( $siblings, 'name' ) ) ) {
 					$existing_term = $name_match;
-				} elseif ( $slug_match && in_array( $slug, $sibling_slugs, true ) ) {
+				} elseif ( $slug_match && in_array( $slug, wp_list_pluck( $siblings, 'slug' ) ) ) {
 					$existing_term = $slug_match;
 				}
 
@@ -2475,20 +2465,16 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
 		}
 
 		$term_info = term_exists( $term, $taxonomy );
-
 		if ( ! $term_info ) {
 			// Skip if a non-existent term ID is passed.
 			if ( is_int( $term ) ) {
 				continue;
 			}
-
 			$term_info = wp_insert_term( $term, $taxonomy );
 		}
-
 		if ( is_wp_error( $term_info ) ) {
 			return $term_info;
 		}
-
 		$term_ids[] = $term_info['term_id'];
 		$tt_id      = $term_info['term_taxonomy_id'];
 		$tt_ids[]   = $tt_id;
@@ -2508,7 +2494,6 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
 		 * @param string $taxonomy  Taxonomy slug.
 		 */
 		do_action( 'add_term_relationship', $object_id, $tt_id, $taxonomy );
-
 		$wpdb->insert(
 			$wpdb->term_relationships,
 			array(
@@ -2528,7 +2513,6 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
 		 * @param string $taxonomy  Taxonomy slug.
 		 */
 		do_action( 'added_term_relationship', $object_id, $tt_id, $taxonomy );
-
 		$new_tt_ids[] = $tt_id;
 	}
 
@@ -2552,11 +2536,9 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
 	}
 
 	$t = get_taxonomy( $taxonomy );
-
 	if ( ! $append && isset( $t->sort ) && $t->sort ) {
-		$values     = array();
-		$term_order = 0;
-
+		$values       = array();
+		$term_order   = 0;
 		$final_tt_ids = wp_get_object_terms(
 			$object_id,
 			$taxonomy,
@@ -2565,13 +2547,11 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
 				'update_term_meta_cache' => false,
 			)
 		);
-
 		foreach ( $tt_ids as $tt_id ) {
-			if ( in_array( (int) $tt_id, $final_tt_ids, true ) ) {
+			if ( in_array( $tt_id, $final_tt_ids ) ) {
 				$values[] = $wpdb->prepare( '(%d, %d, %d)', $object_id, $tt_id, ++$term_order );
 			}
 		}
-
 		if ( $values ) {
 			if ( false === $wpdb->query( "INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES " . join( ',', $values ) . ' ON DUPLICATE KEY UPDATE term_order = VALUES(term_order)' ) ) {
 				return new WP_Error( 'db_insert_error', __( 'Could not insert term relationship into the database.' ), $wpdb->last_error );
@@ -2595,7 +2575,6 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
 	 * @param array  $old_tt_ids Old array of term taxonomy IDs.
 	 */
 	do_action( 'set_object_terms', $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids );
-
 	return $tt_ids;
 }
 
@@ -3634,10 +3613,8 @@ function _pad_term_counts( &$terms, $taxonomy ) {
 	$tax_obj      = get_taxonomy( $taxonomy );
 	$object_types = esc_sql( $tax_obj->object_type );
 	$results      = $wpdb->get_results( "SELECT object_id, term_taxonomy_id FROM $wpdb->term_relationships INNER JOIN $wpdb->posts ON object_id = ID WHERE term_taxonomy_id IN (" . implode( ',', array_keys( $term_ids ) ) . ") AND post_type IN ('" . implode( "', '", $object_types ) . "') AND post_status = 'publish'" );
-
 	foreach ( $results as $row ) {
-		$id = $term_ids[ $row->term_taxonomy_id ];
-
+		$id                                   = $term_ids[ $row->term_taxonomy_id ];
 		$term_items[ $id ][ $row->object_id ] = isset( $term_items[ $id ][ $row->object_id ] ) ? ++$term_items[ $id ][ $row->object_id ] : 1;
 	}
 
@@ -3647,16 +3624,14 @@ function _pad_term_counts( &$terms, $taxonomy ) {
 		$ancestors = array();
 		while ( ! empty( $terms_by_id[ $child ] ) && $parent = $terms_by_id[ $child ]->parent ) {
 			$ancestors[] = $child;
-
 			if ( ! empty( $term_items[ $term_id ] ) ) {
 				foreach ( $term_items[ $term_id ] as $item_id => $touches ) {
 					$term_items[ $parent ][ $item_id ] = isset( $term_items[ $parent ][ $item_id ] ) ? ++$term_items[ $parent ][ $item_id ] : 1;
 				}
 			}
-
 			$child = $parent;
 
-			if ( in_array( $parent, $ancestors, true ) ) {
+			if ( in_array( $parent, $ancestors ) ) {
 				break;
 			}
 		}
@@ -3725,7 +3700,7 @@ function _update_post_term_count( $terms, $taxonomy ) {
 
 	$object_types = array_unique( $object_types );
 
-	$check_attachments = array_search( 'attachment', $object_types, true );
+	$check_attachments = array_search( 'attachment', $object_types );
 	if ( false !== $check_attachments ) {
 		unset( $object_types[ $check_attachments ] );
 		$check_attachments = true;
@@ -4472,7 +4447,7 @@ function is_object_in_term( $object_id, $taxonomy, $terms = null ) {
 
 	foreach ( $object_terms as $object_term ) {
 		// If term is an int, check against term_ids only.
-		if ( $ints && in_array( $object_term->term_id, $ints, true ) ) {
+		if ( $ints && in_array( $object_term->term_id, $ints ) ) {
 			return true;
 		}
 
@@ -4483,10 +4458,10 @@ function is_object_in_term( $object_id, $taxonomy, $terms = null ) {
 				return true;
 			}
 
-			if ( in_array( $object_term->name, $strs, true ) ) {
+			if ( in_array( $object_term->name, $strs ) ) {
 				return true;
 			}
-			if ( in_array( $object_term->slug, $strs, true ) ) {
+			if ( in_array( $object_term->slug, $strs ) ) {
 				return true;
 			}
 		}
@@ -4509,7 +4484,7 @@ function is_object_in_taxonomy( $object_type, $taxonomy ) {
 	if ( empty( $taxonomies ) ) {
 		return false;
 	}
-	return in_array( $taxonomy, $taxonomies, true );
+	return in_array( $taxonomy, $taxonomies );
 }
 
 /**
@@ -4546,7 +4521,7 @@ function get_ancestors( $object_id = 0, $object_type = '', $resource_type = '' )
 
 	if ( 'taxonomy' === $resource_type ) {
 		$term = get_term( $object_id, $object_type );
-		while ( ! is_wp_error( $term ) && ! empty( $term->parent ) && ! in_array( $term->parent, $ancestors, true ) ) {
+		while ( ! is_wp_error( $term ) && ! empty( $term->parent ) && ! in_array( $term->parent, $ancestors ) ) {
 			$ancestors[] = (int) $term->parent;
 			$term        = get_term( $term->parent, $object_type );
 		}

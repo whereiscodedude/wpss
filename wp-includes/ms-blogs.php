@@ -703,9 +703,7 @@ function update_blog_status( $blog_id, $pref, $value, $deprecated = null ) {
 		_deprecated_argument( __FUNCTION__, '3.1.0' );
 	}
 
-	$pref_whitelist = array( 'site_id', 'domain', 'path', 'registered', 'last_updated', 'public', 'archived', 'mature', 'spam', 'deleted', 'lang_id' );
-
-	if ( ! in_array( $pref, $pref_whitelist, true ) ) {
+	if ( ! in_array( $pref, array( 'site_id', 'domain', 'path', 'registered', 'last_updated', 'public', 'archived', 'mature', 'spam', 'deleted', 'lang_id' ) ) ) {
 		return $value;
 	}
 

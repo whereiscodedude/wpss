@@ -515,8 +515,8 @@ function get_attached_file( $attachment_id, $unfiltered = false ) {
 	 *
 	 * @since 2.1.0
 	 *
-	 * @param string|false $file          The file path to where the attached file should be, false otherwise.
-	 * @param int          $attachment_id Attachment ID.
+	 * @param string $file          Path to attached file.
+	 * @param int    $attachment_id Attachment ID.
 	 */
 	return apply_filters( 'get_attached_file', $file, $attachment_id );
 }
@@ -815,7 +815,7 @@ function get_post_ancestors( $post ) {
 
 	while ( $ancestor = get_post( $id ) ) {
 		// Loop detection: If the ancestor has been seen before, break.
-		if ( empty( $ancestor->post_parent ) || ( $ancestor->post_parent == $post->ID ) || in_array( $ancestor->post_parent, $ancestors, true ) ) {
+		if ( empty( $ancestor->post_parent ) || ( $ancestor->post_parent == $post->ID ) || in_array( $ancestor->post_parent, $ancestors ) ) {
 			break;
 		}
 
@@ -1616,7 +1616,7 @@ function _post_type_meta_capabilities( $capabilities = null ) {
 	global $post_type_meta_caps;
 
 	foreach ( $capabilities as $core => $custom ) {
-		if ( in_array( $core, array( 'read_post', 'delete_post', 'edit_post' ), true ) ) {
+		if ( in_array( $core, array( 'read_post', 'delete_post', 'edit_post' ) ) ) {
 			$post_type_meta_caps[ $custom ] = $core;
 		}
 	}
@@ -2090,9 +2090,8 @@ function add_post_meta( $post_id, $meta_key, $meta_value, $unique = false ) {
  *
  * @param int    $post_id    Post ID.
  * @param string $meta_key   Metadata name.
- * @param mixed  $meta_value Optional. Metadata value. If provided,
- *                           rows will only be removed that match the value.
- *                           Must be serializable if non-scalar. Default empty.
+ * @param mixed  $meta_value Optional. Metadata value. Must be serializable if
+ *                           non-scalar. Default empty.
  * @return bool True on success, false on failure.
  */
 function delete_post_meta( $post_id, $meta_key, $meta_value = '' ) {
@@ -2111,13 +2110,12 @@ function delete_post_meta( $post_id, $meta_key, $meta_value = '' ) {
  * @since 1.5.0
  *
  * @param int    $post_id Post ID.
- * @param string $key     Optional. The meta key to retrieve. By default,
- *                        returns data for all keys. Default empty.
- * @param bool   $single  Optional. Whether to return a single value.
- *                        This parameter has no effect if $key is not specified.
- *                        Default false.
- * @return mixed An array if $single is false. The value of the meta field
- *               if $single is true.
+ * @param string $key     Optional. The meta key to retrieve. By default, returns
+ *                        data for all keys. Default empty.
+ * @param bool   $single  Optional. If true, returns only the first value for the specified meta key.
+ *                        This parameter has no effect if $key is not specified. Default false.
+ * @return mixed Will be an array if $single is false. Will be value of the meta
+ *               field if $single is true.
  */
 function get_post_meta( $post_id, $key = '', $single = false ) {
 	return get_metadata( 'post', $post_id, $key, $single );
@@ -2139,9 +2137,8 @@ function get_post_meta( $post_id, $key = '', $single = false ) {
  * @param string $meta_key   Metadata key.
  * @param mixed  $meta_value Metadata value. Must be serializable if non-scalar.
  * @param mixed  $prev_value Optional. Previous value to check before updating.
- *                           Default empty.
- * @return int|bool Meta ID if the key didn't exist, true on successful update,
- *                  false on failure.
+ * @return int|bool The new meta field ID if a field with the given key didn't exist and was
+ *                  therefore added, true on successful update, false on failure.
  */
 function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) {
 	// Make sure meta is added to the post, not a revision.
@@ -2287,12 +2284,7 @@ function is_sticky( $post_id = 0 ) {
 
 	$stickies = get_option( 'sticky_posts' );
 
-	if ( is_array( $stickies ) ) {
-		$stickies  = array_map( 'intval', $stickies );
-		$is_sticky = in_array( $post_id, $stickies, true );
-	} else {
-		$is_sticky = false;
-	}
+	$is_sticky = is_array( $stickies ) && in_array( $post_id, $stickies );
 
 	/**
 	 * Filters whether a post is sticky.
@@ -2370,13 +2362,13 @@ function sanitize_post( $post, $context = 'display' ) {
  */
 function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
 	$int_fields = array( 'ID', 'post_parent', 'menu_order' );
-	if ( in_array( $field, $int_fields, true ) ) {
+	if ( in_array( $field, $int_fields ) ) {
 		$value = (int) $value;
 	}
 
 	// Fields which contain arrays of integers.
 	$array_int_fields = array( 'ancestors' );
-	if ( in_array( $field, $array_int_fields, true ) ) {
+	if ( in_array( $field, $array_int_fields ) ) {
 		$value = array_map( 'absint', $value );
 		return $value;
 	}
@@ -2425,7 +2417,7 @@ function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
 			$value = apply_filters( "edit_post_{$field}", $value, $post_id );
 		}
 
-		if ( in_array( $field, $format_to_edit, true ) ) {
+		if ( in_array( $field, $format_to_edit ) ) {
 			if ( 'post_content' == $field ) {
 				$value = format_to_edit( $value, user_can_richedit() );
 			} else {
@@ -2519,16 +2511,13 @@ function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
  * @param int $post_id Post ID.
  */
 function stick_post( $post_id ) {
-	$post_id  = (int) $post_id;
 	$stickies = get_option( 'sticky_posts' );
 
 	if ( ! is_array( $stickies ) ) {
-		$stickies = array();
+		$stickies = array( $post_id );
 	}
 
-	$stickies = array_map( 'intval', $stickies );
-
-	if ( ! in_array( $post_id, $stickies, true ) ) {
+	if ( ! in_array( $post_id, $stickies ) ) {
 		$stickies[] = $post_id;
 	}
 
@@ -2556,20 +2545,17 @@ function stick_post( $post_id ) {
  * @param int $post_id Post ID.
  */
 function unstick_post( $post_id ) {
-	$post_id  = (int) $post_id;
 	$stickies = get_option( 'sticky_posts' );
 
 	if ( ! is_array( $stickies ) ) {
 		return;
 	}
 
-	$stickies = array_map( 'intval', $stickies );
-
-	if ( ! in_array( $post_id, $stickies, true ) ) {
+	if ( ! in_array( $post_id, $stickies ) ) {
 		return;
 	}
 
-	$offset = array_search( $post_id, $stickies, true );
+	$offset = array_search( $post_id, $stickies );
 	if ( false === $offset ) {
 		return;
 	}
@@ -2792,7 +2778,7 @@ function get_post_mime_types() {
 	$mime_types = wp_get_mime_types();
 
 	foreach ( $post_mime_types as $group => $labels ) {
-		if ( in_array( $group, array( 'image', 'audio', 'video' ), true ) ) {
+		if ( in_array( $group, array( 'image', 'audio', 'video' ) ) ) {
 			continue;
 		}
 
@@ -2855,10 +2841,8 @@ function wp_match_mime_types( $wildcard_mime_types, $real_mime_types ) {
 	foreach ( (array) $wildcard_mime_types as $type ) {
 		$mimes = array_map( 'trim', explode( ',', $type ) );
 		foreach ( $mimes as $mime ) {
-			$regex = str_replace( '__wildcard__', $wild, preg_quote( str_replace( '*', '__wildcard__', $mime ) ) );
-
+			$regex                 = str_replace( '__wildcard__', $wild, preg_quote( str_replace( '*', '__wildcard__', $mime ) ) );
 			$patternses[][ $type ] = "^$regex$";
-
 			if ( false === strpos( $mime, '/' ) ) {
 				$patternses[][ $type ] = "^$regex/";
 				$patternses[][ $type ] = $regex;
@@ -2870,15 +2854,12 @@ function wp_match_mime_types( $wildcard_mime_types, $real_mime_types ) {
 	foreach ( $patternses as $patterns ) {
 		foreach ( $patterns as $type => $pattern ) {
 			foreach ( (array) $real_mime_types as $real ) {
-				if ( preg_match( "#$pattern#", $real )
-					&& ( empty( $matches[ $type ] ) || false === array_search( $real, $matches[ $type ], true ) )
-				) {
+				if ( preg_match( "#$pattern#", $real ) && ( empty( $matches[ $type ] ) || false === array_search( $real, $matches[ $type ] ) ) ) {
 					$matches[ $type ][] = $real;
 				}
 			}
 		}
 	}
-
 	return $matches;
 }
 
@@ -2923,7 +2904,7 @@ function wp_post_mime_type_where( $post_mime_types, $table_alias = '' ) {
 
 		$mime_pattern = preg_replace( '/\*+/', '%', $mime_pattern );
 
-		if ( in_array( $mime_type, $wildcards, true ) ) {
+		if ( in_array( $mime_type, $wildcards ) ) {
 			return '';
 		}
 
@@ -2933,11 +2914,9 @@ function wp_post_mime_type_where( $post_mime_types, $table_alias = '' ) {
 			$wheres[] = empty( $table_alias ) ? "post_mime_type = '$mime_pattern'" : "$table_alias.post_mime_type = '$mime_pattern'";
 		}
 	}
-
 	if ( ! empty( $wheres ) ) {
 		$where = ' AND (' . join( ' OR ', $wheres ) . ') ';
 	}
-
 	return $where;
 }
 
@@ -2999,14 +2978,12 @@ function wp_delete_post( $postid = 0, $force_delete = false ) {
 	 * Fires before a post is deleted, at the start of wp_delete_post().
 	 *
 	 * @since 3.2.0
-	 * @since 5.5.0 Added the `$post` parameter.
 	 *
 	 * @see wp_delete_post()
 	 *
-	 * @param int     $postid Post ID.
-	 * @param WP_Post $post   Post object.
+	 * @param int $postid Post ID.
 	 */
-	do_action( 'before_delete_post', $postid, $post );
+	do_action( 'before_delete_post', $postid );
 
 	delete_post_meta( $postid, '_wp_trash_meta_status' );
 	delete_post_meta( $postid, '_wp_trash_meta_time' );
@@ -3053,12 +3030,10 @@ function wp_delete_post( $postid = 0, $force_delete = false ) {
 	 * Fires immediately before a post is deleted from the database.
 	 *
 	 * @since 1.2.0
-	 * @since 5.5.0 Added the `$post` parameter.
 	 *
-	 * @param int     $postid Post ID.
-	 * @param WP_Post $post   Post object.
+	 * @param int $postid Post ID.
 	 */
-	do_action( 'delete_post', $postid, $post );
+	do_action( 'delete_post', $postid );
 	$result = $wpdb->delete( $wpdb->posts, array( 'ID' => $postid ) );
 	if ( ! $result ) {
 		return false;
@@ -3068,12 +3043,10 @@ function wp_delete_post( $postid = 0, $force_delete = false ) {
 	 * Fires immediately after a post is deleted from the database.
 	 *
 	 * @since 2.2.0
-	 * @since 5.5.0 Added the `$post` parameter.
 	 *
-	 * @param int     $postid Post ID.
-	 * @param WP_Post $post   Post object.
+	 * @param int $postid Post ID.
 	 */
-	do_action( 'deleted_post', $postid, $post );
+	do_action( 'deleted_post', $postid );
 
 	clean_post_cache( $post );
 
@@ -3089,14 +3062,12 @@ function wp_delete_post( $postid = 0, $force_delete = false ) {
 	 * Fires after a post is deleted, at the conclusion of wp_delete_post().
 	 *
 	 * @since 3.2.0
-	 * @since 5.5.0 Added the `$post` parameter.
 	 *
 	 * @see wp_delete_post()
 	 *
-	 * @param int     $postid Post ID.
-	 * @param WP_Post $post   Post object.
+	 * @param int $postid Post ID.
 	 */
-	do_action( 'after_delete_post', $postid, $post );
+	do_action( 'after_delete_post', $postid );
 
 	return $post;
 }
@@ -3729,7 +3700,7 @@ function wp_insert_post( $postarr, $wp_error = false ) {
 	 * an empty post name.
 	 */
 	if ( empty( $post_name ) ) {
-		if ( ! in_array( $post_status, array( 'draft', 'pending', 'auto-draft' ), true ) ) {
+		if ( ! in_array( $post_status, array( 'draft', 'pending', 'auto-draft' ) ) ) {
 			$post_name = sanitize_title( $post_title );
 		} else {
 			$post_name = '';
@@ -3984,7 +3955,7 @@ function wp_insert_post( $postarr, $wp_error = false ) {
 		$where = array( 'ID' => $post_ID );
 	}
 
-	if ( empty( $data['post_name'] ) && ! in_array( $data['post_status'], array( 'draft', 'pending', 'auto-draft' ), true ) ) {
+	if ( empty( $data['post_name'] ) && ! in_array( $data['post_status'], array( 'draft', 'pending', 'auto-draft' ) ) ) {
 		$data['post_name'] = wp_unique_post_slug( sanitize_title( $data['post_title'], $post_ID ), $post_ID, $data['post_status'], $post_type, $post_parent );
 		$wpdb->update( $wpdb->posts, array( 'post_name' => $data['post_name'] ), $where );
 		clean_post_cache( $post_ID );
@@ -4237,10 +4208,8 @@ function wp_update_post( $postarr = array(), $wp_error = false ) {
 	}
 
 	// Drafts shouldn't be assigned a date unless explicitly done so by the user.
-	if ( isset( $post['post_status'] )
-		&& in_array( $post['post_status'], array( 'draft', 'pending', 'auto-draft' ), true )
-		&& empty( $postarr['edit_date'] ) && ( '0000-00-00 00:00:00' == $post['post_date_gmt'] )
-	) {
+	if ( isset( $post['post_status'] ) && in_array( $post['post_status'], array( 'draft', 'pending', 'auto-draft' ) ) && empty( $postarr['edit_date'] ) &&
+			( '0000-00-00 00:00:00' == $post['post_date_gmt'] ) ) {
 		$clear_date = true;
 	} else {
 		$clear_date = false;
@@ -4370,9 +4339,7 @@ function check_and_publish_future_post( $post_id ) {
  * @return string Unique slug for the post, based on $post_name (with a -1, -2, etc. suffix)
  */
 function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_parent ) {
-	if ( in_array( $post_status, array( 'draft', 'pending', 'auto-draft' ), true )
-		|| ( 'inherit' == $post_status && 'revision' == $post_type ) || 'user_request' === $post_type
-	) {
+	if ( in_array( $post_status, array( 'draft', 'pending', 'auto-draft' ) ) || ( 'inherit' == $post_status && 'revision' == $post_type ) || 'user_request' === $post_type ) {
 		return $slug;
 	}
 
@@ -4418,12 +4385,7 @@ function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_p
 		 * @param bool   $bad_slug Whether the slug would be bad as an attachment slug.
 		 * @param string $slug     The post slug.
 		 */
-		$is_bad_attachment_slug = apply_filters( 'wp_unique_post_slug_is_bad_attachment_slug', false, $slug );
-
-		if ( $post_name_check
-			|| in_array( $slug, $feeds, true ) || 'embed' === $slug
-			|| $is_bad_attachment_slug
-		) {
+		if ( $post_name_check || in_array( $slug, $feeds ) || 'embed' === $slug || apply_filters( 'wp_unique_post_slug_is_bad_attachment_slug', false, $slug ) ) {
 			$suffix = 2;
 			do {
 				$alt_post_name   = _truncate_post_slug( $slug, 200 - ( strlen( $suffix ) + 1 ) ) . "-$suffix";
@@ -4454,13 +4416,7 @@ function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_p
 		 * @param string $post_type   Post type.
 		 * @param int    $post_parent Post parent ID.
 		 */
-		$is_bad_hierarchical_slug = apply_filters( 'wp_unique_post_slug_is_bad_hierarchical_slug', false, $slug, $post_type, $post_parent );
-
-		if ( $post_name_check
-			|| in_array( $slug, $feeds, true ) || 'embed' === $slug
-			|| preg_match( "@^($wp_rewrite->pagination_base)?\d+$@", $slug )
-			|| $is_bad_hierarchical_slug
-		) {
+		if ( $post_name_check || in_array( $slug, $feeds ) || 'embed' === $slug || preg_match( "@^($wp_rewrite->pagination_base)?\d+$@", $slug ) || apply_filters( 'wp_unique_post_slug_is_bad_hierarchical_slug', false, $slug, $post_type, $post_parent ) ) {
 			$suffix = 2;
 			do {
 				$alt_post_name   = _truncate_post_slug( $slug, 200 - ( strlen( $suffix ) + 1 ) ) . "-$suffix";
@@ -4474,16 +4430,15 @@ function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_p
 		$check_sql       = "SELECT post_name FROM $wpdb->posts WHERE post_name = %s AND post_type = %s AND ID != %d LIMIT 1";
 		$post_name_check = $wpdb->get_var( $wpdb->prepare( $check_sql, $slug, $post_type, $post_ID ) );
 
-		$post = get_post( $post_ID );
-
 		// Prevent new post slugs that could result in URLs that conflict with date archives.
+		$post                        = get_post( $post_ID );
 		$conflicts_with_date_archive = false;
 		if ( 'post' === $post_type && ( ! $post || $post->post_name !== $slug ) && preg_match( '/^[0-9]+$/', $slug ) ) {
 			$slug_num = intval( $slug );
 
 			if ( $slug_num ) {
 				$permastructs   = array_values( array_filter( explode( '/', get_option( 'permalink_structure' ) ) ) );
-				$postname_index = array_search( '%postname%', $permastructs, true );
+				$postname_index = array_search( '%postname%', $permastructs );
 
 				/*
 				* Potential date clashes are as follows:
@@ -4510,13 +4465,7 @@ function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_p
 		 * @param string $slug      The post slug.
 		 * @param string $post_type Post type.
 		 */
-		$is_bad_flat_slug = apply_filters( 'wp_unique_post_slug_is_bad_flat_slug', false, $slug, $post_type );
-
-		if ( $post_name_check
-			|| in_array( $slug, $feeds, true ) || 'embed' === $slug
-			|| $conflicts_with_date_archive
-			|| $is_bad_flat_slug
-		) {
+		if ( $post_name_check || in_array( $slug, $feeds ) || 'embed' === $slug || $conflicts_with_date_archive || apply_filters( 'wp_unique_post_slug_is_bad_flat_slug', false, $slug, $post_type ) ) {
 			$suffix = 2;
 			do {
 				$alt_post_name   = _truncate_post_slug( $slug, 200 - ( strlen( $suffix ) + 1 ) ) . "-$suffix";
@@ -5325,7 +5274,7 @@ function get_pages( $args = array() ) {
 
 	// Make sure the post type is hierarchical.
 	$hierarchical_post_types = get_post_types( array( 'hierarchical' => true ) );
-	if ( ! in_array( $parsed_args['post_type'], $hierarchical_post_types, true ) ) {
+	if ( ! in_array( $parsed_args['post_type'], $hierarchical_post_types ) ) {
 		return false;
 	}
 
@@ -5463,7 +5412,7 @@ function get_pages( $args = array() ) {
 
 	foreach ( explode( ',', $parsed_args['sort_column'] ) as $orderby ) {
 		$orderby = trim( $orderby );
-		if ( ! in_array( $orderby, $allowed_keys, true ) ) {
+		if ( ! in_array( $orderby, $allowed_keys ) ) {
 			continue;
 		}
 
@@ -5493,7 +5442,7 @@ function get_pages( $args = array() ) {
 	$sort_column = ! empty( $orderby_array ) ? implode( ',', $orderby_array ) : "$wpdb->posts.post_title";
 
 	$sort_order = strtoupper( $parsed_args['sort_order'] );
-	if ( '' !== $sort_order && ! in_array( $sort_order, array( 'ASC', 'DESC' ), true ) ) {
+	if ( '' !== $sort_order && ! in_array( $sort_order, array( 'ASC', 'DESC' ) ) ) {
 		$sort_order = 'ASC';
 	}
 
@@ -5539,7 +5488,7 @@ function get_pages( $args = array() ) {
 
 		$num_pages = count( $pages );
 		for ( $i = 0; $i < $num_pages; $i++ ) {
-			if ( in_array( $pages[ $i ]->ID, $exclude, true ) ) {
+			if ( in_array( $pages[ $i ]->ID, $exclude ) ) {
 				unset( $pages[ $i ] );
 			}
 		}
@@ -5678,20 +5627,6 @@ function wp_delete_attachment( $post_id, $force_delete = false ) {
 
 	if ( ! $force_delete && EMPTY_TRASH_DAYS && MEDIA_TRASH && 'trash' !== $post->post_status ) {
 		return wp_trash_post( $post_id );
-	}
-
-	/**
-	 * Filters whether an attachment deletion should take place.
-	 *
-	 * @since 5.5.0
-	 *
-	 * @param bool|null $delete       Whether to go forward with deletion.
-	 * @param WP_Post   $post         Post object.
-	 * @param bool      $force_delete Whether to bypass the Trash.
-	 */
-	$check = apply_filters( 'pre_delete_attachment', null, $post, $force_delete );
-	if ( null !== $check ) {
-		return $check;
 	}
 
 	delete_post_meta( $post_id, '_wp_trash_meta_status' );
@@ -5850,8 +5785,7 @@ function wp_delete_attachment_files( $post_id, $meta, $backup_sizes, $file ) {
  */
 function wp_get_attachment_metadata( $attachment_id = 0, $unfiltered = false ) {
 	$attachment_id = (int) $attachment_id;
-
-	$post = get_post( $attachment_id );
+	$post          = get_post( $attachment_id );
 	if ( ! $post ) {
 		return false;
 	}
@@ -5885,8 +5819,7 @@ function wp_get_attachment_metadata( $attachment_id = 0, $unfiltered = false ) {
  */
 function wp_update_attachment_metadata( $attachment_id, $data ) {
 	$attachment_id = (int) $attachment_id;
-
-	$post = get_post( $attachment_id );
+	$post          = get_post( $attachment_id );
 	if ( ! $post ) {
 		return false;
 	}
@@ -5919,8 +5852,7 @@ function wp_update_attachment_metadata( $attachment_id, $data ) {
  */
 function wp_get_attachment_url( $attachment_id = 0 ) {
 	$attachment_id = (int) $attachment_id;
-
-	$post = get_post( $attachment_id );
+	$post          = get_post( $attachment_id );
 	if ( ! $post ) {
 		return false;
 	}
@@ -6132,13 +6064,13 @@ function wp_attachment_is( $type, $post = null ) {
 	switch ( $type ) {
 		case 'image':
 			$image_exts = array( 'jpg', 'jpeg', 'jpe', 'gif', 'png' );
-			return in_array( $ext, $image_exts, true );
+			return in_array( $ext, $image_exts );
 
 		case 'audio':
-			return in_array( $ext, wp_get_audio_extensions(), true );
+			return in_array( $ext, wp_get_audio_extensions() );
 
 		case 'video':
-			return in_array( $ext, wp_get_video_extensions(), true );
+			return in_array( $ext, wp_get_video_extensions() );
 
 		default:
 			return $type === $ext;
@@ -6242,9 +6174,7 @@ function wp_mime_type_icon( $mime = 0 ) {
 						if ( substr( $file, 0, 1 ) == '.' ) {
 							continue;
 						}
-
-						$ext = strtolower( substr( $file, -4 ) );
-						if ( ! in_array( $ext, array( '.png', '.gif', '.jpg' ), true ) ) {
+						if ( ! in_array( strtolower( substr( $file, -4 ) ), array( '.png', '.gif', '.jpg' ) ) ) {
 							if ( is_dir( "$dir/$file" ) ) {
 								$dirs[ "$dir/$file" ] = "$uri/$file";
 							}
@@ -6334,12 +6264,12 @@ function wp_check_for_changed_slugs( $post_id, $post, $post_before ) {
 	$old_slugs = (array) get_post_meta( $post_id, '_wp_old_slug' );
 
 	// If we haven't added this old slug before, add it now.
-	if ( ! empty( $post_before->post_name ) && ! in_array( $post_before->post_name, $old_slugs, true ) ) {
+	if ( ! empty( $post_before->post_name ) && ! in_array( $post_before->post_name, $old_slugs ) ) {
 		add_post_meta( $post_id, '_wp_old_slug', $post_before->post_name );
 	}
 
 	// If the new slug was used previously, delete it from the list.
-	if ( in_array( $post->post_name, $old_slugs, true ) ) {
+	if ( in_array( $post->post_name, $old_slugs ) ) {
 		delete_post_meta( $post_id, '_wp_old_slug', $post->post_name );
 	}
 }
@@ -6366,26 +6296,21 @@ function wp_check_for_changed_slugs( $post_id, $post, $post_before ) {
 function wp_check_for_changed_dates( $post_id, $post, $post_before ) {
 	$previous_date = gmdate( 'Y-m-d', strtotime( $post_before->post_date ) );
 	$new_date      = gmdate( 'Y-m-d', strtotime( $post->post_date ) );
-
 	// Don't bother if it hasn't changed.
 	if ( $new_date == $previous_date ) {
 		return;
 	}
-
 	// We're only concerned with published, non-hierarchical objects.
 	if ( ! ( 'publish' === $post->post_status || ( 'attachment' === get_post_type( $post ) && 'inherit' === $post->post_status ) ) || is_post_type_hierarchical( $post->post_type ) ) {
 		return;
 	}
-
 	$old_dates = (array) get_post_meta( $post_id, '_wp_old_date' );
-
 	// If we haven't added this old date before, add it now.
-	if ( ! empty( $previous_date ) && ! in_array( $previous_date, $old_dates, true ) ) {
+	if ( ! empty( $previous_date ) && ! in_array( $previous_date, $old_dates ) ) {
 		add_post_meta( $post_id, '_wp_old_date', $previous_date );
 	}
-
 	// If the new slug was used previously, delete it from the list.
-	if ( in_array( $new_date, $old_dates, true ) ) {
+	if ( in_array( $new_date, $old_dates ) ) {
 		delete_post_meta( $post_id, '_wp_old_date', $new_date );
 	}
 }
@@ -6594,7 +6519,7 @@ function get_lastpostmodified( $timezone = 'server', $post_type = 'any' ) {
 function _get_last_post_time( $timezone, $field, $post_type = 'any' ) {
 	global $wpdb;
 
-	if ( ! in_array( $field, array( 'date', 'modified' ), true ) ) {
+	if ( ! in_array( $field, array( 'date', 'modified' ) ) ) {
 		return false;
 	}
 
@@ -6778,7 +6703,8 @@ function update_post_caches( &$posts, $post_type = 'post', $update_term_cache = 
  * @since 2.1.0
  *
  * @param int[] $post_ids Array of post IDs.
- * @return array|false An array of metadata on success, false if there is nothing to update.
+ * @return array|false Returns false if there is nothing to update or an array
+ *                     of metadata.
  */
 function update_postmeta_cache( $post_ids ) {
 	return update_meta_cache( 'post', $post_ids );

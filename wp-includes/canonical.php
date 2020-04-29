@@ -42,7 +42,7 @@
 function redirect_canonical( $requested_url = null, $do_redirect = true ) {
 	global $wp_rewrite, $is_IIS, $wp_query, $wpdb, $wp;
 
-	if ( isset( $_SERVER['REQUEST_METHOD'] ) && ! in_array( strtoupper( $_SERVER['REQUEST_METHOD'] ), array( 'GET', 'HEAD' ), true ) ) {
+	if ( isset( $_SERVER['REQUEST_METHOD'] ) && ! in_array( strtoupper( $_SERVER['REQUEST_METHOD'] ), array( 'GET', 'HEAD' ) ) ) {
 		return;
 	}
 
@@ -67,7 +67,7 @@ function redirect_canonical( $requested_url = null, $do_redirect = true ) {
 		$requested_url .= $_SERVER['REQUEST_URI'];
 	}
 
-	$original = parse_url( $requested_url );
+	$original = @parse_url( $requested_url );
 	if ( false === $original ) {
 		return;
 	}
@@ -331,7 +331,7 @@ function redirect_canonical( $requested_url = null, $do_redirect = true ) {
 			}
 
 			$addl_path = '';
-			if ( is_feed() && in_array( get_query_var( 'feed' ), $wp_rewrite->feeds, true ) ) {
+			if ( is_feed() && in_array( get_query_var( 'feed' ), $wp_rewrite->feeds ) ) {
 				$addl_path = ! empty( $addl_path ) ? trailingslashit( $addl_path ) : '';
 				if ( ! is_singular() && get_query_var( 'withcomments' ) ) {
 					$addl_path .= 'comments/';
@@ -407,7 +407,7 @@ function redirect_canonical( $requested_url = null, $do_redirect = true ) {
 	$redirect['query'] = preg_replace( '#^\??&*?#', '', $redirect['query'] );
 	if ( $redirect_url && ! empty( $redirect['query'] ) ) {
 		parse_str( $redirect['query'], $_parsed_query );
-		$redirect = parse_url( $redirect_url );
+		$redirect = @parse_url( $redirect_url );
 
 		if ( ! empty( $_parsed_query['name'] ) && ! empty( $redirect['query'] ) ) {
 			parse_str( $redirect['query'], $_parsed_redirect_query );
@@ -425,11 +425,11 @@ function redirect_canonical( $requested_url = null, $do_redirect = true ) {
 	}
 
 	if ( $redirect_url ) {
-		$redirect = parse_url( $redirect_url );
+		$redirect = @parse_url( $redirect_url );
 	}
 
 	// www.example.com vs. example.com
-	$user_home = parse_url( home_url() );
+	$user_home = @parse_url( home_url() );
 	if ( ! empty( $user_home['host'] ) ) {
 		$redirect['host'] = $user_home['host'];
 	}
@@ -637,7 +637,7 @@ function redirect_canonical( $requested_url = null, $do_redirect = true ) {
  * @return string The altered query string
  */
 function _remove_qs_args_if_not_in_url( $query_string, array $args_to_check, $url ) {
-	$parsed_url = parse_url( $url );
+	$parsed_url = @parse_url( $url );
 	if ( ! empty( $parsed_url['query'] ) ) {
 		parse_str( $parsed_url['query'], $parsed_query );
 		foreach ( $args_to_check as $qv ) {
@@ -660,7 +660,7 @@ function _remove_qs_args_if_not_in_url( $query_string, array $args_to_check, $ur
  * @return string The altered URL.
  */
 function strip_fragment_from_url( $url ) {
-	$parsed_url = parse_url( $url );
+	$parsed_url = @parse_url( $url );
 	if ( ! empty( $parsed_url['host'] ) ) {
 		// This mirrors code in redirect_canonical(). It does not handle every case.
 		$url = $parsed_url['scheme'] . '://' . $parsed_url['host'];
@@ -751,7 +751,7 @@ function wp_redirect_admin_locations() {
 		site_url( 'dashboard', 'relative' ),
 		site_url( 'admin', 'relative' ),
 	);
-	if ( in_array( untrailingslashit( $_SERVER['REQUEST_URI'] ), $admins, true ) ) {
+	if ( in_array( untrailingslashit( $_SERVER['REQUEST_URI'] ), $admins ) ) {
 		wp_redirect( admin_url() );
 		exit;
 	}
@@ -761,7 +761,7 @@ function wp_redirect_admin_locations() {
 		home_url( 'login', 'relative' ),
 		site_url( 'login', 'relative' ),
 	);
-	if ( in_array( untrailingslashit( $_SERVER['REQUEST_URI'] ), $logins, true ) ) {
+	if ( in_array( untrailingslashit( $_SERVER['REQUEST_URI'] ), $logins ) ) {
 		wp_redirect( wp_login_url() );
 		exit;
 	}

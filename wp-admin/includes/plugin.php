@@ -523,7 +523,7 @@ function _get_dropins() {
  * @return bool True, if in the active plugins list. False, not in the list.
  */
 function is_plugin_active( $plugin ) {
-	return in_array( $plugin, (array) get_option( 'active_plugins', array() ), true ) || is_plugin_active_for_network( $plugin );
+	return in_array( $plugin, (array) get_option( 'active_plugins', array() ) ) || is_plugin_active_for_network( $plugin );
 }
 
 /**
@@ -644,7 +644,7 @@ function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silen
 		return $requirements;
 	}
 
-	if ( ( $network_wide && ! isset( $current[ $plugin ] ) ) || ( ! $network_wide && ! in_array( $plugin, $current, true ) ) ) {
+	if ( ( $network_wide && ! isset( $current[ $plugin ] ) ) || ( ! $network_wide && ! in_array( $plugin, $current ) ) ) {
 		if ( ! empty( $redirect ) ) {
 			// We'll override this later if the plugin can be included without fatal error.
 			wp_redirect( add_query_arg( '_error_nonce', wp_create_nonce( 'plugin-activation-error_' . $plugin ), $redirect ) );
@@ -783,7 +783,7 @@ function deactivate_plugins( $plugins, $silent = false, $network_wide = null ) {
 		}
 
 		if ( true !== $network_wide ) {
-			$key = array_search( $plugin, $current, true );
+			$key = array_search( $plugin, $current );
 			if ( false !== $key ) {
 				$do_blog = true;
 				unset( $current[ $key ] );
@@ -1100,33 +1100,22 @@ function validate_plugin( $plugin ) {
 }
 
 /**
- * Validates the plugin requirements for WordPress version and PHP version.
- *
- * Uses the information from `Requires at least` and `Requires PHP` headers
- * defined in the plugin's main PHP file.
- *
- * If the headers are not present in the plugin's main PHP file,
- * `readme.txt` is also checked as a fallback.
+ * Validate the plugin requirements for WP version and PHP version.
  *
  * @since 5.2.0
- * @since 5.3.0 Added support for reading the headers from the plugin's
- *              main PHP file, with `readme.txt` as a fallback.
  *
  * @param string $plugin Path to the plugin file relative to the plugins directory.
  * @return true|WP_Error True if requirements are met, WP_Error on failure.
  */
 function validate_plugin_requirements( $plugin ) {
-	$plugin_headers = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-
-	$requirements = array(
-		'requires'     => ! empty( $plugin_headers['RequiresWP'] ) ? $plugin_headers['RequiresWP'] : '',
-		'requires_php' => ! empty( $plugin_headers['RequiresPHP'] ) ? $plugin_headers['RequiresPHP'] : '',
+	$readme_file = WP_PLUGIN_DIR . '/' . dirname( $plugin ) . '/readme.txt';
+	$plugin_data = array(
+		'requires'     => '',
+		'requires_php' => '',
 	);
 
-	$readme_file = WP_PLUGIN_DIR . '/' . dirname( $plugin ) . '/readme.txt';
-
 	if ( file_exists( $readme_file ) ) {
-		$readme_headers = get_file_data(
+		$plugin_data = get_file_data(
 			$readme_file,
 			array(
 				'requires'     => 'Requires at least',
@@ -1134,38 +1123,42 @@ function validate_plugin_requirements( $plugin ) {
 			),
 			'plugin'
 		);
-
-		$requirements = array_merge( $readme_headers, $requirements );
 	}
 
-	$compatible_wp  = is_wp_version_compatible( $requirements['requires'] );
-	$compatible_php = is_php_version_compatible( $requirements['requires_php'] );
+	$plugin_data = array_merge( $plugin_data, get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin ) );
 
-	if ( ! $compatible_wp && ! $compatible_php ) {
+	// Check for headers in the plugin's PHP file, give precedence to the plugin headers.
+	$plugin_data['requires']     = ! empty( $plugin_data['RequiresWP'] ) ? $plugin_data['RequiresWP'] : $plugin_data['requires'];
+	$plugin_data['requires_php'] = ! empty( $plugin_data['RequiresPHP'] ) ? $plugin_data['RequiresPHP'] : $plugin_data['requires_php'];
+
+	$plugin_data['wp_compatible']  = is_wp_version_compatible( $plugin_data['requires'] );
+	$plugin_data['php_compatible'] = is_php_version_compatible( $plugin_data['requires_php'] );
+
+	if ( ! $plugin_data['wp_compatible'] && ! $plugin_data['php_compatible'] ) {
 		return new WP_Error(
 			'plugin_wp_php_incompatible',
 			sprintf(
 				/* translators: %s: Plugin name. */
-				_x( '<strong>Error:</strong> Current WordPress and PHP versions do not meet minimum requirements for %s.', 'plugin' ),
-				$plugin_headers['Name']
+				__( '<strong>Error:</strong> Current WordPress and PHP versions do not meet minimum requirements for %s.' ),
+				$plugin_data['Name']
 			)
 		);
-	} elseif ( ! $compatible_php ) {
+	} elseif ( ! $plugin_data['php_compatible'] ) {
 		return new WP_Error(
 			'plugin_php_incompatible',
 			sprintf(
 				/* translators: %s: Plugin name. */
-				_x( '<strong>Error:</strong> Current PHP version does not meet minimum requirements for %s.', 'plugin' ),
-				$plugin_headers['Name']
+				__( '<strong>Error:</strong> Current PHP version does not meet minimum requirements for %s.' ),
+				$plugin_data['Name']
 			)
 		);
-	} elseif ( ! $compatible_wp ) {
+	} elseif ( ! $plugin_data['wp_compatible'] ) {
 		return new WP_Error(
 			'plugin_wp_incompatible',
 			sprintf(
 				/* translators: %s: Plugin name. */
-				_x( '<strong>Error:</strong> Current WordPress version does not meet minimum requirements for %s.', 'plugin' ),
-				$plugin_headers['Name']
+				__( '<strong>Error:</strong> Current WordPress version does not meet minimum requirements for %s.' ),
+				$plugin_data['Name']
 			)
 		);
 	}
@@ -1819,17 +1812,15 @@ function menu_page_url( $menu_slug, $echo = true ) {
  * @since 1.5.0
  *
  * @global string $parent_file
- * @global array  $menu
- * @global array  $submenu
+ * @global array $menu
+ * @global array $submenu
  * @global string $pagenow
  * @global string $typenow
  * @global string $plugin_page
- * @global array  $_wp_real_parent_file
- * @global array  $_wp_menu_nopriv
- * @global array  $_wp_submenu_nopriv
+ * @global array $_wp_real_parent_file
+ * @global array $_wp_menu_nopriv
+ * @global array $_wp_submenu_nopriv
  *
- * @param string $parent The slug name for the parent menu (or the file name of a standard
- *                       WordPress admin page). Default empty string.
  * @return string The parent file of the current admin page.
  */
 function get_admin_page_parent( $parent = '' ) {
@@ -2177,7 +2168,7 @@ function add_option_whitelist( $new_options, $options = '' ) {
 				$whitelist_options[ $page ]   = array();
 				$whitelist_options[ $page ][] = $key;
 			} else {
-				$pos = array_search( $key, $whitelist_options[ $page ], true );
+				$pos = array_search( $key, $whitelist_options[ $page ] );
 				if ( false === $pos ) {
 					$whitelist_options[ $page ][] = $key;
 				}
@@ -2209,7 +2200,7 @@ function remove_option_whitelist( $del_options, $options = '' ) {
 	foreach ( $del_options as $page => $keys ) {
 		foreach ( $keys as $key ) {
 			if ( isset( $whitelist_options[ $page ] ) && is_array( $whitelist_options[ $page ] ) ) {
-				$pos = array_search( $key, $whitelist_options[ $page ], true );
+				$pos = array_search( $key, $whitelist_options[ $page ] );
 				if ( false !== $pos ) {
 					unset( $whitelist_options[ $page ][ $pos ] );
 				}

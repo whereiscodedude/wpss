@@ -2180,10 +2180,9 @@ function get_calendar( $initial = true, $echo = true ) {
 		AND post_date <= '{$thisyear}-{$thismonth}-{$last_day} 23:59:59'",
 		ARRAY_N
 	);
-
 	if ( $dayswithposts ) {
 		foreach ( (array) $dayswithposts as $daywith ) {
-			$daywithpost[] = (int) $daywith[0];
+			$daywithpost[] = $daywith[0];
 		}
 	}
 
@@ -2210,7 +2209,7 @@ function get_calendar( $initial = true, $echo = true ) {
 			$calendar_output .= '<td>';
 		}
 
-		if ( in_array( $day, $daywithpost, true ) ) {
+		if ( in_array( $day, $daywithpost ) ) {
 			// Any posts today?
 			$date_format = gmdate( _x( 'F j, Y', 'daily archives date format' ), strtotime( "{$thisyear}-{$thismonth}-{$day}" ) );
 			/* translators: Post calendar label. %s: Date. */
@@ -2224,7 +2223,6 @@ function get_calendar( $initial = true, $echo = true ) {
 		} else {
 			$calendar_output .= $day;
 		}
-
 		$calendar_output .= '</td>';
 
 		if ( 6 == calendar_week_mod( gmdate( 'w', mktime( 0, 0, 0, $thismonth, $day, $thisyear ) ) - $week_begins ) ) {
@@ -2236,7 +2234,6 @@ function get_calendar( $initial = true, $echo = true ) {
 	if ( 0 != $pad && 7 != $pad ) {
 		$calendar_output .= "\n\t\t" . '<td class="pad" colspan="' . esc_attr( $pad ) . '">&nbsp;</td>';
 	}
-
 	$calendar_output .= "\n\t</tr>\n\t</tbody>";
 
 	$calendar_output .= "\n\t</table>";
@@ -3236,7 +3233,7 @@ function wp_resource_hints() {
 				continue;
 			}
 
-			if ( in_array( $relation_type, array( 'preconnect', 'dns-prefetch' ), true ) ) {
+			if ( in_array( $relation_type, array( 'preconnect', 'dns-prefetch' ) ) ) {
 				$parsed = wp_parse_url( $url );
 
 				if ( empty( $parsed['host'] ) ) {
@@ -3261,9 +3258,8 @@ function wp_resource_hints() {
 			$html = '';
 
 			foreach ( $atts as $attr => $value ) {
-				if ( ! is_scalar( $value )
-					|| ( ! in_array( $attr, array( 'as', 'crossorigin', 'href', 'pr', 'rel', 'type' ), true ) && ! is_numeric( $attr ) )
-				) {
+				if ( ! is_scalar( $value ) ||
+					( ! in_array( $attr, array( 'as', 'crossorigin', 'href', 'pr', 'rel', 'type' ), true ) && ! is_numeric( $attr ) ) ) {
 
 					continue;
 				}
@@ -3307,9 +3303,7 @@ function wp_dependencies_unique_hosts() {
 				$dependency = $dependencies->registered[ $handle ];
 				$parsed     = wp_parse_url( $dependency->src );
 
-				if ( ! empty( $parsed['host'] )
-					&& ! in_array( $parsed['host'], $unique_hosts, true ) && $parsed['host'] !== $_SERVER['SERVER_NAME']
-				) {
+				if ( ! empty( $parsed['host'] ) && ! in_array( $parsed['host'], $unique_hosts ) && $parsed['host'] !== $_SERVER['SERVER_NAME'] ) {
 					$unique_hosts[] = $parsed['host'];
 				}
 			}
@@ -3377,7 +3371,7 @@ function wp_default_editor() {
 	$r = user_can_richedit() ? 'tinymce' : 'html'; // Defaults.
 	if ( wp_get_current_user() ) { // Look for cookie.
 		$ed = get_user_setting( 'editor', 'tinymce' );
-		$r  = ( in_array( $ed, array( 'tinymce', 'html', 'test' ), true ) ) ? $ed : $r;
+		$r  = ( in_array( $ed, array( 'tinymce', 'html', 'test' ) ) ) ? $ed : $r;
 	}
 
 	/**

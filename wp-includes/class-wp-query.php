@@ -1707,15 +1707,6 @@ class WP_Query {
 		$this->is_404 = true;
 
 		$this->is_feed = $is_feed;
-
-		/**
-		 * Fires after a 404 is triggered.
-		 *
-		 * @since 5.5.0
-		 *
-		 * @param WP_Query $this The WP_Query instance (passed by reference).
-		 */
-		do_action_ref_array( 'set_404', array( $this ) );
 	}
 
 	/**
@@ -2152,7 +2143,7 @@ class WP_Query {
 				}
 
 				$post_status_join = true;
-			} elseif ( in_array( 'attachment', (array) $post_type, true ) ) {
+			} elseif ( in_array( 'attachment', (array) $post_type ) ) {
 				$post_status_join = true;
 			}
 		}
@@ -2173,7 +2164,7 @@ class WP_Query {
 						continue;
 					}
 
-					if ( ! in_array( $queried_taxonomy, array( 'category', 'post_tag' ), true ) ) {
+					if ( ! in_array( $queried_taxonomy, array( 'category', 'post_tag' ) ) ) {
 						$q['taxonomy'] = $queried_taxonomy;
 
 						if ( 'slug' === $queried_items['field'] ) {
@@ -2459,15 +2450,15 @@ class WP_Query {
 			$r_status = array();
 			$p_status = array();
 			$e_status = array();
-			if ( in_array( 'any', $q_status, true ) ) {
+			if ( in_array( 'any', $q_status ) ) {
 				foreach ( get_post_stati( array( 'exclude_from_search' => true ) ) as $status ) {
-					if ( ! in_array( $status, $q_status, true ) ) {
+					if ( ! in_array( $status, $q_status ) ) {
 						$e_status[] = "{$wpdb->posts}.post_status <> '$status'";
 					}
 				}
 			} else {
 				foreach ( get_post_stati() as $status ) {
-					if ( in_array( $status, $q_status, true ) ) {
+					if ( in_array( $status, $q_status ) ) {
 						if ( 'private' == $status ) {
 							$p_status[] = "{$wpdb->posts}.post_status = '$status'";
 						} else {
@@ -3079,7 +3070,7 @@ class WP_Query {
 			}
 
 			// If the post_status was specifically requested, let it pass through.
-			if ( ! in_array( $status, $q_status, true ) ) {
+			if ( ! in_array( $status, $q_status ) ) {
 				$post_status_obj = get_post_status_object( $status );
 
 				if ( $post_status_obj && ! $post_status_obj->public ) {
@@ -3133,7 +3124,7 @@ class WP_Query {
 			$sticky_offset = 0;
 			// Loop over posts and relocate stickies to the front.
 			for ( $i = 0; $i < $num_posts; $i++ ) {
-				if ( in_array( $this->posts[ $i ]->ID, $sticky_posts, true ) ) {
+				if ( in_array( $this->posts[ $i ]->ID, $sticky_posts ) ) {
 					$sticky_post = $this->posts[ $i ];
 					// Remove sticky from current position.
 					array_splice( $this->posts, $i, 1 );
@@ -3142,7 +3133,7 @@ class WP_Query {
 					// Increment the sticky offset. The next sticky will be placed at this offset.
 					$sticky_offset++;
 					// Remove post from sticky posts array.
-					$offset = array_search( $sticky_post->ID, $sticky_posts, true );
+					$offset = array_search( $sticky_post->ID, $sticky_posts );
 					unset( $sticky_posts[ $offset ] );
 				}
 			}
@@ -3560,7 +3551,7 @@ class WP_Query {
 	 * @return mixed Property.
 	 */
 	public function __get( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return $this->$name;
 		}
 	}
@@ -3574,7 +3565,7 @@ class WP_Query {
 	 * @return bool Whether the property is set.
 	 */
 	public function __isset( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return isset( $this->$name );
 		}
 	}
@@ -3589,7 +3580,7 @@ class WP_Query {
 	 * @return mixed|false Return value of the callback, false otherwise.
 	 */
 	public function __call( $name, $arguments ) {
-		if ( in_array( $name, $this->compat_methods, true ) ) {
+		if ( in_array( $name, $this->compat_methods ) ) {
 			return $this->$name( ...$arguments );
 		}
 		return false;
@@ -3628,7 +3619,7 @@ class WP_Query {
 		}
 		$post_type_object = get_post_type_object( $post_type );
 
-		return in_array( $post_type_object->name, (array) $post_types, true );
+		return in_array( $post_type_object->name, (array) $post_types );
 	}
 
 	/**
@@ -3653,11 +3644,11 @@ class WP_Query {
 
 		$post_obj = $this->get_queried_object();
 
-		if ( in_array( (string) $post_obj->ID, $attachment, true ) ) {
+		if ( in_array( (string) $post_obj->ID, $attachment ) ) {
 			return true;
-		} elseif ( in_array( $post_obj->post_title, $attachment, true ) ) {
+		} elseif ( in_array( $post_obj->post_title, $attachment ) ) {
 			return true;
-		} elseif ( in_array( $post_obj->post_name, $attachment, true ) ) {
+		} elseif ( in_array( $post_obj->post_name, $attachment ) ) {
 			return true;
 		}
 		return false;
@@ -3688,11 +3679,11 @@ class WP_Query {
 
 		$author = array_map( 'strval', (array) $author );
 
-		if ( in_array( (string) $author_obj->ID, $author, true ) ) {
+		if ( in_array( (string) $author_obj->ID, $author ) ) {
 			return true;
-		} elseif ( in_array( $author_obj->nickname, $author, true ) ) {
+		} elseif ( in_array( $author_obj->nickname, $author ) ) {
 			return true;
-		} elseif ( in_array( $author_obj->user_nicename, $author, true ) ) {
+		} elseif ( in_array( $author_obj->user_nicename, $author ) ) {
 			return true;
 		}
 
@@ -3724,11 +3715,11 @@ class WP_Query {
 
 		$category = array_map( 'strval', (array) $category );
 
-		if ( in_array( (string) $cat_obj->term_id, $category, true ) ) {
+		if ( in_array( (string) $cat_obj->term_id, $category ) ) {
 			return true;
-		} elseif ( in_array( $cat_obj->name, $category, true ) ) {
+		} elseif ( in_array( $cat_obj->name, $category ) ) {
 			return true;
-		} elseif ( in_array( $cat_obj->slug, $category, true ) ) {
+		} elseif ( in_array( $cat_obj->slug, $category ) ) {
 			return true;
 		}
 
@@ -3760,11 +3751,11 @@ class WP_Query {
 
 		$tag = array_map( 'strval', (array) $tag );
 
-		if ( in_array( (string) $tag_obj->term_id, $tag, true ) ) {
+		if ( in_array( (string) $tag_obj->term_id, $tag ) ) {
 			return true;
-		} elseif ( in_array( $tag_obj->name, $tag, true ) ) {
+		} elseif ( in_array( $tag_obj->name, $tag ) ) {
 			return true;
-		} elseif ( in_array( $tag_obj->slug, $tag, true ) ) {
+		} elseif ( in_array( $tag_obj->slug, $tag ) ) {
 			return true;
 		}
 
@@ -3808,7 +3799,7 @@ class WP_Query {
 		$term_array     = (array) $term;
 
 		// Check that the taxonomy matches.
-		if ( ! ( isset( $queried_object->taxonomy ) && count( $tax_array ) && in_array( $queried_object->taxonomy, $tax_array, true ) ) ) {
+		if ( ! ( isset( $queried_object->taxonomy ) && count( $tax_array ) && in_array( $queried_object->taxonomy, $tax_array ) ) ) {
 			return false;
 		}
 
@@ -3879,7 +3870,7 @@ class WP_Query {
 		if ( 'feed' == $qv ) {
 			$qv = get_default_feed();
 		}
-		return in_array( $qv, (array) $feeds, true );
+		return in_array( $qv, (array) $feeds );
 	}
 
 	/**
@@ -4000,11 +3991,11 @@ class WP_Query {
 
 		$page = array_map( 'strval', (array) $page );
 
-		if ( in_array( (string) $page_obj->ID, $page, true ) ) {
+		if ( in_array( (string) $page_obj->ID, $page ) ) {
 			return true;
-		} elseif ( in_array( $page_obj->post_title, $page, true ) ) {
+		} elseif ( in_array( $page_obj->post_title, $page ) ) {
 			return true;
-		} elseif ( in_array( $page_obj->post_name, $page, true ) ) {
+		} elseif ( in_array( $page_obj->post_name, $page ) ) {
 			return true;
 		} else {
 			foreach ( $page as $pagepath ) {
@@ -4107,11 +4098,11 @@ class WP_Query {
 
 		$post = array_map( 'strval', (array) $post );
 
-		if ( in_array( (string) $post_obj->ID, $post, true ) ) {
+		if ( in_array( (string) $post_obj->ID, $post ) ) {
 			return true;
-		} elseif ( in_array( $post_obj->post_title, $post, true ) ) {
+		} elseif ( in_array( $post_obj->post_title, $post ) ) {
 			return true;
-		} elseif ( in_array( $post_obj->post_name, $post, true ) ) {
+		} elseif ( in_array( $post_obj->post_name, $post ) ) {
 			return true;
 		} else {
 			foreach ( $post as $postpath ) {
@@ -4152,7 +4143,7 @@ class WP_Query {
 
 		$post_obj = $this->get_queried_object();
 
-		return in_array( $post_obj->post_type, (array) $post_types, true );
+		return in_array( $post_obj->post_type, (array) $post_types );
 	}
 
 	/**

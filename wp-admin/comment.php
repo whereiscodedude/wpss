@@ -255,7 +255,7 @@ switch ( $action ) {
 	case 'unapprovecomment':
 		$comment_id = absint( $_REQUEST['c'] );
 
-		if ( in_array( $action, array( 'approvecomment', 'unapprovecomment' ), true ) ) {
+		if ( in_array( $action, array( 'approvecomment', 'unapprovecomment' ) ) ) {
 			check_admin_referer( 'approve-comment_' . $comment_id );
 		} else {
 			check_admin_referer( 'delete-comment_' . $comment_id );
@@ -275,7 +275,7 @@ switch ( $action ) {
 			$redir = wp_get_referer();
 		} elseif ( '' != wp_get_original_referer() && ! $noredir ) {
 			$redir = wp_get_original_referer();
-		} elseif ( in_array( $action, array( 'approvecomment', 'unapprovecomment' ), true ) ) {
+		} elseif ( in_array( $action, array( 'approvecomment', 'unapprovecomment' ) ) ) {
 			$redir = admin_url( 'edit-comments.php?p=' . absint( $comment->comment_post_ID ) );
 		} else {
 			$redir = admin_url( 'edit-comments.php' );

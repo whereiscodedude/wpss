@@ -615,6 +615,7 @@ class getid3_ogg extends getid3_handler
 
 			default:
 				return false;
+				break;
 		}
 
 		$VendorSize = getid3_lib::LittleEndian2Int(substr($commentdata, $commentdataoffset, 4));

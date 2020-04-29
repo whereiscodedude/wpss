@@ -48,7 +48,7 @@ function wp_get_themes( $args = array() ) {
 		$current_theme = get_stylesheet();
 		if ( isset( $theme_directories[ $current_theme ] ) ) {
 			$root_of_current_theme = get_raw_theme_root( $current_theme );
-			if ( ! in_array( $root_of_current_theme, $wp_theme_directories, true ) ) {
+			if ( ! in_array( $root_of_current_theme, $wp_theme_directories ) ) {
 				$root_of_current_theme = WP_CONTENT_DIR . $root_of_current_theme;
 			}
 			$theme_directories[ $current_theme ]['theme_root'] = $root_of_current_theme;
@@ -119,7 +119,7 @@ function wp_get_theme( $stylesheet = '', $theme_root = '' ) {
 		$theme_root = get_raw_theme_root( $stylesheet );
 		if ( false === $theme_root ) {
 			$theme_root = WP_CONTENT_DIR . '/themes';
-		} elseif ( ! in_array( $theme_root, (array) $wp_theme_directories, true ) ) {
+		} elseif ( ! in_array( $theme_root, (array) $wp_theme_directories ) ) {
 			$theme_root = WP_CONTENT_DIR . $theme_root;
 		}
 	}
@@ -411,7 +411,7 @@ function register_theme_directory( $directory ) {
 	}
 
 	$untrailed = untrailingslashit( $directory );
-	if ( ! empty( $untrailed ) && ! in_array( $untrailed, $wp_theme_directories, true ) ) {
+	if ( ! empty( $untrailed ) && ! in_array( $untrailed, $wp_theme_directories ) ) {
 		$wp_theme_directories[] = $untrailed;
 	}
 
@@ -583,7 +583,7 @@ function get_theme_root( $stylesheet_or_template = '' ) {
 		if ( $theme_root ) {
 			// Always prepend WP_CONTENT_DIR unless the root currently registered as a theme directory.
 			// This gives relative theme roots the benefit of the doubt when things go haywire.
-			if ( ! in_array( $theme_root, (array) $wp_theme_directories, true ) ) {
+			if ( ! in_array( $theme_root, (array) $wp_theme_directories ) ) {
 				$theme_root = WP_CONTENT_DIR . $theme_root;
 			}
 		}
@@ -626,7 +626,7 @@ function get_theme_root_uri( $stylesheet_or_template = '', $theme_root = '' ) {
 	}
 
 	if ( $stylesheet_or_template && $theme_root ) {
-		if ( in_array( $theme_root, (array) $wp_theme_directories, true ) ) {
+		if ( in_array( $theme_root, (array) $wp_theme_directories ) ) {
 			// Absolute path. Make an educated guess. YMMV -- but note the filter below.
 			if ( 0 === strpos( $theme_root, WP_CONTENT_DIR ) ) {
 				$theme_root_uri = content_url( str_replace( WP_CONTENT_DIR, '', $theme_root ) );
@@ -732,11 +732,6 @@ function locale_stylesheet() {
  */
 function switch_theme( $stylesheet ) {
 	global $wp_theme_directories, $wp_customize, $sidebars_widgets;
-
-	$requirements = validate_theme_requirements( $stylesheet );
-	if ( is_wp_error( $requirements ) ) {
-		wp_die( $requirements );
-	}
 
 	$_sidebars_widgets = null;
 	if ( 'wp_ajax_customize_save' === current_action() ) {
@@ -883,78 +878,6 @@ function validate_current_theme() {
 
 	switch_theme( $default->get_stylesheet() );
 	return false;
-}
-
-/**
- * Validates the theme requirements for WordPress version and PHP version.
- *
- * Uses the information from `Requires at least` and `Requires PHP` headers
- * defined in the theme's `style.css` file.
- *
- * If the headers are not present in the theme's stylesheet file,
- * `readme.txt` is also checked as a fallback.
- *
- * @since 5.5.0
- *
- * @param string $stylesheet Directory name for the theme.
- * @return true|WP_Error True if requirements are met, WP_Error on failure.
- */
-function validate_theme_requirements( $stylesheet ) {
-	$theme = wp_get_theme( $stylesheet );
-
-	$requirements = array(
-		'requires'     => ! empty( $theme->get( 'RequiresWP' ) ) ? $theme->get( 'RequiresWP' ) : '',
-		'requires_php' => ! empty( $theme->get( 'RequiresPHP' ) ) ? $theme->get( 'RequiresPHP' ) : '',
-	);
-
-	$readme_file = $theme->theme_root . '/' . $stylesheet . '/readme.txt';
-
-	if ( file_exists( $readme_file ) ) {
-		$readme_headers = get_file_data(
-			$readme_file,
-			array(
-				'requires'     => 'Requires at least',
-				'requires_php' => 'Requires PHP',
-			),
-			'theme'
-		);
-
-		$requirements = array_merge( $readme_headers, $requirements );
-	}
-
-	$compatible_wp  = is_wp_version_compatible( $requirements['requires'] );
-	$compatible_php = is_php_version_compatible( $requirements['requires_php'] );
-
-	if ( ! $compatible_wp && ! $compatible_php ) {
-		return new WP_Error(
-			'theme_wp_php_incompatible',
-			sprintf(
-				/* translators: %s: Theme name. */
-				_x( '<strong>Error:</strong> Current WordPress and PHP versions do not meet minimum requirements for %s.', 'theme' ),
-				$theme->display( 'Name' )
-			)
-		);
-	} elseif ( ! $compatible_php ) {
-		return new WP_Error(
-			'theme_php_incompatible',
-			sprintf(
-				/* translators: %s: Theme name. */
-				_x( '<strong>Error:</strong> Current PHP version does not meet minimum requirements for %s.', 'theme' ),
-				$theme->display( 'Name' )
-			)
-		);
-	} elseif ( ! $compatible_wp ) {
-		return new WP_Error(
-			'theme_wp_incompatible',
-			sprintf(
-				/* translators: %s: Theme name. */
-				_x( '<strong>Error:</strong> Current WordPress version does not meet minimum requirements for %s.', 'theme' ),
-				$theme->display( 'Name' )
-			)
-		);
-	}
-
-	return true;
 }
 
 /**
@@ -2815,7 +2738,7 @@ function get_theme_support( $feature, ...$args ) {
  */
 function remove_theme_support( $feature ) {
 	// Blacklist: for internal registrations not used directly by themes.
-	if ( in_array( $feature, array( 'editor-style', 'widgets', 'menus' ), true ) ) {
+	if ( in_array( $feature, array( 'editor-style', 'widgets', 'menus' ) ) ) {
 		return false;
 	}
 
@@ -2923,11 +2846,11 @@ function current_theme_supports( $feature, ...$args ) {
 			 * by passing an array of types to add_theme_support().
 			 * If no array was passed, then any type is accepted.
 			 */
-			if ( true === $_wp_theme_features[ $feature ] ) {  // Registered for all types.
+			if ( true === $_wp_theme_features[ $feature ] ) {  // Registered for all types
 				return true;
 			}
 			$content_type = $args[0];
-			return in_array( $content_type, $_wp_theme_features[ $feature ][0], true );
+			return in_array( $content_type, $_wp_theme_features[ $feature ][0] );
 
 		case 'html5':
 		case 'post-formats':
@@ -2938,7 +2861,7 @@ function current_theme_supports( $feature, ...$args ) {
 			 * Specific areas of HTML5 support *must* be passed via an array to add_theme_support().
 			 */
 			$type = $args[0];
-			return in_array( $type, $_wp_theme_features[ $feature ][0], true );
+			return in_array( $type, $_wp_theme_features[ $feature ][0] );
 
 		case 'custom-logo':
 		case 'custom-header':

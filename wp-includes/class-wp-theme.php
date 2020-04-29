@@ -206,9 +206,7 @@ final class WP_Theme implements ArrayAccess {
 		$this->stylesheet = $theme_dir;
 
 		// Correct a situation where the theme is 'some-directory/some-theme' but 'some-directory' was passed in as part of the theme root instead.
-		if ( ! in_array( $theme_root, (array) $wp_theme_directories, true )
-			&& in_array( dirname( $theme_root ), (array) $wp_theme_directories, true )
-		) {
+		if ( ! in_array( $theme_root, (array) $wp_theme_directories ) && in_array( dirname( $theme_root ), (array) $wp_theme_directories ) ) {
 			$this->stylesheet = basename( $this->theme_root ) . '/' . $this->stylesheet;
 			$this->theme_root = dirname( $theme_root );
 		}
@@ -276,7 +274,7 @@ final class WP_Theme implements ArrayAccess {
 			$this->headers = get_file_data( $this->theme_root . '/' . $theme_file, self::$file_headers, 'theme' );
 			// Default themes always trump their pretenders.
 			// Properly identify default themes that are inside a directory within wp-content/themes.
-			$default_theme_slug = array_search( $this->headers['Name'], self::$default_themes, true );
+			$default_theme_slug = array_search( $this->headers['Name'], self::$default_themes );
 			if ( $default_theme_slug ) {
 				if ( basename( $this->stylesheet ) != $default_theme_slug ) {
 					$this->headers['Name'] .= '/' . $this->stylesheet;
@@ -477,7 +475,7 @@ final class WP_Theme implements ArrayAccess {
 			'theme_root_uri',
 		);
 
-		return in_array( $offset, $properties, true );
+		return in_array( $offset, $properties );
 	}
 
 	/**
@@ -576,7 +574,7 @@ final class WP_Theme implements ArrayAccess {
 			'Parent Theme',
 		);
 
-		return in_array( $offset, $keys, true );
+		return in_array( $offset, $keys );
 	}
 
 	/**
@@ -663,7 +661,7 @@ final class WP_Theme implements ArrayAccess {
 	 * @return bool Whether the theme exists.
 	 */
 	public function exists() {
-		return ! ( $this->errors() && in_array( 'theme_not_found', $this->errors()->get_error_codes(), true ) );
+		return ! ( $this->errors() && in_array( 'theme_not_found', $this->errors()->get_error_codes() ) );
 	}
 
 	/**
@@ -1031,7 +1029,7 @@ final class WP_Theme implements ArrayAccess {
 	 * @return string Absolute path of the stylesheet directory.
 	 */
 	public function get_stylesheet_directory() {
-		if ( $this->errors() && in_array( 'theme_root_missing', $this->errors()->get_error_codes(), true ) ) {
+		if ( $this->errors() && in_array( 'theme_root_missing', $this->errors()->get_error_codes() ) ) {
 			return '';
 		}
 
@@ -1189,8 +1187,8 @@ final class WP_Theme implements ArrayAccess {
 	 *
 	 * @since 4.7.0
 	 *
-	 * @return string[] Array of page templates, keyed by filename and post type,
-	 *                  with the value of the translated header name.
+	 * @return string Array of page templates, keyed by filename and post type,
+	 *               with the value of the translated header name.
 	 */
 	public function get_post_templates() {
 		// If you screw up your current theme and we invalidate your parent, most things still work. Let it slide.

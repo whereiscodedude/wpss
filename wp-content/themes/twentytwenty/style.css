@@ -3506,10 +3506,6 @@ figure.wp-block-table.is-style-stripes {
 	line-height: 1.4;
 }
 
-.entry-content li img {
-	display: inline-block;
-}
-
 .entry-content h1,
 .entry-content h2,
 .entry-content h3,
@@ -5660,7 +5656,7 @@ a.to-the-top > * {
 	/* Site Header --------------------------- */
 
 	#site-header {
-		z-index: 2;
+		z-index: 1;
 	}
 
 	.header-inner {
@@ -5917,10 +5913,6 @@ a.to-the-top > * {
 		/*rtl:ignore*/
 		margin-left: 0;
 	}
-  
-    .wp-block-image .aligncenter figcaption {
-        text-align: center;
-    }
 
 	/* BLOCK: SEPARATOR */
 

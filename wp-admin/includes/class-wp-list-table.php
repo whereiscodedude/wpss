@@ -181,7 +181,7 @@ class WP_List_Table {
 	 * @return mixed Property.
 	 */
 	public function __get( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return $this->$name;
 		}
 	}
@@ -196,7 +196,7 @@ class WP_List_Table {
 	 * @return mixed Newly-set property.
 	 */
 	public function __set( $name, $value ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return $this->$name = $value;
 		}
 	}
@@ -210,7 +210,7 @@ class WP_List_Table {
 	 * @return bool Whether the property is set.
 	 */
 	public function __isset( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			return isset( $this->$name );
 		}
 	}
@@ -223,7 +223,7 @@ class WP_List_Table {
 	 * @param string $name Property to unset.
 	 */
 	public function __unset( $name ) {
-		if ( in_array( $name, $this->compat_fields, true ) ) {
+		if ( in_array( $name, $this->compat_fields ) ) {
 			unset( $this->$name );
 		}
 	}
@@ -238,7 +238,7 @@ class WP_List_Table {
 	 * @return mixed|bool Return value of the callback, false otherwise.
 	 */
 	public function __call( $name, $arguments ) {
-		if ( in_array( $name, $this->compat_methods, true ) ) {
+		if ( in_array( $name, $this->compat_methods ) ) {
 			return $this->$name( ...$arguments );
 		}
 		return false;
@@ -1133,13 +1133,13 @@ class WP_List_Table {
 		foreach ( $columns as $column_key => $column_display_name ) {
 			$class = array( 'manage-column', "column-$column_key" );
 
-			if ( in_array( $column_key, $hidden, true ) ) {
+			if ( in_array( $column_key, $hidden ) ) {
 				$class[] = 'hidden';
 			}
 
 			if ( 'cb' === $column_key ) {
 				$class[] = 'check-column';
-			} elseif ( in_array( $column_key, array( 'posts', 'comments', 'links' ), true ) ) {
+			} elseif ( in_array( $column_key, array( 'posts', 'comments', 'links' ) ) ) {
 				$class[] = 'num';
 			}
 
@@ -1329,7 +1329,7 @@ class WP_List_Table {
 				$classes .= ' has-row-actions column-primary';
 			}
 
-			if ( in_array( $column_name, $hidden, true ) ) {
+			if ( in_array( $column_name, $hidden ) ) {
 				$classes .= ' hidden';
 			}
 

@@ -729,18 +729,6 @@ form#tags-filter {
 	padding-bottom: 6px;
 }
 
-.privacy-text-actions .success {
-	display: none;
-	color: #40860a;
-	float: left;
-	padding-left: 1em;
-}
-
-.privacy-text-actions .success.visible {
-	display: inline-block;
-	height: 32px;
-}
-
 .wp-privacy-policy-guide .policy-text h2 {
 	margin: 1.2em 0 1em;
 	padding: 0;
@@ -1762,8 +1750,6 @@ table.links-table {
 		float: none;
 		width: auto;
 		height: 100%;
-		display: flex;
-		flex-direction: column;
 	}
 
 	.privacy-text-section a.return-to-top {

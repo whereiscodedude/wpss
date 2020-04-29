@@ -454,9 +454,7 @@ final class WP_Post_Type {
 		}
 
 		// Back compat with quirky handling in version 3.0. #14122.
-		if ( empty( $args['capabilities'] )
-			&& null === $args['map_meta_cap'] && in_array( $args['capability_type'], array( 'post', 'page' ), true )
-		) {
+		if ( empty( $args['capabilities'] ) && null === $args['map_meta_cap'] && in_array( $args['capability_type'], array( 'post', 'page' ) ) ) {
 			$args['map_meta_cap'] = true;
 		}
 

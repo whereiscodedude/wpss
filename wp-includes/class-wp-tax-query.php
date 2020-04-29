@@ -526,7 +526,7 @@ class WP_Tax_Query {
 			}
 
 			// The sibling must both have compatible operator to share its alias.
-			if ( in_array( strtoupper( $sibling['operator'] ), $compatible_operators, true ) ) {
+			if ( in_array( strtoupper( $sibling['operator'] ), $compatible_operators ) ) {
 				$alias = $sibling['alias'];
 				break;
 			}

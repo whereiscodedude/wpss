@@ -719,7 +719,7 @@ class WP_Site_Health {
 				sprintf(
 					/* translators: %s: The minimum recommended PHP version. */
 					__( 'PHP is the programming language used to build and maintain WordPress. Newer versions of PHP are faster and more secure, so staying up to date will help your site&#8217;s overall performance and security. The minimum recommended version of PHP is %s.' ),
-					$response ? $response['recommended_version'] : ''
+					$response['recommended_version']
 				)
 			),
 			'actions'     => sprintf(
@@ -1036,7 +1036,10 @@ class WP_Site_Health {
 				$result['label'] = __( 'One or more required modules are missing' );
 			}
 
-			$result['description'] .= $output;
+			$result['description'] .= sprintf(
+				'<p>%s</p>',
+				$output
+			);
 		}
 
 		return $result;
@@ -1061,7 +1064,6 @@ class WP_Site_Health {
 				'<p>%s</p>',
 				__( 'PHP default timezone was configured by WordPress on loading. This is necessary for correct calculations of dates and times.' )
 			),
-			'actions'     => '',
 			'test'        => 'php_default_timezone',
 		);
 
@@ -1076,52 +1078,6 @@ class WP_Site_Health {
 					/* translators: %s: date_default_timezone_set() */
 					__( 'PHP default timezone was changed after WordPress loading by a %s function call. This interferes with correct calculations of dates and times.' ),
 					'<code>date_default_timezone_set()</code>'
-				)
-			);
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Test if there's an active PHP session that can affect loopback requests.
-	 *
-	 * @since 5.5.0
-	 *
-	 * @return array The test results.
-	 */
-	public function get_test_php_sessions() {
-		$result = array(
-			'label'       => __( 'No PHP sessions detected' ),
-			'status'      => 'good',
-			'badge'       => array(
-				'label' => __( 'Performance' ),
-				'color' => 'blue',
-			),
-			'description' => sprintf(
-				'<p>%s</p>',
-				sprintf(
-					/* translators: 1: session_start(), 2: session_write_close() */
-					__( 'PHP sessions created by a %1$s function call may interfere with REST API and loopback requests. An active session should be closed by %2$s before making any HTTP requests.' ),
-					'<code>session_start()</code>',
-					'<code>session_write_close()</code>'
-				)
-			),
-			'test'        => 'php_sessions',
-		);
-
-		if ( PHP_SESSION_ACTIVE === session_status() ) {
-			$result['status'] = 'critical';
-
-			$result['label'] = __( 'An active PHP session was detected' );
-
-			$result['description'] = sprintf(
-				'<p>%s</p>',
-				sprintf(
-					/* translators: 1: session_start(), 2: session_write_close() */
-					__( 'A PHP session was created by a %1$s function call. This interferes with REST API and loopback requests. The session should be closed by %2$s before making any HTTP requests.' ),
-					'<code>session_start()</code>',
-					'<code>session_write_close()</code>'
 				)
 			);
 		}
@@ -1722,7 +1678,10 @@ class WP_Site_Health {
 		$output .= '</ul>';
 
 		if ( 'good' !== $result['status'] ) {
-			$result['description'] .= $output;
+			$result['description'] .= sprintf(
+				'<p>%s</p>',
+				$output
+			);
 		}
 
 		return $result;
@@ -1984,10 +1943,6 @@ class WP_Site_Health {
 				'php_default_timezone' => array(
 					'label' => __( 'PHP Default Timezone' ),
 					'test'  => 'php_default_timezone',
-				),
-				'php_sessions'         => array(
-					'label' => __( 'PHP Sessions' ),
-					'test'  => 'php_sessions',
 				),
 				'sql_server'           => array(
 					'label' => __( 'Database Server version' ),
@@ -2334,13 +2289,7 @@ class WP_Site_Health {
 				}
 
 				if ( ! is_wp_error( $result_fetch ) ) {
-					$result = json_decode( wp_remote_retrieve_body( $result_fetch ), true );
-				} else {
-					$result = false;
-				}
-
-				if ( is_array( $result ) ) {
-					$results[] = $result;
+					$results[] = json_decode( wp_remote_retrieve_body( $result_fetch ) );
 				} else {
 					$results[] = array(
 						'status' => 'recommended',

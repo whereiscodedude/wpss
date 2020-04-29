@@ -454,7 +454,7 @@ if ( ! function_exists( 'wp_mail' ) ) :
 		if ( ! empty( $headers ) ) {
 			foreach ( (array) $headers as $name => $content ) {
 				// Only add custom headers not added automatically by PHPMailer.
-				if ( ! in_array( $name, array( 'MIME-Version', 'X-Mailer' ), true ) ) {
+				if ( ! in_array( $name, array( 'MIME-Version', 'X-Mailer' ) ) ) {
 					$phpmailer->addCustomHeader( sprintf( '%1$s: %2$s', $name, $content ) );
 				}
 			}
@@ -546,7 +546,7 @@ if ( ! function_exists( 'wp_authenticate' ) ) :
 
 		$ignore_codes = array( 'empty_username', 'empty_password' );
 
-		if ( is_wp_error( $user ) && ! in_array( $user->get_error_code(), $ignore_codes, true ) ) {
+		if ( is_wp_error( $user ) && ! in_array( $user->get_error_code(), $ignore_codes ) ) {
 			$error = $user;
 
 			/**
@@ -573,21 +573,16 @@ if ( ! function_exists( 'wp_logout' ) ) :
 	 * @since 2.5.0
 	 */
 	function wp_logout() {
-		$user_id = get_current_user_id();
-
 		wp_destroy_current_session();
 		wp_clear_auth_cookie();
 		wp_set_current_user( 0 );
 
 		/**
-		 * Fires after a user is logged out.
+		 * Fires after a user is logged-out.
 		 *
 		 * @since 1.5.0
-		 * @since 5.5.0 Added the `$user_id` parameter.
-		 *
-		 * @param int $user_id ID of the user that was logged out.
 		 */
-		do_action( 'wp_logout', $user_id );
+		do_action( 'wp_logout' );
 	}
 endif;
 
@@ -1423,7 +1418,8 @@ if ( ! function_exists( 'wp_validate_redirect' ) ) :
 		$cut  = strpos( $location, '?' );
 		$test = $cut ? substr( $location, 0, $cut ) : $location;
 
-		$lp = parse_url( $test );
+		// @-operator is used to prevent possible warnings in PHP < 5.3.3.
+		$lp = @parse_url( $test );
 
 		// Give up if malformed URL.
 		if ( false === $lp ) {
@@ -1469,7 +1465,7 @@ if ( ! function_exists( 'wp_validate_redirect' ) ) :
 		 */
 		$allowed_hosts = (array) apply_filters( 'allowed_redirect_hosts', array( $wpp['host'] ), isset( $lp['host'] ) ? $lp['host'] : '' );
 
-		if ( isset( $lp['host'] ) && ( ! in_array( $lp['host'], $allowed_hosts, true ) && strtolower( $wpp['host'] ) !== $lp['host'] ) ) {
+		if ( isset( $lp['host'] ) && ( ! in_array( $lp['host'], $allowed_hosts ) && strtolower( $wpp['host'] ) !== $lp['host'] ) ) {
 			$location = $default;
 		}
 
@@ -2275,7 +2271,7 @@ if ( ! function_exists( 'wp_salt' ) ) :
 			$values['salt'] = SECRET_SALT;
 		}
 
-		if ( in_array( $scheme, array( 'auth', 'secure_auth', 'logged_in', 'nonce' ), true ) ) {
+		if ( in_array( $scheme, array( 'auth', 'secure_auth', 'logged_in', 'nonce' ) ) ) {
 			foreach ( array( 'key', 'salt' ) as $type ) {
 				$const = strtoupper( "{$scheme}_{$type}" );
 				if ( defined( $const ) && constant( $const ) && empty( $duplicated_keys[ constant( $const ) ] ) ) {
@@ -2605,8 +2601,6 @@ if ( ! function_exists( 'get_avatar' ) ) :
 	 *                                       Default null.
 	 *     @type bool         $force_display Whether to always show the avatar - ignores the show_avatars option.
 	 *                                       Default false.
-	 *     @type string       $loading       Value for the `loading` attribute.
-	 *                                       Default null.
 	 *     @type string       $extra_attr    HTML attributes to insert in the IMG element. Is not sanitized. Default empty.
 	 * }
 	 * @return string|false `<img>` tag for the user's avatar. False on failure.
@@ -2624,13 +2618,8 @@ if ( ! function_exists( 'get_avatar' ) ) :
 			'alt'           => '',
 			'class'         => null,
 			'force_display' => false,
-			'loading'       => null,
 			'extra_attr'    => '',
 		);
-
-		if ( wp_lazy_loading_enabled( 'img', 'get_avatar' ) ) {
-			$defaults['loading'] = 'lazy';
-		}
 
 		if ( empty( $args ) ) {
 			$args = array();
@@ -2654,7 +2643,7 @@ if ( ! function_exists( 'get_avatar' ) ) :
 		}
 
 		/**
-		 * Allows the HTML for a user's avatar to be returned early.
+		 * Filters whether to retrieve the avatar URL early.
 		 *
 		 * Passing a non-null value will effectively short-circuit get_avatar(), passing
 		 * the value through the {@see 'get_avatar'} filter and returning early.
@@ -2662,7 +2651,7 @@ if ( ! function_exists( 'get_avatar' ) ) :
 		 * @since 4.2.0
 		 *
 		 * @param string|null $avatar      HTML for the user's avatar. Default null.
-		 * @param mixed       $id_or_email The avatar to retrieve. Accepts a user_id, Gravatar MD5 hash,
+		 * @param mixed       $id_or_email The Gravatar to retrieve. Accepts a user_id, gravatar md5 hash,
 		 *                                 user email, WP_User object, WP_Post object, or WP_Comment object.
 		 * @param array       $args        Arguments passed to get_avatar_url(), after processing.
 		 */
@@ -2701,18 +2690,6 @@ if ( ! function_exists( 'get_avatar' ) ) :
 			}
 		}
 
-		// Add `loading` attribute.
-		$extra_attr = $args['extra_attr'];
-		$loading    = $args['loading'];
-
-		if ( in_array( $loading, array( 'lazy', 'eager' ), true ) && ! preg_match( '/\bloading\s*=/', $extra_attr ) ) {
-			if ( ! empty( $extra_attr ) ) {
-				$extra_attr .= ' ';
-			}
-
-			$extra_attr .= "loading='{$loading}'";
-		}
-
 		$avatar = sprintf(
 			"<img alt='%s' src='%s' srcset='%s' class='%s' height='%d' width='%d' %s/>",
 			esc_attr( $args['alt'] ),
@@ -2721,21 +2698,21 @@ if ( ! function_exists( 'get_avatar' ) ) :
 			esc_attr( join( ' ', $class ) ),
 			(int) $args['height'],
 			(int) $args['width'],
-			$extra_attr
+			$args['extra_attr']
 		);
 
 		/**
-		 * Filters the HTML for a user's avatar.
+		 * Filters the avatar to retrieve.
 		 *
 		 * @since 2.5.0
 		 * @since 4.2.0 The `$args` parameter was added.
 		 *
-		 * @param string $avatar      HTML for the user's avatar.
-		 * @param mixed  $id_or_email The avatar to retrieve. Accepts a user_id, Gravatar MD5 hash,
+		 * @param string $avatar      &lt;img&gt; tag for the user's avatar.
+		 * @param mixed  $id_or_email The Gravatar to retrieve. Accepts a user_id, gravatar md5 hash,
 		 *                            user email, WP_User object, WP_Post object, or WP_Comment object.
 		 * @param int    $size        Square avatar width and height in pixels to retrieve.
 		 * @param string $default     URL for the default image or a default type. Accepts '404', 'retro', 'monsterid',
-		 *                            'wavatar', 'indenticon', 'mystery', 'mm', 'mysteryman', 'blank', or 'gravatar_default'.
+		 *                            'wavatar', 'indenticon','mystery' (or 'mm', or 'mysteryman'), 'blank', or 'gravatar_default'.
 		 *                            Default is the value of the 'avatar_default' option, with a fallback of 'mystery'.
 		 * @param string $alt         Alternative text to use in the avatar image tag. Default empty.
 		 * @param array  $args        Arguments passed to get_avatar_data(), after processing.

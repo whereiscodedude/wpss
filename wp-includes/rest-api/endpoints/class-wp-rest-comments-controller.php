@@ -585,7 +585,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 			return $prepared_comment;
 		}
 
-		$prepared_comment['comment_type'] = 'comment';
+		$prepared_comment['comment_type'] = '';
 
 		/*
 		 * Do not allow a comment to be created with missing or empty

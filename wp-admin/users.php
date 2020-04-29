@@ -237,7 +237,7 @@ switch ( $wp_list_table->current_action() ) {
 
 		$all_userids = $userids;
 
-		if ( in_array( $current_user->ID, $userids, true ) ) {
+		if ( in_array( $current_user->ID, $userids ) ) {
 			$userids = array_diff( $userids, array( $current_user->ID ) );
 		}
 

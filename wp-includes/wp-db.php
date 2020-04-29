@@ -865,7 +865,7 @@ class wpdb {
 		$incompatible_modes = (array) apply_filters( 'incompatible_sql_modes', $this->incompatible_modes );
 
 		foreach ( $modes as $i => $mode ) {
-			if ( in_array( $mode, $incompatible_modes, true ) ) {
+			if ( in_array( $mode, $incompatible_modes ) ) {
 				unset( $modes[ $i ] );
 			}
 		}
@@ -1039,7 +1039,7 @@ class wpdb {
 			$base_prefix   = $this->base_prefix;
 			$global_tables = array_merge( $this->global_tables, $this->ms_global_tables );
 			foreach ( $tables as $k => $table ) {
-				if ( in_array( $table, $global_tables, true ) ) {
+				if ( in_array( $table, $global_tables ) ) {
 					$tables[ $table ] = $base_prefix . $table;
 				} else {
 					$tables[ $table ] = $blog_prefix . $table;
@@ -2209,7 +2209,7 @@ class wpdb {
 	function _insert_replace_helper( $table, $data, $format = null, $type = 'INSERT' ) {
 		$this->insert_id = 0;
 
-		if ( ! in_array( strtoupper( $type ), array( 'REPLACE', 'INSERT' ), true ) ) {
+		if ( ! in_array( strtoupper( $type ), array( 'REPLACE', 'INSERT' ) ) ) {
 			return false;
 		}
 
@@ -2743,7 +2743,7 @@ class wpdb {
 			list( $type ) = explode( '(', $column->Type );
 
 			// A binary/blob means the whole query gets treated like this.
-			if ( in_array( strtoupper( $type ), array( 'BINARY', 'VARBINARY', 'TINYBLOB', 'MEDIUMBLOB', 'BLOB', 'LONGBLOB' ), true ) ) {
+			if ( in_array( strtoupper( $type ), array( 'BINARY', 'VARBINARY', 'TINYBLOB', 'MEDIUMBLOB', 'BLOB', 'LONGBLOB' ) ) ) {
 				$this->table_charset[ $tablekey ] = 'binary';
 				return 'binary';
 			}
@@ -3610,26 +3610,14 @@ class wpdb {
 	 *
 	 * @since 2.7.0
 	 *
-	 * @return string|null Version number on success, null on failure.
+	 * @return null|string Null on failure, version number on success.
 	 */
 	public function db_version() {
-		return preg_replace( '/[^0-9.].*/', '', $this->db_server_info() );
-	}
-
-	/**
-	 * Retrieves full MySQL server information.
-	 *
-	 * @since 5.5.0
-	 *
-	 * @return string|false Server info on success, false on failure.
-	 */
-	public function db_server_info() {
 		if ( $this->use_mysqli ) {
 			$server_info = mysqli_get_server_info( $this->dbh );
 		} else {
 			$server_info = mysql_get_server_info( $this->dbh );
 		}
-
-		return $server_info;
+		return preg_replace( '/[^0-9.].*/', '', $server_info );
 	}
 }
