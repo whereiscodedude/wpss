@@ -117,9 +117,6 @@ function render_block_core_latest_comments( $attributes = array() ) {
 	}
 
 	$class = 'wp-block-latest-comments';
-	if ( ! empty( $attributes['className'] ) ) {
-		$class .= ' ' . $attributes['className'];
-	}
 	if ( isset( $attributes['align'] ) ) {
 		$class .= " align{$attributes['align']}";
 	}
@@ -137,7 +134,7 @@ function render_block_core_latest_comments( $attributes = array() ) {
 	}
 	$classnames = esc_attr( $class );
 
-	return ! empty( $comments ) ? sprintf(
+	$block_content = ! empty( $comments ) ? sprintf(
 		'<ol class="%1$s">%2$s</ol>',
 		$classnames,
 		$list_items_markup
@@ -146,51 +143,40 @@ function render_block_core_latest_comments( $attributes = array() ) {
 		$classnames,
 		__( 'No comments to show.' )
 	);
+
+	return $block_content;
 }
 
-/**
- * Registers the `core/latest-comments` block.
- */
-function register_block_core_latest_comments() {
-	register_block_type(
-		'core/latest-comments',
-		array(
-			'attributes'      => array(
-				'align'          => array(
-					'type' => 'string',
-					'enum' => array(
-						'left',
-						'center',
-						'right',
-						'wide',
-						'full',
-					),
-				),
-				'className'      => array(
-					'type' => 'string',
-				),
-				'commentsToShow' => array(
-					'type'    => 'number',
-					'default' => 5,
-					'minimum' => 1,
-					'maximum' => 100,
-				),
-				'displayAvatar'  => array(
-					'type'    => 'boolean',
-					'default' => true,
-				),
-				'displayDate'    => array(
-					'type'    => 'boolean',
-					'default' => true,
-				),
-				'displayExcerpt' => array(
-					'type'    => 'boolean',
-					'default' => true,
-				),
+register_block_type(
+	'core/latest-comments',
+	array(
+		'attributes'      => array(
+			'className'      => array(
+				'type' => 'string',
 			),
-			'render_callback' => 'render_block_core_latest_comments',
-		)
-	);
-}
-
-add_action( 'init', 'register_block_core_latest_comments' );
+			'commentsToShow' => array(
+				'type'    => 'number',
+				'default' => 5,
+				'minimum' => 1,
+				'maximum' => 100,
+			),
+			'displayAvatar'  => array(
+				'type'    => 'boolean',
+				'default' => true,
+			),
+			'displayDate'    => array(
+				'type'    => 'boolean',
+				'default' => true,
+			),
+			'displayExcerpt' => array(
+				'type'    => 'boolean',
+				'default' => true,
+			),
+			'align'          => array(
+				'type' => 'string',
+				'enum' => array( 'center', 'left', 'right', 'wide', 'full', '' ),
+			),
+		),
+		'render_callback' => 'render_block_core_latest_comments',
+	)
+);

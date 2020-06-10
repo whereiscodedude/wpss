@@ -73,7 +73,7 @@ class WP_Automatic_Updater {
 	 */
 	public function is_vcs_checkout( $context ) {
 		$context_dirs = array( untrailingslashit( $context ) );
-		if ( ABSPATH !== $context ) {
+		if ( $context !== ABSPATH ) {
 			$context_dirs[] = untrailingslashit( ABSPATH );
 		}
 
@@ -86,7 +86,7 @@ class WP_Automatic_Updater {
 				$check_dirs[] = $context_dir;
 
 				// Once we've hit '/' or 'C:\', we need to stop. dirname will keep returning the input here.
-				if ( dirname( $context_dir ) === $context_dir ) {
+				if ( $context_dir == dirname( $context_dir ) ) {
 					break;
 				}
 
@@ -99,8 +99,7 @@ class WP_Automatic_Updater {
 		// Search all directories we've found for evidence of version control.
 		foreach ( $vcs_dirs as $vcs_dir ) {
 			foreach ( $check_dirs as $check_dir ) {
-				$checkout = @is_dir( rtrim( $check_dir, '\\/' ) . "/$vcs_dir" );
-				if ( $checkout ) {
+				if ( $checkout = @is_dir( rtrim( $check_dir, '\\/' ) . "/$vcs_dir" ) ) {
 					break 2;
 				}
 			}
@@ -141,31 +140,23 @@ class WP_Automatic_Updater {
 			return false;
 		}
 
-		// Only relax the filesystem checks when the update doesn't include new files.
+		// Only relax the filesystem checks when the update doesn't include new files
 		$allow_relaxed_file_ownership = false;
-		if ( 'core' === $type && isset( $item->new_files ) && ! $item->new_files ) {
+		if ( 'core' == $type && isset( $item->new_files ) && ! $item->new_files ) {
 			$allow_relaxed_file_ownership = true;
 		}
 
 		// If we can't do an auto core update, we may still be able to email the user.
 		if ( ! $skin->request_filesystem_credentials( false, $context, $allow_relaxed_file_ownership ) || $this->is_vcs_checkout( $context ) ) {
-			if ( 'core' === $type ) {
+			if ( 'core' == $type ) {
 				$this->send_core_update_notification_email( $item );
 			}
 			return false;
 		}
 
 		// Next up, is this an item we can update?
-		if ( 'core' === $type ) {
+		if ( 'core' == $type ) {
 			$update = Core_Upgrader::should_update_to_version( $item->current );
-		} elseif ( 'plugin' === $type || 'theme' === $type ) {
-			$update = ! empty( $item->autoupdate );
-
-			if ( ! $update && wp_is_auto_update_enabled_for_type( $type ) ) {
-				// Check if the site admin has enabled auto-updates by default for the specific item.
-				$auto_updates = (array) get_site_option( "auto_update_{$type}s", array() );
-				$update       = in_array( $item->{$type}, $auto_updates, true );
-			}
 		} else {
 			$update = ! empty( $item->autoupdate );
 		}
@@ -192,14 +183,14 @@ class WP_Automatic_Updater {
 		$update = apply_filters( "auto_update_{$type}", $update, $item );
 
 		if ( ! $update ) {
-			if ( 'core' === $type ) {
+			if ( 'core' == $type ) {
 				$this->send_core_update_notification_email( $item );
 			}
 			return false;
 		}
 
 		// If it's a core update, are we actually compatible with its requirements?
-		if ( 'core' === $type ) {
+		if ( 'core' == $type ) {
 			global $wpdb;
 
 			$php_compat = version_compare( phpversion(), $item->php_version, '>=' );
@@ -210,13 +201,6 @@ class WP_Automatic_Updater {
 			}
 
 			if ( ! $php_compat || ! $mysql_compat ) {
-				return false;
-			}
-		}
-
-		// If updating a plugin, ensure the minimum PHP version requirements are satisfied.
-		if ( 'plugin' === $type ) {
-			if ( ! empty( $item->requires_php ) && version_compare( phpversion(), $item->requires_php, '<' ) ) {
 				return false;
 			}
 		}
@@ -235,7 +219,7 @@ class WP_Automatic_Updater {
 		$notified = get_site_option( 'auto_core_update_notified' );
 
 		// Don't notify if we've already notified the same email address of the same version.
-		if ( $notified && get_site_option( 'admin_email' ) === $notified['email'] && $notified['version'] == $item->current ) {
+		if ( $notified && $notified['email'] == get_site_option( 'admin_email' ) && $notified['version'] == $item->current ) {
 			return false;
 		}
 
@@ -291,7 +275,7 @@ class WP_Automatic_Updater {
 				break;
 			case 'plugin':
 				$upgrader = new Plugin_Upgrader( $skin );
-				$context  = WP_PLUGIN_DIR; // We don't support custom Plugin directories, or updates for WPMU_PLUGIN_DIR.
+				$context  = WP_PLUGIN_DIR; // We don't support custom Plugin directories, or updates for WPMU_PLUGIN_DIR
 				break;
 			case 'theme':
 				$upgrader = new Theme_Upgrader( $skin );
@@ -323,40 +307,40 @@ class WP_Automatic_Updater {
 		$upgrader_item = $item;
 		switch ( $type ) {
 			case 'core':
-				/* translators: %s: WordPress version. */
+				/* translators: %s: WordPress version */
 				$skin->feedback( __( 'Updating to WordPress %s' ), $item->version );
-				/* translators: %s: WordPress version. */
+				/* translators: %s: WordPress version */
 				$item_name = sprintf( __( 'WordPress %s' ), $item->version );
 				break;
 			case 'theme':
 				$upgrader_item = $item->theme;
 				$theme         = wp_get_theme( $upgrader_item );
 				$item_name     = $theme->Get( 'Name' );
-				/* translators: %s: Theme name. */
+				/* translators: %s: Theme name */
 				$skin->feedback( __( 'Updating theme: %s' ), $item_name );
 				break;
 			case 'plugin':
 				$upgrader_item = $item->plugin;
 				$plugin_data   = get_plugin_data( $context . '/' . $upgrader_item );
 				$item_name     = $plugin_data['Name'];
-				/* translators: %s: Plugin name. */
+				/* translators: %s: Plugin name */
 				$skin->feedback( __( 'Updating plugin: %s' ), $item_name );
 				break;
 			case 'translation':
 				$language_item_name = $upgrader->get_name_for_update( $item );
-				/* translators: %s: Project name (plugin, theme, or WordPress). */
+				/* translators: %s: Name of language item */
 				$item_name = sprintf( __( 'Translations for %s' ), $language_item_name );
-				/* translators: 1: Project name (plugin, theme, or WordPress), 2: Language. */
+				/* translators: 1: Name of language item, 2: Language */
 				$skin->feedback( sprintf( __( 'Updating translations for %1$s (%2$s)&#8230;' ), $language_item_name, $item->language ) );
 				break;
 		}
 
 		$allow_relaxed_file_ownership = false;
-		if ( 'core' === $type && isset( $item->new_files ) && ! $item->new_files ) {
+		if ( 'core' == $type && isset( $item->new_files ) && ! $item->new_files ) {
 			$allow_relaxed_file_ownership = true;
 		}
 
-		// Boom, this site's about to get a whole new splash of paint!
+		// Boom, This sites about to get a whole new splash of paint!
 		$upgrade_result = $upgrader->upgrade(
 			$upgrader_item,
 			array(
@@ -365,7 +349,7 @@ class WP_Automatic_Updater {
 				'pre_check_md5'                => false,
 				// Only available for core updates.
 				'attempt_rollback'             => true,
-				// Allow relaxed file ownership in some scenarios.
+				// Allow relaxed file ownership in some scenarios
 				'allow_relaxed_file_ownership' => $allow_relaxed_file_ownership,
 			)
 		);
@@ -375,13 +359,9 @@ class WP_Automatic_Updater {
 			$upgrade_result = new WP_Error( 'fs_unavailable', __( 'Could not access filesystem.' ) );
 		}
 
-		if ( 'core' === $type ) {
-			if ( is_wp_error( $upgrade_result )
-				&& ( 'up_to_date' === $upgrade_result->get_error_code()
-					|| 'locked' === $upgrade_result->get_error_code() )
-			) {
-				// These aren't actual errors, treat it as a skipped-update instead
-				// to avoid triggering the post-core update failure routines.
+		if ( 'core' == $type ) {
+			if ( is_wp_error( $upgrade_result ) && ( 'up_to_date' == $upgrade_result->get_error_code() || 'locked' == $upgrade_result->get_error_code() ) ) {
+				// These aren't actual errors, treat it as a skipped-update instead to avoid triggering the post-core update failure routines.
 				return false;
 			}
 
@@ -421,51 +401,51 @@ class WP_Automatic_Updater {
 			return;
 		}
 
-		// Don't automatically run these things, as we'll handle it ourselves.
+		// Don't automatically run these thins, as we'll handle it ourselves
 		remove_action( 'upgrader_process_complete', array( 'Language_Pack_Upgrader', 'async_upgrade' ), 20 );
 		remove_action( 'upgrader_process_complete', 'wp_version_check' );
 		remove_action( 'upgrader_process_complete', 'wp_update_plugins' );
 		remove_action( 'upgrader_process_complete', 'wp_update_themes' );
 
-		// Next, plugins.
-		wp_update_plugins(); // Check for plugin updates.
+		// Next, Plugins
+		wp_update_plugins(); // Check for Plugin updates
 		$plugin_updates = get_site_transient( 'update_plugins' );
 		if ( $plugin_updates && ! empty( $plugin_updates->response ) ) {
 			foreach ( $plugin_updates->response as $plugin ) {
 				$this->update( 'plugin', $plugin );
 			}
-			// Force refresh of plugin update information.
+			// Force refresh of plugin update information
 			wp_clean_plugins_cache();
 		}
 
-		// Next, those themes we all love.
-		wp_update_themes();  // Check for theme updates.
+		// Next, those themes we all love
+		wp_update_themes();  // Check for Theme updates
 		$theme_updates = get_site_transient( 'update_themes' );
 		if ( $theme_updates && ! empty( $theme_updates->response ) ) {
 			foreach ( $theme_updates->response as $theme ) {
 				$this->update( 'theme', (object) $theme );
 			}
-			// Force refresh of theme update information.
+			// Force refresh of theme update information
 			wp_clean_themes_cache();
 		}
 
-		// Next, process any core update.
-		wp_version_check(); // Check for core updates.
+		// Next, Process any core update
+		wp_version_check(); // Check for Core updates
 		$core_update = find_core_auto_update();
 
 		if ( $core_update ) {
 			$this->update( 'core', $core_update );
 		}
 
-		// Clean up, and check for any pending translations.
-		// (Core_Upgrader checks for core updates.)
+		// Clean up, and check for any pending translations
+		// (Core_Upgrader checks for core updates)
 		$theme_stats = array();
 		if ( isset( $this->update_results['theme'] ) ) {
 			foreach ( $this->update_results['theme'] as $upgrade ) {
 				$theme_stats[ $upgrade->item->theme ] = ( true === $upgrade->result );
 			}
 		}
-		wp_update_themes( $theme_stats ); // Check for theme updates.
+		wp_update_themes( $theme_stats );  // Check for Theme updates
 
 		$plugin_stats = array();
 		if ( isset( $this->update_results['plugin'] ) ) {
@@ -473,21 +453,21 @@ class WP_Automatic_Updater {
 				$plugin_stats[ $upgrade->item->plugin ] = ( true === $upgrade->result );
 			}
 		}
-		wp_update_plugins( $plugin_stats ); // Check for plugin updates.
+		wp_update_plugins( $plugin_stats ); // Check for Plugin updates
 
-		// Finally, process any new translations.
+		// Finally, Process any new translations
 		$language_updates = wp_get_translation_updates();
 		if ( $language_updates ) {
 			foreach ( $language_updates as $update ) {
 				$this->update( 'translation', $update );
 			}
 
-			// Clear existing caches.
+			// Clear existing caches
 			wp_clean_update_cache();
 
-			wp_version_check();  // Check for core updates.
-			wp_update_themes();  // Check for theme updates.
-			wp_update_plugins(); // Check for plugin updates.
+			wp_version_check();  // check for Core updates
+			wp_update_themes();  // Check for Theme updates
+			wp_update_plugins(); // Check for Plugin updates
 		}
 
 		// Send debugging email to admin for all development installations.
@@ -509,8 +489,6 @@ class WP_Automatic_Updater {
 
 			if ( ! empty( $this->update_results['core'] ) ) {
 				$this->after_core_update( $this->update_results['core'][0] );
-			} elseif ( ! empty( $this->update_results['plugin'] ) || ! empty( $this->update_results['theme'] ) ) {
-				$this->after_plugin_theme_update( $this->update_results );
 			}
 
 			/**
@@ -550,9 +528,9 @@ class WP_Automatic_Updater {
 		// Any of these WP_Error codes are critical failures, as in they occurred after we started to copy core files.
 		// We should not try to perform a background update again until there is a successful one-click update performed by the user.
 		$critical = false;
-		if ( 'disk_full' === $error_code || false !== strpos( $error_code, '__copy_dir' ) ) {
+		if ( $error_code === 'disk_full' || false !== strpos( $error_code, '__copy_dir' ) ) {
 			$critical = true;
-		} elseif ( 'rollback_was_required' === $error_code && is_wp_error( $result->get_error_data()->rollback ) ) {
+		} elseif ( $error_code === 'rollback_was_required' && is_wp_error( $result->get_error_data()->rollback ) ) {
 			// A rollback is only critical if it failed too.
 			$critical        = true;
 			$rollback_result = $result->get_error_data()->rollback;
@@ -591,14 +569,14 @@ class WP_Automatic_Updater {
 		 */
 		$send               = true;
 		$transient_failures = array( 'incompatible_archive', 'download_failed', 'insane_distro', 'locked' );
-		if ( in_array( $error_code, $transient_failures, true ) && ! get_site_option( 'auto_core_update_failed' ) ) {
+		if ( in_array( $error_code, $transient_failures ) && ! get_site_option( 'auto_core_update_failed' ) ) {
 			wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'wp_maybe_auto_update' );
 			$send = false;
 		}
 
 		$n = get_site_option( 'auto_core_update_notified' );
 		// Don't notify if we've already notified the same email address of the same version of the same notification type.
-		if ( $n && 'fail' === $n['type'] && get_site_option( 'admin_email' ) === $n['email'] && $n['version'] == $core_update->current ) {
+		if ( $n && 'fail' == $n['type'] && $n['email'] == get_site_option( 'admin_email' ) && $n['version'] == $core_update->current ) {
 			$send = false;
 		}
 
@@ -610,7 +588,7 @@ class WP_Automatic_Updater {
 				'error_code' => $error_code,
 				'error_data' => $result->get_error_data(),
 				'timestamp'  => time(),
-				'retry'      => in_array( $error_code, $transient_failures, true ),
+				'retry'      => in_array( $error_code, $transient_failures ),
 			)
 		);
 
@@ -640,13 +618,11 @@ class WP_Automatic_Updater {
 		);
 
 		$next_user_core_update = get_preferred_from_update_core();
-
-		// If the update transient is empty, use the update we just performed.
+		// If the update transient is empty, use the update we just performed
 		if ( ! $next_user_core_update ) {
 			$next_user_core_update = $core_update;
 		}
-
-		$newer_version_available = ( 'upgrade' === $next_user_core_update->response && version_compare( $next_user_core_update->version, $core_update->version, '>' ) );
+		$newer_version_available = ( 'upgrade' == $next_user_core_update->response && version_compare( $next_user_core_update->version, $core_update->version, '>' ) );
 
 		/**
 		 * Filters whether to send an email following an automatic background core update.
@@ -665,18 +641,18 @@ class WP_Automatic_Updater {
 
 		switch ( $type ) {
 			case 'success': // We updated.
-				/* translators: Site updated notification email subject. 1: Site title, 2: WordPress version. */
+				/* translators: 1: Site name, 2: WordPress version number. */
 				$subject = __( '[%1$s] Your site has updated to WordPress %2$s' );
 				break;
 
 			case 'fail':   // We tried to update but couldn't.
 			case 'manual': // We can't update (and made no attempt).
-				/* translators: Update available notification email subject. 1: Site title, 2: WordPress version. */
+				/* translators: 1: Site name, 2: WordPress version number. */
 				$subject = __( '[%1$s] WordPress %2$s is available. Please update!' );
 				break;
 
 			case 'critical': // We tried to update, started to copy files, then things went wrong.
-				/* translators: Site down notification email subject. 1: Site title. */
+				/* translators: 1: Site name. */
 				$subject = __( '[%1$s] URGENT: Your site may be down due to a failed update' );
 				break;
 
@@ -692,12 +668,8 @@ class WP_Automatic_Updater {
 
 		switch ( $type ) {
 			case 'success':
-				$body .= sprintf(
-					/* translators: 1: Home URL, 2: WordPress version. */
-					__( 'Howdy! Your site at %1$s has been updated automatically to WordPress %2$s.' ),
-					home_url(),
-					$core_update->current
-				);
+				/* translators: 1: Home URL, 2: WordPress version */
+				$body .= sprintf( __( 'Howdy! Your site at %1$s has been updated automatically to WordPress %2$s.' ), home_url(), $core_update->current );
 				$body .= "\n\n";
 				if ( ! $newer_version_available ) {
 					$body .= __( 'No further action is needed on your part.' ) . ' ';
@@ -705,12 +677,12 @@ class WP_Automatic_Updater {
 
 				// Can only reference the About screen if their update was successful.
 				list( $about_version ) = explode( '-', $core_update->current, 2 );
-				/* translators: %s: WordPress version. */
+				/* translators: %s: WordPress core version */
 				$body .= sprintf( __( 'For more on version %s, see the About WordPress screen:' ), $about_version );
 				$body .= "\n" . admin_url( 'about.php' );
 
 				if ( $newer_version_available ) {
-					/* translators: %s: WordPress latest version. */
+					/* translators: %s: WordPress core latest version */
 					$body .= "\n\n" . sprintf( __( 'WordPress %s is also now available.' ), $next_user_core_update->current ) . ' ';
 					$body .= __( 'Updating is easy and only takes a few moments:' );
 					$body .= "\n" . network_admin_url( 'update-core.php' );
@@ -720,18 +692,14 @@ class WP_Automatic_Updater {
 
 			case 'fail':
 			case 'manual':
-				$body .= sprintf(
-					/* translators: 1: Home URL, 2: WordPress version. */
-					__( 'Please update your site at %1$s to WordPress %2$s.' ),
-					home_url(),
-					$next_user_core_update->current
-				);
+				/* translators: 1: Home URL, 2: WordPress core latest version */
+				$body .= sprintf( __( 'Please update your site at %1$s to WordPress %2$s.' ), home_url(), $next_user_core_update->current );
 
 				$body .= "\n\n";
 
 				// Don't show this message if there is a newer version available.
 				// Potential for confusion, and also not useful for them to know at this point.
-				if ( 'fail' === $type && ! $newer_version_available ) {
+				if ( 'fail' == $type && ! $newer_version_available ) {
 					$body .= __( 'We tried but were unable to update your site automatically.' ) . ' ';
 				}
 
@@ -741,19 +709,11 @@ class WP_Automatic_Updater {
 
 			case 'critical':
 				if ( $newer_version_available ) {
-					$body .= sprintf(
-						/* translators: 1: Home URL, 2: WordPress version. */
-						__( 'Your site at %1$s experienced a critical failure while trying to update WordPress to version %2$s.' ),
-						home_url(),
-						$core_update->current
-					);
+					/* translators: 1: Home URL, 2: WordPress core latest version */
+					$body .= sprintf( __( 'Your site at %1$s experienced a critical failure while trying to update WordPress to version %2$s.' ), home_url(), $core_update->current );
 				} else {
-					$body .= sprintf(
-						/* translators: 1: Home URL, 2: WordPress latest version. */
-						__( 'Your site at %1$s experienced a critical failure while trying to update to the latest version of WordPress, %2$s.' ),
-						home_url(),
-						$core_update->current
-					);
+					/* translators: 1: Home URL, 2: Core update version */
+					$body .= sprintf( __( 'Your site at %1$s experienced a critical failure while trying to update to the latest version of WordPress, %2$s.' ), home_url(), $core_update->current );
 				}
 
 				$body .= "\n\n" . __( "This means your site may be offline or broken. Don't panic; this can be fixed." );
@@ -766,19 +726,16 @@ class WP_Automatic_Updater {
 		$critical_support = 'critical' === $type && ! empty( $core_update->support_email );
 		if ( $critical_support ) {
 			// Support offer if available.
-			$body .= "\n\n" . sprintf(
-				/* translators: %s: Support email address. */
-				__( 'The WordPress team is willing to help you. Forward this email to %s and the team will work with you to make sure your site is working.' ),
-				$core_update->support_email
-			);
+			/* translators: %s: Support e-mail */
+			$body .= "\n\n" . sprintf( __( 'The WordPress team is willing to help you. Forward this email to %s and the team will work with you to make sure your site is working.' ), $core_update->support_email );
 		} else {
 			// Add a note about the support forums.
 			$body .= "\n\n" . __( 'If you experience any issues or need support, the volunteers in the WordPress.org support forums may be able to help.' );
-			$body .= "\n" . __( 'https://wordpress.org/support/forums/' );
+			$body .= "\n" . __( 'https://wordpress.org/support/' );
 		}
 
 		// Updates are important!
-		if ( 'success' !== $type || $newer_version_available ) {
+		if ( $type != 'success' || $newer_version_available ) {
 			$body .= "\n\n" . __( 'Keeping your site updated is important for security. It also makes the internet a safer place for you and your readers.' );
 		}
 
@@ -787,23 +744,23 @@ class WP_Automatic_Updater {
 		}
 
 		// If things are successful and we're now on the latest, mention plugins and themes if any are out of date.
-		if ( 'success' === $type && ! $newer_version_available && ( get_plugin_updates() || get_theme_updates() ) ) {
+		if ( $type == 'success' && ! $newer_version_available && ( get_plugin_updates() || get_theme_updates() ) ) {
 			$body .= "\n\n" . __( 'You also have some plugins or themes with updates available. Update them now:' );
 			$body .= "\n" . network_admin_url();
 		}
 
 		$body .= "\n\n" . __( 'The WordPress Team' ) . "\n";
 
-		if ( 'critical' === $type && is_wp_error( $result ) ) {
+		if ( 'critical' == $type && is_wp_error( $result ) ) {
 			$body .= "\n***\n\n";
-			/* translators: %s: WordPress version. */
+			/* translators: %s: WordPress version */
 			$body .= sprintf( __( 'Your site was running version %s.' ), get_bloginfo( 'version' ) );
 			$body .= ' ' . __( 'We have some data that describes the error your site encountered.' );
 			$body .= ' ' . __( 'Your hosting company, support forum volunteers, or a friendly developer may be able to use this information to help you:' );
 
 			// If we had a rollback and we're still critical, then the rollback failed too.
 			// Loop through all errors (the main WP_Error, the update result, the rollback result) for code, data, etc.
-			if ( 'rollback_was_required' === $result->get_error_code() ) {
+			if ( 'rollback_was_required' == $result->get_error_code() ) {
 				$errors = array( $result, $result->get_error_data()->update, $result->get_error_data()->rollback );
 			} else {
 				$errors = array( $result );
@@ -813,25 +770,20 @@ class WP_Automatic_Updater {
 				if ( ! is_wp_error( $error ) ) {
 					continue;
 				}
-
 				$error_code = $error->get_error_code();
-				/* translators: %s: Error code. */
+				/* translators: %s: Error code */
 				$body .= "\n\n" . sprintf( __( 'Error code: %s' ), $error_code );
-
-				if ( 'rollback_was_required' === $error_code ) {
+				if ( 'rollback_was_required' == $error_code ) {
 					continue;
 				}
-
 				if ( $error->get_error_message() ) {
 					$body .= "\n" . $error->get_error_message();
 				}
-
 				$error_data = $error->get_error_data();
 				if ( $error_data ) {
 					$body .= "\n" . implode( ', ', (array) $error_data );
 				}
 			}
-
 			$body .= "\n";
 		}
 
@@ -864,189 +816,6 @@ class WP_Automatic_Updater {
 		wp_mail( $email['to'], wp_specialchars_decode( $email['subject'] ), $email['body'], $email['headers'] );
 	}
 
-
-	/**
-	 * If we tried to perform plugin or theme updates, check if we should send an email.
-	 *
-	 * @since 5.5.0
-	 *
-	 * @param object $results The result of updates tasks.
-	 */
-	protected function after_plugin_theme_update( $update_results ) {
-		$successful_updates = array();
-		$failed_updates     = array();
-
-		/**
-		 * Filters whether to send an email following an automatic background plugin update.
-		 *
-		 * @since 5.5.0
-		 *
-		 * @param bool $enabled True if plugins notifications are enabled, false otherwise.
-		 */
-		$notifications_enabled = apply_filters( 'auto_plugin_update_send_email', true );
-
-		if ( ! empty( $update_results['plugin'] ) && $notifications_enabled ) {
-			foreach ( $update_results['plugin'] as $update_result ) {
-				if ( true === $update_result->result ) {
-					$successful_updates['plugin'][] = $update_result;
-				} else {
-					$failed_updates['plugin'][] = $update_result;
-				}
-			}
-		}
-
-		/**
-		 * Filters whether to send an email following an automatic background theme update.
-		 *
-		 * @since 5.5.0
-		 *
-		 * @param bool $enabled True if notifications are enabled, false otherwise.
-		 */
-		$notifications_enabled = apply_filters( 'auto_theme_update_send_email', true );
-
-		if ( ! empty( $update_results['theme'] ) && $notifications_enabled ) {
-			foreach ( $update_results['theme'] as $update_result ) {
-				if ( true === $update_result->result ) {
-					$successful_updates['theme'][] = $update_result;
-				} else {
-					$failed_updates['theme'][] = $update_result;
-				}
-			}
-		}
-
-		if ( empty( $successful_updates ) && empty( $failed_updates ) ) {
-			return;
-		}
-
-		if ( empty( $failed_updates ) ) {
-			$this->send_plugin_theme_email( 'success', $successful_updates, $failed_updates );
-		} elseif ( empty( $successful_updates ) ) {
-			$this->send_plugin_theme_email( 'fail', $successful_updates, $failed_updates );
-		} else {
-			$this->send_plugin_theme_email( 'mixed', $successful_updates, $failed_updates );
-		}
-	}
-
-	/**
-	 * Sends an email upon the completion or failure of a plugin or theme background update.
-	 *
-	 * @since 5.5.0
-	 *
-	 * @param string $type               The type of email to send. Can be one of 'success', 'failure', 'mixed'.
-	 * @param array  $successful_updates A list of updates that succeeded.
-	 * @param array  $failed_updates     A list of updates that failed.
-	 */
-	protected function send_plugin_theme_email( $type, $successful_updates, $failed_updates ) {
-		// No updates were attempted.
-		if ( empty( $successful_updates ) && empty( $failed_updates ) ) {
-			return;
-		}
-		$body = array();
-
-		switch ( $type ) {
-			case 'success':
-				/* translators: %s: Site title. */
-				$subject = __( '[%s] Some plugins or themes were automatically updated' );
-				break;
-			case 'fail':
-				/* translators: %s: Site title. */
-				$subject = __( '[%s] Some plugins or themes have failed to update' );
-				$body[]  = sprintf(
-					/* translators: %s: Home URL. */
-					__( 'Howdy! Failures occurred when attempting to update plugins/themes on your site at %s.' ),
-					home_url()
-				);
-				$body[] = "\n";
-				$body[] = __( 'Please check out your site now. It’s possible that everything is working. If it says you need to update, you should do so.' );
-				break;
-			case 'mixed':
-				/* translators: %s: Site title. */
-				$subject = __( '[%s] Some plugins or themes were automatically updated' );
-				$body[]  = sprintf(
-					/* translators: %s: Home URL. */
-					__( 'Howdy! Failures occurred when attempting to update plugins/themes on your site at %s.' ),
-					home_url()
-				);
-				$body[] = "\n";
-				$body[] = __( 'Please check out your site now. It’s possible that everything is working. If it says you need to update, you should do so.' );
-				$body[] = "\n";
-				break;
-		}
-
-		// Get failed plugin updates.
-		if ( in_array( $type, array( 'fail', 'mixed' ), true ) && ! empty( $failed_updates['plugin'] ) ) {
-			$body[] = __( 'The following plugins failed to update:' );
-			// List failed updates.
-			foreach ( $failed_updates['plugin'] as $item ) {
-				$body[] = "- {$item->name}";
-			}
-			$body[] = "\n";
-		}
-		// Get failed theme updates.
-		if ( in_array( $type, array( 'fail', 'mixed' ), true ) && ! empty( $failed_updates['theme'] ) ) {
-			$body[] = __( 'The following themes failed to update:' );
-			// List failed updates.
-			foreach ( $failed_updates['theme'] as $item ) {
-				$body[] = "- {$item->name}";
-			}
-			$body[] = "\n";
-		}
-		// Get successful plugin updates.
-		if ( in_array( $type, array( 'success', 'mixed' ), true ) && ! empty( $successful_updates['plugin'] ) ) {
-			$body[] = __( 'The following plugins were successfully updated:' );
-			// List successful updates.
-			foreach ( $successful_updates['plugin'] as $item ) {
-				$body[] = "- {$item->name}";
-			}
-			$body[] = "\n";
-		}
-		// Get successful theme updates.
-		if ( in_array( $type, array( 'success', 'mixed' ), true ) && ! empty( $successful_updates['theme'] ) ) {
-			$body[] = __( 'The following themes were successfully updated:' );
-			// List successful updates.
-			foreach ( $successful_updates['theme'] as $item ) {
-				$body[] = "- {$item->name}";
-			}
-			$body[] = "\n";
-		}
-		$body[] = "\n";
-
-		// Add a note about the support forums.
-		$body[] = __( 'If you experience any issues or need support, the volunteers in the WordPress.org support forums may be able to help.' );
-		$body[] = __( 'https://wordpress.org/support/forums/' );
-		$body[] = "\n" . __( 'The WordPress Team' );
-
-		$body    = implode( "\n", $body );
-		$to      = get_site_option( 'admin_email' );
-		$subject = sprintf( $subject, wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) );
-		$headers = '';
-
-		$email = compact( 'to', 'subject', 'body', 'headers' );
-
-		/**
-		 * Filters the email sent following an automatic background plugin update.
-		 *
-		 * @since 5.5.0
-		 *
-		 * @param array $email {
-		 *     Array of email arguments that will be passed to wp_mail().
-		 *
-		 *     @type string $to      The email recipient. An array of emails
-		 *                           can be returned, as handled by wp_mail().
-		 *     @type string $subject The email's subject.
-		 *     @type string $body    The email message body.
-		 *     @type string $headers Any email headers, defaults to no headers.
-		 * }
-		 * @param string $type               The type of email being sent. Can be one of
-		 *                                   'success', 'fail', 'mixed'.
-		 * @param object $successful_updates The updates that succeeded.
-		 * @param object $failed_updates     The updates that failed.
-		 */
-		$email = apply_filters( 'auto_plugin_theme_update_email', $email, $type, $successful_updates, $failed_updates );
-
-		wp_mail( $email['to'], wp_specialchars_decode( $email['subject'] ), $email['body'], $email['headers'] );
-	}
-
 	/**
 	 * Prepares and sends an email of a full log of background update results, useful for debugging and geekery.
 	 *
@@ -1061,24 +830,24 @@ class WP_Automatic_Updater {
 		$body     = array();
 		$failures = 0;
 
-		/* translators: %s: Network home URL. */
+		/* translators: %s: Network home URL */
 		$body[] = sprintf( __( 'WordPress site: %s' ), network_home_url( '/' ) );
 
-		// Core.
+		// Core
 		if ( isset( $this->update_results['core'] ) ) {
 			$result = $this->update_results['core'][0];
 			if ( $result->result && ! is_wp_error( $result->result ) ) {
-				/* translators: %s: WordPress version. */
+				/* translators: %s: WordPress core version */
 				$body[] = sprintf( __( 'SUCCESS: WordPress was successfully updated to %s' ), $result->name );
 			} else {
-				/* translators: %s: WordPress version. */
+				/* translators: %s: WordPress core version */
 				$body[] = sprintf( __( 'FAILED: WordPress failed to update to %s' ), $result->name );
 				$failures++;
 			}
 			$body[] = '';
 		}
 
-		// Plugins, Themes, Translations.
+		// Plugins, Themes, Translations
 		foreach ( array( 'plugin', 'theme', 'translation' ) as $type ) {
 			if ( ! isset( $this->update_results[ $type ] ) ) {
 				continue;
@@ -1093,12 +862,12 @@ class WP_Automatic_Updater {
 
 				$body[] = $messages[ $type ];
 				foreach ( wp_list_pluck( $success_items, 'name' ) as $name ) {
-					/* translators: %s: Name of plugin / theme / translation. */
+					/* translators: %s: name of plugin / theme / translations */
 					$body[] = ' * ' . sprintf( __( 'SUCCESS: %s' ), $name );
 				}
 			}
 			if ( $success_items != $this->update_results[ $type ] ) {
-				// Failed updates.
+				// Failed updates
 				$messages = array(
 					'plugin'      => __( 'The following plugins failed to update:' ),
 					'theme'       => __( 'The following themes failed to update:' ),
@@ -1108,7 +877,7 @@ class WP_Automatic_Updater {
 				$body[] = $messages[ $type ];
 				foreach ( $this->update_results[ $type ] as $item ) {
 					if ( ! $item->result || is_wp_error( $item->result ) ) {
-						/* translators: %s: Name of plugin / theme / translation. */
+						/* translators: %s: name of plugin / theme / translations */
 						$body[] = ' * ' . sprintf( __( 'FAILED: %s' ), $item->name );
 						$failures++;
 					}
@@ -1135,11 +904,11 @@ Thanks! -- The WordPress Team"
 			);
 			$body[] = '';
 
-			/* translators: Background update failed notification email subject. %s: Site title. */
-			$subject = sprintf( __( '[%s] Background Update Failed' ), $site_title );
+			/* translators: %s: site title */
+			$subject = sprintf( __( '[%s] There were failures during background updates' ), $site_title );
 		} else {
-			/* translators: Background update finished notification email subject. %s: Site title. */
-			$subject = sprintf( __( '[%s] Background Update Finished' ), $site_title );
+			/* translators: %s: site title */
+			$subject = sprintf( __( '[%s] Background updates have finished' ), $site_title );
 		}
 
 		$body[] = trim(

@@ -62,8 +62,7 @@ $theme_field_defaults = array(
 function install_themes_feature_list() {
 	_deprecated_function( __FUNCTION__, '3.1.0', 'get_theme_feature_list()' );
 
-	$cache = get_transient( 'wporg_theme_feature_list' );
-	if ( ! $cache ) {
+	if ( ! $cache = get_transient( 'wporg_theme_feature_list' ) ) {
 		set_transient( 'wporg_theme_feature_list', array(), 3 * HOUR_IN_SECONDS );
 	}
 

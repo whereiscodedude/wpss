@@ -48,8 +48,7 @@ class WP_List_Util {
 	 * @param array $input Array to perform operations on.
 	 */
 	public function __construct( $input ) {
-		$this->output = $input;
-		$this->input  = $input;
+		$this->output = $this->input = $input;
 	}
 
 	/**
@@ -112,9 +111,9 @@ class WP_List_Util {
 			}
 
 			if (
-				( 'AND' === $operator && $matched == $count ) ||
-				( 'OR' === $operator && $matched > 0 ) ||
-				( 'NOT' === $operator && 0 == $matched )
+				( 'AND' == $operator && $matched == $count ) ||
+				( 'OR' == $operator && $matched > 0 ) ||
+				( 'NOT' == $operator && 0 == $matched )
 			) {
 				$filtered[ $key ] = $obj;
 			}

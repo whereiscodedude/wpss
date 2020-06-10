@@ -40,10 +40,8 @@ final class WP_oEmbed_Controller {
 					'callback' => array( $this, 'get_item' ),
 					'args'     => array(
 						'url'      => array(
-							'description' => __( 'The URL of the resource for which to fetch oEmbed data.' ),
-							'required'    => true,
-							'type'        => 'string',
-							'format'      => 'uri',
+							'required'          => true,
+							'sanitize_callback' => 'esc_url_raw',
 						),
 						'format'   => array(
 							'default'           => 'json',
@@ -68,10 +66,10 @@ final class WP_oEmbed_Controller {
 					'permission_callback' => array( $this, 'get_proxy_item_permissions_check' ),
 					'args'                => array(
 						'url'       => array(
-							'description' => __( 'The URL of the resource for which to fetch oEmbed data.' ),
-							'required'    => true,
-							'type'        => 'string',
-							'format'      => 'uri',
+							'description'       => __( 'The URL of the resource for which to fetch oEmbed data.' ),
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'esc_url_raw',
 						),
 						'format'    => array(
 							'description' => __( 'The oEmbed format to use.' ),
@@ -112,7 +110,7 @@ final class WP_oEmbed_Controller {
 	 * @since 4.4.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
-	 * @return array|WP_Error oEmbed response data or WP_Error on failure.
+	 * @return WP_Error|array oEmbed response data or WP_Error on failure.
 	 */
 	public function get_item( $request ) {
 		$post_id = url_to_postid( $request['url'] );
@@ -196,7 +194,7 @@ final class WP_oEmbed_Controller {
 			return new WP_Error( 'oembed_invalid_url', get_status_header_desc( 404 ), array( 'status' => 404 ) );
 		}
 
-		/** This filter is documented in wp-includes/class-wp-oembed.php */
+		/** This filter is documented in wp-includes/class-oembed.php */
 		$data->html = apply_filters( 'oembed_result', _wp_oembed_get_object()->data2html( (object) $data, $url ), $url, $args );
 
 		/**
