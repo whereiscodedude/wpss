@@ -15,7 +15,6 @@
  * @see register_block_type()
  */
 class WP_Block_Type {
-
 	/**
 	 * Block type key.
 	 *
@@ -25,112 +24,52 @@ class WP_Block_Type {
 	public $name;
 
 	/**
-	 * @since 5.5.0
-	 * @var string
-	 */
-	public $title = '';
-
-	/**
-	 * @since 5.5.0
-	 * @var string|null
-	 */
-	public $category = null;
-
-	/**
-	 * @since 5.5.0
-	 * @var array|null
-	 */
-	public $parent = null;
-
-	/**
-	 * @since 5.5.0
-	 * @var string|null
-	 */
-	public $icon = null;
-
-	/**
-	 * @since 5.5.0
-	 * @var string
-	 */
-	public $description = '';
-
-	/**
-	 * @since 5.5.0
-	 * @var array
-	 */
-	public $keywords = array();
-
-	/**
-	 * @since 5.5.0
-	 * @var string|null
-	 */
-	public $textdomain = null;
-
-	/**
-	 * @since 5.5.0
-	 * @var array
-	 */
-	public $styles = array();
-
-	/**
-	 * @since 5.5.0
-	 * @var array
-	 */
-	public $supports = array();
-
-	/**
-	 * @since 5.5.0
-	 * @var array|null
-	 */
-	public $example = null;
-
-	/**
 	 * Block type render callback.
 	 *
 	 * @since 5.0.0
 	 * @var callable
 	 */
-	public $render_callback = null;
+	public $render_callback;
 
 	/**
 	 * Block type attributes property schemas.
 	 *
 	 * @since 5.0.0
-	 * @var array|null
+	 * @var array
 	 */
-	public $attributes = null;
+	public $attributes;
 
 	/**
 	 * Block type editor script handle.
 	 *
 	 * @since 5.0.0
-	 * @var string|null
+	 * @var string
 	 */
-	public $editor_script = null;
+	public $editor_script;
 
 	/**
 	 * Block type front end script handle.
 	 *
 	 * @since 5.0.0
-	 * @var string|null
+	 * @var string
 	 */
-	public $script = null;
+	public $script;
 
 	/**
 	 * Block type editor style handle.
 	 *
 	 * @since 5.0.0
-	 * @var string|null
+	 * @var string
 	 */
-	public $editor_style = null;
+	public $editor_style;
 
 	/**
 	 * Block type front end style handle.
 	 *
 	 * @since 5.0.0
-	 * @var string|null
+	 * @var string
 	 */
-	public $style = null;
+	public $style;
 
 	/**
 	 * Constructor.
