@@ -167,7 +167,7 @@ function get_the_author_meta( $field = '', $user_id = false ) {
 		$authordata = get_userdata( $user_id );
 	}
 
-	if ( in_array( $field, array( 'login', 'pass', 'nicename', 'email', 'url', 'registered', 'activation_key', 'status' ), true ) ) {
+	if ( in_array( $field, array( 'login', 'pass', 'nicename', 'email', 'url', 'registered', 'activation_key', 'status' ) ) ) {
 		$field = 'user_' . $field;
 	}
 
@@ -349,7 +349,7 @@ function get_author_posts_url( $author_id, $author_nicename = '' ) {
 		$file = home_url( '/' );
 		$link = $file . '?author=' . $auth_ID;
 	} else {
-		if ( '' === $author_nicename ) {
+		if ( '' == $author_nicename ) {
 			$user = get_userdata( $author_id );
 			if ( ! empty( $user->user_nicename ) ) {
 				$author_nicename = $user->user_nicename;
@@ -407,7 +407,7 @@ function get_author_posts_url( $author_id, $author_nicename = '' ) {
  *     @type array|string $exclude       Array or comma/space-separated list of author IDs to exclude. Default empty.
  *     @type array|string $include       Array or comma/space-separated list of author IDs to include. Default empty.
  * }
- * @return void|string Void if 'echo' argument is true, list of authors if 'echo' is false.
+ * @return string|void The output, if echo is set to false.
  */
 function wp_list_authors( $args = '' ) {
 	global $wpdb;
@@ -467,7 +467,7 @@ function wp_list_authors( $args = '' ) {
 			continue; // No need to go further to process HTML.
 		}
 
-		if ( 'list' === $args['style'] ) {
+		if ( 'list' == $args['style'] ) {
 			$return .= '<li>';
 		}
 
@@ -513,16 +513,15 @@ function wp_list_authors( $args = '' ) {
 		}
 
 		$return .= $link;
-		$return .= ( 'list' === $args['style'] ) ? '</li>' : ', ';
+		$return .= ( 'list' == $args['style'] ) ? '</li>' : ', ';
 	}
 
 	$return = rtrim( $return, ', ' );
 
-	if ( $args['echo'] ) {
-		echo $return;
-	} else {
+	if ( ! $args['echo'] ) {
 		return $return;
 	}
+	echo $return;
 }
 
 /**
@@ -566,6 +565,6 @@ function is_multi_author() {
  * @since 3.2.0
  * @access private
  */
-function __clear_multi_author_cache() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionDoubleUnderscore,PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.FunctionDoubleUnderscore
+function __clear_multi_author_cache() { //phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionDoubleUnderscore,PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.FunctionDoubleUnderscore
 	delete_transient( 'is_multi_author' );
 }

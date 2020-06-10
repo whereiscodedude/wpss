@@ -33,16 +33,16 @@ if ( false ) {
 define( 'WP_INSTALLING', true );
 
 /** Load WordPress Bootstrap */
-require_once dirname( __DIR__ ) . '/wp-load.php';
+require_once( dirname( dirname( __FILE__ ) ) . '/wp-load.php' );
 
 /** Load WordPress Administration Upgrade API */
-require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 /** Load WordPress Translation Install API */
-require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+require_once( ABSPATH . 'wp-admin/includes/translation-install.php' );
 
 /** Load wpdb */
-require_once ABSPATH . WPINC . '/wp-db.php';
+require_once( ABSPATH . WPINC . '/wp-db.php' );
 
 nocache_headers();
 
@@ -74,10 +74,10 @@ function display_header( $body_classes = '' ) {
 	<?php wp_admin_css( 'install', true ); ?>
 </head>
 <body class="wp-core-ui<?php echo $body_classes; ?>">
-<p id="logo"><?php _e( 'WordPress' ); ?></p>
+<p id="logo"><a href="<?php echo esc_url( __( 'https://wordpress.org/' ) ); ?>"><?php _e( 'WordPress' ); ?></a></p>
 
 	<?php
-} // End display_header().
+} // end display_header()
 
 /**
  * Display installer setup form.
@@ -91,9 +91,10 @@ function display_header( $body_classes = '' ) {
 function display_setup_form( $error = null ) {
 	global $wpdb;
 
-	$user_table = ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $wpdb->users ) ) ) !== null );
+	$sql        = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $wpdb->users ) );
+	$user_table = ( $wpdb->get_var( $sql ) != null );
 
-	// Ensure that sites appear in search engines by default.
+	// Ensure that Blogs appear in search engines by default.
 	$blog_public = 1;
 	if ( isset( $_POST['weblog_title'] ) ) {
 		$blog_public = isset( $_POST['blog_public'] );
@@ -179,10 +180,10 @@ function display_setup_form( $error = null ) {
 			<p><?php _e( 'Double-check your email address before continuing.' ); ?></p></td>
 		</tr>
 		<tr>
-			<th scope="row"><?php has_action( 'blog_privacy_selector' ) ? _e( 'Site visibility' ) : _e( 'Search engine visibility' ); ?></th>
+			<th scope="row"><?php has_action( 'blog_privacy_selector' ) ? _e( 'Site Visibility' ) : _e( 'Search Engine Visibility' ); ?></th>
 			<td>
 				<fieldset>
-					<legend class="screen-reader-text"><span><?php has_action( 'blog_privacy_selector' ) ? _e( 'Site visibility' ) : _e( 'Search engine visibility' ); ?> </span></legend>
+					<legend class="screen-reader-text"><span><?php has_action( 'blog_privacy_selector' ) ? _e( 'Site Visibility' ) : _e( 'Search Engine Visibility' ); ?> </span></legend>
 					<?php
 					if ( has_action( 'blog_privacy_selector' ) ) {
 						?>
@@ -208,7 +209,7 @@ function display_setup_form( $error = null ) {
 	<input type="hidden" name="language" value="<?php echo isset( $_REQUEST['language'] ) ? esc_attr( $_REQUEST['language'] ) : ''; ?>" />
 </form>
 	<?php
-} // End display_setup_form().
+} // end display_setup_form()
 
 // Let's check to make sure WP isn't already installed.
 if ( is_blog_installed() ) {
@@ -222,9 +223,9 @@ if ( is_blog_installed() ) {
 }
 
 /**
- * @global string $wp_version             The WordPress version string.
- * @global string $required_php_version   The required PHP version string.
- * @global string $required_mysql_version The required MySQL version string.
+ * @global string $wp_version
+ * @global string $required_php_version
+ * @global string $required_mysql_version
  */
 global $wp_version, $required_php_version, $required_mysql_version;
 
@@ -289,7 +290,7 @@ if ( defined( 'DO_NOT_UPGRADE_GLOBAL_TABLES' ) ) {
 }
 
 /**
- * @global string    $wp_local_package Locale code of the package.
+ * @global string    $wp_local_package
  * @global WP_Locale $wp_locale        WordPress date and time locale object.
  */
 $language = '';
@@ -302,7 +303,7 @@ if ( ! empty( $_REQUEST['language'] ) ) {
 $scripts_to_print = array( 'jquery' );
 
 switch ( $step ) {
-	case 0: // Step 0.
+	case 0: // Step 0
 		if ( wp_can_install_language_pack() && empty( $language ) ) {
 			$languages = wp_get_available_translations();
 			if ( $languages ) {
@@ -354,7 +355,7 @@ switch ( $step ) {
 		$scripts_to_print[] = 'user-profile';
 
 		display_header();
-		// Fill in the data we gathered.
+		// Fill in the data we gathered
 		$weblog_title         = isset( $_POST['weblog_title'] ) ? trim( wp_unslash( $_POST['weblog_title'] ) ) : '';
 		$user_name            = isset( $_POST['user_name'] ) ? trim( wp_unslash( $_POST['user_name'] ) ) : '';
 		$admin_password       = isset( $_POST['admin_password'] ) ? wp_unslash( $_POST['admin_password'] ) : '';
@@ -365,27 +366,27 @@ switch ( $step ) {
 		// Check email address.
 		$error = false;
 		if ( empty( $user_name ) ) {
-			// TODO: Poka-yoke.
+			// TODO: poka-yoke
 			display_setup_form( __( 'Please provide a valid username.' ) );
 			$error = true;
-		} elseif ( sanitize_user( $user_name, true ) !== $user_name ) {
+		} elseif ( $user_name != sanitize_user( $user_name, true ) ) {
 			display_setup_form( __( 'The username you provided has invalid characters.' ) );
 			$error = true;
-		} elseif ( $admin_password !== $admin_password_check ) {
-			// TODO: Poka-yoke.
+		} elseif ( $admin_password != $admin_password_check ) {
+			// TODO: poka-yoke
 			display_setup_form( __( 'Your passwords do not match. Please try again.' ) );
 			$error = true;
 		} elseif ( empty( $admin_email ) ) {
-			// TODO: Poka-yoke.
+			// TODO: poka-yoke
 			display_setup_form( __( 'You must provide an email address.' ) );
 			$error = true;
 		} elseif ( ! is_email( $admin_email ) ) {
-			// TODO: Poka-yoke.
+			// TODO: poka-yoke
 			display_setup_form( __( 'Sorry, that isn&#8217;t a valid email address. Email addresses look like <code>username@example.com</code>.' ) );
 			$error = true;
 		}
 
-		if ( false === $error ) {
+		if ( $error === false ) {
 			$wpdb->show_errors();
 			$result = wp_install( $weblog_title, $user_name, $admin_email, $public, '', wp_slash( $admin_password ), $loaded_language );
 			?>

@@ -1,4 +1,3 @@
-/*! This file is auto-generated */
 /* ----------------------------------------------------------------------------
 
 NOTE: If you edit this file, you should make sure that the CSS rules for
@@ -234,6 +233,9 @@ TABLE OF CONTENTS:
 	background: transparent !important;
 }
 
+.ie8 .wp-core-ui .button-link:focus {
+	outline: #5b9dd9 solid 1px;
+}
 
 /* ----------------------------------------------------------------------------
   3.0 - Primary Button Style

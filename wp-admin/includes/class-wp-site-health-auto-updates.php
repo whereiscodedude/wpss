@@ -13,7 +13,7 @@ class WP_Site_Health_Auto_Updates {
 	 * @since 5.2.0
 	 */
 	public function __construct() {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	}
 
 
@@ -65,7 +65,7 @@ class WP_Site_Health_Auto_Updates {
 	 * @return array The test results.
 	 */
 	public function test_constants( $constant, $value ) {
-		if ( defined( $constant ) && constant( $constant ) !== $value ) {
+		if ( defined( $constant ) && constant( $constant ) != $value ) {
 			return array(
 				'description' => sprintf(
 					/* translators: %s: Name of the constant used. */
@@ -166,7 +166,7 @@ class WP_Site_Health_Auto_Updates {
 	 */
 	public function test_wp_automatic_updates_disabled() {
 		if ( ! class_exists( 'WP_Automatic_Updater' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/class-wp-automatic-updates.php';
+			require_once( ABSPATH . 'wp-admin/includes/class-wp-automatic-updates.php' );
 		}
 
 		$auto_updates = new WP_Automatic_Updater();
@@ -245,7 +245,7 @@ class WP_Site_Health_Auto_Updates {
 				$check_dirs[] = $context_dir;
 
 				// Once we've hit '/' or 'C:\', we need to stop. dirname will keep returning the input here.
-				if ( dirname( $context_dir ) === $context_dir ) {
+				if ( dirname( $context_dir ) == $context_dir ) {
 					break;
 				}
 
@@ -336,7 +336,7 @@ class WP_Site_Health_Auto_Updates {
 	function test_all_files_writable() {
 		global $wp_filesystem;
 
-		require ABSPATH . WPINC . '/version.php'; // $wp_version; // x.y.z
+		include ABSPATH . WPINC . '/version.php'; // $wp_version; // x.y.z
 
 		$skin    = new Automatic_Upgrader_Skin;
 		$success = $skin->request_filesystem_credentials( false, ABSPATH );
@@ -347,18 +347,18 @@ class WP_Site_Health_Auto_Updates {
 
 		WP_Filesystem();
 
-		if ( 'direct' !== $wp_filesystem->method ) {
+		if ( 'direct' != $wp_filesystem->method ) {
 			return false;
 		}
 
 		$checksums = get_core_checksums( $wp_version, 'en_US' );
 		$dev       = ( false !== strpos( $wp_version, '-' ) );
-		// Get the last stable version's files and test against that.
+		// Get the last stable version's files and test against that
 		if ( ! $checksums && $dev ) {
 			$checksums = get_core_checksums( (float) $wp_version - 0.1, 'en_US' );
 		}
 
-		// There aren't always checksums for development releases, so just skip the test if we still can't find any.
+		// There aren't always checksums for development releases, so just skip the test if we still can't find any
 		if ( ! $checksums && $dev ) {
 			return false;
 		}
@@ -378,7 +378,7 @@ class WP_Site_Health_Auto_Updates {
 
 		$unwritable_files = array();
 		foreach ( array_keys( $checksums ) as $file ) {
-			if ( 'wp-content' === substr( $file, 0, 10 ) ) {
+			if ( 'wp-content' == substr( $file, 0, 10 ) ) {
 				continue;
 			}
 			if ( ! file_exists( ABSPATH . $file ) ) {
@@ -414,8 +414,8 @@ class WP_Site_Health_Auto_Updates {
 	 * @return array|bool The test results. False if it isn't a development version.
 	 */
 	function test_accepts_dev_updates() {
-		require ABSPATH . WPINC . '/version.php'; // $wp_version; // x.y.z
-		// Only for dev versions.
+		include ABSPATH . WPINC . '/version.php'; // $wp_version; // x.y.z
+		// Only for dev versions
 		if ( false === strpos( $wp_version, '-' ) ) {
 			return false;
 		}

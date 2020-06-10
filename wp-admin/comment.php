@@ -7,7 +7,7 @@
  */
 
 /** Load WordPress Bootstrap */
-require_once __DIR__ . '/admin.php';
+require_once( dirname( __FILE__ ) . '/admin.php' );
 
 $parent_file  = 'edit-comments.php';
 $submenu_file = 'edit-comments.php';
@@ -22,16 +22,16 @@ if ( isset( $_POST['deletecomment'] ) ) {
 	$action = 'deletecomment';
 }
 
-if ( 'cdc' === $action ) {
+if ( 'cdc' == $action ) {
 	$action = 'delete';
-} elseif ( 'mac' === $action ) {
+} elseif ( 'mac' == $action ) {
 	$action = 'approve';
 }
 
 if ( isset( $_GET['dt'] ) ) {
-	if ( 'spam' === $_GET['dt'] ) {
+	if ( 'spam' == $_GET['dt'] ) {
 		$action = 'spam';
-	} elseif ( 'trash' === $_GET['dt'] ) {
+	} elseif ( 'trash' == $_GET['dt'] ) {
 		$action = 'trash';
 	}
 }
@@ -58,7 +58,7 @@ switch ( $action ) {
 		);
 
 		wp_enqueue_script( 'comment' );
-		require_once ABSPATH . 'wp-admin/admin-header.php';
+		require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
 		$comment_id = absint( $_GET['c'] );
 
@@ -71,13 +71,13 @@ switch ( $action ) {
 			comment_footer_die( __( 'Sorry, you are not allowed to edit this comment.' ) );
 		}
 
-		if ( 'trash' === $comment->comment_approved ) {
+		if ( 'trash' == $comment->comment_approved ) {
 			comment_footer_die( __( 'This comment is in the Trash. Please move it out of the Trash if you want to edit it.' ) );
 		}
 
 		$comment = get_comment_to_edit( $comment_id );
 
-		require ABSPATH . 'wp-admin/edit-form-comment.php';
+		include( ABSPATH . 'wp-admin/edit-form-comment.php' );
 
 		break;
 
@@ -101,15 +101,15 @@ switch ( $action ) {
 		}
 
 		// No need to re-approve/re-trash/re-spam a comment.
-		if ( str_replace( '1', 'approve', $comment->comment_approved ) === $action ) {
+		if ( $action == str_replace( '1', 'approve', $comment->comment_approved ) ) {
 			wp_redirect( admin_url( 'edit-comments.php?same=' . $comment_id ) );
 			die();
 		}
 
-		require_once ABSPATH . 'wp-admin/admin-header.php';
+		require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
 		$formaction    = $action . 'comment';
-		$nonce_action  = ( 'approve' === $action ) ? 'approve-comment_' : 'delete-comment_';
+		$nonce_action  = 'approve' == $action ? 'approve-comment_' : 'delete-comment_';
 		$nonce_action .= $comment_id;
 
 		?>
@@ -137,7 +137,7 @@ switch ( $action ) {
 				break;
 		}
 
-		if ( '0' !== $comment->comment_approved ) { // If not unapproved.
+		if ( $comment->comment_approved != '0' ) { // if not unapproved
 			$message = '';
 			switch ( $comment->comment_approved ) {
 				case '1':
@@ -207,9 +207,9 @@ switch ( $action ) {
 		$submitted = sprintf(
 			/* translators: 1: Comment date, 2: Comment time. */
 			__( '%1$s at %2$s' ),
-			/* translators: Comment date format. See https://www.php.net/date */
+			/* translators: Comment date format. See https://secure.php.net/date */
 			get_comment_date( __( 'Y/m/d' ), $comment ),
-			/* translators: Comment time format. See https://www.php.net/date */
+			/* translators: Comment time format. See https://secure.php.net/date */
 			get_comment_date( __( 'g:i a' ), $comment )
 		);
 		if ( 'approved' === wp_get_comment_status( $comment ) && ! empty( $comment->comment_post_ID ) ) {
@@ -255,7 +255,7 @@ switch ( $action ) {
 	case 'unapprovecomment':
 		$comment_id = absint( $_REQUEST['c'] );
 
-		if ( in_array( $action, array( 'approvecomment', 'unapprovecomment' ), true ) ) {
+		if ( in_array( $action, array( 'approvecomment', 'unapprovecomment' ) ) ) {
 			check_admin_referer( 'approve-comment_' . $comment_id );
 		} else {
 			check_admin_referer( 'delete-comment_' . $comment_id );
@@ -271,11 +271,11 @@ switch ( $action ) {
 			comment_footer_die( __( 'Sorry, you are not allowed to edit comments on this post.' ) );
 		}
 
-		if ( wp_get_referer() && ! $noredir && false === strpos( wp_get_referer(), 'comment.php' ) ) {
+		if ( '' != wp_get_referer() && ! $noredir && false === strpos( wp_get_referer(), 'comment.php' ) ) {
 			$redir = wp_get_referer();
-		} elseif ( wp_get_original_referer() && ! $noredir ) {
+		} elseif ( '' != wp_get_original_referer() && ! $noredir ) {
 			$redir = wp_get_original_referer();
-		} elseif ( in_array( $action, array( 'approvecomment', 'unapprovecomment' ), true ) ) {
+		} elseif ( in_array( $action, array( 'approvecomment', 'unapprovecomment' ) ) ) {
 			$redir = admin_url( 'edit-comments.php?p=' . absint( $comment->comment_post_ID ) );
 		} else {
 			$redir = admin_url( 'edit-comments.php' );
@@ -348,13 +348,13 @@ switch ( $action ) {
 		 * @param int $comment_id The ID of the comment being edited.
 		 */
 		$location = apply_filters( 'comment_edit_redirect', $location, $comment_id );
-
 		wp_redirect( $location );
-		exit;
+
+		exit();
 
 	default:
 		wp_die( __( 'Unknown action.' ) );
 
-} // End switch.
+} // end switch
 
-require_once ABSPATH . 'wp-admin/admin-footer.php';
+include( ABSPATH . 'wp-admin/admin-footer.php' );

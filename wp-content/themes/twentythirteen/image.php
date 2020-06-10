@@ -15,7 +15,7 @@ get_header(); ?>
 		<div id="content" class="site-content" role="main">
 
 			<?php
-			// Start the loop.
+				// Start the Loop.
 			while ( have_posts() ) :
 				the_post();
 				?>
@@ -94,7 +94,7 @@ get_header(); ?>
 
 				<?php comments_template(); ?>
 
-			<?php endwhile; // End of the loop. ?>
+			<?php endwhile; // End the loop. ?>
 
 		</div><!-- #content -->
 	</div><!-- #primary -->

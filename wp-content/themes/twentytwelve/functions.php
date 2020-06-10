@@ -120,7 +120,7 @@ function twentytwelve_setup() {
 
 	// This theme uses a custom image size for featured images, displayed on "standard" posts.
 	add_theme_support( 'post-thumbnails' );
-	set_post_thumbnail_size( 624, 9999 ); // Unlimited height, soft crop.
+	set_post_thumbnail_size( 624, 9999 ); // Unlimited height, soft crop
 
 	// Indicate widget sidebars can use selective refresh in the Customizer.
 	add_theme_support( 'customize-selective-refresh-widgets' );
@@ -130,7 +130,7 @@ add_action( 'after_setup_theme', 'twentytwelve_setup' );
 /**
  * Add support for a custom header image.
  */
-require get_template_directory() . '/inc/custom-header.php';
+require( get_template_directory() . '/inc/custom-header.php' );
 
 /**
  * Return the Google font stylesheet URL if available.
@@ -158,11 +158,11 @@ function twentytwelve_get_font_url() {
 		 */
 		$subset = _x( 'no-subset', 'Open Sans font: add new subset (greek, cyrillic, vietnamese)', 'twentytwelve' );
 
-		if ( 'cyrillic' === $subset ) {
+		if ( 'cyrillic' == $subset ) {
 			$subsets .= ',cyrillic,cyrillic-ext';
-		} elseif ( 'greek' === $subset ) {
+		} elseif ( 'greek' == $subset ) {
 			$subsets .= ',greek,greek-ext';
-		} elseif ( 'vietnamese' === $subset ) {
+		} elseif ( 'vietnamese' == $subset ) {
 			$subsets .= ',vietnamese';
 		}
 
@@ -482,7 +482,7 @@ if ( ! function_exists( 'twentytwelve_comment' ) ) :
 			</article><!-- #comment-## -->
 				<?php
 				break;
-		endswitch; // End comment_type check.
+		endswitch; // end comment_type check
 	}
 endif;
 
@@ -501,7 +501,7 @@ if ( ! function_exists( 'twentytwelve_entry_meta' ) ) :
 		$categories_list = get_the_category_list( __( ', ', 'twentytwelve' ) );
 
 		/* translators: Used between list items, there is a space after the comma. */
-		$tags_list = get_the_tag_list( '', __( ', ', 'twentytwelve' ) );
+		$tag_list = get_the_tag_list( '', __( ', ', 'twentytwelve' ) );
 
 		$date = sprintf(
 			'<a href="%1$s" title="%2$s" rel="bookmark"><time class="entry-date" datetime="%3$s">%4$s</time></a>',
@@ -519,7 +519,7 @@ if ( ! function_exists( 'twentytwelve_entry_meta' ) ) :
 			get_the_author()
 		);
 
-		if ( $tags_list && ! is_wp_error( $tags_list ) ) {
+		if ( $tag_list ) {
 			/* translators: 1: Category name, 2: Tag name, 3: Date, 4: Author display name. */
 			$utility_text = __( 'This entry was posted in %1$s and tagged %2$s on %3$s<span class="by-author"> by %4$s</span>.', 'twentytwelve' );
 		} elseif ( $categories_list ) {
@@ -533,7 +533,7 @@ if ( ! function_exists( 'twentytwelve_entry_meta' ) ) :
 		printf(
 			$utility_text,
 			$categories_list,
-			$tags_list,
+			$tag_list,
 			$date,
 			$author
 		);
@@ -578,7 +578,7 @@ function twentytwelve_body_class( $classes ) {
 	if ( empty( $background_image ) ) {
 		if ( empty( $background_color ) ) {
 			$classes[] = 'custom-background-empty';
-		} elseif ( in_array( $background_color, array( 'fff', 'ffffff' ), true ) ) {
+		} elseif ( in_array( $background_color, array( 'fff', 'ffffff' ) ) ) {
 			$classes[] = 'custom-background-white';
 		}
 	}
@@ -706,7 +706,7 @@ if ( ! function_exists( 'wp_body_open' ) ) :
 	/**
 	 * Fire the wp_body_open action.
 	 *
-	 * Added for backward compatibility to support pre-5.2.0 WordPress versions.
+	 * Added for backwards compatibility to support pre 5.2.0 WordPress versions.
 	 *
 	 * @since Twenty Twelve 3.0
 	 */

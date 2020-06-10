@@ -152,9 +152,15 @@ function wp_underscore_video_template() {
  * Prints the templates used in the media manager.
  *
  * @since 3.5.0
+ *
+ * @global bool $is_IE
  */
 function wp_print_media_templates() {
+	global $is_IE;
 	$class = 'media-modal wp-core-ui';
+	if ( $is_IE && strpos( $_SERVER['HTTP_USER_AGENT'], 'MSIE 7' ) !== false ) {
+		$class .= ' ie7';
+	}
 
 	$alt_text_description = sprintf(
 		/* translators: 1: Link to tutorial, 2: Additional link attributes, 3: Accessibility text. */
@@ -419,11 +425,6 @@ function wp_print_media_templates() {
 							?>
 						</div>
 					<# } #>
-
-					<# if ( data.originalImageURL && data.originalImageName ) { #>
-						<?php _e( 'Original image:' ); ?>
-						<a href="{{ data.originalImageURL }}">{{data.originalImageName}}</a>
-					<# } #>
 				<# } #>
 
 				<# if ( data.fileLength && data.fileLengthHumanReadable ) { #>
@@ -613,11 +614,6 @@ function wp_print_media_templates() {
 							printf( __( '%1$s by %2$s pixels' ), '{{ data.width }}', '{{ data.height }}' );
 							?>
 						</div>
-					<# } #>
-
-					<# if ( data.originalImageURL && data.originalImageName ) { #>
-						<?php _e( 'Original image:' ); ?>
-						<a href="{{ data.originalImageURL }}">{{data.originalImageName}}</a>
 					<# } #>
 
 					<# if ( data.can.save && data.sizes ) { #>
@@ -832,15 +828,15 @@ function wp_print_media_templates() {
 					data-user-setting="urlbutton"
 				<# } #>>
 
-				<option value="post" <# if ( ! wp.media.galleryDefaults.link || 'post' === wp.media.galleryDefaults.link ) {
+				<option value="post" <# if ( ! wp.media.galleryDefaults.link || 'post' == wp.media.galleryDefaults.link ) {
 					#>selected="selected"<# }
 				#>>
 					<?php esc_html_e( 'Attachment Page' ); ?>
 				</option>
-				<option value="file" <# if ( 'file' === wp.media.galleryDefaults.link ) { #>selected="selected"<# } #>>
+				<option value="file" <# if ( 'file' == wp.media.galleryDefaults.link ) { #>selected="selected"<# } #>>
 					<?php esc_html_e( 'Media File' ); ?>
 				</option>
-				<option value="none" <# if ( 'none' === wp.media.galleryDefaults.link ) { #>selected="selected"<# } #>>
+				<option value="none" <# if ( 'none' == wp.media.galleryDefaults.link ) { #>selected="selected"<# } #>>
 					<?php esc_html_e( 'None' ); ?>
 				</option>
 			</select>

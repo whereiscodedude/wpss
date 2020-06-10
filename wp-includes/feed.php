@@ -85,8 +85,7 @@ function get_default_feed() {
 	 *                          Default 'rss2'.
 	 */
 	$default_feed = apply_filters( 'default_feed', 'rss2' );
-
-	return ( 'rss' === $default_feed ) ? 'rss2' : $default_feed;
+	return 'rss' == $default_feed ? 'rss2' : $default_feed;
 }
 
 /**
@@ -161,7 +160,8 @@ function get_the_title_rss() {
 	 *
 	 * @param string $title The current post title.
 	 */
-	return apply_filters( 'the_title_rss', $title );
+	$title = apply_filters( 'the_title_rss', $title );
+	return $title;
 }
 
 /**
@@ -190,7 +190,6 @@ function get_the_content_feed( $feed_type = null ) {
 	/** This filter is documented in wp-includes/post-template.php */
 	$content = apply_filters( 'the_content', get_the_content() );
 	$content = str_replace( ']]>', ']]&gt;', $content );
-
 	/**
 	 * Filters the post content for use in feeds.
 	 *
@@ -251,6 +250,7 @@ function the_permalink_rss() {
  * Outputs the link to the comments for the current post in an xml safe way
  *
  * @since 3.0.0
+ * @return none
  */
 function comments_link_feed() {
 	/**
@@ -281,7 +281,7 @@ function comment_guid( $comment_id = null ) {
  * @since 2.5.0
  *
  * @param int|WP_Comment $comment_id Optional comment object or id. Defaults to global comment object.
- * @return string|false GUID for comment on success, false on failure.
+ * @return false|string false on failure or guid for comment on success.
  */
 function get_comment_guid( $comment_id = null ) {
 	$comment = get_comment( $comment_id );
@@ -383,7 +383,7 @@ function get_the_category_rss( $type = null ) {
 	$cat_names  = array();
 
 	$filter = 'rss';
-	if ( 'atom' === $type ) {
+	if ( 'atom' == $type ) {
 		$filter = 'raw';
 	}
 
@@ -402,9 +402,9 @@ function get_the_category_rss( $type = null ) {
 	$cat_names = array_unique( $cat_names );
 
 	foreach ( $cat_names as $cat_name ) {
-		if ( 'rdf' === $type ) {
+		if ( 'rdf' == $type ) {
 			$the_list .= "\t\t<dc:subject><![CDATA[$cat_name]]></dc:subject>\n";
-		} elseif ( 'atom' === $type ) {
+		} elseif ( 'atom' == $type ) {
 			$the_list .= sprintf( '<category scheme="%1$s" term="%2$s" />', esc_attr( get_bloginfo_rss( 'url' ) ), esc_attr( $cat_name ) );
 		} else {
 			$the_list .= "\t\t<category><![CDATA[" . html_entity_decode( $cat_name, ENT_COMPAT, get_option( 'blog_charset' ) ) . "]]></category>\n";
@@ -472,11 +472,11 @@ function rss_enclosure() {
 	}
 
 	foreach ( (array) get_post_custom() as $key => $val ) {
-		if ( 'enclosure' === $key ) {
+		if ( $key == 'enclosure' ) {
 			foreach ( (array) $val as $enc ) {
 				$enclosure = explode( "\n", $enc );
 
-				// Only get the first element, e.g. 'audio/mpeg' from 'audio/mpeg mpga mp2 mp3'.
+				// only get the first element, e.g. audio/mpeg from 'audio/mpeg mpga mp2 mp3'
 				$t    = preg_split( '/[ \t]/', trim( $enclosure[2] ) );
 				$type = $t[0];
 
@@ -512,7 +512,7 @@ function atom_enclosure() {
 	}
 
 	foreach ( (array) get_post_custom() as $key => $val ) {
-		if ( 'enclosure' === $key ) {
+		if ( $key == 'enclosure' ) {
 			foreach ( (array) $val as $enc ) {
 				$enclosure = explode( "\n", $enc );
 				/**
@@ -623,7 +623,7 @@ function rss2_site_icon() {
  * @return string Correct link for the atom:self element.
  */
 function get_self_link() {
-	$host = parse_url( home_url() );
+	$host = @parse_url( home_url() );
 	return set_url_scheme( 'http://' . $host['host'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
 }
 
@@ -744,26 +744,27 @@ function feed_content_type( $type = '' ) {
  *
  * @since 2.8.0
  *
- * @param string|string[] $url URL of feed to retrieve. If an array of URLs, the feeds are merged
- *                             using SimplePie's multifeed feature.
- *                             See also {@link http://simplepie.org/wiki/faq/typical_multifeed_gotchas}
- * @return SimplePie|WP_Error SimplePie object on success or WP_Error object on failure.
+ * @param mixed $url URL of feed to retrieve. If an array of URLs, the feeds are merged
+ * using SimplePie's multifeed feature.
+ * See also {@link http://simplepie.org/wiki/faq/typical_multifeed_gotchas}
+ *
+ * @return WP_Error|SimplePie WP_Error object on failure or SimplePie object on success
  */
 function fetch_feed( $url ) {
 	if ( ! class_exists( 'SimplePie', false ) ) {
-		require_once ABSPATH . WPINC . '/class-simplepie.php';
+		require_once( ABSPATH . WPINC . '/class-simplepie.php' );
 	}
 
-	require_once ABSPATH . WPINC . '/class-wp-feed-cache.php';
-	require_once ABSPATH . WPINC . '/class-wp-feed-cache-transient.php';
-	require_once ABSPATH . WPINC . '/class-wp-simplepie-file.php';
-	require_once ABSPATH . WPINC . '/class-wp-simplepie-sanitize-kses.php';
+	require_once( ABSPATH . WPINC . '/class-wp-feed-cache.php' );
+	require_once( ABSPATH . WPINC . '/class-wp-feed-cache-transient.php' );
+	require_once( ABSPATH . WPINC . '/class-wp-simplepie-file.php' );
+	require_once( ABSPATH . WPINC . '/class-wp-simplepie-sanitize-kses.php' );
 
 	$feed = new SimplePie();
 
 	$feed->set_sanitize_class( 'WP_SimplePie_Sanitize_KSES' );
 	// We must manually overwrite $feed->sanitize because SimplePie's
-	// constructor sets it before we have a chance to set the sanitization class.
+	// constructor sets it before we have a chance to set the sanitization class
 	$feed->sanitize = new WP_SimplePie_Sanitize_KSES();
 
 	$feed->set_cache_class( 'WP_Feed_Cache' );
@@ -777,8 +778,8 @@ function fetch_feed( $url ) {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param SimplePie       $feed SimplePie feed object (passed by reference).
-	 * @param string|string[] $url  URL of feed or array of URLs of feeds to retrieve.
+	 * @param object $feed SimplePie feed object (passed by reference).
+	 * @param mixed  $url  URL of feed to retrieve. If an array of URLs, the feeds are merged.
 	 */
 	do_action_ref_array( 'wp_feed_options', array( &$feed, $url ) );
 	$feed->init();

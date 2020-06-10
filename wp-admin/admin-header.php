@@ -8,7 +8,7 @@
 
 header( 'Content-Type: ' . get_option( 'html_type' ) . '; charset=' . get_option( 'blog_charset' ) );
 if ( ! defined( 'WP_ADMIN' ) ) {
-	require_once __DIR__ . '/admin.php';
+	require_once( dirname( __FILE__ ) . '/admin.php' );
 }
 
 /**
@@ -32,19 +32,19 @@ if ( empty( $current_screen ) ) {
 }
 
 get_admin_page_title();
-$title = strip_tags( $title );
+$title = esc_html( strip_tags( $title ) );
 
 if ( is_network_admin() ) {
 	/* translators: Network admin screen title. %s: Network title. */
-	$admin_title = sprintf( __( 'Network Admin: %s' ), get_network()->site_name );
+	$admin_title = sprintf( __( 'Network Admin: %s' ), esc_html( get_network()->site_name ) );
 } elseif ( is_user_admin() ) {
 	/* translators: User dashboard screen title. %s: Network title. */
-	$admin_title = sprintf( __( 'User Dashboard: %s' ), get_network()->site_name );
+	$admin_title = sprintf( __( 'User Dashboard: %s' ), esc_html( get_network()->site_name ) );
 } else {
 	$admin_title = get_bloginfo( 'name' );
 }
 
-if ( $admin_title === $title ) {
+if ( $admin_title == $title ) {
 	/* translators: Admin screen title. %s: Admin screen name. */
 	$admin_title = sprintf( __( '%s &#8212; WordPress' ), $title );
 } else {
@@ -71,10 +71,11 @@ wp_user_settings();
 
 _wp_admin_html_begin();
 ?>
-<title><?php echo esc_html( $admin_title ); ?></title>
+<title><?php echo $admin_title; ?></title>
 <?php
 
 wp_enqueue_style( 'colors' );
+wp_enqueue_style( 'ie' );
 wp_enqueue_script( 'utils' );
 wp_enqueue_script( 'svg-painter' );
 
@@ -147,7 +148,7 @@ do_action( "admin_head-{$hook_suffix}" ); // phpcs:ignore WordPress.NamingConven
  */
 do_action( 'admin_head' );
 
-if ( 'f' === get_user_setting( 'mfold' ) ) {
+if ( get_user_setting( 'mfold' ) == 'f' ) {
 	$admin_body_class .= ' folded';
 }
 
@@ -199,11 +200,6 @@ if ( $current_screen->is_block_editor() ) {
 	}
 }
 
-// Print a CSS class to make PHP errors visible.
-if ( error_get_last() && WP_DEBUG && WP_DEBUG_DISPLAY && ini_get( 'display_errors' ) ) {
-	$admin_body_class .= ' php-error';
-}
-
 ?>
 </head>
 <?php
@@ -237,7 +233,7 @@ if ( current_user_can( 'customize' ) ) {
 ?>
 
 <div id="wpwrap">
-<?php require ABSPATH . 'wp-admin/menu-header.php'; ?>
+<?php require( ABSPATH . 'wp-admin/menu-header.php' ); ?>
 <div id="wpcontent">
 
 <?php
@@ -292,6 +288,6 @@ if ( is_network_admin() ) {
  */
 do_action( 'all_admin_notices' );
 
-if ( 'options-general.php' === $parent_file ) {
-	require ABSPATH . 'wp-admin/options-head.php';
+if ( $parent_file == 'options-general.php' ) {
+	require( ABSPATH . 'wp-admin/options-head.php' );
 }
