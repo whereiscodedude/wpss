@@ -120,7 +120,8 @@ window.wp = window.wp || {};
 		 * @param  {plupload.File} file     File that was uploaded.
 		 */
 		tryAgain = function( message, data, file ) {
-			var times, id;
+			var times;
+			var id;
 
 			if ( ! data || ! data.responseHeaders ) {
 				error( pluploadL10n.http_error_image, data, file, 'no-retry' );
@@ -209,8 +210,8 @@ window.wp = window.wp || {};
 		 * @param  {string}        retry    Whether to try again to create image sub-sizes. Passing 'no-retry' will prevent it.
 		 */
 		error = function( message, data, file, retry ) {
-			var isImage = file.type && file.type.indexOf( 'image/' ) === 0,
-				status = data && data.status;
+			var isImage = file.type && file.type.indexOf( 'image/' ) === 0;
+			var status  = data && data.status;
 
 			// If the file is an image and the error is HTTP 5xx try to create sub-sizes again.
 			if ( retry !== 'no-retry' && isImage && status >= 500 && status < 600 ) {
@@ -326,15 +327,9 @@ window.wp = window.wp || {};
 			this.browser.on( 'mouseenter', this.refresh );
 		} else {
 			this.uploader.disableBrowse( true );
+			// If HTML5 mode, hide the auto-created file container.
+			$('#' + this.uploader.id + '_html5_container').hide();
 		}
-
-		$( self ).on( 'uploader:ready', function() {
-			$( '.moxie-shim-html5 input[type="file"]' )
-				.attr( {
-					tabIndex:      '-1',
-					'aria-hidden': 'true'
-				} );
-		} );
 
 		/**
 		 * After files were filtered and added to the queue, create a model for each.
@@ -526,7 +521,7 @@ window.wp = window.wp || {};
 
 				/*
 				 * If the browser node is not attached to the DOM,
-				 * use a temporary container to house it, as the browser button shims
+				 * use a temporary container to house it, as the browser button shims 
 				 * require the button to exist in the DOM at all times.
 				 */
 				if ( ! attached ) {

@@ -6,9 +6,7 @@
  * @subpackage Administration
  */
 
-if ( ! defined( 'IFRAME_REQUEST' )
-	&& isset( $_GET['action'] ) && in_array( $_GET['action'], array( 'update-selected', 'activate-plugin', 'update-selected-themes' ), true )
-) {
+if ( ! defined( 'IFRAME_REQUEST' ) && isset( $_GET['action'] ) && in_array( $_GET['action'], array( 'update-selected', 'activate-plugin', 'update-selected-themes' ) ) ) {
 	define( 'IFRAME_REQUEST', true );
 }
 
@@ -22,7 +20,7 @@ if ( isset( $_GET['action'] ) ) {
 	$theme  = isset( $_REQUEST['theme'] ) ? urldecode( $_REQUEST['theme'] ) : '';
 	$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
 
-	if ( 'update-selected' === $action ) {
+	if ( 'update-selected' == $action ) {
 		if ( ! current_user_can( 'update_plugins' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to update plugins for this site.' ) );
 		}
@@ -50,7 +48,7 @@ if ( isset( $_GET['action'] ) ) {
 
 		iframe_footer();
 
-	} elseif ( 'upgrade-plugin' === $action ) {
+	} elseif ( 'upgrade-plugin' == $action ) {
 		if ( ! current_user_can( 'update_plugins' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to update plugins for this site.' ) );
 		}
@@ -72,7 +70,7 @@ if ( isset( $_GET['action'] ) ) {
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';
 
-	} elseif ( 'activate-plugin' === $action ) {
+	} elseif ( 'activate-plugin' == $action ) {
 		if ( ! current_user_can( 'update_plugins' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to update plugins for this site.' ) );
 		}
@@ -98,7 +96,7 @@ if ( isset( $_GET['action'] ) ) {
 			include WP_PLUGIN_DIR . '/' . $plugin;
 		}
 		iframe_footer();
-	} elseif ( 'install-plugin' === $action ) {
+	} elseif ( 'install-plugin' == $action ) {
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to install plugins on this site.' ) );
@@ -141,7 +139,7 @@ if ( isset( $_GET['action'] ) ) {
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';
 
-	} elseif ( 'upload-plugin' === $action ) {
+	} elseif ( 'upload-plugin' == $action ) {
 
 		if ( ! current_user_can( 'upload_plugins' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to install plugins on this site.' ) );
@@ -171,7 +169,7 @@ if ( isset( $_GET['action'] ) ) {
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';
 
-	} elseif ( 'upgrade-theme' === $action ) {
+	} elseif ( 'upgrade-theme' == $action ) {
 
 		if ( ! current_user_can( 'update_themes' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to update themes for this site.' ) );
@@ -193,7 +191,7 @@ if ( isset( $_GET['action'] ) ) {
 		$upgrader->upgrade( $theme );
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';
-	} elseif ( 'update-selected-themes' === $action ) {
+	} elseif ( 'update-selected-themes' == $action ) {
 		if ( ! current_user_can( 'update_themes' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to update themes for this site.' ) );
 		}
@@ -220,7 +218,7 @@ if ( isset( $_GET['action'] ) ) {
 		$upgrader->bulk_upgrade( $themes );
 
 		iframe_footer();
-	} elseif ( 'install-theme' === $action ) {
+	} elseif ( 'install-theme' == $action ) {
 
 		if ( ! current_user_can( 'install_themes' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to install themes on this site.' ) );
@@ -260,7 +258,7 @@ if ( isset( $_GET['action'] ) ) {
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';
 
-	} elseif ( 'upload-theme' === $action ) {
+	} elseif ( 'upload-theme' == $action ) {
 
 		if ( ! current_user_can( 'upload_themes' ) ) {
 			wp_die( __( 'Sorry, you are not allowed to install themes on this site.' ) );

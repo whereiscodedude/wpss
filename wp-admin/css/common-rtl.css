@@ -280,6 +280,10 @@ a:focus .media-icon img,
 		outline: 1px solid transparent;
 }
 
+.ie8 a:focus {
+	outline: #5b9dd9 solid 1px;
+}
+
 #adminmenu a:focus {
 	box-shadow: none;
 	/* Only visible in Windows High Contrast mode */
@@ -1438,6 +1442,10 @@ div.error p,
 		0 0 2px 1px rgba(30, 140, 190, 0.8);
 }
 
+.ie8 .notice-dismiss:focus {
+	outline: 1px solid #5b9dd9;
+}
+
 .notice-success,
 div.updated {
 	border-right-color: #46b450;
@@ -1525,9 +1533,7 @@ div.error {
 .updating-message p:before,
 .import-php .updating-message:before,
 .button.updating-message:before,
-.button.installing:before,
-.plugins .column-auto-updates .dashicons-update.spin,
-.theme-overlay .theme-autoupdate .dashicons-update.spin {
+.button.installing:before {
 	animation: rotation 2s infinite linear;
 }
 
@@ -1759,6 +1765,10 @@ form.upgrade .hint {
 	padding: 8px 0;
 	font-size: 13px;
 	font-weight: 600;
+}
+
+.ie8 #screen-options-wrap legend {
+	color: inherit;
 }
 
 .metabox-prefs label {
@@ -2238,6 +2248,13 @@ h1.nav-tab-wrapper, /* Back-compat for pre-4.4 */
 	clear: both;
 }
 
+.ie8 .nav-tab-wrapper {
+	/* contain floats establishing a new block formatting context */
+	display: inline-block;
+	width: 100%;
+	vertical-align: top;
+}
+
 /*------------------------------------------------------------------------------
   26.0 - Misc
 ------------------------------------------------------------------------------*/
@@ -2461,11 +2478,11 @@ div.star-holder {
 	position: relative;
 	height: 17px;
 	width: 100px;
-	background: url(../images/stars.png?ver=20121108) repeat-x bottom right;
+	background: url(../images/stars.png?ver=20121108) repeat-x bottom left;
 }
 
 div.star-holder .star-rating {
-	background: url(../images/stars.png?ver=20121108) repeat-x top right;
+	background: url(../images/stars.png?ver=20121108) repeat-x top left;
 	height: 17px;
 	float: right;
 }
@@ -3664,7 +3681,7 @@ img {
 	/* Back-compat for pre-3.8 */
 	div.star-holder,
 	div.star-holder .star-rating {
-		background: url(../images/stars-2x.png?ver=20121108) repeat-x bottom right;
+		background: url(../images/stars-2x.png?ver=20121108) repeat-x bottom left;
 		background-size: 21px 37px;
 	}
 
@@ -3978,11 +3995,6 @@ img {
 		clear: both;
 		max-width: 100%;
 		float: none;
-	}
-
-	#screen-meta,
-	#screen-meta-links {
-		margin-left: 10px;
 	}
 
 	#screen-meta-links {

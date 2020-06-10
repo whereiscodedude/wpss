@@ -474,6 +474,7 @@ $document.ready( function() {
 		currentPage = pageInput.val(),
 		isIOS = /iPhone|iPad|iPod/.test( navigator.userAgent ),
 		isAndroid = navigator.userAgent.indexOf( 'Android' ) !== -1,
+		isIE8 = $( document.documentElement ).hasClass( 'ie8' ),
 		$adminMenuWrap = $( '#adminmenuwrap' ),
 		$wpwrap = $( '#wpwrap' ),
 		$adminmenu = $( '#adminmenu' ),
@@ -1059,7 +1060,7 @@ $document.ready( function() {
 		var windowPos = $window.scrollTop(),
 			resizing = ! event || event.type !== 'scroll';
 
-		if ( isIOS || $adminmenu.data( 'wp-responsive' ) ) {
+		if ( isIOS || isIE8 || $adminmenu.data( 'wp-responsive' ) ) {
 			return;
 		}
 

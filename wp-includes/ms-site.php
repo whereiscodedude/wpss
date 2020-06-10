@@ -69,11 +69,9 @@ function wp_insert_site( array $data ) {
 		return new WP_Error( 'db_insert_error', __( 'Could not insert site into the database.' ), $wpdb->last_error );
 	}
 
-	$site_id = (int) $wpdb->insert_id;
+	clean_blog_cache( $wpdb->insert_id );
 
-	clean_blog_cache( $site_id );
-
-	$new_site = get_site( $site_id );
+	$new_site = get_site( $wpdb->insert_id );
 
 	if ( ! $new_site ) {
 		return new WP_Error( 'get_site_error', __( 'Could not retrieve site data.' ) );
@@ -387,7 +385,7 @@ function update_site_cache( $sites, $update_meta_cache = true ) {
  * @since 5.1.0
  *
  * @param array $site_ids List of site IDs.
- * @return array|false An array of metadata on success, false if there is nothing to update.
+ * @return array|false Returns false if there is nothing to update. Returns an array of metadata on success.
  */
 function update_sitemeta_cache( $site_ids ) {
 	// Ensure this filter is hooked in even if the function is called early.
@@ -1061,9 +1059,8 @@ function add_site_meta( $site_id, $meta_key, $meta_value, $unique = false ) {
  *
  * @param int    $site_id    Site ID.
  * @param string $meta_key   Metadata name.
- * @param mixed  $meta_value Optional. Metadata value. If provided,
- *                           rows will only be removed that match the value.
- *                           Must be serializable if non-scalar. Default empty.
+ * @param mixed  $meta_value Optional. Metadata value. Must be serializable if
+ *                           non-scalar. Default empty.
  * @return bool True on success, false on failure.
  */
 function delete_site_meta( $site_id, $meta_key, $meta_value = '' ) {
@@ -1076,13 +1073,11 @@ function delete_site_meta( $site_id, $meta_key, $meta_value = '' ) {
  * @since 5.1.0
  *
  * @param int    $site_id Site ID.
- * @param string $key     Optional. The meta key to retrieve. By default,
- *                        returns data for all keys. Default empty.
- * @param bool   $single  Optional. Whether to return a single value.
- *                        This parameter has no effect if $key is not specified.
- *                        Default false.
- * @return mixed An array if $single is false. The value of meta data field
- *               if $single is true.
+ * @param string $key     Optional. The meta key to retrieve. By default, returns
+ *                        data for all keys. Default empty.
+ * @param bool   $single  Optional. Whether to return a single value. Default false.
+ * @return mixed Will be an array if $single is false. Will be value of meta data
+ *               field if $single is true.
  */
 function get_site_meta( $site_id, $key = '', $single = false ) {
 	return get_metadata( 'blog', $site_id, $key, $single );
@@ -1101,7 +1096,7 @@ function get_site_meta( $site_id, $key = '', $single = false ) {
  * @param int    $site_id    Site ID.
  * @param string $meta_key   Metadata key.
  * @param mixed  $meta_value Metadata value. Must be serializable if non-scalar.
- * @param mixed  $prev_value Optional. Previous value to check before updating.
+ * @param mixed  $prev_value Optional. Previous value to check before removing.
  *                           Default empty.
  * @return int|bool Meta ID if the key didn't exist, true on successful update,
  *                  false on failure.

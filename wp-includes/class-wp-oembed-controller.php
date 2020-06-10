@@ -40,10 +40,8 @@ final class WP_oEmbed_Controller {
 					'callback' => array( $this, 'get_item' ),
 					'args'     => array(
 						'url'      => array(
-							'description' => __( 'The URL of the resource for which to fetch oEmbed data.' ),
-							'required'    => true,
-							'type'        => 'string',
-							'format'      => 'uri',
+							'required'          => true,
+							'sanitize_callback' => 'esc_url_raw',
 						),
 						'format'   => array(
 							'default'           => 'json',
@@ -68,10 +66,10 @@ final class WP_oEmbed_Controller {
 					'permission_callback' => array( $this, 'get_proxy_item_permissions_check' ),
 					'args'                => array(
 						'url'       => array(
-							'description' => __( 'The URL of the resource for which to fetch oEmbed data.' ),
-							'required'    => true,
-							'type'        => 'string',
-							'format'      => 'uri',
+							'description'       => __( 'The URL of the resource for which to fetch oEmbed data.' ),
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'esc_url_raw',
 						),
 						'format'    => array(
 							'description' => __( 'The oEmbed format to use.' ),

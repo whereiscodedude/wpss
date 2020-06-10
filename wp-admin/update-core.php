@@ -16,7 +16,7 @@ add_thickbox();
 
 if ( is_multisite() && ! is_network_admin() ) {
 	wp_redirect( network_admin_url( 'update-core.php' ) );
-	exit;
+	exit();
 }
 
 if ( ! current_user_can( 'update_core' ) && ! current_user_can( 'update_themes' ) && ! current_user_can( 'update_plugins' ) && ! current_user_can( 'update_languages' ) ) {
@@ -46,7 +46,7 @@ function list_core_update( $update ) {
 		$version_string = $update->current;
 	} elseif ( 'en_US' === $update->locale && $update->packages->partial && $wp_version == $update->partial_version ) {
 		$updates = get_core_updates();
-		if ( $updates && 1 === count( $updates ) ) {
+		if ( $updates && 1 == count( $updates ) ) {
 			// If the only available update is a partial builds, it doesn't need a language-specific version string.
 			$version_string = $update->current;
 		}
@@ -328,13 +328,6 @@ function list_plugin_updates() {
 
 	<tbody class="plugins">
 	<?php
-
-	$auto_updates = array();
-	if ( wp_is_auto_update_enabled_for_type( 'plugin' ) ) {
-		$auto_updates       = (array) get_site_option( 'auto_update_plugins', array() );
-		$auto_update_notice = ' | ' . wp_get_auto_update_message();
-	}
-
 	foreach ( (array) $plugins as $plugin_file => $plugin_data ) {
 		$plugin_data = (object) _get_plugin_data_markup_translate( $plugin_file, (array) $plugin_data, false, true );
 
@@ -426,9 +419,6 @@ function list_plugin_updates() {
 				$plugin_data->update->new_version
 			);
 			echo ' ' . $details . $compat . $upgrade_notice;
-			if ( in_array( $plugin_file, $auto_updates, true ) ) {
-				echo $auto_update_notice;
-			}
 			?>
 		</p></td>
 	</tr>
@@ -488,15 +478,8 @@ function list_theme_updates() {
 
 	<tbody class="plugins">
 	<?php
-	$auto_updates = array();
-	if ( wp_is_auto_update_enabled_for_type( 'theme' ) ) {
-		$auto_updates       = (array) get_site_option( 'auto_update_themes', array() );
-		$auto_update_notice = ' | ' . wp_get_auto_update_message();
-	}
-
 	foreach ( $themes as $stylesheet => $theme ) {
 		$checkbox_id = 'checkbox_' . md5( $theme->get( 'Name' ) );
-
 		?>
 	<tr>
 		<td class="check-column">
@@ -518,9 +501,6 @@ function list_theme_updates() {
 				$theme->display( 'Version' ),
 				$theme->update['new_version']
 			);
-			if ( in_array( $stylesheet, $auto_updates, true ) ) {
-				echo $auto_update_notice;
-			}
 			?>
 		</p></td>
 	</tr>
@@ -710,9 +690,9 @@ function do_undismiss_core_update() {
 $action = isset( $_GET['action'] ) ? $_GET['action'] : 'upgrade-core';
 
 $upgrade_error = false;
-if ( ( 'do-theme-upgrade' === $action || ( 'do-plugin-upgrade' === $action && ! isset( $_GET['plugins'] ) ) )
+if ( ( 'do-theme-upgrade' == $action || ( 'do-plugin-upgrade' == $action && ! isset( $_GET['plugins'] ) ) )
 	&& ! isset( $_POST['checked'] ) ) {
-	$upgrade_error = ( 'do-theme-upgrade' === $action ) ? 'themes' : 'plugins';
+	$upgrade_error = 'do-theme-upgrade' == $action ? 'themes' : 'plugins';
 	$action        = 'upgrade-core';
 }
 
@@ -751,7 +731,7 @@ get_current_screen()->set_help_sidebar(
 	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
-if ( 'upgrade-core' === $action ) {
+if ( 'upgrade-core' == $action ) {
 	// Force a update check when requested.
 	$force_check = ! empty( $_GET['force-check'] );
 	wp_version_check( array(), $force_check );
@@ -815,7 +795,7 @@ if ( 'upgrade-core' === $action ) {
 
 	require_once ABSPATH . 'wp-admin/admin-footer.php';
 
-} elseif ( 'do-core-upgrade' === $action || 'do-core-reinstall' === $action ) {
+} elseif ( 'do-core-upgrade' == $action || 'do-core-reinstall' == $action ) {
 
 	if ( ! current_user_can( 'update_core' ) ) {
 		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
@@ -831,7 +811,7 @@ if ( 'upgrade-core' === $action ) {
 	}
 
 	require_once ABSPATH . 'wp-admin/admin-header.php';
-	if ( 'do-core-reinstall' === $action ) {
+	if ( 'do-core-reinstall' == $action ) {
 		$reinstall = true;
 	} else {
 		$reinstall = false;
@@ -851,7 +831,7 @@ if ( 'upgrade-core' === $action ) {
 
 	require_once ABSPATH . 'wp-admin/admin-footer.php';
 
-} elseif ( 'do-plugin-upgrade' === $action ) {
+} elseif ( 'do-plugin-upgrade' == $action ) {
 
 	if ( ! current_user_can( 'update_plugins' ) ) {
 		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
@@ -889,7 +869,7 @@ if ( 'upgrade-core' === $action ) {
 
 	require_once ABSPATH . 'wp-admin/admin-footer.php';
 
-} elseif ( 'do-theme-upgrade' === $action ) {
+} elseif ( 'do-theme-upgrade' == $action ) {
 
 	if ( ! current_user_can( 'update_themes' ) ) {
 		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
@@ -929,7 +909,7 @@ if ( 'upgrade-core' === $action ) {
 
 	require_once ABSPATH . 'wp-admin/admin-footer.php';
 
-} elseif ( 'do-translation-upgrade' === $action ) {
+} elseif ( 'do-translation-upgrade' == $action ) {
 
 	if ( ! current_user_can( 'update_languages' ) ) {
 		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );

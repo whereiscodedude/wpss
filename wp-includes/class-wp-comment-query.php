@@ -388,7 +388,7 @@ class WP_Comment_Query {
 		 *
 		 * The expected return type from this filter depends on the value passed in the request query_vars.
 		 * When `$this->query_vars['count']` is set, the filter should return the comment count as an int.
-		 * When `'ids' === $this->query_vars['fields']`, the filter should return an array of comment ids.
+		 * When `'ids' == $this->query_vars['fields']`, the filter should return an array of comment ids.
 		 * Otherwise the filter should return an array of WP_Comment objects.
 		 *
 		 * @since 5.3.0
@@ -444,7 +444,7 @@ class WP_Comment_Query {
 
 		$comment_ids = array_map( 'intval', $comment_ids );
 
-		if ( 'ids' === $this->query_vars['fields'] ) {
+		if ( 'ids' == $this->query_vars['fields'] ) {
 			$this->comments = $comment_ids;
 			return $this->comments;
 		}
@@ -516,7 +516,7 @@ class WP_Comment_Query {
 		}
 
 		// 'any' overrides other statuses.
-		if ( ! in_array( 'any', $statuses, true ) ) {
+		if ( ! in_array( 'any', $statuses ) ) {
 			foreach ( $statuses as $status ) {
 				switch ( $status ) {
 					case 'hold':
@@ -575,7 +575,7 @@ class WP_Comment_Query {
 			}
 		}
 
-		$order = ( 'ASC' === strtoupper( $this->query_vars['order'] ) ) ? 'ASC' : 'DESC';
+		$order = ( 'ASC' == strtoupper( $this->query_vars['order'] ) ) ? 'ASC' : 'DESC';
 
 		// Disable ORDER BY with 'none', an empty array, or boolean false.
 		if ( in_array( $this->query_vars['orderby'], array( 'none', array(), false ), true ) ) {
@@ -600,7 +600,7 @@ class WP_Comment_Query {
 					$_order   = $_value;
 				}
 
-				if ( ! $found_orderby_comment_id && in_array( $_orderby, array( 'comment_ID', 'comment__in' ), true ) ) {
+				if ( ! $found_orderby_comment_id && in_array( $_orderby, array( 'comment_ID', 'comment__in' ) ) ) {
 					$found_orderby_comment_id = true;
 				}
 
@@ -747,7 +747,6 @@ class WP_Comment_Query {
 					case 'comment':
 					case 'comments':
 						$comment_types[ $operator ][] = "''";
-						$comment_types[ $operator ][] = "'comment'";
 						break;
 
 					case 'pings':
@@ -1151,7 +1150,7 @@ class WP_Comment_Query {
 		} elseif ( 'comment__in' === $orderby ) {
 			$comment__in = implode( ',', array_map( 'absint', $this->query_vars['comment__in'] ) );
 			$parsed      = "FIELD( {$wpdb->comments}.comment_ID, $comment__in )";
-		} elseif ( in_array( $orderby, $allowed_keys, true ) ) {
+		} elseif ( in_array( $orderby, $allowed_keys ) ) {
 
 			if ( isset( $meta_query_clauses[ $orderby ] ) ) {
 				$meta_clause = $meta_query_clauses[ $orderby ];
