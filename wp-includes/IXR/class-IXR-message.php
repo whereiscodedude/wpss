@@ -9,12 +9,12 @@
  */
 class IXR_Message
 {
-    var $message     = false;
-    var $messageType = false;  // methodCall / methodResponse / fault
-    var $faultCode   = false;
-    var $faultString = false;
-    var $methodName  = '';
-    var $params      = array();
+    var $message;
+    var $messageType;  // methodCall / methodResponse / fault
+    var $faultCode;
+    var $faultString;
+    var $methodName;
+    var $params;
 
     // Current variable stacks
     var $_arraystructs = array();   // The stack used to keep track of the current array/struct
@@ -101,7 +101,7 @@ class IXR_Message
         $chunk_size = 262144;
 
         /**
-         * Filters the chunk size that can be used to parse an XML-RPC response message.
+         * Filters the chunk size that can be used to parse an XML-RPC reponse message.
          *
          * @since 4.4.0
          *
