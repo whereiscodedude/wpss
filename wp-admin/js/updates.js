@@ -2,7 +2,9 @@
  * Functions for ajaxified updates, deletions and installs inside the WordPress admin.
  *
  * @version 4.2.0
- * @output wp-admin/js/updates.js
+ *
+ * @package WordPress
+ * @subpackage Administration
  */
 
 /* global pagenow */
@@ -12,24 +14,20 @@
  * @param {object}  wp                                  WP object.
  * @param {object}  settings                            WP Updates settings.
  * @param {string}  settings.ajax_nonce                 AJAX nonce.
+ * @param {object}  settings.l10n                       Translation strings.
  * @param {object=} settings.plugins                    Base names of plugins in their different states.
  * @param {Array}   settings.plugins.all                Base names of all plugins.
  * @param {Array}   settings.plugins.active             Base names of active plugins.
  * @param {Array}   settings.plugins.inactive           Base names of inactive plugins.
  * @param {Array}   settings.plugins.upgrade            Base names of plugins with updates available.
  * @param {Array}   settings.plugins.recently_activated Base names of recently activated plugins.
- * @param {object=} settings.themes                     Plugin/theme status information or null.
- * @param {number}  settings.themes.all                 Amount of all themes.
- * @param {number}  settings.themes.upgrade             Amount of themes with updates available.
- * @param {number}  settings.themes.disabled            Amount of disabled themes.
- * @param {object=} settings.totals                     Combined information for available update counts.
- * @param {number}  settings.totals.count               Holds the amount of available updates.
+ * @param {object=} settings.totals                     Plugin/theme status information or null.
+ * @param {number}  settings.totals.all                 Amount of all plugins or themes.
+ * @param {number}  settings.totals.upgrade             Amount of plugins or themes with updates available.
+ * @param {number}  settings.totals.disabled            Amount of disabled themes.
  */
 (function( $, wp, settings ) {
-	var $document = $( document ),
-		__ = wp.i18n.__,
-		_x = wp.i18n._x,
-		sprintf = wp.i18n.sprintf;
+	var $document = $( document );
 
 	wp = wp || {};
 
@@ -38,7 +36,7 @@
 	 *
 	 * @since 4.2.0
 	 *
-	 * @namespace wp.updates
+	 * @type {object}
 	 */
 	wp.updates = {};
 
@@ -50,6 +48,15 @@
 	 * @type {string}
 	 */
 	wp.updates.ajaxNonce = settings.ajax_nonce;
+
+	/**
+	 * Localized strings.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @type {object}
+	 */
+	wp.updates.l10n = settings.l10n;
 
 	/**
 	 * Current search term.
@@ -75,19 +82,19 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 Added `available` property to indicate whether credentials have been provided.
 	 *
-	 * @type {Object}
-	 * @property {Object} filesystemCredentials.ftp                Holds FTP credentials.
-	 * @property {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
-	 * @property {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
-	 * @property {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
-	 * @property {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
-	 *                                                             Default empty string.
-	 * @property {Object} filesystemCredentials.ssh                Holds SSH credentials.
-	 * @property {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
-	 * @property {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
-	 * @property {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
-	 * @property {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
-	 *                                                             Default 'false'.
+	 * @type {object} filesystemCredentials                    Holds filesystem credentials.
+	 * @type {object} filesystemCredentials.ftp                Holds FTP credentials.
+	 * @type {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
+	 * @type {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
+	 * @type {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
+	 * @type {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
+	 *                                                         Default empty string.
+	 * @type {object} filesystemCredentials.ssh                Holds SSH credentials.
+	 * @type {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
+	 * @type {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
+	 * @type {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
+	 * @type {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
+	 *                                                         Default 'false'.
 	 */
 	wp.updates.filesystemCredentials = {
 		ftp:       {
@@ -119,7 +126,7 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @type {function}
+	 * @type {function} A function that lazily-compiles the template requested.
 	 */
 	wp.updates.adminNotice = wp.template( 'wp-updates-admin-notice' );
 
@@ -161,9 +168,7 @@
 	 *
 	 */
 	wp.updates.addAdminNotice = function( data ) {
-		var $notice = $( data.selector ),
-			$headerEnd = $( '.wp-header-end' ),
-			$adminNotice;
+		var $notice = $( data.selector ), $adminNotice;
 
 		delete data.selector;
 		$adminNotice = wp.updates.adminNotice( data );
@@ -175,14 +180,8 @@
 
 		if ( $notice.length ) {
 			$notice.replaceWith( $adminNotice );
-		} else if ( $headerEnd.length ) {
-			$headerEnd.after( $adminNotice );
 		} else {
-			if ( 'customize' === pagenow ) {
-				$( '.customize-themes-notifications' ).append( $adminNotice );
-			} else {
-				$( '.wrap' ).find( '> h1' ).after( $adminNotice );
-			}
+			$( '.wrap' ).find( '> h1' ).after( $adminNotice );
 		}
 
 		$document.trigger( 'wp-updates-notice-added' );
@@ -255,74 +254,8 @@
 
 		if ( 'undefined' !== typeof response.debug && window.console && window.console.log ) {
 			_.map( response.debug, function( message ) {
-				// Remove all HTML tags and write a message to the console.
-				window.console.log( wp.sanitize.stripTagsAndEncodeText( message ) );
+				window.console.log( $( '<p />' ).html( message ).text() );
 			} );
-		}
-	};
-
-	/**
-	 * Refreshes update counts everywhere on the screen.
-	 *
-	 * @since 4.7.0
-	 */
-	wp.updates.refreshCount = function() {
-		var $adminBarUpdates              = $( '#wp-admin-bar-updates' ),
-			$dashboardNavMenuUpdateCount  = $( 'a[href="update-core.php"] .update-plugins' ),
-			$pluginsNavMenuUpdateCount    = $( 'a[href="plugins.php"] .update-plugins' ),
-			$appearanceNavMenuUpdateCount = $( 'a[href="themes.php"] .update-plugins' ),
-			itemCount;
-
-		$adminBarUpdates.find( '.ab-item' ).removeAttr( 'title' );
-		$adminBarUpdates.find( '.ab-label' ).text( settings.totals.counts.total );
-
-		// Remove the update count from the toolbar if it's zero.
-		if ( 0 === settings.totals.counts.total ) {
-			$adminBarUpdates.find( '.ab-label' ).parents( 'li' ).remove();
-		}
-
-		// Update the "Updates" menu item.
-		$dashboardNavMenuUpdateCount.each( function( index, element ) {
-			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.total );
-		} );
-		if ( settings.totals.counts.total > 0 ) {
-			$dashboardNavMenuUpdateCount.find( '.update-count' ).text( settings.totals.counts.total );
-		} else {
-			$dashboardNavMenuUpdateCount.remove();
-		}
-
-		// Update the "Plugins" menu item.
-		$pluginsNavMenuUpdateCount.each( function( index, element ) {
-			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.plugins );
-		} );
-		if ( settings.totals.counts.total > 0 ) {
-			$pluginsNavMenuUpdateCount.find( '.plugin-count' ).text( settings.totals.counts.plugins );
-		} else {
-			$pluginsNavMenuUpdateCount.remove();
-		}
-
-		// Update the "Appearance" menu item.
-		$appearanceNavMenuUpdateCount.each( function( index, element ) {
-			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.themes );
-		} );
-		if ( settings.totals.counts.total > 0 ) {
-			$appearanceNavMenuUpdateCount.find( '.theme-count' ).text( settings.totals.counts.themes );
-		} else {
-			$appearanceNavMenuUpdateCount.remove();
-		}
-
-		// Update list table filter navigation.
-		if ( 'plugins' === pagenow || 'plugins-network' === pagenow ) {
-			itemCount = settings.totals.counts.plugins;
-		} else if ( 'themes' === pagenow || 'themes-network' === pagenow ) {
-			itemCount = settings.totals.counts.themes;
-		}
-
-		if ( itemCount > 0 ) {
-			$( '.subsubsub .upgrade .count' ).text( '(' + itemCount + ')' );
-		} else {
-			$( '.subsubsub .upgrade' ).remove();
-			$( '.subsubsub li:last' ).html( function() { return $( this ).children(); } );
 		}
 	};
 
@@ -338,15 +271,62 @@
 	 *                      Can be 'plugin', 'theme'.
 	 */
 	wp.updates.decrementCount = function( type ) {
-		settings.totals.counts.total = Math.max( --settings.totals.counts.total, 0 );
+		var $adminBarUpdates             = $( '#wp-admin-bar-updates' ),
+			$dashboardNavMenuUpdateCount = $( 'a[href="update-core.php"] .update-plugins' ),
+			count                        = $adminBarUpdates.find( '.ab-label' ).text(),
+			$menuItem, $itemCount, itemCount;
 
-		if ( 'plugin' === type ) {
-			settings.totals.counts.plugins = Math.max( --settings.totals.counts.plugins, 0 );
-		} else if ( 'theme' === type ) {
-			settings.totals.counts.themes = Math.max( --settings.totals.counts.themes, 0 );
+		count = parseInt( count, 10 ) - 1;
+
+		if ( count < 0 || isNaN( count ) ) {
+			return;
 		}
 
-		wp.updates.refreshCount( type );
+		$adminBarUpdates.find( '.ab-item' ).removeAttr( 'title' );
+		$adminBarUpdates.find( '.ab-label' ).text( count );
+
+		// Remove the update count from the toolbar if it's zero.
+		if ( ! count ) {
+			$adminBarUpdates.find( '.ab-label' ).parents( 'li' ).remove();
+		}
+
+		// Update the "Updates" menu item.
+		$dashboardNavMenuUpdateCount.each( function( index, element ) {
+			element.className = element.className.replace( /count-\d+/, 'count-' + count );
+		} );
+
+		$dashboardNavMenuUpdateCount.removeAttr( 'title' );
+		$dashboardNavMenuUpdateCount.find( '.update-count' ).text( count );
+
+		if ( 'plugin' === type ) {
+			$menuItem  = $( '#menu-plugins' );
+			$itemCount = $menuItem.find( '.plugin-count' );
+		} else if ( 'theme' === type ) {
+			$menuItem  = $( '#menu-appearance' );
+			$itemCount = $menuItem.find( '.theme-count' );
+		}
+
+		// Decrement the counter of the other menu items.
+		if ( $itemCount ) {
+			itemCount = $itemCount.eq( 0 ).text();
+			itemCount = parseInt( itemCount, 10 ) - 1;
+		}
+
+		if ( itemCount < 0 || isNaN( itemCount ) ) {
+			return;
+		}
+
+		if ( itemCount > 0 ) {
+			$( '.subsubsub .upgrade .count' ).text( '(' + itemCount + ')' );
+
+			$itemCount.text( itemCount );
+			$menuItem.find( '.update-plugins' ).each( function( index, element ) {
+				element.className = element.className.replace( /count-\d+/, 'count-' + itemCount );
+			} );
+		} else {
+			$( '.subsubsub .upgrade' ).remove();
+			$menuItem.find( '.update-plugins' ).remove();
+		}
 	};
 
 	/**
@@ -374,31 +354,23 @@
 		if ( 'plugins' === pagenow || 'plugins-network' === pagenow ) {
 			$updateRow = $( 'tr[data-plugin="' + args.plugin + '"]' );
 			$message   = $updateRow.find( '.update-message' ).removeClass( 'notice-error' ).addClass( 'updating-message notice-warning' ).find( 'p' );
-			message    = sprintf(
-				/* translators: %s: Plugin name and version. */
- 				_x( 'Updating %s...', 'plugin' ),
-				$updateRow.find( '.plugin-title strong' ).text()
-			);
+			message    = wp.updates.l10n.updatingLabel.replace( '%s', $updateRow.find( '.plugin-title strong' ).text() );
 		} else if ( 'plugin-install' === pagenow || 'plugin-install-network' === pagenow ) {
 			$card    = $( '.plugin-card-' + args.slug );
 			$message = $card.find( '.update-now' ).addClass( 'updating-message' );
-			message    = sprintf(
-				/* translators: %s: Plugin name and version. */
- 				_x( 'Updating %s...', 'plugin' ),
-				$message.data( 'name' )
-			);
+			message  = wp.updates.l10n.updatingLabel.replace( '%s', $message.data( 'name' ) );
 
 			// Remove previous error messages, if any.
 			$card.removeClass( 'plugin-card-update-failed' ).find( '.notice.notice-error' ).remove();
 		}
 
-		if ( $message.html() !== __( 'Updating...' ) ) {
+		if ( $message.html() !== wp.updates.l10n.updating ) {
 			$message.data( 'originaltext', $message.html() );
 		}
 
 		$message
 			.attr( 'aria-label', message )
-			.text( __( 'Updating...' ) );
+			.text( wp.updates.l10n.updating );
 
 		$document.trigger( 'wp-plugin-updating', args );
 
@@ -410,8 +382,8 @@
 	 *
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginSuccess`.
-	 * @since 5.5.0 Auto-update "time to next update" text cleared.
 	 *
+	 * @typedef {object} updatePluginSuccess
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin to be updated.
 	 * @param {string} response.plugin     Basename of the plugin to be updated.
@@ -433,9 +405,6 @@
 			// Update the version number in the row.
 			newText = $pluginRow.find( '.plugin-version-author-uri' ).html().replace( response.oldVersion, response.newVersion );
 			$pluginRow.find( '.plugin-version-author-uri' ).html( newText );
-
-			// Clear the "time to next auto-update" text.
-			$pluginRow.find( '.auto-update-time' ).empty();
 		} else if ( 'plugin-install' === pagenow || 'plugin-install-network' === pagenow ) {
 			$updateMessage = $( '.plugin-card-' + response.slug ).find( '.update-now' )
 				.removeClass( 'updating-message' )
@@ -443,17 +412,10 @@
 		}
 
 		$updateMessage
-			.attr(
-				'aria-label',
-				sprintf(
-					/* translators: %s: Plugin name and version. */
-					_x( '%s updated!', 'plugin' ),
-					response.pluginName
-				)
-			)
-			.text( _x( 'Updated!', 'plugin' ) );
+			.attr( 'aria-label', wp.updates.l10n.updatedLabel.replace( '%s', response.pluginName ) )
+			.text( wp.updates.l10n.updated );
 
-		wp.a11y.speak( __( 'Update completed successfully.' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.updatedMsg, 'polite' );
 
 		wp.updates.decrementCount( 'plugin' );
 
@@ -466,6 +428,7 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginError`.
 	 *
+	 * @typedef {object} updatePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be updated.
 	 * @param {string}  response.plugin       Basename of the plugin to be updated.
@@ -484,11 +447,7 @@
 			return;
 		}
 
-		errorMessage = sprintf(
-			/* translators: %s: Error string for a failed update. */
-			__( 'Update Failed: %s' ),
-			response.errorMessage
-		);
+		errorMessage = wp.updates.l10n.updateFailed.replace( '%s', response.errorMessage );
 
 		if ( 'plugins' === pagenow || 'plugins-network' === pagenow ) {
 			if ( response.plugin ) {
@@ -500,14 +459,7 @@
 
 			if ( response.pluginName ) {
 				$message.find( 'p' )
-					.attr(
-						'aria-label',
-						sprintf(
-							/* translators: %s: Plugin name and version. */
-							_x( '%s update failed', 'plugin' ),
-							response.pluginName
-						)
-					);
+					.attr( 'aria-label', wp.updates.l10n.updateFailedLabel.replace( '%s', response.pluginName ) );
 			} else {
 				$message.find( 'p' ).removeAttr( 'aria-label' );
 			}
@@ -520,19 +472,11 @@
 				} ) );
 
 			$card.find( '.update-now' )
-				.text(  __( 'Update Failed!' ) )
-				.removeClass( 'updating-message' );
+				.text( wp.updates.l10n.updateFailedShort ).removeClass( 'updating-message' );
 
 			if ( response.pluginName ) {
 				$card.find( '.update-now' )
-					.attr(
-						'aria-label',
-						sprintf(
-							/* translators: %s: Plugin name and version. */
-							_x( '%s update failed', 'plugin' ),
-							response.pluginName
-						)
-					);
+					.attr( 'aria-label', wp.updates.l10n.updateFailedLabel.replace( '%s', response.pluginName ) );
 			} else {
 				$card.find( '.update-now' ).removeAttr( 'aria-label' );
 			}
@@ -547,7 +491,7 @@
 
 					$card.find( '.update-now' )
 						.attr( 'aria-label', false )
-						.text( __( 'Update Now' ) );
+						.text( wp.updates.l10n.updateNow );
 				}, 200 );
 			} );
 		}
@@ -582,23 +526,16 @@
 			$message = $( '[data-slug="' + args.slug + '"]' );
 		}
 
-		if ( $message.html() !== __( 'Installing...' ) ) {
+		if ( $message.html() !== wp.updates.l10n.installing ) {
 			$message.data( 'originaltext', $message.html() );
 		}
 
 		$message
 			.addClass( 'updating-message' )
-			.attr(
-				'aria-label',
-				sprintf(
-					/* translators: %s: Plugin name and version. */
-					_x( 'Installing %s...', 'plugin' ),
-					$message.data( 'name' )
-				)
-			)
-			.text( __( 'Installing...' ) );
+			.attr( 'aria-label', wp.updates.l10n.pluginInstallingLabel.replace( '%s', $message.data( 'name' ) ) )
+			.text( wp.updates.l10n.installing );
 
-		wp.a11y.speak( __( 'Installing... please wait.' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.installingMsg, 'polite' );
 
 		// Remove previous error messages, if any.
 		$card.removeClass( 'plugin-card-install-failed' ).find( '.notice.notice-error' ).remove();
@@ -613,6 +550,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installPluginSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -624,17 +562,10 @@
 		$message
 			.removeClass( 'updating-message' )
 			.addClass( 'updated-message installed button-disabled' )
-			.attr(
-				'aria-label',
-				sprintf(
-					/* translators: %s: Plugin name and version. */
-					_x( '%s installed!', 'plugin' ),
-					response.pluginName
-				)
-			)
-			.text( _x( 'Installed!', 'plugin' ) );
+			.attr( 'aria-label', wp.updates.l10n.pluginInstalledLabel.replace( '%s', response.pluginName ) )
+			.text( wp.updates.l10n.installed );
 
-		wp.a11y.speak( __( 'Installation completed successfully.' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
 
 		$document.trigger( 'wp-plugin-install-success', response );
 
@@ -642,33 +573,10 @@
 			setTimeout( function() {
 
 				// Transform the 'Install' button into an 'Activate' button.
-				$message.removeClass( 'install-now installed button-disabled updated-message' )
-					.addClass( 'activate-now button-primary' )
-					.attr( 'href', response.activateUrl );
-
-				if ( 'plugins-network' === pagenow ) {
-					$message
-						.attr(
-							'aria-label',
-							sprintf(
-								/* translators: %s: Plugin name. */
-								_x( 'Network Activate %s', 'plugin' ),
-								response.pluginName
-							)
-						)
-						.text( __( 'Network Activate' ) );
-				} else {
-					$message
-						.attr(
-							'aria-label',
-							sprintf(
-								/* translators: %s: Plugin name. */
-								_x( 'Activate %s', 'plugin' ),
-								response.pluginName
-							)
-						)
-						.text( __( 'Activate' ) );
-				}
+				$message.removeClass( 'install-now installed button-disabled updated-message' ).addClass( 'activate-now button-primary' )
+					.attr( 'href', response.activateUrl )
+					.attr( 'aria-label', wp.updates.l10n.activatePluginLabel.replace( '%s', response.pluginName ) )
+					.text( wp.updates.l10n.activatePlugin );
 			}, 1000 );
 		}
 	};
@@ -678,6 +586,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installPluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
 	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
@@ -697,11 +606,7 @@
 			return;
 		}
 
-		errorMessage = sprintf(
-			/* translators: %s: Error string for a failed installation. */
-			__( 'Installation failed: %s' ),
-			response.errorMessage
-		);
+		errorMessage = wp.updates.l10n.installFailed.replace( '%s', response.errorMessage );
 
 		$card
 			.addClass( 'plugin-card-update-failed' )
@@ -719,15 +624,8 @@
 
 		$button
 			.removeClass( 'updating-message' ).addClass( 'button-disabled' )
-			.attr(
-				'aria-label',
-				sprintf(
-					/* translators: %s: Plugin name and version. */
-					_x( '%s installation failed', 'plugin' ),
-					$button.data( 'name' )
-				)
-			)
-			.text( __( 'Installation Failed!' ) );
+			.attr( 'aria-label', wp.updates.l10n.pluginInstallFailedLabel.replace( '%s', $button.data( 'name' ) ) )
+			.text( wp.updates.l10n.installFailedShort );
 
 		wp.a11y.speak( errorMessage, 'assertive' );
 
@@ -739,6 +637,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installImporterSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -748,11 +647,7 @@
 		wp.updates.addAdminNotice( {
 			id:        'install-success',
 			className: 'notice-success is-dismissible',
-			message:   sprintf(
-				/* translators: %s: Activation URL. */
-				__( 'Importer installed successfully. <a href="%s">Run importer</a>' ),
-				response.activateUrl + '&from=import'
-			)
+			message:   wp.updates.l10n.importerInstalledMsg.replace( '%s', response.activateUrl + '&from=import' )
 		} );
 
 		$( '[data-slug="' + response.slug + '"]' )
@@ -760,15 +655,11 @@
 			.addClass( 'activate-now' )
 			.attr({
 				'href': response.activateUrl + '&from=import',
-				'aria-label':sprintf(
-					/* translators: %s: Importer name. */
-					__( 'Run %s' ),
-					response.pluginName
-				)
+				'aria-label': wp.updates.l10n.activateImporterLabel.replace( '%s', response.pluginName )
 			})
-			.text( __( 'Run Importer' ) );
+			.text( wp.updates.l10n.activateImporter );
 
-		wp.a11y.speak( __( 'Installation completed successfully.' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
 
 		$document.trigger( 'wp-importer-install-success', response );
 	};
@@ -778,6 +669,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installImporterError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
 	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
@@ -785,11 +677,7 @@
 	 * @param {string}  response.errorMessage The error that occurred.
 	 */
 	wp.updates.installImporterError = function( response ) {
-		var errorMessage = sprintf(
-				/* translators: %s: Error string for a failed installation. */
-				__( 'Installation failed: %s' ),
-				response.errorMessage
-			),
+		var errorMessage = wp.updates.l10n.installFailed.replace( '%s', response.errorMessage ),
 			$installLink = $( '[data-slug="' + response.slug + '"]' ),
 			pluginName = $installLink.data( 'name' );
 
@@ -809,15 +697,8 @@
 
 		$installLink
 			.removeClass( 'updating-message' )
-			.attr(
-				'aria-label',
-				sprintf(
-					/* translators: %s: Plugin name. */
-					 _x( 'Install %s now', 'plugin' ),
-					 pluginName
-				)
-			)
-			.text( __( 'Install Now' ) );
+			.text( wp.updates.l10n.installNow )
+			.attr( 'aria-label', wp.updates.l10n.installNowLabel.replace( '%s', pluginName ) );
 
 		wp.a11y.speak( errorMessage, 'assertive' );
 
@@ -845,13 +726,13 @@
 			error: wp.updates.deletePluginError
 		}, args );
 
-		if ( $link.html() !== __( 'Deleting...' ) ) {
+		if ( $link.html() !== wp.updates.l10n.deleting ) {
 			$link
 				.data( 'originaltext', $link.html() )
-				.text( __( 'Deleting...' ) );
+				.text( wp.updates.l10n.deleting );
 		}
 
-		wp.a11y.speak( __( 'Deleting...' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.deleting, 'polite' );
 
 		$document.trigger( 'wp-plugin-deleting', args );
 
@@ -863,7 +744,8 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param {Object} response            Response from the server.
+	 * @typedef {object} deletePluginSuccess
+	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin that was deleted.
 	 * @param {string} response.plugin     Base name of the plugin that was deleted.
 	 * @param {string} response.pluginName Name of the plugin that was deleted.
@@ -877,11 +759,7 @@
 				$pluginRow       = $( this ),
 				columnCount      = $form.find( 'thead th:not(.hidden), thead td' ).length,
 				pluginDeletedRow = wp.template( 'item-deleted-row' ),
-				/**
-				 * Plugins Base names of plugins in their different states.
-				 *
-				 * @type {Object}
-				 */
+				/** @type {object} plugins Base names of plugins in their different states. */
 				plugins          = settings.plugins;
 
 			// Add a success message after deleting a plugin.
@@ -941,12 +819,12 @@
 				$views.find( '.all' ).remove();
 
 				if ( ! $form.find( 'tr.no-items' ).length ) {
-					$form.find( '#the-list' ).append( '<tr class="no-items"><td class="colspanchange" colspan="' + columnCount + '">' + __( 'No plugins are currently available.' ) + '</td></tr>' );
+					$form.find( '#the-list' ).append( '<tr class="no-items"><td class="colspanchange" colspan="' + columnCount + '">' + wp.updates.l10n.noPlugins + '</td></tr>' );
 				}
 			}
 		} );
 
-		wp.a11y.speak( _x( 'Deleted!', 'plugin' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.deleted, 'polite' );
 
 		$document.trigger( 'wp-plugin-delete-success', response );
 	};
@@ -956,6 +834,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} deletePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be deleted.
 	 * @param {string}  response.plugin       Base name of the plugin to be deleted
@@ -1031,17 +910,6 @@
 		if ( 'themes-network' === pagenow ) {
 			$notice = $( '[data-slug="' + args.slug + '"]' ).find( '.update-message' ).removeClass( 'notice-error' ).addClass( 'updating-message notice-warning' ).find( 'p' );
 
-		} else if ( 'customize' === pagenow ) {
-
-			// Update the theme details UI.
-			$notice = $( '[data-slug="' + args.slug + '"].notice' ).removeClass( 'notice-large' );
-
-			$notice.find( 'h3' ).remove();
-
-			// Add the top-level UI, and update both.
-			$notice = $notice.add( $( '#customize-control-installed_theme_' + args.slug ).find( '.update-message' ) );
-			$notice = $notice.addClass( 'updating-message' ).find( 'p' );
-
 		} else {
 			$notice = $( '#update-theme' ).closest( '.notice' ).removeClass( 'notice-large' );
 
@@ -1051,12 +919,12 @@
 			$notice = $notice.addClass( 'updating-message' ).find( 'p' );
 		}
 
-		if ( $notice.html() !== __( 'Updating...' ) ) {
+		if ( $notice.html() !== wp.updates.l10n.updating ) {
 			$notice.data( 'originaltext', $notice.html() );
 		}
 
-		wp.a11y.speak( __( 'Updating... please wait.' ), 'polite' );
-		$notice.text( __( 'Updating...' ) );
+		wp.a11y.speak( wp.updates.l10n.updatingMsg, 'polite' );
+		$notice.text( wp.updates.l10n.updating );
 
 		$document.trigger( 'wp-theme-updating', args );
 
@@ -1067,8 +935,8 @@
 	 * Updates the UI appropriately after a successful theme update.
 	 *
 	 * @since 4.6.0
-	 * @since 5.5.0 Auto-update "time to next update" text cleared.
 	 *
+	 * @typedef {object} updateThemeSuccess
 	 * @param {object} response
 	 * @param {string} response.slug       Slug of the theme to be updated.
 	 * @param {object} response.theme      Updated theme.
@@ -1080,51 +948,36 @@
 			$theme         = $( '[data-slug="' + response.slug + '"]' ),
 			updatedMessage = {
 				className: 'updated-message notice-success notice-alt',
-				message:   _x( 'Updated!', 'theme' )
+				message:   wp.updates.l10n.updated
 			},
 			$notice, newText;
 
-		if ( 'customize' === pagenow ) {
-			$theme = $( '.updating-message' ).siblings( '.theme-name' );
-
-			if ( $theme.length ) {
-
-				// Update the version number in the row.
-				newText = $theme.html().replace( response.oldVersion, response.newVersion );
-				$theme.html( newText );
-			}
-
-			$notice = $( '.theme-info .notice' ).add( wp.customize.control( 'installed_theme_' + response.slug ).container.find( '.theme' ).find( '.update-message' ) );
-		} else if ( 'themes-network' === pagenow ) {
+		if ( 'themes-network' === pagenow ) {
 			$notice = $theme.find( '.update-message' );
 
 			// Update the version number in the row.
 			newText = $theme.find( '.theme-version-author-uri' ).html().replace( response.oldVersion, response.newVersion );
 			$theme.find( '.theme-version-author-uri' ).html( newText );
-
-			// Clear the "time to next auto-update" text.
-			$theme.find( '.auto-update-time' ).empty();
 		} else {
 			$notice = $( '.theme-info .notice' ).add( $theme.find( '.update-message' ) );
 
 			// Focus on Customize button after updating.
 			if ( isModalOpen ) {
 				$( '.load-customize:visible' ).focus();
-				$( '.theme-info .theme-autoupdate' ).find( '.auto-update-time' ).empty();
 			} else {
 				$theme.find( '.load-customize' ).focus();
 			}
 		}
 
 		wp.updates.addAdminNotice( _.extend( { selector: $notice }, updatedMessage ) );
-		wp.a11y.speak( __( 'Update completed successfully.' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.updatedMsg, 'polite' );
 
 		wp.updates.decrementCount( 'theme' );
 
 		$document.trigger( 'wp-theme-update-success', response );
 
 		// Show updated message after modal re-rendered.
-		if ( isModalOpen && 'customize' !== pagenow ) {
+		if ( isModalOpen ) {
 			$( '.theme-info .theme-author' ).after( wp.updates.adminNotice( updatedMessage ) );
 		}
 	};
@@ -1134,6 +987,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} updateThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be updated.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1141,11 +995,7 @@
 	 */
 	wp.updates.updateThemeError = function( response ) {
 		var $theme       = $( '[data-slug="' + response.slug + '"]' ),
-			errorMessage = sprintf(
-				/* translators: %s: Error string for a failed update. */
-				 __( 'Update Failed: %s' ),
-				response.errorMessage
-			),
+			errorMessage = wp.updates.l10n.updateFailed.replace( '%s', response.errorMessage ),
 			$notice;
 
 		if ( ! wp.updates.isValidResponse( response, 'update' ) ) {
@@ -1154,10 +1004,6 @@
 
 		if ( wp.updates.maybeHandleCredentialError( response, 'update-theme' ) ) {
 			return;
-		}
-
-		if ( 'customize' === pagenow ) {
-			$theme = wp.customize.control( 'installed_theme_' + response.slug ).container.find( '.theme' );
 		}
 
 		if ( 'themes-network' === pagenow ) {
@@ -1201,22 +1047,14 @@
 
 		$message.addClass( 'updating-message' );
 		$message.parents( '.theme' ).addClass( 'focus' );
-		if ( $message.html() !== __( 'Installing...' ) ) {
+		if ( $message.html() !== wp.updates.l10n.installing ) {
 			$message.data( 'originaltext', $message.html() );
 		}
 
 		$message
-			.attr(
-				'aria-label',
-				sprintf(
-					/* translators: %s: Theme name and version. */
-					_x( 'Installing %s...', 'theme' ),
-					$message.data( 'name' )
-				)
-			)
-			.text( __( 'Installing...' ) );
-
-		wp.a11y.speak( __( 'Installing... please wait.' ), 'polite' );
+			.text( wp.updates.l10n.installing )
+			.attr( 'aria-label', wp.updates.l10n.themeInstallingLabel.replace( '%s', $message.data( 'name' ) ) );
+		wp.a11y.speak( wp.updates.l10n.installingMsg, 'polite' );
 
 		// Remove previous error messages, if any.
 		$( '.install-theme-info, [data-slug="' + args.slug + '"]' ).removeClass( 'theme-install-failed' ).find( '.notice.notice-error' ).remove();
@@ -1231,6 +1069,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installThemeSuccess
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.customizeUrl URL to the Customizer for the just installed theme.
@@ -1245,17 +1084,10 @@
 		$message = $card.find( '.button-primary' )
 			.removeClass( 'updating-message' )
 			.addClass( 'updated-message disabled' )
-			.attr(
-				'aria-label',
-				sprintf(
-					/* translators: %s: Theme name and version. */
-					_x( '%s installed!', 'theme' ),
-					response.themeName
-				)
-			)
-			.text( _x( 'Installed!', 'theme' ) );
+			.attr( 'aria-label', wp.updates.l10n.themeInstalledLabel.replace( '%s', response.themeName ) )
+			.text( wp.updates.l10n.installed );
 
-		wp.a11y.speak( __( 'Installation completed successfully.' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
 
 		setTimeout( function() {
 
@@ -1265,31 +1097,9 @@
 				$message
 					.attr( 'href', response.activateUrl )
 					.removeClass( 'theme-install updated-message disabled' )
-					.addClass( 'activate' );
-
-				if ( 'themes-network' === pagenow ) {
-					$message
-						.attr(
-							'aria-label',
-							sprintf(
-								/* translators: %s: Theme name. */
-								_x( 'Network Activate %s', 'theme' ),
-								response.themeName
-							)
-						)
-						.text( __( 'Network Enable' ) );
-				} else {
-					$message
-						.attr(
-							'aria-label',
-							sprintf(
-								/* translators: %s: Theme name. */
-								_x( 'Activate %s', 'theme' ),
-								response.themeName
-							)
-						)
-						.text( __( 'Activate' ) );
-				}
+					.addClass( 'activate' )
+					.attr( 'aria-label', wp.updates.l10n.activateThemeLabel.replace( '%s', response.themeName ) )
+					.text( wp.updates.l10n.activateTheme );
 			}
 
 			if ( response.customizeUrl ) {
@@ -1298,8 +1108,8 @@
 				$message.siblings( '.preview' ).replaceWith( function () {
 					return $( '<a>' )
 						.attr( 'href', response.customizeUrl )
-						.addClass( 'button load-customize' )
-						.text( __( 'Live Preview' ) );
+						.addClass( 'button button-secondary load-customize' )
+						.text( wp.updates.l10n.livePreview );
 				} );
 			}
 		}, 1000 );
@@ -1310,6 +1120,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} installThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1317,11 +1128,7 @@
 	 */
 	wp.updates.installThemeError = function( response ) {
 		var $card, $button,
-			errorMessage = sprintf(
-				/* translators: %s: Error string for a failed installation. */
-				__( 'Installation failed: %s' ),
-				response.errorMessage
-			),
+			errorMessage = wp.updates.l10n.installFailed.replace( '%s', response.errorMessage ),
 			$message     = wp.updates.adminNotice( {
 				className: 'update-message notice-error notice-alt',
 				message:   errorMessage
@@ -1335,36 +1142,18 @@
 			return;
 		}
 
-		if ( 'customize' === pagenow ) {
-			if ( $document.find( 'body' ).hasClass( 'modal-open' ) ) {
-				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
-				$card   = $( '.theme-overlay .theme-info' ).prepend( $message );
-			} else {
-				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
-				$card   = $button.closest( '.theme' ).addClass( 'theme-install-failed' ).append( $message );
-			}
-			wp.customize.notifications.remove( 'theme_installing' );
+		if ( $document.find( 'body' ).hasClass( 'full-overlay-active' ) ) {
+			$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
+			$card   = $( '.install-theme-info' ).prepend( $message );
 		} else {
-			if ( $document.find( 'body' ).hasClass( 'full-overlay-active' ) ) {
-				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
-				$card   = $( '.install-theme-info' ).prepend( $message );
-			} else {
-				$card   = $( '[data-slug="' + response.slug + '"]' ).removeClass( 'focus' ).addClass( 'theme-install-failed' ).append( $message );
-				$button = $card.find( '.theme-install' );
-			}
+			$card   = $( '[data-slug="' + response.slug + '"]' ).removeClass( 'focus' ).addClass( 'theme-install-failed' ).append( $message );
+			$button = $card.find( '.theme-install' );
 		}
 
 		$button
 			.removeClass( 'updating-message' )
-			.attr(
-				'aria-label',
-				sprintf(
-					/* translators: %s: Theme name and version. */
-					_x( '%s installation failed', 'theme' ),
-					$button.data( 'name' )
-				)
-			)
-			.text( __( 'Installation Failed!' ) );
+			.attr( 'aria-label', wp.updates.l10n.themeInstallFailedLabel.replace( '%s', $button.data( 'name' ) ) )
+			.text( wp.updates.l10n.installFailedShort );
 
 		wp.a11y.speak( errorMessage, 'assertive' );
 
@@ -1372,7 +1161,7 @@
 	};
 
 	/**
-	 * Sends an Ajax request to the server to delete a theme.
+	 * Sends an Ajax request to the server to install a theme.
 	 *
 	 * @since 4.6.0
 	 *
@@ -1397,13 +1186,13 @@
 			error: wp.updates.deleteThemeError
 		}, args );
 
-		if ( $button && $button.html() !== __( 'Deleting...' ) ) {
+		if ( $button && $button.html() !== wp.updates.l10n.deleting ) {
 			$button
 				.data( 'originaltext', $button.html() )
-				.text( __( 'Deleting...' ) );
+				.text( wp.updates.l10n.deleting );
 		}
 
-		wp.a11y.speak( __( 'Deleting...' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.deleting, 'polite' );
 
 		// Remove previous error messages, if any.
 		$( '.theme-info .update-message' ).remove();
@@ -1418,6 +1207,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} deleteThemeSuccess
 	 * @param {object} response      Response from the server.
 	 * @param {string} response.slug Slug of the theme that was deleted.
 	 */
@@ -1430,7 +1220,7 @@
 			$themeRows.css( { backgroundColor: '#faafaa' } ).fadeOut( 350, function() {
 				var $views     = $( '.subsubsub' ),
 					$themeRow  = $( this ),
-					totals     = settings.themes,
+					totals     = settings.totals,
 					deletedRow = wp.template( 'item-deleted-row' );
 
 				if ( ! $themeRow.hasClass( 'plugin-update-tr' ) ) {
@@ -1466,7 +1256,7 @@
 			} );
 		}
 
-		wp.a11y.speak( _x( 'Deleted!', 'theme' ), 'polite' );
+		wp.a11y.speak( wp.updates.l10n.deleted, 'polite' );
 
 		$document.trigger( 'wp-theme-delete-success', response );
 	};
@@ -1476,6 +1266,7 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} deleteThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be deleted.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1486,11 +1277,7 @@
 			$button      = $( '.theme-actions .delete-theme' ),
 			updateRow    = wp.template( 'item-update-row' ),
 			$updateRow   = $themeRow.siblings( '#' + response.slug + '-update' ),
-			errorMessage = sprintf(
-				/* translators: %s: Error string for a failed deletion. */
-				__( 'Deletion failed: %s' ),
-				response.errorMessage
-			),
+			errorMessage = wp.updates.l10n.deleteFailed.replace( '%s', response.errorMessage ),
 			$message     = wp.updates.adminNotice( {
 				className: 'update-message notice-error notice-alt',
 				message:   errorMessage
@@ -1713,11 +1500,11 @@
 	 * @param {string} message Error message.
 	 */
 	wp.updates.showErrorInCredentialsForm = function( message ) {
-		var $filesystemForm = $( '#request-filesystem-credentials-form' );
+		var $modal = $( '#request-filesystem-credentials-form' );
 
 		// Remove any existing error.
-		$filesystemForm.find( '.notice' ).remove();
-		$filesystemForm.find( '#request-filesystem-credentials-title' ).after( '<div class="notice notice-alt notice-error"><p>' + message + '</p></div>' );
+		$modal.find( '.notice' ).remove();
+		$modal.find( '#request-filesystem-credentials-title' ).after( '<div class="notice notice-alt notice-error"><p>' + message + '</p></div>' );
 	};
 
 	/**
@@ -1753,11 +1540,12 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @typedef {object} maybeHandleCredentialError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.
 	 * @param {string} action                The type of request to perform.
-	 * @return {boolean} Whether there is an error that needs to be handled or not.
+	 * @returns {boolean} Whether there is an error that needs to be handled or not.
 	 */
 	wp.updates.maybeHandleCredentialError = function( response, action ) {
 		if ( wp.updates.shouldRequestFilesystemCredentials && response.errorCode && 'unable_to_connect_to_filesystem' === response.errorCode ) {
@@ -1781,8 +1569,8 @@
 	 *                                                'update' or 'install'.
 	 */
 	wp.updates.isValidResponse = function( response, action ) {
-		var error = __( 'Something went wrong.' ),
-			errorMessage;
+		var error = wp.updates.l10n.unknownError,
+		    errorMessage;
 
 		// Make sure the response is a valid data object and not a Promise object.
 		if ( _.isObject( response ) && ! _.isFunction( response.always ) ) {
@@ -1790,11 +1578,11 @@
 		}
 
 		if ( _.isString( response ) && '-1' === response ) {
-			error = __( 'An error has occurred. Please reload the page and try again.' );
+			error = wp.updates.l10n.nonceError;
 		} else if ( _.isString( response ) ) {
 			error = response;
 		} else if ( 'undefined' !== typeof response.readyState && 0 === response.readyState ) {
-			error = __( 'Connection lost or the server is busy. Please try again later.' );
+			error = wp.updates.l10n.connectionError;
 		} else if ( _.isString( response.responseText ) && '' !== response.responseText ) {
 			error = response.responseText;
 		} else if ( _.isString( response.statusText ) ) {
@@ -1803,18 +1591,15 @@
 
 		switch ( action ) {
 			case 'update':
-				/* translators: %s: Error string for a failed update. */
-				errorMessage = __( 'Update Failed: %s' );
+				errorMessage = wp.updates.l10n.updateFailed;
 				break;
 
 			case 'install':
-				/* translators: %s: Error string for a failed installation. */
-				errorMessage = __( 'Installation failed: %s' );
+				errorMessage = wp.updates.l10n.installFailed;
 				break;
 
 			case 'delete':
-				/* translators: %s: Error string for a failed deletion. */
-				errorMessage = __( 'Deletion failed: %s' );
+				errorMessage = wp.updates.l10n.deleteFailed;
 				break;
 		}
 
@@ -1838,7 +1623,7 @@
 			.removeClass( 'updating-message' )
 			.removeAttr( 'aria-label' )
 			.prop( 'disabled', true )
-			.text( __( 'Update Failed!' ) );
+			.text( wp.updates.l10n.updateFailedShort );
 
 		$( '.updating-message:not(.button):not(.thickbox)' )
 			.removeClass( 'updating-message notice-warning' )
@@ -1862,23 +1647,16 @@
 	 */
 	wp.updates.beforeunload = function() {
 		if ( wp.updates.ajaxLocked ) {
-			return __( 'Updates may not complete if you navigate away from this page.' );
+			return wp.updates.l10n.beforeunload;
 		}
 	};
 
 	$( function() {
 		var $pluginFilter        = $( '#plugin-filter' ),
 			$bulkActionForm      = $( '#bulk-action-form' ),
-			$filesystemForm      = $( '#request-filesystem-credentials-form' ),
 			$filesystemModal     = $( '#request-filesystem-credentials-dialog' ),
 			$pluginSearch        = $( '.plugins-php .wp-filter-search' ),
 			$pluginInstallSearch = $( '.plugin-install-php .wp-filter-search' );
-
-		settings = _.extend( settings, window._wpUpdatesItemCounts || {} );
-
-		if ( settings.totals ) {
-			wp.updates.refreshCount();
-		}
 
 		/*
 		 * Whether a user needs to submit filesystem credentials.
@@ -1926,7 +1704,7 @@
 		 *
 		 * @since 4.2.0
 		 */
-		$filesystemForm.on( 'change', 'input[name="connection_type"]', function() {
+		$filesystemModal.on( 'change', 'input[name="connection_type"]', function() {
 			$( '#ssh-keys' ).toggleClass( 'hidden', ( 'ssh' !== $( this ).val() ) );
 		} ).change();
 
@@ -1975,28 +1753,14 @@
 
 				if ( 'plugin-install' === pagenow || 'plugin-install-network' === pagenow ) {
 					if ( 'update-plugin' === job.action ) {
-						$message.attr(
-							'aria-label',
-							sprintf(
-								/* translators: %s: Plugin name and version. */
-								_x( 'Update %s now', 'plugin' ),
-								$message.data( 'name' )
-							)
-						);
+						$message.attr( 'aria-label', wp.updates.l10n.updateNowLabel.replace( '%s', $message.data( 'name' ) ) );
 					} else if ( 'install-plugin' === job.action ) {
-						$message.attr(
-							'aria-label',
-							sprintf(
-								/* translators: %s: Plugin name. */
-								_x( 'Install %s now', 'plugin' ),
-								$message.data( 'name' )
-							)
-						);
+						$message.attr( 'aria-label', wp.updates.l10n.installNowLabel.replace( '%s', $message.data( 'name' ) ) );
 					}
 				}
 			}
 
-			wp.a11y.speak( __( 'Update canceled.' ), 'polite' );
+			wp.a11y.speak( wp.updates.l10n.updateCancel, 'polite' );
 		} );
 
 		/**
@@ -2072,9 +1836,9 @@
 
 					$message
 						.removeClass( 'updating-message' )
-						.text( __( 'Install Now' ) );
+						.text( wp.updates.l10n.installNow );
 
-					wp.a11y.speak( __( 'Update canceled.' ), 'polite' );
+					wp.a11y.speak( wp.updates.l10n.updateCancel, 'polite' );
 				} );
 			}
 
@@ -2107,23 +1871,15 @@
 
 					$button
 						.removeClass( 'updating-message' )
-						.attr(
-							'aria-label',
-							sprintf(
-								/* translators: %s: Plugin name. */
-								_x( 'Install %s now', 'plugin' ),
-								pluginName
-							)
-						)
-						.text( __( 'Install Now' ) );
+						.text( wp.updates.l10n.installNow )
+						.attr( 'aria-label', wp.updates.l10n.installNowLabel.replace( '%s', pluginName ) );
 
-					wp.a11y.speak( __( 'Update canceled.' ), 'polite' );
+					wp.a11y.speak( wp.updates.l10n.updateCancel, 'polite' );
 				} );
 			}
 
 			wp.updates.installPlugin( {
 				slug:    $button.data( 'slug' ),
-				pagenow: pagenow,
 				success: wp.updates.installImporterSuccess,
 				error:   wp.updates.installImporterError
 			} );
@@ -2137,16 +1893,11 @@
 		 * @param {Event} event Event interface.
 		 */
 		$bulkActionForm.on( 'click', '[data-plugin] a.delete', function( event ) {
-			var $pluginRow = $( event.target ).parents( 'tr' ),
-				confirmMessage = sprintf(
-					/* translators: %s: Plugin name. */
-					__( 'Are you sure you want to delete %s and its data?' ),
-					$pluginRow.find( '.plugin-title strong' ).text()
-				);
+			var $pluginRow = $( event.target ).parents( 'tr' );
 
 			event.preventDefault();
 
-			if ( ! window.confirm( confirmMessage ) ) {
+			if ( ! window.confirm( wp.updates.l10n.aysDeleteUninstall.replace( '%s', $pluginRow.find( '.plugin-title strong' ).text() ) ) ) {
 				return;
 			}
 
@@ -2193,16 +1944,11 @@
 		 * @param {Event} event Event interface.
 		 */
 		$document.on( 'click', '.themes-php.network-admin a.delete', function( event ) {
-			var $themeRow = $( event.target ).parents( 'tr' ),
-				confirmMessage = sprintf(
-					/* translators: %s: Theme name. */
-					__( 'Are you sure you want to delete %s?' ),
-					$themeRow.find( '.theme-title strong' ).text()
-				);
+			var $themeRow = $( event.target ).parents( 'tr' );
 
 			event.preventDefault();
 
-			if ( ! window.confirm( confirmMessage ) ) {
+			if ( ! window.confirm( wp.updates.l10n.aysDelete.replace( '%s', $themeRow.find( '.theme-title strong' ).text() ) ) ) {
 				return;
 			}
 
@@ -2222,7 +1968,7 @@
 		 *
 		 * @param {Event} event Event interface.
 		 */
-		$bulkActionForm.on( 'click', '[type="submit"]:not([name="clear-recent-list"])', function( event ) {
+		$bulkActionForm.on( 'click', '[type="submit"]', function( event ) {
 			var bulkAction    = $( event.target ).siblings( 'select' ).val(),
 				itemsSelected = $bulkActionForm.find( 'input[name="checked[]"]:checked' ),
 				success       = 0,
@@ -2253,7 +1999,7 @@
 				return wp.updates.addAdminNotice( {
 					id:        'no-items-selected',
 					className: 'notice-error is-dismissible',
-					message:   __( 'Please select at least one item to perform this action on.' )
+					message:   wp.updates.l10n.noItemsSelected
 				} );
 			}
 
@@ -2264,11 +2010,7 @@
 					break;
 
 				case 'delete-selected':
-					var confirmMessage = 'plugin' === type ?
-						__( 'Are you sure you want to delete the selected plugins and their data?' ) :
-						__( 'Caution: These themes may be active on other sites in the network. Are you sure you want to proceed?' );
-
-					if ( ! window.confirm( confirmMessage ) ) {
+					if ( ! window.confirm( 'plugin' === type ? wp.updates.l10n.aysBulkDelete : wp.updates.l10n.aysBulkDeleteThemes ) ) {
 						event.preventDefault();
 						return;
 					}
@@ -2405,7 +2147,7 @@
 					.append( $( '<a />', {
 						'class': 'current',
 						'href': searchLocation,
-						'text': __( 'Search Results' )
+						'text': wp.updates.l10n.searchResultsLabel
 					} ) );
 
 				$( '.wp-filter .filter-links .current' )
@@ -2428,18 +2170,12 @@
 				delete wp.updates.searchRequest;
 
 				if ( 0 === response.count ) {
-					wp.a11y.speak( __( 'You do not appear to have any plugins available at this time.' ) );
+					wp.a11y.speak( wp.updates.l10n.noPluginsFound );
 				} else {
-					wp.a11y.speak(
-						sprintf(
-							/* translators: %s: Number of plugins. */
-							__( 'Number of plugins found: %d' ),
-							response.count
-						)
-					);
+					wp.a11y.speak( wp.updates.l10n.pluginsFound.replace( '%d', response.count ) );
 				}
 			} );
-		}, 1000 ) );
+		}, 500 ) );
 
 		if ( $pluginSearch.length ) {
 			$pluginSearch.attr( 'aria-describedby', 'live-search-desc' );
@@ -2453,12 +2189,10 @@
 		 */
 		$pluginSearch.on( 'keyup input', _.debounce( function( event ) {
 			var data = {
-				_ajax_nonce:   wp.updates.ajaxNonce,
-				s:             event.target.value,
-				pagenow:       pagenow,
-				plugin_status: 'all'
-			},
-			queryArgs;
+				_ajax_nonce: wp.updates.ajaxNonce,
+				s:           event.target.value,
+				pagenow:     pagenow
+			};
 
 			// Clear on escape.
 			if ( 'keyup' === event.type && 27 === event.which ) {
@@ -2471,14 +2205,8 @@
 				wp.updates.searchTerm = data.s;
 			}
 
-			queryArgs = _.object( _.compact( _.map( location.search.slice( 1 ).split( '&' ), function( item ) {
-				if ( item ) return item.split( '=' );
-			} ) ) );
-
-			data.plugin_status = queryArgs.plugin_status || 'all';
-
 			if ( window.history && window.history.replaceState ) {
-				window.history.replaceState( null, '', location.href.split( '?' )[ 0 ] + '?s=' + data.s + '&plugin_status=' + data.plugin_status );
+				window.history.replaceState( null, '', location.href.split( '?' )[ 0 ] + '?s=' + data.s );
 			}
 
 			if ( 'undefined' !== typeof wp.updates.searchRequest ) {
@@ -2487,26 +2215,19 @@
 
 			$bulkActionForm.empty();
 			$( 'body' ).addClass( 'loading-content' );
-			$( '.subsubsub .current' ).removeClass( 'current' );
 
 			wp.updates.searchRequest = wp.ajax.post( 'search-plugins', data ).done( function( response ) {
 
 				// Can we just ditch this whole subtitle business?
-				var $subTitle    = $( '<span />' ).addClass( 'subtitle' ).html(
-					sprintf(
-						/* translators: %s: Search query. */
-						__( 'Search results for &#8220;%s&#8221;' ),
-						_.escape( data.s )
-					) ),
+				var $subTitle    = $( '<span />' ).addClass( 'subtitle' ).html( wp.updates.l10n.searchResults.replace( '%s', _.escape( data.s ) ) ),
 					$oldSubTitle = $( '.wrap .subtitle' );
 
 				if ( ! data.s.length ) {
 					$oldSubTitle.remove();
-					$( '.subsubsub .' + data.plugin_status + ' a' ).addClass( 'current' );
 				} else if ( $oldSubTitle.length ) {
 					$oldSubTitle.replaceWith( $subTitle );
 				} else {
-					$( '.wp-header-end' ).before( $subTitle );
+					$( '.wrap h1' ).append( $subTitle );
 				}
 
 				$( 'body' ).removeClass( 'loading-content' );
@@ -2514,15 +2235,9 @@
 				delete wp.updates.searchRequest;
 
 				if ( 0 === response.count ) {
-					wp.a11y.speak( __( 'No plugins found. Try a different search.'  ) );
+					wp.a11y.speak( wp.updates.l10n.noPluginsFound );
 				} else {
-					wp.a11y.speak(
-						sprintf(
-							/* translators: %s: Number of plugins. */
-							__( 'Number of plugins found: %d' ),
-							response.count
-						)
-					);
+					wp.a11y.speak( wp.updates.l10n.pluginsFound.replace( '%d', response.count ) );
 				}
 			} );
 		}, 500 ) );
@@ -2536,16 +2251,6 @@
 			event.preventDefault();
 
 			$( 'input.wp-filter-search' ).trigger( 'input' );
-		} );
-
-		/**
-		 * Trigger a search event when the "Try Again" button is clicked.
-		 *
-		 * @since 4.9.0
-		 */
-		$document.on( 'click', '.try-again', function( event ) {
-			event.preventDefault();
-			$pluginInstallSearch.trigger( 'input' );
 		} );
 
 		/**
@@ -2630,7 +2335,7 @@
 		 */
 		$( window ).on( 'message', function( event ) {
 			var originalEvent  = event.originalEvent,
-				expectedOrigin = document.location.protocol + '//' + document.location.host,
+				expectedOrigin = document.location.protocol + '//' + document.location.hostname,
 				message;
 
 			if ( originalEvent.origin !== expectedOrigin ) {
@@ -2643,7 +2348,7 @@
 				return;
 			}
 
-			if ( ! message || 'undefined' === typeof message.action ) {
+			if ( 'undefined' === typeof message.action ) {
 				return;
 			}
 
@@ -2675,150 +2380,5 @@
 		 * @since 4.2.0
 		 */
 		$( window ).on( 'beforeunload', wp.updates.beforeunload );
-
-		/**
-		 * Click handler for enabling and disabling plugin and theme auto-updates.
-		 *
-		 * @since 5.5.0
-		 */
-		$document.on( 'click', '.column-auto-updates a.toggle-auto-update, .theme-overlay a.toggle-auto-update', function( event ) {
-			var data, asset, type, $parent;
-			var $anchor = $( this ),
-				action = $anchor.attr( 'data-wp-action' ),
-				$label = $anchor.find( '.label' );
-
-			if ( 'themes' !== pagenow ) {
-				$parent = $anchor.closest( '.column-auto-updates' );
-			} else {
-				$parent = $anchor.closest( '.theme-autoupdate' );
-			}
-
-			event.preventDefault();
-
-			// Prevent multiple simultaneous requests.
-			if ( $anchor.attr( 'data-doing-ajax' ) === 'yes' ) {
-				return;
-			}
-
-			$anchor.attr( 'data-doing-ajax', 'yes' );
-
-			switch ( pagenow ) {
-				case 'plugins':
-				case 'plugins-network':
-					type = 'plugin';
-					asset = $anchor.closest( 'tr' ).attr( 'data-plugin' );
-					break;
-				case 'themes-network':
-					type = 'theme';
-					asset = $anchor.closest( 'tr' ).attr( 'data-slug' );
-					break;
-				case 'themes':
-					type = 'theme';
-					asset = $anchor.attr( 'data-slug' );
-					break;
-			}
-
-			// Clear any previous errors.
-			$parent.find( '.notice.error' ).addClass( 'hidden' );
-
-			// Show loading status.
-			if ( 'enable' === action ) {
-				$label.text( __( 'Enabling...' ) );
-			} else {
-				$label.text( __( 'Disabling...' ) );
-			}
-
-			$anchor.find( '.dashicons-update' ).removeClass( 'hidden' );
-
-			data = {
-				action: 'toggle-auto-updates',
-				_ajax_nonce: settings.ajax_nonce,
-				state: action,
-				type: type,
-				asset: asset
-			};
-
-			$.post( window.ajaxurl, data )
-				.done( function( response ) {
-					var $enabled, $disabled, enabledNumber, disabledNumber, errorMessage;
-					var href = $anchor.attr( 'href' );
-
-					if ( ! response.success ) {
-						// if WP returns 0 for response (which can happen in a few cases),
-						// output the general error message since we won't have response.data.error.
-						if ( response.data && response.data.error ) {
-							errorMessage = response.data.error;
-						} else {
-							errorMessage = __( 'The request could not be completed.' );
-						}
-
-						$parent.find( '.notice.error' ).removeClass( 'hidden' ).find( 'p' ).text( errorMessage );
-						wp.a11y.speak( errorMessage, 'polite' );
-						return;
-					}
-
-					// Update the counts in the enabled/disabled views if on a screen
-					// with a list table.
-					if ( 'themes' !== pagenow ) {
-						$enabled       = $( '.auto-update-enabled span' );
-						$disabled      = $( '.auto-update-disabled span' );
-						enabledNumber  = parseInt( $enabled.text().replace( /[^\d]+/g, '' ), 10 ) || 0;
-						disabledNumber = parseInt( $disabled.text().replace( /[^\d]+/g, '' ), 10 ) || 0;
-
-						switch ( action ) {
-							case 'enable':
-								++enabledNumber;
-								--disabledNumber;
-								break;
-							case 'disable':
-								--enabledNumber;
-								++disabledNumber;
-								break;
-						}
-
-						enabledNumber = Math.max( 0, enabledNumber );
-						disabledNumber = Math.max( 0, disabledNumber );
-
-						$enabled.text( '(' + enabledNumber + ')' );
-						$disabled.text( '(' + disabledNumber + ')' );
-					}
-
-					if ( 'enable' === action ) {
-						href = href.replace( 'action=enable-auto-update', 'action=disable-auto-update' );
-						$anchor.attr( {
-							'data-wp-action': 'disable',
-							href: href
-						} );
-
-						$label.text( __( 'Disable auto-updates' ) );
-						$parent.find( '.auto-update-time' ).removeClass( 'hidden' );
-						wp.a11y.speak( __( 'Enable auto-updates' ), 'polite' );
-					} else {
-						href = href.replace( 'action=disable-auto-update', 'action=enable-auto-update' );
-						$anchor.attr( {
-							'data-wp-action': 'enable',
-							href: href
-						} );
-
-						$label.text( __( 'Enable auto-updates' ) );
-						$parent.find( '.auto-update-time' ).addClass( 'hidden' );
-						wp.a11y.speak( __( 'Auto-updates disabled' ), 'polite' );
-					}
-
-					$document.trigger( 'wp-auto-update-setting-changed', { state: action, type: type, asset: asset } );
-				} )
-				.fail( function() {
-					$parent.find( '.notice.error' )
-						.removeClass( 'hidden' )
-						.find( 'p' )
-						.text( __( 'The request could not be completed.' ) );
-
-					wp.a11y.speak( __( 'The request could not be completed.' ), 'polite' );
-				} )
-				.always( function() {
-					$anchor.removeAttr( 'data-doing-ajax' ).find( '.dashicons-update' ).addClass( 'hidden' );
-				} );
-			}
-		);
 	} );
-})( jQuery, window.wp, window._wpUpdatesSettings );
+})( jQuery, window.wp, _.extend( window._wpUpdatesSettings, window._wpUpdatesItemCounts || {} ) );
