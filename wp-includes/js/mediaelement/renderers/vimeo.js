@@ -8,7 +8,7 @@
  * Copyright 2010-2017, John Dyer (http://j.hn/)
  * License: MIT
  *
- */(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
+ */(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 
 var VimeoApi = {
@@ -73,8 +73,10 @@ var vimeoIframeRenderer = {
 		vimeo.id = mediaElement.id + '_' + options.prefix;
 		vimeo.mediaElement = mediaElement;
 
-		var errorHandler = function errorHandler(error) {
-			mediaElement.generateError('Code ' + error.name + ': ' + error.message, mediaFiles);
+		var errorHandler = function errorHandler(error, target) {
+			var event = mejs.Utils.createEvent('error', target);
+			event.message = error.name + ': ' + error.message;
+			mediaElement.dispatchEvent(event);
 		};
 
 		var props = mejs.html5media.properties,
@@ -89,8 +91,10 @@ var vimeoIframeRenderer = {
 					switch (propName) {
 						case 'currentTime':
 							return currentTime;
+
 						case 'duration':
 							return duration;
+
 						case 'volume':
 							return volume;
 						case 'muted':
@@ -99,12 +103,12 @@ var vimeoIframeRenderer = {
 							return paused;
 						case 'ended':
 							return ended;
+
 						case 'src':
 							vimeoPlayer.getVideoUrl().then(function (_url) {
 								url = _url;
-							}).catch(function (error) {
-								return errorHandler(error);
 							});
+
 							return url;
 						case 'buffered':
 							return {
@@ -137,7 +141,7 @@ var vimeoIframeRenderer = {
 									vimeoPlayer.play();
 								}
 							}).catch(function (error) {
-								return errorHandler(error);
+								errorHandler(error, vimeo);
 							});
 							break;
 						case 'currentTime':
@@ -148,7 +152,7 @@ var vimeoIframeRenderer = {
 									mediaElement.dispatchEvent(event);
 								}, 50);
 							}).catch(function (error) {
-								return errorHandler(error);
+								errorHandler(error, vimeo);
 							});
 							break;
 						case 'volume':
@@ -160,12 +164,12 @@ var vimeoIframeRenderer = {
 									mediaElement.dispatchEvent(event);
 								}, 50);
 							}).catch(function (error) {
-								return errorHandler(error);
+								errorHandler(error, vimeo);
 							});
 							break;
 						case 'loop':
 							vimeoPlayer.setLoop(value).catch(function (error) {
-								return errorHandler(error);
+								errorHandler(error, vimeo);
 							});
 							break;
 						case 'muted':
@@ -177,7 +181,7 @@ var vimeoIframeRenderer = {
 										mediaElement.dispatchEvent(event);
 									}, 50);
 								}).catch(function (error) {
-									return errorHandler(error);
+									errorHandler(error, vimeo);
 								});
 							} else {
 								vimeoPlayer.setVolume(oldVolume).then(function () {
@@ -187,7 +191,7 @@ var vimeoIframeRenderer = {
 										mediaElement.dispatchEvent(event);
 									}, 50);
 								}).catch(function (error) {
-									return errorHandler(error);
+									errorHandler(error, vimeo);
 								});
 							}
 							break;
@@ -305,16 +309,17 @@ var vimeoIframeRenderer = {
 					var event = mejs.Utils.createEvent('progress', vimeo);
 					mediaElement.dispatchEvent(event);
 				}).catch(function (error) {
-					return errorHandler(error);
+					errorHandler(error, vimeo);
 				});
 			});
 			vimeoPlayer.on('timeupdate', function () {
 				vimeoPlayer.getCurrentTime().then(function (seconds) {
 					currentTime = seconds;
+
 					var event = mejs.Utils.createEvent('timeupdate', vimeo);
 					mediaElement.dispatchEvent(event);
 				}).catch(function (error) {
-					return errorHandler(error);
+					errorHandler(error, vimeo);
 				});
 			});
 			vimeoPlayer.on('play', function () {
@@ -355,26 +360,21 @@ var vimeoIframeRenderer = {
 		    standardUrl = 'https://player.vimeo.com/video/' + VimeoApi.getVimeoId(mediaFiles[0].src);
 
 		var queryArgs = ~mediaFiles[0].src.indexOf('?') ? '?' + mediaFiles[0].src.slice(mediaFiles[0].src.indexOf('?') + 1) : '';
-		var args = [];
-
-		if (mediaElement.originalNode.autoplay && queryArgs.indexOf('autoplay') === -1) {
-			args.push('autoplay=1');
+		if (queryArgs && mediaElement.originalNode.autoplay && queryArgs.indexOf('autoplay') === -1) {
+			queryArgs += '&autoplay=1';
 		}
-		if (mediaElement.originalNode.loop && queryArgs.indexOf('loop') === -1) {
-			args.push('loop=1');
+		if (queryArgs && mediaElement.originalNode.loop && queryArgs.indexOf('loop') === -1) {
+			queryArgs += '&loop=1';
 		}
-
-		queryArgs = '' + queryArgs + (queryArgs ? '&' : '?') + args.join('&');
 
 		vimeoContainer.setAttribute('id', vimeo.id);
 		vimeoContainer.setAttribute('width', width);
 		vimeoContainer.setAttribute('height', height);
 		vimeoContainer.setAttribute('frameBorder', '0');
 		vimeoContainer.setAttribute('src', '' + standardUrl + queryArgs);
-		vimeoContainer.setAttribute('webkitallowfullscreen', 'true');
-		vimeoContainer.setAttribute('mozallowfullscreen', 'true');
-		vimeoContainer.setAttribute('allowfullscreen', 'true');
-		vimeoContainer.setAttribute('allow', 'autoplay');
+		vimeoContainer.setAttribute('webkitallowfullscreen', '');
+		vimeoContainer.setAttribute('mozallowfullscreen', '');
+		vimeoContainer.setAttribute('allowfullscreen', '');
 
 		mediaElement.originalNode.parentNode.insertBefore(vimeoContainer, mediaElement.originalNode);
 		mediaElement.originalNode.style.display = 'none';
