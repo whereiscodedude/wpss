@@ -1,7 +1,5 @@
 /*
  * Script run inside a Customizer preview frame.
- *
- * @output wp-includes/js/customize-preview.js
  */
 (function( exports, $ ){
 	var api = wp.customize,
@@ -28,7 +26,7 @@
 		 * @access private
 		 *
 		 * @param {string} url URL.
-		 * @return {string} URL with customized state.
+		 * @returns {string} URL with customized state.
 		 */
 		injectUrlWithState = function( url ) {
 			var urlParser, oldQueryParams, newQueryParams;
@@ -38,9 +36,6 @@
 			newQueryParams = api.utils.parseQueryString( urlParser.search.substr( 1 ) );
 
 			newQueryParams.customize_changeset_uuid = oldQueryParams.customize_changeset_uuid;
-			if ( oldQueryParams.customize_autosaved ) {
-				newQueryParams.customize_autosaved = 'on';
-			}
 			if ( oldQueryParams.customize_theme ) {
 				newQueryParams.customize_theme = oldQueryParams.customize_theme;
 			}
@@ -92,15 +87,12 @@
 	};
 
 	/**
-	 * @memberOf wp.customize
-	 * @alias wp.customize.Preview
-	 *
 	 * @constructor
 	 * @augments wp.customize.Messenger
 	 * @augments wp.customize.Class
 	 * @mixes wp.customize.Events
 	 */
-	api.Preview = api.Messenger.extend(/** @lends wp.customize.Preview.prototype */{
+	api.Preview = api.Messenger.extend({
 		/**
 		 * @param {object} params  - Parameters to configure the messenger.
 		 * @param {object} options - Extend any instance parameter or method with this object.
@@ -232,12 +224,12 @@
 	 *
 	 * @since 4.7.0
 	 * @access protected
-	 * @access private
 	 *
-	 * @return {void}
+	 * @access private
+	 * @returns {void}
 	 */
 	api.addLinkPreviewing = function addLinkPreviewing() {
-		var linkSelectors = 'a[href], area[href]';
+		var linkSelectors = 'a[href], area';
 
 		// Inject links into initial document.
 		$( document.body ).find( linkSelectors ).each( function() {
@@ -278,7 +270,7 @@
 	 * @param {string} element.host Host.
 	 * @param {object} [options]
 	 * @param {object} [options.allowAdminAjax=false] Allow admin-ajax.php requests.
-	 * @return {boolean} Is appropriate for changeset link.
+	 * @returns {boolean} Is appropriate for changeset link.
 	 */
 	api.isLinkPreviewable = function isLinkPreviewable( element, options ) {
 		var matchesAllowedUrl, parsedAllowedUrl, args, elementHost;
@@ -332,23 +324,18 @@
 	 * @param {string} element.search Query string.
 	 * @param {string} element.host Host.
 	 * @param {string} element.protocol Protocol.
-	 * @return {void}
+	 * @returns {void}
 	 */
 	api.prepareLinkPreview = function prepareLinkPreview( element ) {
-		var queryParams, $element = $( element );
-
-        // Skip elements with no href attribute. Check first to avoid more expensive checks down the road.
-        if ( ! element.hasAttribute( 'href' ) ) {
-            return;
-        }
+		var queryParams;
 
 		// Skip links in admin bar.
-		if ( $element.closest( '#wpadminbar' ).length ) {
+		if ( $( element ).closest( '#wpadminbar' ).length ) {
 			return;
 		}
 
 		// Ignore links with href="#", href="#id", or non-HTTP protocols (e.g. javascript: and mailto:).
-		if ( '#' === $element.attr( 'href' ).substr( 0, 1 ) || ! /^https?:$/.test( element.protocol ) ) {
+		if ( '#' === $( element ).attr( 'href' ).substr( 0, 1 ) || ! /^https?:$/.test( element.protocol ) ) {
 			return;
 		}
 
@@ -357,26 +344,18 @@
 			element.protocol = 'https:';
 		}
 
-		// Ignore links with class wp-playlist-caption.
-		if ( $element.hasClass( 'wp-playlist-caption' ) ) {
-			return;
-		}
-
 		if ( ! api.isLinkPreviewable( element ) ) {
 
 			// Style link as unpreviewable only if previewing in iframe; if previewing on frontend, links will be allowed to work normally.
 			if ( api.settings.channel ) {
-				$element.addClass( 'customize-unpreviewable' );
+				$( element ).addClass( 'customize-unpreviewable' );
 			}
 			return;
 		}
-		$element.removeClass( 'customize-unpreviewable' );
+		$( element ).removeClass( 'customize-unpreviewable' );
 
 		queryParams = api.utils.parseQueryString( element.search.substring( 1 ) );
 		queryParams.customize_changeset_uuid = api.settings.changeset.uuid;
-		if ( api.settings.changeset.autosaved ) {
-			queryParams.customize_autosaved = 'on';
-		}
 		if ( ! api.settings.theme.active ) {
 			queryParams.customize_theme = api.settings.theme.stylesheet;
 		}
@@ -384,6 +363,11 @@
 			queryParams.customize_messenger_channel = api.settings.channel;
 		}
 		element.search = $.param( queryParams );
+
+		// Prevent links from breaking out of preview iframe.
+		if ( api.settings.channel ) {
+			element.target = '_self';
+		}
 	};
 
 	/**
@@ -404,7 +388,7 @@
 		 * @param {string} options.url URL.
 		 * @param {object} originalOptions Original options.
 		 * @param {XMLHttpRequest} xhr XHR.
-		 * @return {void}
+		 * @returns {void}
 		 */
 		var prefilterAjax = function( options, originalOptions, xhr ) {
 			var urlParser, queryParams, requestMethod, dirtyValues = {};
@@ -447,16 +431,9 @@
 
 			// Include customized state query params in URL.
 			queryParams.customize_changeset_uuid = api.settings.changeset.uuid;
-			if ( api.settings.changeset.autosaved ) {
-				queryParams.customize_autosaved = 'on';
-			}
 			if ( ! api.settings.theme.active ) {
 				queryParams.customize_theme = api.settings.theme.stylesheet;
 			}
-
-			// Ensure preview nonce is included with every customized request, to allow post data to be read.
-			queryParams.customize_preview_nonce = api.settings.nonce.preview;
-
 			urlParser.search = $.param( queryParams );
 			options.url = urlParser.href;
 		};
@@ -470,7 +447,7 @@
 	 * @since 4.7.0
 	 * @access protected
 	 *
-	 * @return {void}
+	 * @returns {void}
 	 */
 	api.addFormPreviewing = function addFormPreviewing() {
 
@@ -502,7 +479,7 @@
 	 * @access protected
 	 *
 	 * @param {HTMLFormElement} form Form.
-	 * @return {void}
+	 * @returns {void}
 	 */
 	api.prepareFormPreview = function prepareFormPreview( form ) {
 		var urlParser, stateParams = {};
@@ -531,9 +508,6 @@
 		$( form ).removeClass( 'customize-unpreviewable' );
 
 		stateParams.customize_changeset_uuid = api.settings.changeset.uuid;
-		if ( api.settings.changeset.autosaved ) {
-			stateParams.customize_autosaved = 'on';
-		}
 		if ( ! api.settings.theme.active ) {
 			stateParams.customize_theme = api.settings.theme.stylesheet;
 		}
@@ -573,7 +547,7 @@
 		var previousPathName = location.pathname,
 			previousQueryString = location.search.substr( 1 ),
 			previousQueryParams = null,
-			stateQueryParams = [ 'customize_theme', 'customize_changeset_uuid', 'customize_messenger_channel', 'customize_autosaved' ];
+			stateQueryParams = [ 'customize_theme', 'customize_changeset_uuid', 'customize_messenger_channel' ];
 
 		return function keepAliveCurrentUrl() {
 			var urlParser, currentQueryParams;
@@ -626,7 +600,7 @@
 		 * Preview changes to custom logo.
 		 *
 		 * @param {number} attachmentId Attachment ID for custom logo.
-		 * @return {void}
+		 * @returns {void}
 		 */
 		custom_logo: function( attachmentId ) {
 			$( 'body' ).toggleClass( 'wp-custom-logo', !! attachmentId );
@@ -636,7 +610,7 @@
 		 * Preview changes to custom css.
 		 *
 		 * @param {string} value Custom CSS..
-		 * @return {void}
+		 * @returns {void}
 		 */
 		custom_css: function( value ) {
 			$( '#wp-custom-css' ).text( value );
@@ -645,7 +619,7 @@
 		/**
 		 * Preview changes to any of the background settings.
 		 *
-		 * @return {void}
+		 * @returns {void}
 		 */
 		background: function() {
 			var css = '', settings = {};
@@ -678,7 +652,7 @@
 	};
 
 	$( function() {
-		var bg, setValue, handleUpdatedChangesetUuid;
+		var bg, setValue;
 
 		api.settings = window._wpCustomizeSettings;
 		if ( ! api.settings ) {
@@ -771,59 +745,30 @@
 			api.preview.send( 'scroll', $( window ).scrollTop() );
 		});
 
-		/**
-		 * Handle update to changeset UUID.
-		 *
-		 * @param {string} uuid - UUID.
-		 * @return {void}
-		 */
-		handleUpdatedChangesetUuid = function( uuid ) {
-			api.settings.changeset.uuid = uuid;
-
-			// Update UUIDs in links and forms.
-			$( document.body ).find( 'a[href], area[href]' ).each( function() {
-				api.prepareLinkPreview( this );
-			} );
-			$( document.body ).find( 'form' ).each( function() {
-				api.prepareFormPreview( this );
-			} );
-
-			/*
-			 * Replace the UUID in the URL. Note that the wrapped history.replaceState()
-			 * will handle injecting the current api.settings.changeset.uuid into the URL,
-			 * so this is merely to trigger that logic.
-			 */
-			if ( history.replaceState ) {
-				history.replaceState( currentHistoryState, '', location.href );
-			}
-		};
-
-		api.preview.bind( 'changeset-uuid', handleUpdatedChangesetUuid );
-
 		api.preview.bind( 'saved', function( response ) {
+
 			if ( response.next_changeset_uuid ) {
-				handleUpdatedChangesetUuid( response.next_changeset_uuid );
+				api.settings.changeset.uuid = response.next_changeset_uuid;
+
+				// Update UUIDs in links and forms.
+				$( document.body ).find( 'a[href], area' ).each( function() {
+					api.prepareLinkPreview( this );
+				} );
+				$( document.body ).find( 'form' ).each( function() {
+					api.prepareFormPreview( this );
+				} );
+
+				/*
+				 * Replace the UUID in the URL. Note that the wrapped history.replaceState()
+				 * will handle injecting the current api.settings.changeset.uuid into the URL,
+				 * so this is merely to trigger that logic.
+				 */
+				if ( history.replaceState ) {
+					history.replaceState( currentHistoryState, '', location.href );
+				}
 			}
+
 			api.trigger( 'saved', response );
-		} );
-
-		// Update the URLs to reflect the fact we've started autosaving.
-		api.preview.bind( 'autosaving', function() {
-			if ( api.settings.changeset.autosaved ) {
-				return;
-			}
-
-			api.settings.changeset.autosaved = true; // Start deferring to any autosave once changeset is updated.
-
-			$( document.body ).find( 'a[href], area[href]' ).each( function() {
-				api.prepareLinkPreview( this );
-			} );
-			$( document.body ).find( 'form' ).each( function() {
-				api.prepareFormPreview( this );
-			} );
-			if ( history.replaceState ) {
-				history.replaceState( currentHistoryState, '', location.href );
-			}
 		} );
 
 		/*
