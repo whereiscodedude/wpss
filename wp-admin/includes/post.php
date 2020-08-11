@@ -1741,10 +1741,10 @@ function _admin_notice_post_locked() {
 		<?php
 		if ( $override ) {
 			/* translators: %s: User's display name. */
-			printf( __( '%s is currently editing this post. Do you want to take over?' ), esc_html( $user->display_name ) );
+			printf( __( '%s is already editing this post. Do you want to take over?' ), esc_html( $user->display_name ) );
 		} else {
 			/* translators: %s: User's display name. */
-			printf( __( '%s is currently editing this post.' ), esc_html( $user->display_name ) );
+			printf( __( '%s is already editing this post.' ), esc_html( $user->display_name ) );
 		}
 		?>
 		</p>
@@ -2127,7 +2127,7 @@ function use_block_editor_for_post( $post ) {
 	$use_block_editor = use_block_editor_for_post_type( $post->post_type );
 
 	/**
-	 * Filters whether a post is able to be edited in the block editor.
+	 * Filter whether a post is able to be edited in the block editor.
 	 *
 	 * @since 5.0.0
 	 *
@@ -2163,7 +2163,7 @@ function use_block_editor_for_post_type( $post_type ) {
 	}
 
 	/**
-	 * Filters whether a post is able to be edited in the block editor.
+	 * Filter whether a post is able to be edited in the block editor.
 	 *
 	 * @since 5.0.0
 	 *
@@ -2216,7 +2216,7 @@ function get_block_categories( $post ) {
 	);
 
 	/**
-	 * Filters the default array of block categories.
+	 * Filter the default array of block categories.
 	 *
 	 * @since 5.0.0
 	 *

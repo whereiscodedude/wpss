@@ -551,7 +551,7 @@ if ( ! function_exists( 'twentythirteen_the_attached_image' ) ) :
 	 */
 	function twentythirteen_the_attached_image() {
 		/**
-		 * Filters the image attachment size to use.
+		 * Filter the image attachment size to use.
 		 *
 		 * @since Twenty thirteen 1.0
 		 *

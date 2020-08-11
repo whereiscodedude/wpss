@@ -2050,7 +2050,7 @@ function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
 	$args = wp_parse_args( $args );
 
 	/**
-	 * Filters arguments for retrieving object terms.
+	 * Filter arguments for retrieving object terms.
 	 *
 	 * @since 4.9.0
 	 *
@@ -2407,9 +2407,6 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 	/**
 	 * Fires immediately after a new term is created, before the term cache is cleaned.
 	 *
-	 * The {@see 'create_$taxonomy'} hook is also available for targeting a specific
-	 * taxonomy.
-	 *
 	 * @since 2.3.0
 	 *
 	 * @param int    $term_id  Term ID.
@@ -2446,9 +2443,6 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 	/**
 	 * Fires after a new term is created, and after the term cache has been cleaned.
 	 *
-	 * The {@see 'created_$taxonomy'} hook is also available for targeting a specific
-	 * taxonomy.
-	 *
 	 * @since 2.3.0
 	 *
 	 * @param int    $term_id  Term ID.
@@ -2472,9 +2466,6 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 
 	/**
 	 * Fires after a term has been saved, and the term cache has been cleared.
-	 *
-	 * The {@see 'saved_$taxonomy'} hook is also available for targeting a specific
-	 * taxonomy.
 	 *
 	 * @since 5.5.0
 	 *

@@ -2380,7 +2380,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 				_doing_it_wrong(
 					'register_taxonomy',
 					sprintf(
-						/* translators: 1: The taxonomy name, 2: The property name, either 'rest_base' or 'name', 3: The conflicting value. */
+						/* translators: 1. The taxonomy name, 2. The property name, either 'rest_base' or 'name', 3. The conflicting value. */
 						__( 'The "%1$s" taxonomy "%2$s" property (%3$s) conflicts with an existing property on the REST API Posts Controller. Specify a custom "rest_base" when registering the taxonomy to avoid this error.' ),
 						$taxonomy->name,
 						$taxonomy_field_name_with_conflict,
@@ -2411,7 +2411,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		$schema_fields = array_keys( $schema['properties'] );
 
 		/**
-		 * Filters the post's schema.
+		 * Filter the post's schema.
 		 *
 		 * The dynamic portion of the filter, `$this->post_type`, refers to the
 		 * post type slug for the controller.
@@ -2752,7 +2752,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		/**
-		 * Filters collection parameters for the posts controller.
+		 * Filter collection parameters for the posts controller.
 		 *
 		 * The dynamic part of the filter `$this->post_type` refers to the post
 		 * type slug for the controller.
