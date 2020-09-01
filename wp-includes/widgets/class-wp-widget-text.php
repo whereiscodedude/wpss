@@ -193,7 +193,7 @@ class WP_Widget_Text extends WP_Widget {
 	}
 
 	/**
-	 * Filters gallery shortcode attributes.
+	 * Filter gallery shortcode attributes.
 	 *
 	 * Prevents all of a site's attachments from being shown in a gallery displayed on a
 	 * non-singular template where a $post context is not available.

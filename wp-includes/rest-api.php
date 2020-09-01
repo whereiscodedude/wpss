@@ -94,7 +94,7 @@ function register_rest_route( $namespace, $route, $args = array(), $override = f
 			_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
-					/* translators: 1: The REST API route being registered, 2: The argument name, 3: The suggested function name. */
+					/* translators: 1. The REST API route being registered. 2. The argument name. 3. The suggested function name. */
 					__( 'The REST API route definition for %1$s is missing the required %2$s argument. For REST API routes that are intended to be public, use %3$s as the permission callback.' ),
 					'<code>' . $clean_namespace . '/' . trim( $route, '/' ) . '</code>',
 					'<code>permission_callback</code>',
@@ -787,7 +787,7 @@ function _rest_array_intersect_key_recursive( $array1, $array2 ) {
 }
 
 /**
- * Filters the API response to include only a white-listed set of response object fields.
+ * Filter the API response to include only a white-listed set of response object fields.
  *
  * @since 4.8.0
  *
@@ -1462,7 +1462,7 @@ function rest_handle_multi_type_schema( $value, $args, $param = '' ) {
 	if ( $invalid_types ) {
 		_doing_it_wrong(
 			__FUNCTION__,
-			/* translators: 1: Parameter, 2: List of allowed types. */
+			/* translators: 1. Parameter. 2. List of allowed types. */
 			wp_sprintf( __( 'The "type" schema keyword for %1$s can only contain the built-in types: %2$l.' ), $param, $allowed_types ),
 			'5.5.0'
 		);
@@ -1561,7 +1561,7 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 	$allowed_types = array( 'array', 'object', 'string', 'number', 'integer', 'boolean', 'null' );
 
 	if ( ! isset( $args['type'] ) ) {
-		/* translators: %s: Parameter. */
+		/* translators: 1. Parameter */
 		_doing_it_wrong( __FUNCTION__, sprintf( __( 'The "type" schema keyword for %s is required.' ), $param ), '5.5.0' );
 	}
 
@@ -1579,7 +1579,7 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 	if ( ! in_array( $args['type'], $allowed_types, true ) ) {
 		_doing_it_wrong(
 			__FUNCTION__,
-			/* translators: 1: Parameter, 2: The list of allowed types. */
+			/* translators: 1. Parameter 2. The list of allowed types. */
 			wp_sprintf( __( 'The "type" schema keyword for %1$s can only be one of the built-in types: %2$l.' ), $param, $allowed_types ),
 			'5.5.0'
 		);
@@ -1613,7 +1613,7 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 		}
 
 		if ( ! empty( $args['uniqueItems'] ) && ! rest_validate_array_contains_unique_items( $value ) ) {
-			/* translators: 1: Parameter. */
+			/* translators: 1: Parameter */
 			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s has duplicate items.' ), $param ) );
 		}
 	}
@@ -1765,7 +1765,7 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 				break;
 			case 'uuid':
 				if ( ! wp_is_uuid( $value ) ) {
-					/* translators: %s: The name of a JSON field expecting a valid UUID. */
+					/* translators: %s is the name of a JSON field expecting a valid uuid. */
 					return new WP_Error( 'rest_invalid_uuid', sprintf( __( '%s is not a valid UUID.' ), $param ) );
 				}
 				break;
@@ -1832,7 +1832,7 @@ function rest_sanitize_value_from_schema( $value, $args, $param = '' ) {
 	$allowed_types = array( 'array', 'object', 'string', 'number', 'integer', 'boolean', 'null' );
 
 	if ( ! isset( $args['type'] ) ) {
-		/* translators: %s: Parameter. */
+		/* translators: 1. Parameter */
 		_doing_it_wrong( __FUNCTION__, sprintf( __( 'The "type" schema keyword for %s is required.' ), $param ), '5.5.0' );
 	}
 
@@ -1849,7 +1849,7 @@ function rest_sanitize_value_from_schema( $value, $args, $param = '' ) {
 	if ( ! in_array( $args['type'], $allowed_types, true ) ) {
 		_doing_it_wrong(
 			__FUNCTION__,
-			/* translators: 1: Parameter, 2: The list of allowed types. */
+			/* translators: 1. Parameter. 2. The list of allowed types. */
 			wp_sprintf( __( 'The "type" schema keyword for %1$s can only be one of the built-in types: %2$l.' ), $param, $allowed_types ),
 			'5.5.0'
 		);
@@ -1865,7 +1865,7 @@ function rest_sanitize_value_from_schema( $value, $args, $param = '' ) {
 		}
 
 		if ( ! empty( $args['uniqueItems'] ) && ! rest_validate_array_contains_unique_items( $value ) ) {
-			/* translators: 1: Parameter. */
+			/* translators: 1: Parameter */
 			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s has duplicate items.' ), $param ) );
 		}
 

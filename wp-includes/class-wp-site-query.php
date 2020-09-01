@@ -291,7 +291,7 @@ class WP_Site_Query {
 		$site_data = null;
 
 		/**
-		 * Filters the site data before the get_sites query takes place.
+		 * Filter the site data before the get_sites query takes place.
 		 *
 		 * Return a non-null value to bypass WordPress's default site queries.
 		 *

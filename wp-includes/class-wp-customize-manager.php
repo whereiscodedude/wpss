@@ -1941,7 +1941,7 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Filters the X-Frame-Options and Content-Security-Policy headers to ensure frontend can load in customizer.
+	 * Filter the X-Frame-Options and Content-Security-Policy headers to ensure frontend can load in customizer.
 	 *
 	 * @since 4.7.0
 	 *
@@ -3276,7 +3276,7 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Filters heartbeat settings for the Customizer.
+	 * Filter heartbeat settings for the Customizer.
 	 *
 	 * @since 4.9.0
 	 * @param array $settings Current settings to filter.
@@ -4273,7 +4273,7 @@ final class WP_Customize_Manager {
 		<script type="text/html" id="tmpl-customize-changeset-locked-notification">
 			<li class="notice notice-{{ data.type || 'info' }} {{ data.containerClasses || '' }}" data-code="{{ data.code }}" data-type="{{ data.type }}">
 				<div class="notification-message customize-changeset-locked-message">
-					<img class="customize-changeset-locked-avatar" src="{{ data.lockUser.avatar }}" alt="{{ data.lockUser.name }}" />
+					<img class="customize-changeset-locked-avatar" src="{{ data.lockUser.avatar }}" alt="{{ data.lockUser.name }}">
 					<p class="currently-editing">
 						<# if ( data.message ) { #>
 							{{{ data.message }}}

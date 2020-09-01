@@ -1170,11 +1170,10 @@ function get_term_to_edit( $id, $taxonomy ) {
  * @internal The `$deprecated` parameter is parsed for backward compatibility only.
  *
  * @param array|string $args       Optional. Array or string of arguments. See WP_Term_Query::__construct()
- *                                 for information on accepted arguments. Default empty array.
- * @param array|string $deprecated Optional. Argument array, when using the legacy function parameter format.
- *                                 If present, this parameter will be interpreted as `$args`, and the first
- *                                 function parameter will be parsed as a taxonomy or array of taxonomies.
- *                                 Default empty.
+ *                                 for information on accepted arguments. Default empty.
+ * @param array|string $deprecated Argument array, when using the legacy function parameter format. If present,
+ *                                 this parameter will be interpreted as `$args`, and the first function parameter
+ *                                 will be parsed as a taxonomy or array of taxonomies.
  * @return WP_Term[]|int|WP_Error Array of WP_Term instances, a count thereof,
  *                                or WP_Error if any of the taxonomies do not exist.
  */
@@ -1731,37 +1730,18 @@ function sanitize_term_field( $field, $value, $term_id, $taxonomy, $context ) {
  * Default $args is 'hide_empty' which can be 'hide_empty=true' or array('hide_empty' => true).
  *
  * @since 2.3.0
- * @since 5.6.0 Changed the function signature so that the `$args` array can be provided as the first parameter.
  *
- * @internal The `$deprecated` parameter is parsed for backward compatibility only.
- *
- * @param array|string $args       Optional. Array of arguments that get passed to get_terms().
- *                                 Default empty array.
- * @param array|string $deprecated Optional. Argument array, when using the legacy function parameter format.
- *                                 If present, this parameter will be interpreted as `$args`, and the first
- *                                 function parameter will be parsed as a taxonomy or array of taxonomies.
- *                                 Default empty.
+ * @param string       $taxonomy Taxonomy name.
+ * @param array|string $args     Optional. Array of arguments that get passed to get_terms().
+ *                               Default empty array.
  * @return array|int|WP_Error Number of terms in that taxonomy or WP_Error if the taxonomy does not exist.
  */
-function wp_count_terms( $args = array(), $deprecated = '' ) {
-	$use_legacy_args = false;
-
-	// Check whether function is used with legacy signature: `$taxonomy` and `$args`.
-	if ( $args
-		&& ( is_string( $args ) && taxonomy_exists( $args )
-			|| is_array( $args ) && wp_is_numeric_array( $args ) )
-	) {
-		$use_legacy_args = true;
-	}
-
-	$defaults = array( 'hide_empty' => false );
-
-	if ( $use_legacy_args ) {
-		$defaults['taxonomy'] = $args;
-		$args                 = $deprecated;
-	}
-
-	$args = wp_parse_args( $args, $defaults );
+function wp_count_terms( $taxonomy, $args = array() ) {
+	$defaults = array(
+		'taxonomy'   => $taxonomy,
+		'hide_empty' => false,
+	);
+	$args     = wp_parse_args( $args, $defaults );
 
 	// Backward compatibility.
 	if ( isset( $args['ignore_empty'] ) ) {
@@ -2070,7 +2050,7 @@ function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
 	$args = wp_parse_args( $args );
 
 	/**
-	 * Filters arguments for retrieving object terms.
+	 * Filter arguments for retrieving object terms.
 	 *
 	 * @since 4.9.0
 	 *
@@ -2427,9 +2407,6 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 	/**
 	 * Fires immediately after a new term is created, before the term cache is cleaned.
 	 *
-	 * The {@see 'create_$taxonomy'} hook is also available for targeting a specific
-	 * taxonomy.
-	 *
 	 * @since 2.3.0
 	 *
 	 * @param int    $term_id  Term ID.
@@ -2466,9 +2443,6 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 	/**
 	 * Fires after a new term is created, and after the term cache has been cleaned.
 	 *
-	 * The {@see 'created_$taxonomy'} hook is also available for targeting a specific
-	 * taxonomy.
-	 *
 	 * @since 2.3.0
 	 *
 	 * @param int    $term_id  Term ID.
@@ -2492,9 +2466,6 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 
 	/**
 	 * Fires after a term has been saved, and the term cache has been cleared.
-	 *
-	 * The {@see 'saved_$taxonomy'} hook is also available for targeting a specific
-	 * taxonomy.
 	 *
 	 * @since 5.5.0
 	 *

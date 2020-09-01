@@ -259,27 +259,27 @@ function create_initial_post_types() {
 		'wp_block',
 		array(
 			'labels'                => array(
-				'name'                     => _x( 'Reusable Blocks', 'post type general name' ),
-				'singular_name'            => _x( 'Reusable Block', 'post type singular name' ),
-				'menu_name'                => _x( 'Reusable Blocks', 'admin menu' ),
-				'name_admin_bar'           => _x( 'Reusable Block', 'add new on admin bar' ),
-				'add_new'                  => _x( 'Add New', 'Reusable Block' ),
-				'add_new_item'             => __( 'Add New Reusable Block' ),
-				'new_item'                 => __( 'New Reusable Block' ),
-				'edit_item'                => __( 'Edit Reusable Block' ),
-				'view_item'                => __( 'View Reusable Block' ),
-				'all_items'                => __( 'All Reusable Blocks' ),
-				'search_items'             => __( 'Search Reusable Blocks' ),
-				'not_found'                => __( 'No reusable blocks found.' ),
-				'not_found_in_trash'       => __( 'No reusable blocks found in Trash.' ),
-				'filter_items_list'        => __( 'Filter reusable blocks list' ),
-				'items_list_navigation'    => __( 'Reusable Blocks list navigation' ),
-				'items_list'               => __( 'Reusable Blocks list' ),
-				'item_published'           => __( 'Reusable Block published.' ),
-				'item_published_privately' => __( 'Reusable Block published privately.' ),
-				'item_reverted_to_draft'   => __( 'Reusable Block reverted to draft.' ),
-				'item_scheduled'           => __( 'Reusable Block scheduled.' ),
-				'item_updated'             => __( 'Reusable Block updated.' ),
+				'name'                     => _x( 'Blocks', 'post type general name' ),
+				'singular_name'            => _x( 'Block', 'post type singular name' ),
+				'menu_name'                => _x( 'Blocks', 'admin menu' ),
+				'name_admin_bar'           => _x( 'Block', 'add new on admin bar' ),
+				'add_new'                  => _x( 'Add New', 'Block' ),
+				'add_new_item'             => __( 'Add New Block' ),
+				'new_item'                 => __( 'New Block' ),
+				'edit_item'                => __( 'Edit Block' ),
+				'view_item'                => __( 'View Block' ),
+				'all_items'                => __( 'All Blocks' ),
+				'search_items'             => __( 'Search Blocks' ),
+				'not_found'                => __( 'No blocks found.' ),
+				'not_found_in_trash'       => __( 'No blocks found in Trash.' ),
+				'filter_items_list'        => __( 'Filter blocks list' ),
+				'items_list_navigation'    => __( 'Blocks list navigation' ),
+				'items_list'               => __( 'Blocks list' ),
+				'item_published'           => __( 'Block published.' ),
+				'item_published_privately' => __( 'Block published privately.' ),
+				'item_reverted_to_draft'   => __( 'Block reverted to draft.' ),
+				'item_scheduled'           => __( 'Block scheduled.' ),
+				'item_updated'             => __( 'Block updated.' ),
 			),
 			'public'                => false,
 			'_builtin'              => true, /* internal use only. don't use this when registering your own post type. */
@@ -7330,7 +7330,7 @@ function wp_add_trashed_suffix_to_post_name_for_post( $post ) {
 }
 
 /**
- * Filters the SQL clauses of an attachment query to include filenames.
+ * Filter the SQL clauses of an attachment query to include filenames.
  *
  * @since 4.7.0
  * @access private

@@ -69,7 +69,7 @@ $preload_paths = apply_filters( 'block_editor_preload_paths', $preload_paths, $p
  * Because API preloading can call the_content and other filters, plugins
  * can unexpectedly modify $post.
  */
-$backup_global_post = clone $post;
+$backup_global_post = $post;
 
 $preload_data = array_reduce(
 	$preload_paths,
@@ -125,11 +125,7 @@ $meta_box_url = add_query_arg(
 	),
 	$meta_box_url
 );
-wp_add_inline_script(
-	'wp-editor',
-	sprintf( 'var _wpMetaBoxUrl = %s;', wp_json_encode( $meta_box_url ) ),
-	'before'
-);
+wp_localize_script( 'wp-editor', '_wpMetaBoxUrl', $meta_box_url );
 
 
 /*
