@@ -1,13 +1,8 @@
-/**
- * @output wp-includes/js/wp-custom-header.js
- */
-
 /* global YT */
 (function( window, settings ) {
 
 	var NativeHandler, YouTubeHandler;
 
-	/** @namespace wp */
 	window.wp = window.wp || {};
 
 	// Fail gracefully in unsupported browsers.
@@ -37,9 +32,7 @@
 	/**
 	 * Create a custom header instance.
 	 *
-	 * @memberOf wp
-	 *
-	 * @class
+	 * @class CustomHeader
 	 */
 	function CustomHeader() {
 		this.handlers = {
@@ -50,7 +43,7 @@
 
 	CustomHeader.prototype = {
 		/**
-		 * Initialize the custom header.
+		 * Initalize the custom header.
 		 *
 		 * If the environment supports video, loops through registered handlers
 		 * until one is found that can handle the video.
@@ -79,7 +72,7 @@
 		 * @return {boolean}
 		 */
 		supportsVideo: function() {
-			// Don't load video on small screens. @todo Consider bandwidth and other factors.
+			// Don't load video on small screens. @todo: consider bandwidth and other factors.
 			if ( window.innerWidth < settings.minWidth || window.innerHeight < settings.minHeight ) {
 				return false;
 			}
@@ -98,9 +91,7 @@
 	/**
 	 * Create a video handler instance.
 	 *
-	 * @memberOf wp
-	 *
-	 * @class
+	 * @class BaseHandler
 	 */
 	function BaseHandler() {}
 
@@ -108,7 +99,7 @@
 		/**
 		 * Initialize the video handler.
 		 *
-		 * @param {Object} settings Video settings.
+		 * @param {object} settings Video settings.
 		 */
 		initialize: function( settings ) {
 			var handler = this,
@@ -217,7 +208,7 @@
 		 * Whether the handler can process a video.
 		 *
 		 * @abstract
-		 * @param {Object} settings Video settings.
+		 * @param {object} settings Video settings.
 		 * @return {boolean}
 		 */
 		test: function() {
@@ -237,9 +228,7 @@
 	/**
 	 * Create a custom handler.
 	 *
-	 * @memberOf wp
-	 *
-	 * @param {Object} protoProps Properties to apply to the prototype.
+	 * @param {object} protoProps Properties to apply to the prototype.
 	 * @return CustomHandler The subclass.
 	 */
 	BaseHandler.extend = function( protoProps ) {
@@ -263,15 +252,13 @@
 	/**
 	 * Native video handler.
 	 *
-	 * @memberOf wp
-	 *
-	 * @class
+	 * @class NativeHandler
 	 */
-	NativeHandler = BaseHandler.extend(/** @lends wp.NativeHandler.prototype */{
+	NativeHandler = BaseHandler.extend({
 		/**
 		 * Whether the native handler supports a video.
 		 *
-		 * @param {Object} settings Video settings.
+		 * @param {object} settings Video settings.
 		 * @return {boolean}
 		 */
 		test: function( settings ) {
@@ -337,15 +324,13 @@
 	/**
 	 * YouTube video handler.
 	 *
-	 * @memberOf wp
-	 *
-	 * @class wp.YouTubeHandler
+	 * @class YouTubeHandler
 	 */
-	YouTubeHandler = BaseHandler.extend(/** @lends wp.YouTubeHandler.prototype */{
+	YouTubeHandler = BaseHandler.extend({
 		/**
 		 * Whether the handler supports a video.
 		 *
-		 * @param {Object} settings Video settings.
+		 * @param {object} settings Video settings.
 		 * @return {boolean}
 		 */
 		test: function( settings ) {
