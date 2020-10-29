@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["keycodes"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 485);
+/******/ 	return __webpack_require__(__webpack_require__.s = 326);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -94,39 +94,57 @@ this["wp"] = this["wp"] || {}; this["wp"]["keycodes"] =
 
 /***/ }),
 
-/***/ 17:
+/***/ 15:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _defineProperty; });
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+/***/ }),
+
+/***/ 19:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ _toConsumableArray; });
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayLikeToArray.js
-var arrayLikeToArray = __webpack_require__(27);
-
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithoutHoles.js
-
 function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) return Object(arrayLikeToArray["a" /* default */])(arr);
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) {
+      arr2[i] = arr[i];
+    }
+
+    return arr2;
+  }
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArray.js
-var iterableToArray = __webpack_require__(37);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js
-var unsupportedIterableToArray = __webpack_require__(30);
+var iterableToArray = __webpack_require__(33);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableSpread.js
 function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  throw new TypeError("Invalid attempt to spread non-iterable instance");
 }
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js
-
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _toConsumableArray; });
 
 
 
 function _toConsumableArray(arr) {
-  return _arrayWithoutHoles(arr) || Object(iterableToArray["a" /* default */])(arr) || Object(unsupportedIterableToArray["a" /* default */])(arr) || _nonIterableSpread();
+  return _arrayWithoutHoles(arr) || Object(iterableToArray["a" /* default */])(arr) || _nonIterableSpread();
 }
 
 /***/ }),
@@ -138,91 +156,20 @@ function _toConsumableArray(arr) {
 
 /***/ }),
 
-/***/ 27:
+/***/ 326:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _arrayLikeToArray; });
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
-/***/ }),
-
-/***/ 30:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _unsupportedIterableToArray; });
-/* harmony import */ var _arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(27);
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return Object(_arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return Object(_arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
-}
-
-/***/ }),
-
-/***/ 37:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _iterableToArray; });
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
-}
-
-/***/ }),
-
-/***/ 485:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, "BACKSPACE", function() { return /* binding */ BACKSPACE; });
-__webpack_require__.d(__webpack_exports__, "TAB", function() { return /* binding */ TAB; });
-__webpack_require__.d(__webpack_exports__, "ENTER", function() { return /* binding */ ENTER; });
-__webpack_require__.d(__webpack_exports__, "ESCAPE", function() { return /* binding */ ESCAPE; });
-__webpack_require__.d(__webpack_exports__, "SPACE", function() { return /* binding */ SPACE; });
-__webpack_require__.d(__webpack_exports__, "LEFT", function() { return /* binding */ LEFT; });
-__webpack_require__.d(__webpack_exports__, "UP", function() { return /* binding */ UP; });
-__webpack_require__.d(__webpack_exports__, "RIGHT", function() { return /* binding */ RIGHT; });
-__webpack_require__.d(__webpack_exports__, "DOWN", function() { return /* binding */ DOWN; });
-__webpack_require__.d(__webpack_exports__, "DELETE", function() { return /* binding */ DELETE; });
-__webpack_require__.d(__webpack_exports__, "F10", function() { return /* binding */ F10; });
-__webpack_require__.d(__webpack_exports__, "ALT", function() { return /* binding */ ALT; });
-__webpack_require__.d(__webpack_exports__, "CTRL", function() { return /* binding */ CTRL; });
-__webpack_require__.d(__webpack_exports__, "COMMAND", function() { return /* binding */ COMMAND; });
-__webpack_require__.d(__webpack_exports__, "SHIFT", function() { return /* binding */ SHIFT; });
-__webpack_require__.d(__webpack_exports__, "ZERO", function() { return /* binding */ ZERO; });
-__webpack_require__.d(__webpack_exports__, "modifiers", function() { return /* binding */ modifiers; });
-__webpack_require__.d(__webpack_exports__, "rawShortcut", function() { return /* binding */ rawShortcut; });
-__webpack_require__.d(__webpack_exports__, "displayShortcutList", function() { return /* binding */ displayShortcutList; });
-__webpack_require__.d(__webpack_exports__, "displayShortcut", function() { return /* binding */ displayShortcut; });
-__webpack_require__.d(__webpack_exports__, "shortcutAriaLabel", function() { return /* binding */ shortcutAriaLabel; });
-__webpack_require__.d(__webpack_exports__, "isKeyboardEvent", function() { return /* binding */ isKeyboardEvent; });
-
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
-var defineProperty = __webpack_require__(5);
+var defineProperty = __webpack_require__(15);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 2 modules
-var toConsumableArray = __webpack_require__(17);
+var toConsumableArray = __webpack_require__(19);
 
-// EXTERNAL MODULE: external {"this":"lodash"}
-var external_this_lodash_ = __webpack_require__(2);
+// EXTERNAL MODULE: external "lodash"
+var external_lodash_ = __webpack_require__(2);
 
 // EXTERNAL MODULE: external {"this":["wp","i18n"]}
 var external_this_wp_i18n_ = __webpack_require__(1);
@@ -244,10 +191,31 @@ function isAppleOS() {
   var _window = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : window;
 
   var platform = _window.navigator.platform;
-  return platform.indexOf('Mac') !== -1 || Object(external_this_lodash_["includes"])(['iPad', 'iPhone'], platform);
+  return platform.indexOf('Mac') !== -1 || Object(external_lodash_["includes"])(['iPad', 'iPhone'], platform);
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/keycodes/build-module/index.js
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BACKSPACE", function() { return BACKSPACE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TAB", function() { return TAB; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ENTER", function() { return ENTER; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ESCAPE", function() { return ESCAPE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SPACE", function() { return SPACE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LEFT", function() { return LEFT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UP", function() { return UP; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RIGHT", function() { return RIGHT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DOWN", function() { return DOWN; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DELETE", function() { return DELETE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "F10", function() { return F10; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ALT", function() { return ALT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CTRL", function() { return CTRL; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "COMMAND", function() { return COMMAND; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SHIFT", function() { return SHIFT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "modifiers", function() { return modifiers; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rawShortcut", function() { return rawShortcut; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "displayShortcutList", function() { return displayShortcutList; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "displayShortcut", function() { return displayShortcut; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "shortcutAriaLabel", function() { return shortcutAriaLabel; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isKeyboardEvent", function() { return isKeyboardEvent; });
 
 
 
@@ -276,113 +244,22 @@ function isAppleOS() {
  */
 
 
-/**
- * @typedef {'primary'|'primaryShift'|'primaryAlt'|'secondary'|'access'|'ctrl'|'alt'|'ctrlShift'|'shift'|'shiftAlt'} WPKeycodeModifier
- */
-
-/**
- * An object of handler functions for each of the possible modifier
- * combinations. A handler will return a value for a given key.
- *
- * @typedef {Record<WPKeycodeModifier, (key:string)=>any>} WPKeycodeHandlerByModifier
- */
-
-/**
- * Keycode for BACKSPACE key.
- */
-
 var BACKSPACE = 8;
-/**
- * Keycode for TAB key.
- */
-
 var TAB = 9;
-/**
- * Keycode for ENTER key.
- */
-
 var ENTER = 13;
-/**
- * Keycode for ESCAPE key.
- */
-
 var ESCAPE = 27;
-/**
- * Keycode for SPACE key.
- */
-
 var SPACE = 32;
-/**
- * Keycode for LEFT key.
- */
-
 var LEFT = 37;
-/**
- * Keycode for UP key.
- */
-
 var UP = 38;
-/**
- * Keycode for RIGHT key.
- */
-
 var RIGHT = 39;
-/**
- * Keycode for DOWN key.
- */
-
 var DOWN = 40;
-/**
- * Keycode for DELETE key.
- */
-
 var DELETE = 46;
-/**
- * Keycode for F10 key.
- */
-
 var F10 = 121;
-/**
- * Keycode for ALT key.
- */
-
 var ALT = 'alt';
-/**
- * Keycode for CTRL key.
- */
-
-var CTRL = 'ctrl';
-/**
- * Keycode for COMMAND/META key.
- */
+var CTRL = 'ctrl'; // Understood in both Mousetrap and TinyMCE.
 
 var COMMAND = 'meta';
-/**
- * Keycode for SHIFT key.
- */
-
 var SHIFT = 'shift';
-/**
- * Keycode for ZERO key.
- */
-
-var ZERO = 48;
-/**
- * Object that contains functions that return the available modifier
- * depending on platform.
- *
- * - `primary`: takes a isApple function as a parameter.
- * - `primaryShift`: takes a isApple function as a parameter.
- * - `primaryAlt`: takes a isApple function as a parameter.
- * - `secondary`: takes a isApple function as a parameter.
- * - `access`: takes a isApple function as a parameter.
- * - `ctrl`
- * - `alt`
- * - `ctrlShift`
- * - `shift`
- * - `shiftAlt`
- */
-
 var modifiers = {
   primary: function primary(_isApple) {
     return _isApple() ? [COMMAND] : [CTRL];
@@ -420,25 +297,24 @@ var modifiers = {
  * E.g. rawShortcut.primary( 'm' ) will return 'meta+m' on Mac.
  * These are intended for user with the KeyboardShortcuts component or TinyMCE.
  *
- * @type {WPKeycodeHandlerByModifier} Keyed map of functions to raw shortcuts.
+ * @type {Object} Keyed map of functions to raw shortcuts.
  */
 
-var rawShortcut = Object(external_this_lodash_["mapValues"])(modifiers, function (modifier) {
+var rawShortcut = Object(external_lodash_["mapValues"])(modifiers, function (modifier) {
   return function (character) {
     var _isApple = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : isAppleOS;
 
-    return [].concat(Object(toConsumableArray["a" /* default */])(modifier(_isApple)), [character.toLowerCase()]).join('+');
+    return Object(toConsumableArray["a" /* default */])(modifier(_isApple)).concat([character.toLowerCase()]).join('+');
   };
 });
 /**
  * Return an array of the parts of a keyboard shortcut chord for display
  * E.g displayShortcutList.primary( 'm' ) will return [ '⌘', 'M' ] on Mac.
  *
- * @type {WPKeycodeHandlerByModifier} Keyed map of functions to shortcut
- *                                    sequences.
+ * @type {Object} keyed map of functions to shortcut sequences
  */
 
-var displayShortcutList = Object(external_this_lodash_["mapValues"])(modifiers, function (modifier) {
+var displayShortcutList = Object(external_lodash_["mapValues"])(modifiers, function (modifier) {
   return function (character) {
     var _replacementKeyMap;
 
@@ -446,29 +322,28 @@ var displayShortcutList = Object(external_this_lodash_["mapValues"])(modifiers, 
 
     var isApple = _isApple();
 
-    var replacementKeyMap = (_replacementKeyMap = {}, Object(defineProperty["a" /* default */])(_replacementKeyMap, ALT, isApple ? '⌥' : 'Alt'), Object(defineProperty["a" /* default */])(_replacementKeyMap, CTRL, isApple ? '⌃' : 'Ctrl'), Object(defineProperty["a" /* default */])(_replacementKeyMap, COMMAND, '⌘'), Object(defineProperty["a" /* default */])(_replacementKeyMap, SHIFT, isApple ? '⇧' : 'Shift'), _replacementKeyMap);
+    var replacementKeyMap = (_replacementKeyMap = {}, Object(defineProperty["a" /* default */])(_replacementKeyMap, ALT, isApple ? '⌥' : 'Alt'), Object(defineProperty["a" /* default */])(_replacementKeyMap, CTRL, isApple ? '^' : 'Ctrl'), Object(defineProperty["a" /* default */])(_replacementKeyMap, COMMAND, '⌘'), Object(defineProperty["a" /* default */])(_replacementKeyMap, SHIFT, isApple ? '⇧' : 'Shift'), _replacementKeyMap);
     var modifierKeys = modifier(_isApple).reduce(function (accumulator, key) {
-      var replacementKey = Object(external_this_lodash_["get"])(replacementKeyMap, key, key); // If on the Mac, adhere to platform convention and don't show plus between keys.
+      var replacementKey = Object(external_lodash_["get"])(replacementKeyMap, key, key); // If on the Mac, adhere to platform convention and don't show plus between keys.
 
       if (isApple) {
-        return [].concat(Object(toConsumableArray["a" /* default */])(accumulator), [replacementKey]);
+        return Object(toConsumableArray["a" /* default */])(accumulator).concat([replacementKey]);
       }
 
-      return [].concat(Object(toConsumableArray["a" /* default */])(accumulator), [replacementKey, '+']);
+      return Object(toConsumableArray["a" /* default */])(accumulator).concat([replacementKey, '+']);
     }, []);
-    var capitalizedCharacter = Object(external_this_lodash_["capitalize"])(character);
-    return [].concat(Object(toConsumableArray["a" /* default */])(modifierKeys), [capitalizedCharacter]);
+    var capitalizedCharacter = Object(external_lodash_["capitalize"])(character);
+    return Object(toConsumableArray["a" /* default */])(modifierKeys).concat([capitalizedCharacter]);
   };
 });
 /**
  * An object that contains functions to display shortcuts.
  * E.g. displayShortcut.primary( 'm' ) will return '⌘M' on Mac.
  *
- * @type {WPKeycodeHandlerByModifier} Keyed map of functions to display
- *                                    shortcuts.
+ * @type {Object} Keyed map of functions to display shortcuts.
  */
 
-var displayShortcut = Object(external_this_lodash_["mapValues"])(displayShortcutList, function (shortcutList) {
+var displayShortcut = Object(external_lodash_["mapValues"])(displayShortcutList, function (shortcutList) {
   return function (character) {
     var _isApple = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : isAppleOS;
 
@@ -478,12 +353,9 @@ var displayShortcut = Object(external_this_lodash_["mapValues"])(displayShortcut
 /**
  * An object that contains functions to return an aria label for a keyboard shortcut.
  * E.g. shortcutAriaLabel.primary( '.' ) will return 'Command + Period' on Mac.
- *
- * @type {WPKeycodeHandlerByModifier} Keyed map of functions to shortcut ARIA
- *                                    labels.
  */
 
-var shortcutAriaLabel = Object(external_this_lodash_["mapValues"])(modifiers, function (modifier) {
+var shortcutAriaLabel = Object(external_lodash_["mapValues"])(modifiers, function (modifier) {
   return function (character) {
     var _replacementKeyMap2;
 
@@ -492,48 +364,34 @@ var shortcutAriaLabel = Object(external_this_lodash_["mapValues"])(modifiers, fu
     var isApple = _isApple();
 
     var replacementKeyMap = (_replacementKeyMap2 = {}, Object(defineProperty["a" /* default */])(_replacementKeyMap2, SHIFT, 'Shift'), Object(defineProperty["a" /* default */])(_replacementKeyMap2, COMMAND, isApple ? 'Command' : 'Control'), Object(defineProperty["a" /* default */])(_replacementKeyMap2, CTRL, 'Control'), Object(defineProperty["a" /* default */])(_replacementKeyMap2, ALT, isApple ? 'Option' : 'Alt'), Object(defineProperty["a" /* default */])(_replacementKeyMap2, ',', Object(external_this_wp_i18n_["__"])('Comma')), Object(defineProperty["a" /* default */])(_replacementKeyMap2, '.', Object(external_this_wp_i18n_["__"])('Period')), Object(defineProperty["a" /* default */])(_replacementKeyMap2, '`', Object(external_this_wp_i18n_["__"])('Backtick')), _replacementKeyMap2);
-    return [].concat(Object(toConsumableArray["a" /* default */])(modifier(_isApple)), [character]).map(function (key) {
-      return Object(external_this_lodash_["capitalize"])(Object(external_this_lodash_["get"])(replacementKeyMap, key, key));
+    return Object(toConsumableArray["a" /* default */])(modifier(_isApple)).concat([character]).map(function (key) {
+      return Object(external_lodash_["capitalize"])(Object(external_lodash_["get"])(replacementKeyMap, key, key));
     }).join(isApple ? ' ' : ' + ');
   };
 });
-/**
- * From a given KeyboardEvent, returns an array of active modifier constants for
- * the event.
- *
- * @param {KeyboardEvent} event Keyboard event.
- *
- * @return {Array<ALT|CTRL|COMMAND|SHIFT>} Active modifier constants.
- */
-
-function getEventModifiers(event) {
-  return [ALT, CTRL, COMMAND, SHIFT].filter(function (key) {
-    return event["".concat(key, "Key")];
-  });
-}
 /**
  * An object that contains functions to check if a keyboard event matches a
  * predefined shortcut combination.
  * E.g. isKeyboardEvent.primary( event, 'm' ) will return true if the event
  * signals pressing ⌘M.
  *
- * @type {WPKeycodeHandlerByModifier} Keyed map of functions to match events.
+ * @type {Object} Keyed map of functions to match events.
  */
 
-
-var isKeyboardEvent = Object(external_this_lodash_["mapValues"])(modifiers, function (getModifiers) {
+var isKeyboardEvent = Object(external_lodash_["mapValues"])(modifiers, function (getModifiers) {
   return function (event, character) {
     var _isApple = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : isAppleOS;
 
     var mods = getModifiers(_isApple);
-    var eventMods = getEventModifiers(event);
 
-    if (Object(external_this_lodash_["xor"])(mods, eventMods).length) {
+    if (!mods.every(function (key) {
+      return event["".concat(key, "Key")];
+    })) {
       return false;
     }
 
     if (!character) {
-      return Object(external_this_lodash_["includes"])(mods, event.key.toLowerCase());
+      return Object(external_lodash_["includes"])(mods, event.key.toLowerCase());
     }
 
     return event.key === character;
@@ -543,24 +401,13 @@ var isKeyboardEvent = Object(external_this_lodash_["mapValues"])(modifiers, func
 
 /***/ }),
 
-/***/ 5:
+/***/ 33:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _defineProperty; });
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _iterableToArray; });
+function _iterableToArray(iter) {
+  if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
 }
 
 /***/ })
