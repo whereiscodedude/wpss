@@ -3,8 +3,8 @@
  * The loop that displays a page
  *
  * The loop displays the posts and the post content. See
- * https://developer.wordpress.org/themes/basics/the-loop/ to understand it and
- * https://developer.wordpress.org/themes/basics/template-tags/ to understand
+ * https://codex.wordpress.org/The_Loop to understand it and
+ * https://codex.wordpress.org/Template_Tags to understand
  * the tags used in it.
  *
  * This can be overridden in child themes with loop-page.php.
@@ -45,4 +45,4 @@ if ( have_posts() ) {
 				<?php comments_template( '', true ); ?>
 
 <?php endwhile;
-}; // End of the loop. ?>
+}; // end of the loop. ?>

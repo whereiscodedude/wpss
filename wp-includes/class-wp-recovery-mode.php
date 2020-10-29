@@ -3,7 +3,7 @@
  * Error Protection API: WP_Recovery_Mode class
  *
  * @package WordPress
- * @since 5.2.0
+ * @since   5.2.0
  */
 
 /**
@@ -239,7 +239,7 @@ class WP_Recovery_Mode {
 		}
 
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], self::EXIT_ACTION ) ) {
-			wp_die( __( 'Exit recovery mode link expired.' ), 403 );
+			wp_die( __( 'Exit recovery mode link expired.' ) );
 		}
 
 		if ( ! $this->exit_recovery_mode() ) {
@@ -272,16 +272,14 @@ class WP_Recovery_Mode {
 		if ( is_wp_error( $validated ) ) {
 			$this->cookie_service->clear_cookie();
 
-			$validated->add_data( array( 'status' => 403 ) );
-			wp_die( $validated );
+			wp_die( $validated, '' );
 		}
 
 		$session_id = $this->cookie_service->get_session_id_from_cookie();
 		if ( is_wp_error( $session_id ) ) {
 			$this->cookie_service->clear_cookie();
 
-			$session_id->add_data( array( 'status' => 403 ) );
-			wp_die( $session_id );
+			wp_die( $session_id, '' );
 		}
 
 		$this->is_active  = true;
@@ -297,7 +295,7 @@ class WP_Recovery_Mode {
 	 */
 	protected function get_email_rate_limit() {
 		/**
-		 * Filters the rate limit between sending new recovery mode email links.
+		 * Filter the rate limit between sending new recovery mode email links.
 		 *
 		 * @since 5.2.0
 		 *
@@ -319,7 +317,7 @@ class WP_Recovery_Mode {
 		$valid_for  = $rate_limit;
 
 		/**
-		 * Filters the amount of time the recovery mode email link is valid for.
+		 * Filter the amount of time the recovery mode email link is valid for.
 		 *
 		 * The ttl must be at least as long as the email rate limit.
 		 *
@@ -339,12 +337,11 @@ class WP_Recovery_Mode {
 	 *
 	 * @global array $wp_theme_directories
 	 *
-	 * @param array $error Error that was triggered.
-	 * @return array|false {
-	 *     Extension details.
+	 * @param array  $error Error that was triggered.
 	 *
-	 *     @type string $slug The extension slug. This is the plugin or theme's directory.
-	 *     @type string $type The extension type. Either 'plugin' or 'theme'.
+	 * @return array|false {
+	 *      @type string  $slug  The extension slug. This is the plugin or theme's directory.
+	 *      @type string  $type  The extension type. Either 'plugin' or 'theme'.
 	 * }
 	 */
 	protected function get_extension_for_error( $error ) {

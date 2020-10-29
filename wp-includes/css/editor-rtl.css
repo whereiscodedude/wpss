@@ -1,4 +1,3 @@
-/*! This file is auto-generated */
 /*------------------------------------------------------------------------------
  TinyMCE and Quicklinks toolbars
 ------------------------------------------------------------------------------*/
@@ -83,7 +82,7 @@
 
 .mce-window-head .mce-close:hover .mce-i-remove:before,
 .mce-window-head .mce-close:focus .mce-i-remove:before {
-	color: #006799;
+	color: #00a0d2;
 }
 
 .mce-window-head .mce-close:focus .mce-i-remove,
@@ -465,7 +464,7 @@ div.mce-path {
 
 .mce-toolbar .mce-listbox button {
 	font-size: 13px;
-	line-height: 1.53846153;
+	line-height: 20px;
 	padding-right: 6px;
 	padding-left: 20px;
 }
@@ -676,7 +675,7 @@ div.mce-menu .mce-menu-item-sep,
 	color: #fff;
 	text-shadow: none;
 	padding: 0;
-	line-height: 1.85714285;
+	line-height: 26px;
 }
 
 .mce-window .mce-btn {
@@ -796,12 +795,17 @@ div.mce-menu .mce-menu-item-sep,
 .mce-charmap td div {
 	width: 18px;
 	height: 22px;
-	line-height: 1.57142857;
+	line-height: 22px;
 }
 
 /* TinyMCE tooltips */
 .mce-tooltip {
 	margin-top: 2px;
+}
+
+/* Don't show the tooltip. Used in Chrome RTL, see #42018 */
+.rtl .mce-tooltip.wp-hide-mce-tooltip {
+	display: none !important;
 }
 
 .mce-tooltip-inner {
@@ -822,7 +826,7 @@ div.mce-menu .mce-menu-item-sep,
 
 .mce-toolbar .mce-ico {
 	color: #555d66;
-	line-height: 1;
+	line-height: 20px;
 	width: 20px;
 	height: 20px;
 	text-align: center;
@@ -833,7 +837,7 @@ div.mce-menu .mce-menu-item-sep,
 
 .qt-dfw {
 	color: #555d66;
-	line-height: 1;
+	line-height: 20px;
 	width: 28px;
 	height: 26px;
 	text-align: center;
@@ -908,7 +912,7 @@ i.mce-i-remove {
 	font: normal 20px/1 dashicons;
 	padding: 0;
 	vertical-align: top;
-	speak: never;
+	speak: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	margin-right: -2px;
@@ -918,7 +922,7 @@ i.mce-i-remove {
 .qt-dfw {
 	font: normal 20px/1 dashicons;
 	vertical-align: top;
-	speak: never;
+	speak: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -1126,7 +1130,7 @@ i.mce-i-wp_code:before {
 	color: #666;
 	cursor: pointer;
 	font-size: 13px;
-	line-height: 1.46153846;
+	line-height: 19px;
 	height: 20px;
 	margin: 5px 5px 0 0;
 	padding: 3px 8px 4px;
@@ -1202,10 +1206,9 @@ i.mce-i-wp_code:before {
 
 .wp-media-buttons span.wp-media-buttons-icon {
 	display: inline-block;
-	width: 20px;
-	height: 20px;
-	line-height: 1;
-	vertical-align: middle;
+	width: 18px;
+	height: 18px;
+	vertical-align: text-top;
 	margin: 0 2px;
 }
 
@@ -1215,7 +1218,7 @@ i.mce-i-wp_code:before {
 
 .wp-media-buttons .add_media span.wp-media-buttons-icon:before {
 	font: normal 18px/1 dashicons;
-	speak: never;
+	speak: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -1324,8 +1327,8 @@ i.mce-i-wp_code:before {
 	.wp-core-ui .quicktags-toolbar input.button.button-small {
 		/* .button-small is normally 11px, but a bit too small for these buttons. */
 		font-size: 12px;
-		min-height: 26px;
-		line-height: 2;
+		height: 26px;
+		line-height: 24px;
 	}
 }
 
@@ -1415,7 +1418,7 @@ i.mce-i-wp_code:before {
 	height: 36px;
 	font-size: 18px;
 	font-weight: 600;
-	line-height: 2;
+	line-height: 36px;
 	margin: 0;
 	padding: 0 16px 0 36px;
 }
@@ -1437,7 +1440,7 @@ i.mce-i-wp_code:before {
 #wp-link-close:before {
 	font: normal 20px/36px dashicons;
 	vertical-align: top;
-	speak: never;
+	speak: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	width: 36px;
@@ -1447,7 +1450,7 @@ i.mce-i-wp_code:before {
 
 #wp-link-close:hover,
 #wp-link-close:focus {
-	color: #006799;
+	color: #00a0d2;
 }
 
 #wp-link-close:focus {
@@ -1455,9 +1458,6 @@ i.mce-i-wp_code:before {
 	box-shadow:
 		0 0 0 1px #5b9dd9,
 		0 0 2px 1px rgba(30, 140, 190, 0.8);
-	/* Only visible in Windows High Contrast mode */
-	outline: 2px solid transparent;
-	outline-offset: -2px;
 }
 
 #wp-link-wrap #link-selector {
@@ -1511,6 +1511,7 @@ i.mce-i-wp_code:before {
 }
 
 #wp-link .link-search-field {
+	float: right;
 	width: 250px;
 	max-width: 70%;
 }
@@ -1521,9 +1522,13 @@ i.mce-i-wp_code:before {
 	overflow: hidden;
 }
 
+#wp-link .link-search-wrapper span {
+	float: right;
+	margin-top: 4px;
+}
+
 #wp-link .link-search-wrapper .spinner {
-	float: none;
-	margin: -3px 4px 0 0;
+	margin-top: 5px;
 }
 
 #wp-link .link-target {
@@ -1550,7 +1555,7 @@ i.mce-i-wp_code:before {
 }
 
 .has-text-field #wp-link .query-results {
-	top: 210px;
+	top: 200px;
 }
 
 #wp-link li {
@@ -1653,12 +1658,12 @@ i.mce-i-wp_code:before {
 }
 
 #wp-link-cancel {
-	line-height: 1.92307692;
+	line-height: 25px;
 	float: right;
 }
 
 #wp-link-update {
-	line-height: 1.76923076;
+	line-height: 23px;
 	float: left;
 }
 
@@ -1688,7 +1693,7 @@ i.mce-i-wp_code:before {
 	}
 
 	#wp-link-cancel {
-		line-height: 2.46153846;
+		line-height: 32px;
 	}
 
 	#wp-link .link-target {
@@ -1778,9 +1783,6 @@ div.wp-link-input input {
 	width: 300px;
 	padding: 3px;
 	box-sizing: border-box;
-	line-height: 1.28571429; /* 18px */
-	/* Override value inherited from default input fields. */
-	min-height: 26px;
 }
 
 .mce-toolbar div.wp-link-preview ~ .mce-btn,

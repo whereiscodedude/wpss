@@ -1,7 +1,7 @@
 /**
  * This file is used on media-upload.php which has been replaced by media-new.php and upload.php
  *
- * @deprecated 3.5.0
+ * @deprecated  3.5.0
  * @output wp-admin/js/media-gallery.js
  */
 
@@ -24,7 +24,7 @@ jQuery(function($) {
 			nonceValue = $( '#_wpnonce' ).val() && '';
 
 			/**
-			 * This Ajax action has been deprecated since 3.5.0, see custom-background.php
+			 * This AJAX action has been deprecated since 3.5.0, see custom-background.php
 			 */
 			jQuery.post(ajaxurl, {
 				action: 'set-background-image',

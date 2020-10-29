@@ -7,7 +7,7 @@
  */
 
 //
-// Category.
+// Category
 //
 
 /**
@@ -53,8 +53,7 @@ function get_category_to_edit( $id ) {
  * @return int|WP_Error
  */
 function wp_create_category( $cat_name, $parent = 0 ) {
-	$id = category_exists( $cat_name, $parent );
-	if ( $id ) {
+	if ( $id = category_exists( $cat_name, $parent ) ) {
 		return $id;
 	}
 
@@ -73,19 +72,15 @@ function wp_create_category( $cat_name, $parent = 0 ) {
  *
  * @param string[] $categories Array of category names to create.
  * @param int      $post_id    Optional. The post ID. Default empty.
- * @return int[] Array of IDs of categories assigned to the given post.
+ * @return array List of categories to create for the given post.
  */
 function wp_create_categories( $categories, $post_id = '' ) {
 	$cat_ids = array();
 	foreach ( $categories as $category ) {
-		$id = category_exists( $category );
-		if ( $id ) {
+		if ( $id = category_exists( $category ) ) {
 			$cat_ids[] = $id;
-		} else {
-			$id = wp_create_category( $category );
-			if ( $id ) {
-				$cat_ids[] = $id;
-			}
+		} elseif ( $id = wp_create_category( $category ) ) {
+			$cat_ids[] = $id;
 		}
 	}
 
@@ -129,7 +124,7 @@ function wp_insert_category( $catarr, $wp_error = false ) {
 	);
 	$catarr       = wp_parse_args( $catarr, $cat_defaults );
 
-	if ( '' === trim( $catarr['cat_name'] ) ) {
+	if ( trim( $catarr['cat_name'] ) == '' ) {
 		if ( ! $wp_error ) {
 			return 0;
 		} else {
@@ -192,7 +187,7 @@ function wp_update_category( $catarr ) {
 		return false;
 	}
 
-	// First, get all of the original fields.
+	// First, get all of the original fields
 	$category = get_term( $cat_ID, 'category', ARRAY_A );
 	_make_cat_compat( $category );
 
@@ -206,7 +201,7 @@ function wp_update_category( $catarr ) {
 }
 
 //
-// Tags.
+// Tags
 //
 
 /**
@@ -278,7 +273,7 @@ function get_terms_to_edit( $post_id, $taxonomy = 'post_tag' ) {
 		$term_names[] = $term->name;
 	}
 
-	$terms_to_edit = esc_attr( implode( ',', $term_names ) );
+	$terms_to_edit = esc_attr( join( ',', $term_names ) );
 
 	/**
 	 * Filters the comma-separated list of terms available to edit.
@@ -300,13 +295,12 @@ function get_terms_to_edit( $post_id, $taxonomy = 'post_tag' ) {
  *
  * @since 2.8.0
  *
- * @param string $tag_name The term name.
- * @param string $taxonomy Optional. The taxonomy within which to create the term. Default 'post_tag'.
+ * @param int|string $tag_name
+ * @param string $taxonomy Optional. The taxonomy for which to retrieve terms. Default 'post_tag'.
  * @return array|WP_Error
  */
 function wp_create_term( $tag_name, $taxonomy = 'post_tag' ) {
-	$id = term_exists( $tag_name, $taxonomy );
-	if ( $id ) {
+	if ( $id = term_exists( $tag_name, $taxonomy ) ) {
 		return $id;
 	}
 
