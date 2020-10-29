@@ -34,13 +34,12 @@ final class WP_Block_Type_Registry {
 	 *
 	 * @since 5.0.0
 	 *
-	 * @param string|WP_Block_Type $name Block type name including namespace, or alternatively
-	 *                                   a complete WP_Block_Type instance. In case a WP_Block_Type
+	 * @param string|WP_Block_Type $name Block type name including namespace, or alternatively a
+	 *                                   complete WP_Block_Type instance. In case a WP_Block_Type
 	 *                                   is provided, the $args parameter will be ignored.
 	 * @param array                $args {
-	 *     Optional. Array of block type arguments. Accepts any public property of `WP_Block_Type`.
-	 *     Any arguments may be defined, however the ones described below are supported by default.
-	 *     Default empty array.
+	 *     Optional. Array of block type arguments. Any arguments may be defined, however the
+	 *     ones described below are supported by default. Default empty array.
 	 *
 	 *     @type callable $render_callback Callback used to render blocks of this block type.
 	 *     @type array    $attributes      Block attributes mapping, property name to schema.
@@ -74,7 +73,7 @@ final class WP_Block_Type_Registry {
 		}
 
 		if ( $this->is_registered( $name ) ) {
-			/* translators: %s: Block name. */
+			/* translators: %s: block name */
 			$message = sprintf( __( 'Block type "%s" is already registered.' ), $name );
 			_doing_it_wrong( __METHOD__, $message, '5.0.0' );
 			return false;
@@ -94,8 +93,8 @@ final class WP_Block_Type_Registry {
 	 *
 	 * @since 5.0.0
 	 *
-	 * @param string|WP_Block_Type $name Block type name including namespace, or alternatively
-	 *                                   a complete WP_Block_Type instance.
+	 * @param string|WP_Block_Type $name Block type name including namespace, or alternatively a
+	 *                                   complete WP_Block_Type instance.
 	 * @return WP_Block_Type|false The unregistered block type on success, or false on failure.
 	 */
 	public function unregister( $name ) {
@@ -104,7 +103,7 @@ final class WP_Block_Type_Registry {
 		}
 
 		if ( ! $this->is_registered( $name ) ) {
-			/* translators: %s: Block name. */
+			/* translators: %s: block name */
 			$message = sprintf( __( 'Block type "%s" is not registered.' ), $name );
 			_doing_it_wrong( __METHOD__, $message, '5.0.0' );
 			return false;
