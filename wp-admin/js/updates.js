@@ -115,7 +115,7 @@
 		autoUpdatesError: ''
 	};
 
-	wp.updates.l10n = window.wp.deprecateL10nObject( 'wp.updates.l10n', wp.updates.l10n, '5.5.0' );
+	wp.updates.l10n = window.wp.deprecateL10nObject( 'wp.updates.l10n', wp.updates.l10n );
 
 	/**
 	 * User nonce for ajax calls.
@@ -2580,8 +2580,8 @@
 				var $subTitle    = $( '<span />' ).addClass( 'subtitle' ).html(
 					sprintf(
 						/* translators: %s: Search query. */
-						__( 'Search results for: %s' ),
-						'<strong>' + _.escape( data.s ) + '</strong>'
+						__( 'Search results for &#8220;%s&#8221;' ),
+						_.escape( data.s )
 					) ),
 					$oldSubTitle = $( '.wrap .subtitle' );
 
