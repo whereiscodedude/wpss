@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
 /**
@@ -76,7 +76,6 @@ if ( ! function_exists( 'twentynineteen_setup' ) ) :
 				'caption',
 				'script',
 				'style',
-				'navigation-widgets',
 			)
 		);
 
@@ -175,9 +174,6 @@ if ( ! function_exists( 'twentynineteen_setup' ) ) :
 
 		// Add support for responsive embedded content.
 		add_theme_support( 'responsive-embeds' );
-
-		// Add support for custom line height.
-		add_theme_support( 'custom-line-height' );
 	}
 endif;
 add_action( 'after_setup_theme', 'twentynineteen_setup' );
@@ -309,19 +305,14 @@ require get_template_directory() . '/classes/class-twentynineteen-svg-icons.php'
 require get_template_directory() . '/classes/class-twentynineteen-walker-comment.php';
 
 /**
- * Common theme functions.
+ * Enhance the theme by hooking into WordPress.
  */
-require get_template_directory() . '/inc/helper-functions.php';
+require get_template_directory() . '/inc/template-functions.php';
 
 /**
  * SVG Icons related functions.
  */
 require get_template_directory() . '/inc/icon-functions.php';
-
-/**
- * Enhance the theme by hooking into WordPress.
- */
-require get_template_directory() . '/inc/template-functions.php';
 
 /**
  * Custom template tags for the theme.
@@ -332,8 +323,3 @@ require get_template_directory() . '/inc/template-tags.php';
  * Customizer additions.
  */
 require get_template_directory() . '/inc/customizer.php';
-
-/**
- * Block Patterns.
- */
-require get_template_directory() . '/inc/block-patterns.php';

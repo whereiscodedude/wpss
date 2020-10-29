@@ -296,7 +296,7 @@
 .ui-dialog-titlebar-close:before {
 	font: normal 20px/1 dashicons;
 	vertical-align: top;
-	speak: never;
+	speak: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	line-height: 1.8;
@@ -307,7 +307,7 @@
 
 .ui-button.ui-dialog-titlebar-close:hover,
 .ui-button.ui-dialog-titlebar-close:focus {
-	color: #006799;
+	color: #00a0d2;
 }
 
 .ui-button.ui-dialog-titlebar-close:focus {

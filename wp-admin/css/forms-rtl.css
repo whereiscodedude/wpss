@@ -1,4 +1,3 @@
-/*! This file is auto-generated */
 /* Include margin and padding in the width calculation of input and textarea. */
 input,
 select,
@@ -143,7 +142,7 @@ input[type="radio"]:checked + label:before {
 
 .wp-core-ui input[type="reset"]:hover,
 .wp-core-ui input[type="reset"]:active {
-	color: #006799;
+	color: #00a0d2;
 }
 
 td > input[type="checkbox"],
@@ -173,7 +172,7 @@ input[type="radio"]:checked::before {
 	display: inline-block;
 	vertical-align: middle;
 	width: 1rem;
-	speak: never;
+	speak: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -239,12 +238,10 @@ textarea[readonly] {
 	color: #72777c;
 }
 
-.form-invalid .form-required,
-.form-invalid .form-required:focus,
-.form-invalid.form-required input,
-.form-invalid.form-required input:focus,
-.form-invalid.form-required select,
-.form-invalid.form-required select:focus {
+.form-invalid input,
+.form-invalid input:focus,
+.form-invalid select,
+.form-invalid select:focus {
 	border-color: #dc3232 !important;
 	box-shadow: 0 0 2px rgba(204, 0, 0, 0.8);
 }
@@ -327,7 +324,7 @@ input[type="radio"].disabled:checked:before {
 	background-size: 16px 16px;
 	cursor: pointer;
 	vertical-align: middle;
-}
+}e
 
 .wp-core-ui select:hover {
 	color: #007cba;
@@ -469,13 +466,8 @@ input.small-text {
 	padding: 0 6px;
 }
 
-label input.small-text {
-	margin-top: -4px;
-}
-
 input[type="number"].small-text {
 	width: 65px;
-	padding-left: 0;
 }
 
 input.tiny-text {
@@ -484,7 +476,6 @@ input.tiny-text {
 
 input[type="number"].tiny-text {
 	width: 45px;
-	padding-left: 0;
 }
 
 #doaction,
@@ -534,14 +525,6 @@ fieldset label,
 
 .options-media-php .small-text[name*="_size_"] {
 	margin: 0 0 1em;
-}
-
-.wp-generate-pw {
-	margin-top: 1em;
-}
-
-.wp-pwd {
-	margin-top: 1em;
 }
 
 #misc-publishing-actions label {
@@ -763,12 +746,8 @@ ul#add-to-blog-users {
 }
 
 .form-table td fieldset label {
-	margin: 0.35em 0 0.5em !important;
+	margin: 0.25em 0 0.5em !important;
 	display: inline-block;
-}
-
-.form-table td fieldset p label {
-	margin-top: 0 !important;
 }
 
 .form-table td fieldset label,
@@ -850,28 +829,6 @@ table.form-table td .updated p {
 
 .color-option {
 	cursor: pointer;
-}
-
-.create-application-password .form-field {
-	max-width: 25em;
-}
-
-.create-application-password label {
-	font-weight: 600;
-}
-
-.create-application-password p.submit {
-	margin-bottom: 0;
-	padding-bottom: 0;
-}
-
-.new-application-password-notice.notice {
-	margin-top: 20px;
-	margin-bottom: 0;
-}
-
-.application-password-display input.code {
-	width: 19em;
 }
 
 /*------------------------------------------------------------------------------
@@ -1079,7 +1036,7 @@ table.form-table td .updated p {
 
 #search-users,
 #search-sites {
-	max-width: 60%;
+	max-width: 100%;
 }
 
 /*------------------------------------------------------------------------------
@@ -1247,10 +1204,6 @@ table.form-table td .updated p {
 	color: #72777c;
 }
 
-.privacy_requests .row-actions.processing {
-	position: static;
-}
-
 .privacy_requests tbody .has-request-results th {
 	box-shadow: none;
 }
@@ -1269,8 +1222,8 @@ table.form-table td .updated p {
 }
 
 .privacy_requests .next_steps .button {
-	word-wrap: break-word;
-	white-space: normal;
+	word-break: break-all;
+	white-space: unset;
 }
 
 .privacy_requests .status-request-confirmed th,
@@ -1327,7 +1280,7 @@ table.form-table td .updated p {
 	display: inline-block;
 	font: normal 20px/1 dashicons;
 	margin: 3px -2px 0 5px;
-	speak: never;
+	speak: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	vertical-align: top;
@@ -1541,13 +1494,16 @@ table.form-table td .updated p {
 	}
 
 	.form-table th {
-		padding: 10px 0 0 0;
+		padding-top: 10px;
+		padding-bottom: 0;
 		border-bottom: 0;
 	}
 
 	.form-table td {
 		margin-bottom: 0;
-		padding: 4px 0 6px 0;
+		padding-bottom: 6px;
+		padding-top: 4px;
+		padding-right: 0;
 	}
 
 	.form-table.permalink-structure td code {
@@ -1675,13 +1631,6 @@ table.form-table td .updated p {
 	.wp-list-table.privacy_requests.widefat thead td input {
 		margin-right: 5px;
 	}
-
-	.wp-privacy-request-form-field input[type="text"] {
-		width: 100%;
-		margin-bottom: 10px;
-		vertical-align: middle;
-	}
-
 	.regular-text {
 		max-width: 100%;
 	}
