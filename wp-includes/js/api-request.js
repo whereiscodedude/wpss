@@ -8,9 +8,7 @@
  * - Sends the REST API nonce as a request header.
  * - Allows specifying only an endpoint namespace/path instead of a full URL.
  *
- * @since 4.9.0
- * @since 5.6.0 Added overriding of the "PUT" and "DELETE" methods with "POST".
- * @output wp-includes/js/api-request.js
+ * @since     4.9.0
  */
 
 ( function( $ ) {
@@ -24,8 +22,7 @@
 	apiRequest.buildAjaxOptions = function( options ) {
 		var url = options.url;
 		var path = options.path;
-		var method = options.method;
-		var namespaceTrimmed, endpointTrimmed, apiRoot;
+		var namespaceTrimmed, endpointTrimmed;
 		var headers, addNonceHeader, headerName;
 
 		if (
@@ -41,16 +38,7 @@
 			}
 		}
 		if ( typeof path === 'string' ) {
-			apiRoot = wpApiSettings.root;
-			path = path.replace( /^\//, '' );
-
-			// API root may already include query parameter prefix
-			// if site is configured to use plain permalinks.
-			if ( 'string' === typeof apiRoot && -1 !== apiRoot.indexOf( '?' ) ) {
-				path = path.replace( '?', '&' );
-			}
-
-			url = apiRoot + path;
+			url = wpApiSettings.root + path.replace( /^\//, '' );
 		}
 
 		// If ?_wpnonce=... is present, no need to add a nonce header.
@@ -78,23 +66,10 @@
 			}, headers );
 		}
 
-		if ( typeof method === 'string' ) {
-			method = method.toUpperCase();
-
-			if ( 'PUT' === method || 'DELETE' === method ) {
-				headers = $.extend( {
-					'X-HTTP-Method-Override': method
-				}, headers );
-
-				method = 'POST';
-			}
-		}
-
 		// Do not mutate the original options object.
 		options = $.extend( {}, options, {
 			headers: headers,
-			url: url,
-			method: method
+			url: url
 		} );
 
 		delete options.path;
