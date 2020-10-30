@@ -245,7 +245,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 				$args['post__in'] = $args['post__in'] ? array_intersect( $sticky_posts, $args['post__in'] ) : $sticky_posts;
 
 				/*
-				 * If we intersected, but there are no post IDs in common,
+				 * If we intersected, but there are no post ids in common,
 				 * WP_Query won't return "no posts" for post__in = array()
 				 * so we have to fake it a bit.
 				 */
@@ -591,7 +591,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 
 		$prepared_post->post_type = $this->post_type;
 
-		$post_id = wp_insert_post( wp_slash( (array) $prepared_post ), true, false );
+		$post_id = wp_insert_post( wp_slash( (array) $prepared_post ), true );
 
 		if ( is_wp_error( $post_id ) ) {
 
@@ -677,8 +677,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 */
 		do_action( "rest_after_insert_{$this->post_type}", $post, $request, true );
 
-		wp_after_insert_post( $post, false );
-
 		$response = $this->prepare_item_for_response( $post, $request );
 		$response = rest_ensure_response( $response );
 
@@ -760,7 +758,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		// Convert the post object to an array, otherwise wp_update_post() will expect non-escaped input.
-		$post_id = wp_update_post( wp_slash( (array) $post ), true, false );
+		$post_id = wp_update_post( wp_slash( (array) $post ), true );
 
 		if ( is_wp_error( $post_id ) ) {
 			if ( 'db_update_error' === $post_id->get_error_code() ) {
@@ -829,8 +827,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 
 		/** This action is documented in wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php */
 		do_action( "rest_after_insert_{$this->post_type}", $post, $request, false );
-
-		wp_after_insert_post( $post, true );
 
 		$response = $this->prepare_item_for_response( $post, $request );
 
@@ -1052,8 +1048,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	 * @return stdClass|WP_Error Post object or WP_Error.
 	 */
 	protected function prepare_item_for_database( $request ) {
-		$prepared_post  = new stdClass();
-		$current_status = '';
+		$prepared_post = new stdClass();
 
 		// Post ID.
 		if ( isset( $request['id'] ) ) {
@@ -1063,7 +1058,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			}
 
 			$prepared_post->ID = $existing_post->ID;
-			$current_status    = $existing_post->post_status;
 		}
 
 		$schema = $this->get_item_schema();
@@ -1107,11 +1101,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		$post_type = get_post_type_object( $prepared_post->post_type );
 
 		// Post status.
-		if (
-			! empty( $schema['properties']['status'] ) &&
-			isset( $request['status'] ) &&
-			( ! $current_status || $current_status !== $request['status'] )
-		) {
+		if ( ! empty( $schema['properties']['status'] ) && isset( $request['status'] ) ) {
 			$status = $this->handle_status_param( $request['status'], $post_type );
 
 			if ( is_wp_error( $status ) ) {
@@ -1262,32 +1252,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Checks whether the status is valid for the given post.
-	 *
-	 * Allows for sending an update request with the current status, even if that status would not be acceptable.
-	 *
-	 * @since 5.6.0
-	 *
-	 * @param string          $status  The provided status.
-	 * @param WP_REST_Request $request The request object.
-	 * @param string          $param   The parameter name.
-	 * @return true|WP_Error True if the status is valid, or WP_Error if not.
-	 */
-	public function check_status( $status, $request, $param ) {
-		if ( $request['id'] ) {
-			$post = $this->get_post( $request['id'] );
-
-			if ( ! is_wp_error( $post ) && $post->post_status === $status ) {
-				return true;
-			}
-		}
-
-		$args = $request->get_attributes()['args'][ $param ];
-
-		return rest_validate_value_from_schema( $status, $args, $param );
-	}
-
-	/**
 	 * Determines validity and normalizes the given status parameter.
 	 *
 	 * @since 4.7.0
@@ -1376,10 +1340,8 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		if ( $request['id'] ) {
-			$post             = get_post( $request['id'] );
 			$current_template = get_page_template_slug( $request['id'] );
 		} else {
-			$post             = null;
 			$current_template = '';
 		}
 
@@ -1389,7 +1351,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		// If this is a create request, get_post() will return null and wp theme will fallback to the passed post type.
-		$allowed_templates = wp_get_theme()->get_page_templates( $post, $this->post_type );
+		$allowed_templates = wp_get_theme()->get_page_templates( get_post( $request['id'] ), $this->post_type );
 
 		if ( isset( $allowed_templates[ $template ] ) ) {
 			return true;
@@ -1408,9 +1370,9 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	 * @since 4.7.0
 	 * @since 4.9.0 Added the `$validate` parameter.
 	 *
-	 * @param string $template Page template filename.
-	 * @param int    $post_id  Post ID.
-	 * @param bool   $validate Whether to validate that the template selected is valid.
+	 * @param string  $template Page template filename.
+	 * @param integer $post_id  Post ID.
+	 * @param bool    $validate Whether to validate that the template selected is valid.
 	 */
 	public function handle_template( $template, $post_id, $validate = false ) {
 
@@ -1517,7 +1479,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		// Is the post readable?
-		if ( 'publish' === $post->post_status || current_user_can( 'read_post', $post->ID ) ) {
+		if ( 'publish' === $post->post_status || current_user_can( $post_type->cap->read_post, $post->ID ) ) {
 			return true;
 		}
 
@@ -1560,7 +1522,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			return false;
 		}
 
-		return current_user_can( 'edit_post', $post->ID );
+		return current_user_can( $post_type->cap->edit_post, $post->ID );
 	}
 
 	/**
@@ -1596,7 +1558,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			return false;
 		}
 
-		return current_user_can( 'delete_post', $post->ID );
+		return current_user_can( $post_type->cap->delete_post, $post->ID );
 	}
 
 	/**
@@ -2147,9 +2109,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 					'type'        => 'string',
 					'enum'        => array_keys( get_post_stati( array( 'internal' => false ) ) ),
 					'context'     => array( 'view', 'edit' ),
-					'arg_options' => array(
-						'validate_callback' => array( $this, 'check_status' ),
-					),
 				),
 				'type'         => array(
 					'description' => __( 'Type of Post for the object.' ),
@@ -2233,7 +2192,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 				'custom-fields',
 			),
 		);
-
 		foreach ( $post_type_attributes as $attribute ) {
 			if ( isset( $fixed_schemas[ $this->post_type ] ) && ! in_array( $attribute, $fixed_schemas[ $this->post_type ], true ) ) {
 				continue;
@@ -2421,7 +2379,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 				_doing_it_wrong(
 					'register_taxonomy',
 					sprintf(
-						/* translators: 1: The taxonomy name, 2: The property name, either 'rest_base' or 'name', 3: The conflicting value. */
+						/* translators: 1. The taxonomy name, 2. The property name, either 'rest_base' or 'name', 3. The conflicting value. */
 						__( 'The "%1$s" taxonomy "%2$s" property (%3$s) conflicts with an existing property on the REST API Posts Controller. Specify a custom "rest_base" when registering the taxonomy to avoid this error.' ),
 						$taxonomy->name,
 						$taxonomy_field_name_with_conflict,
@@ -2452,7 +2410,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		$schema_fields = array_keys( $schema['properties'] );
 
 		/**
-		 * Filters the post's schema.
+		 * Filter the post's schema.
 		 *
 		 * The dynamic portion of the filter, `$this->post_type`, refers to the
 		 * post type slug for the controller.
@@ -2466,15 +2424,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		// Emit a _doing_it_wrong warning if user tries to add new properties using this filter.
 		$new_fields = array_diff( array_keys( $schema['properties'] ), $schema_fields );
 		if ( count( $new_fields ) > 0 ) {
-			_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-					/* translators: %s: register_rest_field */
-					__( 'Please use %s to add new schema properties.' ),
-					'register_rest_field'
-				),
-				'5.4.0'
-			);
+			_doing_it_wrong( __METHOD__, __( 'Please use register_rest_field to add new schema properties.' ), '5.4.0' );
 		}
 
 		$this->schema = $schema;
@@ -2793,7 +2743,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		/**
-		 * Filters collection parameters for the posts controller.
+		 * Filter collection parameters for the posts controller.
 		 *
 		 * The dynamic part of the filter `$this->post_type` refers to the post
 		 * type slug for the controller.

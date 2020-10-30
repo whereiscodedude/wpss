@@ -43,12 +43,6 @@
 							get_the_title()
 						)
 					);
-					wp_link_pages(
-						array(
-							'before' => '<div class="page-links">' . __( 'Pages:', 'twentyseventeen' ),
-							'after'  => '</div>',
-						)
-					);
 					?>
 			</div><!-- .entry-content -->
 

@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["apiFetch"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 470);
+/******/ 	return __webpack_require__(__webpack_require__.s = 434);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -94,7 +94,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["apiFetch"] =
 
 /***/ }),
 
-/***/ 14:
+/***/ 19:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -122,14 +122,14 @@ function _objectWithoutProperties(source, excluded) {
 
 /***/ }),
 
-/***/ 20:
+/***/ 23:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["regeneratorRuntime"]; }());
 
 /***/ }),
 
-/***/ 31:
+/***/ 30:
 /***/ (function(module, exports) {
 
 (function() { module.exports = this["wp"]["url"]; }());
@@ -158,61 +158,17 @@ function _objectWithoutPropertiesLoose(source, excluded) {
 
 /***/ }),
 
-/***/ 45:
+/***/ 434:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _asyncToGenerator; });
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
-
-/***/ }),
-
-/***/ 470:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
 var defineProperty = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js
-var objectWithoutProperties = __webpack_require__(14);
+var objectWithoutProperties = __webpack_require__(19);
 
 // EXTERNAL MODULE: external {"this":["wp","i18n"]}
 var external_this_wp_i18n_ = __webpack_require__(1);
@@ -231,13 +187,13 @@ function createNonceMiddleware(nonce) {
     // thereof) was specified, no need to add a nonce header.
 
     for (var headerName in headers) {
-      if (headerName.toLowerCase() === 'x-wp-nonce' && headers[headerName] === middleware.nonce) {
+      if (headerName.toLowerCase() === 'x-wp-nonce') {
         return next(options);
       }
     }
 
-    return next(_objectSpread(_objectSpread({}, options), {}, {
-      headers: _objectSpread(_objectSpread({}, headers), {}, {
+    return next(_objectSpread({}, options, {
+      headers: _objectSpread({}, headers, {
         'X-WP-Nonce': middleware.nonce
       })
     }));
@@ -273,7 +229,7 @@ var namespaceAndEndpointMiddleware = function namespaceAndEndpointMiddleware(opt
 
   delete options.namespace;
   delete options.endpoint;
-  return next(namespace_endpoint_objectSpread(namespace_endpoint_objectSpread({}, options), {}, {
+  return next(namespace_endpoint_objectSpread({}, options, {
     path: path
   }));
 };
@@ -316,7 +272,7 @@ var root_url_createRootURLMiddleware = function createRootURLMiddleware(rootURL)
         url = apiRoot + path;
       }
 
-      return next(root_url_objectSpread(root_url_objectSpread({}, optionsWithPath), {}, {
+      return next(root_url_objectSpread({}, optionsWithPath, {
         url: url
       }));
     });
@@ -372,15 +328,8 @@ function createPreloadingMiddleware(preloadedData) {
       var method = options.method || 'GET';
       var path = getStablePath(options.path);
 
-      if ('GET' === method && cache[path]) {
-        var cacheData = cache[path]; // Unsetting the cache key ensures that the data is only preloaded a single time
-
-        delete cache[path];
-        return Promise.resolve(parse ? cacheData.body : new window.Response(JSON.stringify(cacheData.body), {
-          status: 200,
-          statusText: 'OK',
-          headers: cacheData.headers
-        }));
+      if (parse && 'GET' === method && cache[path]) {
+        return Promise.resolve(cache[path].body);
       } else if ('OPTIONS' === method && cache[method] && cache[method][path]) {
         return Promise.resolve(cache[method][path]);
       }
@@ -393,14 +342,14 @@ function createPreloadingMiddleware(preloadedData) {
 /* harmony default export */ var preloading = (createPreloadingMiddleware);
 
 // EXTERNAL MODULE: external {"this":"regeneratorRuntime"}
-var external_this_regeneratorRuntime_ = __webpack_require__(20);
+var external_this_regeneratorRuntime_ = __webpack_require__(23);
 var external_this_regeneratorRuntime_default = /*#__PURE__*/__webpack_require__.n(external_this_regeneratorRuntime_);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(45);
+var asyncToGenerator = __webpack_require__(49);
 
 // EXTERNAL MODULE: external {"this":["wp","url"]}
-var external_this_wp_url_ = __webpack_require__(31);
+var external_this_wp_url_ = __webpack_require__(30);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/api-fetch/build-module/middlewares/fetch-all-middleware.js
 
@@ -415,11 +364,6 @@ function fetch_all_middleware_objectSpread(target) { for (var i = 1; i < argumen
 /**
  * WordPress dependencies
  */
-
-/**
- * Internal dependencies
- */
-
  // Apply query arguments to both URL and Path, whichever is present.
 
 var fetch_all_middleware_modifyQuery = function modifyQuery(_ref, queryArgs) {
@@ -427,7 +371,7 @@ var fetch_all_middleware_modifyQuery = function modifyQuery(_ref, queryArgs) {
       url = _ref.url,
       options = Object(objectWithoutProperties["a" /* default */])(_ref, ["path", "url"]);
 
-  return fetch_all_middleware_objectSpread(fetch_all_middleware_objectSpread({}, options), {}, {
+  return fetch_all_middleware_objectSpread({}, options, {
     url: url && Object(external_this_wp_url_["addQueryArgs"])(url, queryArgs),
     path: path && Object(external_this_wp_url_["addQueryArgs"])(path, queryArgs)
   });
@@ -465,8 +409,12 @@ var requestContainsUnboundedQuery = function requestContainsUnboundedQuery(optio
 // then recursively assemble a full response array from all available pages.
 
 
-var fetchAllMiddleware = /*#__PURE__*/function () {
-  var _ref2 = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/external_this_regeneratorRuntime_default.a.mark(function _callee(options, next) {
+var fetchAllMiddleware =
+/*#__PURE__*/
+function () {
+  var _ref2 = Object(asyncToGenerator["a" /* default */])(
+  /*#__PURE__*/
+  external_this_regeneratorRuntime_default.a.mark(function _callee(options, next) {
     var response, results, nextPage, mergedResults, nextResponse, nextResults;
     return external_this_regeneratorRuntime_default.a.wrap(function _callee$(_context) {
       while (1) {
@@ -489,9 +437,9 @@ var fetchAllMiddleware = /*#__PURE__*/function () {
 
           case 4:
             _context.next = 6;
-            return build_module(fetch_all_middleware_objectSpread(fetch_all_middleware_objectSpread({}, fetch_all_middleware_modifyQuery(options, {
+            return next(fetch_all_middleware_objectSpread({}, fetch_all_middleware_modifyQuery(options, {
               per_page: 100
-            })), {}, {
+            }), {
               // Ensure headers are returned for page 1.
               parse: false
             }));
@@ -532,7 +480,7 @@ var fetchAllMiddleware = /*#__PURE__*/function () {
             }
 
             _context.next = 19;
-            return build_module(fetch_all_middleware_objectSpread(fetch_all_middleware_objectSpread({}, options), {}, {
+            return next(fetch_all_middleware_objectSpread({}, options, {
               // Ensure the URL for the next page is used instead of any provided path.
               path: undefined,
               url: nextPage,
@@ -611,8 +559,8 @@ function httpV1Middleware(options, next) {
       method = _options$method === void 0 ? DEFAULT_METHOD : _options$method;
 
   if (OVERRIDE_METHODS.has(method.toUpperCase())) {
-    options = http_v1_objectSpread(http_v1_objectSpread({}, options), {}, {
-      headers: http_v1_objectSpread(http_v1_objectSpread({}, options.headers), {}, {
+    options = http_v1_objectSpread({}, options, {
+      headers: http_v1_objectSpread({}, options.headers, {
         'X-HTTP-Method-Override': method,
         'Content-Type': 'application/json'
       }),
@@ -620,7 +568,7 @@ function httpV1Middleware(options, next) {
     });
   }
 
-  return next(options);
+  return next(options, next);
 }
 
 /* harmony default export */ var http_v1 = (httpV1Middleware);
@@ -644,7 +592,7 @@ function userLocaleMiddleware(options, next) {
     });
   }
 
-  return next(options);
+  return next(options, next);
 }
 
 /* harmony default export */ var user_locale = (userLocaleMiddleware);
@@ -780,7 +728,7 @@ function mediaUploadMiddleware(options, next) {
     });
   };
 
-  return next(media_upload_objectSpread(media_upload_objectSpread({}, options), {}, {
+  return next(media_upload_objectSpread({}, options, {
     parse: false
   })).catch(function (response) {
     var attachmentId = response.headers.get('x-wp-upload-attachment-id');
@@ -880,14 +828,14 @@ var build_module_defaultFetchHandler = function defaultFetchHandler(nextOptions)
   var body = nextOptions.body,
       headers = nextOptions.headers; // Merge explicitly-provided headers with default values.
 
-  headers = build_module_objectSpread(build_module_objectSpread({}, DEFAULT_HEADERS), headers); // The `data` property is a shorthand for sending a JSON body.
+  headers = build_module_objectSpread({}, DEFAULT_HEADERS, {}, headers); // The `data` property is a shorthand for sending a JSON body.
 
   if (data) {
     body = JSON.stringify(data);
     headers['Content-Type'] = 'application/json';
   }
 
-  var responsePromise = window.fetch(url || path, build_module_objectSpread(build_module_objectSpread(build_module_objectSpread({}, DEFAULT_OPTIONS), remainingOptions), {}, {
+  var responsePromise = window.fetch(url || path, build_module_objectSpread({}, DEFAULT_OPTIONS, {}, remainingOptions, {
     body: body,
     headers: headers
   }));
@@ -921,27 +869,34 @@ function setFetchHandler(newFetchHandler) {
 }
 
 function apiFetch(options) {
-  // creates a nested function chain that calls all middlewares and finally the `fetchHandler`,
-  // converting `middlewares = [ m1, m2, m3 ]` into:
-  // ```
-  // opts1 => m1( opts1, opts2 => m2( opts2, opts3 => m3( opts3, fetchHandler ) ) );
-  // ```
-  var enhancedHandler = middlewares.reduceRight(function (next, middleware) {
+  var steps = [].concat(middlewares, [fetchHandler]);
+
+  var createRunStep = function createRunStep(index) {
     return function (workingOptions) {
-      return middleware(workingOptions, next);
+      var step = steps[index];
+
+      if (index === steps.length - 1) {
+        return step(workingOptions);
+      }
+
+      var next = createRunStep(index + 1);
+      return step(workingOptions, next);
     };
-  }, fetchHandler);
-  return enhancedHandler(options).catch(function (error) {
-    if (error.code !== 'rest_cookie_invalid_nonce') {
-      return Promise.reject(error);
-    } // If the nonce is invalid, refresh it and try again.
+  };
+
+  return new Promise(function (resolve, reject) {
+    createRunStep(0)(options).then(resolve).catch(function (error) {
+      if (error.code !== 'rest_cookie_invalid_nonce') {
+        return reject(error);
+      } // If the nonce is invalid, refresh it and try again.
 
 
-    return window.fetch(apiFetch.nonceEndpoint).then(checkStatus).then(function (data) {
-      return data.text();
-    }).then(function (text) {
-      apiFetch.nonceMiddleware.nonce = text;
-      return apiFetch(options);
+      window.fetch(apiFetch.nonceEndpoint).then(checkStatus).then(function (data) {
+        return data.text();
+      }).then(function (text) {
+        apiFetch.nonceMiddleware.nonce = text;
+        apiFetch(options).then(resolve).catch(reject);
+      }).catch(reject);
     });
   });
 }
@@ -955,6 +910,49 @@ apiFetch.fetchAllMiddleware = fetch_all_middleware;
 apiFetch.mediaUploadMiddleware = media_upload;
 /* harmony default export */ var build_module = __webpack_exports__["default"] = (apiFetch);
 
+
+/***/ }),
+
+/***/ 49:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _asyncToGenerator; });
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
 
 /***/ }),
 
