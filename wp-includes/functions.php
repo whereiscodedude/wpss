@@ -467,7 +467,7 @@ function size_format( $bytes, $decimals = 0 ) {
 	}
 
 	foreach ( $quant as $unit => $mag ) {
-		if ( (float) $bytes >= $mag ) {
+		if ( doubleval( $bytes ) >= $mag ) {
 			return number_format_i18n( $bytes / $mag, $decimals ) . ' ' . $unit;
 		}
 	}
@@ -830,16 +830,14 @@ function wp_extract_urls( $content ) {
  * @since 1.5.0
  * @since 5.3.0 The `$content` parameter was made optional, and the `$post` parameter was
  *              updated to accept a post ID or a WP_Post object.
- * @since 5.6.0 The `$content` parameter is no longer optional, but passing `null` to skip it
- *              is still supported.
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @param string|null $content Post content. If `null`, the `post_content` field from `$post` is used.
+ * @param string      $content Post content. If `null`, the `post_content` field from `$post` is used.
  * @param int|WP_Post $post    Post ID or post object.
  * @return null|bool Returns false if post is not found.
  */
-function do_enclose( $content, $post ) {
+function do_enclose( $content = null, $post ) {
 	global $wpdb;
 
 	// @todo Tidy this code and make the debug code optional.
@@ -1193,7 +1191,6 @@ function wp_removable_query_args() {
 		'error',
 		'hotkeys_highlight_first',
 		'hotkeys_highlight_last',
-		'ids',
 		'locked',
 		'message',
 		'same',
@@ -2744,10 +2741,6 @@ function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
 	// Compute the URL.
 	$url = $upload['url'] . "/$filename";
 
-	if ( is_multisite() ) {
-		invalidate_dirsize_cache( $new_file );
-	}
-
 	/** This filter is documented in wp-admin/includes/file.php */
 	return apply_filters(
 		'wp_handle_upload',
@@ -2942,25 +2935,9 @@ function wp_check_filetype_and_ext( $file, $filename, $mimes = null ) {
 				array(
 					'text/plain',
 					'text/csv',
-					'application/csv',
 					'text/richtext',
 					'text/tsv',
 					'text/vtt',
-				),
-				true
-			)
-			) {
-				$type = false;
-				$ext  = false;
-			}
-		} elseif ( 'application/csv' === $real_mime ) {
-			// Special casing for CSV files.
-			if ( ! in_array(
-				$type,
-				array(
-					'text/csv',
-					'text/plain',
-					'application/csv',
 				),
 				true
 			)
@@ -3439,7 +3416,7 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 				array( $message ),
 				wp_list_pluck( $parsed_args['additional_errors'], 'message' )
 			);
-			$message = "<ul>\n\t\t<li>" . implode( "</li>\n\t\t<li>", $message ) . "</li>\n\t</ul>";
+			$message = "<ul>\n\t\t<li>" . join( "</li>\n\t\t<li>", $message ) . "</li>\n\t</ul>";
 		}
 
 		$message = sprintf(
@@ -4082,14 +4059,12 @@ function _wp_json_prepare_data( $data ) {
  *
  * @since 3.5.0
  * @since 4.7.0 The `$status_code` parameter was added.
- * @since 5.6.0 The `$options` parameter was added.
  *
  * @param mixed $response    Variable (usually an array or object) to encode as JSON,
  *                           then print and die.
- * @param int   $status_code Optional. The HTTP status code to output. Default null.
- * @param int   $options     Optional. Options to be passed to json_encode(). Default 0.
+ * @param int   $status_code The HTTP status code to output.
  */
-function wp_send_json( $response, $status_code = null, $options = 0 ) {
+function wp_send_json( $response, $status_code = null ) {
 	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 		_doing_it_wrong(
 			__FUNCTION__,
@@ -4110,7 +4085,7 @@ function wp_send_json( $response, $status_code = null, $options = 0 ) {
 		}
 	}
 
-	echo wp_json_encode( $response, $options );
+	echo wp_json_encode( $response );
 
 	if ( wp_doing_ajax() ) {
 		wp_die(
@@ -4130,20 +4105,18 @@ function wp_send_json( $response, $status_code = null, $options = 0 ) {
  *
  * @since 3.5.0
  * @since 4.7.0 The `$status_code` parameter was added.
- * @since 5.6.0 The `$options` parameter was added.
  *
- * @param mixed $data        Optional. Data to encode as JSON, then print and die. Default null.
- * @param int   $status_code Optional. The HTTP status code to output. Default null.
- * @param int   $options     Optional. Options to be passed to json_encode(). Default 0.
+ * @param mixed $data        Data to encode as JSON, then print and die.
+ * @param int   $status_code The HTTP status code to output.
  */
-function wp_send_json_success( $data = null, $status_code = null, $options = 0 ) {
+function wp_send_json_success( $data = null, $status_code = null ) {
 	$response = array( 'success' => true );
 
 	if ( isset( $data ) ) {
 		$response['data'] = $data;
 	}
 
-	wp_send_json( $response, $status_code, $options );
+	wp_send_json( $response, $status_code );
 }
 
 /**
@@ -4157,13 +4130,11 @@ function wp_send_json_success( $data = null, $status_code = null, $options = 0 )
  * @since 3.5.0
  * @since 4.1.0 The `$data` parameter is now processed if a WP_Error object is passed in.
  * @since 4.7.0 The `$status_code` parameter was added.
- * @since 5.6.0 The `$options` parameter was added.
  *
- * @param mixed $data        Optional. Data to encode as JSON, then print and die. Default null.
- * @param int   $status_code Optional. The HTTP status code to output. Default null.
- * @param int   $options     Optional. Options to be passed to json_encode(). Default 0.
+ * @param mixed $data        Data to encode as JSON, then print and die.
+ * @param int   $status_code The HTTP status code to output.
  */
-function wp_send_json_error( $data = null, $status_code = null, $options = 0 ) {
+function wp_send_json_error( $data = null, $status_code = null ) {
 	$response = array( 'success' => false );
 
 	if ( isset( $data ) ) {
@@ -4184,7 +4155,7 @@ function wp_send_json_error( $data = null, $status_code = null, $options = 0 ) {
 		}
 	}
 
-	wp_send_json( $response, $status_code, $options );
+	wp_send_json( $response, $status_code );
 }
 
 /**
@@ -4513,7 +4484,6 @@ function wp_parse_slug_list( $list ) {
  */
 function wp_array_slice_assoc( $array, $keys ) {
 	$slice = array();
-
 	foreach ( $keys as $key ) {
 		if ( isset( $array[ $key ] ) ) {
 			$slice[ $key ] = $array[ $key ];
@@ -4521,38 +4491,6 @@ function wp_array_slice_assoc( $array, $keys ) {
 	}
 
 	return $slice;
-}
-
-/**
- * Accesses an array in depth based on a path of keys.
- *
- * It is the PHP equivalent of JavaScript's lodash.get, and mirroring it may help other components
- * retain some symmetry between client and server implementations.
- *
- * @since 5.6.0
- *
- * @param array $array   An array from which we want to retrieve some information.
- * @param array $path    An array of keys describing the path with which to retrieve information.
- * @param array $default The return value if the path is not set on the array,
- *                       or if the types of array and path are not arrays.
- * @return array An array matching the path specified.
- */
-function wp_array_get( $array, $path, $default = array() ) {
-	// Confirm input values are expected type to avoid notice warnings.
-	if ( ! is_array( $array ) || ! is_array( $path ) ) {
-		return $default;
-	}
-
-	$path_length = count( $path );
-
-	for ( $i = 0; $i < $path_length; ++$i ) {
-		if ( ! isset( $array[ $path[ $i ] ] ) ) {
-			return $default;
-		}
-		$array = $array[ $path[ $i ] ];
-	}
-
-	return $array;
 }
 
 /**
@@ -4570,7 +4508,6 @@ function wp_is_numeric_array( $data ) {
 
 	$keys        = array_keys( $data );
 	$string_keys = array_filter( $keys, 'is_string' );
-
 	return count( $string_keys ) === 0;
 }
 
@@ -4784,7 +4721,7 @@ function dead_db() {
  * @return int A non-negative integer.
  */
 function absint( $maybeint ) {
-	return abs( (int) $maybeint );
+	return abs( intval( $maybeint ) );
 }
 
 /**
@@ -5894,7 +5831,7 @@ function wp_timezone_choice( $selected_zone, $locale = null ) {
 		}
 
 		// Build the value.
-		$value    = implode( '/', $value );
+		$value    = join( '/', $value );
 		$selected = '';
 		if ( $value === $selected_zone ) {
 			$selected = 'selected="selected" ';
@@ -5995,7 +5932,7 @@ function wp_timezone_choice( $selected_zone, $locale = null ) {
 	}
 	$structure[] = '</optgroup>';
 
-	return implode( "\n", $structure );
+	return join( "\n", $structure );
 }
 
 /**
@@ -6089,15 +6026,11 @@ function get_file_data( $file, $default_headers, $context = '' ) {
 	// We don't need to write to the file, so just open for reading.
 	$fp = fopen( $file, 'r' );
 
-	if ( $fp ) {
-		// Pull only the first 8 KB of the file in.
-		$file_data = fread( $fp, 8 * KB_IN_BYTES );
+	// Pull only the first 8 KB of the file in.
+	$file_data = fread( $fp, 8 * KB_IN_BYTES );
 
-		// PHP will close file handle, but we are good citizens.
-		fclose( $fp );
-	} else {
-		$file_data = '';
-	}
+	// PHP will close file handle, but we are good citizens.
+	fclose( $fp );
 
 	// Make sure we catch CR-only line endings.
 	$file_data = str_replace( "\r", "\n", $file_data );
@@ -6348,14 +6281,13 @@ function send_frame_options_header() {
  * @since 4.3.0 Added 'webcal' to the protocols array.
  * @since 4.7.0 Added 'urn' to the protocols array.
  * @since 5.3.0 Added 'sms' to the protocols array.
- * @since 5.6.0 Added 'irc6' and 'ircs' to the protocols array.
  *
  * @see wp_kses()
  * @see esc_url()
  *
  * @return string[] Array of allowed protocols. Defaults to an array containing 'http', 'https',
- *                  'ftp', 'ftps', 'mailto', 'news', 'irc', 'irc6', 'ircs', 'gopher', 'nntp', 'feed',
- *                  'telnet', 'mms', 'rtsp', 'sms', 'svn', 'tel', 'fax', 'xmpp', 'webcal', and 'urn'.
+ *                  'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet',
+ *                  'mms', 'rtsp', 'sms', 'svn', 'tel', 'fax', 'xmpp', 'webcal', and 'urn'.
  *                  This covers all common link protocols, except for 'javascript' which should not
  *                  be allowed for untrusted users.
  */
@@ -6363,7 +6295,7 @@ function wp_allowed_protocols() {
 	static $protocols = array();
 
 	if ( empty( $protocols ) ) {
-		$protocols = array( 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'irc6', 'ircs', 'gopher', 'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'sms', 'svn', 'tel', 'fax', 'xmpp', 'webcal', 'urn' );
+		$protocols = array( 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'sms', 'svn', 'tel', 'fax', 'xmpp', 'webcal', 'urn' );
 	}
 
 	if ( ! did_action( 'wp_loaded' ) ) {
@@ -6433,7 +6365,7 @@ function wp_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
 		}
 	}
 	if ( $pretty ) {
-		return implode( ', ', array_reverse( $caller ) );
+		return join( ', ', array_reverse( $caller ) );
 	} else {
 		return $caller;
 	}
@@ -6893,7 +6825,7 @@ function mysql_to_rfc3339( $date_string ) {
  *
  * @param string $context Optional. Context in which the function is called. Accepts either 'admin',
  *                        'image', or an arbitrary other context. If an arbitrary context is passed,
- *                        the similarly arbitrary {@see '$context_memory_limit'} filter will be
+ *                        the similarly arbitrary {@see '{$context}_memory_limit'} filter will be
  *                        invoked. Default 'admin'.
  * @return bool|int|string The limit that was set or false on failure.
  */
@@ -7142,18 +7074,18 @@ All at ###SITENAME###
 	 * @since 4.9.0
 	 *
 	 * @param array $email_change_email {
-	 *     Used to build wp_mail().
+	 *            Used to build wp_mail().
 	 *
-	 *     @type string $to      The intended recipient.
-	 *     @type string $subject The subject of the email.
-	 *     @type string $message The content of the email.
-	 *         The following strings have a special meaning and will get replaced dynamically:
-	 *         - ###OLD_EMAIL### The old site admin email address.
-	 *         - ###NEW_EMAIL### The new site admin email address.
-	 *         - ###SITENAME###  The name of the site.
-	 *         - ###SITEURL###   The URL to the site.
-	 *     @type string $headers Headers.
-	 * }
+	 *            @type string $to      The intended recipient.
+	 *            @type string $subject The subject of the email.
+	 *            @type string $message The content of the email.
+	 *                The following strings have a special meaning and will get replaced dynamically:
+	 *                - ###OLD_EMAIL### The old site admin email address.
+	 *                - ###NEW_EMAIL### The new site admin email address.
+	 *                - ###SITENAME###  The name of the site.
+	 *                - ###SITEURL###   The URL to the site.
+	 *            @type string $headers Headers.
+	 *        }
 	 * @param string $old_email The old site admin email address.
 	 * @param string $new_email The new site admin email address.
 	 */
@@ -7311,8 +7243,6 @@ function wp_privacy_exports_dir() {
 	 * Filters the directory used to store personal data export files.
 	 *
 	 * @since 4.9.6
-	 * @since 5.5.0 Exports now use relative paths, so changes to the directory
-	 *              via this filter should be reflected on the server.
 	 *
 	 * @param string $exports_dir Exports directory.
 	 */
@@ -7336,8 +7266,6 @@ function wp_privacy_exports_url() {
 	 * Filters the URL of the directory used to store personal data export files.
 	 *
 	 * @since 4.9.6
-	 * @since 5.5.0 Exports now use relative paths, so changes to the directory URL
-	 *              via this filter should be reflected on the server.
 	 *
 	 * @param string $exports_url Exports directory URL.
 	 */
@@ -7550,7 +7478,7 @@ function wp_direct_php_update_button() {
 
 	echo '<p class="button-container">';
 	printf(
-		'<a class="button button-primary" href="%1$s" target="_blank" rel="noopener">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
+		'<a class="button button-primary" href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
 		esc_url( $direct_update_url ),
 		__( 'Update PHP' ),
 		/* translators: Accessibility text. */
@@ -7574,16 +7502,26 @@ function wp_direct_php_update_button() {
  * @return int|false|null Size in bytes if a valid directory. False if not. Null if timeout.
  */
 function get_dirsize( $directory, $max_execution_time = null ) {
+	$dirsize = get_transient( 'dirsize_cache' );
+
+	if ( is_array( $dirsize ) && isset( $dirsize[ $directory ]['size'] ) ) {
+		return $dirsize[ $directory ]['size'];
+	}
+
+	if ( ! is_array( $dirsize ) ) {
+		$dirsize = array();
+	}
 
 	// Exclude individual site directories from the total when checking the main site of a network,
 	// as they are subdirectories and should not be counted.
 	if ( is_multisite() && is_main_site() ) {
-		$size = recurse_dirsize( $directory, $directory . '/sites', $max_execution_time );
+		$dirsize[ $directory ]['size'] = recurse_dirsize( $directory, $directory . '/sites', $max_execution_time );
 	} else {
-		$size = recurse_dirsize( $directory, null, $max_execution_time );
+		$dirsize[ $directory ]['size'] = recurse_dirsize( $directory, null, $max_execution_time );
 	}
 
-	return $size;
+	set_transient( 'dirsize_cache', $dirsize, HOUR_IN_SECONDS );
+	return $dirsize[ $directory ]['size'];
 }
 
 /**
@@ -7595,32 +7533,18 @@ function get_dirsize( $directory, $max_execution_time = null ) {
  * @since MU (3.0.0)
  * @since 4.3.0 $exclude parameter added.
  * @since 5.2.0 $max_execution_time parameter added.
- * @since 5.6.0 $directory_cache parameter added.
  *
  * @param string       $directory          Full path of a directory.
  * @param string|array $exclude            Optional. Full path of a subdirectory to exclude from the total,
  *                                         or array of paths. Expected without trailing slash(es).
  * @param int          $max_execution_time Maximum time to run before giving up. In seconds. The timeout is global
  *                                         and is measured from the moment WordPress started to load.
- * @param array        $directory_cache    Optional. Array of cached directory paths.
- *
  * @return int|false|null Size in bytes if a valid directory. False if not. Null if timeout.
  */
-function recurse_dirsize( $directory, $exclude = null, $max_execution_time = null, &$directory_cache = null ) {
+function recurse_dirsize( $directory, $exclude = null, $max_execution_time = null ) {
 	$size = 0;
 
-	$directory  = untrailingslashit( $directory );
-	$cache_path = normalize_dirsize_cache_path( $directory );
-	$save_cache = false;
-
-	if ( ! isset( $directory_cache ) ) {
-		$directory_cache = get_transient( 'dirsize_cache' );
-		$save_cache      = true;
-	}
-
-	if ( isset( $directory_cache[ $cache_path ] ) ) {
-		return $directory_cache[ $cache_path ];
-	}
+	$directory = untrailingslashit( $directory );
 
 	if ( ! file_exists( $directory ) || ! is_dir( $directory ) || ! is_readable( $directory ) ) {
 		return false;
@@ -7648,94 +7572,30 @@ function recurse_dirsize( $directory, $exclude = null, $max_execution_time = nul
 		}
 	}
 
-	/**
-	* Filters the amount of storage space used by one directory and all it's children, in megabytes.
-	* Return the actual used space to shortcircuit the recursive PHP file size calculation and use something else
-	* like a CDN API or native operating system tools for better performance
-	*
-	* @since 5.6.0
-	*
-	* @param int|false $space_used The amount of used space, in bytes. Default 0.
-	*/
-	$size = apply_filters( 'calculate_current_dirsize', $size, $directory, $exclude, $max_execution_time, $directory_cache );
-
-	if ( 0 === $size ) {
-		$handle = opendir( $directory );
-		if ( $handle ) {
-			while ( ( $file = readdir( $handle ) ) !== false ) {
-				$path = $directory . '/' . $file;
-				if ( '.' !== $file && '..' !== $file ) {
-					if ( is_file( $path ) ) {
-						$size += filesize( $path );
-					} elseif ( is_dir( $path ) ) {
-						$handlesize = recurse_dirsize( $path, $exclude, $max_execution_time, $directory_cache );
-						if ( $handlesize > 0 ) {
-							$size += $handlesize;
-						}
-					}
-
-					if ( $max_execution_time > 0 && microtime( true ) - WP_START_TIMESTAMP > $max_execution_time ) {
-						// Time exceeded. Give up instead of risking a fatal timeout.
-						$size = null;
-						break;
+	$handle = opendir( $directory );
+	if ( $handle ) {
+		while ( ( $file = readdir( $handle ) ) !== false ) {
+			$path = $directory . '/' . $file;
+			if ( '.' !== $file && '..' !== $file ) {
+				if ( is_file( $path ) ) {
+					$size += filesize( $path );
+				} elseif ( is_dir( $path ) ) {
+					$handlesize = recurse_dirsize( $path, $exclude, $max_execution_time );
+					if ( $handlesize > 0 ) {
+						$size += $handlesize;
 					}
 				}
+
+				if ( $max_execution_time > 0 && microtime( true ) - WP_START_TIMESTAMP > $max_execution_time ) {
+					// Time exceeded. Give up instead of risking a fatal timeout.
+					$size = null;
+					break;
+				}
 			}
-			closedir( $handle );
 		}
+		closedir( $handle );
 	}
-	$directory_cache[ $cache_path ] = $size;
-
-	// Only write the transient on the top level call and not on recursive calls
-	if ( $save_cache ) {
-		set_transient( 'dirsize_cache', $directory_cache );
-	}
-
 	return $size;
-}
-
-/**
- * Invalidates entries within the dirsize_cache
- *
- * Remove the current directory and all parent directories
- * from the dirsize_cache transient.
- *
- * @since 5.6.0
- *
- * @param string $path Full path of a directory or file.
- */
-function invalidate_dirsize_cache( $path ) {
-	$directory_cache = get_transient( 'dirsize_cache' );
-
-	if ( empty( $directory_cache ) ) {
-		return;
-	}
-
-	$cache_path = normalize_dirsize_cache_path( $path );
-	unset( $directory_cache[ $cache_path ] );
-
-	while ( DIRECTORY_SEPARATOR !== $cache_path && '.' !== $cache_path && '..' !== $cache_path ) {
-		$cache_path = dirname( $cache_path );
-		unset( $directory_cache[ $cache_path ] );
-	}
-
-	set_transient( 'dirsize_cache', $directory_cache );
-}
-
-/**
- * Normalize dirsize cache path.
- *
- * Ensures array keys within the dirsize_cache transient follow the same format.
- *
- * @since 5.6.0
- *
- * @param string $path
- * @return string
- */
-function normalize_dirsize_cache_path( $path ) {
-	$path = str_replace( ABSPATH, '', $path );
-
-	return untrailingslashit( $path );
 }
 
 /**
