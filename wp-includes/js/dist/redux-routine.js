@@ -82,16 +82,15 @@ this["wp"] = this["wp"] || {}; this["wp"]["reduxRoutine"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 483);
+/******/ 	return __webpack_require__(__webpack_require__.s = 378);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 155:
+/***/ 100:
 /***/ (function(module, exports) {
 
 module.exports = isPromise;
-module.exports.default = isPromise;
 
 function isPromise(obj) {
   return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
@@ -100,7 +99,7 @@ function isPromise(obj) {
 
 /***/ }),
 
-/***/ 164:
+/***/ 107:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -112,7 +111,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _keys = __webpack_require__(270);
+var _keys = __webpack_require__(200);
 
 var _keys2 = _interopRequireDefault(_keys);
 
@@ -165,14 +164,7 @@ exports.default = is;
 
 /***/ }),
 
-/***/ 2:
-/***/ (function(module, exports) {
-
-(function() { module.exports = this["lodash"]; }());
-
-/***/ }),
-
-/***/ 269:
+/***/ 199:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -183,7 +175,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.createChannel = exports.subscribe = exports.cps = exports.apply = exports.call = exports.invoke = exports.delay = exports.race = exports.join = exports.fork = exports.error = exports.all = undefined;
 
-var _keys = __webpack_require__(270);
+var _keys = __webpack_require__(200);
 
 var _keys2 = _interopRequireDefault(_keys);
 
@@ -313,7 +305,14 @@ var createChannel = exports.createChannel = function createChannel(callback) {
 
 /***/ }),
 
-/***/ 270:
+/***/ 2:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["lodash"]; }());
+
+/***/ }),
+
+/***/ 200:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -337,7 +336,7 @@ exports.default = keys;
 
 /***/ }),
 
-/***/ 293:
+/***/ 228:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -348,7 +347,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.wrapControls = exports.asyncControls = exports.create = undefined;
 
-var _helpers = __webpack_require__(269);
+var _helpers = __webpack_require__(199);
 
 Object.keys(_helpers).forEach(function (key) {
   if (key === "default") return;
@@ -360,15 +359,15 @@ Object.keys(_helpers).forEach(function (key) {
   });
 });
 
-var _create = __webpack_require__(444);
+var _create = __webpack_require__(347);
 
 var _create2 = _interopRequireDefault(_create);
 
-var _async = __webpack_require__(446);
+var _async = __webpack_require__(349);
 
 var _async2 = _interopRequireDefault(_async);
 
-var _wrap = __webpack_require__(448);
+var _wrap = __webpack_require__(351);
 
 var _wrap2 = _interopRequireDefault(_wrap);
 
@@ -380,7 +379,7 @@ exports.wrapControls = _wrap2.default;
 
 /***/ }),
 
-/***/ 444:
+/***/ 347:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -390,11 +389,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _builtin = __webpack_require__(445);
+var _builtin = __webpack_require__(348);
 
 var _builtin2 = _interopRequireDefault(_builtin);
 
-var _is = __webpack_require__(164);
+var _is = __webpack_require__(107);
 
 var _is2 = _interopRequireDefault(_is);
 
@@ -466,7 +465,7 @@ exports.default = create;
 
 /***/ }),
 
-/***/ 445:
+/***/ 348:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -477,7 +476,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.iterator = exports.array = exports.object = exports.error = exports.any = undefined;
 
-var _is = __webpack_require__(164);
+var _is = __webpack_require__(107);
 
 var _is2 = _interopRequireDefault(_is);
 
@@ -567,7 +566,7 @@ exports.default = [error, iterator, array, object, any];
 
 /***/ }),
 
-/***/ 446:
+/***/ 349:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -578,13 +577,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.race = exports.join = exports.fork = exports.promise = undefined;
 
-var _is = __webpack_require__(164);
+var _is = __webpack_require__(107);
 
 var _is2 = _interopRequireDefault(_is);
 
-var _helpers = __webpack_require__(269);
+var _helpers = __webpack_require__(199);
 
-var _dispatcher = __webpack_require__(447);
+var _dispatcher = __webpack_require__(350);
 
 var _dispatcher2 = _interopRequireDefault(_dispatcher);
 
@@ -689,7 +688,7 @@ exports.default = [promise, fork, join, race, subscribe];
 
 /***/ }),
 
-/***/ 447:
+/***/ 350:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -722,7 +721,7 @@ exports.default = createDispatcher;
 
 /***/ }),
 
-/***/ 448:
+/***/ 351:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -733,7 +732,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.cps = exports.call = undefined;
 
-var _is = __webpack_require__(164);
+var _is = __webpack_require__(107);
 
 var _is2 = _interopRequireDefault(_is);
 
@@ -765,40 +764,34 @@ exports.default = [call, cps];
 
 /***/ }),
 
-/***/ 483:
+/***/ 378:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
-
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, "default", function() { return /* binding */ createMiddleware; });
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/redux-routine/build-module/is-generator.js
 /**
  * Returns true if the given object is a generator, or false otherwise.
  *
- * @see https://www.ecma-international.org/ecma-262/6.0/#sec-generator-objects
+ * @link https://www.ecma-international.org/ecma-262/6.0/#sec-generator-objects
  *
  * @param {*} object Object to test.
  *
  * @return {boolean} Whether object is a generator.
  */
 function isGenerator(object) {
-  // Check that iterator (next) and iterable (Symbol.iterator) interfaces are satisfied.
-  // These checks seem to be compatible with several generator helpers as well as the native implementation.
-  return !!object && typeof object[Symbol.iterator] === 'function' && typeof object.next === 'function';
+  return !!object && object[Symbol.toStringTag] === 'Generator';
 }
 
 // EXTERNAL MODULE: ./node_modules/rungen/dist/index.js
-var dist = __webpack_require__(293);
+var dist = __webpack_require__(228);
 
-// EXTERNAL MODULE: external {"this":"lodash"}
-var external_this_lodash_ = __webpack_require__(2);
+// EXTERNAL MODULE: external "lodash"
+var external_lodash_ = __webpack_require__(2);
 
 // EXTERNAL MODULE: ./node_modules/is-promise/index.js
-var is_promise = __webpack_require__(155);
+var is_promise = __webpack_require__(100);
 var is_promise_default = /*#__PURE__*/__webpack_require__.n(is_promise);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/redux-routine/build-module/is-action.js
@@ -815,7 +808,7 @@ var is_promise_default = /*#__PURE__*/__webpack_require__.n(is_promise);
  */
 
 function isAction(object) {
-  return Object(external_this_lodash_["isPlainObject"])(object) && Object(external_this_lodash_["isString"])(object.type);
+  return Object(external_lodash_["isPlainObject"])(object) && Object(external_lodash_["isString"])(object.type);
 }
 /**
  * Returns true if the given object quacks like an action and has a specific
@@ -847,15 +840,15 @@ function isActionOfType(object, expectedType) {
  * Create a co-routine runtime.
  *
  * @param {Object}    controls Object of control handlers.
- * @param {Function}  dispatch Unhandled action dispatch.
+ * @param {function}  dispatch Unhandled action dispatch.
  *
- * @return {Function} co-routine runtime
+ * @return {function} co-routine runtime
  */
 
 function createRuntime() {
   var controls = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var dispatch = arguments.length > 1 ? arguments[1] : undefined;
-  var rungenControls = Object(external_this_lodash_["map"])(controls, function (control, actionType) {
+  var rungenControls = Object(external_lodash_["map"])(controls, function (control, actionType) {
     return function (value, next, iterate, yieldNext, yieldError) {
       if (!isActionOfType(value, actionType)) {
         return false;
@@ -900,6 +893,7 @@ function createRuntime() {
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/redux-routine/build-module/index.js
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return createMiddleware; });
 /**
  * Internal dependencies
  */
