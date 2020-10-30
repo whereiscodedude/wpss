@@ -33,7 +33,7 @@ function get_query_template( $type, $templates = array() ) {
 	 * The last element in the array should always be the fallback template for this query type.
 	 *
 	 * Possible values for `$type` include: 'index', '404', 'archive', 'author', 'category', 'tag', 'taxonomy', 'date',
-	 * 'embed', 'home', 'frontpage', 'privacypolicy', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
+	 * 'embed', 'home', 'frontpage', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
 	 *
 	 * @since 4.7.0
 	 *
@@ -51,13 +51,13 @@ function get_query_template( $type, $templates = array() ) {
 	 * This hook also applies to various types of files loaded as part of the Template Hierarchy.
 	 *
 	 * Possible values for `$type` include: 'index', '404', 'archive', 'author', 'category', 'tag', 'taxonomy', 'date',
-	 * 'embed', 'home', 'frontpage', 'privacypolicy', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
+	 * 'embed', 'home', 'frontpage', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
 	 *
 	 * @since 1.5.0
 	 * @since 4.8.0 The `$type` and `$templates` parameters were added.
 	 *
 	 * @param string $template  Path to the template. See locate_template().
-	 * @param string $type      Sanitized filename without extension.
+	 * @param string $type      Filename without extension.
 	 * @param array  $templates A list of template candidates, in descending order of priority.
 	 */
 	return apply_filters( "{$type}_template", $template, $type, $templates );
@@ -373,25 +373,7 @@ function get_home_template() {
 function get_front_page_template() {
 	$templates = array( 'front-page.php' );
 
-	return get_query_template( 'frontpage', $templates );
-}
-
-/**
- * Retrieve path of Privacy Policy page template in current or parent template.
- *
- * The template hierarchy and template path are filterable via the {@see '$type_template_hierarchy'}
- * and {@see '$type_template'} dynamic hooks, where `$type` is 'privacypolicy'.
- *
- * @since 5.2.0
- *
- * @see get_query_template()
- *
- * @return string Full path to privacy policy template file.
- */
-function get_privacy_policy_template() {
-	$templates = array( 'privacy-policy.php' );
-
-	return get_query_template( 'privacypolicy', $templates );
+	return get_query_template( 'front_page', $templates );
 }
 
 /**
@@ -428,8 +410,7 @@ function get_page_template() {
 	$pagename = get_query_var( 'pagename' );
 
 	if ( ! $pagename && $id ) {
-		// If a static page is set as the front page, $pagename will not be set.
-		// Retrieve it from the queried object.
+		// If a static page is set as the front page, $pagename will not be set. Retrieve it from the queried object
 		$post = get_queried_object();
 		if ( $post ) {
 			$pagename = $post->post_name;
@@ -644,17 +625,13 @@ function get_attachment_template() {
  * so that themes which inherit from a parent theme can just overload one file.
  *
  * @since 2.7.0
- * @since 5.5.0 The `$args` parameter was added.
  *
  * @param string|array $template_names Template file(s) to search for, in order.
  * @param bool         $load           If true the template file will be loaded if it is found.
- * @param bool         $require_once   Whether to require_once or require. Has no effect if `$load` is false.
- *                                     Default true.
- * @param array        $args           Optional. Additional arguments passed to the template.
- *                                     Default empty array.
+ * @param bool         $require_once   Whether to require_once or require. Default true. Has no effect if $load is false.
  * @return string The template filename if one is located.
  */
-function locate_template( $template_names, $load = false, $require_once = true, $args = array() ) {
+function locate_template( $template_names, $load = false, $require_once = true ) {
 	$located = '';
 	foreach ( (array) $template_names as $template_name ) {
 		if ( ! $template_name ) {
@@ -672,8 +649,8 @@ function locate_template( $template_names, $load = false, $require_once = true, 
 		}
 	}
 
-	if ( $load && '' !== $located ) {
-		load_template( $located, $require_once, $args );
+	if ( $load && '' != $located ) {
+		load_template( $located, $require_once );
 	}
 
 	return $located;
@@ -687,26 +664,23 @@ function locate_template( $template_names, $load = false, $require_once = true, 
  * also available.
  *
  * @since 1.5.0
- * @since 5.5.0 The `$args` parameter was added.
  *
  * @global array      $posts
- * @global WP_Post    $post          Global post object.
+ * @global WP_Post    $post
  * @global bool       $wp_did_header
- * @global WP_Query   $wp_query      WordPress Query object.
- * @global WP_Rewrite $wp_rewrite    WordPress rewrite component.
- * @global wpdb       $wpdb          WordPress database abstraction object.
+ * @global WP_Query   $wp_query
+ * @global WP_Rewrite $wp_rewrite
+ * @global wpdb       $wpdb
  * @global string     $wp_version
- * @global WP         $wp            Current WordPress environment instance.
+ * @global WP         $wp
  * @global int        $id
- * @global WP_Comment $comment       Global comment object.
+ * @global WP_Comment $comment
  * @global int        $user_ID
  *
  * @param string $_template_file Path to template file.
  * @param bool   $require_once   Whether to require_once or require. Default true.
- * @param array  $args           Optional. Additional arguments passed to the template.
- *                               Default empty array.
  */
-function load_template( $_template_file, $require_once = true, $args = array() ) {
+function load_template( $_template_file, $require_once = true ) {
 	global $posts, $post, $wp_did_header, $wp_query, $wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment, $user_ID;
 
 	if ( is_array( $wp_query->query_vars ) ) {
@@ -727,8 +701,8 @@ function load_template( $_template_file, $require_once = true, $args = array() )
 	}
 
 	if ( $require_once ) {
-		require_once $_template_file;
+		require_once( $_template_file );
 	} else {
-		require $_template_file;
+		require( $_template_file );
 	}
 }

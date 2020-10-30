@@ -169,7 +169,7 @@ class WP_Network_Query {
 	 * @since 4.6.0
 	 *
 	 * @param string|array $query Array or URL query string of parameters.
-	 * @return array|int List of WP_Network objects, a list of network IDs when 'fields' is set to 'ids',
+	 * @return array|int List of WP_Network objects, a list of network ids when 'fields' is set to 'ids',
 	 *                   or the number of networks when 'count' is passed as a query var.
 	 */
 	public function query( $query ) {
@@ -182,7 +182,7 @@ class WP_Network_Query {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @return array|int List of WP_Network objects, a list of network IDs when 'fields' is set to 'ids',
+	 * @return array|int List of WP_Network objects, a list of network ids when 'fields' is set to 'ids',
 	 *                   or the number of networks when 'count' is passed as a query var.
 	 */
 	public function get_networks() {
@@ -196,34 +196,6 @@ class WP_Network_Query {
 		 * @param WP_Network_Query $this Current instance of WP_Network_Query (passed by reference).
 		 */
 		do_action_ref_array( 'pre_get_networks', array( &$this ) );
-
-		$network_data = null;
-
-		/**
-		 * Filters the network data before the query takes place.
-		 *
-		 * Return a non-null value to bypass WordPress' default network queries.
-		 *
-		 * The expected return type from this filter depends on the value passed
-		 * in the request query vars:
-		 * - When `$this->query_vars['count']` is set, the filter should return
-		 *   the network count as an integer.
-		 * - When `'ids' === $this->query_vars['fields']`, the filter should return
-		 *   an array of network IDs.
-		 * - Otherwise the filter should return an array of WP_Network objects.
-		 *
-		 * @since 5.2.0
-		 *
-		 * @param array|int|null   $network_data Return an array of network data to short-circuit WP's network query,
-		 *                                       the network count as an integer if `$this->query_vars['count']` is set,
-		 *                                       or null to allow WP to run its normal queries.
-		 * @param WP_Network_Query $this         The WP_Network_Query instance, passed by reference.
-		 */
-		$network_data = apply_filters_ref_array( 'networks_pre_query', array( $network_data, &$this ) );
-
-		if ( null !== $network_data ) {
-			return $network_data;
-		}
 
 		// $args can include anything. Only use the args defined in the query_var_defaults to compute the key.
 		$_args = wp_array_slice_assoc( $this->query_vars, array_keys( $this->query_var_defaults ) );
@@ -260,12 +232,12 @@ class WP_Network_Query {
 		// If querying for a count only, there's nothing more to do.
 		if ( $this->query_vars['count'] ) {
 			// $network_ids is actually a count in this case.
-			return (int) $network_ids;
+			return intval( $network_ids );
 		}
 
 		$network_ids = array_map( 'intval', $network_ids );
 
-		if ( 'ids' === $this->query_vars['fields'] ) {
+		if ( 'ids' == $this->query_vars['fields'] ) {
 			$this->networks = $network_ids;
 			return $this->networks;
 		}
@@ -277,8 +249,7 @@ class WP_Network_Query {
 		// Fetch full network objects from the primed cache.
 		$_networks = array();
 		foreach ( $network_ids as $network_id ) {
-			$_network = get_network( $network_id );
-			if ( $_network ) {
+			if ( $_network = get_network( $network_id ) ) {
 				$_networks[] = $_network;
 			}
 		}
@@ -293,7 +264,7 @@ class WP_Network_Query {
 		 */
 		$_networks = apply_filters_ref_array( 'the_networks', array( $_networks, &$this ) );
 
-		// Convert to WP_Network instances.
+		// Convert to WP_Network instances
 		$this->networks = array_map( 'get_network', $_networks );
 
 		return $this->networks;
@@ -469,7 +440,7 @@ class WP_Network_Query {
 		$this->request = "{$this->sql_clauses['select']} {$this->sql_clauses['from']} {$where} {$this->sql_clauses['groupby']} {$this->sql_clauses['orderby']} {$this->sql_clauses['limits']}";
 
 		if ( $this->query_vars['count'] ) {
-			return (int) $wpdb->get_var( $this->request );
+			return intval( $wpdb->get_var( $this->request ) );
 		}
 
 		$network_ids = $wpdb->get_col( $this->request );
@@ -508,10 +479,11 @@ class WP_Network_Query {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
+	 * @global wpdb  $wpdb WordPress database abstraction object.
 	 *
 	 * @param string   $string  Search string.
 	 * @param string[] $columns Array of columns to search.
+	 *
 	 * @return string Search SQL.
 	 */
 	protected function get_search_sql( $string, $columns ) {
@@ -547,13 +519,13 @@ class WP_Network_Query {
 		);
 
 		$parsed = false;
-		if ( 'network__in' === $orderby ) {
+		if ( $orderby == 'network__in' ) {
 			$network__in = implode( ',', array_map( 'absint', $this->query_vars['network__in'] ) );
 			$parsed      = "FIELD( {$wpdb->site}.id, $network__in )";
-		} elseif ( 'domain_length' === $orderby || 'path_length' === $orderby ) {
+		} elseif ( $orderby == 'domain_length' || $orderby == 'path_length' ) {
 			$field  = substr( $orderby, 0, -7 );
 			$parsed = "CHAR_LENGTH($wpdb->site.$field)";
-		} elseif ( in_array( $orderby, $allowed_keys, true ) ) {
+		} elseif ( in_array( $orderby, $allowed_keys ) ) {
 			$parsed = "$wpdb->site.$orderby";
 		}
 
