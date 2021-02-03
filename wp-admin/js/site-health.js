@@ -205,7 +205,7 @@ jQuery( document ).ready( function( $ ) {
 			val = 100;
 		}
 
-		pct = ( ( 100 - val ) / 100 ) * c + 'px';
+		pct = ( ( 100 - val ) / 100 ) * c;
 
 		$circle.css( { strokeDashoffset: pct } );
 

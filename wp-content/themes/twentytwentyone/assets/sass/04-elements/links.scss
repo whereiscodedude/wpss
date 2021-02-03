@@ -52,13 +52,6 @@ a:hover {
 		}
 	}
 
-	&.custom-logo-link {
-
-		&:focus {
-			background: none;
-		}
-	}
-
 	img {
 		outline: 2px dotted var(--wp--style--color--link, var(--global--color-primary));
 	}

@@ -15,7 +15,7 @@
 		tmplAppPassRow = wp.template( 'application-password-row' ),
 		userId = $( '#user_id' ).val();
 
-	$newAppPassButton.on( 'click', function( e ) {
+	$newAppPassButton.click( function( e ) {
 		e.preventDefault();
 
 		if ( $newAppPassButton.prop( 'aria-disabled' ) ) {
@@ -57,7 +57,7 @@
 			$newAppPassButton.prop( 'disabled', false );
 
 			$newAppPassForm.after( tmplNewAppPass( {
-				name: response.name,
+				name: name,
 				password: response.password
 			} ) );
 			$( '.new-application-password-notice' ).focus();

@@ -90,7 +90,6 @@ function wp_default_packages_vendor( $scripts ) {
 		'wp-polyfill-url',
 		'wp-polyfill-dom-rect',
 		'wp-polyfill-element-closest',
-		'wp-polyfill-object-fit',
 		'wp-polyfill',
 	);
 
@@ -105,7 +104,6 @@ function wp_default_packages_vendor( $scripts ) {
 		'wp-polyfill-url'             => '3.6.4',
 		'wp-polyfill-dom-rect'        => '3.42.0',
 		'wp-polyfill-element-closest' => '2.0.2',
-		'wp-polyfill-object-fit'      => '2.3.4',
 		'wp-polyfill'                 => '7.4.4',
 	);
 
@@ -133,7 +131,6 @@ function wp_default_packages_vendor( $scripts ) {
 				'window.URL && window.URL.prototype && window.URLSearchParams' => 'wp-polyfill-url',
 				'window.FormData && window.FormData.prototype.keys' => 'wp-polyfill-formdata',
 				'Element.prototype.matches && Element.prototype.closest' => 'wp-polyfill-element-closest',
-				'\'objectFit\' in document.documentElement.style' => 'wp-polyfill-object-fit',
 			)
 		)
 	);
@@ -1078,15 +1075,6 @@ function wp_default_scripts( $scripts ) {
 
 	$scripts->add( 'user-profile', "/wp-admin/js/user-profile$suffix.js", array( 'jquery', 'password-strength-meter', 'wp-util' ), false, 1 );
 	$scripts->set_translations( 'user-profile' );
-	$user_id = isset( $_GET['user_id'] ) ? (int) $_GET['user_id'] : 0;
-	did_action( 'init' ) && $scripts->localize(
-		'user-profile',
-		'userProfileL10n',
-		array(
-			'user_id' => $user_id,
-			'nonce'   => wp_create_nonce( 'reset-password-for-' . $user_id ),
-		)
-	);
 
 	$scripts->add( 'language-chooser', "/wp-admin/js/language-chooser$suffix.js", array( 'jquery' ), false, 1 );
 
@@ -1474,7 +1462,7 @@ function wp_default_styles( $styles ) {
 	$styles->add( 'colors-fresh', false, array( 'wp-admin', 'buttons' ) ); // Old handle.
 	$styles->add( 'open-sans', $open_sans_font_url ); // No longer used in core as of 4.6.
 
-	// Noto Serif is no longer used by core, but may be relied upon by themes and plugins.
+	// Packages styles.
 	$fonts_url = '';
 
 	/*
@@ -1486,7 +1474,7 @@ function wp_default_styles( $styles ) {
 	if ( 'off' !== $font_family ) {
 		$fonts_url = 'https://fonts.googleapis.com/css?family=' . urlencode( $font_family );
 	}
-	$styles->add( 'wp-editor-font', $fonts_url ); // No longer used in core as of 5.7.
+	$styles->add( 'wp-editor-font', $fonts_url );
 
 	$styles->add( 'wp-block-library-theme', "/wp-includes/css/dist/block-library/theme$suffix.css" );
 
@@ -1503,7 +1491,10 @@ function wp_default_styles( $styles ) {
 	);
 
 	$package_styles = array(
-		'block-editor'         => array( 'wp-components' ),
+		'block-editor'         => array(
+			'wp-components',
+			'wp-editor-font',
+		),
 		'block-library'        => array(),
 		'block-directory'      => array(),
 		'components'           => array(),
