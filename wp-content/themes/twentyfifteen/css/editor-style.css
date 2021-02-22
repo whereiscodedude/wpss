@@ -163,6 +163,7 @@ pre {
 	font-size: 17px;
 	line-height: 1.2353;
 	margin-bottom: 28px;
+	max-width: 100%;
 	overflow: auto;
 	padding: 14px;
 	white-space: pre;
