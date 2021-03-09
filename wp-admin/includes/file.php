@@ -757,8 +757,7 @@ function _wp_handle_upload( &$file, $overrides, $time, $action ) {
 	 * Filters the data for a file before it is uploaded to WordPress.
 	 *
 	 * The dynamic portion of the hook name, `$action`, refers to the post action.
-	 *
-	 * Possible hook names include:
+	 * Possible filter names include:
 	 *
 	 *  - `wp_handle_sideload_prefilter`
 	 *  - `wp_handle_upload_prefilter`
@@ -774,8 +773,7 @@ function _wp_handle_upload( &$file, $overrides, $time, $action ) {
 	 * Filters the override parameters for a file before it is uploaded to WordPress.
 	 *
 	 * The dynamic portion of the hook name, `$action`, refers to the post action.
-	 *
-	 * Possible hook names include:
+	 * Possible filter names include:
 	 *
 	 *  - `wp_handle_sideload_overrides`
 	 *  - `wp_handle_upload_overrides`
