@@ -145,7 +145,7 @@ media.events = _.extend( {}, Backbone.Events );
  * Makes it easier to bind events using transitions.
  *
  * @param {string} selector
- * @param {number} sensitivity
+ * @param {Number} sensitivity
  * @return {Promise}
  */
 media.transition = function( selector, sensitivity ) {
@@ -272,7 +272,7 @@ media.view.Heading = __webpack_require__( 105 );
  *
  * @class
  *
- * @param {Object}        options          Options hash for the region.
+ * @param {object}        options          Options hash for the region.
  * @param {string}        options.id       Unique identifier for the region.
  * @param {Backbone.View} options.view     A parent view the region exists within.
  * @param {string}        options.selector jQuery selector for the region within the parent view.
@@ -1091,7 +1091,7 @@ Library = wp.media.controller.State.extend(/** @lends wp.media.controller.Librar
 	 * @since 4.4.1
 	 *
 	 * @param {wp.media.model.Attachment} attachment
-	 * @return {boolean}
+	 * @return {Boolean}
 	 */
 	isImageAttachment: function( attachment ) {
 		// If uploading, we know the filename but not the mime type.
@@ -1108,7 +1108,7 @@ Library = wp.media.controller.State.extend(/** @lends wp.media.controller.Librar
 	 * @since 3.6.0
 	 *
 	 * @param {wp.media.model.Attachment} attachment
-	 * @return {boolean}
+	 * @return {Boolean}
 	 */
 	canEmbed: function( attachment ) {
 		// If uploading, we know the filename but not the mime type.
@@ -2890,7 +2890,7 @@ var Frame = wp.media.View.extend(/** @lends wp.media.view.Frame.prototype */{
 	/**
 	 * Check if a mode is enabled on the frame.
 	 *
-	 * @param string mode Mode ID.
+	 * @param  string mode Mode ID.
 	 * @return bool
 	 */
 	isModeActive: function( mode ) {
@@ -4515,7 +4515,7 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 		}
 
 		// Set initial focus on the content instead of this view element, to avoid page scrolling.
-		this.$( '.media-modal' ).trigger( 'focus' );
+		this.$( '.media-modal' ).focus();
 
 		// Hide the page content from assistive technologies.
 		this.focusManager.setAriaHiddenOnBodyChildren( $el );
@@ -4532,14 +4532,11 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 			return this;
 		}
 
-		// Pause current audio/video even after closing the modal.
-		$( '.mejs-pause button' ).trigger( 'click' );
-
 		// Enable page scrolling.
 		$( 'body' ).removeClass( 'modal-open' );
 
 		// Hide modal and remove restricted media modal tab focus once it's closed.
-		this.$el.hide().off( 'keydown' );
+		this.$el.hide().undelegate( 'keydown' );
 
 		/*
 		 * Make visible again to assistive technologies all body children that
@@ -4555,7 +4552,7 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 			// Fallback to the admin page main element.
 			$( '#wpbody-content' )
 				.attr( 'tabindex', '-1' )
-				.trigger( 'focus' );
+				.focus();
 		}
 
 		this.propagate('close');
@@ -4645,7 +4642,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	/**
 	 * Initializes the Focus Manager.
 	 *
-	 * @param {Object} options The Focus Manager options.
+	 * @param {object} options The Focus Manager options.
 	 *
 	 * @since 5.3.0
 	 *
@@ -4661,7 +4658,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 *
 	 * @since 5.3.0
 	 *
-	 * @param {Object} event jQuery event object.
+	 * @param {object} event jQuery event object.
 	 *
 	 * @return {void}
 	 */
@@ -4680,7 +4677,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 *
 	 * @since 5.3.0
 	 *
-	 * @return {Object} A jQuery collection of tabbable elements.
+	 * @return {object} A jQuery collection of tabbable elements.
 	 */
 	getTabbables: function() {
 		// Skip the file input added by Plupload.
@@ -4695,7 +4692,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 * @return {void}
 	 */
 	focus: function() {
-		this.$( '.media-modal' ).trigger( 'focus' );
+		this.$( '.media-modal' ).focus();
 	},
 
 	/**
@@ -4740,7 +4737,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 *
 	 * @since 5.2.3
 	 *
-	 * @param {Object} visibleElement The jQuery object representing the element that should not be hidden.
+	 * @param {object} visibleElement The jQuery object representing the element that should not be hidden.
 	 *
 	 * @return {void}
 	 */
@@ -4797,7 +4794,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 *
 	 * @since 5.2.3
 	 *
-	 * @param {Object} element The DOM element that should be checked.
+	 * @param {object} element The DOM element that should be checked.
 	 *
 	 * @return {boolean} Whether the element should not be hidden from assistive technologies.
 	 */
@@ -4844,7 +4841,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 *
 	 * @since 5.3.0
 	 *
-	 * @param {Object} event jQuery event object.
+	 * @param {object} event jQuery event object.
 	 *
 	 * @return {void}
 	 */
@@ -4868,7 +4865,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 *
 	 * @since 5.3.0
 	 *
-	 * @param {Object} event jQuery event object.
+	 * @param {object} event jQuery event object.
 	 *
 	 * @return {void}
 	 */
@@ -4904,7 +4901,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 *
 	 * @since 5.3.0
 	 *
-	 * @param {Object} event jQuery event object.
+	 * @param {object} event jQuery event object.
 	 *
 	 * @return {void}
 	 */
@@ -4955,7 +4952,7 @@ var FocusManager = wp.media.View.extend(/** @lends wp.media.view.FocusManager.pr
 	 *
 	 * @since 5.3.0
 	 *
-	 * @param {Object} tab The tab DOM element.
+	 * @param {object} tab The tab DOM element.
 	 *
 	 * @return {void}
 	 */
@@ -5174,7 +5171,7 @@ EditorUploader = View.extend(/** @lends wp.media.view.EditorUploader.prototype *
 	/**
 	 * Check browser support for drag'n'drop.
 	 *
-	 * @return {boolean}
+	 * @return {Boolean}
 	 */
 	browserSupport: function() {
 		var supports = false, div = document.createElement('div');
@@ -5239,7 +5236,7 @@ EditorUploader = View.extend(/** @lends wp.media.view.EditorUploader.prototype *
 	 * When a file is dropped on the editor uploader, open up an editor media workflow
 	 * and upload the file immediately.
 	 *
-	 * @param {jQuery.Event} event The 'drop' event.
+	 * @param  {jQuery.Event} event The 'drop' event.
 	 */
 	drop: function( event ) {
 		var $wrap, uploadView;
@@ -5456,7 +5453,6 @@ UploaderInline = View.extend(/** @lends wp.media.view.UploaderInline.prototype *
 
 			$browser.detach().text( $placeholder.text() );
 			$browser[0].className = $placeholder[0].className;
-			$browser[0].setAttribute( 'aria-labelledby', $browser[0].id + ' ' + $placeholder[0].getAttribute('aria-labelledby') );
 			$placeholder.replaceWith( $browser.show() );
 		}
 
@@ -5475,7 +5471,7 @@ UploaderInline = View.extend(/** @lends wp.media.view.UploaderInline.prototype *
 			this.controller.$uploaderToggler
 				.attr( 'aria-expanded', 'false' )
 				// Move focus back to the toggle button when closing the uploader.
-				.trigger( 'focus' );
+				.focus();
 		}
 	}
 
@@ -5606,14 +5602,8 @@ UploaderStatus = View.extend(/** @lends wp.media.view.UploaderStatus.prototype *
 			message:  error.get( 'message' )
 		} );
 
-		var buttonClose = this.$el.find( 'button' );
-
 		// Can show additional info here while retrying to create image sub-sizes.
 		this.views.add( '.upload-errors', statusError, { at: 0 } );
-		_.delay( function() {
-			buttonClose.trigger( 'focus' );
-			wp.a11y.speak( error.get( 'message' ), 'assertive' );
-		}, 1000 );
 	},
 
 	dismiss: function() {
@@ -6803,7 +6793,7 @@ Attachment = View.extend(/** @lends wp.media.view.Attachment.prototype */{
 		this[ this.selected() ? 'select' : 'deselect' ]();
 	},
 	/**
-	 * @return {unresolved|boolean}
+	 * @return {unresolved|Boolean}
 	 */
 	selected: function() {
 		var selection = this.options.selection;
@@ -7018,8 +7008,8 @@ Attachment = View.extend(/** @lends wp.media.view.Attachment.prototype */{
 	 * Add the model if it isn't in the selection, if it is in the selection,
 	 * remove it.
 	 *
-	 * @param {[type]} event [description]
-	 * @return {[type]} [description]
+	 * @param  {[type]} event [description]
+	 * @return {[type]}       [description]
 	 */
 	checkClickHandler: function ( event ) {
 		var selection = this.options.selection;
@@ -8124,7 +8114,7 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 	}, 200 ),
 
 	editSelection: function( modal ) {
-		// When editing a selection, move focus to the "Go to library" button.
+		// When editing a selection, move focus to the "Return to library" button.
 		modal.$( '.media-button-backToLibrary' ).focus();
 	},
 
@@ -9004,12 +8994,10 @@ module.exports = Playlist;
 /* 91 */
 /***/ (function(module, exports) {
 
-/* global ClipboardJS */
 var Attachment = wp.media.view.Attachment,
 	l10n = wp.media.view.l10n,
 	$ = jQuery,
-	Details,
-	__ = wp.i18n.__;
+	Details;
 
 Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototype */{
 	tagName:   'div',
@@ -9035,42 +9023,6 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	},
 
 	/**
-	 * Copies the attachment URL to the clipboard.
-	 *
-	 * @since 5.5.0
-	 *
-	 * @param {MouseEvent} event A click event.
-	 *
-	 * @return {void}
-	 */
-	 copyAttachmentDetailsURLClipboard: function() {
-		var clipboard = new ClipboardJS( '.copy-attachment-url' ),
-			successTimeout;
-
-		clipboard.on( 'success', function( event ) {
-			var triggerElement = $( event.trigger ),
-				successElement = $( '.success', triggerElement.closest( '.copy-to-clipboard-container' ) );
-
-			// Clear the selection and move focus back to the trigger.
-			event.clearSelection();
-			// Handle ClipboardJS focus bug, see https://github.com/zenorocha/clipboard.js/issues/680
-			triggerElement.trigger( 'focus' );
-
-			// Show success visual feedback.
-			clearTimeout( successTimeout );
-			successElement.removeClass( 'hidden' );
-
-			// Hide success visual feedback after 3 seconds since last success.
-			successTimeout = setTimeout( function() {
-				successElement.addClass( 'hidden' );
-			}, 3000 );
-
-			// Handle success audible feedback.
-			wp.a11y.speak( __( 'The file URL has been copied to your clipboard' ) );
-		} );
-	 },
-
-	/**
 	 * Shows the details of an attachment.
 	 *
 	 * @since 3.5.0
@@ -9087,8 +9039,6 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 
 		// Call 'initialize' directly on the parent class.
 		Attachment.prototype.initialize.apply( this, arguments );
-
-		this.copyAttachmentDetailsURLClipboard();
 	},
 
 	/**
@@ -9111,18 +9061,18 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	 */
 	moveFocus: function() {
 		if ( this.previousAttachment.length ) {
-			this.previousAttachment.trigger( 'focus' );
+			this.previousAttachment.focus();
 			return;
 		}
 
 		if ( this.nextAttachment.length ) {
-			this.nextAttachment.trigger( 'focus' );
+			this.nextAttachment.focus();
 			return;
 		}
 
 		// Fallback: move focus to the "Select Files" button in the media modal.
 		if ( this.controller.uploader && this.controller.uploader.$browser ) {
-			this.controller.uploader.$browser.trigger( 'focus' );
+			this.controller.uploader.$browser.focus();
 			return;
 		}
 
@@ -9139,7 +9089,7 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		// Last fallback: make the frame focusable and move focus to it.
 		$( '.media-frame' )
 			.attr( 'tabindex', '-1' )
-			.trigger( 'focus' );
+			.focus();
 	},
 
 	/**
@@ -9204,7 +9154,6 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 			this.moveFocus();
 		}
 	},
-
 	/**
 	 * Untrashes an attachment.
 	 *
@@ -9264,16 +9213,6 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 			this.controller.trigger( 'attachment:details:shift-tab', event );
 			return false;
 		}
-	},
-
-	render: function() {
-		Attachment.prototype.render.apply( this, arguments );
-
-		wp.media.mixin.removeAllPlayers();
-		this.$( 'audio, video' ).each( function (i, elem) {
-			var el = wp.media.view.MediaDetails.prepareSrc( elem );
-			new window.MediaElementPlayer( el, wp.media.mixin.mejsSettings );
-		} );
 	}
 });
 
@@ -9566,8 +9505,7 @@ EmbedUrl = View.extend(/** @lends wp.media.view.EmbedUrl.prototype */{
 	},
 
 	url: function( event ) {
-		var url = event.target.value || '';
-		this.model.set( 'url', url.trim() );
+		this.model.set( 'url', $.trim( event.target.value ) );
 	}
 });
 

@@ -29,7 +29,7 @@ if ( ! function_exists( 'twentysixteen_entry_meta' ) ) :
 			);
 		}
 
-		if ( in_array( get_post_type(), array( 'post', 'attachment' ), true ) ) {
+		if ( in_array( get_post_type(), array( 'post', 'attachment' ) ) ) {
 			twentysixteen_entry_date();
 		}
 

@@ -116,7 +116,7 @@ window.wp = window.wp || {};
  * @memberOf wp
  * @namespace
  *
- * @param {Object} attributes The properties passed to the main media controller.
+ * @param  {object} attributes The properties passed to the main media controller.
  * @return {wp.media.view.MediaFrame} A media workflow.
  */
 media = wp.media = function( attributes ) {
@@ -185,13 +185,13 @@ media.model.Selection = __webpack_require__( 28 );
  *
  * Used to order models within a collection - @see wp.media.model.Attachments.comparator().
  *
- * @param {mixed}  a  The primary parameter to compare.
- * @param {mixed}  b  The primary parameter to compare.
- * @param {string} ac The fallback parameter to compare, a's cid.
- * @param {string} bc The fallback parameter to compare, b's cid.
- * @return {number} -1: a should come before b.
- *                   0: a and b are of the same rank.
- *                   1: b should come before a.
+ * @param  {mixed}  a  The primary parameter to compare.
+ * @param  {mixed}  b  The primary parameter to compare.
+ * @param  {string} ac The fallback parameter to compare, a's cid.
+ * @param  {string} bc The fallback parameter to compare, b's cid.
+ * @return {number}    -1: a should come before b.
+ *                      0: a and b are of the same rank.
+ *                      1: b should come before a.
  */
 media.compare = function( a, b, ac, bc ) {
 	if ( _.isEqual( a, b ) ) {
@@ -282,10 +282,10 @@ _.extend( media, /** @lends wp.media */{
 	 * Truncates a string by injecting an ellipsis into the middle.
 	 * Useful for filenames.
 	 *
-	 * @param {string} string
-	 * @param {number} [length=30]
-	 * @param {string} [replacement=&hellip;]
-	 * @return {string} The string, unless length is greater than string.length.
+	 * @param {String} string
+	 * @param {Number} [length=30]
+	 * @param {String} [replacement=&hellip;]
+	 * @return {String} The string, unless length is greater than string.length.
 	 */
 	truncate: function( string, length, replacement ) {
 		length = length || 30;
@@ -308,7 +308,7 @@ _.extend( media, /** @lends wp.media */{
  * wp.media.attachment
  *
  * @static
- * @param {string} id A string used to identify a model.
+ * @param {String} id A string used to identify a model.
  * @return {wp.media.model.Attachment}
  */
 media.attachment = function( id ) {
@@ -328,7 +328,7 @@ Attachments.all = new Attachments();
  *
  * Shorthand for creating a new Attachments Query.
  *
- * @param {Object} [props]
+ * @param {object} [props]
  * @return {wp.media.model.Attachments}
  */
 media.query = function( props ) {
@@ -613,7 +613,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	 * @access private
 	 *
 	 * @param {Backbone.Model} model
-	 * @param {boolean} query
+	 * @param {Boolean} query
 	 */
 	_changeQuery: function( model, query ) {
 		if ( query ) {
@@ -673,9 +673,17 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	 * Checks whether an attachment is valid.
 	 *
 	 * @param {wp.media.model.Attachment} attachment
-	 * @return {boolean}
+	 * @return {Boolean}
 	 */
 	validator: function( attachment ) {
+
+		// Filter out contextually created attachments (e.g. headers, logos, etc.).
+		if (
+			! _.isUndefined( attachment.attributes.context ) &&
+			'' !== attachment.attributes.context
+		) {
+			return false;
+		}
 
 		if ( ! this.validateDestroyed && attachment.destroyed ) {
 			return false;
@@ -708,7 +716,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	 * Add or remove all attachments from another collection depending on each one's validity.
 	 *
 	 * @param {wp.media.model.Attachments} attachments
-	 * @param {Object} [options={}]
+	 * @param {object} [options={}]
 	 *
 	 * @fires wp.media.model.Attachments#reset
 	 *
@@ -832,7 +840,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	 * and forwards to its `more` method. This collection class doesn't have
 	 * server persistence by itself.
 	 *
-	 * @param {Object} options
+	 * @param {object} options
 	 * @return {Promise}
 	 */
 	more: function( options ) {
@@ -874,7 +882,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		return this.mirroring ? this.mirroring.hasMore() : false;
 	},
 	/**
-	 * A custom Ajax-response parser.
+	 * A custom AJAX-response parser.
 	 *
 	 * See trac ticket #24753
 	 *
@@ -909,14 +917,14 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	},
 	/**
 	 * If the collection is a query, create and mirror an Attachments Query collection.
-	 * 
+	 *
 	 * @access private
-	 * @param {Boolean} refresh Deprecated, refresh parameter no longer used.
 	 */
-	_requery: function() {
+	_requery: function( refresh ) {
 		var props;
 		if ( this.props.get('query') ) {
 			props = this.props.toJSON();
+			props.cache = ( true !== refresh );
 			this.mirror( wp.media.model.Query.get( props ) );
 		}
 	},
@@ -965,7 +973,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	 * @param {Backbone.Model} a
 	 * @param {Backbone.Model} b
 	 * @param {Object} options
-	 * @return {number} -1 if the first model should come before the second,
+	 * @return {Number} -1 if the first model should come before the second,
 	 *                   0 if they are of the same rank and
 	 *                   1 if the first model should come after.
 	 */
@@ -1019,7 +1027,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		 *
 		 * @this wp.media.model.Attachments
 		 *
-		 * @return {boolean}
+		 * @return {Boolean}
 		 */
 		type: function( attachment ) {
 			var type = this.props.get('type'), atts = attachment.toJSON(), mime, found;
@@ -1046,7 +1054,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		 *
 		 * @this wp.media.model.Attachments
 		 *
-		 * @return {boolean}
+		 * @return {Boolean}
 		 */
 		uploadedTo: function( attachment ) {
 			var uploadedTo = this.props.get('uploadedTo');
@@ -1062,7 +1070,7 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		 *
 		 * @this wp.media.model.Attachments
 		 *
-		 * @return {boolean}
+		 * @return {Boolean}
 		 */
 		status: function( attachment ) {
 			var status = this.props.get('status');
@@ -1107,8 +1115,8 @@ var Attachments = wp.media.model.Attachments,
  */
 Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 	/**
-	 * @param {Array}  [models=[]]  Array of initial models to populate the collection.
-	 * @param {Object} [options={}]
+	 * @param {array}  [models=[]]  Array of initial models to populate the collection.
+	 * @param {object} [options={}]
 	 */
 	initialize: function( models, options ) {
 		var allowed;
@@ -1179,7 +1187,7 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 	/**
 	 * Fetch more attachments from the server for the collection.
 	 *
-	 * @param {Object} [options={}]
+	 * @param   {object}  [options={}]
 	 * @return {Promise}
 	 */
 	more: function( options ) {
@@ -1207,7 +1215,7 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 	 * Overrides Backbone.Collection.sync
 	 * Overrides wp.media.model.Attachments.sync
 	 *
-	 * @param {string} method
+	 * @param {String} method
 	 * @param {Backbone.Model} model
 	 * @param {Object} [options={}]
 	 * @return {Promise}
@@ -1298,6 +1306,7 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 	 * @method
 	 *
 	 * @param {object} [props]
+	 * @param {Object} [props.cache=true]   Whether to use the query cache or not.
 	 * @param {Object} [props.order]
 	 * @param {Object} [props.orderby]
 	 * @param {Object} [props.include]
@@ -1327,11 +1336,13 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 			var args     = {},
 				orderby  = Query.orderby,
 				defaults = Query.defaultProps,
-				query;
+				query,
+				cache    = !! props.cache || _.isUndefined( props.cache );
 
 			// Remove the `query` property. This isn't linked to a query,
 			// this *is* the query.
 			delete props.query;
+			delete props.cache;
 
 			// Fill default args.
 			_.defaults( props, defaults );
@@ -1370,7 +1381,14 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 			// Substitute exceptions specified in orderby.keymap.
 			args.orderby = orderby.valuemap[ props.orderby ] || props.orderby;
 
-			queries = [];
+			// Search the query cache for a matching query.
+			if ( cache ) {
+				query = _.find( queries, function( query ) {
+					return _.isEqual( query.args, args );
+				});
+			} else {
+				queries = [];
+			}
 
 			// Otherwise, create a new query and add it to the cache.
 			if ( ! query ) {

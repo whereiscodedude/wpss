@@ -82,12 +82,12 @@ this["wp"] = this["wp"] || {}; this["wp"]["priorityQueue"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 488);
+/******/ 	return __webpack_require__(__webpack_require__.s = 451);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 488:
+/***/ 451:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99,11 +99,7 @@ __webpack_require__.d(__webpack_exports__, "createQueue", function() { return /*
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/priority-queue/build-module/request-idle-callback.js
 /**
- * @typedef {( timeOrDeadline: IdleDeadline | number ) => void} Callback
- */
-
-/**
- * @return {(callback: Callback) => void} RequestIdleCallback
+ * @return {typeof window.requestIdleCallback|typeof window.requestAnimationFrame|((callback:(timestamp:number)=>void)=>void)}
  */
 function createRequestIdleCallback() {
   if (typeof window === 'undefined') {
@@ -148,19 +144,12 @@ function createRequestIdleCallback() {
  */
 
 /**
- * Reset the queue.
- *
- * @typedef {()=>void} WPPriorityQueueReset
- */
-
-/**
  * Priority queue instance.
  *
  * @typedef {Object} WPPriorityQueue
  *
  * @property {WPPriorityQueueAdd}   add   Add callback to queue for context.
  * @property {WPPriorityQueueFlush} flush Flush queue for context.
- * @property {WPPriorityQueueReset} reset Reset queue.
  */
 
 /**
@@ -183,7 +172,7 @@ function createRequestIdleCallback() {
  * queue.add( ctx2, () => console.log( 'This will be printed second' ) );
  *```
  *
- * @return {WPPriorityQueue} Queue object with `add`, `flush` and `reset` methods.
+ * @return {WPPriorityQueue} Queue object with `add` and `flush` methods.
  */
 
 var build_module_createQueue = function createQueue() {
@@ -195,6 +184,8 @@ var build_module_createQueue = function createQueue() {
   var isRunning = false;
   /**
    * Callback to process as much queue as time permits.
+   *
+   * @type {IdleRequestCallback & FrameRequestCallback}
    *
    * @param {IdleDeadline|number} deadline Idle callback deadline object, or
    *                                       animation frame timestamp.
@@ -273,23 +264,10 @@ var build_module_createQueue = function createQueue() {
     callback();
     return true;
   };
-  /**
-   * Reset the queue without running the pending callbacks.
-   *
-   * @type {WPPriorityQueueReset}
-   */
-
-
-  var reset = function reset() {
-    waitingList = [];
-    elementsMap = new WeakMap();
-    isRunning = false;
-  };
 
   return {
     add: add,
-    flush: flush,
-    reset: reset
+    flush: flush
   };
 };
 

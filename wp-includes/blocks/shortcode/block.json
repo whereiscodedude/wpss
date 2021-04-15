@@ -1,5 +1,4 @@
 {
-	"apiVersion": 2,
 	"name": "core/shortcode",
 	"category": "widgets",
 	"attributes": {
@@ -7,11 +6,5 @@
 			"type": "string",
 			"source": "html"
 		}
-	},
-	"supports": {
-		"className": false,
-		"customClassName": false,
-		"html": false
-	},
-	"editorStyle": "wp-block-shortcode-editor"
+	}
 }

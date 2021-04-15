@@ -41,8 +41,8 @@ class WP_Media_List_Table extends WP_List_Table {
 		$this->detached = ( isset( $_REQUEST['attachment-filter'] ) && 'detached' === $_REQUEST['attachment-filter'] );
 
 		$this->modes = array(
-			'list' => __( 'List view' ),
-			'grid' => __( 'Grid view' ),
+			'list' => __( 'List View' ),
+			'grid' => __( 'Grid View' ),
 		);
 
 		parent::__construct(
@@ -61,44 +61,19 @@ class WP_Media_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * @global string   $mode                  List table view mode.
 	 * @global WP_Query $wp_query              WordPress Query object.
 	 * @global array    $post_mime_types
 	 * @global array    $avail_post_mime_types
+	 * @global string   $mode
 	 */
 	public function prepare_items() {
-		global $mode, $wp_query, $post_mime_types, $avail_post_mime_types;
-
-		$mode = empty( $_REQUEST['mode'] ) ? 'list' : $_REQUEST['mode'];
-
-		/*
-		 * Exclude attachments scheduled for deletion in the next two hours
-		 * if they are for zip packages for interrupted or failed updates.
-		 * See File_Upload_Upgrader class.
-		 */
-		$not_in = array();
-
-		foreach ( _get_cron_array() as $cron ) {
-			if ( isset( $cron['upgrader_scheduled_cleanup'] ) ) {
-				$details = reset( $cron['upgrader_scheduled_cleanup'] );
-
-				if ( ! empty( $details['args'][0] ) ) {
-					$not_in[] = (int) $details['args'][0];
-				}
-			}
-		}
-
-		if ( ! empty( $_REQUEST['post__not_in'] ) && is_array( $_REQUEST['post__not_in'] ) ) {
-			$not_in = array_merge( array_values( $_REQUEST['post__not_in'] ), $not_in );
-		}
-
-		if ( ! empty( $not_in ) ) {
-			$_REQUEST['post__not_in'] = $not_in;
-		}
+		global $wp_query, $post_mime_types, $avail_post_mime_types, $mode;
 
 		list( $post_mime_types, $avail_post_mime_types ) = wp_edit_attachments_query( $_REQUEST );
 
 		$this->is_trash = isset( $_REQUEST['attachment-filter'] ) && 'trash' === $_REQUEST['attachment-filter'];
+
+		$mode = empty( $_REQUEST['mode'] ) ? 'list' : $_REQUEST['mode'];
 
 		$this->set_pagination_args(
 			array(
@@ -174,12 +149,12 @@ class WP_Media_List_Table extends WP_List_Table {
 		if ( MEDIA_TRASH ) {
 			if ( $this->is_trash ) {
 				$actions['untrash'] = __( 'Restore' );
-				$actions['delete']  = __( 'Delete permanently' );
+				$actions['delete']  = __( 'Delete Permanently' );
 			} else {
 				$actions['trash'] = __( 'Move to Trash' );
 			}
 		} else {
-			$actions['delete'] = __( 'Delete permanently' );
+			$actions['delete'] = __( 'Delete Permanently' );
 		}
 
 		if ( $this->detached ) {
@@ -198,7 +173,8 @@ class WP_Media_List_Table extends WP_List_Table {
 		}
 		?>
 		<div class="actions">
-			<?php
+		<?php
+		if ( ! is_singular() ) {
 			if ( ! $this->is_trash ) {
 				$this->months_dropdown( 'attachment' );
 			}
@@ -207,11 +183,12 @@ class WP_Media_List_Table extends WP_List_Table {
 			do_action( 'restrict_manage_posts', $this->screen->post_type, $which );
 
 			submit_button( __( 'Filter' ), '', 'filter_action', false, array( 'id' => 'post-query-submit' ) );
+		}
 
-			if ( $this->is_trash && current_user_can( 'edit_others_posts' ) && $this->has_items() ) {
-				submit_button( __( 'Empty Trash' ), 'apply', 'delete_all', false );
-			}
-			?>
+		if ( $this->is_trash && current_user_can( 'edit_others_posts' ) && $this->has_items() ) {
+			submit_button( __( 'Empty Trash' ), 'apply', 'delete_all', false );
+		}
+		?>
 		</div>
 		<?php
 	}
@@ -264,43 +241,42 @@ class WP_Media_List_Table extends WP_List_Table {
 
 		$this->screen->render_screen_reader_content( 'heading_views' );
 		?>
-		<div class="wp-filter">
-			<div class="filter-items">
-				<?php $this->view_switcher( $mode ); ?>
+<div class="wp-filter">
+	<div class="filter-items">
+		<?php $this->view_switcher( $mode ); ?>
 
-				<label for="attachment-filter" class="screen-reader-text"><?php _e( 'Filter by type' ); ?></label>
-				<select class="attachment-filters" name="attachment-filter" id="attachment-filter">
-					<?php
-					if ( ! empty( $views ) ) {
-						foreach ( $views as $class => $view ) {
-							echo "\t$view\n";
-						}
-					}
-					?>
-				</select>
-
-				<?php
-				$this->extra_tablenav( 'bar' );
-
-				/** This filter is documented in wp-admin/inclues/class-wp-list-table.php */
-				$views = apply_filters( "views_{$this->screen->id}", array() );
-
-				// Back compat for pre-4.0 view links.
-				if ( ! empty( $views ) ) {
-					echo '<ul class="filter-links">';
-					foreach ( $views as $class => $view ) {
-						echo "<li class='$class'>$view</li>";
-					}
-					echo '</ul>';
+		<label for="attachment-filter" class="screen-reader-text"><?php _e( 'Filter by type' ); ?></label>
+		<select class="attachment-filters" name="attachment-filter" id="attachment-filter">
+			<?php
+			if ( ! empty( $views ) ) {
+				foreach ( $views as $class => $view ) {
+					echo "\t$view\n";
 				}
-				?>
-			</div>
+			}
+			?>
+		</select>
 
-			<div class="search-form">
-				<label for="media-search-input" class="media-search-input-label"><?php esc_html_e( 'Search' ); ?></label>
-				<input type="search" id="media-search-input" class="search" name="s" value="<?php _admin_search_query(); ?>">
-			</div>
-		</div>
+		<?php
+		$this->extra_tablenav( 'bar' );
+
+		/** This filter is documented in wp-admin/inclues/class-wp-list-table.php */
+		$views = apply_filters( "views_{$this->screen->id}", array() );
+
+		// Back compat for pre-4.0 view links.
+		if ( ! empty( $views ) ) {
+			echo '<ul class="filter-links">';
+			foreach ( $views as $class => $view ) {
+				echo "<li class='$class'>$view</li>";
+			}
+			echo '</ul>';
+		}
+		?>
+	</div>
+
+	<div class="search-form">
+		<label for="media-search-input" class="media-search-input-label"><?php esc_html_e( 'Search' ); ?></label>
+		<input type="search" id="media-search-input" class="search" name="s" value="<?php _admin_search_query(); ?>"></div>
+	</div>
 		<?php
 	}
 
@@ -515,9 +491,14 @@ class WP_Media_List_Table extends WP_List_Table {
 			$parent_type = get_post_type_object( $parent->post_type );
 
 			if ( $parent_type && $parent_type->show_ui && current_user_can( 'edit_post', $post->post_parent ) ) {
-				printf( '<strong><a href="%s">%s</a></strong>', get_edit_post_link( $post->post_parent ), $title );
+				?>
+				<strong><a href="<?php echo get_edit_post_link( $post->post_parent ); ?>">
+					<?php echo $title; ?></a></strong>
+								<?php
 			} elseif ( $parent_type && current_user_can( 'read_post', $post->post_parent ) ) {
-				printf( '<strong>%s</strong>', $title );
+				?>
+				<strong><?php echo $title; ?></strong>
+									<?php
 			} else {
 				_e( '(Private post)' );
 			}
@@ -612,7 +593,7 @@ class WP_Media_List_Table extends WP_List_Table {
 					);
 				}
 				/* translators: Used between list items, there is a space after the comma. */
-				echo implode( __( ', ' ), $out );
+				echo join( __( ', ' ), $out );
 			} else {
 				echo '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">' . get_taxonomy( $taxonomy )->labels->no_terms . '</span>';
 			}
@@ -648,8 +629,9 @@ class WP_Media_List_Table extends WP_List_Table {
 
 		while ( have_posts() ) :
 			the_post();
-			if ( $this->is_trash && 'trash' !== $post->post_status
-				|| ! $this->is_trash && 'trash' === $post->post_status
+			if (
+				( $this->is_trash && 'trash' !== $post->post_status )
+				|| ( ! $this->is_trash && 'trash' === $post->post_status )
 			) {
 				continue;
 			}
@@ -676,6 +658,7 @@ class WP_Media_List_Table extends WP_List_Table {
 	/**
 	 * @param WP_Post $post
 	 * @param string  $att_title
+	 *
 	 * @return array
 	 */
 	private function _get_row_actions( $post, $att_title ) {
@@ -799,9 +782,9 @@ class WP_Media_List_Table extends WP_List_Table {
 	 *
 	 * @since 4.3.0
 	 *
-	 * @param WP_Post $post        Attachment being acted upon.
-	 * @param string  $column_name Current column name.
-	 * @param string  $primary     Primary column name.
+	 * @param object $post        Attachment being acted upon.
+	 * @param string $column_name Current column name.
+	 * @param string $primary     Primary column name.
 	 * @return string Row actions output for media attachments, or an empty string
 	 *                if the current column is not the primary column.
 	 */

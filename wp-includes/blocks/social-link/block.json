@@ -1,10 +1,7 @@
 {
-	"apiVersion": 2,
 	"name": "core/social-link",
 	"category": "widgets",
-	"parent": [
-		"core/social-links"
-	],
+	"icon": "share",
 	"attributes": {
 		"url": {
 			"type": "string"
@@ -15,15 +12,5 @@
 		"label": {
 			"type": "string"
 		}
-	},
-	"usesContext": [
-		"openInNewTab",
-		"iconColorValue",
-		"iconBackgroundColorValue"
-	],
-	"supports": {
-		"reusable": false,
-		"html": false
-	},
-	"editorStyle": "wp-block-social-link-editor"
+	}
 }

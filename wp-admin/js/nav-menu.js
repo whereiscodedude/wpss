@@ -9,7 +9,7 @@
  * @output wp-admin/js/nav-menu.js
  */
 
-/* global menus, postboxes, columns, isRtl, ajaxurl, wpNavMenu */
+/* global menus, postboxes, columns, isRtl, navMenuL10n, ajaxurl, wpNavMenu */
 
 (function($) {
 
@@ -390,7 +390,7 @@
 				thisItem.shiftHorizontally( 1 );
 				break;
 			}
-			$this.trigger( 'focus' );
+			$this.focus();
 			api.registerChange();
 			api.refreshKeyboardAccessibility();
 			api.refreshAdvancedAccessibility();
@@ -429,7 +429,7 @@
 		 * Refreshes advanced accessibility buttons for one menu item.
 		 * Shows or hides buttons based on the location of the menu item.
 		 *
-		 * @param {Object} itemToRefresh The menu item that might need its advanced accessibility buttons refreshed
+		 * @param  {object} itemToRefresh The menu item that might need its advanced accessibility buttons refreshed
 		 */
 		refreshAdvancedAccessibilityOfItem : function( itemToRefresh ) {
 
@@ -572,7 +572,7 @@
 						break;
 					}
 					// Put focus back on same menu item.
-					$( '#edit-' + thisItemData['menu-item-db-id'] ).trigger( 'focus' );
+					$( '#edit-' + thisItemData['menu-item-db-id'] ).focus();
 					return false;
 				});
 			});
@@ -588,7 +588,7 @@
 				if ( title ) {
 					titleEl.text( title ).removeClass( 'no-title' );
 				} else {
-					titleEl.text( wp.i18n._x( '(no label)', 'missing menu item navigation label' ) ).addClass( 'no-title' );
+					titleEl.text( navMenuL10n.untitled ).addClass( 'no-title' );
 				}
 			} );
 		},
@@ -608,7 +608,7 @@
 			// Hide fields.
 			api.menuList.hideAdvancedMenuItemFields();
 
-			$('.hide-postbox-tog').on( 'click', function () {
+			$('.hide-postbox-tog').click(function () {
 				var hidden = $( '.accordion-container li.accordion-section' ).filter(':hidden').map(function() { return this.id; }).get().join(',');
 				$.post(ajaxurl, {
 					action: 'closed-postboxes',
@@ -809,7 +809,7 @@
 		},
 
 		initManageLocations : function () {
-			$('#menu-locations-wrap form').on( 'submit', function(){
+			$('#menu-locations-wrap form').submit(function(){
 				window.onbeforeunload = null;
 			});
 			$('.menu-location-menus select').on('change', function () {
@@ -823,7 +823,7 @@
 
 		attachMenuEditListeners : function() {
 			var that = this;
-			$('#update-nav-menu').on('click', function(e) {
+			$('#update-nav-menu').bind('click', function(e) {
 				if ( e.target && e.target.className ) {
 					if ( -1 != e.target.className.indexOf('item-edit') ) {
 						return that.eventOnClickEditLink(e.target);
@@ -852,12 +852,12 @@
 				}
 			}, 500 ) );
 
-			$('#add-custom-links input[type="text"]').on( 'keypress', function(e){
+			$('#add-custom-links input[type="text"]').keypress(function(e){
 				$('#customlinkdiv').removeClass('form-invalid');
 
 				if ( e.keyCode === 13 ) {
 					e.preventDefault();
-					$( '#submit-customlinkdiv' ).trigger( 'click' );
+					$( '#submit-customlinkdiv' ).click();
 				}
 			});
 		},
@@ -867,7 +867,7 @@
 			 * When a navigation menu is saved, store a JSON representation of all form data
 			 * in a single input to avoid PHP `max_input_vars` limitations. See #14134.
 			 */
-			$( '#update-nav-menu' ).on( 'submit', function() {
+			$( '#update-nav-menu' ).submit( function() {
 				var navMenuData = $( '#update-nav-menu' ).serializeArray();
 				$( '[name="nav-menu-data"]' ).val( JSON.stringify( navMenuData ) );
 			});
@@ -877,7 +877,7 @@
 			var loc = $('#nav-menu-theme-locations'), params = {};
 			params.action = 'menu-locations-save';
 			params['menu-settings-column-nonce'] = $('#menu-settings-column-nonce').val();
-			loc.find('input[type="submit"]').on( 'click', function() {
+			loc.find('input[type="submit"]').click(function() {
 				loc.find('select').each(function() {
 					params[this.name] = $(this).val();
 				});
@@ -920,7 +920,7 @@
 				q = input.val();
 
 			/*
-			 * Minimum characters for a search. Also avoid a new Ajax search when
+			 * Minimum characters for a search. Also avoid a new AJAX search when
 			 * the pressed key (e.g. arrows) doesn't change the searched term.
 			 */
 			if ( q.length < minSearchLength || api.lastSearch == q ) {
@@ -947,12 +947,8 @@
 		},
 
 		addCustomLink : function( processMethod ) {
-			var url = $('#custom-menu-item-url').val().toString(),
+			var url = $('#custom-menu-item-url').val().trim(),
 				label = $('#custom-menu-item-name').val();
-
-			if ( '' !== url ) {
-				url = url.trim();
-			}
 
 			processMethod = processMethod || api.addMenuItemToBottom;
 
@@ -967,7 +963,7 @@
 				// Remove the Ajax spinner.
 				$( '.customlinkdiv .spinner' ).removeClass( 'is-active' );
 				// Set custom link form back to defaults.
-				$('#custom-menu-item-name').val('').trigger( 'blur' );
+				$('#custom-menu-item-name').val('').blur();
 				$( '#custom-menu-item-url' ).val( '' ).attr( 'placeholder', 'https://' );
 			});
 		},
@@ -1003,8 +999,7 @@
 			$.post( ajaxurl, params, function(menuMarkup) {
 				var ins = $('#menu-instructions');
 
-				menuMarkup = menuMarkup || '';
-				menuMarkup = menuMarkup.toString().trim(); // Trim leading whitespaces.
+				menuMarkup = $.trim( menuMarkup ); // Trim leading whitespaces.
 				processMethod(menuMarkup, params);
 
 				// Make it stand out a bit more visually, by adding a fadeIn.
@@ -1048,18 +1043,18 @@
 		},
 
 		attachUnsavedChangesListener : function() {
-			$('#menu-management input, #menu-management select, #menu-management, #menu-management textarea, .menu-location-menus select').on( 'change', function(){
+			$('#menu-management input, #menu-management select, #menu-management, #menu-management textarea, .menu-location-menus select').change(function(){
 				api.registerChange();
 			});
 
 			if ( 0 !== $('#menu-to-edit').length || 0 !== $('.menu-location-menus select').length ) {
 				window.onbeforeunload = function(){
 					if ( api.menusChanged )
-						return wp.i18n.__( 'The changes you made will be lost if you navigate away from this page.' );
+						return navMenuL10n.saveAlert;
 				};
 			} else {
 				// Make the post boxes read-only, as they can't be used yet.
-				$( '#menu-settings-column' ).find( 'input,select' ).end().find( 'a' ).attr( 'href', '#' ).off( 'click' );
+				$( '#menu-settings-column' ).find( 'input,select' ).end().find( 'a' ).attr( 'href', '#' ).unbind( 'click' );
 			}
 		},
 
@@ -1068,7 +1063,7 @@
 		},
 
 		attachTabsPanelListeners : function() {
-			$('#menu-settings-column').on('click', function(e) {
+			$('#menu-settings-column').bind('click', function(e) {
 				var selectAreaMatch, selectAll, panelId, wrapper, items,
 					target = $(e.target);
 
@@ -1088,7 +1083,7 @@
 					target.parent().addClass('tabs');
 
 					// Select the search bar.
-					$('.quick-search', wrapper).trigger( 'focus' );
+					$('.quick-search', wrapper).focus();
 
 					// Hide controls in the search tab if no items found.
 					if ( ! wrapper.find( '.tabs-panel-active .menu-item-title' ).length ) {
@@ -1141,7 +1136,7 @@
 
 				$.post( ajaxurl, this.href.replace( /.*\?/, '' ).replace( /action=([^&]*)/, '' ) + '&action=menu-get-metabox',
 					function( resp ) {
-						var metaBoxData = JSON.parse( resp ),
+						var metaBoxData = $.parseJSON( resp ),
 							toReplace;
 
 						if ( -1 === resp.indexOf( 'replace-id' ) ) {
@@ -1225,7 +1220,7 @@
 
 		eventOnClickMenuDelete : function() {
 			// Delete warning AYS.
-			if ( window.confirm( wp.i18n.__( 'You are about to permanently delete this menu.\n\'Cancel\' to stop, \'OK\' to delete.' ) ) ) {
+			if ( window.confirm( navMenuL10n.warnDeleteMenu ) ) {
 				window.onbeforeunload = null;
 				return true;
 			}
@@ -1258,7 +1253,7 @@
 			$item;
 
 			if( ! $items.length ) {
-				$('.categorychecklist', panel).html( '<li><p>' + wp.i18n.__( 'No results found.' ) + '</p></li>' );
+				$('.categorychecklist', panel).html( '<li><p>' + navMenuL10n.noResultsFound + '</p></li>' );
 				$( '.spinner', panel ).removeClass( 'is-active' );
 				wrapper.addClass( 'has-no-menu-item' );
 				return;
@@ -1297,8 +1292,7 @@
 
 		/**
 		 * Remove a menu item.
-		 *
-		 * @param {Object} el The element to be removed as a jQuery object.
+		 * @param  {object} el The element to be removed as a jQuery object.
 		 *
 		 * @fires document#menu-removing-item Passes the element to be removed.
 		 */
@@ -1331,27 +1325,6 @@
 
 	};
 
-	$( function() {
-
-		wpNavMenu.init();
-
-		// Prevent focused element from being hidden by the sticky footer.
-		$( '.menu-edit a, .menu-edit button, .menu-edit input, .menu-edit textarea, .menu-edit select' ).on('focus', function() {
-			if ( window.innerWidth >= 783 ) {
-				var navMenuHeight = $( '#nav-menu-footer' ).height() + 20;
-				var bottomOffset = $(this).offset().top - ( $(window).scrollTop() + $(window).height() - $(this).height() );
-
-				if ( bottomOffset > 0 ) {
-					bottomOffset = 0;
-				}
-				bottomOffset = bottomOffset * -1;
-
-				if( bottomOffset < navMenuHeight ) {
-					var scrollTop = $(document).scrollTop();
-					$(document).scrollTop( scrollTop + ( navMenuHeight - bottomOffset ) );
-				}
-			}
-		});
-	});
+	$(document).ready(function(){ wpNavMenu.init(); });
 
 })(jQuery);
