@@ -8,7 +8,7 @@
  * To hook methods, you'll need to pass an array one of two ways.
  *
  * Any of the syntaxes explained in the PHP documentation for the
- * {@link https://www.php.net/manual/en/language.pseudo-types.php#language.types.callback 'callback'}
+ * {@link https://secure.php.net/manual/en/language.pseudo-types.php#language.types.callback 'callback'}
  * type are valid.
  *
  * Also see the {@link https://developer.wordpress.org/plugins/ Plugin API} for
@@ -22,16 +22,10 @@
  */
 
 // Initialize the filter globals.
-require __DIR__ . '/class-wp-hook.php';
+require( dirname( __FILE__ ) . '/class-wp-hook.php' );
 
 /** @var WP_Hook[] $wp_filter */
-global $wp_filter;
-
-/** @var int[] $wp_actions */
-global $wp_actions;
-
-/** @var string[] $wp_current_filter */
-global $wp_current_filter;
+global $wp_filter, $wp_actions, $wp_current_filter;
 
 if ( $wp_filter ) {
 	$wp_filter = WP_Hook::build_preinitialized_hooks( $wp_filter );
@@ -99,15 +93,15 @@ if ( ! isset( $wp_current_filter ) ) {
  *
  * @since 0.71
  *
- * @global WP_Hook[] $wp_filter A multidimensional array of all hooks and the callbacks hooked to them.
+ * @global array $wp_filter      A multidimensional array of all hooks and the callbacks hooked to them.
  *
  * @param string   $tag             The name of the filter to hook the $function_to_add callback to.
  * @param callable $function_to_add The callback to be run when the filter is applied.
  * @param int      $priority        Optional. Used to specify the order in which the functions
- *                                  associated with a particular action are executed.
+ *                                  associated with a particular action are executed. Default 10.
  *                                  Lower numbers correspond with earlier execution,
  *                                  and functions with the same priority are executed
- *                                  in the order in which they were added to the action. Default 10.
+ *                                  in the order in which they were added to the action.
  * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
  * @return true
  */
@@ -121,20 +115,20 @@ function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 
 }
 
 /**
- * Checks if any filter has been registered for a hook.
- *
- * When using the `$function_to_check` argument, this function may return a non-boolean value
- * that evaluates to false (e.g. 0), so use the `===` operator for testing the return value.
+ * Check if any filter has been registered for a hook.
  *
  * @since 2.5.0
  *
- * @global WP_Hook[] $wp_filter Stores all of the filters and actions.
+ * @global array $wp_filter Stores all of the filters.
  *
- * @param string         $tag               The name of the filter hook.
- * @param callable|false $function_to_check Optional. The callback to check for. Default false.
- * @return bool|int If `$function_to_check` is omitted, returns boolean for whether the hook has
- *                  anything registered. When checking a specific function, the priority of that
- *                  hook is returned, or false if the function is not attached.
+ * @param string        $tag               The name of the filter hook.
+ * @param callable|bool $function_to_check Optional. The callback to check for. Default false.
+ * @return false|int If $function_to_check is omitted, returns boolean for whether the hook has
+ *                   anything registered. When checking a specific function, the priority of that
+ *                   hook is returned, or false if the function is not attached. When using the
+ *                   $function_to_check argument, this function may return a non-boolean value
+ *                   that evaluates to false (e.g.) 0, so use the === operator for testing the
+ *                   return value.
  */
 function has_filter( $tag, $function_to_check = false ) {
 	global $wp_filter;
@@ -158,26 +152,26 @@ function has_filter( $tag, $function_to_check = false ) {
  *
  * Example usage:
  *
- *     // The filter callback function.
+ *     // The filter callback function
  *     function example_callback( $string, $arg1, $arg2 ) {
- *         // (maybe) modify $string.
+ *         // (maybe) modify $string
  *         return $string;
  *     }
  *     add_filter( 'example_filter', 'example_callback', 10, 3 );
  *
  *     /*
- *      * Apply the filters by calling the 'example_callback()' function
- *      * that's hooked onto `example_filter` above.
+ *      * Apply the filters by calling the 'example_callback()' function that's
+ *      * hooked onto `example_filter` above.
  *      *
- *      * - 'example_filter' is the filter hook.
- *      * - 'filter me' is the value being filtered.
+ *      * - 'example_filter' is the filter hook
+ *      * - 'filter me' is the value being filtered
  *      * - $arg1 and $arg2 are the additional arguments passed to the callback.
  *     $value = apply_filters( 'example_filter', 'filter me', $arg1, $arg2 );
  *
  * @since 0.71
  *
- * @global WP_Hook[] $wp_filter         Stores all of the filters and actions.
- * @global string[]  $wp_current_filter Stores the list of current filters with the current one last.
+ * @global array $wp_filter         Stores all of the filters.
+ * @global array $wp_current_filter Stores the list of current filters with the current one last.
  *
  * @param string $tag     The name of the filter hook.
  * @param mixed  $value   The value to filter.
@@ -224,8 +218,8 @@ function apply_filters( $tag, $value ) {
  * @see apply_filters() This function is identical, but the arguments passed to the
  * functions hooked to `$tag` are supplied using an array.
  *
- * @global WP_Hook[] $wp_filter         Stores all of the filters and actions.
- * @global string[]  $wp_current_filter Stores the list of current filters with the current one last.
+ * @global array $wp_filter         Stores all of the filters
+ * @global array $wp_current_filter Stores the list of current filters with the current one last
  *
  * @param string $tag  The name of the filter hook.
  * @param array  $args The arguments supplied to the functions hooked to $tag.
@@ -234,10 +228,10 @@ function apply_filters( $tag, $value ) {
 function apply_filters_ref_array( $tag, $args ) {
 	global $wp_filter, $wp_current_filter;
 
-	// Do 'all' actions first.
+	// Do 'all' actions first
 	if ( isset( $wp_filter['all'] ) ) {
 		$wp_current_filter[] = $tag;
-		$all_args            = func_get_args(); // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
+		$all_args            = func_get_args();
 		_wp_call_all_hook( $all_args );
 	}
 
@@ -272,7 +266,7 @@ function apply_filters_ref_array( $tag, $args ) {
  *
  * @since 1.2.0
  *
- * @global WP_Hook[] $wp_filter Stores all of the filters and actions.
+ * @global array $wp_filter         Stores all of the filters
  *
  * @param string   $tag                The filter hook to which the function to be removed is hooked.
  * @param callable $function_to_remove The name of the function which should be removed.
@@ -298,10 +292,10 @@ function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
  *
  * @since 2.7.0
  *
- * @global WP_Hook[] $wp_filter Stores all of the filters and actions.
+ * @global array $wp_filter  Stores all of the filters
  *
- * @param string    $tag      The filter to remove hooks from.
- * @param int|false $priority Optional. The priority number to remove. Default false.
+ * @param string   $tag      The filter to remove hooks from.
+ * @param int|bool $priority Optional. The priority number to remove. Default false.
  * @return true True when finished.
  */
 function remove_all_filters( $tag, $priority = false ) {
@@ -322,7 +316,7 @@ function remove_all_filters( $tag, $priority = false ) {
  *
  * @since 2.5.0
  *
- * @global string[] $wp_current_filter Stores the list of current filters with the current one last
+ * @global array $wp_current_filter Stores the list of current filters with the current one last
  *
  * @return string Hook name of the current filter or action.
  */
@@ -357,7 +351,7 @@ function current_action() {
  *
  * @see current_filter()
  * @see did_action()
- * @global string[] $wp_current_filter Current filter.
+ * @global array $wp_current_filter Current filter.
  *
  * @param null|string $filter Optional. Filter to check. Defaults to null, which
  *                            checks if any filter is currently being run.
@@ -370,7 +364,7 @@ function doing_filter( $filter = null ) {
 		return ! empty( $wp_current_filter );
 	}
 
-	return in_array( $filter, $wp_current_filter, true );
+	return in_array( $filter, $wp_current_filter );
 }
 
 /**
@@ -421,17 +415,17 @@ function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 
  *
  * Example usage:
  *
- *     // The action callback function.
+ *     // The action callback function
  *     function example_callback( $arg1, $arg2 ) {
- *         // (maybe) do something with the args.
+ *         // (maybe) do something with the args
  *     }
  *     add_action( 'example_action', 'example_callback', 10, 2 );
  *
  *     /*
- *      * Trigger the actions by calling the 'example_callback()' function
- *      * that's hooked onto `example_action` above.
+ *      * Trigger the actions by calling the 'example_callback()' function that's
+ *      * hooked onto `example_action` above.
  *      *
- *      * - 'example_action' is the action hook.
+ *      * - 'example_action' is the action hook
  *      * - $arg1 and $arg2 are the additional arguments passed to the callback.
  *     $value = do_action( 'example_action', $arg1, $arg2 );
  *
@@ -439,9 +433,9 @@ function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 
  * @since 5.3.0 Formalized the existing and already documented `...$arg` parameter
  *              by adding it to the function signature.
  *
- * @global WP_Hook[] $wp_filter         Stores all of the filters and actions.
- * @global int[]     $wp_actions        Stores the number of times each action was triggered.
- * @global string[]  $wp_current_filter Stores the list of current filters with the current one last.
+ * @global array $wp_filter         Stores all of the filters
+ * @global array $wp_actions        Increments the amount of times action was triggered.
+ * @global array $wp_current_filter Stores the list of current filters with the current one last
  *
  * @param string $tag    The name of the action to be executed.
  * @param mixed  ...$arg Optional. Additional arguments which are passed on to the
@@ -456,10 +450,10 @@ function do_action( $tag, ...$arg ) {
 		++$wp_actions[ $tag ];
 	}
 
-	// Do 'all' actions first.
+	// Do 'all' actions first
 	if ( isset( $wp_filter['all'] ) ) {
 		$wp_current_filter[] = $tag;
-		$all_args            = func_get_args(); // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
+		$all_args            = func_get_args();
 		_wp_call_all_hook( $all_args );
 	}
 
@@ -491,7 +485,7 @@ function do_action( $tag, ...$arg ) {
  *
  * @since 2.1.0
  *
- * @global int[] $wp_actions Stores the number of times each action was triggered.
+ * @global array $wp_actions Increments the amount of times action was triggered.
  *
  * @param string $tag The name of the action hook.
  * @return int The number of times action hook $tag is fired.
@@ -513,10 +507,9 @@ function did_action( $tag ) {
  *
  * @see do_action() This function is identical, but the arguments passed to the
  *                  functions hooked to `$tag` are supplied using an array.
- *
- * @global WP_Hook[] $wp_filter         Stores all of the filters and actions.
- * @global int[]     $wp_actions        Stores the number of times each action was triggered.
- * @global string[]  $wp_current_filter Stores the list of current filters with the current one last.
+ * @global array $wp_filter         Stores all of the filters
+ * @global array $wp_actions        Increments the amount of times action was triggered.
+ * @global array $wp_current_filter Stores the list of current filters with the current one last
  *
  * @param string $tag  The name of the action to be executed.
  * @param array  $args The arguments supplied to the functions hooked to `$tag`.
@@ -530,10 +523,10 @@ function do_action_ref_array( $tag, $args ) {
 		++$wp_actions[ $tag ];
 	}
 
-	// Do 'all' actions first.
+	// Do 'all' actions first
 	if ( isset( $wp_filter['all'] ) ) {
 		$wp_current_filter[] = $tag;
-		$all_args            = func_get_args(); // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
+		$all_args            = func_get_args();
 		_wp_call_all_hook( $all_args );
 	}
 
@@ -554,20 +547,20 @@ function do_action_ref_array( $tag, $args ) {
 }
 
 /**
- * Checks if any action has been registered for a hook.
- *
- * When using the `$function_to_check` argument, this function may return a non-boolean value
- * that evaluates to false (e.g. 0), so use the `===` operator for testing the return value.
+ * Check if any action has been registered for a hook.
  *
  * @since 2.5.0
  *
  * @see has_filter() has_action() is an alias of has_filter().
  *
- * @param string         $tag               The name of the action hook.
- * @param callable|false $function_to_check Optional. The callback to check for. Default false.
- * @return bool|int If `$function_to_check` is omitted, returns boolean for whether the hook has
+ * @param string        $tag               The name of the action hook.
+ * @param callable|bool $function_to_check Optional. The callback to check for. Default false.
+ * @return bool|int If $function_to_check is omitted, returns boolean for whether the hook has
  *                  anything registered. When checking a specific function, the priority of that
- *                  hook is returned, or false if the function is not attached.
+ *                  hook is returned, or false if the function is not attached. When using the
+ *                  $function_to_check argument, this function may return a non-boolean value
+ *                  that evaluates to false (e.g.) 0, so use the === operator for testing the
+ *                  return value.
  */
 function has_action( $tag, $function_to_check = false ) {
 	return has_filter( $tag, $function_to_check );
@@ -596,8 +589,8 @@ function remove_action( $tag, $function_to_remove, $priority = 10 ) {
  *
  * @since 2.7.0
  *
- * @param string    $tag      The action to remove hooks from.
- * @param int|false $priority The priority number to remove them from. Default false.
+ * @param string   $tag      The action to remove hooks from.
+ * @param int|bool $priority The priority number to remove them from. Default false.
  * @return true True when finished.
  */
 function remove_all_actions( $tag, $priority = false ) {
@@ -618,7 +611,7 @@ function remove_all_actions( $tag, $priority = false ) {
  *     return apply_filters( 'wpdocs_filter', $value, $extra_arg );
  *
  *     // Deprecated.
- *     return apply_filters_deprecated( 'wpdocs_filter', array( $value, $extra_arg ), '4.9.0', 'wpdocs_new_filter' );
+ *     return apply_filters_deprecated( 'wpdocs_filter', array( $value, $extra_arg ), '4.9', 'wpdocs_new_filter' );
  *
  * @since 4.6.0
  *
@@ -627,10 +620,10 @@ function remove_all_actions( $tag, $priority = false ) {
  * @param string $tag         The name of the filter hook.
  * @param array  $args        Array of additional function arguments to be passed to apply_filters().
  * @param string $version     The version of WordPress that deprecated the hook.
- * @param string $replacement Optional. The hook that should have been used. Default empty.
- * @param string $message     Optional. A message regarding the change. Default empty.
+ * @param string $replacement Optional. The hook that should have been used. Default false.
+ * @param string $message     Optional. A message regarding the change. Default null.
  */
-function apply_filters_deprecated( $tag, $args, $version, $replacement = '', $message = '' ) {
+function apply_filters_deprecated( $tag, $args, $version, $replacement = false, $message = null ) {
 	if ( ! has_filter( $tag ) ) {
 		return $args[0];
 	}
@@ -654,10 +647,10 @@ function apply_filters_deprecated( $tag, $args, $version, $replacement = '', $me
  * @param string $tag         The name of the action hook.
  * @param array  $args        Array of additional function arguments to be passed to do_action().
  * @param string $version     The version of WordPress that deprecated the hook.
- * @param string $replacement Optional. The hook that should have been used. Default empty.
- * @param string $message     Optional. A message regarding the change. Default empty.
+ * @param string $replacement Optional. The hook that should have been used.
+ * @param string $message     Optional. A message regarding the change.
  */
-function do_action_deprecated( $tag, $args, $version, $replacement = '', $message = '' ) {
+function do_action_deprecated( $tag, $args, $version, $replacement = false, $message = null ) {
 	if ( ! has_action( $tag ) ) {
 		return;
 	}
@@ -699,8 +692,7 @@ function plugin_basename( $file ) {
 	$plugin_dir    = wp_normalize_path( WP_PLUGIN_DIR );
 	$mu_plugin_dir = wp_normalize_path( WPMU_PLUGIN_DIR );
 
-	// Get relative path from plugins directory.
-	$file = preg_replace( '#^' . preg_quote( $plugin_dir, '#' ) . '/|^' . preg_quote( $mu_plugin_dir, '#' ) . '/#', '', $file );
+	$file = preg_replace( '#^' . preg_quote( $plugin_dir, '#' ) . '/|^' . preg_quote( $mu_plugin_dir, '#' ) . '/#', '', $file ); // get relative path from plugins dir
 	$file = trim( $file, '/' );
 	return $file;
 }
@@ -716,13 +708,16 @@ function plugin_basename( $file ) {
  *
  * @global array $wp_plugin_paths
  *
+ * @staticvar string $wp_plugin_path
+ * @staticvar string $wpmu_plugin_path
+ *
  * @param string $file Known path to the file.
  * @return bool Whether the path was able to be registered.
  */
 function wp_register_plugin_realpath( $file ) {
 	global $wp_plugin_paths;
 
-	// Normalize, but store as static to avoid recalculation of a constant value.
+	// Normalize, but store as static to avoid recalculation of a constant value
 	static $wp_plugin_path = null, $wpmu_plugin_path = null;
 	if ( ! isset( $wp_plugin_path ) ) {
 		$wp_plugin_path   = wp_normalize_path( WP_PLUGIN_DIR );
@@ -872,7 +867,7 @@ function register_uninstall_hook( $file, $callback ) {
  * @since 2.5.0
  * @access private
  *
- * @global WP_Hook[] $wp_filter Stores all of the filters and actions.
+ * @global array $wp_filter  Stores all of the filters
  *
  * @param array $args The collected parameters from the hook that was called.
  */
@@ -902,34 +897,40 @@ function _wp_call_all_hook( $args ) {
  * @link https://core.trac.wordpress.org/ticket/3875
  *
  * @since 2.2.3
- * @since 5.3.0 Removed workarounds for spl_object_hash().
- *              `$tag` and `$priority` are no longer used,
- *              and the function always returns a string.
  * @access private
  *
- * @param string   $tag      Unused. The name of the filter to build ID for.
- * @param callable $function The function to generate ID for.
- * @param int      $priority Unused. The order in which the functions
- *                           associated with a particular action are executed.
- * @return string Unique function ID for usage as array key.
+ * @global array $wp_filter Storage for all of the filters and actions.
+ * @staticvar int $filter_id_count
+ *
+ * @param string   $tag      Used in counting how many hooks were applied
+ * @param callable $function Used for creating unique id
+ * @param int|bool $priority Used in counting how many hooks were applied. If === false
+ *                           and $function is an object reference, we return the unique
+ *                           id only if it already has one, false otherwise.
+ * @return string|false Unique ID for usage as array key or false if $priority === false
+ *                      and $function is an object reference, and it does not already have
+ *                      a unique id.
  */
 function _wp_filter_build_unique_id( $tag, $function, $priority ) {
+	global $wp_filter;
+	static $filter_id_count = 0;
+
 	if ( is_string( $function ) ) {
 		return $function;
 	}
 
 	if ( is_object( $function ) ) {
-		// Closures are currently implemented as objects.
+		// Closures are currently implemented as objects
 		$function = array( $function, '' );
 	} else {
 		$function = (array) $function;
 	}
 
 	if ( is_object( $function[0] ) ) {
-		// Object class calling.
+		// Object Class Calling
 		return spl_object_hash( $function[0] ) . $function[1];
 	} elseif ( is_string( $function[0] ) ) {
-		// Static calling.
+		// Static Calling
 		return $function[0] . '::' . $function[1];
 	}
 }
