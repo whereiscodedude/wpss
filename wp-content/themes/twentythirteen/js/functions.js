@@ -75,11 +75,9 @@
 	} )();
 
 	/**
-	 * Add or remove ARIA attributes.
-	 *
+	 * @summary Add or remove ARIA attributes.
 	 * Uses jQuery's width() function to determine the size of the window and add
 	 * the default ARIA attributes for the menu toggle if it's visible.
-	 *
 	 * @since Twenty Thirteen 1.5
 	 */
 	function onResizeARIA() {
@@ -123,7 +121,7 @@
 	 */
 	$( function() {
 		var columnWidth, widgetArea;
-		if ( typeof $.fn.masonry !== 'function' ) {
+		if ( ! $.isFunction( $.fn.masonry ) ) {
 			return;
 		}
 		columnWidth = body.is( '.sidebar' ) ? 228 : 245;
