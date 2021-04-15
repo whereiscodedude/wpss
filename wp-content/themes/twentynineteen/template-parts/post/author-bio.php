@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
 if ( (bool) get_the_author_meta( 'description' ) ) : ?>
@@ -13,7 +13,7 @@ if ( (bool) get_the_author_meta( 'description' ) ) : ?>
 		<span class="author-heading">
 			<?php
 			printf(
-				/* translators: %s: Post author. */
+				/* translators: %s: post author */
 				__( 'Published by %s', 'twentynineteen' ),
 				esc_html( get_the_author() )
 			);
