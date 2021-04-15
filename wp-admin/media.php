@@ -7,7 +7,7 @@
  */
 
 /** Load WordPress Administration Bootstrap */
-require_once __DIR__ . '/admin.php';
+require_once( dirname( __FILE__ ) . '/admin.php' );
 
 $parent_file  = 'upload.php';
 $submenu_file = 'upload.php';
@@ -27,9 +27,8 @@ switch ( $action ) {
 
 		if ( empty( $errors ) ) {
 			$location = 'media.php';
-			$referer  = wp_get_original_referer();
-			if ( $referer ) {
-				if ( false !== strpos( $referer, 'upload.php' ) || ( url_to_postid( $referer ) === $attachment_id ) ) {
+			if ( $referer = wp_get_original_referer() ) {
+				if ( false !== strpos( $referer, 'upload.php' ) || ( url_to_postid( $referer ) == $attachment_id ) ) {
 					$location = $referer;
 				}
 			}
@@ -53,7 +52,7 @@ switch ( $action ) {
 
 		if ( empty( $_GET['attachment_id'] ) ) {
 			wp_redirect( admin_url( 'upload.php' ) );
-			exit;
+			exit();
 		}
 		$att_id = (int) $_GET['attachment_id'];
 
@@ -69,7 +68,7 @@ switch ( $action ) {
 		if ( 'attachment' !== $att->post_type ) {
 			wp_die( __( 'You attempted to edit an item that isn&#8217;t an attachment. Please go back and try again.' ) );
 		}
-		if ( 'trash' === $att->post_status ) {
+		if ( $att->post_status == 'trash' ) {
 			wp_die( __( 'You can&#8217;t edit this attachment because it is in the Trash. Please move it out of the Trash and try again.' ) );
 		}
 
@@ -84,20 +83,20 @@ switch ( $action ) {
 				'id'      => 'overview',
 				'title'   => __( 'Overview' ),
 				'content' =>
-					'<p>' . __( 'This screen allows you to edit fields for metadata in a file within the media library.' ) . '</p>' .
-					'<p>' . __( 'For images only, you can click on Edit Image under the thumbnail to expand out an inline image editor with icons for cropping, rotating, or flipping the image as well as for undoing and redoing. The boxes on the right give you more options for scaling the image, for cropping it, and for cropping the thumbnail in a different way than you crop the original image. You can click on Help in those boxes to get more information.' ) . '</p>' .
-					'<p>' . __( 'Note that you crop the image by clicking on it (the Crop icon is already selected) and dragging the cropping frame to select the desired part. Then click Save to retain the cropping.' ) . '</p>' .
-					'<p>' . __( 'Remember to click Update Media to save metadata entered or changed.' ) . '</p>',
+					  '<p>' . __( 'This screen allows you to edit five fields for metadata in a file within the media library.' ) . '</p>' .
+					  '<p>' . __( 'For images only, you can click on Edit Image under the thumbnail to expand out an inline image editor with icons for cropping, rotating, or flipping the image as well as for undoing and redoing. The boxes on the right give you more options for scaling the image, for cropping it, and for cropping the thumbnail in a different way than you crop the original image. You can click on Help in those boxes to get more information.' ) . '</p>' .
+					  '<p>' . __( 'Note that you crop the image by clicking on it (the Crop icon is already selected) and dragging the cropping frame to select the desired part. Then click Save to retain the cropping.' ) . '</p>' .
+					  '<p>' . __( 'Remember to click Update Media to save metadata entered or changed.' ) . '</p>',
 			)
 		);
 
 		get_current_screen()->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
-			'<p>' . __( '<a href="https://wordpress.org/support/article/edit-media/">Documentation on Edit Media</a>' ) . '</p>' .
-			'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
+			'<p>' . __( '<a href="https://codex.wordpress.org/Media_Add_New_Screen#Edit_Media">Documentation on Edit Media</a>' ) . '</p>' .
+			'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
 		);
 
-		require_once ABSPATH . 'wp-admin/admin-header.php';
+		require( ABSPATH . 'wp-admin/admin-header.php' );
 
 		$parent_file = 'upload.php';
 		$message     = '';
@@ -166,7 +165,7 @@ switch ( $action ) {
 
 		<?php
 
-		require_once ABSPATH . 'wp-admin/admin-footer.php';
+		require( ABSPATH . 'wp-admin/admin-footer.php' );
 
 		exit;
 
