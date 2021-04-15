@@ -89,17 +89,19 @@ class WP_Posts_List_Table extends WP_List_Table {
 				'show_in_admin_all_list' => false,
 			)
 		);
-		$this->user_posts_count = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"
+		$this->user_posts_count = intval(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"
 			SELECT COUNT( 1 )
 			FROM $wpdb->posts
 			WHERE post_type = %s
 			AND post_status NOT IN ( '" . implode( "','", $exclude_states ) . "' )
 			AND post_author = %d
 		",
-				$post_type,
-				get_current_user_id()
+					$post_type,
+					get_current_user_id()
+				)
 			)
 		);
 
@@ -456,8 +458,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 				'selected'        => $cat,
 			);
 
-			echo '<label class="screen-reader-text" for="cat">' . get_taxonomy( 'category' )->labels->filter_by_item . '</label>';
-
+			echo '<label class="screen-reader-text" for="cat">' . __( 'Filter by category' ) . '</label>';
 			wp_dropdown_categories( $dropdown_options );
 		}
 	}
@@ -632,11 +633,6 @@ class WP_Posts_List_Table extends WP_List_Table {
 		 * The dynamic portion of the hook name, `$post_type`, refers to the post
 		 * type slug.
 		 *
-		 * Possible hook names include:
-		 *
-		 *  - `manage_taxonomies_for_post_columns`
-		 *  - `manage_taxonomies_for_page_columns`
-		 *
 		 * @since 3.5.0
 		 *
 		 * @param string[] $taxonomies Array of taxonomy names to show columns for.
@@ -691,11 +687,6 @@ class WP_Posts_List_Table extends WP_List_Table {
 		 * Filters the columns displayed in the Posts list table for a specific post type.
 		 *
 		 * The dynamic portion of the hook name, `$post_type`, refers to the post type slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `manage_post_posts_columns`
-		 *  - `manage_page_posts_columns`
 		 *
 		 * @since 3.0.0
 		 *
@@ -936,19 +927,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 * @param WP_Post $post The current WP_Post object.
 	 */
 	public function column_cb( $post ) {
-		$show = current_user_can( 'edit_post', $post->ID );
-
-		/**
-		 * Filters whether to show the bulk edit checkbox for a post in its list table.
-		 *
-		 * By default the checkbox is only shown if the current user can edit the post.
-		 *
-		 * @since 5.7.0
-		 *
-		 * @param bool    $show Whether to show the checkbox.
-		 * @param WP_Post $post The current WP_Post object.
-		 */
-		if ( apply_filters( 'wp_list_table_show_post_checkbox', $show, $post ) ) :
+		if ( current_user_can( 'edit_post', $post->ID ) ) :
 			?>
 			<label class="screen-reader-text" for="cb-select-<?php the_ID(); ?>">
 				<?php
@@ -1102,9 +1081,9 @@ class WP_Posts_List_Table extends WP_List_Table {
 			$t_time = sprintf(
 				/* translators: 1: Post date, 2: Post time. */
 				__( '%1$s at %2$s' ),
-				/* translators: Post date format. See https://www.php.net/manual/datetime.format.php */
+				/* translators: Post date format. See https://www.php.net/date */
 				get_the_time( __( 'Y/m/d' ), $post ),
-				/* translators: Post time format. See https://www.php.net/manual/datetime.format.php */
+				/* translators: Post time format. See https://www.php.net/date */
 				get_the_time( __( 'g:i a' ), $post )
 			);
 
@@ -1242,7 +1221,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 				$term_links = apply_filters( 'post_column_taxonomy_links', $term_links, $taxonomy, $terms );
 
 				/* translators: Used between list items, there is a space after the comma. */
-				echo implode( __( ', ' ), $term_links );
+				echo join( __( ', ' ), $term_links );
 			} else {
 				echo '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">' . $taxonomy_object->labels->no_terms . '</span>';
 			}
@@ -1283,11 +1262,6 @@ class WP_Posts_List_Table extends WP_List_Table {
 		 * Fires for each custom column of a specific post type in the Posts list table.
 		 *
 		 * The dynamic portion of the hook name, `$post->post_type`, refers to the post type.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `manage_post_posts_custom_column`
-		 *  - `manage_page_posts_custom_column`
 		 *
 		 * @since 3.1.0
 		 *
@@ -1349,9 +1323,9 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 *
 	 * @since 4.3.0
 	 *
-	 * @param WP_Post $post        Post being acted upon.
-	 * @param string  $column_name Current column name.
-	 * @param string  $primary     Primary column name.
+	 * @param object $post        Post being acted upon.
+	 * @param string $column_name Current column name.
+	 * @param string $primary     Primary column name.
 	 * @return string Row actions output for posts, or an empty string
 	 *                if the current column is not the primary column.
 	 */
@@ -1615,18 +1589,6 @@ class WP_Posts_List_Table extends WP_List_Table {
 							$users_opt['show_option_none'] = __( '&mdash; No Change &mdash;' );
 						}
 
-						/**
-						 * Filters the arguments used to generate the Quick Edit authors drop-down.
-						 *
-						 * @since 5.6.0
-						 *
-						 * @see wp_dropdown_users()
-						 *
-						 * @param array $users_opt An array of arguments passed to wp_dropdown_users().
-						 * @param bool  $bulk      A flag to denote if it's a bulk action.
-						 */
-						$users_opt = apply_filters( 'quick_edit_dropdown_authors_args', $users_opt, $bulk );
-
 						$authors = wp_dropdown_users( $users_opt );
 						if ( $authors ) :
 							$authors_dropdown  = '<label class="inline-edit-author">';
@@ -1722,14 +1684,12 @@ class WP_Posts_List_Table extends WP_List_Table {
 							 * Filters the arguments used to generate the Quick Edit page-parent drop-down.
 							 *
 							 * @since 2.7.0
-							 * @since 5.6.0 The `$bulk` parameter was added.
 							 *
 							 * @see wp_dropdown_pages()
 							 *
-							 * @param array $dropdown_args An array of arguments passed to wp_dropdown_pages().
-							 * @param bool  $bulk          A flag to denote if it's a bulk action.
+							 * @param array $dropdown_args An array of arguments.
 							 */
-							$dropdown_args = apply_filters( 'quick_edit_dropdown_pages_args', $dropdown_args, $bulk );
+							$dropdown_args = apply_filters( 'quick_edit_dropdown_pages_args', $dropdown_args );
 
 							wp_dropdown_pages( $dropdown_args );
 							?>

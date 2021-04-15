@@ -1,5 +1,4 @@
 {
-	"apiVersion": 2,
 	"name": "core/table",
 	"category": "text",
 	"attributes": {
@@ -124,9 +123,6 @@
 	},
 	"supports": {
 		"anchor": true,
-		"align": true,
-		"__experimentalSelector": ".wp-block-table > table"
-	},
-	"editorStyle": "wp-block-table-editor",
-	"style": "wp-block-table"
+		"align": true
+	}
 }

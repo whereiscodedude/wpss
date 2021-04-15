@@ -1,17 +1,16 @@
 {
-	"apiVersion": 2,
 	"name": "core/code",
 	"category": "text",
 	"attributes": {
 		"content": {
 			"type": "string",
-			"source": "html",
+			"source": "text",
 			"selector": "code"
 		}
 	},
 	"supports": {
 		"anchor": true,
-		"fontSize": true
-	},
-	"style": "wp-block-code"
+		"html": false,
+		"lightBlockWrapper": true
+	}
 }

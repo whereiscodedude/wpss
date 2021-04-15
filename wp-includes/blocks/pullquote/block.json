@@ -1,5 +1,4 @@
 {
-	"apiVersion": 2,
 	"name": "core/pullquote",
 	"category": "text",
 	"attributes": {
@@ -36,7 +35,5 @@
 			"wide",
 			"full"
 		]
-	},
-	"editorStyle": "wp-block-pullquote-editor",
-	"style": "wp-block-pullquote"
+	}
 }

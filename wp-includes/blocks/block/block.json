@@ -1,5 +1,4 @@
 {
-	"apiVersion": 2,
 	"name": "core/block",
 	"category": "reusable",
 	"attributes": {
@@ -11,6 +10,5 @@
 		"customClassName": false,
 		"html": false,
 		"inserter": false
-	},
-	"editorStyle": "wp-block-editor"
+	}
 }

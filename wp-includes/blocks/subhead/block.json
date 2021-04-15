@@ -1,5 +1,4 @@
 {
-	"apiVersion": 2,
 	"name": "core/subhead",
 	"category": "text",
 	"attributes": {
@@ -15,7 +14,5 @@
 	"supports": {
 		"inserter": false,
 		"multiple": false
-	},
-	"editorStyle": "wp-block-subhead-editor",
-	"style": "wp-block-subhead"
+	}
 }

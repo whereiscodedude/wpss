@@ -168,7 +168,6 @@ function twentythirteen_setup() {
 			'caption',
 			'script',
 			'style',
-			'navigation-widgets',
 		)
 	);
 
@@ -285,7 +284,7 @@ function twentythirteen_scripts_styles() {
 	wp_enqueue_style( 'genericons', get_template_directory_uri() . '/genericons/genericons.css', array(), '3.0.3' );
 
 	// Loads our main stylesheet.
-	wp_enqueue_style( 'twentythirteen-style', get_stylesheet_uri(), array(), '20201208' );
+	wp_enqueue_style( 'twentythirteen-style', get_stylesheet_uri(), array(), '20190507' );
 
 	// Theme block stylesheet.
 	wp_enqueue_style( 'twentythirteen-block-style', get_template_directory_uri() . '/css/blocks.css', array( 'twentythirteen-style' ), '20190102' );
@@ -328,7 +327,7 @@ add_filter( 'wp_resource_hints', 'twentythirteen_resource_hints', 10, 2 );
  */
 function twentythirteen_block_editor_styles() {
 	// Block styles.
-	wp_enqueue_style( 'twentythirteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20201208' );
+	wp_enqueue_style( 'twentythirteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20190102' );
 	// Add custom fonts.
 	wp_enqueue_style( 'twentythirteen-fonts', twentythirteen_fonts_url(), array(), null );
 }
@@ -516,7 +515,7 @@ if ( ! function_exists( 'twentythirteen_entry_date' ) ) :
 	 *
 	 * @since Twenty Thirteen 1.0
 	 *
-	 * @param bool $echo (optional) Whether to echo the date. Default true.
+	 * @param boolean $echo (optional) Whether to echo the date. Default true.
 	 * @return string The HTML-formatted post date.
 	 */
 	function twentythirteen_entry_date( $echo = true ) {
@@ -552,7 +551,7 @@ if ( ! function_exists( 'twentythirteen_the_attached_image' ) ) :
 	 */
 	function twentythirteen_the_attached_image() {
 		/**
-		 * Filters the image attachment size to use.
+		 * Filter the image attachment size to use.
 		 *
 		 * @since Twenty thirteen 1.0
 		 *
@@ -758,7 +757,7 @@ function twentythirteen_customize_partial_blogdescription() {
 }
 
 /**
- * Enqueue JavaScript postMessage handlers for the Customizer.
+ * Enqueue Javascript postMessage handlers for the Customizer.
  *
  * Binds JavaScript handlers to make the Customizer preview
  * reload changes asynchronously.
