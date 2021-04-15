@@ -21,6 +21,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Hook callbacks.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 * @var array
 	 */
 	public $callbacks = array();
@@ -29,6 +30,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * The priority keys of actively running iterations of a hook.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 * @var array
 	 */
 	private $iterations = array();
@@ -37,6 +39,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * The current priority of actively running iterations of a hook.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 * @var array
 	 */
 	private $current_priority = array();
@@ -45,6 +48,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Number of levels this hook can be recursively called.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 * @var int
 	 */
 	private $nesting_level = 0;
@@ -53,6 +57,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Flag for if we're current doing an action, rather than a filter.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 * @var bool
 	 */
 	private $doing_action = false;
@@ -61,26 +66,26 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Hooks a function or method to a specific filter action.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @param string   $tag             The name of the filter to hook the $function_to_add callback to.
 	 * @param callable $function_to_add The callback to be run when the filter is applied.
-	 * @param int      $priority        The order in which the functions associated with a particular action
-	 *                                  are executed. Lower numbers correspond with earlier execution,
-	 *                                  and functions with the same priority are executed in the order
-	 *                                  in which they were added to the action.
+	 * @param int      $priority        The order in which the functions associated with a
+	 *                                  particular action are executed. Lower numbers correspond with
+	 *                                  earlier execution, and functions with the same priority are executed
+	 *                                  in the order in which they were added to the action.
 	 * @param int      $accepted_args   The number of arguments the function accepts.
 	 */
 	public function add_filter( $tag, $function_to_add, $priority, $accepted_args ) {
 		$idx = _wp_filter_build_unique_id( $tag, $function_to_add, $priority );
-
 		$priority_existed = isset( $this->callbacks[ $priority ] );
 
 		$this->callbacks[ $priority ][ $idx ] = array(
-			'function'      => $function_to_add,
-			'accepted_args' => $accepted_args,
+			'function' => $function_to_add,
+			'accepted_args' => $accepted_args
 		);
 
-		// If we're adding a new priority to the list, put them back in sorted order.
+		// if we're adding a new priority to the list, put them back in sorted order
 		if ( ! $priority_existed && count( $this->callbacks ) > 1 ) {
 			ksort( $this->callbacks, SORT_NUMERIC );
 		}
@@ -91,14 +96,15 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * Handles resetting callback priority keys mid-iteration.
+	 * Handles reseting callback priority keys mid-iteration.
 	 *
 	 * @since 4.7.0
+	 * @access private
 	 *
-	 * @param false|int $new_priority     Optional. The priority of the new filter being added. Default false,
-	 *                                    for no priority being added.
-	 * @param bool      $priority_existed Optional. Flag for whether the priority already existed before the new
-	 *                                    filter was added. Default false.
+	 * @param bool|int $new_priority     Optional. The priority of the new filter being added. Default false,
+	 *                                   for no priority being added.
+	 * @param bool     $priority_existed Optional. Flag for whether the priority already existed before the new
+	 *                                   filter was added. Default false.
 	 */
 	private function resort_active_iterations( $new_priority = false, $priority_existed = false ) {
 		$new_priorities = array_keys( $this->callbacks );
@@ -135,7 +141,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 			// If we have a new priority that didn't exist, but ::apply_filters() or ::do_action() thinks it's the current priority...
 			if ( $new_priority === $this->current_priority[ $index ] && ! $priority_existed ) {
 				/*
-				 * ...and the new priority is the same as what $this->iterations thinks is the previous
+				 * ... and the new priority is the same as what $this->iterations thinks is the previous
 				 * priority, we need to move back to it.
 				 */
 
@@ -162,8 +168,10 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Unhooks a function or method from a specific filter action.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @param string   $tag                The filter hook to which the function to be removed is hooked.
+	 * @param string   $tag                The filter hook to which the function to be removed is hooked. Used
+	 *                                     for building the callback ID when SPL is not available.
 	 * @param callable $function_to_remove The callback to be removed from running when the filter is applied.
 	 * @param int      $priority           The exact priority used when adding the original filter callback.
 	 * @return bool Whether the callback existed before it was removed.
@@ -187,16 +195,13 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	/**
 	 * Checks if a specific action has been registered for this hook.
 	 *
-	 * When using the `$function_to_check` argument, this function may return a non-boolean value
-	 * that evaluates to false (e.g. 0), so use the `===` operator for testing the return value.
-	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @param string         $tag               Optional. The name of the filter hook. Default empty.
-	 * @param callable|false $function_to_check Optional. The callback to check for. Default false.
-	 * @return bool|int If `$function_to_check` is omitted, returns boolean for whether the hook has
-	 *                  anything registered. When checking a specific function, the priority of that
-	 *                  hook is returned, or false if the function is not attached.
+	 * @param callable|bool $function_to_check Optional. The callback to check for. Default false.
+	 * @param string        $tag               Optional. The name of the filter hook. Used for building
+	 *                                         the callback ID when SPL is not available. Default empty.
+	 * @return bool|int The priority of that hook is returned, or false if the function is not attached.
 	 */
 	public function has_filter( $tag = '', $function_to_check = false ) {
 		if ( false === $function_to_check ) {
@@ -221,6 +226,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Checks if any callbacks have been registered for this hook.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @return bool True if callbacks have been registered for the current hook, otherwise false.
 	 */
@@ -237,8 +243,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Removes all callbacks from the current filter.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @param int|false $priority Optional. The priority number to remove. Default false.
+	 * @param int|bool $priority Optional. The priority number to remove. Default false.
 	 */
 	public function remove_all_filters( $priority = false ) {
 		if ( ! $this->callbacks ) {
@@ -247,7 +254,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 
 		if ( false === $priority ) {
 			$this->callbacks = array();
-		} elseif ( isset( $this->callbacks[ $priority ] ) ) {
+		} else if ( isset( $this->callbacks[ $priority ] ) ) {
 			unset( $this->callbacks[ $priority ] );
 		}
 
@@ -257,13 +264,13 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * Calls the callback functions that have been added to a filter hook.
+	 * Calls the callback functions added to a filter hook.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @param mixed $value The value to filter.
-	 * @param array $args  Additional parameters to pass to the callback functions.
-	 *                     This array is expected to include $value at index 0.
+	 * @param array $args  Arguments to pass to callbacks.
 	 * @return mixed The filtered value after all hooked functions are applied to it.
 	 */
 	public function apply_filters( $value, $args ) {
@@ -274,24 +281,23 @@ final class WP_Hook implements Iterator, ArrayAccess {
 		$nesting_level = $this->nesting_level++;
 
 		$this->iterations[ $nesting_level ] = array_keys( $this->callbacks );
-		$num_args                           = count( $args );
+		$num_args = count( $args );
 
 		do {
-			$this->current_priority[ $nesting_level ] = current( $this->iterations[ $nesting_level ] );
-			$priority                                 = $this->current_priority[ $nesting_level ];
+			$this->current_priority[ $nesting_level ] = $priority = current( $this->iterations[ $nesting_level ] );
 
 			foreach ( $this->callbacks[ $priority ] as $the_ ) {
-				if ( ! $this->doing_action ) {
-					$args[0] = $value;
+				if( ! $this->doing_action ) {
+					$args[ 0 ] = $value;
 				}
 
-				// Avoid the array_slice() if possible.
-				if ( 0 == $the_['accepted_args'] ) {
-					$value = call_user_func( $the_['function'] );
+				// Avoid the array_slice if possible.
+				if ( $the_['accepted_args'] == 0 ) {
+					$value = call_user_func_array( $the_['function'], array() );
 				} elseif ( $the_['accepted_args'] >= $num_args ) {
 					$value = call_user_func_array( $the_['function'], $args );
 				} else {
-					$value = call_user_func_array( $the_['function'], array_slice( $args, 0, (int) $the_['accepted_args'] ) );
+					$value = call_user_func_array( $the_['function'], array_slice( $args, 0, (int)$the_['accepted_args'] ) );
 				}
 			}
 		} while ( false !== next( $this->iterations[ $nesting_level ] ) );
@@ -305,11 +311,12 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * Calls the callback functions that have been added to an action hook.
+	 * Executes the callback functions hooked on a specific action hook.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @param array $args Parameters to pass to the callback functions.
+	 * @param mixed $args Arguments to pass to the hook callbacks.
 	 */
 	public function do_action( $args ) {
 		$this->doing_action = true;
@@ -325,11 +332,12 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Processes the functions hooked into the 'all' hook.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @param array $args Arguments to pass to the hook callbacks. Passed by reference.
 	 */
 	public function do_all_hook( &$args ) {
-		$nesting_level                      = $this->nesting_level++;
+		$nesting_level = $this->nesting_level++;
 		$this->iterations[ $nesting_level ] = array_keys( $this->callbacks );
 
 		do {
@@ -347,6 +355,7 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Return the current priority level of the currently running iteration of the hook.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
 	 * @return int|false If the hook is running, return the current priority level. If it isn't running, return false.
 	 */
@@ -361,30 +370,11 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	/**
 	 * Normalizes filters set up before WordPress has initialized to WP_Hook objects.
 	 *
-	 * The `$filters` parameter should be an array keyed by hook name, with values
-	 * containing either:
-	 *
-	 *  - A `WP_Hook` instance
-	 *  - An array of callbacks keyed by their priorities
-	 *
-	 * Examples:
-	 *
-	 *     $filters = array(
-	 *         'wp_fatal_error_handler_enabled' => array(
-	 *             10 => array(
-	 *                 array(
-	 *                     'accepted_args' => 0,
-	 *                     'function'      => function() {
-	 *                         return false;
-	 *                     },
-	 *                 ),
-	 *             ),
-	 *         ),
-	 *     );
-	 *
 	 * @since 4.7.0
+	 * @access public
+	 * @static
 	 *
-	 * @param array $filters Filters to normalize. See documentation above for details.
+	 * @param array $filters Filters to normalize.
 	 * @return WP_Hook[] Array of normalized filters.
 	 */
 	public static function build_preinitialized_hooks( $filters ) {
@@ -415,8 +405,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Determines whether an offset value exists.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/arrayaccess.offsetexists.php
+	 * @link http://php.net/manual/en/arrayaccess.offsetexists.php
 	 *
 	 * @param mixed $offset An offset to check for.
 	 * @return bool True if the offset exists, false otherwise.
@@ -429,8 +420,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Retrieves a value at a specified offset.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/arrayaccess.offsetget.php
+	 * @link http://php.net/manual/en/arrayaccess.offsetget.php
 	 *
 	 * @param mixed $offset The offset to retrieve.
 	 * @return mixed If set, the value at the specified offset, null otherwise.
@@ -443,8 +435,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Sets a value at a specified offset.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/arrayaccess.offsetset.php
+	 * @link http://php.net/manual/en/arrayaccess.offsetset.php
 	 *
 	 * @param mixed $offset The offset to assign the value to.
 	 * @param mixed $value The value to set.
@@ -461,8 +454,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Unsets a specified offset.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/arrayaccess.offsetunset.php
+	 * @link http://php.net/manual/en/arrayaccess.offsetunset.php
 	 *
 	 * @param mixed $offset The offset to unset.
 	 */
@@ -474,8 +468,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Returns the current element.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/iterator.current.php
+	 * @link http://php.net/manual/en/iterator.current.php
 	 *
 	 * @return array Of callbacks at current priority.
 	 */
@@ -487,8 +482,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Moves forward to the next element.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/iterator.next.php
+	 * @link http://php.net/manual/en/iterator.next.php
 	 *
 	 * @return array Of callbacks at next priority.
 	 */
@@ -500,8 +496,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Returns the key of the current element.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/iterator.key.php
+	 * @link http://php.net/manual/en/iterator.key.php
 	 *
 	 * @return mixed Returns current priority on success, or NULL on failure
 	 */
@@ -513,10 +510,11 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Checks if current position is valid.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/iterator.valid.php
+	 * @link http://php.net/manual/en/iterator.valid.php
 	 *
-	 * @return bool Whether the current position is valid.
+	 * @return boolean
 	 */
 	public function valid() {
 		return key( $this->callbacks ) !== null;
@@ -526,8 +524,9 @@ final class WP_Hook implements Iterator, ArrayAccess {
 	 * Rewinds the Iterator to the first element.
 	 *
 	 * @since 4.7.0
+	 * @access public
 	 *
-	 * @link https://www.php.net/manual/en/iterator.rewind.php
+	 * @link http://php.net/manual/en/iterator.rewind.php
 	 */
 	public function rewind() {
 		reset( $this->callbacks );
