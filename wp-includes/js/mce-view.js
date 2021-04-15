@@ -1,7 +1,3 @@
-/**
- * @output wp-includes/js/mce-view.js
- */
-
 /* global tinymce */
 
 /*
@@ -46,7 +42,7 @@
 		/**
 		 * Registers a new view type.
 		 *
-		 * @param {string} type   The view type.
+		 * @param {String} type   The view type.
 		 * @param {Object} extend An object to extend wp.mce.View.prototype with.
 		 */
 		register: function( type, extend ) {
@@ -56,7 +52,7 @@
 		/**
 		 * Unregisters a view type.
 		 *
-		 * @param {string} type The view type.
+		 * @param {String} type The view type.
 		 */
 		unregister: function( type ) {
 			delete views[ type ];
@@ -65,7 +61,7 @@
 		/**
 		 * Returns the settings of a view type.
 		 *
-		 * @param {string} type The view type.
+		 * @param {String} type The view type.
 		 *
 		 * @return {Function} The view constructor.
 		 */
@@ -88,12 +84,11 @@
 		 * replacing any matches with markers,
 		 * and creates a new instance for every match.
 		 *
-		 * @param {string} content The string to scan.
-		 * @param {tinymce.Editor} editor The editor.
+		 * @param {String} content The string to scan.
 		 *
-		 * @return {string} The string with markers.
+		 * @return {String} The string with markers.
 		 */
-		setMarkers: function( content, editor ) {
+		setMarkers: function( content ) {
 			var pieces = [ { content: content } ],
 				self = this,
 				instance, current;
@@ -120,7 +115,6 @@
 							pieces.push( { content: remaining.substring( 0, result.index ) } );
 						}
 
-						result.options.editor = editor;
 						instance = self.createInstance( type, result.content, result.options );
 						text = instance.loader ? '.' : instance.text;
 
@@ -149,10 +143,10 @@
 		/**
 		 * Create a view instance.
 		 *
-		 * @param {string}  type    The view type.
-		 * @param {string}  text    The textual representation of the view.
+		 * @param {String}  type    The view type.
+		 * @param {String}  text    The textual representation of the view.
 		 * @param {Object}  options Options.
-		 * @param {boolean} force   Recreate the instance. Optional.
+		 * @param {Boolean} force   Recreate the instance. Optional.
 		 *
 		 * @return {wp.mce.View} The view instance.
 		 */
@@ -190,7 +184,7 @@
 		/**
 		 * Get a view instance.
 		 *
-		 * @param {(string|HTMLElement)} object The textual representation of the view or the view node.
+		 * @param {(String|HTMLElement)} object The textual representation of the view or the view node.
 		 *
 		 * @return {wp.mce.View} The view instance or undefined.
 		 */
@@ -207,7 +201,7 @@
 		 *
 		 * @param {HTMLElement} node The view node.
 		 *
-		 * @return {string} The textual representation of the view.
+		 * @return {String} The textual representation of the view.
 		 */
 		getText: function( node ) {
 			return decodeURIComponent( $( node ).attr( 'data-wpview-text' ) || '' );
@@ -216,7 +210,7 @@
 		/**
 		 * Renders all view nodes that are not yet rendered.
 		 *
-		 * @param {boolean} force Rerender all view nodes.
+		 * @param {Boolean} force Rerender all view nodes.
 		 */
 		render: function( force ) {
 			_.each( instances, function( instance ) {
@@ -227,10 +221,10 @@
 		/**
 		 * Update the text of a given view node.
 		 *
-		 * @param {string}         text   The new text.
+		 * @param {String}         text   The new text.
 		 * @param {tinymce.Editor} editor The TinyMCE editor instance the view node is in.
 		 * @param {HTMLElement}    node   The view node to update.
-		 * @param {boolean}        force  Recreate the instance. Optional.
+		 * @param {Boolean}        force  Recreate the instance. Optional.
 		 */
 		update: function( text, editor, node, force ) {
 			var instance = this.getInstance( node );
@@ -284,7 +278,7 @@
 
 	wp.mce.View.extend = Backbone.View.extend;
 
-	_.extend( wp.mce.View.prototype, /** @lends wp.mce.View.prototype */{
+	_.extend( wp.mce.View.prototype, {
 
 		/**
 		 * The content.
@@ -317,8 +311,8 @@
 		/**
 		 * Renders all view nodes tied to this view instance that are not yet rendered.
 		 *
-		 * @param {string}  content The content to render. Optional.
-		 * @param {boolean} force   Rerender all view nodes tied to this view instance. Optional.
+		 * @param {String}  content The content to render. Optional.
+		 * @param {Boolean} force   Rerender all view nodes tied to this view instance. Optional.
 		 */
 		render: function( content, force ) {
 			if ( content != null ) {
@@ -385,7 +379,7 @@
 		 * Gets all view nodes tied to this view instance.
 		 *
 		 * @param {Function} callback A callback.
-		 * @param {boolean}  rendered Get (un)rendered view nodes. Optional.
+		 * @param {Boolean}  rendered Get (un)rendered view nodes. Optional.
 		 */
 		getNodes: function( callback, rendered ) {
 			this.getEditors( function( editor ) {
@@ -432,7 +426,6 @@
 		 */
 		replaceMarkers: function() {
 			this.getMarkers( function( editor, node ) {
-				var selected = node === editor.selection.getNode();
 				var $viewNode;
 
 				if ( ! this.loader && $( node ).text() !== tinymce.DOM.decode( this.text ) ) {
@@ -444,18 +437,7 @@
 					'<div class="wpview wpview-wrap" data-wpview-text="' + this.encodedText + '" data-wpview-type="' + this.type + '" contenteditable="false"></div>'
 				);
 
-				editor.undoManager.ignore( function() {
-					editor.$( node ).replaceWith( $viewNode );
-				} );
-
-				if ( selected ) {
-					setTimeout( function() {
-						editor.undoManager.ignore( function() {
-							editor.selection.select( $viewNode[0] );
-							editor.selection.collapse();
-						} );
-					} );
-				}
+				editor.$( node ).replaceWith( $viewNode );
 			} );
 		},
 
@@ -473,10 +455,10 @@
 		 *
 		 * @param {*}        content  The content to set.
 		 * @param {Function} callback A callback. Optional.
-		 * @param {boolean}  rendered Only set for (un)rendered nodes. Optional.
+		 * @param {Boolean}  rendered Only set for (un)rendered nodes. Optional.
 		 */
 		setContent: function( content, callback, rendered ) {
-			if ( _.isObject( content ) && ( content.sandbox || content.head || content.body.indexOf( '<script' ) !== -1 ) ) {
+			if ( _.isObject( content ) && content.body.indexOf( '<script' ) !== -1 ) {
 				this.setIframes( content.head || '', content.body, callback, rendered );
 			} else if ( _.isString( content ) && content.indexOf( '<script' ) !== -1 ) {
 				this.setIframes( '', content, callback, rendered );
@@ -502,10 +484,10 @@
 		/**
 		 * Sets the content in an iframe for all view nodes tied to this view instance.
 		 *
-		 * @param {string}   head     HTML string to be added to the head of the document.
-		 * @param {string}   body     HTML string to be added to the body of the document.
+		 * @param {String}   head     HTML string to be added to the head of the document.
+		 * @param {String}   body     HTML string to be added to the body of the document.
 		 * @param {Function} callback A callback. Optional.
-		 * @param {boolean}  rendered Only set for (un)rendered nodes. Optional.
+		 * @param {Boolean}  rendered Only set for (un)rendered nodes. Optional.
 		 */
 		setIframes: function( head, body, callback, rendered ) {
 			var self = this;
@@ -565,12 +547,10 @@
 					dom.add( node, 'span', { 'class': 'wpview-end' } );
 				} );
 
-				/*
-				 * Bail if the iframe node is not attached to the DOM.
-				 * Happens when the view is dragged in the editor.
-				 * There is a browser restriction when iframes are moved in the DOM. They get emptied.
-				 * The iframe will be rerendered after dropping the view node at the new location.
-				 */
+				// Bail if the iframe node is not attached to the DOM.
+				// Happens when the view is dragged in the editor.
+				// There is a browser restriction when iframes are moved in the DOM. They get emptied.
+				// The iframe will be rerendered after dropping the view node at the new location.
 				if ( ! iframe.contentWindow ) {
 					return;
 				}
@@ -601,9 +581,6 @@
 								'body#wpview-iframe-sandbox:after {' +
 									'display: none;' +
 									'content: "";' +
-								'}' +
-								'iframe {' +
-									'max-width: 100%;' +
 								'}' +
 							'</style>' +
 						'</head>' +
@@ -644,22 +621,10 @@
 				}
 
 				function reload() {
-					if ( ! editor.isHidden() ) {
-						$( node ).data( 'rendered', null );
+					$( node ).data( 'rendered', null );
 
-						setTimeout( function() {
-							wp.mce.views.render();
-						} );
-					}
-				}
-
-				function addObserver() {
-					observer = new MutationObserver( _.debounce( resize, 100 ) );
-
-					observer.observe( iframeDoc.body, {
-						attributes: true,
-						childList: true,
-						subtree: true
+					setTimeout( function() {
+						wp.mce.views.render();
 					} );
 				}
 
@@ -668,11 +633,13 @@
 				MutationObserver = iframeWin.MutationObserver || iframeWin.WebKitMutationObserver || iframeWin.MozMutationObserver;
 
 				if ( MutationObserver ) {
-					if ( ! iframeDoc.body ) {
-						iframeDoc.addEventListener( 'DOMContentLoaded', addObserver, false );
-					} else {
-						addObserver();
-					}
+					observer = new MutationObserver( _.debounce( resize, 100 ) );
+
+					observer.observe( iframeDoc.body, {
+						attributes: true,
+						childList: true,
+						subtree: true
+					} );
 				} else {
 					for ( i = 1; i < 6; i++ ) {
 						setTimeout( resize, i * 700 );
@@ -698,8 +665,8 @@
 		/**
 		 * Sets an error for all view nodes tied to this view instance.
 		 *
-		 * @param {string} message  The error message to set.
-		 * @param {string} dashicon A dashicon ID. Optional. {@link https://developer.wordpress.org/resource/dashicons/}
+		 * @param {String} message  The error message to set.
+		 * @param {String} dashicon A dashicon ID. Optional. {@link https://developer.wordpress.org/resource/dashicons/}
 		 */
 		setError: function( message, dashicon ) {
 			this.setContent(
@@ -713,7 +680,7 @@
 		/**
 		 * Tries to find a text match in a given string.
 		 *
-		 * @param {string} content The string to scan.
+		 * @param {String} content The string to scan.
 		 *
 		 * @return {Object}
 		 */
@@ -734,10 +701,10 @@
 		/**
 		 * Update the text of a given view node.
 		 *
-		 * @param {string}         text   The new text.
+		 * @param {String}         text   The new text.
 		 * @param {tinymce.Editor} editor The TinyMCE editor instance the view node is in.
 		 * @param {HTMLElement}    node   The view node to update.
-		 * @param {boolean}        force  Recreate the instance. Optional.
+		 * @param {Boolean}        force  Recreate the instance. Optional.
 		 */
 		update: function( text, editor, node, force ) {
 			_.find( views, function( view, type ) {
@@ -862,7 +829,7 @@
 		action: 'parse-media-shortcode',
 
 		initialize: function() {
-			var self = this, maxwidth = null;
+			var self = this;
 
 			if ( this.url ) {
 				this.loader = false;
@@ -871,16 +838,10 @@
 				} );
 			}
 
-			// Obtain the target width for the embed.
-			if ( self.editor ) {
-				maxwidth = self.editor.getBody().clientWidth;
-			}
-
 			wp.ajax.post( this.action, {
 				post_ID: media.view.settings.post.id,
 				type: this.shortcode.tag,
-				shortcode: this.shortcode.string(),
-				maxwidth: maxwidth
+				shortcode: this.shortcode.string()
 			} )
 			.done( function( response ) {
 				self.render( response );
@@ -967,9 +928,8 @@
 
 	views.register( 'embedURL', _.extend( {}, embed, {
 		match: function( content ) {
-			// There may be a "bookmark" node next to the URL...
-			var re = /(^|<p>(?:<span data-mce-type="bookmark"[^>]+>\s*<\/span>)?)(https?:\/\/[^\s"]+?)((?:<span data-mce-type="bookmark"[^>]+>\s*<\/span>)?<\/p>\s*|$)/gi;
-			var match = re.exec( content );
+			var re = /(^|<p>)(https?:\/\/[^\s"]+?)(<\/p>\s*|$)/gi,
+				match = re.exec( content );
 
 			if ( match ) {
 				return {
