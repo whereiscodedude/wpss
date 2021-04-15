@@ -1,8 +1,6 @@
 <?php
 namespace Sodium;
 
-require_once dirname(dirname(__FILE__)) . '/autoload.php';
-
 use ParagonIE_Sodium_Compat;
 
 /**

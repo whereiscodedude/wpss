@@ -141,9 +141,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
             ParagonIE_Sodium_Compat::memzero($nonce);
             ParagonIE_Sodium_Compat::memzero($ephKeypair);
         } catch (SodiumException $ex) {
-            if (isset($ephKeypair)) {
-                unset($ephKeypair);
-            }
+            unset($ephKeypair);
         }
         return $res;
     }
@@ -243,7 +241,6 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
             ParagonIE_Sodium_Compat::memzero($nonce);
             ParagonIE_Sodium_Compat::memzero($ephKeypair);
         } catch (SodiumException $ex) {
-            /** @psalm-suppress PossiblyUndefinedVariable */
             unset($ephKeypair);
         }
         return $res;
@@ -331,9 +328,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
             ParagonIE_Sodium_Compat::memzero($nonce);
             ParagonIE_Sodium_Compat::memzero($ephKeypair);
         } catch (SodiumException $ex) {
-            if (isset($ephKeypair)) {
-                unset($ephKeypair);
-            }
+            unset($ephKeypair);
         }
         return $res;
     }
@@ -542,7 +537,6 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         try {
             ParagonIE_Sodium_Compat::memzero($key);
         } catch (SodiumException $ex) {
-            /** @psalm-suppress PossiblyUndefinedVariable */
             unset($key);
         }
         return $res;
@@ -685,11 +679,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         }
 
         /* Security checks */
-        if (
-            (ParagonIE_Sodium_Core_Ed25519::chrToInt($sig[63]) & 240)
-                &&
-            ParagonIE_Sodium_Core_Ed25519::check_S_lt_L(self::substr($sig, 32, 32))
-        ) {
+        if (ParagonIE_Sodium_Core_Ed25519::check_S_lt_L(self::substr($sig, 32, 32))) {
             throw new SodiumException('S < L - Invalid signature');
         }
         if (ParagonIE_Sodium_Core_Ed25519::small_order($sig)) {
@@ -851,7 +841,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         if (!is_string($plaintext)) {
             throw new SodiumException('Could not read input file');
         }
-        $first32 = self::ftell($ifp);
+        $first32 = ftell($ifp);
 
         /** @var string $subkey */
         $subkey = ParagonIE_Sodium_Core_HSalsa20::hsalsa20($nonce, $key);
@@ -885,7 +875,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         );
 
         // Pre-write 16 blank bytes for the Poly1305 tag
-        $start = self::ftell($ofp);
+        $start = ftell($ofp);
         fwrite($ofp, str_repeat("\x00", 16));
 
         /** @var string $c */
@@ -936,7 +926,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
             $block0 = null;
             $subkey = null;
         }
-        $end = self::ftell($ofp);
+        $end = ftell($ofp);
 
         /*
          * Write the Poly1305 authentication tag that provides integrity
@@ -1053,7 +1043,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         $mlen = 0
     ) {
         /** @var int $pos */
-        $pos = self::ftell($ifp);
+        $pos = ftell($ifp);
 
         /** @var int $iter */
         $iter = 1;
@@ -1116,7 +1106,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         }
 
         /** @var int $originalPosition */
-        $originalPosition = self::ftell($fp);
+        $originalPosition = ftell($fp);
 
         // Move file pointer to beginning of file
         fseek($fp, 0, SEEK_SET);
@@ -1324,7 +1314,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         if (!is_string($plaintext)) {
             throw new SodiumException('Could not read input file');
         }
-        $first32 = self::ftell($ifp);
+        $first32 = ftell($ifp);
 
         /** @var string $subkey */
         $subkey = ParagonIE_Sodium_Core32_HSalsa20::hsalsa20($nonce, $key);
@@ -1358,7 +1348,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         );
 
         // Pre-write 16 blank bytes for the Poly1305 tag
-        $start = self::ftell($ofp);
+        $start = ftell($ofp);
         fwrite($ofp, str_repeat("\x00", 16));
 
         /** @var string $c */
@@ -1409,7 +1399,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
             $block0 = null;
             $subkey = null;
         }
-        $end = self::ftell($ofp);
+        $end = ftell($ofp);
 
         /*
          * Write the Poly1305 authentication tag that provides integrity
@@ -1525,7 +1515,7 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         $mlen = 0
     ) {
         /** @var int $pos */
-        $pos = self::ftell($ifp);
+        $pos = ftell($ifp);
 
         /** @var int $iter */
         $iter = 1;
@@ -1549,19 +1539,5 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
 
         fseek($ifp, $pos, SEEK_SET);
         return $res;
-    }
-
-    /**
-     * @param resource $resource
-     * @return int
-     * @throws SodiumException
-     */
-    private static function ftell($resource)
-    {
-        $return = ftell($resource);
-        if (!is_int($return)) {
-            throw new SodiumException('ftell() returned false');
-        }
-        return (int) $return;
     }
 }
