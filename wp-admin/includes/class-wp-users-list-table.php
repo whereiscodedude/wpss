@@ -54,7 +54,7 @@ class WP_Users_List_Table extends WP_List_Table {
 		$this->is_site_users = 'site-users-network' === $this->screen->id;
 
 		if ( $this->is_site_users ) {
-			$this->site_id = isset( $_REQUEST['id'] ) ? (int) $_REQUEST['id'] : 0;
+			$this->site_id = isset( $_REQUEST['id'] ) ? intval( $_REQUEST['id'] ) : 0;
 		}
 	}
 
@@ -137,7 +137,7 @@ class WP_Users_List_Table extends WP_List_Table {
 		 */
 		$args = apply_filters( 'users_list_table_query_args', $args );
 
-		// Query the user IDs for this page.
+		// Query the user IDs for this page
 		$wp_user_search = new WP_User_Query( $args );
 
 		$this->items = $wp_user_search->get_results();
@@ -166,11 +166,11 @@ class WP_Users_List_Table extends WP_List_Table {
 	 * Provides a list of roles and user count for that role for easy
 	 * Filtersing of the user table.
 	 *
-	 * @since 3.1.0
+	 * @since  3.1.0
 	 *
 	 * @global string $role
 	 *
-	 * @return string[] An array of HTML links keyed by their view.
+	 * @return array An array of HTML links, one for each view.
 	 */
 	protected function get_views() {
 		global $role;
@@ -223,7 +223,7 @@ class WP_Users_List_Table extends WP_List_Table {
 
 			$name = translate_user_role( $name );
 			$name = sprintf(
-				/* translators: 1: User role name, 2: Number of users. */
+				/* translators: User role name with count. */
 				__( '%1$s <span class="count">(%2$s)</span>' ),
 				$name,
 				number_format_i18n( $avail_roles[ $this_role ] )
@@ -242,7 +242,7 @@ class WP_Users_List_Table extends WP_List_Table {
 
 			$name = __( 'No role' );
 			$name = sprintf(
-				/* translators: 1: User role name, 2: Number of users. */
+				/* translators: User role name with count. */
 				__( '%1$s <span class="count">(%2$s)</span>' ),
 				$name,
 				number_format_i18n( $avail_roles['none'] )
@@ -257,9 +257,9 @@ class WP_Users_List_Table extends WP_List_Table {
 	/**
 	 * Retrieve an associative array of bulk actions available on this table.
 	 *
-	 * @since 3.1.0
+	 * @since  3.1.0
 	 *
-	 * @return array Array of bulk action labels keyed by their action.
+	 * @return array Array of bulk actions.
 	 */
 	protected function get_bulk_actions() {
 		$actions = array();
@@ -272,11 +272,6 @@ class WP_Users_List_Table extends WP_List_Table {
 			if ( current_user_can( 'delete_users' ) ) {
 				$actions['delete'] = __( 'Delete' );
 			}
-		}
-
-		// Add a password reset link to the bulk actions dropdown.
-		if ( current_user_can( 'edit_users' ) ) {
-			$actions['resetpassword'] = __( 'Send password reset' );
 		}
 
 		return $actions;
@@ -300,7 +295,6 @@ class WP_Users_List_Table extends WP_List_Table {
 		<select name="<?php echo $id; ?>" id="<?php echo $id; ?>">
 			<option value=""><?php _e( 'Change role to&hellip;' ); ?></option>
 			<?php wp_dropdown_roles(); ?>
-			<option value="none"><?php _e( '&mdash; No role for this site &mdash;' ); ?></option>
 		</select>
 			<?php
 			submit_button( __( 'Change' ), '', $button_id, false );
@@ -336,12 +330,13 @@ class WP_Users_List_Table extends WP_List_Table {
 	 * Overridden from the base class implementation to capture
 	 * the role change drop-down.
 	 *
-	 * @since 3.1.0
+	 * @since  3.1.0
 	 *
 	 * @return string The bulk action required.
 	 */
 	public function current_action() {
-		if ( isset( $_REQUEST['changeit'] ) && ! empty( $_REQUEST['new_role'] ) ) {
+		if ( ( isset( $_REQUEST['changeit'] ) || isset( $_REQUEST['changeit2'] ) ) &&
+			( ! empty( $_REQUEST['new_role'] ) || ! empty( $_REQUEST['new_role2'] ) ) ) {
 			return 'promote';
 		}
 
@@ -351,9 +346,10 @@ class WP_Users_List_Table extends WP_List_Table {
 	/**
 	 * Get a list of columns for the list table.
 	 *
-	 * @since 3.1.0
+	 * @since  3.1.0
 	 *
-	 * @return string[] Array of column titles keyed by their column name.
+	 * @return array Array in which the key is the ID of the column,
+	 *               and the value is the description.
 	 */
 	public function get_columns() {
 		$c = array(
@@ -394,7 +390,7 @@ class WP_Users_List_Table extends WP_List_Table {
 	 * @since 3.1.0
 	 */
 	public function display_rows() {
-		// Query the post counts for this page.
+		// Query the post counts for this page
 		if ( ! $this->is_site_users ) {
 			$post_counts = count_many_users_posts( array_keys( $this->items ) );
 		}
@@ -433,7 +429,7 @@ class WP_Users_List_Table extends WP_List_Table {
 
 		$user_roles = $this->get_role_list( $user_object );
 
-		// Set up the hover actions for this user.
+		// Set up the hover actions for this user
 		$actions     = array();
 		$checkbox    = '';
 		$super_admin = '';
@@ -444,9 +440,9 @@ class WP_Users_List_Table extends WP_List_Table {
 			}
 		}
 
-		// Check if the user for this row is editable.
+		// Check if the user for this row is editable
 		if ( current_user_can( 'list_users' ) ) {
-			// Set up the user editing link.
+			// Set up the user editing link
 			$edit_link = esc_url( add_query_arg( 'wp_http_referer', urlencode( wp_unslash( $_SERVER['REQUEST_URI'] ) ), get_edit_user_link( $user_object->ID ) ) );
 
 			if ( current_user_can( 'edit_user', $user_object->ID ) ) {
@@ -475,11 +471,6 @@ class WP_Users_List_Table extends WP_List_Table {
 				);
 			}
 
-			// Add a link to send the user a reset password link by email.
-			if ( get_current_user_id() !== $user_object->ID && current_user_can( 'edit_user', $user_object->ID ) ) {
-				$actions['resetpassword'] = "<a class='resetpassword' href='" . wp_nonce_url( "users.php?action=resetpassword&amp;users=$user_object->ID", 'bulk-users' ) . "'>" . __( 'Send password reset' ) . '</a>';
-			}
-
 			/**
 			 * Filters the action links displayed under each user in the Users list table.
 			 *
@@ -495,7 +486,7 @@ class WP_Users_List_Table extends WP_List_Table {
 			// Role classes.
 			$role_classes = esc_attr( implode( ' ', array_keys( $user_roles ) ) );
 
-			// Set up the checkbox (because the user is editable, otherwise it's empty).
+			// Set up the checkbox ( because the user is editable, otherwise it's empty )
 			$checkbox = sprintf(
 				'<label class="screen-reader-text" for="user_%1$s">%2$s</label>' .
 				'<input type="checkbox" name="users[]" id="user_%1$s" class="%3$s" value="%1$s" />',
@@ -524,10 +515,10 @@ class WP_Users_List_Table extends WP_List_Table {
 				$classes .= ' has-row-actions column-primary';
 			}
 			if ( 'posts' === $column_name ) {
-				$classes .= ' num'; // Special case for that column.
+				$classes .= ' num'; // Special case for that column
 			}
 
-			if ( in_array( $column_name, $hidden, true ) ) {
+			if ( in_array( $column_name, $hidden ) ) {
 				$classes .= ' hidden';
 			}
 

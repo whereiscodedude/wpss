@@ -82,12 +82,12 @@ this["wp"] = this["wp"] || {}; this["wp"]["escapeHtml"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 480);
+/******/ 	return __webpack_require__(__webpack_require__.s = 367);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 480:
+/***/ 367:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -100,7 +100,6 @@ __webpack_require__.d(__webpack_exports__, "escapeQuotationMark", function() { r
 __webpack_require__.d(__webpack_exports__, "escapeLessThan", function() { return /* binding */ escapeLessThan; });
 __webpack_require__.d(__webpack_exports__, "escapeAttribute", function() { return /* binding */ escapeAttribute; });
 __webpack_require__.d(__webpack_exports__, "escapeHTML", function() { return /* binding */ escapeHTML; });
-__webpack_require__.d(__webpack_exports__, "escapeEditableHTML", function() { return /* binding */ escapeEditableHTML; });
 __webpack_require__.d(__webpack_exports__, "isValidAttributeName", function() { return /* binding */ isValidAttributeName; });
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/escape-html/build-module/escape-greater.js
@@ -217,19 +216,6 @@ function escapeAttribute(value) {
 
 function escapeHTML(value) {
   return escapeLessThan(escapeAmpersand(value));
-}
-/**
- * Returns an escaped Editable HTML element value. This is different from
- * `escapeHTML`, because for editable HTML, ALL ampersands must be escaped in
- * order to render the content correctly on the page.
- *
- * @param {string} value Element value.
- *
- * @return {string} Escaped HTML element value.
- */
-
-function escapeEditableHTML(value) {
-  return escapeLessThan(value.replace(/&/g, '&amp;'));
 }
 /**
  * Returns true if the given attribute name is valid, or false otherwise.
