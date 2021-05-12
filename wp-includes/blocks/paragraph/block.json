@@ -10,8 +10,7 @@
 			"type": "string",
 			"source": "html",
 			"selector": "p",
-			"default": "",
-			"__experimentalRole": "content"
+			"default": ""
 		},
 		"dropCap": {
 			"type": "boolean",
@@ -22,7 +21,10 @@
 		},
 		"direction": {
 			"type": "string",
-			"enum": [ "ltr", "rtl" ]
+			"enum": [
+				"ltr",
+				"rtl"
+			]
 		}
 	},
 	"supports": {
@@ -35,7 +37,5 @@
 		"lineHeight": true,
 		"__experimentalSelector": "p",
 		"__unstablePasteTextInline": true
-	},
-	"editorStyle": "wp-block-paragraph-editor",
-	"style": "wp-block-paragraph"
+	}
 }

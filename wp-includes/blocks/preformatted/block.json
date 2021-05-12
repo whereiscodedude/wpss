@@ -8,16 +8,10 @@
 			"source": "html",
 			"selector": "pre",
 			"default": "",
-			"__unstablePreserveWhiteSpace": true,
-			"__experimentalRole": "content"
+			"__unstablePreserveWhiteSpace": true
 		}
 	},
 	"supports": {
-		"anchor": true,
-		"color": {
-			"gradients": true
-		},
-		"fontSize": true
-	},
-	"style": "wp-block-preformatted"
+		"anchor": true
+	}
 }

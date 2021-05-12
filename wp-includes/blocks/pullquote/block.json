@@ -7,15 +7,13 @@
 			"type": "string",
 			"source": "html",
 			"selector": "blockquote",
-			"multiline": "p",
-			"__experimentalRole": "content"
+			"multiline": "p"
 		},
 		"citation": {
 			"type": "string",
 			"source": "html",
 			"selector": "cite",
-			"default": "",
-			"__experimentalRole": "content"
+			"default": ""
 		},
 		"mainColor": {
 			"type": "string"
@@ -32,8 +30,11 @@
 	},
 	"supports": {
 		"anchor": true,
-		"align": [ "left", "right", "wide", "full" ]
-	},
-	"editorStyle": "wp-block-pullquote-editor",
-	"style": "wp-block-pullquote"
+		"align": [
+			"left",
+			"right",
+			"wide",
+			"full"
+		]
+	}
 }

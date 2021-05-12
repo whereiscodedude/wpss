@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["mediaUtils"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 476);
+/******/ 	return __webpack_require__(__webpack_require__.s = 493);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -90,14 +90,14 @@ this["wp"] = this["wp"] || {}; this["wp"]["mediaUtils"] =
 /***/ 0:
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["element"]; }());
+(function() { module.exports = this["wp"]["element"]; }());
 
 /***/ }),
 
 /***/ 1:
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["i18n"]; }());
+(function() { module.exports = this["wp"]["i18n"]; }());
 
 /***/ }),
 
@@ -114,17 +114,14 @@ var arrayWithHoles = __webpack_require__(38);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
 function _iterableToArrayLimit(arr, i) {
-  var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
-
-  if (_i == null) return;
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
   var _arr = [];
   var _n = true;
   var _d = false;
-
-  var _s, _e;
+  var _e = undefined;
 
   try {
-    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
       _arr.push(_s.value);
 
       if (i && _arr.length === i) break;
@@ -143,7 +140,7 @@ function _iterableToArrayLimit(arr, i) {
   return _arr;
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js
-var unsupportedIterableToArray = __webpack_require__(28);
+var unsupportedIterableToArray = __webpack_require__(31);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableRest.js
 var nonIterableRest = __webpack_require__(39);
@@ -159,7 +156,22 @@ function _slicedToArray(arr, i) {
 
 /***/ }),
 
-/***/ 15:
+/***/ 16:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _assertThisInitialized; });
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return self;
+}
+
+/***/ }),
+
+/***/ 17:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -168,7 +180,7 @@ function _slicedToArray(arr, i) {
 __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ _toConsumableArray; });
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayLikeToArray.js
-var arrayLikeToArray = __webpack_require__(24);
+var arrayLikeToArray = __webpack_require__(27);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithoutHoles.js
 
@@ -176,10 +188,10 @@ function _arrayWithoutHoles(arr) {
   if (Array.isArray(arr)) return Object(arrayLikeToArray["a" /* default */])(arr);
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArray.js
-var iterableToArray = __webpack_require__(42);
+var iterableToArray = __webpack_require__(37);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js
-var unsupportedIterableToArray = __webpack_require__(28);
+var unsupportedIterableToArray = __webpack_require__(31);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableSpread.js
 function _nonIterableSpread() {
@@ -196,36 +208,7 @@ function _toConsumableArray(arr) {
 
 /***/ }),
 
-/***/ 16:
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["regeneratorRuntime"]; }());
-
-/***/ }),
-
-/***/ 18:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _assertThisInitialized; });
-function _assertThisInitialized(self) {
-  if (self === void 0) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return self;
-}
-
-/***/ }),
-
-/***/ 2:
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["lodash"]; }());
-
-/***/ }),
-
-/***/ 22:
+/***/ 19:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -239,24 +222,21 @@ function _getPrototypeOf(o) {
 
 /***/ }),
 
-/***/ 24:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ 2:
+/***/ (function(module, exports) {
 
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _arrayLikeToArray; });
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
+(function() { module.exports = this["lodash"]; }());
 
 /***/ }),
 
-/***/ 25:
+/***/ 20:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["regeneratorRuntime"]; }());
+
+/***/ }),
+
+/***/ 21:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -269,7 +249,7 @@ function _classCallCheck(instance, Constructor) {
 
 /***/ }),
 
-/***/ 26:
+/***/ 22:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -292,30 +272,24 @@ function _createClass(Constructor, protoProps, staticProps) {
 
 /***/ }),
 
-/***/ 28:
+/***/ 23:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _unsupportedIterableToArray; });
-/* harmony import */ var _arrayLikeToArray_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(24);
 
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return Object(_arrayLikeToArray_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return Object(_arrayLikeToArray_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ _inherits; });
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/setPrototypeOf.js
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
 }
-
-/***/ }),
-
-/***/ 33:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _inherits; });
-/* harmony import */ var _setPrototypeOf_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(55);
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/inherits.js
 
 function _inherits(subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
@@ -329,27 +303,72 @@ function _inherits(subClass, superClass) {
       configurable: true
     }
   });
-  if (superClass) Object(_setPrototypeOf_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(subClass, superClass);
+  if (superClass) _setPrototypeOf(subClass, superClass);
 }
 
 /***/ }),
 
-/***/ 34:
+/***/ 24:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _possibleConstructorReturn; });
-/* harmony import */ var _babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(59);
-/* harmony import */ var _babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _assertThisInitialized_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(18);
+/* harmony import */ var _babel_runtime_helpers_esm_typeof__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(40);
+/* harmony import */ var _babel_runtime_helpers_esm_assertThisInitialized__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
 
 
 function _possibleConstructorReturn(self, call) {
-  if (call && (_babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0___default()(call) === "object" || typeof call === "function")) {
+  if (call && (Object(_babel_runtime_helpers_esm_typeof__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(call) === "object" || typeof call === "function")) {
     return call;
   }
 
-  return Object(_assertThisInitialized_js__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(self);
+  return Object(_babel_runtime_helpers_esm_assertThisInitialized__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(self);
+}
+
+/***/ }),
+
+/***/ 27:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _arrayLikeToArray; });
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+/***/ }),
+
+/***/ 31:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _unsupportedIterableToArray; });
+/* harmony import */ var _babel_runtime_helpers_esm_arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(27);
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return Object(_babel_runtime_helpers_esm_arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return Object(_babel_runtime_helpers_esm_arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
+}
+
+/***/ }),
+
+/***/ 37:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _iterableToArray; });
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
 }
 
 /***/ }),
@@ -376,25 +395,87 @@ function _nonIterableRest() {
 
 /***/ }),
 
-/***/ 42:
+/***/ 40:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _iterableToArray; });
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _typeof; });
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+  }
+
+  return _typeof(obj);
 }
 
 /***/ }),
 
-/***/ 43:
+/***/ 41:
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["blob"]; }());
+(function() { module.exports = this["wp"]["blob"]; }());
 
 /***/ }),
 
-/***/ 476:
+/***/ 45:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _asyncToGenerator; });
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
+/***/ }),
+
+/***/ 47:
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["apiFetch"]; }());
+
+/***/ }),
+
+/***/ 493:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -406,31 +487,31 @@ __webpack_require__.d(__webpack_exports__, "MediaUpload", function() { return /*
 __webpack_require__.d(__webpack_exports__, "uploadMedia", function() { return /* reexport */ uploadMedia; });
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/classCallCheck.js
-var classCallCheck = __webpack_require__(25);
+var classCallCheck = __webpack_require__(21);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/createClass.js
-var createClass = __webpack_require__(26);
+var createClass = __webpack_require__(22);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
-var assertThisInitialized = __webpack_require__(18);
+var assertThisInitialized = __webpack_require__(16);
 
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inherits.js
-var inherits = __webpack_require__(33);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inherits.js + 1 modules
+var inherits = __webpack_require__(23);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/possibleConstructorReturn.js
-var possibleConstructorReturn = __webpack_require__(34);
+var possibleConstructorReturn = __webpack_require__(24);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/getPrototypeOf.js
-var getPrototypeOf = __webpack_require__(22);
+var getPrototypeOf = __webpack_require__(19);
 
-// EXTERNAL MODULE: external "lodash"
-var external_lodash_ = __webpack_require__(2);
+// EXTERNAL MODULE: external {"this":"lodash"}
+var external_this_lodash_ = __webpack_require__(2);
 
-// EXTERNAL MODULE: external ["wp","element"]
-var external_wp_element_ = __webpack_require__(0);
+// EXTERNAL MODULE: external {"this":["wp","element"]}
+var external_this_wp_element_ = __webpack_require__(0);
 
-// EXTERNAL MODULE: external ["wp","i18n"]
-var external_wp_i18n_ = __webpack_require__(1);
+// EXTERNAL MODULE: external {"this":["wp","i18n"]}
+var external_this_wp_i18n_ = __webpack_require__(1);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/media-utils/build-module/components/media-upload/index.js
 
@@ -442,7 +523,7 @@ var external_wp_i18n_ = __webpack_require__(1);
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = Object(getPrototypeOf["a" /* default */])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = Object(getPrototypeOf["a" /* default */])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return Object(possibleConstructorReturn["a" /* default */])(this, result); }; }
 
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 /**
  * External dependencies
@@ -593,7 +674,7 @@ var media_upload_getGalleryDetailsMediaFrame = function getGalleryDetailsMediaFr
         filterable: 'uploaded',
         multiple: 'add',
         editable: false,
-        library: wp.media.query(Object(external_lodash_["defaults"])({
+        library: wp.media.query(Object(external_this_lodash_["defaults"])({
           type: 'image'
         }, this.options.library))
       }), new wp.media.controller.EditImage({
@@ -613,7 +694,7 @@ var media_upload_getGalleryDetailsMediaFrame = function getGalleryDetailsMediaFr
 
 var media_upload_slimImageObject = function slimImageObject(img) {
   var attrSet = ['sizes', 'mime', 'type', 'subtype', 'id', 'url', 'alt', 'link', 'caption'];
-  return Object(external_lodash_["pick"])(img, attrSet);
+  return Object(external_this_lodash_["pick"])(img, attrSet);
 };
 
 var getAttachmentsCollection = function getAttachmentsCollection(ids) {
@@ -644,7 +725,7 @@ var media_upload_MediaUpload = /*#__PURE__*/function (_Component) {
         _ref$multiple = _ref.multiple,
         multiple = _ref$multiple === void 0 ? false : _ref$multiple,
         _ref$title = _ref.title,
-        title = _ref$title === void 0 ? Object(external_wp_i18n_["__"])('Select or Upload Media') : _ref$title;
+        title = _ref$title === void 0 ? Object(external_this_wp_i18n_["__"])('Select or Upload Media') : _ref$title;
 
     Object(classCallCheck["a" /* default */])(this, MediaUpload);
 
@@ -819,7 +900,7 @@ var media_upload_MediaUpload = /*#__PURE__*/function (_Component) {
       this.updateCollection(); // Handle both this.props.value being either (number[]) multiple ids
       // (for galleries) or a (number) singular id (e.g. image block).
 
-      var hasMedia = Array.isArray(this.props.value) ? !!((_this$props$value2 = this.props.value) !== null && _this$props$value2 !== void 0 && _this$props$value2.length) : !!this.props.value;
+      var hasMedia = Array.isArray(this.props.value) ? !!((_this$props$value2 = this.props.value) === null || _this$props$value2 === void 0 ? void 0 : _this$props$value2.length) : !!this.props.value;
 
       if (!hasMedia) {
         return;
@@ -827,13 +908,13 @@ var media_upload_MediaUpload = /*#__PURE__*/function (_Component) {
 
       if (!this.props.gallery) {
         var selection = this.frame.state().get('selection');
-        Object(external_lodash_["castArray"])(this.props.value).forEach(function (id) {
+        Object(external_this_lodash_["castArray"])(this.props.value).forEach(function (id) {
           selection.add(wp.media.attachment(id));
         });
       } // load the images so they are available in the media modal.
 
 
-      getAttachmentsCollection(Object(external_lodash_["castArray"])(this.props.value)).more();
+      getAttachmentsCollection(Object(external_this_lodash_["castArray"])(this.props.value)).more();
     }
   }, {
     key: "onClose",
@@ -880,35 +961,35 @@ var media_upload_MediaUpload = /*#__PURE__*/function (_Component) {
   }]);
 
   return MediaUpload;
-}(external_wp_element_["Component"]);
+}(external_this_wp_element_["Component"]);
 
 /* harmony default export */ var media_upload = (media_upload_MediaUpload);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/media-utils/build-module/components/index.js
 
 
+// EXTERNAL MODULE: external {"this":"regeneratorRuntime"}
+var external_this_regeneratorRuntime_ = __webpack_require__(20);
+var external_this_regeneratorRuntime_default = /*#__PURE__*/__webpack_require__.n(external_this_regeneratorRuntime_);
+
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
 var defineProperty = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(48);
+var asyncToGenerator = __webpack_require__(45);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 2 modules
-var toConsumableArray = __webpack_require__(15);
+var toConsumableArray = __webpack_require__(17);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js + 1 modules
 var slicedToArray = __webpack_require__(12);
 
-// EXTERNAL MODULE: external "regeneratorRuntime"
-var external_regeneratorRuntime_ = __webpack_require__(16);
-var external_regeneratorRuntime_default = /*#__PURE__*/__webpack_require__.n(external_regeneratorRuntime_);
+// EXTERNAL MODULE: external {"this":["wp","apiFetch"]}
+var external_this_wp_apiFetch_ = __webpack_require__(47);
+var external_this_wp_apiFetch_default = /*#__PURE__*/__webpack_require__.n(external_this_wp_apiFetch_);
 
-// EXTERNAL MODULE: external ["wp","apiFetch"]
-var external_wp_apiFetch_ = __webpack_require__(50);
-var external_wp_apiFetch_default = /*#__PURE__*/__webpack_require__.n(external_wp_apiFetch_);
-
-// EXTERNAL MODULE: external ["wp","blob"]
-var external_wp_blob_ = __webpack_require__(43);
+// EXTERNAL MODULE: external {"this":["wp","blob"]}
+var external_this_wp_blob_ = __webpack_require__(41);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/media-utils/build-module/utils/upload-media.js
 
@@ -958,13 +1039,13 @@ function getMimeTypesArray(wpMimeTypesObject) {
     return wpMimeTypesObject;
   }
 
-  return Object(external_lodash_["flatMap"])(wpMimeTypesObject, function (mime, extensionsString) {
+  return Object(external_this_lodash_["flatMap"])(wpMimeTypesObject, function (mime, extensionsString) {
     var _mime$split = mime.split('/'),
         _mime$split2 = Object(slicedToArray["a" /* default */])(_mime$split, 1),
         type = _mime$split2[0];
 
     var extensions = extensionsString.split('|');
-    return [mime].concat(Object(toConsumableArray["a" /* default */])(Object(external_lodash_["map"])(extensions, function (extension) {
+    return [mime].concat(Object(toConsumableArray["a" /* default */])(Object(external_this_lodash_["map"])(extensions, function (extension) {
       return "".concat(type, "/").concat(extension);
     })));
   });
@@ -996,22 +1077,22 @@ function uploadMedia(_x) {
  */
 
 function _uploadMedia() {
-  _uploadMedia = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/external_regeneratorRuntime_default.a.mark(function _callee(_ref) {
+  _uploadMedia = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/external_this_regeneratorRuntime_default.a.mark(function _callee(_ref) {
     var allowedTypes, _ref$additionalData, additionalData, filesList, maxUploadFileSize, _ref$onError, onError, onFileChange, _ref$wpAllowedMimeTyp, wpAllowedMimeTypes, files, filesSet, setAndUpdateFiles, isAllowedType, allowedMimeTypesForUser, isAllowedMimeTypeForUser, triggerError, validFiles, _iterator, _step, _mediaFile, idx, mediaFile, savedMedia, mediaObject, message;
 
-    return external_regeneratorRuntime_default.a.wrap(function _callee$(_context) {
+    return external_this_regeneratorRuntime_default.a.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            allowedTypes = _ref.allowedTypes, _ref$additionalData = _ref.additionalData, additionalData = _ref$additionalData === void 0 ? {} : _ref$additionalData, filesList = _ref.filesList, maxUploadFileSize = _ref.maxUploadFileSize, _ref$onError = _ref.onError, onError = _ref$onError === void 0 ? external_lodash_["noop"] : _ref$onError, onFileChange = _ref.onFileChange, _ref$wpAllowedMimeTyp = _ref.wpAllowedMimeTypes, wpAllowedMimeTypes = _ref$wpAllowedMimeTyp === void 0 ? null : _ref$wpAllowedMimeTyp;
+            allowedTypes = _ref.allowedTypes, _ref$additionalData = _ref.additionalData, additionalData = _ref$additionalData === void 0 ? {} : _ref$additionalData, filesList = _ref.filesList, maxUploadFileSize = _ref.maxUploadFileSize, _ref$onError = _ref.onError, onError = _ref$onError === void 0 ? external_this_lodash_["noop"] : _ref$onError, onFileChange = _ref.onFileChange, _ref$wpAllowedMimeTyp = _ref.wpAllowedMimeTypes, wpAllowedMimeTypes = _ref$wpAllowedMimeTyp === void 0 ? null : _ref$wpAllowedMimeTyp;
             // Cast filesList to array
             files = Object(toConsumableArray["a" /* default */])(filesList);
             filesSet = [];
 
             setAndUpdateFiles = function setAndUpdateFiles(idx, value) {
-              Object(external_wp_blob_["revokeBlobURL"])(Object(external_lodash_["get"])(filesSet, [idx, 'url']));
+              Object(external_this_wp_blob_["revokeBlobURL"])(Object(external_this_lodash_["get"])(filesSet, [idx, 'url']));
               filesSet[idx] = value;
-              onFileChange(Object(external_lodash_["compact"])(filesSet));
+              onFileChange(Object(external_this_lodash_["compact"])(filesSet));
             }; // Allowed type specified by consumer
 
 
@@ -1020,14 +1101,14 @@ function _uploadMedia() {
                 return true;
               }
 
-              return Object(external_lodash_["some"])(allowedTypes, function (allowedType) {
+              return Object(external_this_lodash_["some"])(allowedTypes, function (allowedType) {
                 // If a complete mimetype is specified verify if it matches exactly the mime type of the file.
-                if (Object(external_lodash_["includes"])(allowedType, '/')) {
+                if (Object(external_this_lodash_["includes"])(allowedType, '/')) {
                   return allowedType === fileType;
                 } // Otherwise a general mime type is used and we should verify if the file mimetype starts with it.
 
 
-                return Object(external_lodash_["startsWith"])(fileType, "".concat(allowedType, "/"));
+                return Object(external_this_lodash_["startsWith"])(fileType, "".concat(allowedType, "/"));
               });
             }; // Allowed types for the current WP_User
 
@@ -1035,12 +1116,12 @@ function _uploadMedia() {
             allowedMimeTypesForUser = getMimeTypesArray(wpAllowedMimeTypes);
 
             isAllowedMimeTypeForUser = function isAllowedMimeTypeForUser(fileType) {
-              return Object(external_lodash_["includes"])(allowedMimeTypesForUser, fileType);
+              return Object(external_this_lodash_["includes"])(allowedMimeTypesForUser, fileType);
             }; // Build the error message including the filename
 
 
             triggerError = function triggerError(error) {
-              error.message = [Object(external_wp_element_["createElement"])("strong", {
+              error.message = [Object(external_this_wp_element_["createElement"])("strong", {
                 key: "filename"
               }, error.file.name), ': ', error.message];
               onError(error);
@@ -1067,7 +1148,7 @@ function _uploadMedia() {
 
             triggerError({
               code: 'MIME_TYPE_NOT_ALLOWED_FOR_USER',
-              message: Object(external_wp_i18n_["__"])('Sorry, this file type is not permitted for security reasons.'),
+              message: Object(external_this_wp_i18n_["__"])('Sorry, this file type is not permitted for security reasons.'),
               file: _mediaFile
             });
             return _context.abrupt("continue", 29);
@@ -1080,7 +1161,7 @@ function _uploadMedia() {
 
             triggerError({
               code: 'MIME_TYPE_NOT_SUPPORTED',
-              message: Object(external_wp_i18n_["__"])('Sorry, this file type is not supported here.'),
+              message: Object(external_this_wp_i18n_["__"])('Sorry, this file type is not supported here.'),
               file: _mediaFile
             });
             return _context.abrupt("continue", 29);
@@ -1093,7 +1174,7 @@ function _uploadMedia() {
 
             triggerError({
               code: 'SIZE_ABOVE_LIMIT',
-              message: Object(external_wp_i18n_["__"])('This file exceeds the maximum upload size for this site.'),
+              message: Object(external_this_wp_i18n_["__"])('This file exceeds the maximum upload size for this site.'),
               file: _mediaFile
             });
             return _context.abrupt("continue", 29);
@@ -1106,7 +1187,7 @@ function _uploadMedia() {
 
             triggerError({
               code: 'EMPTY_FILE',
-              message: Object(external_wp_i18n_["__"])('This file is empty.'),
+              message: Object(external_this_wp_i18n_["__"])('This file is empty.'),
               file: _mediaFile
             });
             return _context.abrupt("continue", 29);
@@ -1116,7 +1197,7 @@ function _uploadMedia() {
             // with final file from media gallery when upload is `done` below
 
             filesSet.push({
-              url: Object(external_wp_blob_["createBlobURL"])(_mediaFile)
+              url: Object(external_this_wp_blob_["createBlobURL"])(_mediaFile)
             });
             onFileChange(filesSet);
 
@@ -1157,9 +1238,9 @@ function _uploadMedia() {
 
           case 45:
             savedMedia = _context.sent;
-            mediaObject = _objectSpread(_objectSpread({}, Object(external_lodash_["omit"])(savedMedia, ['alt_text', 'source_url'])), {}, {
+            mediaObject = _objectSpread(_objectSpread({}, Object(external_this_lodash_["omit"])(savedMedia, ['alt_text', 'source_url'])), {}, {
               alt: savedMedia.alt_text,
-              caption: Object(external_lodash_["get"])(savedMedia, ['caption', 'raw'], ''),
+              caption: Object(external_this_lodash_["get"])(savedMedia, ['caption', 'raw'], ''),
               title: savedMedia.title.raw,
               url: savedMedia.source_url
             });
@@ -1174,11 +1255,11 @@ function _uploadMedia() {
             setAndUpdateFiles(idx, null);
             message = void 0;
 
-            if (Object(external_lodash_["has"])(_context.t1, ['message'])) {
-              message = Object(external_lodash_["get"])(_context.t1, ['message']);
+            if (Object(external_this_lodash_["has"])(_context.t1, ['message'])) {
+              message = Object(external_this_lodash_["get"])(_context.t1, ['message']);
             } else {
-              message = Object(external_wp_i18n_["sprintf"])( // translators: %s: file name
-              Object(external_wp_i18n_["__"])('Error while uploading file %s to the media library.'), mediaFile.name);
+              message = Object(external_this_wp_i18n_["sprintf"])( // translators: %s: file name
+              Object(external_this_wp_i18n_["__"])('Error while uploading file %s to the media library.'), mediaFile.name);
             }
 
             onError({
@@ -1206,10 +1287,10 @@ function createMediaFromFile(file, additionalData) {
   // Create upload payload
   var data = new window.FormData();
   data.append('file', file, file.name || file.type.replace('/', '.'));
-  Object(external_lodash_["forEach"])(additionalData, function (value, key) {
+  Object(external_this_lodash_["forEach"])(additionalData, function (value, key) {
     return data.append(key, value);
   });
-  return external_wp_apiFetch_default()({
+  return external_this_wp_apiFetch_default()({
     path: '/wp/v2/media',
     body: data,
     method: 'POST'
@@ -1223,49 +1304,6 @@ function createMediaFromFile(file, additionalData) {
 
 
 
-
-/***/ }),
-
-/***/ 48:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _asyncToGenerator; });
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
 
 /***/ }),
 
@@ -1288,57 +1326,6 @@ function _defineProperty(obj, key, value) {
 
   return obj;
 }
-
-/***/ }),
-
-/***/ 50:
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["wp"]["apiFetch"]; }());
-
-/***/ }),
-
-/***/ 55:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _setPrototypeOf; });
-function _setPrototypeOf(o, p) {
-  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  };
-
-  return _setPrototypeOf(o, p);
-}
-
-/***/ }),
-
-/***/ 59:
-/***/ (function(module, exports) {
-
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    module.exports = _typeof = function _typeof(obj) {
-      return typeof obj;
-    };
-
-    module.exports["default"] = module.exports, module.exports.__esModule = true;
-  } else {
-    module.exports = _typeof = function _typeof(obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-
-    module.exports["default"] = module.exports, module.exports.__esModule = true;
-  }
-
-  return _typeof(obj);
-}
-
-module.exports = _typeof;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
 
 /***/ })
 

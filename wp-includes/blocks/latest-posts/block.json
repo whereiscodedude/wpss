@@ -58,7 +58,11 @@
 		},
 		"featuredImageAlign": {
 			"type": "string",
-			"enum": [ "left", "center", "right" ]
+			"enum": [
+				"left",
+				"center",
+				"right"
+			]
 		},
 		"featuredImageSizeSlug": {
 			"type": "string",
@@ -80,7 +84,5 @@
 	"supports": {
 		"align": true,
 		"html": false
-	},
-	"editorStyle": "wp-block-latest-posts-editor",
-	"style": "wp-block-latest-posts"
+	}
 }
