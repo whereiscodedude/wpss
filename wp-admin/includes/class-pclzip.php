@@ -34,12 +34,12 @@
   // In version 1.x of PclZip, the separator for file list is a space
   // (which is not a very smart choice, specifically for windows paths !).
   // A better separator should be a comma (,). This constant gives you the
-  // ability to change that.
+  // abilty to change that.
   // However notice that changing this value, may have impact on existing
   // scripts, using space separated filenames.
-  // Recommended values for compatibility with older versions :
+  // Recommanded values for compatibility with older versions :
   //define( 'PCLZIP_SEPARATOR', ' ' );
-  // Recommended values for smart separation of filenames.
+  // Recommanded values for smart separation of filenames.
   if (!defined('PCLZIP_SEPARATOR')) {
     define( 'PCLZIP_SEPARATOR', ',' );
   }
@@ -68,7 +68,7 @@
 
   // ----- Optional threshold ratio for use of temporary files
   //       Pclzip sense the size of the file to add/extract and decide to
-  //       use or not temporary file. The algorithm is looking for
+  //       use or not temporary file. The algorythm is looking for
   //       memory_limit of PHP and apply a ratio.
   //       threshold = memory_limit * ratio.
   //       Recommended values are under 0.5. Default 0.47.
@@ -248,7 +248,7 @@
   //   When a directory is in the list, the directory and its content is added
   //   in the archive.
   //   In this synopsis, the function takes an optional variable list of
-  //   options. See below the supported options.
+  //   options. See bellow the supported options.
   // Parameters :
   //   $p_filelist : An array containing file or directory names, or
   //                 a string containing one filename or one directory name, or
@@ -682,7 +682,7 @@
   //   By default, if a newer file with the same name already exists, the
   //   file is not extracted.
   //
-  //   If both PCLZIP_OPT_PATH and PCLZIP_OPT_ADD_PATH options
+  //   If both PCLZIP_OPT_PATH and PCLZIP_OPT_ADD_PATH aoptions
   //   are used, the path indicated in PCLZIP_OPT_ADD_PATH is append
   //   at the end of the path value of PCLZIP_OPT_PATH.
   // Parameters :
@@ -1064,7 +1064,7 @@
   // Function : deleteByIndex()
   // Description :
   //   ***** Deprecated *****
-  //   delete(PCLZIP_OPT_BY_INDEX, $p_index) should be preferred.
+  //   delete(PCLZIP_OPT_BY_INDEX, $p_index) should be prefered.
   // --------------------------------------------------------------------------------
   function deleteByIndex($p_index)
   {
@@ -1126,7 +1126,7 @@
         return 0;
       }
 
-      // ----- Read the central directory information
+      // ----- Read the central directory informations
       $v_central_dir = array();
       if (($v_result = $this->privReadEndCentralDir($v_central_dir)) != 1)
       {
@@ -1171,7 +1171,7 @@
     $this->privErrorReset();
 
     // ----- Look if the $p_archive is a PclZip object
-    if (is_object($p_archive) && $p_archive instanceof pclzip)
+    if ((is_object($p_archive)) && (get_class($p_archive) == 'pclzip'))
     {
 
       // ----- Duplicate the archive
@@ -1235,7 +1235,7 @@
     }
 
     // ----- Look if the $p_archive_to_add is a PclZip object
-    if (is_object($p_archive_to_add) && $p_archive_to_add instanceof pclzip)
+    if ((is_object($p_archive_to_add)) && (get_class($p_archive_to_add) == 'pclzip'))
     {
 
       // ----- Merge the archive
@@ -1391,7 +1391,7 @@
       return(false);
     }
 
-    // ----- Check that the file is readable
+    // ----- Check that the file is readeable
     if (!is_readable($this->zipname)) {
       // ----- Error log
       PclZip::privErrorLog(PCLZIP_ERR_READ_OPEN_FAIL, "Unable to read archive '".$this->zipname."'");
@@ -1698,7 +1698,7 @@
               if ($v_result_list[$p_options_list[$i]][$j]['start'] < $v_sort_value) {
                   $v_sort_flag=true;
 
-                  // ----- TBC : An automatic sort should be written ...
+                  // ----- TBC : An automatic sort should be writen ...
                   // ----- Error log
                   PclZip::privErrorLog(PCLZIP_ERR_INVALID_OPTION_VALUE, "Invalid order of index range for option '".PclZipUtilOptionText($p_options_list[$i])."'");
 
@@ -2189,7 +2189,7 @@
       return $v_result;
     }
 
-    // ----- Read the central directory information
+    // ----- Read the central directory informations
     $v_central_dir = array();
     if (($v_result = $this->privReadEndCentralDir($v_central_dir)) != 1)
     {
@@ -2201,7 +2201,7 @@
     // ----- Go to beginning of File
     @rewind($this->zip_fd);
 
-    // ----- Creates a temporary file
+    // ----- Creates a temporay file
     $v_zip_temp_name = PCLZIP_TEMPORARY_DIR.uniqid('pclzip-').'.tmp';
 
     // ----- Open the temporary file in write mode
@@ -2391,7 +2391,7 @@
   // Function : privAddList()
   // Description :
   //   $p_add_dir and $p_remove_dir will give the ability to memorize a path which is
-  //   different from the real path of the file. This is useful if you want to have PclTar
+  //   different from the real path of the file. This is usefull if you want to have PclTar
   //   running in any directory, and memorize relative path from an other directory.
   // Parameters :
   //   $p_list : An array containing the file or directory names to add in the tar
@@ -2631,7 +2631,7 @@
         $v_result = 1;
       }
 
-      // ----- Update the information
+      // ----- Update the informations
       // Only some fields can be modified
       if ($p_header['stored_filename'] != $v_local_header['stored_filename']) {
         $p_header['stored_filename'] = PclZipUtilPathReduction($v_local_header['stored_filename']);
@@ -2783,7 +2783,7 @@
         $v_result = 1;
       }
 
-      // ----- Update the information
+      // ----- Update the informations
       // Nothing can be modified
     }
 
@@ -2946,7 +2946,7 @@
     else {
 
       // ----- Look for short name change
-      // Its when we change just the filename but not the path
+      // Its when we cahnge just the filename but not the path
       if (isset($p_filedescr['new_short_name'])) {
         $v_path_info = pathinfo($p_filename);
         $v_dir = '';
@@ -3169,7 +3169,7 @@
       return PclZip::errorCode();
     }
 
-    // ----- Read the central directory information
+    // ----- Read the central directory informations
     $v_central_dir = array();
     if (($v_result = $this->privReadEndCentralDir($v_central_dir)) != 1)
     {
@@ -3220,7 +3220,7 @@
   // --------------------------------------------------------------------------------
   // Function : privConvertHeader2FileInfo()
   // Description :
-  //   This function takes the file information from the central directory
+  //   This function takes the file informations from the central directory
   //   entries and extract the interesting parameters that will be given back.
   //   The resulting file infos are set in the array $p_info
   //     $p_info['filename'] : Filename with full path. Given by user (add),
@@ -3313,7 +3313,7 @@
       return $v_result;
     }
 
-    // ----- Read the central directory information
+    // ----- Read the central directory informations
     $v_central_dir = array();
     if (($v_result = $this->privReadEndCentralDir($v_central_dir)) != 1)
     {
@@ -3713,7 +3713,7 @@
       	$v_result = PCLZIP_ERR_USER_ABORTED;
       }
 
-      // ----- Update the information
+      // ----- Update the informations
       // Only some fields can be modified
       $p_entry['filename'] = $v_local_header['filename'];
     }
@@ -3884,12 +3884,7 @@
 
 
             // ----- Read the compressed file in a buffer (one shot)
-            if ( $p_entry['compressed_size'] > 0 ) {
-              $v_buffer = @fread($this->zip_fd, $p_entry['compressed_size']);
-            }
-            else {
-              $v_buffer = false;
-            }
+            $v_buffer = @fread($this->zip_fd, $p_entry['compressed_size']);
 
             // ----- Decompress the file
             $v_file_content = @gzinflate($v_buffer);
@@ -4085,7 +4080,7 @@
       	$v_result = PCLZIP_ERR_USER_ABORTED;
       }
 
-      // ----- Update the information
+      // ----- Update the informations
       // Only some fields can be modified
       $p_entry['filename'] = $v_local_header['filename'];
     }
@@ -4101,12 +4096,7 @@
         if ($p_entry['compressed_size'] == $p_entry['size']) {
 
           // ----- Read the file in a buffer (one shot)
-          if ( $p_entry['compressed_size'] > 0 ) {
-            $v_buffer = @fread($this->zip_fd, $p_entry['compressed_size']);
-          }
-          else {
-            $v_buffer = false;
-          }
+          $v_buffer = @fread($this->zip_fd, $p_entry['compressed_size']);
 
           // ----- Send the file to the output
           echo $v_buffer;
@@ -4115,12 +4105,7 @@
         else {
 
           // ----- Read the compressed file in a buffer (one shot)
-          if ( $p_entry['compressed_size'] > 0 ) {
-            $v_buffer = @fread($this->zip_fd, $p_entry['compressed_size']);
-          }
-          else {
-            $v_buffer = false;
-          }
+          $v_buffer = @fread($this->zip_fd, $p_entry['compressed_size']);
 
           // ----- Decompress the file
           $v_file_content = gzinflate($v_buffer);
@@ -4208,7 +4193,7 @@
       	$v_result = PCLZIP_ERR_USER_ABORTED;
       }
 
-      // ----- Update the information
+      // ----- Update the informations
       // Only some fields can be modified
       $p_entry['filename'] = $v_local_header['filename'];
     }
@@ -4224,22 +4209,12 @@
         if ($p_entry['compression'] == 0) {
 
           // ----- Reading the file
-          if ( $p_entry['compressed_size'] > 0 ) {
-            $p_string = @fread($this->zip_fd, $p_entry['compressed_size']);
-          }
-          else {
-            $p_string = false;
-          }
+          $p_string = @fread($this->zip_fd, $p_entry['compressed_size']);
         }
         else {
 
           // ----- Reading the file
-          if ( $p_entry['compressed_size'] > 0 ) {
-            $v_data = @fread($this->zip_fd, $p_entry['compressed_size']);
-          }
-          else {
-            $v_data = false;
-          }
+          $v_data = @fread($this->zip_fd, $p_entry['compressed_size']);
 
           // ----- Decompress the file
           if (($p_string = @gzinflate($v_data)) === FALSE) {
@@ -4714,7 +4689,7 @@
       return $v_result;
     }
 
-    // ----- Read the central directory information
+    // ----- Read the central directory informations
     $v_central_dir = array();
     if (($v_result = $this->privReadEndCentralDir($v_central_dir)) != 1)
     {
@@ -4849,7 +4824,7 @@
     // ----- Look if something need to be deleted
     if ($v_nb_extracted > 0) {
 
-        // ----- Creates a temporary file
+        // ----- Creates a temporay file
         $v_zip_temp_name = PCLZIP_TEMPORARY_DIR.uniqid('pclzip-').'.tmp';
 
         // ----- Creates a temporary zip archive
@@ -5100,7 +5075,7 @@
       return $v_result;
     }
 
-    // ----- Read the central directory information
+    // ----- Read the central directory informations
     $v_central_dir = array();
     if (($v_result = $this->privReadEndCentralDir($v_central_dir)) != 1)
     {
@@ -5120,7 +5095,7 @@
       return $v_result;
     }
 
-    // ----- Read the central directory information
+    // ----- Read the central directory informations
     $v_central_dir_to_add = array();
     if (($v_result = $p_archive_to_add->privReadEndCentralDir($v_central_dir_to_add)) != 1)
     {
@@ -5133,7 +5108,7 @@
     // ----- Go to beginning of File
     @rewind($p_archive_to_add->zip_fd);
 
-    // ----- Creates a temporary file
+    // ----- Creates a temporay file
     $v_zip_temp_name = PCLZIP_TEMPORARY_DIR.uniqid('pclzip-').'.tmp';
 
     // ----- Open the temporary file in write mode
@@ -5351,10 +5326,6 @@
   {
     $v_result=1;
 
-	// EDIT for WordPress 5.3.0
-	// magic_quote functions are deprecated in PHP 7.4, now assuming it's always off.
-	/*
-
     // ----- Look if function exists
     if (   (!function_exists("get_magic_quotes_runtime"))
 	    || (!function_exists("set_magic_quotes_runtime"))) {
@@ -5373,7 +5344,6 @@
 	if ($this->magic_quotes_status == 1) {
 	  @set_magic_quotes_runtime(0);
 	}
-	*/
 
     // ----- Return
     return $v_result;
@@ -5389,10 +5359,6 @@
   function privSwapBackMagicQuotes()
   {
     $v_result=1;
-
-	// EDIT for WordPress 5.3.0
-	// magic_quote functions are deprecated in PHP 7.4, now assuming it's always off.
-	/*
 
     // ----- Look if function exists
     if (   (!function_exists("get_magic_quotes_runtime"))
@@ -5410,7 +5376,6 @@
   	  @set_magic_quotes_runtime($this->magic_quotes_status);
 	}
 
-	*/
     // ----- Return
     return $v_result;
   }
