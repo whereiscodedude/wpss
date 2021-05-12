@@ -98,7 +98,6 @@ add_action( 'customize_register', 'twentyfourteen_customize_register' );
  * Render the site title for the selective refresh partial.
  *
  * @since Twenty Fourteen 1.7
- *
  * @see twentyfourteen_customize_register()
  *
  * @return void
@@ -111,7 +110,6 @@ function twentyfourteen_customize_partial_blogname() {
  * Render the site tagline for the selective refresh partial.
  *
  * @since Twenty Fourteen 1.7
- *
  * @see twentyfourteen_customize_register()
  *
  * @return void
@@ -129,7 +127,7 @@ function twentyfourteen_customize_partial_blogdescription() {
  * @return string Filtered layout type (grid|slider).
  */
 function twentyfourteen_sanitize_layout( $layout ) {
-	if ( ! in_array( $layout, array( 'grid', 'slider' ), true ) ) {
+	if ( ! in_array( $layout, array( 'grid', 'slider' ) ) ) {
 		$layout = 'grid';
 	}
 

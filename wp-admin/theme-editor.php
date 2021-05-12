@@ -11,7 +11,7 @@ require_once __DIR__ . '/admin.php';
 
 if ( is_multisite() && ! is_network_admin() ) {
 	wp_redirect( network_admin_url( 'theme-editor.php' ) );
-	exit;
+	exit();
 }
 
 if ( ! current_user_can( 'edit_themes' ) ) {
@@ -69,12 +69,13 @@ if ( ! $theme->exists() ) {
 	wp_die( __( 'The requested theme does not exist.' ) );
 }
 
-if ( $theme->errors() && 'theme_no_stylesheet' === $theme->errors()->get_error_code() ) {
+if ( $theme->errors() && 'theme_no_stylesheet' == $theme->errors()->get_error_code() ) {
 	wp_die( __( 'The requested theme does not exist.' ) . ' ' . $theme->errors()->get_error_message() );
 }
 
 $allowed_files = array();
 $style_files   = array();
+$has_templates = false;
 
 $file_types = wp_get_theme_file_editable_extensions( $theme );
 
@@ -82,6 +83,7 @@ foreach ( $file_types as $type ) {
 	switch ( $type ) {
 		case 'php':
 			$allowed_files += $theme->get_files( 'php', -1 );
+			$has_templates  = ! empty( $allowed_files );
 			break;
 		case 'css':
 			$style_files                = $theme->get_files( 'css', -1 );
@@ -160,7 +162,7 @@ if ( ! empty( $posted_content ) ) {
 	$f       = fopen( $file, 'r' );
 	$content = fread( $f, filesize( $file ) );
 
-	if ( '.php' === substr( $file, strrpos( $file, '.' ) ) ) {
+	if ( '.php' == substr( $file, strrpos( $file, '.' ) ) ) {
 		$functions = wp_doc_link_parse( $content );
 
 		$docs_select  = '<select name="docs-list" id="docs-list">';
@@ -175,9 +177,9 @@ if ( ! empty( $posted_content ) ) {
 }
 
 $file_description = get_file_description( $relative_file );
-$file_show        = array_search( $file, array_filter( $allowed_files ), true );
+$file_show        = array_search( $file, array_filter( $allowed_files ) );
 $description      = esc_html( $file_description );
-if ( $file_description !== $file_show ) {
+if ( $file_description != $file_show ) {
 	$description .= ' <span>(' . esc_html( $file_show ) . ')</span>';
 }
 ?>
@@ -200,7 +202,7 @@ if ( $file_description !== $file_show ) {
 		<p><strong><?php _e( 'Did you know?' ); ?></strong></p>
 		<p>
 			<?php
-			printf(
+			echo sprintf(
 				/* translators: %s: Link to Custom CSS section in the Customizer. */
 				__( 'There&#8217;s no need to change your CSS here &mdash; you can edit and live preview CSS changes in the <a href="%s">built-in CSS editor</a>.' ),
 				esc_url( add_query_arg( 'autofocus[section]', 'custom_css', admin_url( 'customize.php' ) ) )
@@ -222,15 +224,15 @@ if ( $file_description !== $file_show ) {
 </div>
 <div class="alignright">
 	<form action="theme-editor.php" method="get">
-		<label for="theme" id="theme-plugin-editor-selector"><?php _e( 'Select theme to edit:' ); ?> </label>
+		<strong><label for="theme"><?php _e( 'Select theme to edit:' ); ?> </label></strong>
 		<select name="theme" id="theme">
 		<?php
 		foreach ( wp_get_themes( array( 'errors' => null ) ) as $a_stylesheet => $a_theme ) {
-			if ( $a_theme->errors() && 'theme_no_stylesheet' === $a_theme->errors()->get_error_code() ) {
+			if ( $a_theme->errors() && 'theme_no_stylesheet' == $a_theme->errors()->get_error_code() ) {
 				continue;
 			}
 
-			$selected = ( $a_stylesheet === $stylesheet ) ? ' selected="selected"' : '';
+			$selected = $a_stylesheet == $stylesheet ? ' selected="selected"' : '';
 			echo "\n\t" . '<option value="' . esc_attr( $a_stylesheet ) . '"' . $selected . '>' . $a_theme->display( 'Name' ) . '</option>';
 		}
 		?>
@@ -250,7 +252,7 @@ if ( $theme->errors() ) {
 <div id="templateside">
 	<h2 id="theme-files-label"><?php _e( 'Theme Files' ); ?></h2>
 	<ul role="tree" aria-labelledby="theme-files-label">
-		<?php if ( $theme->parent() ) : ?>
+		<?php if ( ( $has_templates || $theme->parent() ) && $theme->parent() ) : ?>
 			<li class="howto">
 				<?php
 				printf(
@@ -298,10 +300,10 @@ else :
 
 		<div>
 			<div class="editor-notices">
-				<?php if ( is_child_theme() && $theme->get_stylesheet() === get_template() ) : ?>
+				<?php if ( is_child_theme() && $theme->get_stylesheet() == get_template() ) : ?>
 					<div class="notice notice-warning inline">
 						<p>
-							<?php if ( is_writable( $file ) ) : ?>
+							<?php if ( is_writeable( $file ) ) : ?>
 								<strong><?php _e( 'Caution:' ); ?></strong>
 							<?php endif; ?>
 							<?php _e( 'This is a file in your current parent theme.' ); ?>
@@ -309,13 +311,13 @@ else :
 					</div>
 				<?php endif; ?>
 			</div>
-			<?php if ( is_writable( $file ) ) : ?>
+			<?php if ( is_writeable( $file ) ) : ?>
 				<p class="submit">
 					<?php submit_button( __( 'Update File' ), 'primary', 'submit', false ); ?>
 					<span class="spinner"></span>
 				</p>
 			<?php else : ?>
-				<p>
+				<p><em>
 					<?php
 					printf(
 						/* translators: %s: Documentation URL. */
@@ -323,7 +325,7 @@ else :
 						__( 'https://wordpress.org/support/article/changing-file-permissions/' )
 					);
 					?>
-				</p>
+				</em></p>
 			<?php endif; ?>
 		</div>
 
@@ -362,7 +364,7 @@ if ( ! in_array( 'theme_editor_notice', $dismissed_pointers, true ) ) :
 						<?php
 						if ( ! $theme->parent() ) {
 							echo '<p>';
-							printf(
+							echo sprintf(
 								/* translators: %s: Link to documentation on child themes. */
 								__( 'If you need to tweak more than your theme&#8217;s CSS, you might want to try <a href="%s">making a child theme</a>.' ),
 								esc_url( __( 'https://developer.wordpress.org/themes/advanced-topics/child-themes/' ) )

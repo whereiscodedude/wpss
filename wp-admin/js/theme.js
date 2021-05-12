@@ -28,16 +28,9 @@ themes.Model = Backbone.Model.extend({
 	initialize: function() {
 		var description;
 
-		if ( this.get( 'slug' ) ) {
-			// If the theme is already installed, set an attribute.
-			if ( _.indexOf( themes.data.installedThemes, this.get( 'slug' ) ) !== -1 ) {
-				this.set({ installed: true });
-			}
-
-			// If the theme is active, set an attribute.
-			if ( themes.data.activeTheme === this.get( 'slug' ) ) {
-				this.set({ active: true });
-			}
+		// If theme is already installed, set an attribute.
+		if ( _.indexOf( themes.data.installedThemes, this.get( 'slug' ) ) !== -1 ) {
+			this.set({ installed: true });
 		}
 
 		// Set the attributes.
@@ -73,7 +66,7 @@ themes.view.Appearance = wp.Backbone.View.extend({
 		this.SearchView = options.SearchView ? options.SearchView : themes.view.Search;
 		// Bind to the scroll event and throttle
 		// the results from this.scroller.
-		this.window.on( 'scroll', _.throttle( this.scroller, 300 ) );
+		this.window.bind( 'scroll', _.throttle( this.scroller, 300 ) );
 	},
 
 	// Main render control.
@@ -270,7 +263,7 @@ themes.Collection = Backbone.Collection.extend({
 		// it means we have a paginated request.
 		isPaginated = _.has( request, 'page' );
 
-		// Reset the internal api page counter for non-paginated queries.
+		// Reset the internal api page counter for non paginated queries.
 		if ( ! isPaginated ) {
 			this.currentQuery.page = 1;
 		}
@@ -550,7 +543,7 @@ themes.view.Theme = wp.Backbone.View.extend({
 			// Render and append.
 			preview.render();
 			this.setNavButtonsState();
-			$( '.next-theme' ).trigger( 'focus' );
+			$( '.next-theme' ).focus();
 		})
 		.listenTo( preview, 'theme:previous', function() {
 
@@ -580,7 +573,7 @@ themes.view.Theme = wp.Backbone.View.extend({
 			// Render and append.
 			preview.render();
 			this.setNavButtonsState();
-			$( '.previous-theme' ).trigger( 'focus' );
+			$( '.previous-theme' ).focus();
 		});
 
 		this.listenTo( preview, 'preview:close', function() {
@@ -602,7 +595,7 @@ themes.view.Theme = wp.Backbone.View.extend({
 				.addClass( 'disabled' )
 				.prop( 'disabled', true );
 
-			nextThemeButton.trigger( 'focus' );
+			nextThemeButton.focus();
 		}
 
 		// Disable next if the next model is undefined.
@@ -611,7 +604,7 @@ themes.view.Theme = wp.Backbone.View.extend({
 				.addClass( 'disabled' )
 				.prop( 'disabled', true );
 
-			previousThemeButton.trigger( 'focus' );
+			previousThemeButton.focus();
 		}
 	},
 
@@ -673,8 +666,7 @@ themes.view.Details = wp.Backbone.View.extend({
 		'click .delete-theme': 'deleteTheme',
 		'click .left': 'previousTheme',
 		'click .right': 'nextTheme',
-		'click #update-theme': 'updateTheme',
-		'click .toggle-auto-update': 'autoupdateState'
+		'click #update-theme': 'updateTheme'
 	},
 
 	// The HTML template for the theme overlay.
@@ -705,7 +697,7 @@ themes.view.Details = wp.Backbone.View.extend({
 
 		// Set initial focus on the primary action control.
 		_.delay( function() {
-			$( '.theme-overlay' ).trigger( 'focus' );
+			$( '.theme-overlay' ).focus();
 		}, 100 );
 
 		// Constrain tabbing within the modal.
@@ -716,10 +708,10 @@ themes.view.Details = wp.Backbone.View.extend({
 			// Check for the Tab key.
 			if ( 9 === event.which ) {
 				if ( $firstFocusable[0] === event.target && event.shiftKey ) {
-					$lastFocusable.trigger( 'focus' );
+					$lastFocusable.focus();
 					event.preventDefault();
 				} else if ( $lastFocusable[0] === event.target && ! event.shiftKey ) {
-					$firstFocusable.trigger( 'focus' );
+					$firstFocusable.focus();
 					event.preventDefault();
 				}
 			}
@@ -764,7 +756,7 @@ themes.view.Details = wp.Backbone.View.extend({
 
 				// Return focus to the theme div.
 				if ( themes.focusedTheme ) {
-					themes.focusedTheme.trigger( 'focus' );
+					themes.focusedTheme.focus();
 				}
 			});
 		}
@@ -793,26 +785,6 @@ themes.view.Details = wp.Backbone.View.extend({
 		this.remove();
 		this.unbind();
 		this.trigger( 'theme:collapse' );
-	},
-
-	// Set state of the auto-update settings link after it has been changed and saved.
-	autoupdateState: function() {
-		var callback,
-			_this = this;
-
-		// Support concurrent clicks in different Theme Details overlays.
-		callback = function( event, data ) {
-			var autoupdate;
-			if ( _this.model.get( 'id' ) === data.asset ) {
-				autoupdate = _this.model.get( 'autoupdate' );
-				autoupdate.enabled = 'enable' === data.state;
-				_this.model.set( { autoupdate: autoupdate } );
-				$( document ).off( 'wp-auto-update-setting-changed', callback );
-			}
-		};
-
-		// Triggered in updates.js
-		$( document ).on( 'wp-auto-update-setting-changed', callback );
 	},
 
 	updateTheme: function( event ) {
@@ -952,7 +924,7 @@ themes.view.Preview = themes.view.Details.extend({
 
 			// Return focus to the theme div.
 			if ( themes.focusedTheme ) {
-				themes.focusedTheme.trigger( 'focus' );
+				themes.focusedTheme.focus();
 			}
 		}).removeClass( 'iframe-ready' );
 
@@ -1431,7 +1403,7 @@ themes.view.Search = wp.Backbone.View.extend({
  * @since 4.9.0
  *
  * @param {string} url - URL to navigate to.
- * @param {Object} state - State.
+ * @param {object} state - State.
  * @return {void}
  */
 function navigateRouter( url, state ) {
@@ -1844,7 +1816,7 @@ themes.view.Installer = themes.view.Appearance.extend({
 	/**
 	 * Get the checked filters.
 	 *
-	 * @return {Array} of tags or false
+	 * @return {array} of tags or false
 	 */
 	filtersChecked: function() {
 		var items = $( '.filter-group' ).find( ':checkbox' ),
@@ -1965,7 +1937,7 @@ themes.RunInstaller = {
 		// Set up the view.
 		// Passes the default 'section' as an option.
 		this.view = new themes.view.Installer({
-			section: 'popular',
+			section: 'featured',
 			SearchView: themes.view.InstallerSearch
 		});
 
@@ -2032,12 +2004,12 @@ themes.RunInstaller = {
 		/*
 		 * Handles sorting / browsing routes.
 		 * Also handles the root URL triggering a sort request
-		 * for `popular`, the default view.
+		 * for `featured`, the default view.
 		 */
 		themes.router.on( 'route:sort', function( sort ) {
 			if ( ! sort ) {
-				sort = 'popular';
-				themes.router.navigate( themes.router.baseUrl( '?browse=popular' ), { replace: true } );
+				sort = 'featured';
+				themes.router.navigate( themes.router.baseUrl( '?browse=featured' ), { replace: true } );
 			}
 			self.view.sort( sort );
 
@@ -2049,7 +2021,7 @@ themes.RunInstaller = {
 
 		// The `search` route event. The router populates the input field.
 		themes.router.on( 'route:search', function() {
-			$( '.wp-filter-search' ).trigger( 'focus' ).trigger( 'keyup' );
+			$( '.wp-filter-search' ).focus().trigger( 'keyup' );
 		});
 
 		this.extraRoutes();
@@ -2061,7 +2033,7 @@ themes.RunInstaller = {
 };
 
 // Ready...
-$( function() {
+$( document ).ready(function() {
 	if ( themes.isInstall ) {
 		themes.RunInstaller.init();
 	} else {
@@ -2089,7 +2061,7 @@ $( function() {
 })( jQuery );
 
 // Align theme browser thickbox.
-jQuery( function($) {
+jQuery(document).ready( function($) {
 	window.tb_position = function() {
 		var tbWindow = $('#TB_window'),
 			width = $(window).width(),
@@ -2101,7 +2073,7 @@ jQuery( function($) {
 			adminbar_height = parseInt( $('#wpadminbar').css('height'), 10 );
 		}
 
-		if ( tbWindow.length >= 1 ) {
+		if ( tbWindow.size() ) {
 			tbWindow.width( W - 50 ).height( H - 45 - adminbar_height );
 			$('#TB_iframeContent').width( W - 50 ).height( H - 75 - adminbar_height );
 			tbWindow.css({'margin-left': '-' + parseInt( ( ( W - 50 ) / 2 ), 10 ) + 'px'});
@@ -2111,5 +2083,5 @@ jQuery( function($) {
 		}
 	};
 
-	$(window).on( 'resize', function(){ tb_position(); });
+	$(window).resize(function(){ tb_position(); });
 });
