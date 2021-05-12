@@ -1,6 +1,3 @@
-/**
- * @output wp-includes/js/wp-embed-template.js
- */
 (function ( window, document ) {
 	'use strict';
 
@@ -29,7 +26,7 @@
 			share_dialog_close = document.querySelector( '.wp-embed-share-dialog-close' ),
 			share_input = document.querySelectorAll( '.wp-embed-share-input' ),
 			share_dialog_tabs = document.querySelectorAll( '.wp-embed-share-tab-button button' ),
-			featured_image = document.querySelector( '.wp-embed-featured-image img' ),
+			links = document.getElementsByTagName( 'a' ),
 			i;
 
 		if ( share_input ) {
@@ -137,15 +134,10 @@
 			return;
 		}
 
-		// Send this document's height to the parent (embedding) site.
+		/**
+		 * Send this document's height to the parent (embedding) site.
+		 */
 		sendEmbedMessage( 'height', Math.ceil( document.body.getBoundingClientRect().height ) );
-
-		// Send the document's height again after the featured image has been loaded.
-		if ( featured_image ) {
-			featured_image.addEventListener( 'load', function() {
-				sendEmbedMessage( 'height', Math.ceil( document.body.getBoundingClientRect().height ) );
-			} );
-		}
 
 		/**
 		 * Detect clicks to external (_top) links.
@@ -159,19 +151,16 @@
 				href = target.parentElement.getAttribute( 'href' );
 			}
 
-			// Only catch clicks from the primary mouse button, without any modifiers.
-			if ( event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ) {
-				return;
-			}
-
-			// Send link target to the parent (embedding) site.
-			if ( href ) {
-				sendEmbedMessage( 'link', href );
-				e.preventDefault();
-			}
+			/**
+			 * Send link target to the parent (embedding) site.
+			 */
+			sendEmbedMessage( 'link', href );
+			e.preventDefault();
 		}
 
-		document.addEventListener( 'click', linkClickHandler );
+		for ( i = 0; i < links.length; i++ ) {
+			links[ i ].addEventListener( 'click', linkClickHandler );
+		}
 	}
 
 	/**

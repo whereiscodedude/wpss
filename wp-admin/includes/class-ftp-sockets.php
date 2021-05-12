@@ -1,6 +1,6 @@
 <?php
 /**
- * PemFTP - An Ftp implementation in pure PHP
+ * PemFTP - A Ftp implementation in pure PHP
  *
  * @package PemFTP
  * @since 2.5.0
@@ -8,8 +8,8 @@
  * @version 1.0
  * @copyright Alexey Dotsenko
  * @author Alexey Dotsenko
- * @link https://www.phpclasses.org/package/1743-PHP-FTP-client-in-pure-PHP.html
- * @license LGPL https://opensource.org/licenses/lgpl-license.html
+ * @link http://www.phpclasses.org/browse/package/1743.html Site
+ * @license LGPL http://www.opensource.org/licenses/lgpl-license.html
  */
 
 /**
@@ -22,13 +22,17 @@
  * @version 1.0
  * @copyright Alexey Dotsenko
  * @author Alexey Dotsenko
- * @link https://www.phpclasses.org/package/1743-PHP-FTP-client-in-pure-PHP.html
- * @license LGPL https://opensource.org/licenses/lgpl-license.html
+ * @link http://www.phpclasses.org/browse/package/1743.html Site
+ * @license LGPL http://www.opensource.org/licenses/lgpl-license.html
  */
-class ftp_sockets extends ftp_base {
+class ftp extends ftp_base {
 
 	function __construct($verb=FALSE, $le=FALSE) {
 		parent::__construct(true, $verb, $le);
+	}
+
+	function ftp($verb=FALSE, $le=FALSE) {
+		$this->__construct($verb, $le);
 	}
 
 // <!-- --------------------------------------------------------------------------------------- -->

@@ -1,26 +1,20 @@
-/**
- * @output wp-includes/js/wp-ajax-response.js
- */
-
- /* global wpAjax */
-
-window.wpAjax = jQuery.extend( {
+var wpAjax = jQuery.extend( {
 	unserialize: function( s ) {
 		var r = {}, q, pp, i, p;
 		if ( !s ) { return r; }
 		q = s.split('?'); if ( q[1] ) { s = q[1]; }
 		pp = s.split('&');
 		for ( i in pp ) {
-			if ( typeof pp.hasOwnProperty === 'function' && !pp.hasOwnProperty(i) ) { continue; }
+			if ( jQuery.isFunction(pp.hasOwnProperty) && !pp.hasOwnProperty(i) ) { continue; }
 			p = pp[i].split('=');
 			r[p[0]] = p[1];
 		}
 		return r;
 	},
-	parseAjaxResponse: function( x, r, e ) { // 1 = good, 0 = strange (bad data?), -1 = you lack permission.
+	parseAjaxResponse: function( x, r, e ) { // 1 = good, 0 = strange (bad data?), -1 = you lack permission
 		var parsed = {}, re = jQuery('#' + r).empty(), err = '';
 
-		if ( x && typeof x === 'object' && x.getElementsByTagName('wp_ajax') ) {
+		if ( x && typeof x == 'object' && x.getElementsByTagName('wp_ajax') ) {
 			parsed.responses = [];
 			parsed.errors = false;
 			jQuery('response', x).each( function() {
@@ -30,7 +24,7 @@ window.wpAjax = jQuery.extend( {
 				response.supplemental = {};
 				if ( !jQuery( 'supplemental', child ).children().each( function() {
 					response.supplemental[this.nodeName] = jQuery(this).text();
-				} ).length ) { response.supplemental = false; }
+				} ).size() ) { response.supplemental = false; }
 				response.errors = [];
 				if ( !jQuery('wp_error', child).each( function() {
 					var code = jQuery(this).attr('code'), anError, errorData, formField;
@@ -43,7 +37,7 @@ window.wpAjax = jQuery.extend( {
 					err += '<p>' + anError.message + '</p>';
 					response.errors.push( anError );
 					parsed.errors = true;
-				} ).length ) { response.errors = false; }
+				} ).size() ) { response.errors = false; }
 				parsed.responses.push( response );
 			} );
 			if ( err.length ) { re.html( '<div class="error">' + err + '</div>' ); }
@@ -51,7 +45,7 @@ window.wpAjax = jQuery.extend( {
 		}
 		if ( isNaN(x) ) { return !re.html('<div class="error"><p>' + x + '</p></div>'); }
 		x = parseInt(x,10);
-		if ( -1 === x ) { return !re.html('<div class="error"><p>' + wpAjax.noPerm + '</p></div>'); }
+		if ( -1 == x ) { return !re.html('<div class="error"><p>' + wpAjax.noPerm + '</p></div>'); }
 		else if ( 0 === x ) { return !re.html('<div class="error"><p>' + wpAjax.broken  + '</p></div>'); }
 		return true;
 	},
@@ -60,11 +54,11 @@ window.wpAjax = jQuery.extend( {
 	},
 	validateForm: function( selector ) {
 		selector = jQuery( selector );
-		return !wpAjax.invalidateForm( selector.find('.form-required').filter( function() { return jQuery('input:visible', this).val() === ''; } ) ).length;
+		return !wpAjax.invalidateForm( selector.find('.form-required').filter( function() { return jQuery('input:visible', this).val() === ''; } ) ).size();
 	}
-}, wpAjax || { noPerm: 'Sorry, you are not allowed to do that.', broken: 'Something went wrong.' } );
+}, wpAjax || { noPerm: 'You do not have permission to do that.', broken: 'An unidentified error has occurred.' } );
 
-// Basic form validation.
-jQuery( function($){
-	$('form.validate').on( 'submit', function() { return wpAjax.validateForm( $(this) ); } );
+// Basic form validation
+jQuery(document).ready( function($){
+	$('form.validate').submit( function() { return wpAjax.validateForm( $(this) ); } );
 });
