@@ -293,7 +293,7 @@ function get_plugins( $plugin_folder = '' ) {
 	}
 
 	// Files in wp-content/plugins directory.
-	$plugins_dir  = @opendir( $plugin_root );
+	$plugins_dir  = @ opendir( $plugin_root );
 	$plugin_files = array();
 
 	if ( $plugins_dir ) {
@@ -303,7 +303,7 @@ function get_plugins( $plugin_folder = '' ) {
 			}
 
 			if ( is_dir( $plugin_root . '/' . $file ) ) {
-				$plugins_subdir = @opendir( $plugin_root . '/' . $file );
+				$plugins_subdir = @ opendir( $plugin_root . '/' . $file );
 
 				if ( $plugins_subdir ) {
 					while ( ( $subfile = readdir( $plugins_subdir ) ) !== false ) {
@@ -661,8 +661,14 @@ function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silen
 
 		ob_start();
 
-		// Load the plugin to test whether it throws any errors.
-		plugin_sandbox_scrape( $plugin );
+		if ( ! defined( 'WP_SANDBOX_SCRAPING' ) ) {
+			define( 'WP_SANDBOX_SCRAPING', true );
+		}
+
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
+		$_wp_plugin_file = $plugin;
+		include_once WP_PLUGIN_DIR . '/' . $plugin;
+		$plugin = $_wp_plugin_file; // Avoid stomping of the $plugin variable in a plugin.
 
 		if ( ! $silent ) {
 			/**
@@ -726,7 +732,6 @@ function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silen
 			$output = ob_get_clean();
 			return new WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ), $output );
 		}
-
 		ob_end_clean();
 	}
 
@@ -2292,7 +2297,7 @@ function plugin_sandbox_scrape( $plugin ) {
 	}
 
 	wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
-	include_once WP_PLUGIN_DIR . '/' . $plugin;
+	include WP_PLUGIN_DIR . '/' . $plugin;
 }
 
 /**

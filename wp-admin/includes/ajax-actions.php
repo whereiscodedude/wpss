@@ -2927,8 +2927,6 @@ function wp_ajax_get_attachment() {
  * Ajax handler for querying attachments.
  *
  * @since 3.5.0
- * @since 5.8.0 The response returns the attachments under `response.attachments` and
- *              `response.totalAttachments` holds the total number of attachments found.
  */
 function wp_ajax_query_attachments() {
 	if ( ! current_user_can( 'upload_files' ) ) {
@@ -2995,12 +2993,7 @@ function wp_ajax_query_attachments() {
 	$posts = array_map( 'wp_prepare_attachment_for_js', $query->posts );
 	$posts = array_filter( $posts );
 
-	$result = array(
-		'attachments'      => $posts,
-		'totalAttachments' => $query->found_posts,
-	);
-
-	wp_send_json_success( $result );
+	wp_send_json_success( $posts );
 }
 
 /**
@@ -3705,7 +3698,7 @@ function wp_ajax_parse_embed() {
 		$mce_styles = wpview_media_sandbox_styles();
 
 		foreach ( $mce_styles as $style ) {
-			$styles .= sprintf( '<link rel="stylesheet" href="%s" />', $style );
+			$styles .= sprintf( '<link rel="stylesheet" href="%s"/>', $style );
 		}
 
 		$html = do_shortcode( $parsed );

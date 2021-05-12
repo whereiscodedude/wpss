@@ -5,8 +5,7 @@
 	"attributes": {
 		"ordered": {
 			"type": "boolean",
-			"default": false,
-			"__experimentalRole": "content"
+			"default": false
 		},
 		"values": {
 			"type": "string",
@@ -14,8 +13,7 @@
 			"selector": "ol,ul",
 			"multiline": "li",
 			"__unstableMultilineWrapperTags": [ "ol", "ul" ],
-			"default": "",
-			"__experimentalRole": "content"
+			"default": ""
 		},
 		"type": {
 			"type": "string"
@@ -25,9 +23,6 @@
 		},
 		"reversed": {
 			"type": "boolean"
-		},
-		"placeholder": {
-			"type": "string"
 		}
 	},
 	"supports": {

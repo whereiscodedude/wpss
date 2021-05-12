@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["apiFetch"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 465);
+/******/ 	return __webpack_require__(__webpack_require__.s = 454);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -94,16 +94,16 @@ this["wp"] = this["wp"] || {}; this["wp"]["apiFetch"] =
 
 /***/ }),
 
-/***/ 14:
+/***/ 13:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _objectWithoutProperties; });
-/* harmony import */ var _objectWithoutPropertiesLoose_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(45);
+/* harmony import */ var _babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(44);
 
 function _objectWithoutProperties(source, excluded) {
   if (source == null) return {};
-  var target = Object(_objectWithoutPropertiesLoose_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(source, excluded);
+  var target = Object(_babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(source, excluded);
   var key, i;
 
   if (Object.getOwnPropertySymbols) {
@@ -129,14 +129,14 @@ function _objectWithoutProperties(source, excluded) {
 
 /***/ }),
 
-/***/ 29:
+/***/ 32:
 /***/ (function(module, exports) {
 
 (function() { module.exports = window["wp"]["url"]; }());
 
 /***/ }),
 
-/***/ 45:
+/***/ 44:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -158,7 +158,7 @@ function _objectWithoutPropertiesLoose(source, excluded) {
 
 /***/ }),
 
-/***/ 465:
+/***/ 454:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -169,7 +169,7 @@ __webpack_require__.r(__webpack_exports__);
 var defineProperty = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js
-var objectWithoutProperties = __webpack_require__(14);
+var objectWithoutProperties = __webpack_require__(13);
 
 // EXTERNAL MODULE: external ["wp","i18n"]
 var external_wp_i18n_ = __webpack_require__(1);
@@ -181,15 +181,8 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { Object(defineProperty["a" /* default */])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-/**
- * @param {string} nonce
- * @return {import('../types').APIFetchMiddleware & { nonce: string }} A middleware to enhance a request with a nonce.
- */
 function createNonceMiddleware(nonce) {
-  /**
-   * @type {import('../types').APIFetchMiddleware & { nonce: string }}
-   */
-  var middleware = function middleware(options, next) {
+  function middleware(options, next) {
     var _options$headers = options.headers,
         headers = _options$headers === void 0 ? {} : _options$headers; // If an 'X-WP-Nonce' header (or any case-insensitive variation
     // thereof) was specified, no need to add a nonce header.
@@ -205,7 +198,7 @@ function createNonceMiddleware(nonce) {
         'X-WP-Nonce': middleware.nonce
       })
     }));
-  };
+  }
 
   middleware.nonce = nonce;
   return middleware;
@@ -220,9 +213,6 @@ function namespace_endpoint_ownKeys(object, enumerableOnly) { var keys = Object.
 
 function namespace_endpoint_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { namespace_endpoint_ownKeys(Object(source), true).forEach(function (key) { Object(defineProperty["a" /* default */])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { namespace_endpoint_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-/**
- * @type {import('../types').APIFetchMiddleware}
- */
 var namespaceAndEndpointMiddleware = function namespaceAndEndpointMiddleware(options, next) {
   var path = options.path;
   var namespaceTrimmed, endpointTrimmed;
@@ -258,10 +248,6 @@ function root_url_objectSpread(target) { for (var i = 1; i < arguments.length; i
  * Internal dependencies
  */
 
-/**
- * @param {string} rootURL
- * @return {import('../types').APIFetchMiddleware} Root URL middleware.
- */
 
 var root_url_createRootURLMiddleware = function createRootURLMiddleware(rootURL) {
   return function (options, next) {
@@ -329,18 +315,12 @@ function getStablePath(path) {
   }) // 'a=5&b=1&c=2'
   .join('&');
 }
-/**
- * @param {Record<string, any>} preloadedData
- * @return {import('../types').APIFetchMiddleware} Preloading middleware.
- */
 
 function createPreloadingMiddleware(preloadedData) {
   var cache = Object.keys(preloadedData).reduce(function (result, path) {
     result[getStablePath(path)] = preloadedData[path];
     return result;
-  },
-  /** @type {Record<string, any>} */
-  {});
+  }, {});
   return function (options, next) {
     var _options$parse = options.parse,
         parse = _options$parse === void 0 ? true : _options$parse;
@@ -359,7 +339,7 @@ function createPreloadingMiddleware(preloadedData) {
           headers: cacheData.headers
         }));
       } else if ('OPTIONS' === method && cache[method] && cache[method][path]) {
-        return Promise.resolve(parse ? cache[method][path].body : cache[method][path]);
+        return Promise.resolve(cache[method][path]);
       }
     }
 
@@ -369,15 +349,15 @@ function createPreloadingMiddleware(preloadedData) {
 
 /* harmony default export */ var preloading = (createPreloadingMiddleware);
 
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(48);
-
 // EXTERNAL MODULE: external "regeneratorRuntime"
 var external_regeneratorRuntime_ = __webpack_require__(16);
 var external_regeneratorRuntime_default = /*#__PURE__*/__webpack_require__.n(external_regeneratorRuntime_);
 
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(47);
+
 // EXTERNAL MODULE: external ["wp","url"]
-var external_wp_url_ = __webpack_require__(29);
+var external_wp_url_ = __webpack_require__(32);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/api-fetch/build-module/middlewares/fetch-all-middleware.js
 
@@ -397,14 +377,7 @@ function fetch_all_middleware_objectSpread(target) { for (var i = 1; i < argumen
  * Internal dependencies
  */
 
-
-/**
- * Apply query arguments to both URL and Path, whichever is present.
- *
- * @param {import('../types').APIFetchOptions} props
- * @param {Record<string, string | number>} queryArgs
- * @return {import('../types').APIFetchOptions} The request with the modified query args
- */
+ // Apply query arguments to both URL and Path, whichever is present.
 
 var fetch_all_middleware_modifyQuery = function modifyQuery(_ref, queryArgs) {
   var path = _ref.path,
@@ -415,23 +388,12 @@ var fetch_all_middleware_modifyQuery = function modifyQuery(_ref, queryArgs) {
     url: url && Object(external_wp_url_["addQueryArgs"])(url, queryArgs),
     path: path && Object(external_wp_url_["addQueryArgs"])(path, queryArgs)
   });
-};
-/**
- * Duplicates parsing functionality from apiFetch.
- *
- * @param {Response} response
- * @return {Promise<any>} Parsed response json.
- */
+}; // Duplicates parsing functionality from apiFetch.
 
 
 var parseResponse = function parseResponse(response) {
   return response.json ? response.json() : Promise.reject(response);
 };
-/**
- * @param {string | null} linkHeader
- * @return {{ next?: string }} The parsed link header.
- */
-
 
 var parseLinkHeader = function parseLinkHeader(linkHeader) {
   if (!linkHeader) {
@@ -443,11 +405,6 @@ var parseLinkHeader = function parseLinkHeader(linkHeader) {
     next: match[1]
   } : {};
 };
-/**
- * @param {Response} response
- * @return {string | undefined} The next page URL.
- */
-
 
 var getNextPageUrl = function getNextPageUrl(response) {
   var _parseLinkHeader = parseLinkHeader(response.headers.get('link')),
@@ -455,24 +412,14 @@ var getNextPageUrl = function getNextPageUrl(response) {
 
   return next;
 };
-/**
- * @param {import('../types').APIFetchOptions} options
- * @return {boolean} True if the request contains an unbounded query.
- */
-
 
 var requestContainsUnboundedQuery = function requestContainsUnboundedQuery(options) {
-  var pathIsUnbounded = !!options.path && options.path.indexOf('per_page=-1') !== -1;
-  var urlIsUnbounded = !!options.url && options.url.indexOf('per_page=-1') !== -1;
+  var pathIsUnbounded = options.path && options.path.indexOf('per_page=-1') !== -1;
+  var urlIsUnbounded = options.url && options.url.indexOf('per_page=-1') !== -1;
   return pathIsUnbounded || urlIsUnbounded;
-};
-/**
- * The REST API enforces an upper limit on the per_page option. To handle large
- * collections, apiFetch consumers can pass `per_page=-1`; this middleware will
- * then recursively assemble a full response array from all available pages.
- *
- * @type {import('../types').APIFetchMiddleware}
- */
+}; // The REST API enforces an upper limit on the per_page option. To handle large
+// collections, apiFetch consumers can pass `per_page=-1`; this middleware will
+// then recursively assemble a full response array from all available pages.
 
 
 var fetchAllMiddleware = /*#__PURE__*/function () {
@@ -533,9 +480,7 @@ var fetchAllMiddleware = /*#__PURE__*/function () {
 
           case 15:
             // Iteratively fetch all remaining pages until no "next" header is found.
-            mergedResults =
-            /** @type {any[]} */
-            [].concat(results);
+            mergedResults = [].concat(results);
 
           case 16:
             if (!nextPage) {
@@ -592,7 +537,7 @@ function http_v1_objectSpread(target) { for (var i = 1; i < arguments.length; i+
 /**
  * Set of HTTP methods which are eligible to be overridden.
  *
- * @type {Set<string>}
+ * @type {Set}
  */
 var OVERRIDE_METHODS = new Set(['PATCH', 'PUT', 'DELETE']);
 /**
@@ -611,10 +556,13 @@ var DEFAULT_METHOD = 'GET';
  * API Fetch middleware which overrides the request method for HTTP v1
  * compatibility leveraging the REST API X-HTTP-Method-Override header.
  *
- * @type {import('../types').APIFetchMiddleware}
+ * @param {Object}   options Fetch options.
+ * @param {Function} next    [description]
+ *
+ * @return {*} The evaluated result of the remaining middleware chain.
  */
 
-var httpV1Middleware = function httpV1Middleware(options, next) {
+function httpV1Middleware(options, next) {
   var _options = options,
       _options$method = _options.method,
       method = _options$method === void 0 ? DEFAULT_METHOD : _options$method;
@@ -630,7 +578,7 @@ var httpV1Middleware = function httpV1Middleware(options, next) {
   }
 
   return next(options);
-};
+}
 
 /* harmony default export */ var http_v1 = (httpV1Middleware);
 
@@ -639,11 +587,8 @@ var httpV1Middleware = function httpV1Middleware(options, next) {
  * WordPress dependencies
  */
 
-/**
- * @type {import('../types').APIFetchMiddleware}
- */
 
-var user_locale_userLocaleMiddleware = function userLocaleMiddleware(options, next) {
+function userLocaleMiddleware(options, next) {
   if (typeof options.url === 'string' && !Object(external_wp_url_["hasQueryArg"])(options.url, '_locale')) {
     options.url = Object(external_wp_url_["addQueryArgs"])(options.url, {
       _locale: 'user'
@@ -657,9 +602,9 @@ var user_locale_userLocaleMiddleware = function userLocaleMiddleware(options, ne
   }
 
   return next(options);
-};
+}
 
-/* harmony default export */ var user_locale = (user_locale_userLocaleMiddleware);
+/* harmony default export */ var user_locale = (userLocaleMiddleware);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/api-fetch/build-module/utils/response.js
 /**
@@ -672,7 +617,7 @@ var user_locale_userLocaleMiddleware = function userLocaleMiddleware(options, ne
  * @param {Response} response
  * @param {boolean}  shouldParseResponse
  *
- * @return {Promise<any> | null | Response} Parsed response.
+ * @return {Promise} Parsed response
  */
 
 var response_parseResponse = function parseResponse(response) {
@@ -688,14 +633,6 @@ var response_parseResponse = function parseResponse(response) {
 
   return response;
 };
-/**
- * Calls the `json` function on the Response, throwing an error if the response
- * doesn't have a json function or if parsing the json itself fails.
- *
- * @param {Response} response
- * @return {Promise<any>} Parsed response.
- */
-
 
 var response_parseJsonAndNormalizeError = function parseJsonAndNormalizeError(response) {
   var invalidJsonError = {
@@ -717,7 +654,7 @@ var response_parseJsonAndNormalizeError = function parseJsonAndNormalizeError(re
  * @param {Response} response
  * @param {boolean}  shouldParseResponse
  *
- * @return {Promise<any>} Parsed response.
+ * @return {Promise} Parsed response.
  */
 
 
@@ -727,14 +664,6 @@ var parseResponseAndNormalizeError = function parseResponseAndNormalizeError(res
     return parseAndThrowError(res, shouldParseResponse);
   });
 };
-/**
- * Parses a response, throwing an error if parsing the response fails.
- *
- * @param {Response} response
- * @param {boolean} shouldParseResponse
- * @return {Promise<any>} Parsed response.
- */
-
 function parseAndThrowError(response) {
   var shouldParseResponse = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
@@ -770,22 +699,21 @@ function media_upload_objectSpread(target) { for (var i = 1; i < arguments.lengt
 /**
  * Middleware handling media upload failures and retries.
  *
- * @type {import('../types').APIFetchMiddleware}
+ * @param {Object}   options Fetch options.
+ * @param {Function} next    [description]
+ *
+ * @return {*} The evaluated result of the remaining middleware chain.
  */
 
-var media_upload_mediaUploadMiddleware = function mediaUploadMiddleware(options, next) {
+function mediaUploadMiddleware(options, next) {
   var isMediaUploadRequest = options.path && options.path.indexOf('/wp/v2/media') !== -1 || options.url && options.url.indexOf('/wp/v2/media') !== -1;
 
   if (!isMediaUploadRequest) {
-    return next(options);
+    return next(options, next);
   }
 
   var retries = 0;
   var maxRetries = 5;
-  /**
-   * @param {string} attachmentId
-   * @return {Promise<any>} Processed post response.
-   */
 
   var postProcess = function postProcess(attachmentId) {
     retries++;
@@ -831,9 +759,9 @@ var media_upload_mediaUploadMiddleware = function mediaUploadMiddleware(options,
   }).then(function (response) {
     return parseResponseAndNormalizeError(response, options.parse);
   });
-};
+}
 
-/* harmony default export */ var media_upload = (media_upload_mediaUploadMiddleware);
+/* harmony default export */ var media_upload = (mediaUploadMiddleware);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/api-fetch/build-module/index.js
 
@@ -864,7 +792,7 @@ function build_module_objectSpread(target) { for (var i = 1; i < arguments.lengt
  * Default set of header values which should be sent with every request unless
  * explicitly provided through apiFetch options.
  *
- * @type {Record<string, string>}
+ * @type {Object}
  */
 
 var DEFAULT_HEADERS = {
@@ -884,32 +812,11 @@ var DEFAULT_HEADERS = {
 var DEFAULT_OPTIONS = {
   credentials: 'include'
 };
-/** @typedef {import('./types').APIFetchMiddleware} APIFetchMiddleware */
-
-/** @typedef {import('./types').APIFetchOptions} APIFetchOptions */
-
-/**
- * @type {import('./types').APIFetchMiddleware[]}
- */
-
 var middlewares = [user_locale, namespace_endpoint, http_v1, fetch_all_middleware];
-/**
- * Register a middleware
- *
- * @param {import('./types').APIFetchMiddleware} middleware
- */
 
 function registerMiddleware(middleware) {
   middlewares.unshift(middleware);
 }
-/**
- * Checks the status of a response, throwing the Response as an error if
- * it is outside the 200 range.
- *
- * @param {Response} response
- * @return {Response} The response if the status is in the 200 range.
- */
-
 
 var checkStatus = function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
@@ -918,12 +825,6 @@ var checkStatus = function checkStatus(response) {
 
   throw response;
 };
-/** @typedef {(options: import('./types').APIFetchOptions) => Promise<any>} FetchHandler*/
-
-/**
- * @type {FetchHandler}
- */
-
 
 var build_module_defaultFetchHandler = function defaultFetchHandler(nextOptions) {
   var url = nextOptions.url,
@@ -943,8 +844,7 @@ var build_module_defaultFetchHandler = function defaultFetchHandler(nextOptions)
     headers['Content-Type'] = 'application/json';
   }
 
-  var responsePromise = window.fetch( // fall back to explicitly passing `window.location` which is the behavior if `undefined` is passed
-  url || path || window.location.href, build_module_objectSpread(build_module_objectSpread(build_module_objectSpread({}, DEFAULT_OPTIONS), remainingOptions), {}, {
+  var responsePromise = window.fetch(url || path, build_module_objectSpread(build_module_objectSpread(build_module_objectSpread({}, DEFAULT_OPTIONS), remainingOptions), {}, {
     body: body,
     headers: headers
   }));
@@ -964,26 +864,18 @@ var build_module_defaultFetchHandler = function defaultFetchHandler(nextOptions)
     };
   });
 };
-/** @type {FetchHandler} */
-
 
 var fetchHandler = build_module_defaultFetchHandler;
 /**
  * Defines a custom fetch handler for making the requests that will override
  * the default one using window.fetch
  *
- * @param {FetchHandler} newFetchHandler The new fetch handler
+ * @param {Function} newFetchHandler The new fetch handler
  */
 
 function setFetchHandler(newFetchHandler) {
   fetchHandler = newFetchHandler;
 }
-/**
- * @template T
- * @param {import('./types').APIFetchOptions} options
- * @return {Promise<T>} A promise representing the request processed via the registered middlewares.
- */
-
 
 function apiFetch(options) {
   // creates a nested function chain that calls all middlewares and finally the `fetchHandler`,
@@ -991,9 +883,7 @@ function apiFetch(options) {
   // ```
   // opts1 => m1( opts1, opts2 => m2( opts2, opts3 => m3( opts3, fetchHandler ) ) );
   // ```
-  var enhancedHandler = middlewares.reduceRight(function (
-  /** @type {FetchHandler} */
-  next, middleware) {
+  var enhancedHandler = middlewares.reduceRight(function (next, middleware) {
     return function (workingOptions) {
       return middleware(workingOptions, next);
     };
@@ -1004,11 +894,9 @@ function apiFetch(options) {
     } // If the nonce is invalid, refresh it and try again.
 
 
-    return window // @ts-ignore
-    .fetch(apiFetch.nonceEndpoint).then(checkStatus).then(function (data) {
+    return window.fetch(apiFetch.nonceEndpoint).then(checkStatus).then(function (data) {
       return data.text();
     }).then(function (text) {
-      // @ts-ignore
       apiFetch.nonceMiddleware.nonce = text;
       return apiFetch(options);
     });
@@ -1027,7 +915,7 @@ apiFetch.mediaUploadMiddleware = media_upload;
 
 /***/ }),
 
-/***/ 48:
+/***/ 47:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -2799,7 +2799,7 @@ function wp_playlist_shortcode( $attr ) {
 <div class="wp-playlist wp-<?php echo $safe_type; ?>-playlist wp-playlist-<?php echo $safe_style; ?>">
 	<?php if ( 'audio' === $atts['type'] ) : ?>
 		<div class="wp-playlist-current-item"></div>
-	<?php endif; ?>
+	<?php endif ?>
 	<<?php echo $safe_type; ?> controls="controls" preload="none" width="<?php echo (int) $theme_width; ?>"
 		<?php
 		if ( 'video' === $safe_type ) {
@@ -3459,11 +3459,6 @@ function adjacent_image_link( $prev = true, $size = 'thumbnail', $text = false )
 	 *
 	 * The dynamic portion of the hook name, `$adjacent`, refers to the type of adjacency,
 	 * either 'next', or 'previous'.
-	 *
-	 * Possible hook names include:
-	 *
-	 *  - `next_image_link`
-	 *  - `previous_image_link`
 	 *
 	 * @since 3.5.0
 	 *
@@ -4306,39 +4301,29 @@ function wp_enqueue_media( $args = array() ) {
 		);
 	}
 
-	/**
-	 * Filters whether the Media Library grid has infinite scrolling. Default `false`.
-	 *
-	 * @since 5.8.0
-	 *
-	 * @param bool $value The filtered value, defaults to `false`.
-	 */
-	$infinite_scrolling = apply_filters( 'media_library_infinite_scrolling', false );
-
 	$settings = array(
-		'tabs'              => $tabs,
-		'tabUrl'            => add_query_arg( array( 'chromeless' => true ), admin_url( 'media-upload.php' ) ),
-		'mimeTypes'         => wp_list_pluck( get_post_mime_types(), 0 ),
+		'tabs'             => $tabs,
+		'tabUrl'           => add_query_arg( array( 'chromeless' => true ), admin_url( 'media-upload.php' ) ),
+		'mimeTypes'        => wp_list_pluck( get_post_mime_types(), 0 ),
 		/** This filter is documented in wp-admin/includes/media.php */
-		'captions'          => ! apply_filters( 'disable_captions', '' ),
-		'nonce'             => array(
+		'captions'         => ! apply_filters( 'disable_captions', '' ),
+		'nonce'            => array(
 			'sendToEditor' => wp_create_nonce( 'media-send-to-editor' ),
 		),
-		'post'              => array(
+		'post'             => array(
 			'id' => 0,
 		),
-		'defaultProps'      => $props,
-		'attachmentCounts'  => array(
+		'defaultProps'     => $props,
+		'attachmentCounts' => array(
 			'audio' => ( $show_audio_playlist ) ? 1 : 0,
 			'video' => ( $show_video_playlist ) ? 1 : 0,
 		),
-		'oEmbedProxyUrl'    => rest_url( 'oembed/1.0/proxy' ),
-		'embedExts'         => $exts,
-		'embedMimes'        => $ext_mimes,
-		'contentWidth'      => $content_width,
-		'months'            => $months,
-		'mediaTrash'        => MEDIA_TRASH ? 1 : 0,
-		'infiniteScrolling' => ( $infinite_scrolling ) ? 1 : 0,
+		'oEmbedProxyUrl'   => rest_url( 'oembed/1.0/proxy' ),
+		'embedExts'        => $exts,
+		'embedMimes'       => $ext_mimes,
+		'contentWidth'     => $content_width,
+		'months'           => $months,
+		'mediaTrash'       => MEDIA_TRASH ? 1 : 0,
 	);
 
 	$post = null;
@@ -4422,8 +4407,8 @@ function wp_enqueue_media( $args = array() ) {
 		'searchLabel'                 => __( 'Search' ),
 		'searchMediaLabel'            => __( 'Search media' ),          // Backward compatibility pre-5.3.
 		'searchMediaPlaceholder'      => __( 'Search media items...' ), // Placeholder (no ellipsis), backward compatibility pre-5.3.
-		/* translators: %d: Number of attachments found in a search. */
 		'mediaFound'                  => __( 'Number of media items found: %d' ),
+		'mediaFoundHasMoreResults'    => __( 'Number of media items displayed: %d. Scroll the page for more results.' ),
 		'noMedia'                     => __( 'No media items found.' ),
 		'noMediaTryNewSearch'         => __( 'No media items found. Try a different search.' ),
 
@@ -4990,139 +4975,40 @@ function wp_show_heic_upload_error( $plupload_settings ) {
  * Allows PHP's getimagesize() to be debuggable when necessary.
  *
  * @since 5.7.0
- * @since 5.8.0 Added support for WebP images.
  *
  * @param string $filename   The file path.
  * @param array  $image_info Optional. Extended image information (passed by reference).
  * @return array|false Array of image information or false on failure.
  */
 function wp_getimagesize( $filename, array &$image_info = null ) {
-	// Don't silence errors when in debug mode, unless running unit tests.
-	if ( defined( 'WP_DEBUG' ) && WP_DEBUG
-		&& ! defined( 'WP_RUN_CORE_TESTS' )
+	if (
+		// Skip when running unit tests.
+		! defined( 'WP_RUN_CORE_TESTS' )
+		&&
+		// Return without silencing errors when in debug mode.
+		defined( 'WP_DEBUG' ) && WP_DEBUG
 	) {
 		if ( 2 === func_num_args() ) {
-			$info = getimagesize( $filename, $image_info );
+			return getimagesize( $filename, $image_info );
 		} else {
-			$info = getimagesize( $filename );
+			return getimagesize( $filename );
 		}
+	}
+
+	/*
+	 * Silencing notice and warning is intentional.
+	 *
+	 * getimagesize() has a tendency to generate errors, such as
+	 * "corrupt JPEG data: 7191 extraneous bytes before marker",
+	 * even when it's able to provide image size information.
+	 *
+	 * See https://core.trac.wordpress.org/ticket/42480
+	 */
+	if ( 2 === func_num_args() ) {
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return @getimagesize( $filename, $image_info );
 	} else {
-		/*
-		 * Silencing notice and warning is intentional.
-		 *
-		 * getimagesize() has a tendency to generate errors, such as
-		 * "corrupt JPEG data: 7191 extraneous bytes before marker",
-		 * even when it's able to provide image size information.
-		 *
-		 * See https://core.trac.wordpress.org/ticket/42480
-		 */
-		if ( 2 === func_num_args() ) {
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors
-			$info = @getimagesize( $filename, $image_info );
-		} else {
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors
-			$info = @getimagesize( $filename );
-		}
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return @getimagesize( $filename );
 	}
-
-	if ( false !== $info ) {
-		return $info;
-	}
-
-	// For PHP versions that don't support WebP images,
-	// extract the image size info from the file headers.
-	if ( 'image/webp' === wp_get_image_mime( $filename ) ) {
-		$webp_info = wp_get_webp_info( $filename );
-		$width     = $webp_info['width'];
-		$height    = $webp_info['height'];
-
-		// Mimic the native return format.
-		if ( $width && $height ) {
-			return array(
-				$width,
-				$height,
-				IMAGETYPE_WEBP, // phpcs:ignore PHPCompatibility.Constants.NewConstants.imagetype_webpFound
-				sprintf(
-					'width="%d" height="%d"',
-					$width,
-					$height
-				),
-				'mime' => 'image/webp',
-			);
-		}
-	}
-
-	// The image could not be parsed.
-	return false;
-}
-
-/**
- * Extracts meta information about a webp file: width, height and type.
- *
- * @since 5.8.0
- *
- * @param string $filename Path to a WebP file.
- * @return array $webp_info {
- *     An array of WebP image information.
- *
- *     @type array $size {
- *         @type int|false    $width  Image width on success, false on failure.
- *         @type int|false    $height Image height on success, false on failure.
- *         @type string|false $type   The WebP type: one of 'lossy', 'lossless' or 'animated-alpha'.
- *                                    False on failure.
- *     }
- */
-function wp_get_webp_info( $filename ) {
-	$width  = false;
-	$height = false;
-	$type   = false;
-
-	if ( 'image/webp' !== wp_get_image_mime( $filename ) ) {
-		return compact( 'width', 'height', 'type' );
-	}
-
-	try {
-		$handle = fopen( $filename, 'rb' );
-		if ( $handle ) {
-			$magic = fread( $handle, 40 );
-			fclose( $handle );
-
-			// Make sure we got enough bytes.
-			if ( strlen( $magic ) < 40 ) {
-				return compact( 'width', 'height', 'type' );
-			}
-
-			// The headers are a little different for each of the three formats.
-			// Header values based on WebP docs, see https://developers.google.com/speed/webp/docs/riff_container.
-			switch ( substr( $magic, 12, 4 ) ) {
-				// Lossy WebP.
-				case 'VP8 ':
-					$parts  = unpack( 'v2', substr( $magic, 26, 4 ) );
-					$width  = (int) ( $parts[1] & 0x3FFF );
-					$height = (int) ( $parts[2] & 0x3FFF );
-					$type   = 'lossy';
-					break;
-				// Lossless WebP.
-				case 'VP8L':
-					$parts  = unpack( 'C4', substr( $magic, 21, 4 ) );
-					$width  = (int) ( $parts[1] | ( ( $parts[2] & 0x3F ) << 8 ) ) + 1;
-					$height = (int) ( ( ( $parts[2] & 0xC0 ) >> 6 ) | ( $parts[3] << 2 ) | ( ( $parts[4] & 0x03 ) << 10 ) ) + 1;
-					$type   = 'lossless';
-					break;
-				// Animated/alpha WebP.
-				case 'VP8X':
-					// Pad 24-bit int.
-					$width = unpack( 'V', substr( $magic, 24, 3 ) . "\x00" );
-					$width = (int) ( $width[1] & 0xFFFFFF ) + 1;
-					// Pad 24-bit int.
-					$height = unpack( 'V', substr( $magic, 27, 3 ) . "\x00" );
-					$height = (int) ( $height[1] & 0xFFFFFF ) + 1;
-					$type   = 'animated-alpha';
-					break;
-			}
-		}
-	} catch ( Exception $e ) {
-	}
-
-	return compact( 'width', 'height', 'type' );
 }

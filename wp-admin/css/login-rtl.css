@@ -337,10 +337,6 @@ p {
 	max-height: none;
 }
 
-.login input.password-input {
-	font-family: Consolas, Monaco, monospace;
-}
-
 .js.login input.password-input,
 .js.login-action-rp form .input,
 .js.login-action-rp input[type="text"] {
@@ -407,6 +403,10 @@ body.interim-login {
 /* Hide the Edge "reveal password" native button */
 input::-ms-reveal {
 	display: none;
+}
+
+@-ms-viewport {
+	width: device-width;
 }
 
 @media screen and (max-height: 550px) {

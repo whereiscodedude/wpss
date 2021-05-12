@@ -1215,7 +1215,6 @@ We hope you enjoy your new site. Thanks!
 		'jpeg',
 		'png',
 		'gif',
-		'webp',
 		// Video.
 		'mov',
 		'avi',

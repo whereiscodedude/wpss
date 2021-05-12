@@ -82,7 +82,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["richText"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 453);
+/******/ 	return __webpack_require__(__webpack_require__.s = 443);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -94,7 +94,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["richText"] =
 
 /***/ }),
 
-/***/ 108:
+/***/ 105:
 /***/ (function(module, exports) {
 
 (function() { module.exports = window["wp"]["escapeHtml"]; }());
@@ -102,13 +102,6 @@ this["wp"] = this["wp"] || {}; this["wp"]["richText"] =
 /***/ }),
 
 /***/ 11:
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["wp"]["compose"]; }());
-
-/***/ }),
-
-/***/ 12:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -121,17 +114,14 @@ var arrayWithHoles = __webpack_require__(38);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
 function _iterableToArrayLimit(arr, i) {
-  var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
-
-  if (_i == null) return;
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
   var _arr = [];
   var _n = true;
   var _d = false;
-
-  var _s, _e;
+  var _e = undefined;
 
   try {
-    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
       _arr.push(_s.value);
 
       if (i && _arr.length === i) break;
@@ -150,7 +140,7 @@ function _iterableToArrayLimit(arr, i) {
   return _arr;
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js
-var unsupportedIterableToArray = __webpack_require__(28);
+var unsupportedIterableToArray = __webpack_require__(31);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableRest.js
 var nonIterableRest = __webpack_require__(39);
@@ -183,10 +173,10 @@ function _arrayWithoutHoles(arr) {
   if (Array.isArray(arr)) return Object(arrayLikeToArray["a" /* default */])(arr);
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArray.js
-var iterableToArray = __webpack_require__(42);
+var iterableToArray = __webpack_require__(37);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js
-var unsupportedIterableToArray = __webpack_require__(28);
+var unsupportedIterableToArray = __webpack_require__(31);
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableSpread.js
 function _nonIterableSpread() {
@@ -241,20 +231,38 @@ function _arrayLikeToArray(arr, len) {
 
 /***/ }),
 
-/***/ 28:
+/***/ 31:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _unsupportedIterableToArray; });
-/* harmony import */ var _arrayLikeToArray_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(24);
+/* harmony import */ var _babel_runtime_helpers_esm_arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(24);
 
 function _unsupportedIterableToArray(o, minLen) {
   if (!o) return;
-  if (typeof o === "string") return Object(_arrayLikeToArray_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
+  if (typeof o === "string") return Object(_babel_runtime_helpers_esm_arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
   var n = Object.prototype.toString.call(o).slice(8, -1);
   if (n === "Object" && o.constructor) n = o.constructor.name;
   if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return Object(_arrayLikeToArray_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return Object(_babel_runtime_helpers_esm_arrayLikeToArray__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(o, minLen);
+}
+
+/***/ }),
+
+/***/ 35:
+/***/ (function(module, exports) {
+
+(function() { module.exports = window["wp"]["deprecated"]; }());
+
+/***/ }),
+
+/***/ 37:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _iterableToArray; });
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
 }
 
 /***/ }),
@@ -288,7 +296,7 @@ function _nonIterableRest() {
 
 /***/ }),
 
-/***/ 40:
+/***/ 41:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -574,14 +582,26 @@ function isShallowEqual( a, b, fromIndex ) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _iterableToArray; });
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _typeof; });
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+  }
+
+  return _typeof(obj);
 }
 
 /***/ }),
 
-/***/ 453:
+/***/ 443:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -694,7 +714,7 @@ function reducer_formatTypes() {
 }));
 
 // EXTERNAL MODULE: ./node_modules/rememo/es/rememo.js
-var rememo = __webpack_require__(40);
+var rememo = __webpack_require__(41);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/store/selectors.js
 /**
@@ -1039,7 +1059,7 @@ function applyFormat(value, format) {
 }
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/typeof.js
-var esm_typeof = __webpack_require__(56);
+var esm_typeof = __webpack_require__(42);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/create-element.js
 /**
@@ -1820,10 +1840,6 @@ function getActiveObject(_ref) {
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-text-content.js
-/**
- * Internal dependencies
- */
-
 /** @typedef {import('./create').RichTextValue} RichTextValue */
 
 /**
@@ -1834,10 +1850,9 @@ function getActiveObject(_ref) {
  *
  * @return {string} The text content.
  */
-
 function getTextContent(_ref) {
   var text = _ref.text;
-  return text.replace(new RegExp(OBJECT_REPLACEMENT_CHARACTER, 'g'), '').replace(new RegExp(LINE_SEPARATOR, 'g'), '\n');
+  return text;
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-line-index.js
@@ -2393,6 +2408,7 @@ function replace_replace(_ref, pattern, replacement) {
  */
 
 
+
 /** @typedef {import('./create').RichTextValue} RichTextValue */
 
 /**
@@ -2410,7 +2426,7 @@ function replace_replace(_ref, pattern, replacement) {
 function insertLineSeparator(value) {
   var startIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : value.start;
   var endIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : value.end;
-  var beforeText = value.text.slice(0, startIndex);
+  var beforeText = getTextContent(value).slice(0, startIndex);
   var previousLineSeparatorIndex = beforeText.lastIndexOf(LINE_SEPARATOR);
   var previousLineSeparatorFormats = value.replacements[previousLineSeparatorIndex];
   var replacements = [,];
@@ -2947,8 +2963,7 @@ function toTree(_ref2) {
             // Necessary to prevent the placeholder from catching
             // selection. The placeholder is also not editable after
             // all.
-            contenteditable: 'false',
-            style: 'pointer-events:none;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;'
+            contenteditable: 'false'
           }
         });
       }
@@ -3296,7 +3311,7 @@ function applySelection(_ref6, current) {
 }
 
 // EXTERNAL MODULE: external ["wp","escapeHtml"]
-var external_wp_escapeHtml_ = __webpack_require__(108);
+var external_wp_escapeHtml_ = __webpack_require__(105);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/to-html-string.js
 /**
@@ -3918,16 +3933,17 @@ function useAnchorRef(_ref) {
 }
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js + 1 modules
-var slicedToArray = __webpack_require__(12);
+var slicedToArray = __webpack_require__(11);
 
 // EXTERNAL MODULE: external ["wp","keycodes"]
 var external_wp_keycodes_ = __webpack_require__(17);
 
+// EXTERNAL MODULE: external ["wp","deprecated"]
+var external_wp_deprecated_ = __webpack_require__(35);
+var external_wp_deprecated_default = /*#__PURE__*/__webpack_require__.n(external_wp_deprecated_);
+
 // EXTERNAL MODULE: external ["wp","dom"]
 var external_wp_dom_ = __webpack_require__(27);
-
-// EXTERNAL MODULE: external ["wp","compose"]
-var external_wp_compose_ = __webpack_require__(11);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/format-edit.js
 
@@ -4201,55 +4217,11 @@ function useBoundaryStyle(_ref) {
  * WordPress dependencies
  */
 
-var message = 'RichText cannot be used with an inline container. Please use a different display property.';
 function useInlineWarning(_ref) {
   var ref = _ref.ref;
   Object(external_wp_element_["useEffect"])(function () {
     if (false) { var computedStyle, defaultView, target; }
   }, []);
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-copy-handler.js
-/**
- * WordPress dependencies
- */
-
-/**
- * Internal dependencies
- */
-
-
-
-
-
-function useCopyHandler(_ref) {
-  var record = _ref.record,
-      multilineTag = _ref.multilineTag,
-      preserveWhiteSpace = _ref.preserveWhiteSpace;
-  return Object(external_wp_compose_["useRefEffect"])(function (element) {
-    function onCopy(event) {
-      if (isCollapsed(record.current) || !element.contains(element.ownerDocument.activeElement)) {
-        return;
-      }
-
-      var selectedRecord = slice(record.current);
-      var plainText = getTextContent(selectedRecord);
-      var html = toHTMLString({
-        value: selectedRecord,
-        multilineTag: multilineTag,
-        preserveWhiteSpace: preserveWhiteSpace
-      });
-      event.clipboardData.setData('text/plain', plainText);
-      event.clipboardData.setData('text/html', html);
-      event.clipboardData.setData('rich-text', 'true');
-      event.preventDefault();
-    }
-
-    element.addEventListener('copy', onCopy);
-    return function () {
-      element.removeEventListener('copy', onCopy);
-    };
-  }, [record, multilineTag, preserveWhiteSpace]);
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/index.js
@@ -4272,7 +4244,6 @@ function component_objectSpread(target) { for (var i = 1; i < arguments.length; 
 /**
  * Internal dependencies
  */
-
 
 
 
@@ -4325,20 +4296,13 @@ var INSERTION_INPUT_TYPES_TO_IGNORE = new Set(['insertParagraph', 'insertOrdered
 
 var whiteSpace = 'pre-wrap';
 /**
- * A minimum width of 1px will prevent the rich text container from collapsing
- * to 0 width and hiding the caret. This is useful for inline containers.
- */
-
-var minWidth = '1px';
-/**
  * Default style object for the editable element.
  *
  * @type {Object<string,string>}
  */
 
 var defaultStyle = {
-  whiteSpace: whiteSpace,
-  minWidth: minWidth
+  whiteSpace: whiteSpace
 };
 var EMPTY_ACTIVE_FORMATS = [];
 
@@ -4375,7 +4339,7 @@ function fixPlaceholderSelection(defaultView) {
   selection.collapseToStart();
 }
 
-function RichText(_ref, forwardedRef) {
+function RichText(_ref, ref) {
   var _ref$tagName = _ref.tagName,
       TagName = _ref$tagName === void 0 ? 'div' : _ref$tagName,
       _ref$value = _ref.value,
@@ -4396,6 +4360,8 @@ function RichText(_ref, forwardedRef) {
       onSelectionChange = _ref.onSelectionChange,
       onChange = _ref.onChange,
       onFocus = _ref.unstableOnFocus,
+      setFocusedElement = _ref.setFocusedElement,
+      instanceId = _ref.instanceId,
       clientId = _ref.clientId,
       identifier = _ref.identifier,
       multilineTag = _ref.__unstableMultilineTag,
@@ -4411,7 +4377,6 @@ function RichText(_ref, forwardedRef) {
       onExitFormattedText = _ref.__unstableOnExitFormattedText,
       onCreateUndoLevel = _ref.__unstableOnCreateUndoLevel,
       isSelected = _ref.__unstableIsSelected;
-  var ref = Object(external_wp_element_["useRef"])();
 
   var _useState = Object(external_wp_element_["useState"])(),
       _useState2 = Object(slicedToArray["a" /* default */])(_useState, 2),
@@ -4627,13 +4592,11 @@ function RichText(_ref, forwardedRef) {
 
     if (onPaste) {
       var files = Object(external_wp_dom_["getFilesFromDataTransfer"])(clipboardData);
-      var isInternal = clipboardData.getData('rich-text') === 'true';
       onPaste({
         value: removeEditorOnlyFormats(record.current),
         onChange: handleChange,
         html: html,
         plainText: plainText,
-        isInternal: isInternal,
         files: Object(toConsumableArray["a" /* default */])(files),
         activeFormats: activeFormats
       });
@@ -4821,8 +4784,10 @@ function RichText(_ref, forwardedRef) {
 
     if (!collapsed) {
       return;
-    }
+    } // In all other cases, prevent default behaviour.
 
+
+    event.preventDefault();
     var formatsBefore = formats[start - 1] || EMPTY_ACTIVE_FORMATS;
     var formatsAfter = formats[start] || EMPTY_ACTIVE_FORMATS;
     var newActiveFormatsLength = currentActiveFormats.length;
@@ -4852,20 +4817,31 @@ function RichText(_ref, forwardedRef) {
       }
     }
 
-    if (newActiveFormatsLength === currentActiveFormats.length) {
-      record.current._newActiveFormats = isReverse ? formatsBefore : formatsAfter;
+    if (newActiveFormatsLength !== currentActiveFormats.length) {
+      var _newActiveFormats = source.slice(0, newActiveFormatsLength);
+
+      var _newValue = component_objectSpread(component_objectSpread({}, record.current), {}, {
+        activeFormats: _newActiveFormats
+      });
+
+      record.current = _newValue;
+      applyRecord(_newValue);
+      setActiveFormats(_newActiveFormats);
       return;
     }
 
-    event.preventDefault();
-    var newActiveFormats = source.slice(0, newActiveFormatsLength);
+    var newPos = start + (isReverse ? -1 : 1);
+    var newActiveFormats = isReverse ? formatsBefore : formatsAfter;
 
     var newValue = component_objectSpread(component_objectSpread({}, record.current), {}, {
+      start: newPos,
+      end: newPos,
       activeFormats: newActiveFormats
     });
 
     record.current = newValue;
     applyRecord(newValue);
+    onSelectionChange(newPos, newPos);
     setActiveFormats(newActiveFormats);
   }
 
@@ -5051,11 +5027,8 @@ function RichText(_ref, forwardedRef) {
     var newValue = component_objectSpread(component_objectSpread({}, oldRecord), {}, {
       start: start,
       end: end,
-      // _newActiveFormats may be set on arrow key navigation to control
-      // the right boundary position. If undefined, getActiveFormats will
-      // give the active formats according to the browser.
-      activeFormats: oldRecord._newActiveFormats,
-      _newActiveFormats: undefined
+      // Allow `getActiveFormats` to get new `activeFormats`.
+      activeFormats: undefined
     });
 
     var newActiveFormats = getActiveFormats(newValue, EMPTY_ACTIVE_FORMATS); // Update the value with the new active formats.
@@ -5152,6 +5125,12 @@ function RichText(_ref, forwardedRef) {
    * documented, as the current requirements where it is used are subject to
    * future refactoring following `isSelected` handling.
    *
+   * In contrast with `setFocusedElement`, this is only triggered in response
+   * to focus within the contenteditable field, whereas `setFocusedElement`
+   * is triggered on focus within any `RichText` descendent element.
+   *
+   * @see setFocusedElement
+   *
    * @private
    */
 
@@ -5185,6 +5164,13 @@ function RichText(_ref, forwardedRef) {
 
     rafId.current = getWin().requestAnimationFrame(handleSelectionChange);
     getDoc().addEventListener('selectionchange', handleSelectionChange);
+
+    if (setFocusedElement) {
+      external_wp_deprecated_default()('wp.blockEditor.RichText setFocusedElement prop', {
+        alternative: 'selection state from the block editor store.'
+      });
+      setFocusedElement(instanceId);
+    }
   }
 
   function handleBlur() {
@@ -5250,11 +5236,7 @@ function RichText(_ref, forwardedRef) {
     role: 'textbox',
     'aria-multiline': true,
     'aria-label': placeholder,
-    ref: Object(external_wp_compose_["useMergeRefs"])([forwardedRef, ref, useCopyHandler({
-      record: record,
-      multilineTag: multilineTag,
-      preserveWhiteSpace: preserveWhiteSpace
-    })]),
+    ref: ref,
     style: defaultStyle,
     className: 'rich-text',
     onPaste: handlePaste,
@@ -5366,29 +5348,6 @@ function _defineProperty(obj, key, value) {
   }
 
   return obj;
-}
-
-/***/ }),
-
-/***/ 56:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _typeof; });
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof = function _typeof(obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof = function _typeof(obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
 }
 
 /***/ })

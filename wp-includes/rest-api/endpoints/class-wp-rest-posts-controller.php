@@ -330,7 +330,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 *
 		 * The dynamic portion of the hook name, `$this->post_type`, refers to the post type slug.
 		 *
-		 * Possible hook names include:
+		 * Possible filter names include:
 		 *
 		 *  - `rest_post_query`
 		 *  - `rest_page_query`
@@ -656,12 +656,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 *
 		 * The dynamic portion of the hook name, `$this->post_type`, refers to the post type slug.
 		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_insert_post`
-		 *  - `rest_insert_page`
-		 *  - `rest_insert_attachment`
-		 *
 		 * @since 4.7.0
 		 *
 		 * @param WP_Post         $post     Inserted or updated post object.
@@ -719,12 +713,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 * Fires after a single post is completely created or updated via the REST API.
 		 *
 		 * The dynamic portion of the hook name, `$this->post_type`, refers to the post type slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_after_insert_post`
-		 *  - `rest_after_insert_page`
-		 *  - `rest_after_insert_attachment`
 		 *
 		 * @since 5.0.0
 		 *
@@ -947,12 +935,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 * Filters whether a post is trashable.
 		 *
 		 * The dynamic portion of the hook name, `$this->post_type`, refers to the post type slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_post_trashable`
-		 *  - `rest_page_trashable`
-		 *  - `rest_attachment_trashable`
 		 *
 		 * Pass false to disable Trash support for the post.
 		 *
@@ -1314,12 +1296,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 * Filters a post before it is inserted via the REST API.
 		 *
 		 * The dynamic portion of the hook name, `$this->post_type`, refers to the post type slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_pre_insert_post`
-		 *  - `rest_pre_insert_page`
-		 *  - `rest_pre_insert_attachment`
 		 *
 		 * @since 4.7.0
 		 *
@@ -1925,7 +1901,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 *
 		 * The dynamic portion of the hook name, `$this->post_type`, refers to the post type slug.
 		 *
-		 * Possible hook names include:
+		 * Possible filter names include:
 		 *
 		 *  - `rest_prepare_post`
 		 *  - `rest_prepare_page`

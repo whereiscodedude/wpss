@@ -55,7 +55,6 @@ html:lang(he-il) .rtl #wpadminbar * {
 	border: none;
 	text-decoration: none;
 	background: none;
-	box-shadow: none;
 }
 
 #wpadminbar a:focus,
@@ -519,16 +518,12 @@ html:lang(he-il) .rtl #wpadminbar * {
 	color: #72aee6;
 }
 
-#wpadminbar .quicklinks li img.blavatar,
-#wpadminbar .quicklinks li div.blavatar:before {
+#wpadminbar .quicklinks li .blavatar:before {
+	content: "\f120";
 	height: 16px;
 	width: 16px;
-	margin: 0 -2px 2px 8px;
-}
-
-#wpadminbar .quicklinks li div.blavatar:before {
-	content: "\f120";
 	display: inline-block;
+	margin: 0 -2px 2px 8px;
 }
 
 #wpadminbar #wp-admin-bar-appearance {

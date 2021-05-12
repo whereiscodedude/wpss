@@ -148,7 +148,7 @@ function register_block_script_handle( $metadata, $field_name ) {
  *
  * @since 5.5.0
  *
- * @param array  $metadata   Block metadata.
+ * @param array  $metadata Block metadata.
  * @param string $field_name Field name to pick from metadata.
  * @return string|false Style handle provided directly or created through
  *                      style's registration, or false on failure.
@@ -157,47 +157,23 @@ function register_block_style_handle( $metadata, $field_name ) {
 	if ( empty( $metadata[ $field_name ] ) ) {
 		return false;
 	}
-	$is_core_block = isset( $metadata['file'] ) && 0 === strpos( $metadata['file'], ABSPATH . WPINC );
-	if ( $is_core_block && ! should_load_separate_core_block_assets() ) {
-		return false;
-	}
-
-	// Check whether styles should have a ".min" suffix or not.
-	$suffix = SCRIPT_DEBUG ? '' : '.min';
-
 	$style_handle = $metadata[ $field_name ];
 	$style_path   = remove_block_asset_path_prefix( $metadata[ $field_name ] );
-
-	if ( $style_handle === $style_path && ! $is_core_block ) {
+	if ( $style_handle === $style_path ) {
 		return $style_handle;
-	}
-
-	$style_uri = plugins_url( $style_path, $metadata['file'] );
-	if ( $is_core_block ) {
-		$style_path = "style$suffix.css";
-		$style_uri  = includes_url( 'blocks/' . str_replace( 'core/', '', $metadata['name'] ) . "/style$suffix.css" );
 	}
 
 	$style_handle = generate_block_asset_handle( $metadata['name'], $field_name );
 	$block_dir    = dirname( $metadata['file'] );
 	$style_file   = realpath( "$block_dir/$style_path" );
-	$version      = file_exists( $style_file ) ? filemtime( $style_file ) : false;
 	$result       = wp_register_style(
 		$style_handle,
-		$style_uri,
+		plugins_url( $style_path, $metadata['file'] ),
 		array(),
-		$version
+		filemtime( $style_file )
 	);
 	if ( file_exists( str_replace( '.css', '-rtl.css', $style_file ) ) ) {
 		wp_style_add_data( $style_handle, 'rtl', 'replace' );
-	}
-	if ( file_exists( $style_file ) ) {
-		wp_style_add_data( $style_handle, 'path', $style_file );
-	}
-
-	$rtl_file = str_replace( "$suffix.css", "-rtl$suffix.css", $style_file );
-	if ( is_rtl() && file_exists( $rtl_file ) ) {
-		wp_style_add_data( $style_handle, 'path', $rtl_file );
 	}
 
 	return $result ? $style_handle : false;
@@ -926,29 +902,9 @@ function register_block_style( $block_name, $style_properties ) {
  * @since 5.3.0
  *
  * @param string $block_name       Block type name including namespace.
- * @param string $block_style_name Block style name.
+ * @param array  $block_style_name Block style name.
  * @return bool True if the block style was unregistered with success and false otherwise.
  */
 function unregister_block_style( $block_name, $block_style_name ) {
 	return WP_Block_Styles_Registry::get_instance()->unregister( $block_name, $block_style_name );
-}
-
-/**
- * Checks whether the current block type supports the feature requested.
- *
- * @since 5.8.0
- *
- * @param WP_Block_Type $block_type Block type to check for support.
- * @param string        $feature    Name of the feature to check support for.
- * @param mixed         $default    Fallback value for feature support, defaults to false.
- *
- * @return boolean                  Whether or not the feature is supported.
- */
-function block_has_support( $block_type, $feature, $default = false ) {
-	$block_support = $default;
-	if ( $block_type && property_exists( $block_type, 'supports' ) ) {
-		$block_support = _wp_array_get( $block_type->supports, $feature, $default );
-	}
-
-	return true === $block_support || is_array( $block_support );
 }
