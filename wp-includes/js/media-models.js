@@ -677,6 +677,14 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	 */
 	validator: function( attachment ) {
 
+		// Filter out contextually created attachments (e.g. headers, logos, etc.).
+		if (
+			! _.isUndefined( attachment.attributes.context ) &&
+			'' !== attachment.attributes.context
+		) {
+			return false;
+		}
+
 		if ( ! this.validateDestroyed && attachment.destroyed ) {
 			return false;
 		}
@@ -874,48 +882,20 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 		return this.mirroring ? this.mirroring.hasMore() : false;
 	},
 	/**
-	 * Holds the total number of attachments.
-	 *
-	 * @since 5.8.0
-	 */
-	totalAttachments: 0,
-
-	/**
-	 * Gets the total number of attachments.
-	 *
-	 * @since 5.8.0
-	 *
-	 * @return {number} The total number of attachments.
-	 */
-	getTotalAttachments: function() {
-		return this.mirroring ? this.mirroring.totalAttachments : 0;
-	},
-
-	/**
 	 * A custom Ajax-response parser.
 	 *
-	 * See trac ticket #24753.
+	 * See trac ticket #24753
 	 *
-	 * Called automatically by Backbone whenever a collection's models are returned
-	 * by the server, in fetch. The default implementation is a no-op, simply
-	 * passing through the JSON response. We override this to add attributes to
-	 * the collection items.
-	 *
-	 * @since 5.8.0 The response returns the attachments under `response.attachments` and
-	 *              `response.totalAttachments` holds the total number of attachments found.
-	 *
-	 * @param {Object|Array} response The raw response Object/Array.
+	 * @param {Object|Array} resp The raw response Object/Array.
 	 * @param {Object} xhr
 	 * @return {Array} The array of model attributes to be added to the collection
 	 */
-	parse: function( response, xhr ) {
-		if ( ! _.isArray( response.attachments ) ) {
-			response = [ response.attachments ];
+	parse: function( resp, xhr ) {
+		if ( ! _.isArray( resp ) ) {
+			resp = [resp];
 		}
 
-		this.totalAttachments = parseInt( response.totalAttachments, 10 );
-
-		return _.map( response.attachments, function( attrs ) {
+		return _.map( resp, function( attrs ) {
 			var id, attachment, newAttributes;
 
 			if ( attrs instanceof Backbone.Model ) {
@@ -937,14 +917,14 @@ var Attachments = Backbone.Collection.extend(/** @lends wp.media.model.Attachmen
 	},
 	/**
 	 * If the collection is a query, create and mirror an Attachments Query collection.
-	 * 
+	 *
 	 * @access private
-	 * @param {Boolean} refresh Deprecated, refresh parameter no longer used.
 	 */
-	_requery: function() {
+	_requery: function( refresh ) {
 		var props;
 		if ( this.props.get('query') ) {
 			props = this.props.toJSON();
+			props.cache = ( true !== refresh );
 			this.mirror( wp.media.model.Query.get( props ) );
 		}
 	},
@@ -1225,10 +1205,8 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 		options = options || {};
 		options.remove = false;
 
-		return this._more = this.fetch( options ).done( function( response ) {
-			var attachments = response.attachments;
-
-			if ( _.isEmpty( attachments ) || -1 === this.args.posts_per_page || attachments.length < this.args.posts_per_page ) {
+		return this._more = this.fetch( options ).done( function( resp ) {
+			if ( _.isEmpty( resp ) || -1 === this.args.posts_per_page || resp.length < this.args.posts_per_page ) {
 				query._hasMore = false;
 			}
 		});
@@ -1328,6 +1306,7 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 	 * @method
 	 *
 	 * @param {object} [props]
+	 * @param {Object} [props.cache=true]   Whether to use the query cache or not.
 	 * @param {Object} [props.order]
 	 * @param {Object} [props.orderby]
 	 * @param {Object} [props.include]
@@ -1357,11 +1336,13 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 			var args     = {},
 				orderby  = Query.orderby,
 				defaults = Query.defaultProps,
-				query;
+				query,
+				cache    = !! props.cache || _.isUndefined( props.cache );
 
 			// Remove the `query` property. This isn't linked to a query,
 			// this *is* the query.
 			delete props.query;
+			delete props.cache;
 
 			// Fill default args.
 			_.defaults( props, defaults );
@@ -1400,7 +1381,14 @@ Query = Attachments.extend(/** @lends wp.media.model.Query.prototype */{
 			// Substitute exceptions specified in orderby.keymap.
 			args.orderby = orderby.valuemap[ props.orderby ] || props.orderby;
 
-			queries = [];
+			// Search the query cache for a matching query.
+			if ( cache ) {
+				query = _.find( queries, function( query ) {
+					return _.isEqual( query.args, args );
+				});
+			} else {
+				queries = [];
+			}
 
 			// Otherwise, create a new query and add it to the cache.
 			if ( ! query ) {

@@ -1,5 +1,4 @@
 {
-	"apiVersion": 2,
 	"name": "core/quote",
 	"category": "text",
 	"attributes": {
@@ -8,15 +7,13 @@
 			"source": "html",
 			"selector": "blockquote",
 			"multiline": "p",
-			"default": "",
-			"__experimentalRole": "content"
+			"default": ""
 		},
 		"citation": {
 			"type": "string",
 			"source": "html",
 			"selector": "cite",
-			"default": "",
-			"__experimentalRole": "content"
+			"default": ""
 		},
 		"align": {
 			"type": "string"
@@ -24,7 +21,5 @@
 	},
 	"supports": {
 		"anchor": true
-	},
-	"editorStyle": "wp-block-quote-editor",
-	"style": "wp-block-quote"
+	}
 }

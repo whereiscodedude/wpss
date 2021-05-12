@@ -1,5 +1,4 @@
 {
-	"apiVersion": 2,
 	"name": "core/image",
 	"category": "media",
 	"attributes": {
@@ -61,7 +60,8 @@
 			"type": "string"
 		},
 		"linkDestination": {
-			"type": "string"
+			"type": "string",
+			"default": "none"
 		},
 		"linkTarget": {
 			"type": "string",
@@ -72,10 +72,6 @@
 	},
 	"supports": {
 		"anchor": true,
-		"__experimentalBorder": {
-			"radius": true
-		}
-	},
-	"editorStyle": "wp-block-image-editor",
-	"style": "wp-block-image"
+		"lightBlockWrapper": true
+	}
 }
