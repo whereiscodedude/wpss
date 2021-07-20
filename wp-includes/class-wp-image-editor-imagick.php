@@ -901,7 +901,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 	 *
 	 * @since 5.6.0
 	 *
-	 * @return true|WP_Error
+	 * @return true|WP_error
 	 */
 	protected function pdf_load_source() {
 		$filename = $this->pdf_setup();

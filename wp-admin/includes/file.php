@@ -733,16 +733,9 @@ function validate_file_to_edit( $file, $allowed_files = array() ) {
  *
  * @see wp_handle_upload_error
  *
- * @param array       $file      {
- *     Reference to a single element from `$_FILES`. Call the function once for each uploaded file.
- *
- *     @type string $name     The original name of the file on the client machine.
- *     @type string $type     The mime type of the file, if the browser provided this information.
- *     @type string $tmp_name The temporary filename of the file in which the uploaded file was stored on the server.
- *     @type int    $size     The size, in bytes, of the uploaded file.
- *     @type int    $error    The error code associated with this file upload.
- * }
- * @param array|false $overrides {
+ * @param string[]       $file      Reference to a single element of `$_FILES`.
+ *                                  Call the function once for each uploaded file.
+ * @param array|false    $overrides {
  *     An array of override parameters for this file, or boolean false if none are provided.
  *
  *     @type callable $upload_error_handler     Function to call when there is an error during the upload process.
@@ -756,17 +749,11 @@ function validate_file_to_edit( $file, $allowed_files = array() ) {
  *     @type bool     $test_type                Whether to test that the mime type of the file is as expected.
  *     @type string[] $mimes                    Array of allowed mime types keyed by their file extension regex.
  * }
- * @param string      $time      Time formatted in 'yyyy/mm'.
- * @param string      $action    Expected value for `$_POST['action']`.
- * @return array {
- *     On success, returns an associative array of file attributes.
- *     On failure, returns `$overrides['upload_error_handler']( &$file, $message )`
- *     or `array( 'error' => $message )`.
- *
- *     @type string $file Filename of the newly-uploaded file.
- *     @type string $url  URL of the newly-uploaded file.
- *     @type string $type Mime type of the newly-uploaded file.
- * }
+ * @param string         $time      Time formatted in 'yyyy/mm'.
+ * @param string         $action    Expected value for `$_POST['action']`.
+ * @return string[] On success, returns an associative array of file attributes.
+ *                  On failure, returns `$overrides['upload_error_handler']( &$file, $message )`
+ *                  or `array( 'error' => $message )`.
  */
 function _wp_handle_upload( &$file, $overrides, $time, $action ) {
 	// The default error handler.
@@ -789,15 +776,7 @@ function _wp_handle_upload( &$file, $overrides, $time, $action ) {
 	 * @since 2.9.0 as 'wp_handle_upload_prefilter'.
 	 * @since 4.0.0 Converted to a dynamic hook with `$action`.
 	 *
-	 * @param array $file {
-	 *     Reference to a single element from `$_FILES`.
-	 *
-	 *     @type string $name     The original name of the file on the client machine.
-	 *     @type string $type     The mime type of the file, if the browser provided this information.
-	 *     @type string $tmp_name The temporary filename of the file in which the uploaded file was stored on the server.
-	 *     @type int    $size     The size, in bytes, of the uploaded file.
-	 *     @type int    $error    The error code associated with this file upload.
-	 * }
+	 * @param string[] $file An array of data for the file. Reference to a single element of `$_FILES`.
 	 */
 	$file = apply_filters( "{$action}_prefilter", $file );
 
@@ -815,15 +794,7 @@ function _wp_handle_upload( &$file, $overrides, $time, $action ) {
 	 *
 	 * @param array|false $overrides An array of override parameters for this file. Boolean false if none are
 	 *                               provided. @see _wp_handle_upload().
-	 * @param array       $file      {
-	 *     Reference to a single element from `$_FILES`.
-	 *
-	 *     @type string $name     The original name of the file on the client machine.
-	 *     @type string $type     The mime type of the file, if the browser provided this information.
-	 *     @type string $tmp_name The temporary filename of the file in which the uploaded file was stored on the server.
-	 *     @type int    $size     The size, in bytes, of the uploaded file.
-	 *     @type int    $error    The error code associated with this file upload.
-	 * }
+	 * @param string[]    $file      An array of data for the file. Reference to a single element of `$_FILES`.
 	 */
 	$overrides = apply_filters( "{$action}_overrides", $overrides, $file );
 
@@ -964,15 +935,7 @@ function _wp_handle_upload( &$file, $overrides, $time, $action ) {
 	 * @since 4.9.0
 	 *
 	 * @param mixed    $move_new_file If null (default) move the file after the upload.
-	 * @param array    $file          {
-	 *     Reference to a single element from `$_FILES`.
-	 *
-	 *     @type string $name     The original name of the file on the client machine.
-	 *     @type string $type     The mime type of the file, if the browser provided this information.
-	 *     @type string $tmp_name The temporary filename of the file in which the uploaded file was stored on the server.
-	 *     @type int    $size     The size, in bytes, of the uploaded file.
-	 *     @type int    $error    The error code associated with this file upload.
-	 * }
+	 * @param string[] $file          An array of data for a single file.
 	 * @param string   $new_file      Filename of the newly-uploaded file.
 	 * @param string   $type          Mime type of the newly-uploaded file.
 	 */
@@ -1054,12 +1017,12 @@ function _wp_handle_upload( &$file, $overrides, $time, $action ) {
  *
  * @param array       $file      Reference to a single element of `$_FILES`.
  *                               Call the function once for each uploaded file.
- *                               See _wp_handle_upload() for accepted values.
  * @param array|false $overrides Optional. An associative array of names => values
  *                               to override default variables. Default false.
- *                               See _wp_handle_upload() for accepted values.
  * @param string      $time      Optional. Time formatted in 'yyyy/mm'. Default null.
- * @return array See _wp_handle_upload() for return value.
+ * @return array On success, returns an associative array of file attributes.
+ *               On failure, returns `$overrides['upload_error_handler']( &$file, $message )`
+ *               or `array( 'error' => $message )`.
  */
 function wp_handle_upload( &$file, $overrides = false, $time = null ) {
 	/*
@@ -1085,12 +1048,12 @@ function wp_handle_upload( &$file, $overrides = false, $time = null ) {
  *
  * @param array       $file      Reference to a single element of `$_FILES`.
  *                               Call the function once for each uploaded file.
- *                               See _wp_handle_upload() for accepted values.
  * @param array|false $overrides Optional. An associative array of names => values
  *                               to override default variables. Default false.
- *                               See _wp_handle_upload() for accepted values.
  * @param string      $time      Optional. Time formatted in 'yyyy/mm'. Default null.
- * @return array See _wp_handle_upload() for return value.
+ * @return array On success, returns an associative array of file attributes.
+ *               On failure, returns `$overrides['upload_error_handler']( &$file, $message )`
+ *               or `array( 'error' => $message )`.
  */
 function wp_handle_sideload( &$file, $overrides = false, $time = null ) {
 	/*

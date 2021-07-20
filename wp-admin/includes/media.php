@@ -578,7 +578,9 @@ function wp_iframe( $content_func, ...$args ) {
 		 * (pre-3.5.0) media upload popup.
 		 *
 		 * The dynamic portion of the hook, `$content_func`, refers to the form
-		 * callback for the media upload type.
+		 * callback for the media upload type. Possible values include
+		 * 'media_upload_type_form', 'media_upload_type_url_form', and
+		 * 'media_upload_library_form'.
 		 *
 		 * @since 2.5.0
 		 */
@@ -713,7 +715,7 @@ function get_upload_iframe_src( $type = null, $post_id = null, $tab = null ) {
  *
  * @since 2.5.0
  *
- * @return null|array|void Array of error messages keyed by attachment ID, null or void on success.
+ * @return mixed void|object WP_Error on failure
  */
 function media_upload_form_handler() {
 	check_admin_referer( 'media-form' );

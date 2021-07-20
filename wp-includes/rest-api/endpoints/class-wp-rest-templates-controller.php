@@ -477,7 +477,7 @@ class WP_REST_Templates_Controller extends WP_REST_Controller {
 	 *
 	 * @since 5.8.0
 	 *
-	 * @return string[] List of link relations.
+	 * @return array List of link relations.
 	 */
 	protected function get_available_actions() {
 		$rels = array();

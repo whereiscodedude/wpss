@@ -552,11 +552,11 @@ endif;
 			 * Filters a user contactmethod label.
 			 *
 			 * The dynamic portion of the filter hook, `$name`, refers to
-			 * each of the keys in the contact methods array.
+			 * each of the keys in the contactmethods array.
 			 *
 			 * @since 2.9.0
 			 *
-			 * @param string $desc The translatable label for the contact method.
+			 * @param string $desc The translatable label for the contactmethod.
 			 */
 			echo apply_filters( "user_{$name}_label", $desc );
 			?>

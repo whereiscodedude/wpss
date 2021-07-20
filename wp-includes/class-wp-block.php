@@ -61,7 +61,7 @@ class WP_Block {
 	 * List of inner blocks (of this same class)
 	 *
 	 * @since 5.5.0
-	 * @var WP_Block_List
+	 * @var WP_Block[]
 	 */
 	public $inner_blocks = array();
 
