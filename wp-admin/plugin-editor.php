@@ -18,7 +18,6 @@ if ( ! current_user_can( 'edit_plugins' ) ) {
 	wp_die( __( 'Sorry, you are not allowed to edit plugins for this site.' ) );
 }
 
-// Used in the HTML title tag.
 $title       = __( 'Edit Plugins' );
 $parent_file = 'plugins.php';
 
@@ -217,7 +216,7 @@ $content = esc_textarea( $content );
 </div>
 <div class="alignright">
 	<form action="plugin-editor.php" method="get">
-		<label for="plugin" id="theme-plugin-editor-selector"><?php _e( 'Select plugin to edit:' ); ?> </label>
+		<strong><label for="plugin"><?php _e( 'Select plugin to edit:' ); ?> </label></strong>
 		<select name="plugin" id="plugin">
 		<?php
 		foreach ( $plugins as $plugin_key => $a_plugin ) {
@@ -289,7 +288,7 @@ $content = esc_textarea( $content );
 			<span class="spinner"></span>
 		</p>
 	<?php else : ?>
-		<p>
+		<p><em>
 			<?php
 			printf(
 				/* translators: %s: Documentation URL. */
@@ -297,7 +296,7 @@ $content = esc_textarea( $content );
 				__( 'https://wordpress.org/support/article/changing-file-permissions/' )
 			);
 			?>
-		</p>
+		</em></p>
 	<?php endif; ?>
 
 	<?php wp_print_file_editor_templates(); ?>
@@ -312,12 +311,10 @@ if ( ! in_array( 'plugin_editor_notice', $dismissed_pointers, true ) ) :
 
 	$excluded_referer_basenames = array( 'plugin-editor.php', 'wp-login.php' );
 
-	$return_url = admin_url( '/' );
-	if ( $referer ) {
-		$referer_path = parse_url( $referer, PHP_URL_PATH );
-		if ( is_string( $referer_path ) && ! in_array( basename( $referer_path ), $excluded_referer_basenames, true ) ) {
-			$return_url = $referer;
-		}
+	if ( $referer && ! in_array( basename( parse_url( $referer, PHP_URL_PATH ) ), $excluded_referer_basenames, true ) ) {
+		$return_url = $referer;
+	} else {
+		$return_url = admin_url( '/' );
 	}
 	?>
 	<div id="file-editor-warning" class="notification-dialog-wrap file-editor-warning hide-if-no-js hidden">

@@ -100,15 +100,14 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Browser dependencies
  */
-const {
-  createObjectURL,
-  revokeObjectURL
-} = window.URL;
+var _window$URL = window.URL,
+    createObjectURL = _window$URL.createObjectURL,
+    revokeObjectURL = _window$URL.revokeObjectURL;
 /**
  * @type {Record<string, File|undefined>}
  */
 
-const cache = {};
+var cache = {};
 /**
  * Create a blob URL from a file.
  *
@@ -118,7 +117,7 @@ const cache = {};
  */
 
 function createBlobURL(file) {
-  const url = createObjectURL(file);
+  var url = createObjectURL(file);
   cache[url] = file;
   return url;
 }

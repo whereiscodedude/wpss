@@ -31,7 +31,13 @@ function get_locale() {
 	global $locale, $wp_local_package;
 
 	if ( isset( $locale ) ) {
-		/** This filter is documented in wp-includes/l10n.php */
+		/**
+		 * Filters the locale ID of the WordPress installation.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param string $locale The locale ID.
+		 */
 		return apply_filters( 'locale', $locale );
 	}
 
@@ -70,13 +76,7 @@ function get_locale() {
 		$locale = 'en_US';
 	}
 
-	/**
-	 * Filters the locale ID of the WordPress installation.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @param string $locale The locale ID.
-	 */
+	/** This filter is documented in wp-includes/l10n.php */
 	return apply_filters( 'locale', $locale );
 }
 
@@ -401,6 +401,7 @@ function _x( $text, $context, $domain = 'default' ) {
  * @param string $context Context information for the translators.
  * @param string $domain  Optional. Text domain. Unique identifier for retrieving translated strings.
  *                        Default 'default'.
+ * @return string Translated context string without pipe.
  */
 function _ex( $text, $context, $domain = 'default' ) {
 	echo _x( $text, $context, $domain );
@@ -933,9 +934,9 @@ function load_muplugin_textdomain( $domain, $mu_plugin_rel_path = '' ) {
  * @since 1.5.0
  * @since 4.6.0 The function now tries to load the .mo file from the languages directory first.
  *
- * @param string       $domain Text domain. Unique identifier for retrieving translated strings.
- * @param string|false $path   Optional. Path to the directory containing the .mo file.
- *                             Default false.
+ * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+ * @param string $path   Optional. Path to the directory containing the .mo file.
+ *                       Default false.
  * @return bool True when textdomain is successfully loaded, false otherwise.
  */
 function load_theme_textdomain( $domain, $path = false ) {
@@ -973,9 +974,9 @@ function load_theme_textdomain( $domain, $path = false ) {
  *
  * @since 2.9.0
  *
- * @param string       $domain Text domain. Unique identifier for retrieving translated strings.
- * @param string|false $path   Optional. Path to the directory containing the .mo file.
- *                             Default false.
+ * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+ * @param string $path   Optional. Path to the directory containing the .mo file.
+ *                       Default false.
  * @return bool True when the theme textdomain is successfully loaded, false otherwise.
  */
 function load_child_theme_textdomain( $domain, $path = false ) {
@@ -997,8 +998,8 @@ function load_child_theme_textdomain( $domain, $path = false ) {
  * @param string $handle Name of the script to register a translation domain to.
  * @param string $domain Optional. Text domain. Default 'default'.
  * @param string $path   Optional. The full file path to the directory containing translation files.
- * @return string|false The translated strings in JSON encoding on success,
- *                      false if the script textdomain could not be loaded.
+ * @return string|false False if the script textdomain could not be loaded, the translated strings
+ *                      in JSON encoding otherwise.
  */
 function load_script_textdomain( $handle, $domain = 'default', $path = null ) {
 	$wp_scripts = wp_scripts();
@@ -1128,8 +1129,7 @@ function load_script_textdomain( $handle, $domain = 'default', $path = null ) {
  * @param string|false $file   Path to the translation file to load. False if there isn't one.
  * @param string       $handle Name of the script to register a translation domain to.
  * @param string       $domain The text domain.
- * @return string|false The JSON-encoded translated strings for the given script handle and text domain.
- *                      False if there are none.
+ * @return string|false The JSON-encoded translated strings for the given script handle and text domain. False if there are none.
  */
 function load_script_translations( $file, $handle, $domain ) {
 	/**
@@ -1711,48 +1711,4 @@ function is_locale_switched() {
 	global $wp_locale_switcher;
 
 	return $wp_locale_switcher->is_switched();
-}
-
-/**
- * Translates the provided settings value using its i18n schema.
- *
- * @since 5.9.0
- * @access private
- *
- * @param string|string[]|array[]|object $i18n_schema I18n schema for the setting.
- * @param string|string[]|array[]        $settings    Value for the settings.
- * @param string                         $textdomain  Textdomain to use with translations.
- *
- * @return string|string[]|array[] Translated settings.
- */
-function translate_settings_using_i18n_schema( $i18n_schema, $settings, $textdomain ) {
-	if ( empty( $i18n_schema ) || empty( $settings ) || empty( $textdomain ) ) {
-		return $settings;
-	}
-
-	if ( is_string( $i18n_schema ) && is_string( $settings ) ) {
-		return translate_with_gettext_context( $settings, $i18n_schema, $textdomain );
-	}
-	if ( is_array( $i18n_schema ) && is_array( $settings ) ) {
-		$translated_settings = array();
-		foreach ( $settings as $value ) {
-			$translated_settings[] = translate_settings_using_i18n_schema( $i18n_schema[0], $value, $textdomain );
-		}
-		return $translated_settings;
-	}
-	if ( is_object( $i18n_schema ) && is_array( $settings ) ) {
-		$group_key           = '*';
-		$translated_settings = array();
-		foreach ( $settings as $key => $value ) {
-			if ( isset( $i18n_schema->$key ) ) {
-				$translated_settings[ $key ] = translate_settings_using_i18n_schema( $i18n_schema->$key, $value, $textdomain );
-			} elseif ( isset( $i18n_schema->$group_key ) ) {
-				$translated_settings[ $key ] = translate_settings_using_i18n_schema( $i18n_schema->$group_key, $value, $textdomain );
-			} else {
-				$translated_settings[ $key ] = $value;
-			}
-		}
-		return $translated_settings;
-	}
-	return $settings;
 }

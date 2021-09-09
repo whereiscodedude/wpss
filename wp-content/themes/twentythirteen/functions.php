@@ -46,13 +46,6 @@ if ( version_compare( $GLOBALS['wp_version'], '3.6-alpha', '<' ) ) {
 }
 
 /**
- * Block Patterns.
- *
- * @since Twenty Thirteen 3.4
- */
-require get_template_directory() . '/inc/block-patterns.php';
-
-/**
  * Twenty Thirteen setup.
  *
  * Sets up theme defaults and registers the various WordPress features that
@@ -765,7 +758,7 @@ function twentythirteen_customize_partial_blogdescription() {
 }
 
 /**
- * Enqueue JavaScript postMessage handlers for the Customizer.
+ * Enqueue Javascript postMessage handlers for the Customizer.
  *
  * Binds JavaScript handlers to make the Customizer preview
  * reload changes asynchronously.
@@ -835,26 +828,3 @@ if ( ! function_exists( 'wp_body_open' ) ) :
 		do_action( 'wp_body_open' );
 	}
 endif;
-
-/**
- * Register Custom Block Styles
- *
- * @since Twenty Thirteen 3.4
- */
-if ( function_exists( 'register_block_style' ) ) {
-	function twentythirteen_register_block_styles() {
-
-		/**
-		 * Register block style
-		 */
-		register_block_style(
-			'core/button',
-			array(
-				'name'         => 'no-shadow',
-				'label'        => __( 'No Shadow', 'twentythirteen' ),
-				'style_handle' => 'no-shadow',
-			)
-		);
-	}
-	add_action( 'init', 'twentythirteen_register_block_styles' );
-}

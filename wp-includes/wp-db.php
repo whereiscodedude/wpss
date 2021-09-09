@@ -598,6 +598,7 @@ class wpdb {
 	 * @since 2.0.8
 	 *
 	 * @link https://core.trac.wordpress.org/ticket/3354
+	 * @global string $wp_version The WordPress version string.
 	 *
 	 * @param string $dbuser     MySQL database user.
 	 * @param string $dbpassword MySQL database password.
@@ -1006,7 +1007,7 @@ class wpdb {
 	 *                        then the custom users and usermeta tables will be mapped. Default true.
 	 * @param int    $blog_id Optional. The blog_id to prefix. Used only when prefix is requested.
 	 *                        Defaults to wpdb::$blogid.
-	 * @return string[] Table names. When a prefix is requested, the key is the unprefixed table name.
+	 * @return array Table names. When a prefix is requested, the key is the unprefixed table name.
 	 */
 	public function tables( $scope = 'all', $prefix = true, $blog_id = 0 ) {
 		switch ( $scope ) {
@@ -1627,13 +1628,6 @@ class wpdb {
 		$client_flags = defined( 'MYSQL_CLIENT_FLAGS' ) ? MYSQL_CLIENT_FLAGS : 0;
 
 		if ( $this->use_mysqli ) {
-			/*
-			 * Set the MySQLi error reporting off because WordPress handles its own.
-			 * This is due to the default value change from `MYSQLI_REPORT_OFF`
-			 * to `MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT` in PHP 8.1.
-			 */
-			mysqli_report( MYSQLI_REPORT_OFF );
-
 			$this->dbh = mysqli_init();
 
 			$host    = $this->dbhost;
@@ -1893,11 +1887,11 @@ class wpdb {
 	/**
 	 * Performs a MySQL database query, using current database connection.
 	 *
-	 * More information can be found on the documentation page.
+	 * More information can be found on the Codex page.
 	 *
 	 * @since 0.71
 	 *
-	 * @link https://developer.wordpress.org/reference/classes/wpdb/
+	 * @link https://codex.wordpress.org/Function_Reference/wpdb_Class
 	 *
 	 * @param string $query Database query.
 	 * @return int|bool Boolean true for CREATE, ALTER, TRUNCATE and DROP queries. Number of rows
@@ -2089,10 +2083,11 @@ class wpdb {
 	 */
 	public function log_query( $query, $query_time, $query_callstack, $query_start, $query_data ) {
 		/**
-		 * Filters the custom data to log alongside a query.
+		 * Filters the custom query data being logged.
 		 *
 		 * Caution should be used when modifying any of this data, it is recommended that any additional
-		 * information you need to store about a query be added as a new associative array element.
+		 * information you need to store about a query be added as a new associative entry to the fourth
+		 * element $query_data.
 		 *
 		 * @since 5.3.0
 		 *
@@ -2579,11 +2574,11 @@ class wpdb {
 	public function get_var( $query = null, $x = 0, $y = 0 ) {
 		$this->func_call = "\$db->get_var(\"$query\", $x, $y)";
 
-		if ( $query ) {
-			if ( $this->check_current_query && $this->check_safe_collation( $query ) ) {
-				$this->check_current_query = false;
-			}
+		if ( $this->check_current_query && $this->check_safe_collation( $query ) ) {
+			$this->check_current_query = false;
+		}
 
+		if ( $query ) {
 			$this->query( $query );
 		}
 
@@ -2613,11 +2608,11 @@ class wpdb {
 	public function get_row( $query = null, $output = OBJECT, $y = 0 ) {
 		$this->func_call = "\$db->get_row(\"$query\",$output,$y)";
 
-		if ( $query ) {
-			if ( $this->check_current_query && $this->check_safe_collation( $query ) ) {
-				$this->check_current_query = false;
-			}
+		if ( $this->check_current_query && $this->check_safe_collation( $query ) ) {
+			$this->check_current_query = false;
+		}
 
+		if ( $query ) {
 			$this->query( $query );
 		} else {
 			return null;
@@ -2655,11 +2650,11 @@ class wpdb {
 	 * @return array Database query result. Array indexed from 0 by SQL result row number.
 	 */
 	public function get_col( $query = null, $x = 0 ) {
-		if ( $query ) {
-			if ( $this->check_current_query && $this->check_safe_collation( $query ) ) {
-				$this->check_current_query = false;
-			}
+		if ( $this->check_current_query && $this->check_safe_collation( $query ) ) {
+			$this->check_current_query = false;
+		}
 
+		if ( $query ) {
 			$this->query( $query );
 		}
 
@@ -2693,11 +2688,11 @@ class wpdb {
 	public function get_results( $query = null, $output = OBJECT ) {
 		$this->func_call = "\$db->get_results(\"$query\", $output)";
 
-		if ( $query ) {
-			if ( $this->check_current_query && $this->check_safe_collation( $query ) ) {
-				$this->check_current_query = false;
-			}
+		if ( $this->check_current_query && $this->check_safe_collation( $query ) ) {
+			$this->check_current_query = false;
+		}
 
+		if ( $query ) {
 			$this->query( $query );
 		} else {
 			return null;
@@ -3651,7 +3646,10 @@ class wpdb {
 	}
 
 	/**
-	 * Retrieves a comma-separated list of the names of the functions that called wpdb.
+	 * Retrieves the name of the function that called wpdb.
+	 *
+	 * Searches up the list of functions until it reaches the one that would
+	 * most logically had called this method.
 	 *
 	 * @since 2.5.0
 	 *
