@@ -37,7 +37,7 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Registers the routes for users.
+	 * Registers the routes for the objects of the controller.
 	 *
 	 * @since 4.7.0
 	 *
@@ -1173,8 +1173,6 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 	 *
 	 * @since 4.7.0
 	 *
-	 * @global WP_Roles $wp_roles WordPress role management object.
-	 *
 	 * @param int   $user_id User ID.
 	 * @param array $roles   New user roles.
 	 * @return true|WP_Error True if the current user is allowed to make the role change,
@@ -1522,7 +1520,7 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 
 		$query_params['orderby'] = array(
 			'default'     => 'name',
-			'description' => __( 'Sort collection by user attribute.' ),
+			'description' => __( 'Sort collection by object attribute.' ),
 			'enum'        => array(
 				'id',
 				'include',

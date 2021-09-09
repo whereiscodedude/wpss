@@ -91,25 +91,16 @@ if ( ! function_exists( 'get_user_by' ) ) :
 	 *
 	 * @since 2.8.0
 	 * @since 4.4.0 Added 'ID' as an alias of 'id' for the `$field` parameter.
-	 * @since 5.8.0 Returns the global `$current_user` if it's the user being fetched.
-	 *
-	 * @global WP_User $current_user The current user object which holds the user data.
 	 *
 	 * @param string     $field The field to retrieve the user with. id | ID | slug | email | login.
 	 * @param int|string $value A value for $field. A user ID, slug, email address, or login name.
 	 * @return WP_User|false WP_User object on success, false on failure.
 	 */
 	function get_user_by( $field, $value ) {
-		global $current_user;
-
 		$userdata = WP_User::get_data_by( $field, $value );
 
 		if ( ! $userdata ) {
 			return false;
-		}
-
-		if ( $current_user instanceof WP_User && $current_user->ID === (int) $userdata->ID ) {
-			return $current_user;
 		}
 
 		$user = new WP_User;
@@ -167,8 +158,6 @@ if ( ! function_exists( 'wp_mail' ) ) :
 	 * be set using the {@see 'wp_mail_charset'} filter.
 	 *
 	 * @since 1.2.1
-	 * @since 5.5.0 is_email() is used for email validation,
-	 *              instead of PHPMailer's default validator.
 	 *
 	 * @global PHPMailer\PHPMailer\PHPMailer $phpmailer
 	 *
@@ -1176,7 +1165,7 @@ if ( ! function_exists( 'check_admin_referer' ) ) :
 	 */
 	function check_admin_referer( $action = -1, $query_arg = '_wpnonce' ) {
 		if ( -1 === $action ) {
-			_doing_it_wrong( __FUNCTION__, __( 'You should specify an action to be verified by using the first parameter.' ), '3.2.0' );
+			_doing_it_wrong( __FUNCTION__, __( 'You should specify a nonce action to be verified by using the first parameter.' ), '3.2.0' );
 		}
 
 		$adminurl = strtolower( admin_url() );
@@ -1221,7 +1210,7 @@ if ( ! function_exists( 'check_ajax_referer' ) ) :
 	 */
 	function check_ajax_referer( $action = -1, $query_arg = false, $die = true ) {
 		if ( -1 == $action ) {
-			_doing_it_wrong( __FUNCTION__, __( 'You should specify an action to be verified by using the first parameter.' ), '4.7.0' );
+			_doing_it_wrong( __FUNCTION__, __( 'You should specify a nonce action to be verified by using the first parameter.' ), '4.7' );
 		}
 
 		$nonce = '';
@@ -2785,7 +2774,8 @@ if ( ! function_exists( 'get_avatar' ) ) :
 		 * @param int    $size        Square avatar width and height in pixels to retrieve.
 		 * @param string $default     URL for the default image or a default type. Accepts '404', 'retro', 'monsterid',
 		 *                            'wavatar', 'indenticon', 'mystery', 'mm', 'mysteryman', 'blank', or 'gravatar_default'.
-		 * @param string $alt         Alternative text to use in the avatar image tag.
+		 *                            Default is the value of the 'avatar_default' option, with a fallback of 'mystery'.
+		 * @param string $alt         Alternative text to use in the avatar image tag. Default empty.
 		 * @param array  $args        Arguments passed to get_avatar_data(), after processing.
 		 */
 		return apply_filters( 'get_avatar', $avatar, $id_or_email, $args['size'], $args['default'], $args['alt'], $args );

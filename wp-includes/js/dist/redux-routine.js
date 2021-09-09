@@ -174,25 +174,29 @@ function isActionOfType(object, expectedType) {
  * @return {Function} co-routine runtime
  */
 
-function createRuntime(controls = {}, dispatch) {
-  const rungenControls = Object(external_lodash_["map"])(controls, (control, actionType) => (value, next, iterate, yieldNext, yieldError) => {
-    if (!isActionOfType(value, actionType)) {
-      return false;
-    }
+function createRuntime() {
+  var controls = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var dispatch = arguments.length > 1 ? arguments[1] : undefined;
+  var rungenControls = Object(external_lodash_["map"])(controls, function (control, actionType) {
+    return function (value, next, iterate, yieldNext, yieldError) {
+      if (!isActionOfType(value, actionType)) {
+        return false;
+      }
 
-    const routine = control(value);
+      var routine = control(value);
 
-    if (is_promise_default()(routine)) {
-      // Async control routine awaits resolution.
-      routine.then(yieldNext, yieldError);
-    } else {
-      yieldNext(routine);
-    }
+      if (is_promise_default()(routine)) {
+        // Async control routine awaits resolution.
+        routine.then(yieldNext, yieldError);
+      } else {
+        yieldNext(routine);
+      }
 
-    return true;
+      return true;
+    };
   });
 
-  const unhandledActionControl = (value, next) => {
+  var unhandledActionControl = function unhandledActionControl(value, next) {
     if (!isAction(value)) {
       return false;
     }
@@ -203,14 +207,18 @@ function createRuntime(controls = {}, dispatch) {
   };
 
   rungenControls.push(unhandledActionControl);
-  const rungenRuntime = Object(dist["create"])(rungenControls);
-  return action => new Promise((resolve, reject) => rungenRuntime(action, result => {
-    if (isAction(result)) {
-      dispatch(result);
-    }
+  var rungenRuntime = Object(dist["create"])(rungenControls);
+  return function (action) {
+    return new Promise(function (resolve, reject) {
+      return rungenRuntime(action, function (result) {
+        if (isAction(result)) {
+          dispatch(result);
+        }
 
-    resolve(result);
-  }, reject));
+        resolve(result);
+      }, reject);
+    });
+  };
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/redux-routine/build-module/index.js
@@ -232,15 +240,18 @@ function createRuntime(controls = {}, dispatch) {
  * @return {Function} Co-routine runtime
  */
 
-function createMiddleware(controls = {}) {
-  return store => {
-    const runtime = createRuntime(controls, store.dispatch);
-    return next => action => {
-      if (!isGenerator(action)) {
-        return next(action);
-      }
+function createMiddleware() {
+  var controls = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function (store) {
+    var runtime = createRuntime(controls, store.dispatch);
+    return function (next) {
+      return function (action) {
+        if (!isGenerator(action)) {
+          return next(action);
+        }
 
-      return runtime(action);
+        return runtime(action);
+      };
     };
   };
 }

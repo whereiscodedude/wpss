@@ -533,7 +533,7 @@ function wp_iframe( $content_func, ...$args ) {
 
 	?>
 	<script type="text/javascript">
-	addLoadEvent = function(func){if(typeof jQuery!=='undefined')jQuery(document).ready(func);else if(typeof wpOnload!=='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
+	addLoadEvent = function(func){if(typeof jQuery!="undefined")jQuery(document).ready(func);else if(typeof wpOnload!='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
 	var ajaxurl = '<?php echo esc_js( admin_url( 'admin-ajax.php', 'relative' ) ); ?>', pagenow = 'media-upload-popup', adminpage = 'media-upload-popup',
 	isRtl = <?php echo (int) is_rtl(); ?>;
 	</script>
@@ -578,7 +578,9 @@ function wp_iframe( $content_func, ...$args ) {
 		 * (pre-3.5.0) media upload popup.
 		 *
 		 * The dynamic portion of the hook, `$content_func`, refers to the form
-		 * callback for the media upload type.
+		 * callback for the media upload type. Possible values include
+		 * 'media_upload_type_form', 'media_upload_type_url_form', and
+		 * 'media_upload_library_form'.
 		 *
 		 * @since 2.5.0
 		 */
@@ -605,7 +607,7 @@ function wp_iframe( $content_func, ...$args ) {
 	do_action( 'admin_print_footer_scripts' );
 
 	?>
-	<script type="text/javascript">if(typeof wpOnload==='function')wpOnload();</script>
+	<script type="text/javascript">if(typeof wpOnload=='function')wpOnload();</script>
 	</body>
 	</html>
 	<?php
@@ -694,14 +696,9 @@ function get_upload_iframe_src( $type = null, $post_id = null, $tab = null ) {
 	 * The dynamic portion of the hook name, `$type`, refers to the type
 	 * of media uploaded.
 	 *
-	 * Possible hook names include:
-	 *
-	 *  - `image_upload_iframe_src`
-	 *  - `media_upload_iframe_src`
-	 *
 	 * @since 3.0.0
 	 *
-	 * @param string $upload_iframe_src The upload iframe source URL.
+	 * @param string $upload_iframe_src The upload iframe source URL by type.
 	 */
 	$upload_iframe_src = apply_filters( "{$type}_upload_iframe_src", $upload_iframe_src );
 
@@ -713,7 +710,7 @@ function get_upload_iframe_src( $type = null, $post_id = null, $tab = null ) {
  *
  * @since 2.5.0
  *
- * @return null|array|void Array of error messages keyed by attachment ID, null or void on success.
+ * @return mixed void|object WP_Error on failure
  */
 function media_upload_form_handler() {
 	check_admin_referer( 'media-form' );
@@ -896,12 +893,6 @@ function wp_media_upload_handler() {
 			 * The dynamic portion of the hook name, `$type`, refers to the type
 			 * of media being sent.
 			 *
-			 * Possible hook names include:
-			 *
-			 *  - `audio_send_to_editor_url`
-			 *  - `file_send_to_editor_url`
-			 *  - `video_send_to_editor_url`
-			 *
 			 * @since 3.3.0
 			 *
 			 * @param string $html  HTML markup sent to the editor.
@@ -991,7 +982,7 @@ function wp_media_upload_handler() {
 function media_sideload_image( $file, $post_id = 0, $desc = null, $return = 'html' ) {
 	if ( ! empty( $file ) ) {
 
-		$allowed_extensions = array( 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' );
+		$allowed_extensions = array( 'jpg', 'jpeg', 'jpe', 'png', 'gif' );
 
 		/**
 		 * Filters the list of allowed file extensions when sideloading an image from a URL.
@@ -2196,11 +2187,6 @@ function media_upload_form( $errors = null ) {
 		$plupload_init['multi_selection'] = false;
 	}
 
-	// Check if WebP images can be edited.
-	if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
-		$plupload_init['webp_upload_error'] = true;
-	}
-
 	/**
 	 * Filters the default Plupload settings.
 	 *
@@ -2577,6 +2563,7 @@ function media_upload_gallery_form( $errors ) {
 	</div>
 	<form enctype="multipart/form-data" method="post" action="<?php echo esc_url( $form_action_url ); ?>" class="<?php echo $form_class; ?>" id="gallery-form">
 		<?php wp_nonce_field( 'media-form' ); ?>
+		<?php // media_upload_form( $errors ); ?>
 	<table class="widefat">
 	<thead><tr>
 	<th><?php _e( 'Media' ); ?></th>
@@ -2878,6 +2865,7 @@ function media_upload_library_form( $errors ) {
 
 	<form enctype="multipart/form-data" method="post" action="<?php echo esc_url( $form_action_url ); ?>" class="<?php echo $form_class; ?>" id="library-form">
 	<?php wp_nonce_field( 'media-form' ); ?>
+	<?php // media_upload_form( $errors ); ?>
 
 	<script type="text/javascript">
 	jQuery(function($){
