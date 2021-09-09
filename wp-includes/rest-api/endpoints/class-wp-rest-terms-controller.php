@@ -65,7 +65,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Registers the routes for terms.
+	 * Registers the routes for the objects of the controller.
 	 *
 	 * @since 4.7.0
 	 *
@@ -140,23 +140,16 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 * @since 4.7.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has read access, otherwise false or WP_Error object.
+	 * @return bool|WP_Error True if the request has read access, otherwise false or WP_Error object.
 	 */
 	public function get_items_permissions_check( $request ) {
 		$tax_obj = get_taxonomy( $this->taxonomy );
-
 		if ( ! $tax_obj || ! $this->check_is_taxonomy_allowed( $this->taxonomy ) ) {
 			return false;
 		}
-
 		if ( 'edit' === $request['context'] && ! current_user_can( $tax_obj->cap->edit_terms ) ) {
-			return new WP_Error(
-				'rest_forbidden_context',
-				__( 'Sorry, you are not allowed to edit terms in this taxonomy.' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+			return new WP_Error( 'rest_forbidden_context', __( 'Sorry, you are not allowed to edit terms in this taxonomy.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
@@ -191,7 +184,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 			'slug'       => 'slug',
 		);
 
-		$prepared_args = array( 'taxonomy' => $this->taxonomy );
+		$prepared_args = array();
 
 		/*
 		 * For each known parameter which is both registered and present in the request,
@@ -233,14 +226,9 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		}
 
 		/**
-		 * Filters get_terms() arguments when querying terms via the REST API.
+		 * Filters the query arguments before passing them to get_terms().
 		 *
 		 * The dynamic portion of the hook name, `$this->taxonomy`, refers to the taxonomy slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_category_query`
-		 *  - `rest_post_tag_query`
 		 *
 		 * Enables adding extra arguments or setting defaults for a terms
 		 * collection request.
@@ -249,8 +237,9 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		 *
 		 * @link https://developer.wordpress.org/reference/functions/get_terms/
 		 *
-		 * @param array           $prepared_args Array of arguments for get_terms().
-		 * @param WP_REST_Request $request       The REST API request.
+		 * @param array           $prepared_args Array of arguments to be
+		 *                                       passed to get_terms().
+		 * @param WP_REST_Request $request       The current request.
 		 */
 		$prepared_args = apply_filters( "rest_{$this->taxonomy}_query", $prepared_args, $request );
 
@@ -260,16 +249,16 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 			// Used when calling wp_count_terms() below.
 			$prepared_args['object_ids'] = $prepared_args['post'];
 		} else {
-			$query_result = get_terms( $prepared_args );
+			$query_result = get_terms( $this->taxonomy, $prepared_args );
 		}
 
 		$count_args = $prepared_args;
 
 		unset( $count_args['number'], $count_args['offset'] );
 
-		$total_terms = wp_count_terms( $count_args );
+		$total_terms = wp_count_terms( $this->taxonomy, $count_args );
 
-		// wp_count_terms() can return a falsey value when the term has no children.
+		// wp_count_terms can return a falsy value when the term has no children.
 		if ( ! $total_terms ) {
 			$total_terms = 0;
 		}
@@ -323,11 +312,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Term|WP_Error Term object if ID is valid, WP_Error otherwise.
 	 */
 	protected function get_term( $id ) {
-		$error = new WP_Error(
-			'rest_term_invalid',
-			__( 'Term does not exist.' ),
-			array( 'status' => 404 )
-		);
+		$error = new WP_Error( 'rest_term_invalid', __( 'Term does not exist.' ), array( 'status' => 404 ) );
 
 		if ( ! $this->check_is_taxonomy_allowed( $this->taxonomy ) ) {
 			return $error;
@@ -351,23 +336,17 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 * @since 4.7.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has read access for the item, otherwise false or WP_Error object.
+	 * @return bool|WP_Error True if the request has read access for the item, otherwise false or WP_Error object.
 	 */
 	public function get_item_permissions_check( $request ) {
 		$term = $this->get_term( $request['id'] );
-
 		if ( is_wp_error( $term ) ) {
 			return $term;
 		}
 
 		if ( 'edit' === $request['context'] && ! current_user_can( 'edit_term', $term->term_id ) ) {
-			return new WP_Error(
-				'rest_forbidden_context',
-				__( 'Sorry, you are not allowed to edit this term.' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+			return new WP_Error( 'rest_forbidden_context', __( 'Sorry, you are not allowed to edit this term.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
@@ -396,7 +375,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 * @since 4.7.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has access to create items, false or WP_Error object otherwise.
+	 * @return bool|WP_Error True if the request has access to create items, false or WP_Error object otherwise.
 	 */
 	public function create_item_permissions_check( $request ) {
 
@@ -405,16 +384,11 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		}
 
 		$taxonomy_obj = get_taxonomy( $this->taxonomy );
-
 		if ( ( is_taxonomy_hierarchical( $this->taxonomy )
 				&& ! current_user_can( $taxonomy_obj->cap->edit_terms ) )
 			|| ( ! is_taxonomy_hierarchical( $this->taxonomy )
 				&& ! current_user_can( $taxonomy_obj->cap->assign_terms ) ) ) {
-			return new WP_Error(
-				'rest_cannot_create',
-				__( 'Sorry, you are not allowed to create terms in this taxonomy.' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+			return new WP_Error( 'rest_cannot_create', __( 'Sorry, you are not allowed to create new terms.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -431,21 +405,13 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	public function create_item( $request ) {
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $this->taxonomy ) ) {
-				return new WP_Error(
-					'rest_taxonomy_not_hierarchical',
-					__( 'Cannot set parent term, taxonomy is not hierarchical.' ),
-					array( 'status' => 400 )
-				);
+				return new WP_Error( 'rest_taxonomy_not_hierarchical', __( 'Cannot set parent term, taxonomy is not hierarchical.' ), array( 'status' => 400 ) );
 			}
 
 			$parent = get_term( (int) $request['parent'], $this->taxonomy );
 
 			if ( ! $parent ) {
-				return new WP_Error(
-					'rest_term_invalid',
-					__( 'Parent term does not exist.' ),
-					array( 'status' => 400 )
-				);
+				return new WP_Error( 'rest_term_invalid', __( 'Parent term does not exist.' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -457,8 +423,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 			 * If we're going to inform the client that the term already exists,
 			 * give them the identifier for future use.
 			 */
-			$term_id = $term->get_error_data( 'term_exists' );
-			if ( $term_id ) {
+			if ( $term_id = $term->get_error_data( 'term_exists' ) ) {
 				$existing_term = get_term( $term_id, $this->taxonomy );
 				$term->add_data( $existing_term->term_id, 'term_exists' );
 				$term->add_data(
@@ -478,11 +443,6 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		 * Fires after a single term is created or updated via the REST API.
 		 *
 		 * The dynamic portion of the hook name, `$this->taxonomy`, refers to the taxonomy slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_insert_category`
-		 *  - `rest_insert_post_tag`
 		 *
 		 * @since 4.7.0
 		 *
@@ -507,17 +467,12 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 			return $fields_update;
 		}
 
-		$request->set_param( 'context', 'edit' );
+		$request->set_param( 'context', 'view' );
 
 		/**
 		 * Fires after a single term is completely created or updated via the REST API.
 		 *
 		 * The dynamic portion of the hook name, `$this->taxonomy`, refers to the taxonomy slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_after_insert_category`
-		 *  - `rest_after_insert_post_tag`
 		 *
 		 * @since 5.0.0
 		 *
@@ -542,21 +497,16 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 * @since 4.7.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has access to update the item, false or WP_Error object otherwise.
+	 * @return bool|WP_Error True if the request has access to update the item, false or WP_Error object otherwise.
 	 */
 	public function update_item_permissions_check( $request ) {
 		$term = $this->get_term( $request['id'] );
-
 		if ( is_wp_error( $term ) ) {
 			return $term;
 		}
 
 		if ( ! current_user_can( 'edit_term', $term->term_id ) ) {
-			return new WP_Error(
-				'rest_cannot_update',
-				__( 'Sorry, you are not allowed to edit this term.' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+			return new WP_Error( 'rest_cannot_update', __( 'Sorry, you are not allowed to edit this term.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -578,27 +528,19 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $this->taxonomy ) ) {
-				return new WP_Error(
-					'rest_taxonomy_not_hierarchical',
-					__( 'Cannot set parent term, taxonomy is not hierarchical.' ),
-					array( 'status' => 400 )
-				);
+				return new WP_Error( 'rest_taxonomy_not_hierarchical', __( 'Cannot set parent term, taxonomy is not hierarchical.' ), array( 'status' => 400 ) );
 			}
 
 			$parent = get_term( (int) $request['parent'], $this->taxonomy );
 
 			if ( ! $parent ) {
-				return new WP_Error(
-					'rest_term_invalid',
-					__( 'Parent term does not exist.' ),
-					array( 'status' => 400 )
-				);
+				return new WP_Error( 'rest_term_invalid', __( 'Parent term does not exist.' ), array( 'status' => 400 ) );
 			}
 		}
 
 		$prepared_term = $this->prepare_item_for_database( $request );
 
-		// Only update the term if we have something to update.
+		// Only update the term if we haz something to update.
 		if ( ! empty( $prepared_term ) ) {
 			$update = wp_update_term( $term->term_id, $term->taxonomy, wp_slash( (array) $prepared_term ) );
 
@@ -627,7 +569,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 			return $fields_update;
 		}
 
-		$request->set_param( 'context', 'edit' );
+		$request->set_param( 'context', 'view' );
 
 		/** This action is documented in wp-includes/rest-api/endpoints/class-wp-rest-terms-controller.php */
 		do_action( "rest_after_insert_{$this->taxonomy}", $term, $request, false );
@@ -643,21 +585,16 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 * @since 4.7.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has access to delete the item, otherwise false or WP_Error object.
+	 * @return bool|WP_Error True if the request has access to delete the item, otherwise false or WP_Error object.
 	 */
 	public function delete_item_permissions_check( $request ) {
 		$term = $this->get_term( $request['id'] );
-
 		if ( is_wp_error( $term ) ) {
 			return $term;
 		}
 
 		if ( ! current_user_can( 'delete_term', $term->term_id ) ) {
-			return new WP_Error(
-				'rest_cannot_delete',
-				__( 'Sorry, you are not allowed to delete this term.' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+			return new WP_Error( 'rest_cannot_delete', __( 'Sorry, you are not allowed to delete this term.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -681,12 +618,8 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 
 		// We don't support trashing for terms.
 		if ( ! $force ) {
-			return new WP_Error(
-				'rest_trash_not_supported',
-				/* translators: %s: force=true */
-				sprintf( __( "Terms do not support trashing. Set '%s' to delete." ), 'force=true' ),
-				array( 'status' => 501 )
-			);
+			/* translators: %s: force=true */
+			return new WP_Error( 'rest_trash_not_supported', sprintf( __( "Terms do not support trashing. Set '%s' to delete." ), 'force=true' ), array( 'status' => 501 ) );
 		}
 
 		$request->set_param( 'context', 'view' );
@@ -696,11 +629,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		$retval = wp_delete_term( $term->term_id, $term->taxonomy );
 
 		if ( ! $retval ) {
-			return new WP_Error(
-				'rest_cannot_delete',
-				__( 'The term cannot be deleted.' ),
-				array( 'status' => 500 )
-			);
+			return new WP_Error( 'rest_cannot_delete', __( 'The term cannot be deleted.' ), array( 'status' => 500 ) );
 		}
 
 		$response = new WP_REST_Response();
@@ -715,11 +644,6 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		 * Fires after a single term is deleted via the REST API.
 		 *
 		 * The dynamic portion of the hook name, `$this->taxonomy`, refers to the taxonomy slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_delete_category`
-		 *  - `rest_delete_post_tag`
 		 *
 		 * @since 4.7.0
 		 *
@@ -738,7 +662,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 * @since 4.7.0
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return object Term object.
+	 * @return object $prepared_term Term object.
 	 */
 	public function prepare_item_for_database( $request ) {
 		$prepared_term = new stdClass;
@@ -780,11 +704,6 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		 *
 		 * The dynamic portion of the hook name, `$this->taxonomy`, refers to the taxonomy slug.
 		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_pre_insert_category`
-		 *  - `rest_pre_insert_post_tag`
-		 *
 		 * @since 4.7.0
 		 *
 		 * @param object          $prepared_term Term object.
@@ -798,9 +717,9 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 *
 	 * @since 4.7.0
 	 *
-	 * @param WP_Term         $item    Term object.
+	 * @param obj             $item    Term object.
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response Response object.
+	 * @return WP_REST_Response $response Response object.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 
@@ -852,21 +771,16 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		$response->add_links( $this->prepare_links( $item ) );
 
 		/**
-		 * Filters the term data for a REST API response.
+		 * Filters a term item returned from the API.
 		 *
 		 * The dynamic portion of the hook name, `$this->taxonomy`, refers to the taxonomy slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_prepare_category`
-		 *  - `rest_prepare_post_tag`
 		 *
 		 * Allows modification of the term data right before it is returned.
 		 *
 		 * @since 4.7.0
 		 *
 		 * @param WP_REST_Response  $response  The response object.
-		 * @param WP_Term           $item      The original term object.
+		 * @param object            $item      The original term object.
 		 * @param WP_REST_Request   $request   Request used to generate the response.
 		 */
 		return apply_filters( "rest_prepare_{$this->taxonomy}", $response, $item, $request );
@@ -877,7 +791,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 *
 	 * @since 4.7.0
 	 *
-	 * @param WP_Term $term Term object.
+	 * @param object $term Term object.
 	 * @return array Links for the given term.
 	 */
 	protected function prepare_links( $term ) {
@@ -941,10 +855,6 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
-		}
-
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'post_tag' === $this->taxonomy ? 'tag' : $this->taxonomy,
@@ -994,7 +904,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 				'taxonomy'    => array(
 					'description' => __( 'Type attribution for the term.' ),
 					'type'        => 'string',
-					'enum'        => array( $this->taxonomy ),
+					'enum'        => array_keys( get_taxonomies() ),
 					'context'     => array( 'view', 'embed', 'edit' ),
 					'readonly'    => true,
 				),
@@ -1013,9 +923,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 
 		$schema['properties']['meta'] = $this->meta->get_field_schema();
 
-		$this->schema = $schema;
-
-		return $this->add_additional_fields_schema( $this->schema );
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**
@@ -1110,7 +1018,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		);
 
 		/**
-		 * Filters collection parameters for the terms controller.
+		 * Filter collection parameters for the terms controller.
 		 *
 		 * The dynamic part of the filter `$this->taxonomy` refers to the taxonomy
 		 * slug for the controller.

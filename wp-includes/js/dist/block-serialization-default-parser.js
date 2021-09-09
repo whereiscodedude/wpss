@@ -87,16 +87,90 @@ this["wp"] = this["wp"] || {}; this["wp"]["blockSerializationDefaultParser"] =
 /************************************************************************/
 /******/ ({
 
+/***/ "DSFK":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _arrayWithHoles; });
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+/***/ }),
+
+/***/ "ODXe":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ _slicedToArray; });
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithHoles.js
+var arrayWithHoles = __webpack_require__("DSFK");
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
+function _iterableToArrayLimit(arr, i) {
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableRest.js
+var nonIterableRest = __webpack_require__("PYwp");
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js
+
+
+
+function _slicedToArray(arr, i) {
+  return Object(arrayWithHoles["a" /* default */])(arr) || _iterableToArrayLimit(arr, i) || Object(nonIterableRest["a" /* default */])();
+}
+
+/***/ }),
+
+/***/ "PYwp":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _nonIterableRest; });
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance");
+}
+
+/***/ }),
+
 /***/ "SiJt":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parse", function() { return parse; });
-let document;
-let offset;
-let output;
-let stack;
+/* harmony import */ var _babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("ODXe");
+
+var document;
+var offset;
+var output;
+var stack;
 /**
  * Matches block comment delimiters
  *
@@ -126,28 +200,28 @@ let stack;
  *    not captured. thus, we find the long string of `a`s and remember it, then
  *    reference it as a whole unit inside our pattern
  *
- *    @see http://instanceof.me/post/52245507631/regex-emulate-atomic-grouping-with-lookahead
- *    @see http://blog.stevenlevithan.com/archives/mimic-atomic-groups
- *    @see https://javascript.info/regexp-infinite-backtracking-problem
+ *    @cite http://instanceof.me/post/52245507631/regex-emulate-atomic-grouping-with-lookahead
+ *    @cite http://blog.stevenlevithan.com/archives/mimic-atomic-groups
+ *    @cite https://javascript.info/regexp-infinite-backtracking-problem
  *
  *    once browsers reliably support atomic grouping or possessive
  *    quantifiers natively we should remove this trick and simplify
  *
- * @type {RegExp}
+ * @type RegExp
  *
  * @since 3.8.0
  * @since 4.6.1 added optimization to prevent backtracking on attribute parsing
  */
 
-const tokenizer = /<!--\s+(\/)?wp:([a-z][a-z0-9_-]*\/)?([a-z][a-z0-9_-]*)\s+({(?:(?=([^}]+|}+(?=})|(?!}\s+\/?-->)[^])*)\5|[^]*?)}\s+)?(\/)?-->/g;
+var tokenizer = /<!--\s+(\/)?wp:([a-z][a-z0-9_-]*\/)?([a-z][a-z0-9_-]*)\s+({(?:(?=([^}]+|}+(?=})|(?!}\s+\/?-->)[^])*)\5|[^]*?)}\s+)?(\/)?-->/g;
 
 function Block(blockName, attrs, innerBlocks, innerHTML, innerContent) {
   return {
-    blockName,
-    attrs,
-    innerBlocks,
-    innerHTML,
-    innerContent
+    blockName: blockName,
+    attrs: attrs,
+    innerBlocks: innerBlocks,
+    innerHTML: innerHTML,
+    innerContent: innerContent
   };
 }
 
@@ -157,11 +231,11 @@ function Freeform(innerHTML) {
 
 function Frame(block, tokenStart, tokenLength, prevOffset, leadingHtmlStart) {
   return {
-    block,
-    tokenStart,
-    tokenLength,
+    block: block,
+    tokenStart: tokenStart,
+    tokenLength: tokenLength,
     prevOffset: prevOffset || tokenStart + tokenLength,
-    leadingHtmlStart
+    leadingHtmlStart: leadingHtmlStart
   };
 }
 /**
@@ -243,7 +317,7 @@ function Frame(block, tokenStart, tokenLength, prevOffset, leadingHtmlStart) {
  */
 
 
-const parse = doc => {
+var parse = function parse(doc) {
   document = doc;
   offset = 0;
   output = [];
@@ -257,11 +331,18 @@ const parse = doc => {
 };
 
 function proceed() {
-  const next = nextToken();
-  const [tokenType, blockName, attrs, startOffset, tokenLength] = next;
-  const stackDepth = stack.length; // we may have some HTML soup before the next block
+  var next = nextToken();
 
-  const leadingHtmlStart = startOffset > offset ? offset : null;
+  var _next = Object(_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(next, 5),
+      tokenType = _next[0],
+      blockName = _next[1],
+      attrs = _next[2],
+      startOffset = _next[3],
+      tokenLength = _next[4];
+
+  var stackDepth = stack.length; // we may have some HTML soup before the next block
+
+  var leadingHtmlStart = startOffset > offset ? offset : null;
 
   switch (tokenType) {
     case 'no-more-tokens':
@@ -336,8 +417,8 @@ function proceed() {
       // block and add it as a innerBlock to the parent
 
 
-      const stackTop = stack.pop();
-      const html = document.substr(stackTop.prevOffset, startOffset - stackTop.prevOffset);
+      var stackTop = stack.pop();
+      var html = document.substr(stackTop.prevOffset, startOffset - stackTop.prevOffset);
       stackTop.block.innerHTML += html;
       stackTop.block.innerContent.push(html);
       stackTop.prevOffset = startOffset + tokenLength;
@@ -377,24 +458,32 @@ function nextToken() {
   // we're also using a trick here because the only difference between a
   // block opener and a block closer is the leading `/` before `wp:` (and
   // a closer has no attributes). we can trap them both and process the
-  // match back in JavaScript to see which one it was.
-  const matches = tokenizer.exec(document); // we have no more tokens
+  // match back in Javascript to see which one it was.
+  var matches = tokenizer.exec(document); // we have no more tokens
 
   if (null === matches) {
     return ['no-more-tokens'];
   }
 
-  const startedAt = matches.index;
-  const [match, closerMatch, namespaceMatch, nameMatch, attrsMatch
+  var startedAt = matches.index;
+
+  var _matches = Object(_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(matches, 7),
+      match = _matches[0],
+      closerMatch = _matches[1],
+      namespaceMatch = _matches[2],
+      nameMatch = _matches[3],
+      attrsMatch = _matches[4],
+
   /* internal/unused */
-  ,, voidMatch] = matches;
-  const length = match.length;
-  const isCloser = !!closerMatch;
-  const isVoid = !!voidMatch;
-  const namespace = namespaceMatch || 'core/';
-  const name = namespace + nameMatch;
-  const hasAttrs = !!attrsMatch;
-  const attrs = hasAttrs ? parseJSON(attrsMatch) : {}; // This state isn't allowed
+  voidMatch = _matches[6];
+
+  var length = match.length;
+  var isCloser = !!closerMatch;
+  var isVoid = !!voidMatch;
+  var namespace = namespaceMatch || 'core/';
+  var name = namespace + nameMatch;
+  var hasAttrs = !!attrsMatch;
+  var attrs = hasAttrs ? parseJSON(attrsMatch) : {}; // This state isn't allowed
   // This is an error
 
   if (isCloser && (isVoid || hasAttrs)) {// we can ignore them since they don't hurt anything
@@ -413,7 +502,7 @@ function nextToken() {
 }
 
 function addFreeform(rawLength) {
-  const length = rawLength ? rawLength : document.length - offset;
+  var length = rawLength ? rawLength : document.length - offset;
 
   if (0 === length) {
     return;
@@ -423,9 +512,9 @@ function addFreeform(rawLength) {
 }
 
 function addInnerBlock(block, tokenStart, tokenLength, lastOffset) {
-  const parent = stack[stack.length - 1];
+  var parent = stack[stack.length - 1];
   parent.block.innerBlocks.push(block);
-  const html = document.substr(parent.prevOffset, tokenStart - parent.prevOffset);
+  var html = document.substr(parent.prevOffset, tokenStart - parent.prevOffset);
 
   if (html) {
     parent.block.innerHTML += html;
@@ -437,13 +526,13 @@ function addInnerBlock(block, tokenStart, tokenLength, lastOffset) {
 }
 
 function addBlockFromStack(endOffset) {
-  const {
-    block,
-    leadingHtmlStart,
-    prevOffset,
-    tokenStart
-  } = stack.pop();
-  const html = endOffset ? document.substr(prevOffset, endOffset - prevOffset) : document.substr(prevOffset);
+  var _stack$pop = stack.pop(),
+      block = _stack$pop.block,
+      leadingHtmlStart = _stack$pop.leadingHtmlStart,
+      prevOffset = _stack$pop.prevOffset,
+      tokenStart = _stack$pop.tokenStart;
+
+  var html = endOffset ? document.substr(prevOffset, endOffset - prevOffset) : document.substr(prevOffset);
 
   if (html) {
     block.innerHTML += html;
