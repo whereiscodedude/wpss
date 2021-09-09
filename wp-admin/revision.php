@@ -47,31 +47,20 @@ switch ( $action ) {
 			break;
 		}
 
-		// Don't restore if revisions are disabled and this is not an autosave.
+		// Restore if revisions are enabled or this is an autosave.
 		if ( ! wp_revisions_enabled( $post ) && ! wp_is_post_autosave( $revision ) ) {
 			$redirect = 'edit.php?post_type=' . $post->post_type;
 			break;
 		}
 
-		// Don't restore if the post is locked.
+		// Don't allow revision restore when post is locked.
 		if ( wp_check_post_lock( $post->ID ) ) {
 			break;
 		}
 
 		check_admin_referer( "restore-post_{$revision->ID}" );
 
-		/*
-		 * Ensure the global $post remains the same after revision is restored.
-		 * Because wp_insert_post() and wp_transition_post_status() are called
-		 * during the process, plugins can unexpectedly modify $post.
-		 */
-		$backup_global_post = clone $post;
-
 		wp_restore_post_revision( $revision->ID );
-
-		// Restore the global $post as it was before.
-		$post = $backup_global_post;
-
 		$redirect = add_query_arg(
 			array(
 				'message'  => 5,
@@ -97,7 +86,7 @@ switch ( $action ) {
 			break;
 		}
 
-		// Bail if revisions are disabled and this is not an autosave.
+		// Revisions disabled and we're not looking at an autosave.
 		if ( ! wp_revisions_enabled( $post ) && ! wp_is_post_autosave( $revision ) ) {
 			$redirect = 'edit.php?post_type=' . $post->post_type;
 			break;
@@ -107,9 +96,8 @@ switch ( $action ) {
 		$post_title     = '<a href="' . $post_edit_link . '">' . _draft_or_post_title() . '</a>';
 		/* translators: %s: Post title. */
 		$h1             = sprintf( __( 'Compare Revisions of &#8220;%s&#8221;' ), $post_title );
-		$return_to_post = '<a href="' . $post_edit_link . '">' . __( '&larr; Go to editor' ) . '</a>';
-		// Used in the HTML title tag.
-		$title = __( 'Revisions' );
+		$return_to_post = '<a href="' . $post_edit_link . '">' . __( '&larr; Return to editor' ) . '</a>';
+		$title          = __( 'Revisions' );
 
 		$redirect = false;
 		break;

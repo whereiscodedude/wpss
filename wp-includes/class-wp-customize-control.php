@@ -60,7 +60,7 @@ class WP_Customize_Control {
 	 * The primary setting for the control (if there is one).
 	 *
 	 * @since 3.4.0
-	 * @var string|WP_Customize_Setting|null
+	 * @var string
 	 */
 	public $setting = 'default';
 
@@ -204,7 +204,7 @@ class WP_Customize_Control {
 	 *                                                 'textarea', 'radio', 'select', and 'dropdown-pages'. Additional
 	 *                                                 input types such as 'email', 'url', 'number', 'hidden', and
 	 *                                                 'date' are supported implicitly. Default 'text'.
-	 *     @type callable             $active_callback Active callback.
+	 *     @type callback             $active_callback Active callback.
 	 * }
 	 */
 	public function __construct( $manager, $id, $args = array() ) {
@@ -397,7 +397,7 @@ class WP_Customize_Control {
 		 *
 		 * @since 3.4.0
 		 *
-		 * @param WP_Customize_Control $control WP_Customize_Control instance.
+		 * @param WP_Customize_Control $this WP_Customize_Control instance.
 		 */
 		do_action( 'customize_render_control', $this );
 
@@ -409,7 +409,7 @@ class WP_Customize_Control {
 		 *
 		 * @since 3.4.0
 		 *
-		 * @param WP_Customize_Control $control WP_Customize_Control instance.
+		 * @param WP_Customize_Control $this WP_Customize_Control instance.
 		 */
 		do_action( "customize_render_control_{$this->id}", $this );
 
@@ -795,8 +795,3 @@ require_once ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-auto-add-
  * WP_Customize_Date_Time_Control class.
  */
 require_once ABSPATH . WPINC . '/customize/class-wp-customize-date-time-control.php';
-
-/**
- * WP_Sidebar_Block_Editor_Control class.
- */
-require_once ABSPATH . WPINC . '/customize/class-wp-sidebar-block-editor-control.php';

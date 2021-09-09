@@ -11,28 +11,22 @@ if ( ! class_exists( 'TwentyTwenty_Walker_Page' ) ) {
 	/**
 	 * CUSTOM PAGE WALKER
 	 * A custom walker for pages.
-	 *
-	 * @since Twenty Twenty 1.0
 	 */
 	class TwentyTwenty_Walker_Page extends Walker_Page {
 
 		/**
 		 * Outputs the beginning of the current element in the tree.
 		 *
-		 * @since Twenty Twenty 1.0
-		 * @since Twenty Twenty 1.9 Renamed `$page` to `$data_object` to match parent class for PHP 8 named parameter support.
-		 *
 		 * @see Walker::start_el()
+		 * @since 2.1.0
 		 *
 		 * @param string  $output       Used to append additional content. Passed by reference.
-		 * @param WP_Post $data_object  Page data object.
+		 * @param WP_Post $page         Page data object.
 		 * @param int     $depth        Optional. Depth of page. Used for padding. Default 0.
 		 * @param array   $args         Optional. Array of arguments. Default empty array.
 		 * @param int     $current_page Optional. Page ID. Default 0.
 		 */
-		public function start_el( &$output, $data_object, $depth = 0, $args = array(), $current_page = 0 ) {
-			// Restores the more descriptive, specific name for use within this method.
-			$page = $data_object;
+		public function start_el( &$output, $page, $depth = 0, $args = array(), $current_page = 0 ) {
 
 			if ( isset( $args['item_spacing'] ) && 'preserve' === $args['item_spacing'] ) {
 				$t = "\t";
