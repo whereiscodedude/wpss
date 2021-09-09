@@ -87,8 +87,7 @@ function post_submit_meta_box( $post, $args = array() ) {
 		endif;
 
 		/**
-		 * Fires after the Save Draft (or Save as Pending) and Preview (or Preview Changes) buttons
-		 * in the Publish meta box.
+		 * Fires before the post time/date setting in the Publish meta box.
 		 *
 		 * @since 4.4.0
 		 *
@@ -1582,12 +1581,6 @@ function register_and_do_post_meta_boxes( $post ) {
 	 * Fires after all built-in meta boxes have been added, contextually for the given post type.
 	 *
 	 * The dynamic portion of the hook, `$post_type`, refers to the post type of the post.
-	 *
-	 * Possible hook names include:
-	 *
-	 *  - `add_meta_boxes_post`
-	 *  - `add_meta_boxes_page`
-	 *  - `add_meta_boxes_attachment`
 	 *
 	 * @since 3.0.0
 	 *

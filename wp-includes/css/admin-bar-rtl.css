@@ -1,8 +1,4 @@
 /*! This file is auto-generated */
-html {
-	--wp-admin--admin-bar--height: 32px;
-}
-
 #wpadminbar * {
 	height: auto;
 	width: auto;
@@ -253,7 +249,7 @@ html:lang(he-il) .rtl #wpadminbar * {
 #wpadminbar .ab-item:before,
 #wpadminbar #adminbarsearch:before {
 	position: relative;
-	transition: color .1s ease-in-out;
+	transition: all .1s ease-in-out;
 }
 
 #wpadminbar .ab-label {
@@ -734,10 +730,6 @@ html:lang(he-il) .rtl #wpadminbar * {
 }
 
 @media screen and (max-width: 782px) {
-	html {
-		--wp-admin--admin-bar--height: 46px;
-	}
-
 	/* Toolbar Touchification*/
 	html #wpadminbar {
 		height: 46px;

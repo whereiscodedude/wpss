@@ -50,7 +50,7 @@ class WP_REST_Search_Controller extends WP_REST_Controller {
 	 * Search handlers used by the controller.
 	 *
 	 * @since 5.0.0
-	 * @var WP_REST_Search_Handler[]
+	 * @var array
 	 */
 	protected $search_handlers = array();
 

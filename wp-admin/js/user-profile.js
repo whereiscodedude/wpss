@@ -95,7 +95,7 @@
 	 * Handle the password reset button. Sets up an ajax callback to trigger sending
 	 * a password reset email.
 	 */
-	function bindPasswordResetLink() {
+	function bindPasswordRestLink() {
 		$( '#generate-reset-link' ).on( 'click', function() {
 			var $this  = $(this),
 				data = {
@@ -431,7 +431,7 @@
 		});
 
 		bindPasswordForm();
-		bindPasswordResetLink();
+		bindPasswordRestLink();
 	});
 
 	$( '#destroy-sessions' ).on( 'click', function( e ) {

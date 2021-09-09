@@ -6,12 +6,6 @@
 (function( exports, $ ){
 	var Container, focus, normalizedTransitionendEventName, api = wp.customize;
 
-	var reducedMotionMediaQuery = window.matchMedia( '(prefers-reduced-motion: reduce)' );
-	var isReducedMotion = reducedMotionMediaQuery.matches;
-	reducedMotionMediaQuery.addEventListener( 'change' , function handleReducedMotionChange( event ) {
-		isReducedMotion = event.matches;
-	});
-
 	api.OverlayNotification = api.Notification.extend(/** @lends wp.customize.OverlayNotification.prototype */{
 
 		/**
@@ -1270,14 +1264,11 @@
 		 * @return {void}
 		 */
 		_animateChangeExpanded: function( completeCallback ) {
-			// Return if CSS transitions are not supported or if reduced motion is enabled.
-			if ( ! normalizedTransitionendEventName || isReducedMotion ) {
-				// Schedule the callback until the next tick to prevent focus loss.
-				_.defer( function () {
-					if ( completeCallback ) {
-						completeCallback();
-					}
-				} );
+			// Return if CSS transitions are not supported.
+			if ( ! normalizedTransitionendEventName ) {
+				if ( completeCallback ) {
+					completeCallback();
+				}
 				return;
 			}
 

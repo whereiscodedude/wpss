@@ -1167,8 +1167,10 @@ function _admin_bar_bump_cb() {
 	?>
 <style<?php echo $type_attr; ?> media="screen">
 	html { margin-top: 32px !important; }
+	* html body { margin-top: 32px !important; }
 	@media screen and ( max-width: 782px ) {
 		html { margin-top: 46px !important; }
+		* html body { margin-top: 46px !important; }
 	}
 </style>
 	<?php

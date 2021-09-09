@@ -1136,7 +1136,6 @@ if ( 'upgrade-core' === $action ) {
 	$url = 'update.php?action=update-selected&plugins=' . urlencode( implode( ',', $plugins ) );
 	$url = wp_nonce_url( $url, 'bulk-update-plugins' );
 
-	// Used in the HTML title tag.
 	$title = __( 'Update Plugins' );
 
 	require_once ABSPATH . 'wp-admin/admin-header.php';
@@ -1177,7 +1176,6 @@ if ( 'upgrade-core' === $action ) {
 	$url = 'update.php?action=update-selected-themes&themes=' . urlencode( implode( ',', $themes ) );
 	$url = wp_nonce_url( $url, 'bulk-update-themes' );
 
-	// Used in the HTML title tag.
 	$title = __( 'Update Themes' );
 
 	require_once ABSPATH . 'wp-admin/admin-header.php';

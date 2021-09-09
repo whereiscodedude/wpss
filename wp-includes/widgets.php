@@ -1251,30 +1251,13 @@ function _wp_sidebars_changed() {
 		$sidebars_widgets = wp_get_sidebars_widgets();
 	}
 
-	sync_registered_widgets( true );
+	retrieve_widgets( true );
 }
 
 /**
- * Do not use, deprecated.
- *
- * Use sync_registered_widgets() instead.
+ * Look for "lost" widgets, this has to run at least on each theme change.
  *
  * @since 2.8.0
- * @deprecated 5.8.1 Use sync_registered_widgets()
- * @see sync_registered_widgets()
- *
- * @param string|bool $theme_changed
- * @return array
- */
-function retrieve_widgets( $theme_changed = false ) {
-	return sync_registered_widgets( $theme_changed );
-}
-
-/**
- * Looks for "lost" widgets and Updates widgets-to-sidebars allocation.
- * This has to run at least on each theme change.
- *
- * @since 5.8.1
  *
  * @global array $wp_registered_sidebars Registered sidebars.
  * @global array $sidebars_widgets
@@ -1284,7 +1267,7 @@ function retrieve_widgets( $theme_changed = false ) {
  *                                   of 'customize' defers updates for the Customizer.
  * @return array Updated sidebars widgets.
  */
-function sync_registered_widgets( $theme_changed = false ) {
+function retrieve_widgets( $theme_changed = false ) {
 	global $wp_registered_sidebars, $sidebars_widgets, $wp_registered_widgets;
 
 	$registered_sidebars_keys = array_keys( $wp_registered_sidebars );
@@ -1845,15 +1828,15 @@ function wp_setup_widgets_block_editor() {
  *
  * @since 5.8.0
  *
- * @return bool Whether to use the block editor to manage widgets.
+ * @return boolean Whether or not to use the block editor to manage widgets.
  */
 function wp_use_widgets_block_editor() {
 	/**
-	 * Filters whether to use the block editor to manage widgets.
+	 * Filters whether or not to use the block editor to manage widgets.
 	 *
 	 * @since 5.8.0
 	 *
-	 * @param bool $use_widgets_block_editor Whether to use the block editor to manage widgets.
+	 * @param boolean $use_widgets_block_editor Whether or not to use the block editor to manage widgets.
 	 */
 	return apply_filters(
 		'use_widgets_block_editor',
@@ -2052,26 +2035,14 @@ function wp_check_widget_editor_deps() {
 		if ( $wp_scripts->query( 'wp-editor', 'enqueued' ) ) {
 			_doing_it_wrong(
 				'wp_enqueue_script()',
-				sprintf(
-					/* translators: 1: 'wp-editor', 2: 'wp-edit-widgets', 3: 'wp-customize-widgets'. */
-					__( '"%1$s" script should not be enqueued together with the new widgets editor (%2$s or %3$s).' ),
-					'wp-editor',
-					'wp-edit-widgets',
-					'wp-customize-widgets'
-				),
+				'"wp-editor" script should not be enqueued together with the new widgets editor (wp-edit-widgets or wp-customize-widgets).',
 				'5.8.0'
 			);
 		}
 		if ( $wp_styles->query( 'wp-edit-post', 'enqueued' ) ) {
 			_doing_it_wrong(
 				'wp_enqueue_style()',
-				sprintf(
-					/* translators: 1: 'wp-edit-post', 2: 'wp-edit-widgets', 3: 'wp-customize-widgets'. */
-					__( '"%1$s" style should not be enqueued together with the new widgets editor (%2$s or %3$s).' ),
-					'wp-edit-post',
-					'wp-edit-widgets',
-					'wp-customize-widgets'
-				),
+				'"wp-edit-post" style should not be enqueued together with the new widgets editor (wp-edit-widgets or wp-customize-widgets).',
 				'5.8.0'
 			);
 		}

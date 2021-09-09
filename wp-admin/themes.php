@@ -123,7 +123,6 @@ if ( current_user_can( 'switch_themes' ) && isset( $_GET['action'] ) ) {
 	}
 }
 
-// Used in the HTML title tag.
 $title       = __( 'Manage Themes' );
 $parent_file = 'themes.php';
 

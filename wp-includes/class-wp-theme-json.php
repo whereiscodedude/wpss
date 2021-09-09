@@ -44,7 +44,7 @@ class WP_Theme_JSON {
 	 * The sources of data this object can represent.
 	 *
 	 * @since 5.8.0
-	 * @var string[]
+	 * @var array
 	 */
 	const VALID_ORIGINS = array(
 		'core',
@@ -166,7 +166,7 @@ class WP_Theme_JSON {
 
 	/**
 	 * @since 5.8.0
-	 * @var string[]
+	 * @var array
 	 */
 	const ALLOWED_TOP_LEVEL_KEYS = array(
 		'settings',
@@ -244,7 +244,7 @@ class WP_Theme_JSON {
 
 	/**
 	 * @since 5.8.0
-	 * @var string[]
+	 * @var array
 	 */
 	const ELEMENTS = array(
 		'link' => 'a',
@@ -636,7 +636,7 @@ class WP_Theme_JSON {
 
 		$declaration_block = array_reduce(
 			$declarations,
-			static function ( $carry, $element ) {
+			function ( $carry, $element ) {
 				return $carry .= $element['name'] . ': ' . $element['value'] . ';'; },
 			''
 		);
@@ -1221,6 +1221,14 @@ class WP_Theme_JSON {
 				$theme_settings['settings']['spacing'] = array();
 			}
 			$theme_settings['settings']['spacing']['customPadding'] = $settings['enableCustomSpacing'];
+		}
+
+		// Things that didn't land in core yet, so didn't have a setting assigned.
+		if ( current( (array) get_theme_support( 'experimental-link-color' ) ) ) {
+			if ( ! isset( $theme_settings['settings']['color'] ) ) {
+				$theme_settings['settings']['color'] = array();
+			}
+			$theme_settings['settings']['color']['link'] = true;
 		}
 
 		return $theme_settings;
