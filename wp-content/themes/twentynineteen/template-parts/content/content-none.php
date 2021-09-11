@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
 ?>
@@ -22,8 +22,8 @@
 
 			printf(
 				'<p>' . wp_kses(
-					/* translators: %s: Link to WP admin new post page. */
-					__( 'Ready to publish your first post? <a href="%s">Get started here</a>.', 'twentynineteen' ),
+					/* translators: 1: Link to WP admin new post page. */
+					__( 'Ready to publish your first post? <a href="%1$s">Get started here</a>.', 'twentynineteen' ),
 					array(
 						'a' => array(
 							'href' => array(),
