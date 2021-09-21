@@ -90,21 +90,14 @@ this["wp"] = this["wp"] || {}; this["wp"]["viewport"] =
 /***/ "1ZqX":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["data"]; }());
-
-/***/ }),
-
-/***/ "GRId":
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["wp"]["element"]; }());
+(function() { module.exports = this["wp"]["data"]; }());
 
 /***/ }),
 
 /***/ "K9lf":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["compose"]; }());
+(function() { module.exports = this["wp"]["compose"]; }());
 
 /***/ }),
 
@@ -116,14 +109,13 @@ this["wp"] = this["wp"] || {}; this["wp"]["viewport"] =
 __webpack_require__.r(__webpack_exports__);
 
 // EXPORTS
-__webpack_require__.d(__webpack_exports__, "store", function() { return /* reexport */ store; });
 __webpack_require__.d(__webpack_exports__, "ifViewportMatches", function() { return /* reexport */ if_viewport_matches; });
 __webpack_require__.d(__webpack_exports__, "withViewportMatch", function() { return /* reexport */ with_viewport_match; });
 
 // NAMESPACE OBJECT: ./node_modules/@wordpress/viewport/build-module/store/actions.js
 var actions_namespaceObject = {};
 __webpack_require__.r(actions_namespaceObject);
-__webpack_require__.d(actions_namespaceObject, "setIsMatching", function() { return actions_setIsMatching; });
+__webpack_require__.d(actions_namespaceObject, "setIsMatching", function() { return setIsMatching; });
 
 // NAMESPACE OBJECT: ./node_modules/@wordpress/viewport/build-module/store/selectors.js
 var selectors_namespaceObject = {};
@@ -133,8 +125,8 @@ __webpack_require__.d(selectors_namespaceObject, "isViewportMatch", function() {
 // EXTERNAL MODULE: external "lodash"
 var external_lodash_ = __webpack_require__("YLtl");
 
-// EXTERNAL MODULE: external ["wp","data"]
-var external_wp_data_ = __webpack_require__("1ZqX");
+// EXTERNAL MODULE: external {"this":["wp","data"]}
+var external_this_wp_data_ = __webpack_require__("1ZqX");
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/viewport/build-module/store/reducer.js
 /**
@@ -146,7 +138,10 @@ var external_wp_data_ = __webpack_require__("1ZqX");
  *
  * @return {Object} Updated state.
  */
-function reducer(state = {}, action) {
+function reducer() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
   switch (action.type) {
     case 'SET_IS_MATCHING':
       return action.values;
@@ -167,10 +162,10 @@ function reducer(state = {}, action) {
  *
  * @return {Object} Action object.
  */
-function actions_setIsMatching(values) {
+function setIsMatching(values) {
   return {
     type: 'SET_IS_MATCHING',
-    values
+    values: values
   };
 }
 
@@ -212,89 +207,16 @@ function isViewportMatch(state, query) {
 
 
 
-const STORE_NAME = 'core/viewport';
-/**
- * Store definition for the viewport namespace.
- *
- * @see https://github.com/WordPress/gutenberg/blob/HEAD/packages/data/README.md#createReduxStore
- *
- * @type {Object}
- */
-
-const store = Object(external_wp_data_["createReduxStore"])(STORE_NAME, {
+/* harmony default export */ var store = (Object(external_this_wp_data_["registerStore"])('core/viewport', {
   reducer: store_reducer,
   actions: actions_namespaceObject,
   selectors: selectors_namespaceObject
-});
-Object(external_wp_data_["register"])(store);
+}));
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/viewport/build-module/listener.js
-/**
- * External dependencies
- */
-
-/**
- * WordPress dependencies
- */
-
-
-/**
- * Internal dependencies
- */
-
-
-
-const addDimensionsEventListener = (breakpoints, operators) => {
-  /**
-   * Callback invoked when media query state should be updated. Is invoked a
-   * maximum of one time per call stack.
-   */
-  const setIsMatching = Object(external_lodash_["debounce"])(() => {
-    const values = Object(external_lodash_["mapValues"])(queries, query => query.matches);
-    Object(external_wp_data_["dispatch"])(store).setIsMatching(values);
-  }, {
-    leading: true
-  });
-  /**
-   * Hash of breakpoint names with generated MediaQueryList for corresponding
-   * media query.
-   *
-   * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia
-   * @see https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList
-   *
-   * @type {Object<string,MediaQueryList>}
-   */
-
-  const queries = Object(external_lodash_["reduce"])(breakpoints, (result, width, name) => {
-    Object(external_lodash_["forEach"])(operators, (condition, operator) => {
-      const list = window.matchMedia(`(${condition}: ${width}px)`);
-      list.addListener(setIsMatching);
-      const key = [operator, name].join(' ');
-      result[key] = list;
-    });
-    return result;
-  }, {});
-  window.addEventListener('orientationchange', setIsMatching); // Set initial values
-
-  setIsMatching();
-  setIsMatching.flush();
-};
-
-/* harmony default export */ var listener = (addDimensionsEventListener);
-
-// EXTERNAL MODULE: external ["wp","compose"]
-var external_wp_compose_ = __webpack_require__("K9lf");
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/extends.js
-var esm_extends = __webpack_require__("wx14");
-
-// EXTERNAL MODULE: external ["wp","element"]
-var external_wp_element_ = __webpack_require__("GRId");
+// EXTERNAL MODULE: external {"this":["wp","compose"]}
+var external_this_wp_compose_ = __webpack_require__("K9lf");
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/viewport/build-module/with-viewport-match.js
-
-
-
 /**
  * External dependencies
  */
@@ -302,6 +224,7 @@ var external_wp_element_ = __webpack_require__("GRId");
 /**
  * WordPress dependencies
  */
+
 
 
 /**
@@ -309,50 +232,22 @@ var external_wp_element_ = __webpack_require__("GRId");
  * the given prop names, where the value passed to the underlying component is
  * the result of the query assigned as the object's value.
  *
- * @see isViewportMatch
- *
  * @param {Object} queries  Object of prop name to viewport query.
  *
- * @example
- *
- * ```jsx
- * function MyComponent( { isMobile } ) {
- * 	return (
- * 		<div>Currently: { isMobile ? 'Mobile' : 'Not Mobile' }</div>
- * 	);
- * }
- *
- * MyComponent = withViewportMatch( { isMobile: '< small' } )( MyComponent );
- * ```
+ * @see isViewportMatch
  *
  * @return {Function} Higher-order component.
  */
 
-const withViewportMatch = queries => {
-  const useViewPortQueriesResult = () => Object(external_lodash_["mapValues"])(queries, query => {
-    let [operator, breakpointName] = query.split(' ');
-
-    if (breakpointName === undefined) {
-      breakpointName = operator;
-      operator = '>=';
-    } // Hooks should unconditionally execute in the same order,
-    // we are respecting that as from the static query of the HOC we generate
-    // a hook that calls other hooks always in the same order (because the query never changes).
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-
-
-    return Object(external_wp_compose_["useViewportMatch"])(breakpointName, operator);
-  });
-
-  return Object(external_wp_compose_["createHigherOrderComponent"])(WrappedComponent => {
-    return Object(external_wp_compose_["pure"])(props => {
-      const queriesResult = useViewPortQueriesResult();
-      return Object(external_wp_element_["createElement"])(WrappedComponent, Object(esm_extends["a" /* default */])({}, props, queriesResult));
+var with_viewport_match_withViewportMatch = function withViewportMatch(queries) {
+  return Object(external_this_wp_compose_["createHigherOrderComponent"])(Object(external_this_wp_data_["withSelect"])(function (select) {
+    return Object(external_lodash_["mapValues"])(queries, function (query) {
+      return select('core/viewport').isViewportMatch(query);
     });
-  }, 'withViewportMatch');
+  }), 'withViewportMatch');
 };
 
-/* harmony default export */ var with_viewport_match = (withViewportMatch);
+/* harmony default export */ var with_viewport_match = (with_viewport_match_withViewportMatch);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/viewport/build-module/if-viewport-matches.js
 /**
@@ -368,30 +263,33 @@ const withViewportMatch = queries => {
  * Higher-order component creator, creating a new component which renders if
  * the viewport query is satisfied.
  *
- * @see withViewportMatches
- *
  * @param {string} query Viewport query.
  *
- * @example
- *
- * ```jsx
- * function MyMobileComponent() {
- * 	return <div>I'm only rendered on mobile viewports!</div>;
- * }
- *
- * MyMobileComponent = ifViewportMatches( '< small' )( MyMobileComponent );
- * ```
+ * @see withViewportMatches
  *
  * @return {Function} Higher-order component.
  */
 
-const ifViewportMatches = query => Object(external_wp_compose_["createHigherOrderComponent"])(Object(external_wp_compose_["compose"])([with_viewport_match({
-  isViewportMatch: query
-}), Object(external_wp_compose_["ifCondition"])(props => props.isViewportMatch)]), 'ifViewportMatches');
+var if_viewport_matches_ifViewportMatches = function ifViewportMatches(query) {
+  return Object(external_this_wp_compose_["createHigherOrderComponent"])(Object(external_this_wp_compose_["compose"])([with_viewport_match({
+    isViewportMatch: query
+  }), Object(external_this_wp_compose_["ifCondition"])(function (props) {
+    return props.isViewportMatch;
+  })]), 'ifViewportMatches');
+};
 
-/* harmony default export */ var if_viewport_matches = (ifViewportMatches);
+/* harmony default export */ var if_viewport_matches = (if_viewport_matches_ifViewportMatches);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/viewport/build-module/index.js
+/**
+ * External dependencies
+ */
+
+/**
+ * WordPress dependencies
+ */
+
+
 /**
  * Internal dependencies
  */
@@ -407,7 +305,7 @@ const ifViewportMatches = query => Object(external_wp_compose_["createHigherOrde
  * @type {Object}
  */
 
-const BREAKPOINTS = {
+var BREAKPOINTS = {
   huge: 1440,
   wide: 1280,
   large: 960,
@@ -421,11 +319,46 @@ const BREAKPOINTS = {
  * @type {Object}
  */
 
-const OPERATORS = {
+var OPERATORS = {
   '<': 'max-width',
   '>=': 'min-width'
 };
-listener(BREAKPOINTS, OPERATORS);
+/**
+ * Callback invoked when media query state should be updated. Is invoked a
+ * maximum of one time per call stack.
+ */
+
+var build_module_setIsMatching = Object(external_lodash_["debounce"])(function () {
+  var values = Object(external_lodash_["mapValues"])(build_module_queries, function (query) {
+    return query.matches;
+  });
+  Object(external_this_wp_data_["dispatch"])('core/viewport').setIsMatching(values);
+}, {
+  leading: true
+});
+/**
+ * Hash of breakpoint names with generated MediaQueryList for corresponding
+ * media query.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList
+ *
+ * @type {Object<string,MediaQueryList>}
+ */
+
+var build_module_queries = Object(external_lodash_["reduce"])(BREAKPOINTS, function (result, width, name) {
+  Object(external_lodash_["forEach"])(OPERATORS, function (condition, operator) {
+    var list = window.matchMedia("(".concat(condition, ": ").concat(width, "px)"));
+    list.addListener(build_module_setIsMatching);
+    var key = [operator, name].join(' ');
+    result[key] = list;
+  });
+  return result;
+}, {});
+window.addEventListener('orientationchange', build_module_setIsMatching); // Set initial values
+
+build_module_setIsMatching();
+build_module_setIsMatching.flush();
 
 
 /***/ }),
@@ -433,32 +366,7 @@ listener(BREAKPOINTS, OPERATORS);
 /***/ "YLtl":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["lodash"]; }());
-
-/***/ }),
-
-/***/ "wx14":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _extends; });
-function _extends() {
-  _extends = Object.assign || function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-
-    return target;
-  };
-
-  return _extends.apply(this, arguments);
-}
+(function() { module.exports = this["lodash"]; }());
 
 /***/ })
 
