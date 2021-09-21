@@ -101,17 +101,18 @@ __webpack_require__.d(__webpack_exports__, "default", function() { return /* bin
 /**
  * Returns true if the given object is a generator, or false otherwise.
  *
- * @see https://www.ecma-international.org/ecma-262/6.0/#sec-generator-objects
+ * @link https://www.ecma-international.org/ecma-262/6.0/#sec-generator-objects
  *
  * @param {*} object Object to test.
  *
  * @return {boolean} Whether object is a generator.
  */
 function isGenerator(object) {
-  // Check that iterator (next) and iterable (Symbol.iterator) interfaces are satisfied.
-  // These checks seem to be compatible with several generator helpers as well as the native implementation.
-  return !!object && typeof object[Symbol.iterator] === 'function' && typeof object.next === 'function';
+  return !!object && object[Symbol.toStringTag] === 'Generator';
 }
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/typeof.js
+var esm_typeof = __webpack_require__("U8pU");
 
 // EXTERNAL MODULE: ./node_modules/rungen/dist/index.js
 var dist = __webpack_require__("hnoU");
@@ -123,9 +124,25 @@ var external_lodash_ = __webpack_require__("YLtl");
 var is_promise = __webpack_require__("JlUD");
 var is_promise_default = /*#__PURE__*/__webpack_require__.n(is_promise);
 
+// CONCATENATED MODULE: ./node_modules/@wordpress/redux-routine/build-module/cast-error.js
+/**
+ * Casts value as an error if it's not one.
+ *
+ * @param {*} error The value to cast.
+ *
+ * @return {Error} The cast error.
+ */
+function castError(error) {
+  if (!(error instanceof Error)) {
+    error = new Error(error);
+  }
+
+  return error;
+}
+
 // CONCATENATED MODULE: ./node_modules/@wordpress/redux-routine/build-module/is-action.js
 /**
- * External dependencies
+ * External imports
  */
 
 /**
@@ -154,6 +171,8 @@ function isActionOfType(object, expectedType) {
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/redux-routine/build-module/runtime.js
+
+
 /**
  * External dependencies
  */
@@ -165,34 +184,41 @@ function isActionOfType(object, expectedType) {
  */
 
 
+
 /**
  * Create a co-routine runtime.
  *
  * @param {Object}    controls Object of control handlers.
- * @param {Function}  dispatch Unhandled action dispatch.
+ * @param {function}  dispatch Unhandled action dispatch.
  *
- * @return {Function} co-routine runtime
+ * @return {function} co-routine runtime
  */
 
-function createRuntime(controls = {}, dispatch) {
-  const rungenControls = Object(external_lodash_["map"])(controls, (control, actionType) => (value, next, iterate, yieldNext, yieldError) => {
-    if (!isActionOfType(value, actionType)) {
-      return false;
-    }
+function createRuntime() {
+  var controls = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var dispatch = arguments.length > 1 ? arguments[1] : undefined;
+  var rungenControls = Object(external_lodash_["map"])(controls, function (control, actionType) {
+    return function (value, next, iterate, yieldNext, yieldError) {
+      if (!isActionOfType(value, actionType)) {
+        return false;
+      }
 
-    const routine = control(value);
+      var routine = control(value);
 
-    if (is_promise_default()(routine)) {
-      // Async control routine awaits resolution.
-      routine.then(yieldNext, yieldError);
-    } else {
-      yieldNext(routine);
-    }
+      if (is_promise_default()(routine)) {
+        // Async control routine awaits resolution.
+        routine.then(yieldNext, function (error) {
+          return yieldError(castError(error));
+        });
+      } else {
+        next(routine);
+      }
 
-    return true;
+      return true;
+    };
   });
 
-  const unhandledActionControl = (value, next) => {
+  var unhandledActionControl = function unhandledActionControl(value, next) {
     if (!isAction(value)) {
       return false;
     }
@@ -203,14 +229,18 @@ function createRuntime(controls = {}, dispatch) {
   };
 
   rungenControls.push(unhandledActionControl);
-  const rungenRuntime = Object(dist["create"])(rungenControls);
-  return action => new Promise((resolve, reject) => rungenRuntime(action, result => {
-    if (isAction(result)) {
-      dispatch(result);
-    }
+  var rungenRuntime = Object(dist["create"])(rungenControls);
+  return function (action) {
+    return new Promise(function (resolve, reject) {
+      return rungenRuntime(action, function (result) {
+        if (Object(esm_typeof["a" /* default */])(result) === 'object' && Object(external_lodash_["isString"])(result.type)) {
+          dispatch(result);
+        }
 
-    resolve(result);
-  }, reject));
+        resolve(result);
+      }, reject);
+    });
+  };
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/redux-routine/build-module/index.js
@@ -232,15 +262,18 @@ function createRuntime(controls = {}, dispatch) {
  * @return {Function} Co-routine runtime
  */
 
-function createMiddleware(controls = {}) {
-  return store => {
-    const runtime = createRuntime(controls, store.dispatch);
-    return next => action => {
-      if (!isGenerator(action)) {
-        return next(action);
-      }
+function createMiddleware() {
+  var controls = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function (store) {
+    var runtime = createRuntime(controls, store.dispatch);
+    return function (next) {
+      return function (action) {
+        if (!isGenerator(action)) {
+          return next(action);
+        }
 
-      return runtime(action);
+        return runtime(action);
+      };
     };
   };
 }
@@ -285,7 +318,6 @@ exports.default = createDispatcher;
 /***/ (function(module, exports) {
 
 module.exports = isPromise;
-module.exports.default = isPromise;
 
 function isPromise(obj) {
   return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
@@ -337,10 +369,33 @@ exports.default = [call, cps];
 
 /***/ }),
 
+/***/ "U8pU":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _typeof; });
+function _typeof2(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
+
+function _typeof(obj) {
+  if (typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol") {
+    _typeof = function _typeof(obj) {
+      return _typeof2(obj);
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : _typeof2(obj);
+    };
+  }
+
+  return _typeof(obj);
+}
+
+/***/ }),
+
 /***/ "YLtl":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["lodash"]; }());
+(function() { module.exports = this["lodash"]; }());
 
 /***/ }),
 

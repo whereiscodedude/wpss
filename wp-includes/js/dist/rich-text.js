@@ -90,42 +90,229 @@ this["wp"] = this["wp"] || {}; this["wp"]["richText"] =
 /***/ "1ZqX":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["data"]; }());
+(function() { module.exports = this["wp"]["data"]; }());
+
+/***/ }),
+
+/***/ "25BE":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _iterableToArray; });
+function _iterableToArray(iter) {
+  if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+}
+
+/***/ }),
+
+/***/ "4eJC":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = function memize( fn, options ) {
+	var size = 0,
+		maxSize, head, tail;
+
+	if ( options && options.maxSize ) {
+		maxSize = options.maxSize;
+	}
+
+	function memoized( /* ...args */ ) {
+		var node = head,
+			len = arguments.length,
+			args, i;
+
+		searchCache: while ( node ) {
+			// Perform a shallow equality test to confirm that whether the node
+			// under test is a candidate for the arguments passed. Two arrays
+			// are shallowly equal if their length matches and each entry is
+			// strictly equal between the two sets. Avoid abstracting to a
+			// function which could incur an arguments leaking deoptimization.
+
+			// Check whether node arguments match arguments length
+			if ( node.args.length !== arguments.length ) {
+				node = node.next;
+				continue;
+			}
+
+			// Check whether node arguments match arguments values
+			for ( i = 0; i < len; i++ ) {
+				if ( node.args[ i ] !== arguments[ i ] ) {
+					node = node.next;
+					continue searchCache;
+				}
+			}
+
+			// At this point we can assume we've found a match
+
+			// Surface matched node to head if not already
+			if ( node !== head ) {
+				// As tail, shift to previous. Must only shift if not also
+				// head, since if both head and tail, there is no previous.
+				if ( node === tail ) {
+					tail = node.prev;
+				}
+
+				// Adjust siblings to point to each other. If node was tail,
+				// this also handles new tail's empty `next` assignment.
+				node.prev.next = node.next;
+				if ( node.next ) {
+					node.next.prev = node.prev;
+				}
+
+				node.next = head;
+				node.prev = null;
+				head.prev = node;
+				head = node;
+			}
+
+			// Return immediately
+			return node.val;
+		}
+
+		// No cached value found. Continue to insertion phase:
+
+		// Create a copy of arguments (avoid leaking deoptimization)
+		args = new Array( len );
+		for ( i = 0; i < len; i++ ) {
+			args[ i ] = arguments[ i ];
+		}
+
+		node = {
+			args: args,
+
+			// Generate the result from original function
+			val: fn.apply( null, args )
+		};
+
+		// Don't need to check whether node is already head, since it would
+		// have been returned above already if it was
+
+		// Shift existing head down list
+		if ( head ) {
+			head.prev = node;
+			node.next = head;
+		} else {
+			// If no head, follows that there's no tail (at initial or reset)
+			tail = node;
+		}
+
+		// Trim tail if we're reached max size and are pending cache insertion
+		if ( size === maxSize ) {
+			tail = tail.prev;
+			tail.next = null;
+		} else {
+			size++;
+		}
+
+		head = node;
+
+		return node.val;
+	}
+
+	memoized.clear = function() {
+		head = null;
+		tail = null;
+		size = 0;
+	};
+
+	if ( false ) {}
+
+	return memoized;
+};
+
 
 /***/ }),
 
 /***/ "GRId":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["element"]; }());
+(function() { module.exports = this["wp"]["element"]; }());
 
 /***/ }),
 
 /***/ "K9lf":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["compose"]; }());
+(function() { module.exports = this["wp"]["compose"]; }());
 
 /***/ }),
 
-/***/ "RxS6":
-/***/ (function(module, exports) {
+/***/ "KQm4":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-(function() { module.exports = window["wp"]["keycodes"]; }());
+"use strict";
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ _toConsumableArray; });
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithoutHoles.js
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) {
+      arr2[i] = arr[i];
+    }
+
+    return arr2;
+  }
+}
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArray.js
+var iterableToArray = __webpack_require__("25BE");
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableSpread.js
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance");
+}
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js
+
+
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || Object(iterableToArray["a" /* default */])(arr) || _nonIterableSpread();
+}
+
+/***/ }),
+
+/***/ "U8pU":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _typeof; });
+function _typeof2(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
+
+function _typeof(obj) {
+  if (typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol") {
+    _typeof = function _typeof(obj) {
+      return _typeof2(obj);
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : _typeof2(obj);
+    };
+  }
+
+  return _typeof(obj);
+}
 
 /***/ }),
 
 /***/ "Vx3V":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["escapeHtml"]; }());
+(function() { module.exports = this["wp"]["escapeHtml"]; }());
 
 /***/ }),
 
 /***/ "YLtl":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["lodash"]; }());
+(function() { module.exports = this["lodash"]; }());
+
+/***/ }),
+
+/***/ "g56x":
+/***/ (function(module, exports) {
+
+(function() { module.exports = this["wp"]["hooks"]; }());
 
 /***/ }),
 
@@ -411,6 +598,81 @@ function isShallowEqual( a, b, fromIndex ) {
 
 /***/ }),
 
+/***/ "rePB":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _defineProperty; });
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+/***/ }),
+
+/***/ "vpQ4":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _objectSpread; });
+/* harmony import */ var _defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("rePB");
+
+function _objectSpread(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    var ownKeys = Object.keys(source);
+
+    if (typeof Object.getOwnPropertySymbols === 'function') {
+      ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(source, sym).enumerable;
+      }));
+    }
+
+    ownKeys.forEach(function (key) {
+      Object(_defineProperty__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(target, key, source[key]);
+    });
+  }
+
+  return target;
+}
+
+/***/ }),
+
+/***/ "wx14":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return _extends; });
+function _extends() {
+  _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends.apply(this, arguments);
+}
+
+/***/ }),
+
 /***/ "yyEc":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -419,44 +681,36 @@ function isShallowEqual( a, b, fromIndex ) {
 __webpack_require__.r(__webpack_exports__);
 
 // EXPORTS
-__webpack_require__.d(__webpack_exports__, "store", function() { return /* reexport */ store; });
 __webpack_require__.d(__webpack_exports__, "applyFormat", function() { return /* reexport */ applyFormat; });
+__webpack_require__.d(__webpack_exports__, "charAt", function() { return /* reexport */ charAt; });
 __webpack_require__.d(__webpack_exports__, "concat", function() { return /* reexport */ concat; });
 __webpack_require__.d(__webpack_exports__, "create", function() { return /* reexport */ create; });
 __webpack_require__.d(__webpack_exports__, "getActiveFormat", function() { return /* reexport */ getActiveFormat; });
-__webpack_require__.d(__webpack_exports__, "getActiveObject", function() { return /* reexport */ getActiveObject; });
+__webpack_require__.d(__webpack_exports__, "getSelectionEnd", function() { return /* reexport */ getSelectionEnd; });
+__webpack_require__.d(__webpack_exports__, "getSelectionStart", function() { return /* reexport */ getSelectionStart; });
 __webpack_require__.d(__webpack_exports__, "getTextContent", function() { return /* reexport */ getTextContent; });
-__webpack_require__.d(__webpack_exports__, "__unstableIsListRootSelected", function() { return /* reexport */ isListRootSelected; });
-__webpack_require__.d(__webpack_exports__, "__unstableIsActiveListType", function() { return /* reexport */ isActiveListType; });
 __webpack_require__.d(__webpack_exports__, "isCollapsed", function() { return /* reexport */ isCollapsed; });
 __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return /* reexport */ isEmpty; });
-__webpack_require__.d(__webpack_exports__, "__unstableIsEmptyLine", function() { return /* reexport */ isEmptyLine; });
+__webpack_require__.d(__webpack_exports__, "isEmptyLine", function() { return /* reexport */ isEmptyLine; });
 __webpack_require__.d(__webpack_exports__, "join", function() { return /* reexport */ join; });
 __webpack_require__.d(__webpack_exports__, "registerFormatType", function() { return /* reexport */ registerFormatType; });
 __webpack_require__.d(__webpack_exports__, "removeFormat", function() { return /* reexport */ removeFormat; });
 __webpack_require__.d(__webpack_exports__, "remove", function() { return /* reexport */ remove_remove; });
-__webpack_require__.d(__webpack_exports__, "replace", function() { return /* reexport */ replace_replace; });
+__webpack_require__.d(__webpack_exports__, "replace", function() { return /* reexport */ replace; });
 __webpack_require__.d(__webpack_exports__, "insert", function() { return /* reexport */ insert; });
-__webpack_require__.d(__webpack_exports__, "__unstableInsertLineSeparator", function() { return /* reexport */ insertLineSeparator; });
-__webpack_require__.d(__webpack_exports__, "__unstableRemoveLineSeparator", function() { return /* reexport */ removeLineSeparator; });
+__webpack_require__.d(__webpack_exports__, "insertLineSeparator", function() { return /* reexport */ insertLineSeparator; });
 __webpack_require__.d(__webpack_exports__, "insertObject", function() { return /* reexport */ insertObject; });
 __webpack_require__.d(__webpack_exports__, "slice", function() { return /* reexport */ slice; });
 __webpack_require__.d(__webpack_exports__, "split", function() { return /* reexport */ split; });
-__webpack_require__.d(__webpack_exports__, "__unstableToDom", function() { return /* reexport */ toDom; });
+__webpack_require__.d(__webpack_exports__, "apply", function() { return /* reexport */ apply; });
+__webpack_require__.d(__webpack_exports__, "unstableToDom", function() { return /* reexport */ toDom; });
 __webpack_require__.d(__webpack_exports__, "toHTMLString", function() { return /* reexport */ toHTMLString; });
 __webpack_require__.d(__webpack_exports__, "toggleFormat", function() { return /* reexport */ toggleFormat; });
-__webpack_require__.d(__webpack_exports__, "__UNSTABLE_LINE_SEPARATOR", function() { return /* reexport */ LINE_SEPARATOR; });
+__webpack_require__.d(__webpack_exports__, "LINE_SEPARATOR", function() { return /* reexport */ LINE_SEPARATOR; });
 __webpack_require__.d(__webpack_exports__, "unregisterFormatType", function() { return /* reexport */ unregisterFormatType; });
-__webpack_require__.d(__webpack_exports__, "__unstableCanIndentListItems", function() { return /* reexport */ canIndentListItems; });
-__webpack_require__.d(__webpack_exports__, "__unstableCanOutdentListItems", function() { return /* reexport */ canOutdentListItems; });
-__webpack_require__.d(__webpack_exports__, "__unstableIndentListItems", function() { return /* reexport */ indentListItems; });
-__webpack_require__.d(__webpack_exports__, "__unstableOutdentListItems", function() { return /* reexport */ outdentListItems; });
-__webpack_require__.d(__webpack_exports__, "__unstableChangeListType", function() { return /* reexport */ changeListType; });
-__webpack_require__.d(__webpack_exports__, "__unstableCreateElement", function() { return /* reexport */ createElement; });
-__webpack_require__.d(__webpack_exports__, "useAnchorRef", function() { return /* reexport */ useAnchorRef; });
-__webpack_require__.d(__webpack_exports__, "__experimentalRichText", function() { return /* reexport */ __experimentalRichText; });
-__webpack_require__.d(__webpack_exports__, "__unstableUseRichText", function() { return /* reexport */ useRichText; });
-__webpack_require__.d(__webpack_exports__, "__unstableFormatEdit", function() { return /* reexport */ FormatEdit; });
+__webpack_require__.d(__webpack_exports__, "indentListItems", function() { return /* reexport */ indentListItems; });
+__webpack_require__.d(__webpack_exports__, "outdentListItems", function() { return /* reexport */ outdentListItems; });
+__webpack_require__.d(__webpack_exports__, "changeListType", function() { return /* reexport */ changeListType; });
 
 // NAMESPACE OBJECT: ./node_modules/@wordpress/rich-text/build-module/store/selectors.js
 var selectors_namespaceObject = {};
@@ -472,13 +726,18 @@ __webpack_require__.r(actions_namespaceObject);
 __webpack_require__.d(actions_namespaceObject, "addFormatTypes", function() { return addFormatTypes; });
 __webpack_require__.d(actions_namespaceObject, "removeFormatTypes", function() { return removeFormatTypes; });
 
-// EXTERNAL MODULE: external ["wp","data"]
-var external_wp_data_ = __webpack_require__("1ZqX");
+// EXTERNAL MODULE: external {"this":["wp","data"]}
+var external_this_wp_data_ = __webpack_require__("1ZqX");
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/objectSpread.js
+var objectSpread = __webpack_require__("vpQ4");
 
 // EXTERNAL MODULE: external "lodash"
 var external_lodash_ = __webpack_require__("YLtl");
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/store/reducer.js
+
+
 /**
  * External dependencies
  */
@@ -497,12 +756,13 @@ var external_lodash_ = __webpack_require__("YLtl");
  * @return {Object} Updated state.
  */
 
-function reducer_formatTypes(state = {}, action) {
+function reducer_formatTypes() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
   switch (action.type) {
     case 'ADD_FORMAT_TYPES':
-      return { ...state,
-        ...Object(external_lodash_["keyBy"])(action.formatTypes, 'name')
-      };
+      return Object(objectSpread["a" /* default */])({}, state, Object(external_lodash_["keyBy"])(action.formatTypes, 'name'));
 
     case 'REMOVE_FORMAT_TYPES':
       return Object(external_lodash_["omit"])(state, action.names);
@@ -510,7 +770,7 @@ function reducer_formatTypes(state = {}, action) {
 
   return state;
 }
-/* harmony default export */ var reducer = (Object(external_wp_data_["combineReducers"])({
+/* harmony default export */ var reducer = (Object(external_this_wp_data_["combineReducers"])({
   formatTypes: reducer_formatTypes
 }));
 
@@ -531,7 +791,11 @@ var rememo = __webpack_require__("pPDe");
  * @return {Array} Format types.
  */
 
-const getFormatTypes = Object(rememo["a" /* default */])(state => Object.values(state.formatTypes), state => [state.formatTypes]);
+var getFormatTypes = Object(rememo["a" /* default */])(function (state) {
+  return Object.values(state.formatTypes);
+}, function (state) {
+  return [state.formatTypes];
+});
 /**
  * Returns a format type by name.
  *
@@ -555,11 +819,9 @@ function getFormatType(state, name) {
  */
 
 function getFormatTypeForBareElement(state, bareElementTagName) {
-  return Object(external_lodash_["find"])(getFormatTypes(state), ({
-    className,
-    tagName
-  }) => {
-    return className === null && bareElementTagName === tagName;
+  return Object(external_lodash_["find"])(getFormatTypes(state), function (_ref) {
+    var tagName = _ref.tagName;
+    return bareElementTagName === tagName;
   });
 }
 /**
@@ -572,14 +834,14 @@ function getFormatTypeForBareElement(state, bareElementTagName) {
  */
 
 function getFormatTypeForClassName(state, elementClassName) {
-  return Object(external_lodash_["find"])(getFormatTypes(state), ({
-    className
-  }) => {
+  return Object(external_lodash_["find"])(getFormatTypes(state), function (_ref2) {
+    var className = _ref2.className;
+
     if (className === null) {
       return false;
     }
 
-    return ` ${elementClassName} `.indexOf(` ${className} `) >= 0;
+    return " ".concat(elementClassName, " ").indexOf(" ".concat(className, " ")) >= 0;
   });
 }
 
@@ -630,30 +892,18 @@ function removeFormatTypes(names) {
 
 
 
-const STORE_NAME = 'core/rich-text';
-/**
- * Store definition for the rich-text namespace.
- *
- * @see https://github.com/WordPress/gutenberg/blob/HEAD/packages/data/README.md#createReduxStore
- *
- * @type {Object}
- */
-
-const store = Object(external_wp_data_["createReduxStore"])(STORE_NAME, {
+Object(external_this_wp_data_["registerStore"])('core/rich-text', {
   reducer: reducer,
   selectors: selectors_namespaceObject,
   actions: actions_namespaceObject
 });
-Object(external_wp_data_["register"])(store);
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/is-format-equal.js
-/** @typedef {import('./create').RichTextFormat} RichTextFormat */
-
 /**
  * Optimised equality check for format objects.
  *
- * @param {?RichTextFormat} format1 Format to compare.
- * @param {?RichTextFormat} format2 Format to compare.
+ * @param {?Object} format1 Format to compare.
+ * @param {?Object} format2 Format to compare.
  *
  * @return {boolean} True if formats are equal, false if not.
  */
@@ -672,8 +922,8 @@ function isFormatEqual(format1, format2) {
     return false;
   }
 
-  const attributes1 = format1.attributes;
-  const attributes2 = format2.attributes; // Both not defined.
+  var attributes1 = format1.attributes;
+  var attributes2 = format2.attributes; // Both not defined.
 
   if (attributes1 === attributes2) {
     return true;
@@ -684,17 +934,17 @@ function isFormatEqual(format1, format2) {
     return false;
   }
 
-  const keys1 = Object.keys(attributes1);
-  const keys2 = Object.keys(attributes2);
+  var keys1 = Object.keys(attributes1);
+  var keys2 = Object.keys(attributes2);
 
   if (keys1.length !== keys2.length) {
     return false;
   }
 
-  const length = keys1.length; // Optimise for speed.
+  var length = keys1.length; // Optimise for speed.
 
-  for (let i = 0; i < length; i++) {
-    const name = keys1[i];
+  for (var i = 0; i < length; i++) {
+    var name = keys1[i];
 
     if (attributes1[name] !== attributes2[name]) {
       return false;
@@ -706,39 +956,49 @@ function isFormatEqual(format1, format2) {
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/normalise-formats.js
 /**
+ * External dependencies
+ */
+
+/**
  * Internal dependencies
  */
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
 
 /**
- * Normalises formats: ensures subsequent adjacent equal formats have the same
- * reference.
+ * Normalises formats: ensures subsequent equal formats have the same reference.
  *
- * @param {RichTextValue} value Value to normalise formats of.
+ * @param  {Object} value Value to normalise formats of.
  *
- * @return {RichTextValue} New value with normalised formats.
+ * @return {Object} New value with normalised formats.
  */
 
-function normaliseFormats(value) {
-  const newFormats = value.formats.slice();
-  newFormats.forEach((formatsAtIndex, index) => {
-    const formatsAtPreviousIndex = newFormats[index - 1];
-
-    if (formatsAtPreviousIndex) {
-      const newFormatsAtIndex = formatsAtIndex.slice();
-      newFormatsAtIndex.forEach((format, formatIndex) => {
-        const previousFormat = formatsAtPreviousIndex[formatIndex];
-
-        if (isFormatEqual(format, previousFormat)) {
-          newFormatsAtIndex[formatIndex] = previousFormat;
-        }
+function normaliseFormats(_ref) {
+  var formats = _ref.formats,
+      text = _ref.text,
+      start = _ref.start,
+      end = _ref.end,
+      replacements = _ref.replacements;
+  var refs = [];
+  var newFormats = formats.map(function (formatsAtIndex) {
+    return formatsAtIndex.map(function (format) {
+      var equalRef = Object(external_lodash_["find"])(refs, function (ref) {
+        return isFormatEqual(ref, format);
       });
-      newFormats[index] = newFormatsAtIndex;
-    }
+
+      if (equalRef) {
+        return equalRef;
+      }
+
+      refs.push(format);
+      return format;
+    });
   });
-  return { ...value,
-    formats: newFormats
+  return {
+    formats: newFormats,
+    text: text,
+    start: start,
+    end: end,
+    replacements: replacements
   };
 }
 
@@ -752,91 +1012,195 @@ function normaliseFormats(value) {
  */
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/** @typedef {import('./create').RichTextFormat} RichTextFormat */
-
-function replace(array, index, value) {
-  array = array.slice();
-  array[index] = value;
-  return array;
-}
 /**
  * Apply a format object to a Rich Text value from the given `startIndex` to the
  * given `endIndex`. Indices are retrieved from the selection if none are
  * provided.
  *
- * @param {RichTextValue}  value        Value to modify.
- * @param {RichTextFormat} format       Format to apply.
- * @param {number}         [startIndex] Start index.
- * @param {number}         [endIndex]   End index.
+ * @param {Object} value      Value to modify.
+ * @param {Object} format     Format to apply.
+ * @param {number} startIndex Start index.
+ * @param {number} endIndex   End index.
  *
- * @return {RichTextValue} A new value with the format applied.
+ * @return {Object} A new value with the format applied.
  */
 
-
-function applyFormat(value, format, startIndex = value.start, endIndex = value.end) {
-  const {
-    formats,
-    activeFormats
-  } = value;
-  const newFormats = formats.slice(); // The selection is collapsed.
+function applyFormat(_ref, format) {
+  var formats = _ref.formats,
+      text = _ref.text,
+      start = _ref.start,
+      end = _ref.end,
+      replacements = _ref.replacements;
+  var startIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : start;
+  var endIndex = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : end;
+  var newFormats = formats.slice(0); // The selection is collpased.
 
   if (startIndex === endIndex) {
-    const startFormat = Object(external_lodash_["find"])(newFormats[startIndex], {
+    var startFormat = Object(external_lodash_["find"])(newFormats[startIndex], {
       type: format.type
     }); // If the caret is at a format of the same type, expand start and end to
     // the edges of the format. This is useful to apply new attributes.
 
     if (startFormat) {
-      const index = newFormats[startIndex].indexOf(startFormat);
-
-      while (newFormats[startIndex] && newFormats[startIndex][index] === startFormat) {
-        newFormats[startIndex] = replace(newFormats[startIndex], index, format);
+      while (Object(external_lodash_["find"])(newFormats[startIndex], startFormat)) {
+        applyFormats(newFormats, startIndex, format);
         startIndex--;
       }
 
       endIndex++;
 
-      while (newFormats[endIndex] && newFormats[endIndex][index] === startFormat) {
-        newFormats[endIndex] = replace(newFormats[endIndex], index, format);
+      while (Object(external_lodash_["find"])(newFormats[endIndex], startFormat)) {
+        applyFormats(newFormats, endIndex, format);
         endIndex++;
-      }
+      } // Otherwise, insert a placeholder with the format so new input appears
+      // with the format applied.
+
+    } else {
+      var previousFormat = newFormats[startIndex - 1] || [];
+      var hasType = Object(external_lodash_["find"])(previousFormat, {
+        type: format.type
+      });
+      return {
+        formats: formats,
+        text: text,
+        start: start,
+        end: end,
+        replacements: replacements,
+        formatPlaceholder: {
+          index: startIndex,
+          format: hasType ? undefined : format
+        }
+      };
     }
   } else {
-    // Determine the highest position the new format can be inserted at.
-    let position = +Infinity;
-
-    for (let index = startIndex; index < endIndex; index++) {
-      if (newFormats[index]) {
-        newFormats[index] = newFormats[index].filter(({
-          type
-        }) => type !== format.type);
-        const length = newFormats[index].length;
-
-        if (length < position) {
-          position = length;
-        }
-      } else {
-        newFormats[index] = [];
-        position = 0;
-      }
-    }
-
-    for (let index = startIndex; index < endIndex; index++) {
-      newFormats[index].splice(position, 0, format);
+    for (var index = startIndex; index < endIndex; index++) {
+      applyFormats(newFormats, index, format);
     }
   }
 
-  return normaliseFormats({ ...value,
+  return normaliseFormats({
     formats: newFormats,
-    // Always revise active formats. This serves as a placeholder for new
-    // inputs with the format so new input appears with the format applied,
-    // and ensures a format of the same type uses the latest values.
-    activeFormats: [...Object(external_lodash_["reject"])(activeFormats, {
-      type: format.type
-    }), format]
+    text: text,
+    start: start,
+    end: end,
+    replacements: replacements
   });
+}
+
+function applyFormats(formats, index, format) {
+  if (formats[index]) {
+    var newFormatsAtIndex = formats[index].filter(function (_ref2) {
+      var type = _ref2.type;
+      return type !== format.type;
+    });
+    newFormatsAtIndex.push(format);
+    formats[index] = newFormatsAtIndex;
+  } else {
+    formats[index] = [format];
+  }
+}
+
+// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/char-at.js
+/**
+ * Gets the character at the specified index, or returns `undefined` if no
+ * character was found.
+ *
+ * @param {Object} value Value to get the character from.
+ * @param {string} index Index to use.
+ *
+ * @return {?string} A one character long string, or undefined.
+ */
+function charAt(_ref, index) {
+  var text = _ref.text;
+  return text[index];
+}
+
+// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/concat.js
+/**
+ * Internal dependencies
+ */
+
+/**
+ * Combine all Rich Text values into one. This is similar to
+ * `String.prototype.concat`.
+ *
+ * @param {...[object]} values An array of all values to combine.
+ *
+ * @return {Object} A new value combining all given records.
+ */
+
+function concat() {
+  for (var _len = arguments.length, values = new Array(_len), _key = 0; _key < _len; _key++) {
+    values[_key] = arguments[_key];
+  }
+
+  return normaliseFormats(values.reduce(function (accumlator, _ref) {
+    var formats = _ref.formats,
+        text = _ref.text;
+    return {
+      text: accumlator.text + text,
+      formats: accumlator.formats.concat(formats)
+    };
+  }));
+}
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 2 modules
+var toConsumableArray = __webpack_require__("KQm4");
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/typeof.js
+var esm_typeof = __webpack_require__("U8pU");
+
+// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/special-characters.js
+var LINE_SEPARATOR = "\u2028";
+var OBJECT_REPLACEMENT_CHARACTER = "\uFFFC";
+var ZERO_WIDTH_NO_BREAK_SPACE = "\uFEFF";
+
+// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/is-empty.js
+
+/**
+ * Check if a Rich Text value is Empty, meaning it contains no text or any
+ * objects (such as images).
+ *
+ * @param {Object} value Value to use.
+ *
+ * @return {boolean} True if the value is empty, false if not.
+ */
+
+function isEmpty(_ref) {
+  var text = _ref.text;
+  return text.length === 0;
+}
+/**
+ * Check if the current collapsed selection is on an empty line in case of a
+ * multiline value.
+ *
+ * @param  {Object} value Value te check.
+ *
+ * @return {boolean} True if the line is empty, false if not.
+ */
+
+function isEmptyLine(_ref2) {
+  var text = _ref2.text,
+      start = _ref2.start,
+      end = _ref2.end;
+
+  if (start !== end) {
+    return false;
+  }
+
+  if (text.length === 0) {
+    return true;
+  }
+
+  if (start === 0 && text.slice(0, 1) === LINE_SEPARATOR) {
+    return true;
+  }
+
+  if (start === text.length && text.slice(-1) === LINE_SEPARATOR) {
+    return true;
+  }
+
+  return text.slice(start - 1, end + 1) === "".concat(LINE_SEPARATOR).concat(LINE_SEPARATOR);
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/create-element.js
@@ -852,9 +1216,9 @@ function applyFormat(value, format, startIndex = value.start, endIndex = value.e
  *
  * @return {HTMLBodyElement} Body element with parsed HTML.
  */
-function createElement({
-  implementation
-}, html) {
+function createElement(_ref, html) {
+  var implementation = _ref.implementation;
+
   // Because `createHTMLDocument` is an expensive operation, and with this
   // function being internal to `rich-text` (full control in avoiding a risk
   // of asynchronous operations on the shared reference), a single document
@@ -867,24 +1231,10 @@ function createElement({
   return createElement.body;
 }
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/special-characters.js
-/**
- * Line separator character, used for multiline text.
- */
-const LINE_SEPARATOR = '\u2028';
-/**
- * Object replacement character, used as a placeholder for objects.
- */
-
-const OBJECT_REPLACEMENT_CHARACTER = '\ufffc';
-/**
- * Zero width non-breaking space, used as padding in the editable DOM tree when
- * it is empty otherwise.
- */
-
-const ZWNBSP = '\ufeff';
-
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/create.js
+
+
+
 /**
  * WordPress dependencies
  */
@@ -898,24 +1248,12 @@ const ZWNBSP = '\ufeff';
 
 
 /**
- * @typedef {Object} RichTextFormat
- *
- * @property {string} type Format type.
+ * Browser dependencies
  */
 
-/**
- * @typedef {Array<RichTextFormat>} RichTextFormatList
- */
-
-/**
- * @typedef {Object} RichTextValue
- *
- * @property {string}                    text         Text.
- * @property {Array<RichTextFormatList>} formats      Formats.
- * @property {Array<RichTextFormat>}     replacements Replacements.
- * @property {number|undefined}          start        Selection start.
- * @property {number|undefined}          end          Selection end.
- */
+var _window$Node = window.Node,
+    TEXT_NODE = _window$Node.TEXT_NODE,
+    ELEMENT_NODE = _window$Node.ELEMENT_NODE;
 
 function createEmptyValue() {
   return {
@@ -926,25 +1264,24 @@ function createEmptyValue() {
 }
 
 function simpleFindKey(object, value) {
-  for (const key in object) {
+  for (var key in object) {
     if (object[key] === value) {
       return key;
     }
   }
 }
 
-function toFormat({
-  type,
-  attributes
-}) {
-  let formatType;
+function toFormat(_ref) {
+  var type = _ref.type,
+      attributes = _ref.attributes;
+  var formatType;
 
   if (attributes && attributes.class) {
-    formatType = Object(external_wp_data_["select"])('core/rich-text').getFormatTypeForClassName(attributes.class);
+    formatType = Object(external_this_wp_data_["select"])('core/rich-text').getFormatTypeForClassName(attributes.class);
 
     if (formatType) {
       // Preserve any additional classes.
-      attributes.class = ` ${attributes.class} `.replace(` ${formatType.className} `, ' ').trim();
+      attributes.class = " ".concat(attributes.class, " ").replace(" ".concat(formatType.className, " "), ' ').trim();
 
       if (!attributes.class) {
         delete attributes.class;
@@ -953,20 +1290,16 @@ function toFormat({
   }
 
   if (!formatType) {
-    formatType = Object(external_wp_data_["select"])('core/rich-text').getFormatTypeForBareElement(type);
+    formatType = Object(external_this_wp_data_["select"])('core/rich-text').getFormatTypeForBareElement(type);
   }
 
   if (!formatType) {
     return attributes ? {
-      type,
-      attributes
+      type: type,
+      attributes: attributes
     } : {
-      type
+      type: type
     };
-  }
-
-  if (formatType.__experimentalCreatePrepareEditableTree && !formatType.__experimentalCreateOnChangeEditableValue) {
-    return null;
   }
 
   if (!attributes) {
@@ -975,11 +1308,11 @@ function toFormat({
     };
   }
 
-  const registeredAttributes = {};
-  const unregisteredAttributes = {};
+  var registeredAttributes = {};
+  var unregisteredAttributes = {};
 
-  for (const name in attributes) {
-    const key = simpleFindKey(formatType.attributes, name);
+  for (var name in attributes) {
+    var key = simpleFindKey(formatType.attributes, name);
 
     if (key) {
       registeredAttributes[key] = attributes[name];
@@ -991,7 +1324,7 @@ function toFormat({
   return {
     type: formatType.name,
     attributes: registeredAttributes,
-    unregisteredAttributes
+    unregisteredAttributes: unregisteredAttributes
   };
 }
 /**
@@ -1002,87 +1335,77 @@ function toFormat({
  * `multilineTag` will be separated by two newlines. The optional functions can
  * be used to filter out content.
  *
- * A value will have the following shape, which you are strongly encouraged not
- * to modify without the use of helper functions:
- *
- * ```js
- * {
- *   text: string,
- *   formats: Array,
- *   replacements: Array,
- *   ?start: number,
- *   ?end: number,
- * }
- * ```
- *
- * As you can see, text and formatting are separated. `text` holds the text,
- * including any replacement characters for objects and lines. `formats`,
- * `objects` and `lines` are all sparse arrays of the same length as `text`. It
- * holds information about the formatting at the relevant text indices. Finally
- * `start` and `end` state which text indices are selected. They are only
- * provided if a `Range` was given.
- *
- * @param {Object}  [$1]                      Optional named arguments.
- * @param {Element} [$1.element]              Element to create value from.
- * @param {string}  [$1.text]                 Text to create value from.
- * @param {string}  [$1.html]                 HTML to create value from.
- * @param {Range}   [$1.range]                Range to create value from.
- * @param {string}  [$1.multilineTag]         Multiline tag if the structure is
+ * @param {?Object}   $1                      Optional named argements.
+ * @param {?Element}  $1.element              Element to create value from.
+ * @param {?string}   $1.text                 Text to create value from.
+ * @param {?string}   $1.html                 HTML to create value from.
+ * @param {?Range}    $1.range                Range to create value from.
+ * @param {?string}   $1.multilineTag         Multiline tag if the structure is
  *                                            multiline.
- * @param {Array}   [$1.multilineWrapperTags] Tags where lines can be found if
+ * @param {?Array}    $1.multilineWrapperTags Tags where lines can be found if
  *                                            nesting is possible.
- * @param {boolean} [$1.preserveWhiteSpace]   Whether or not to collapse white
- *                                            space characters.
- * @param {boolean} [$1.__unstableIsEditableTree]
+ * @param {?Function} $1.removeNode           Function to declare whether the
+ *                                            given node should be removed.
+ * @param {?Function} $1.unwrapNode           Function to declare whether the
+ *                                            given node should be unwrapped.
+ * @param {?Function} $1.filterString         Function to filter the given
+ *                                            string.
+ * @param {?Function} $1.removeAttribute      Wether to remove an attribute
+ *                                            based on the name.
  *
- * @return {RichTextValue} A rich text value.
+ * @return {Object} A rich text value.
  */
 
 
-function create({
-  element,
-  text,
-  html,
-  range,
-  multilineTag,
-  multilineWrapperTags,
-  __unstableIsEditableTree: isEditableTree,
-  preserveWhiteSpace
-} = {}) {
+function create() {
+  var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      element = _ref2.element,
+      text = _ref2.text,
+      html = _ref2.html,
+      range = _ref2.range,
+      multilineTag = _ref2.multilineTag,
+      multilineWrapperTags = _ref2.multilineWrapperTags,
+      removeNode = _ref2.removeNode,
+      unwrapNode = _ref2.unwrapNode,
+      filterString = _ref2.filterString,
+      removeAttribute = _ref2.removeAttribute;
+
   if (typeof text === 'string' && text.length > 0) {
     return {
       formats: Array(text.length),
       replacements: Array(text.length),
-      text
+      text: text
     };
   }
 
   if (typeof html === 'string' && html.length > 0) {
-    // It does not matter which document this is, we're just using it to
-    // parse.
     element = createElement(document, html);
   }
 
-  if (typeof element !== 'object') {
+  if (Object(esm_typeof["a" /* default */])(element) !== 'object') {
     return createEmptyValue();
   }
 
   if (!multilineTag) {
     return createFromElement({
-      element,
-      range,
-      isEditableTree,
-      preserveWhiteSpace
+      element: element,
+      range: range,
+      removeNode: removeNode,
+      unwrapNode: unwrapNode,
+      filterString: filterString,
+      removeAttribute: removeAttribute
     });
   }
 
   return createFromMultilineElement({
-    element,
-    range,
-    multilineTag,
-    multilineWrapperTags,
-    isEditableTree,
-    preserveWhiteSpace
+    element: element,
+    range: range,
+    multilineTag: multilineTag,
+    multilineWrapperTags: multilineWrapperTags,
+    removeNode: removeNode,
+    unwrapNode: unwrapNode,
+    filterString: filterString,
+    removeAttribute: removeAttribute
   });
 }
 /**
@@ -1100,20 +1423,16 @@ function accumulateSelection(accumulator, node, range, value) {
     return;
   }
 
-  const {
-    parentNode
-  } = node;
-  const {
-    startContainer,
-    startOffset,
-    endContainer,
-    endOffset
-  } = range;
-  const currentLength = accumulator.text.length; // Selection can be extracted from value.
+  var parentNode = node.parentNode;
+  var startContainer = range.startContainer,
+      startOffset = range.startOffset,
+      endContainer = range.endContainer,
+      endOffset = range.endOffset;
+  var currentLength = accumulator.text.length; // Selection can be extracted from value.
 
   if (value.start !== undefined) {
     accumulator.start = currentLength + value.start; // Range indicates that the current node has selection.
-  } else if (node === startContainer && node.nodeType === node.TEXT_NODE) {
+  } else if (node === startContainer && node.nodeType === TEXT_NODE) {
     accumulator.start = currentLength + startOffset; // Range indicates that the current node is selected.
   } else if (parentNode === startContainer && node === startContainer.childNodes[startOffset]) {
     accumulator.start = currentLength; // Range indicates that the selection is after the current node.
@@ -1126,7 +1445,7 @@ function accumulateSelection(accumulator, node, range, value) {
 
   if (value.end !== undefined) {
     accumulator.end = currentLength + value.end; // Range indicates that the current node has selection.
-  } else if (node === endContainer && node.nodeType === node.TEXT_NODE) {
+  } else if (node === endContainer && node.nodeType === TEXT_NODE) {
     accumulator.end = currentLength + endOffset; // Range indicates that the current node is selected.
   } else if (parentNode === endContainer && node === endContainer.childNodes[endOffset - 1]) {
     accumulator.end = currentLength + value.text.length; // Range indicates that the selection is before the current node.
@@ -1143,7 +1462,7 @@ function accumulateSelection(accumulator, node, range, value) {
  * @param {Range}    range  The range to filter.
  * @param {Function} filter Function to use to filter the text.
  *
- * @return {Object|void} Object containing range properties.
+ * @return {?Object} Object containing range properties.
  */
 
 
@@ -1152,14 +1471,10 @@ function filterRange(node, range, filter) {
     return;
   }
 
-  const {
-    startContainer,
-    endContainer
-  } = range;
-  let {
-    startOffset,
-    endOffset
-  } = range;
+  var startContainer = range.startContainer,
+      endContainer = range.endContainer;
+  var startOffset = range.startOffset,
+      endOffset = range.endOffset;
 
   if (node === startContainer) {
     startOffset = filter(node.nodeValue.slice(0, startOffset)).length;
@@ -1170,63 +1485,47 @@ function filterRange(node, range, filter) {
   }
 
   return {
-    startContainer,
-    startOffset,
-    endContainer,
-    endOffset
+    startContainer: startContainer,
+    startOffset: startOffset,
+    endContainer: endContainer,
+    endOffset: endOffset
   };
-}
-/**
- * Collapse any whitespace used for HTML formatting to one space character,
- * because it will also be displayed as such by the browser.
- *
- * @param {string} string
- */
-
-
-function collapseWhiteSpace(string) {
-  return string.replace(/[\n\r\t]+/g, ' ');
-}
-
-const ZWNBSPRegExp = new RegExp(ZWNBSP, 'g');
-/**
- * Removes padding (zero width non breaking spaces) added by `toTree`.
- *
- * @param {string} string
- */
-
-function removePadding(string) {
-  return string.replace(ZWNBSPRegExp, '');
 }
 /**
  * Creates a Rich Text value from a DOM element and range.
  *
- * @param {Object}  $1                        Named argements.
- * @param {Element} [$1.element]              Element to create value from.
- * @param {Range}   [$1.range]                Range to create value from.
- * @param {string}  [$1.multilineTag]         Multiline tag if the structure is
+ * @param {Object}    $1                      Named argements.
+ * @param {?Element}  $1.element              Element to create value from.
+ * @param {?Range}    $1.range                Range to create value from.
+ * @param {?string}   $1.multilineTag         Multiline tag if the structure is
  *                                            multiline.
- * @param {Array}   [$1.multilineWrapperTags] Tags where lines can be found if
+ * @param {?Array}    $1.multilineWrapperTags Tags where lines can be found if
  *                                            nesting is possible.
- * @param {boolean} [$1.preserveWhiteSpace]   Whether or not to collapse white
- *                                            space characters.
- * @param {Array}   [$1.currentWrapperTags]
- * @param {boolean} [$1.isEditableTree]
+ * @param {?Function} $1.removeNode           Function to declare whether the
+ *                                            given node should be removed.
+ * @param {?Function} $1.unwrapNode           Function to declare whether the
+ *                                            given node should be unwrapped.
+ * @param {?Function} $1.filterString         Function to filter the given
+ *                                            string.
+ * @param {?Function} $1.removeAttribute      Wether to remove an attribute
+ *                                            based on the name.
  *
- * @return {RichTextValue} A rich text value.
+ * @return {Object} A rich text value.
  */
 
 
-function createFromElement({
-  element,
-  range,
-  multilineTag,
-  multilineWrapperTags,
-  currentWrapperTags = [],
-  isEditableTree,
-  preserveWhiteSpace
-}) {
-  const accumulator = createEmptyValue();
+function createFromElement(_ref3) {
+  var element = _ref3.element,
+      range = _ref3.range,
+      multilineTag = _ref3.multilineTag,
+      multilineWrapperTags = _ref3.multilineWrapperTags,
+      _ref3$currentWrapperT = _ref3.currentWrapperTags,
+      currentWrapperTags = _ref3$currentWrapperT === void 0 ? [] : _ref3$currentWrapperT,
+      removeNode = _ref3.removeNode,
+      unwrapNode = _ref3.unwrapNode,
+      filterString = _ref3.filterString,
+      removeAttribute = _ref3.removeAttribute;
+  var accumulator = createEmptyValue();
 
   if (!element) {
     return accumulator;
@@ -1237,132 +1536,177 @@ function createFromElement({
     return accumulator;
   }
 
-  const length = element.childNodes.length; // Optimise for speed.
+  var length = element.childNodes.length;
 
-  for (let index = 0; index < length; index++) {
-    const node = element.childNodes[index];
-    const type = node.nodeName.toLowerCase();
+  var filterStringComplete = function filterStringComplete(string) {
+    // Reduce any whitespace used for HTML formatting to one space
+    // character, because it will also be displayed as such by the browser.
+    string = string.replace(/[\n\r\t]+/g, ' ');
 
-    if (node.nodeType === node.TEXT_NODE) {
-      let filter = removePadding;
+    if (filterString) {
+      string = filterString(string);
+    }
 
-      if (!preserveWhiteSpace) {
-        filter = string => removePadding(collapseWhiteSpace(string));
-      }
+    return string;
+  }; // Optimise for speed.
 
-      const text = filter(node.nodeValue);
-      range = filterRange(node, range, filter);
+
+  for (var index = 0; index < length; index++) {
+    var node = element.childNodes[index];
+    var type = node.nodeName.toLowerCase();
+
+    if (node.nodeType === TEXT_NODE) {
+      var _text = filterStringComplete(node.nodeValue);
+
+      range = filterRange(node, range, filterStringComplete);
       accumulateSelection(accumulator, node, range, {
-        text
-      }); // Create a sparse array of the same length as `text`, in which
+        text: _text
+      });
+      accumulator.text += _text; // Create a sparse array of the same length as `text`, in which
       // formats can be added.
 
-      accumulator.formats.length += text.length;
-      accumulator.replacements.length += text.length;
-      accumulator.text += text;
+      accumulator.formats.length += _text.length;
+      accumulator.replacements.length += _text.length;
       continue;
     }
 
-    if (node.nodeType !== node.ELEMENT_NODE) {
+    if (node.nodeType !== ELEMENT_NODE) {
       continue;
     }
 
-    if (isEditableTree && ( // Ignore any placeholders.
-    node.getAttribute('data-rich-text-placeholder') || // Ignore any line breaks that are not inserted by us.
-    type === 'br' && !node.getAttribute('data-rich-text-line-break'))) {
+    if (removeNode && removeNode(node) || unwrapNode && unwrapNode(node) && !node.hasChildNodes()) {
       accumulateSelection(accumulator, node, range, createEmptyValue());
       continue;
     }
 
     if (type === 'script') {
-      const value = {
+      var _value = {
         formats: [,],
         replacements: [{
-          type,
+          type: type,
           attributes: {
             'data-rich-text-script': node.getAttribute('data-rich-text-script') || encodeURIComponent(node.innerHTML)
           }
         }],
         text: OBJECT_REPLACEMENT_CHARACTER
       };
-      accumulateSelection(accumulator, node, range, value);
-      mergePair(accumulator, value);
+      accumulateSelection(accumulator, node, range, _value);
+      accumulator.formats.length += 1;
+      accumulator.replacements = accumulator.replacements.concat(_value.replacements);
+      accumulator.text += OBJECT_REPLACEMENT_CHARACTER;
       continue;
     }
 
     if (type === 'br') {
       accumulateSelection(accumulator, node, range, createEmptyValue());
-      mergePair(accumulator, create({
-        text: '\n'
-      }));
+      accumulator.text += '\n';
+      accumulator.formats.length += 1;
+      accumulator.replacements.length += 1;
       continue;
     }
 
-    const lastFormats = accumulator.formats[accumulator.formats.length - 1];
-    const lastFormat = lastFormats && lastFormats[lastFormats.length - 1];
-    const newFormat = toFormat({
-      type,
-      attributes: getAttributes({
-        element: node
-      })
-    });
-    const format = isFormatEqual(newFormat, lastFormat) ? lastFormat : newFormat;
+    var lastFormats = accumulator.formats[accumulator.formats.length - 1];
+    var lastFormat = lastFormats && lastFormats[lastFormats.length - 1];
+    var format = void 0;
+    var value = void 0;
+
+    if (!unwrapNode || !unwrapNode(node)) {
+      var newFormat = toFormat({
+        type: type,
+        attributes: getAttributes({
+          element: node,
+          removeAttribute: removeAttribute
+        })
+      });
+
+      if (newFormat) {
+        // Reuse the last format if it's equal.
+        if (isFormatEqual(newFormat, lastFormat)) {
+          format = lastFormat;
+        } else {
+          format = newFormat;
+        }
+      }
+    }
 
     if (multilineWrapperTags && multilineWrapperTags.indexOf(type) !== -1) {
-      const value = createFromMultilineElement({
+      value = createFromMultilineElement({
         element: node,
-        range,
-        multilineTag,
-        multilineWrapperTags,
-        currentWrapperTags: [...currentWrapperTags, format],
-        isEditableTree,
-        preserveWhiteSpace
+        range: range,
+        multilineTag: multilineTag,
+        multilineWrapperTags: multilineWrapperTags,
+        removeNode: removeNode,
+        unwrapNode: unwrapNode,
+        filterString: filterString,
+        removeAttribute: removeAttribute,
+        currentWrapperTags: Object(toConsumableArray["a" /* default */])(currentWrapperTags).concat([format])
       });
-      accumulateSelection(accumulator, node, range, value);
-      mergePair(accumulator, value);
+      format = undefined;
+    } else {
+      value = createFromElement({
+        element: node,
+        range: range,
+        multilineTag: multilineTag,
+        multilineWrapperTags: multilineWrapperTags,
+        removeNode: removeNode,
+        unwrapNode: unwrapNode,
+        filterString: filterString,
+        removeAttribute: removeAttribute
+      });
+    }
+
+    var text = value.text;
+    var start = accumulator.text.length;
+    accumulateSelection(accumulator, node, range, value); // Don't apply the element as formatting if it has no content.
+
+    if (isEmpty(value) && format && !format.attributes) {
       continue;
     }
 
-    const value = createFromElement({
-      element: node,
-      range,
-      multilineTag,
-      multilineWrapperTags,
-      isEditableTree,
-      preserveWhiteSpace
-    });
-    accumulateSelection(accumulator, node, range, value);
+    var formats = accumulator.formats;
 
-    if (!format) {
-      mergePair(accumulator, value);
-    } else if (value.text.length === 0) {
-      if (format.attributes) {
-        mergePair(accumulator, {
-          formats: [,],
-          replacements: [format],
-          text: OBJECT_REPLACEMENT_CHARACTER
-        });
+    if (format && format.attributes && text.length === 0) {
+      var lastReplacement = accumulator.replacements[accumulator.replacements.length - 1];
+      format.object = true;
+
+      if (isFormatEqual(lastReplacement, format)) {
+        return accumulator;
       }
+
+      accumulator.text += OBJECT_REPLACEMENT_CHARACTER;
+      accumulator.replacements.push(format);
+      accumulator.formats.length += 1;
     } else {
-      // Indices should share a reference to the same formats array.
-      // Only create a new reference if `formats` changes.
-      function mergeFormats(formats) {
-        if (mergeFormats.formats === formats) {
-          return mergeFormats.newFormats;
+      accumulator.text += text;
+      accumulator.formats.length += text.length;
+      accumulator.replacements.length += text.length;
+      var i = value.formats.length; // Optimise for speed.
+
+      while (i--) {
+        var formatIndex = start + i;
+
+        if (format) {
+          if (formats[formatIndex]) {
+            formats[formatIndex].push(format);
+          } else {
+            formats[formatIndex] = [format];
+          }
         }
 
-        const newFormats = formats ? [format, ...formats] : [format];
-        mergeFormats.formats = formats;
-        mergeFormats.newFormats = newFormats;
-        return newFormats;
-      } // Since the formats parameter can be `undefined`, preset
-      // `mergeFormats` with a new reference.
+        if (value.formats[i]) {
+          if (formats[formatIndex]) {
+            var _formats$formatIndex;
 
+            (_formats$formatIndex = formats[formatIndex]).push.apply(_formats$formatIndex, Object(toConsumableArray["a" /* default */])(value.formats[i]));
+          } else {
+            formats[formatIndex] = value.formats[i];
+          }
+        }
 
-      mergeFormats.newFormats = [format];
-      mergePair(accumulator, { ...value,
-        formats: Array.from(value.formats, mergeFormats)
-      });
+        if (value.replacements[i]) {
+          accumulator.replacements[formatIndex] = value.replacements[i];
+        }
+      }
     }
   }
 
@@ -1372,67 +1716,93 @@ function createFromElement({
  * Creates a rich text value from a DOM element and range that should be
  * multiline.
  *
- * @param {Object}  $1                        Named argements.
- * @param {Element} [$1.element]              Element to create value from.
- * @param {Range}   [$1.range]                Range to create value from.
- * @param {string}  [$1.multilineTag]         Multiline tag if the structure is
+ * @param {Object}    $1                      Named argements.
+ * @param {?Element}  $1.element              Element to create value from.
+ * @param {?Range}    $1.range                Range to create value from.
+ * @param {?string}   $1.multilineTag         Multiline tag if the structure is
  *                                            multiline.
- * @param {Array}   [$1.multilineWrapperTags] Tags where lines can be found if
+ * @param {?Array}    $1.multilineWrapperTags Tags where lines can be found if
  *                                            nesting is possible.
- * @param {boolean} [$1.currentWrapperTags]   Whether to prepend a line
+ * @param {?Function} $1.removeNode           Function to declare whether the
+ *                                            given node should be removed.
+ * @param {?Function} $1.unwrapNode           Function to declare whether the
+ *                                            given node should be unwrapped.
+ * @param {?Function} $1.filterString         Function to filter the given
+ *                                            string.
+ * @param {?Function} $1.removeAttribute      Wether to remove an attribute
+ *                                            based on the name.
+ * @param {boolean}   $1.currentWrapperTags   Whether to prepend a line
  *                                            separator.
- * @param {boolean} [$1.preserveWhiteSpace]   Whether or not to collapse white
- *                                            space characters.
- * @param {boolean} [$1.isEditableTree]
  *
- * @return {RichTextValue} A rich text value.
+ * @return {Object} A rich text value.
  */
 
 
-function createFromMultilineElement({
-  element,
-  range,
-  multilineTag,
-  multilineWrapperTags,
-  currentWrapperTags = [],
-  isEditableTree,
-  preserveWhiteSpace
-}) {
-  const accumulator = createEmptyValue();
+function createFromMultilineElement(_ref4) {
+  var element = _ref4.element,
+      range = _ref4.range,
+      multilineTag = _ref4.multilineTag,
+      multilineWrapperTags = _ref4.multilineWrapperTags,
+      removeNode = _ref4.removeNode,
+      unwrapNode = _ref4.unwrapNode,
+      filterString = _ref4.filterString,
+      removeAttribute = _ref4.removeAttribute,
+      _ref4$currentWrapperT = _ref4.currentWrapperTags,
+      currentWrapperTags = _ref4$currentWrapperT === void 0 ? [] : _ref4$currentWrapperT;
+  var accumulator = createEmptyValue();
 
   if (!element || !element.hasChildNodes()) {
     return accumulator;
   }
 
-  const length = element.children.length; // Optimise for speed.
+  var length = element.children.length; // Optimise for speed.
 
-  for (let index = 0; index < length; index++) {
-    const node = element.children[index];
+  for (var index = 0; index < length; index++) {
+    var node = element.children[index];
 
     if (node.nodeName.toLowerCase() !== multilineTag) {
       continue;
     }
 
-    const value = createFromElement({
+    var value = createFromElement({
       element: node,
-      range,
-      multilineTag,
-      multilineWrapperTags,
-      currentWrapperTags,
-      isEditableTree,
-      preserveWhiteSpace
-    }); // Multiline value text should be separated by a line separator.
+      range: range,
+      multilineTag: multilineTag,
+      multilineWrapperTags: multilineWrapperTags,
+      currentWrapperTags: currentWrapperTags,
+      removeNode: removeNode,
+      unwrapNode: unwrapNode,
+      filterString: filterString,
+      removeAttribute: removeAttribute
+    }); // If a line consists of one single line break (invisible), consider the
+    // line empty, wether this is the browser's doing or not.
+
+    if (value.text === '\n') {
+      var start = value.start;
+      var end = value.end;
+      value = createEmptyValue();
+
+      if (start !== undefined) {
+        value.start = 0;
+      }
+
+      if (end !== undefined) {
+        value.end = 0;
+      }
+    } // Multiline value text should be separated by a double line break.
+
 
     if (index !== 0 || currentWrapperTags.length > 0) {
-      mergePair(accumulator, {
-        formats: [,],
-        replacements: currentWrapperTags.length > 0 ? [currentWrapperTags] : [,],
-        text: LINE_SEPARATOR
-      });
+      var formats = currentWrapperTags.length > 0 ? [currentWrapperTags] : [,];
+      accumulator.formats = accumulator.formats.concat(formats);
+      accumulator.replacements.length += 1;
+      accumulator.text += LINE_SEPARATOR;
     }
 
     accumulateSelection(accumulator, node, range, value);
-    mergePair(accumulator, value);
+    accumulator.formats = accumulator.formats.concat(value.formats);
+    accumulator.replacements = accumulator.replacements.concat(value.replacements);
+    accumulator.text += value.text;
   }
 
   return accumulator;
@@ -1440,122 +1810,42 @@ function createFromMultilineElement({
 /**
  * Gets the attributes of an element in object shape.
  *
- * @param {Object}  $1         Named argements.
- * @param {Element} $1.element Element to get attributes from.
+ * @param {Object}    $1                 Named argements.
+ * @param {Element}   $1.element         Element to get attributes from.
+ * @param {?Function} $1.removeAttribute Wether to remove an attribute based on
+ *                                       the name.
  *
- * @return {Object|void} Attribute object or `undefined` if the element has no
- *                       attributes.
+ * @return {?Object} Attribute object or `undefined` if the element has no
+ *                   attributes.
  */
 
 
-function getAttributes({
-  element
-}) {
+function getAttributes(_ref5) {
+  var element = _ref5.element,
+      removeAttribute = _ref5.removeAttribute;
+
   if (!element.hasAttributes()) {
     return;
   }
 
-  const length = element.attributes.length;
-  let accumulator; // Optimise for speed.
+  var length = element.attributes.length;
+  var accumulator; // Optimise for speed.
 
-  for (let i = 0; i < length; i++) {
-    const {
-      name,
-      value
-    } = element.attributes[i];
+  for (var i = 0; i < length; i++) {
+    var _element$attributes$i = element.attributes[i],
+        name = _element$attributes$i.name,
+        value = _element$attributes$i.value;
 
-    if (name.indexOf('data-rich-text-') === 0) {
+    if (removeAttribute && removeAttribute(name)) {
       continue;
     }
 
-    const safeName = /^on/i.test(name) ? 'data-disable-rich-text-' + name : name;
+    var safeName = /^on/i.test(name) ? 'data-disable-rich-text-' + name : name;
     accumulator = accumulator || {};
     accumulator[safeName] = value;
   }
 
   return accumulator;
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/concat.js
-/**
- * Internal dependencies
- */
-
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
- * Concats a pair of rich text values. Not that this mutates `a` and does NOT
- * normalise formats!
- *
- * @param {Object} a Value to mutate.
- * @param {Object} b Value to add read from.
- *
- * @return {Object} `a`, mutated.
- */
-
-function mergePair(a, b) {
-  a.formats = a.formats.concat(b.formats);
-  a.replacements = a.replacements.concat(b.replacements);
-  a.text += b.text;
-  return a;
-}
-/**
- * Combine all Rich Text values into one. This is similar to
- * `String.prototype.concat`.
- *
- * @param {...RichTextValue} values Objects to combine.
- *
- * @return {RichTextValue} A new value combining all given records.
- */
-
-function concat(...values) {
-  return normaliseFormats(values.reduce(mergePair, create()));
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-active-formats.js
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/** @typedef {import('./create').RichTextFormatList} RichTextFormatList */
-
-/**
- * Gets the all format objects at the start of the selection.
- *
- * @param {RichTextValue} value                Value to inspect.
- * @param {Array}         EMPTY_ACTIVE_FORMATS Array to return if there are no
- *                                             active formats.
- *
- * @return {RichTextFormatList} Active format objects.
- */
-function getActiveFormats({
-  formats,
-  start,
-  end,
-  activeFormats
-}, EMPTY_ACTIVE_FORMATS = []) {
-  if (start === undefined) {
-    return EMPTY_ACTIVE_FORMATS;
-  }
-
-  if (start === end) {
-    // For a collapsed caret, it is possible to override the active formats.
-    if (activeFormats) {
-      return activeFormats;
-    }
-
-    const formatsBefore = formats[start - 1] || EMPTY_ACTIVE_FORMATS;
-    const formatsAfter = formats[start] || EMPTY_ACTIVE_FORMATS; // By default, select the lowest amount of formats possible (which means
-    // the caret is positioned outside the format boundary). The user can
-    // then use arrow keys to define `activeFormats`.
-
-    if (formatsBefore.length < formatsAfter.length) {
-      return formatsBefore;
-    }
-
-    return formatsAfter;
-  }
-
-  return formats[start] || EMPTY_ACTIVE_FORMATS;
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-active-format.js
@@ -1564,254 +1854,95 @@ function getActiveFormats({
  */
 
 /**
- * Internal dependencies
- */
-
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/** @typedef {import('./create').RichTextFormat} RichTextFormat */
-
-/**
  * Gets the format object by type at the start of the selection. This can be
  * used to get e.g. the URL of a link format at the current selection, but also
  * to check if a format is active at the selection. Returns undefined if there
  * is no format at the selection.
  *
- * @param {RichTextValue} value      Value to inspect.
- * @param {string}        formatType Format type to look for.
+ * @param {Object} value      Value to inspect.
+ * @param {string} formatType Format type to look for.
  *
- * @return {RichTextFormat|undefined} Active format object of the specified
- *                                    type, or undefined.
+ * @return {?Object} Active format object of the specified type, or undefined.
  */
 
-function getActiveFormat(value, formatType) {
-  return Object(external_lodash_["find"])(getActiveFormats(value), {
+function getActiveFormat(_ref, formatType) {
+  var formats = _ref.formats,
+      start = _ref.start;
+
+  if (start === undefined) {
+    return;
+  }
+
+  return Object(external_lodash_["find"])(formats[start], {
     type: formatType
   });
 }
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-active-object.js
+// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-selection-end.js
 /**
- * Internal dependencies
+ * Gets the end index of the current selection, or returns `undefined` if no
+ * selection exists. The selection ends right before the character at this
+ * index.
+ *
+ * @param {Object} value Value to get the selection from.
+ *
+ * @return {?number} Index where the selection ends.
  */
+function getSelectionEnd(_ref) {
+  var end = _ref.end;
+  return end;
+}
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/** @typedef {import('./create').RichTextFormat} RichTextFormat */
-
+// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-selection-start.js
 /**
- * Gets the active object, if there is any.
+ * Gets the start index of the current selection, or returns `undefined` if no
+ * selection exists. The selection starts right before the character at this
+ * index.
  *
- * @param {RichTextValue} value Value to inspect.
+ * @param {Object} value Value to get the selection from.
  *
- * @return {RichTextFormat|void} Active object, or undefined.
+ * @return {?number} Index where the selection starts.
  */
-
-function getActiveObject({
-  start,
-  end,
-  replacements,
-  text
-}) {
-  if (start + 1 !== end || text[start] !== OBJECT_REPLACEMENT_CHARACTER) {
-    return;
-  }
-
-  return replacements[start];
+function getSelectionStart(_ref) {
+  var start = _ref.start;
+  return start;
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-text-content.js
 /**
- * Internal dependencies
- */
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
  * Get the textual content of a Rich Text value. This is similar to
  * `Element.textContent`.
  *
- * @param {RichTextValue} value Value to use.
+ * @param {Object} value Value to use.
  *
  * @return {string} The text content.
  */
-
-function getTextContent({
-  text
-}) {
-  return text.replace(new RegExp(OBJECT_REPLACEMENT_CHARACTER, 'g'), '').replace(new RegExp(LINE_SEPARATOR, 'g'), '\n');
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-line-index.js
-/**
- * Internal dependencies
- */
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
- * Gets the currently selected line index, or the first line index if the
- * selection spans over multiple items.
- *
- * @param {RichTextValue}  value      Value to get the line index from.
- * @param {boolean}        startIndex Optional index that should be contained by
- *                                    the line. Defaults to the selection start
- *                                    of the value.
- *
- * @return {number|void} The line index. Undefined if not found.
- */
-
-function getLineIndex({
-  start,
-  text
-}, startIndex = start) {
-  let index = startIndex;
-
-  while (index--) {
-    if (text[index] === LINE_SEPARATOR) {
-      return index;
-    }
-  }
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/is-list-root-selected.js
-/**
- * Internal dependencies
- */
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
- * Whether or not the root list is selected.
- *
- * @param {RichTextValue} value The value to check.
- *
- * @return {boolean} True if the root list or nothing is selected, false if an
- *                   inner list is selected.
- */
-
-function isListRootSelected(value) {
-  const {
-    replacements,
-    start
-  } = value;
-  const lineIndex = getLineIndex(value, start);
-  const replacement = replacements[lineIndex];
-  return !replacement || replacement.length < 1;
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/is-active-list-type.js
-/**
- * Internal dependencies
- */
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
- * Whether or not the selected list has the given tag name.
- *
- * @param {RichTextValue} value    The value to check.
- * @param {string}        type     The tag name the list should have.
- * @param {string}        rootType The current root tag name, to compare with in
- *                                 case nothing is selected.
- *
- * @return {boolean} True if the current list type matches `type`, false if not.
- */
-
-function isActiveListType(value, type, rootType) {
-  const {
-    replacements,
-    start
-  } = value;
-  const lineIndex = getLineIndex(value, start);
-  const replacement = replacements[lineIndex];
-
-  if (!replacement || replacement.length === 0) {
-    return type === rootType;
-  }
-
-  const lastFormat = replacement[replacement.length - 1];
-  return lastFormat.type === type;
+function getTextContent(_ref) {
+  var text = _ref.text;
+  return text;
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/is-collapsed.js
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Check if the selection of a Rich Text value is collapsed or not. Collapsed
  * means that no characters are selected, but there is a caret present. If there
  * is no selection, `undefined` will be returned. This is similar to
  * `window.getSelection().isCollapsed()`.
  *
- * @param {RichTextValue} value The rich text value to check.
+ * @param {Object} value The rich text value to check.
  *
- * @return {boolean|undefined} True if the selection is collapsed, false if not,
- *                             undefined if there is no selection.
+ * @return {?boolean} True if the selection is collapsed, false if not,
+ *                    undefined if there is no selection.
  */
-function isCollapsed({
-  start,
-  end
-}) {
+function isCollapsed(_ref) {
+  var start = _ref.start,
+      end = _ref.end;
+
   if (start === undefined || end === undefined) {
     return;
   }
 
   return start === end;
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/is-empty.js
-/**
- * Internal dependencies
- */
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
- * Check if a Rich Text value is Empty, meaning it contains no text or any
- * objects (such as images).
- *
- * @param {RichTextValue} value Value to use.
- *
- * @return {boolean} True if the value is empty, false if not.
- */
-
-function isEmpty({
-  text
-}) {
-  return text.length === 0;
-}
-/**
- * Check if the current collapsed selection is on an empty line in case of a
- * multiline value.
- *
- * @param  {RichTextValue} value Value te check.
- *
- * @return {boolean} True if the line is empty, false if not.
- */
-
-function isEmptyLine({
-  text,
-  start,
-  end
-}) {
-  if (start !== end) {
-    return false;
-  }
-
-  if (text.length === 0) {
-    return true;
-  }
-
-  if (start === 0 && text.slice(0, 1) === LINE_SEPARATOR) {
-    return true;
-  }
-
-  if (start === text.length && text.slice(-1) === LINE_SEPARATOR) {
-    return true;
-  }
-
-  return text.slice(start - 1, end + 1) === `${LINE_SEPARATOR}${LINE_SEPARATOR}`;
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/join.js
@@ -1820,76 +1951,100 @@ function isEmptyLine({
  */
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Combine an array of Rich Text values into one, optionally separated by
  * `separator`, which can be a Rich Text value, HTML string, or plain text
  * string. This is similar to `Array.prototype.join`.
  *
- * @param {Array<RichTextValue>} values      An array of values to join.
- * @param {string|RichTextValue} [separator] Separator string or value.
+ * @param {Array}         values    An array of values to join.
+ * @param {string|Object} separator Separator string or value.
  *
- * @return {RichTextValue} A new combined value.
+ * @return {Object} A new combined value.
  */
 
-function join(values, separator = '') {
+function join(values) {
+  var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+
   if (typeof separator === 'string') {
     separator = create({
       text: separator
     });
   }
 
-  return normaliseFormats(values.reduce((accumlator, {
-    formats,
-    replacements,
-    text
-  }) => ({
-    formats: accumlator.formats.concat(separator.formats, formats),
-    replacements: accumlator.replacements.concat(separator.replacements, replacements),
-    text: accumlator.text + separator.text + text
-  })));
+  return normaliseFormats(values.reduce(function (accumlator, _ref) {
+    var formats = _ref.formats,
+        text = _ref.text;
+    return {
+      text: accumlator.text + separator.text + text,
+      formats: accumlator.formats.concat(separator.formats, formats)
+    };
+  }));
 }
 
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
+var defineProperty = __webpack_require__("rePB");
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/extends.js
+var esm_extends = __webpack_require__("wx14");
+
+// EXTERNAL MODULE: external {"this":["wp","element"]}
+var external_this_wp_element_ = __webpack_require__("GRId");
+
+// EXTERNAL MODULE: ./node_modules/memize/index.js
+var memize = __webpack_require__("4eJC");
+var memize_default = /*#__PURE__*/__webpack_require__.n(memize);
+
+// EXTERNAL MODULE: external {"this":["wp","hooks"]}
+var external_this_wp_hooks_ = __webpack_require__("g56x");
+
+// EXTERNAL MODULE: external {"this":["wp","compose"]}
+var external_this_wp_compose_ = __webpack_require__("K9lf");
+
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/register-format-type.js
+
+
+
+
+
+
+/**
+ * External dependencies
+ */
+
+
 /**
  * WordPress dependencies
  */
 
-/**
- * Internal dependencies
- */
+
 
 
 /**
- * @typedef {Object} WPFormat
+ * Shared reference to an empty array for cases where it is important to avoid
+ * returning a new array reference on every invocation, as in a connected or
+ * other pure component which performs `shouldComponentUpdate` check on props.
+ * This should be used as a last resort, since the normalized data should be
+ * maintained by the reducer result in state.
  *
- * @property {string}   name        A string identifying the format. Must be
- *                                  unique across all registered formats.
- * @property {string}   tagName     The HTML tag this format will wrap the
- *                                  selection with.
- * @property {string}   [className] A class to match the format.
- * @property {string}   title       Name of the format.
- * @property {Function} edit        Should return a component for the user to
- *                                  interact with the new registered format.
+ * @type {Array}
  */
 
+var EMPTY_ARRAY = [];
 /**
  * Registers a new format provided a unique name and an object defining its
  * behavior.
  *
- * @param {string}   name                 Format name.
- * @param {WPFormat} settings             Format settings.
+ * @param {string} name     Format name.
+ * @param {Object} settings Format settings.
  *
- * @return {WPFormat|undefined} The format, if it has been successfully
- *                              registered; otherwise `undefined`.
+ * @return {?WPFormat} The format, if it has been successfully registered;
+ *                     otherwise `undefined`.
  */
 
 function registerFormatType(name, settings) {
-  settings = {
-    name,
-    ...settings
-  };
+  settings = Object(objectSpread["a" /* default */])({
+    name: name
+  }, settings);
 
   if (typeof settings.name !== 'string') {
     window.console.error('Format names must be strings.');
@@ -1901,7 +2056,7 @@ function registerFormatType(name, settings) {
     return;
   }
 
-  if (Object(external_wp_data_["select"])(store).getFormatType(settings.name)) {
+  if (Object(external_this_wp_data_["select"])('core/rich-text').getFormatType(settings.name)) {
     window.console.error('Format "' + settings.name + '" is already registered.');
     return;
   }
@@ -1922,17 +2077,17 @@ function registerFormatType(name, settings) {
   }
 
   if (settings.className === null) {
-    const formatTypeForBareElement = Object(external_wp_data_["select"])(store).getFormatTypeForBareElement(settings.tagName);
+    var formatTypeForBareElement = Object(external_this_wp_data_["select"])('core/rich-text').getFormatTypeForBareElement(settings.tagName);
 
     if (formatTypeForBareElement) {
-      window.console.error(`Format "${formatTypeForBareElement.name}" is already registered to handle bare tag name "${settings.tagName}".`);
+      window.console.error("Format \"".concat(formatTypeForBareElement.name, "\" is already registered to handle bare tag name \"").concat(settings.tagName, "\"."));
       return;
     }
   } else {
-    const formatTypeForClassName = Object(external_wp_data_["select"])(store).getFormatTypeForClassName(settings.className);
+    var formatTypeForClassName = Object(external_this_wp_data_["select"])('core/rich-text').getFormatTypeForClassName(settings.className);
 
     if (formatTypeForClassName) {
-      window.console.error(`Format "${formatTypeForClassName.name}" is already registered to handle class name "${settings.className}".`);
+      window.console.error("Format \"".concat(formatTypeForClassName.name, "\" is already registered to handle class name \"").concat(settings.className, "\"."));
       return;
     }
   }
@@ -1952,7 +2107,79 @@ function registerFormatType(name, settings) {
     return;
   }
 
-  Object(external_wp_data_["dispatch"])(store).addFormatTypes(settings);
+  Object(external_this_wp_data_["dispatch"])('core/rich-text').addFormatTypes(settings);
+  var getFunctionStackMemoized = memize_default()(function () {
+    var previousStack = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : EMPTY_ARRAY;
+    var newFunction = arguments.length > 1 ? arguments[1] : undefined;
+    return Object(toConsumableArray["a" /* default */])(previousStack).concat([newFunction]);
+  });
+
+  if (settings.__experimentalGetPropsForEditableTreePreparation) {
+    Object(external_this_wp_hooks_["addFilter"])('experimentalRichText', name, function (OriginalComponent) {
+      var Component = OriginalComponent;
+
+      if (settings.__experimentalCreatePrepareEditableTree || settings.__experimentalCreateFormatToValue || settings.__experimentalCreateValueToFormat) {
+        Component = function Component(props) {
+          var additionalProps = {};
+
+          if (settings.__experimentalCreatePrepareEditableTree) {
+            additionalProps.prepareEditableTree = getFunctionStackMemoized(props.prepareEditableTree, settings.__experimentalCreatePrepareEditableTree(props["format_".concat(name)], {
+              richTextIdentifier: props.identifier,
+              blockClientId: props.clientId
+            }));
+          }
+
+          if (settings.__experimentalCreateOnChangeEditableValue) {
+            var dispatchProps = Object.keys(props).reduce(function (accumulator, propKey) {
+              var propValue = props[propKey];
+              var keyPrefix = "format_".concat(name, "_dispatch_");
+
+              if (propKey.startsWith(keyPrefix)) {
+                var realKey = propKey.replace(keyPrefix, '');
+                accumulator[realKey] = propValue;
+              }
+
+              return accumulator;
+            }, {});
+            additionalProps.onChangeEditableValue = getFunctionStackMemoized(props.onChangeEditableValue, settings.__experimentalCreateOnChangeEditableValue(Object(objectSpread["a" /* default */])({}, props["format_".concat(name)], dispatchProps), {
+              richTextIdentifier: props.identifier,
+              blockClientId: props.clientId
+            }));
+          }
+
+          return Object(external_this_wp_element_["createElement"])(OriginalComponent, Object(esm_extends["a" /* default */])({}, props, additionalProps));
+        };
+      }
+
+      var hocs = [Object(external_this_wp_data_["withSelect"])(function (sel, _ref) {
+        var clientId = _ref.clientId,
+            identifier = _ref.identifier;
+        return Object(defineProperty["a" /* default */])({}, "format_".concat(name), settings.__experimentalGetPropsForEditableTreePreparation(sel, {
+          richTextIdentifier: identifier,
+          blockClientId: clientId
+        }));
+      })];
+
+      if (settings.__experimentalGetPropsForEditableTreeChangeHandler) {
+        hocs.push(Object(external_this_wp_data_["withDispatch"])(function (disp, _ref3) {
+          var clientId = _ref3.clientId,
+              identifier = _ref3.identifier;
+
+          var dispatchProps = settings.__experimentalGetPropsForEditableTreeChangeHandler(disp, {
+            richTextIdentifier: identifier,
+            blockClientId: clientId
+          });
+
+          return Object(external_lodash_["mapKeys"])(dispatchProps, function (value, key) {
+            return "format_".concat(name, "_dispatch_").concat(key);
+          });
+        }));
+      }
+
+      return Object(external_this_wp_compose_["compose"])(hocs)(Component);
+    });
+  }
+
   return settings;
 }
 
@@ -1966,67 +2193,68 @@ function registerFormatType(name, settings) {
  */
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Remove any format object from a Rich Text value by type from the given
  * `startIndex` to the given `endIndex`. Indices are retrieved from the
  * selection if none are provided.
  *
- * @param {RichTextValue} value        Value to modify.
- * @param {string}        formatType   Format type to remove.
- * @param {number}        [startIndex] Start index.
- * @param {number}        [endIndex]   End index.
+ * @param {Object} value      Value to modify.
+ * @param {string} formatType Format type to remove.
+ * @param {number} startIndex Start index.
+ * @param {number} endIndex   End index.
  *
- * @return {RichTextValue} A new value with the format applied.
+ * @return {Object} A new value with the format applied.
  */
 
-function removeFormat(value, formatType, startIndex = value.start, endIndex = value.end) {
-  const {
-    formats,
-    activeFormats
-  } = value;
-  const newFormats = formats.slice(); // If the selection is collapsed, expand start and end to the edges of the
+function removeFormat(_ref, formatType) {
+  var formats = _ref.formats,
+      text = _ref.text,
+      start = _ref.start,
+      end = _ref.end,
+      replacements = _ref.replacements;
+  var startIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : start;
+  var endIndex = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : end;
+  var newFormats = formats.slice(0); // If the selection is collapsed, expand start and end to the edges of the
   // format.
 
   if (startIndex === endIndex) {
-    const format = Object(external_lodash_["find"])(newFormats[startIndex], {
+    var format = Object(external_lodash_["find"])(newFormats[startIndex], {
       type: formatType
     });
 
-    if (format) {
-      while (Object(external_lodash_["find"])(newFormats[startIndex], format)) {
-        filterFormats(newFormats, startIndex, formatType);
-        startIndex--;
-      }
+    while (Object(external_lodash_["find"])(newFormats[startIndex], format)) {
+      filterFormats(newFormats, startIndex, formatType);
+      startIndex--;
+    }
 
+    endIndex++;
+
+    while (Object(external_lodash_["find"])(newFormats[endIndex], format)) {
+      filterFormats(newFormats, endIndex, formatType);
       endIndex++;
-
-      while (Object(external_lodash_["find"])(newFormats[endIndex], format)) {
-        filterFormats(newFormats, endIndex, formatType);
-        endIndex++;
-      }
     }
   } else {
-    for (let i = startIndex; i < endIndex; i++) {
+    for (var i = startIndex; i < endIndex; i++) {
       if (newFormats[i]) {
         filterFormats(newFormats, i, formatType);
       }
     }
   }
 
-  return normaliseFormats({ ...value,
+  return normaliseFormats({
     formats: newFormats,
-    activeFormats: Object(external_lodash_["reject"])(activeFormats, {
-      type: formatType
-    })
+    text: text,
+    start: start,
+    end: end,
+    replacements: replacements
   });
 }
 
 function filterFormats(formats, index, formatType) {
-  const newFormats = formats[index].filter(({
-    type
-  }) => type !== formatType);
+  var newFormats = formats[index].filter(function (_ref2) {
+    var type = _ref2.type;
+    return type !== formatType;
+  });
 
   if (newFormats.length) {
     formats[index] = newFormats;
@@ -2041,28 +2269,28 @@ function filterFormats(formats, index, formatType) {
  */
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Insert a Rich Text value, an HTML string, or a plain text string, into a
  * Rich Text value at the given `startIndex`. Any content between `startIndex`
  * and `endIndex` will be removed. Indices are retrieved from the selection if
  * none are provided.
  *
- * @param {RichTextValue}        value         Value to modify.
- * @param {RichTextValue|string} valueToInsert Value to insert.
- * @param {number}               [startIndex]  Start index.
- * @param {number}               [endIndex]    End index.
+ * @param {Object} value         Value to modify.
+ * @param {string} valueToInsert Value to insert.
+ * @param {number} startIndex    Start index.
+ * @param {number} endIndex      End index.
  *
- * @return {RichTextValue} A new value with the value inserted.
+ * @return {Object} A new value with the value inserted.
  */
 
-function insert(value, valueToInsert, startIndex = value.start, endIndex = value.end) {
-  const {
-    formats,
-    replacements,
-    text
-  } = value;
+function insert(_ref, valueToInsert) {
+  var formats = _ref.formats,
+      text = _ref.text,
+      start = _ref.start,
+      end = _ref.end,
+      replacements = _ref.replacements;
+  var startIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : start;
+  var endIndex = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : end;
 
   if (typeof valueToInsert === 'string') {
     valueToInsert = create({
@@ -2070,11 +2298,11 @@ function insert(value, valueToInsert, startIndex = value.start, endIndex = value
     });
   }
 
-  const index = startIndex + valueToInsert.text.length;
+  var index = startIndex + valueToInsert.text.length;
   return normaliseFormats({
     formats: formats.slice(0, startIndex).concat(valueToInsert.formats, formats.slice(endIndex)),
-    replacements: replacements.slice(0, startIndex).concat(valueToInsert.replacements, replacements.slice(endIndex)),
     text: text.slice(0, startIndex) + valueToInsert.text + text.slice(endIndex),
+    replacements: replacements.slice(0, startIndex).concat(valueToInsert.replacements, replacements.slice(endIndex)),
     start: index,
     end: index
   });
@@ -2086,17 +2314,15 @@ function insert(value, valueToInsert, startIndex = value.start, endIndex = value
  */
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Remove content from a Rich Text value between the given `startIndex` and
  * `endIndex`. Indices are retrieved from the selection if none are provided.
  *
- * @param {RichTextValue} value        Value to modify.
- * @param {number}        [startIndex] Start index.
- * @param {number}        [endIndex]   End index.
+ * @param {Object} value      Value to modify.
+ * @param {number} startIndex Start index.
+ * @param {number} endIndex   End index.
  *
- * @return {RichTextValue} A new value with the content removed.
+ * @return {Object} A new value with the content removed.
  */
 
 function remove_remove(value, startIndex, endIndex) {
@@ -2104,17 +2330,17 @@ function remove_remove(value, startIndex, endIndex) {
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/replace.js
+
+
 /**
  * Internal dependencies
  */
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
 
 /**
  * Search a Rich Text value and replace the match(es) with `replacement`. This
  * is similar to `String.prototype.replace`.
  *
- * @param {RichTextValue}  value        The value to modify.
+ * @param {Object}         value        The value to modify.
  * @param {RegExp|string}  pattern      A RegExp object or literal. Can also be
  *                                      a string. It is treated as a verbatim
  *                                      string and is not interpreted as a
@@ -2124,27 +2350,30 @@ function remove_remove(value, startIndex, endIndex) {
  *                                      the specified or the value returned by
  *                                      the specified function.
  *
- * @return {RichTextValue} A new value with replacements applied.
+ * @return {Object} A new value with replacements applied.
  */
 
-function replace_replace({
-  formats,
-  replacements,
-  text,
-  start,
-  end
-}, pattern, replacement) {
-  text = text.replace(pattern, (match, ...rest) => {
-    const offset = rest[rest.length - 2];
-    let newText = replacement;
-    let newFormats;
-    let newReplacements;
-
-    if (typeof newText === 'function') {
-      newText = replacement(match, ...rest);
+function replace(_ref, pattern, replacement) {
+  var formats = _ref.formats,
+      text = _ref.text,
+      start = _ref.start,
+      end = _ref.end,
+      replacements = _ref.replacements;
+  text = text.replace(pattern, function (match) {
+    for (var _len = arguments.length, rest = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      rest[_key - 1] = arguments[_key];
     }
 
-    if (typeof newText === 'object') {
+    var offset = rest[rest.length - 2];
+    var newText = replacement;
+    var newFormats;
+    var newReplacements;
+
+    if (typeof newText === 'function') {
+      newText = replacement.apply(void 0, [match].concat(rest));
+    }
+
+    if (Object(esm_typeof["a" /* default */])(newText) === 'object') {
       newFormats = newText.formats;
       newReplacements = newText.replacements;
       newText = newText.text;
@@ -2167,11 +2396,11 @@ function replace_replace({
     return newText;
   });
   return normaliseFormats({
-    formats,
-    replacements,
-    text,
-    start,
-    end
+    formats: formats,
+    replacements: replacements,
+    text: text,
+    start: start,
+    end: end
   });
 }
 
@@ -2181,154 +2410,97 @@ function replace_replace({
  */
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
 
 /**
  * Insert a line break character into a Rich Text value at the given
  * `startIndex`. Any content between `startIndex` and `endIndex` will be
  * removed. Indices are retrieved from the selection if none are provided.
  *
- * @param {RichTextValue} value        Value to modify.
- * @param {number}        [startIndex] Start index.
- * @param {number}        [endIndex]   End index.
+ * @param {Object} value         Value to modify.
+ * @param {number} startIndex    Start index.
+ * @param {number} endIndex      End index.
  *
- * @return {RichTextValue} A new value with the value inserted.
+ * @return {Object} A new value with the value inserted.
  */
 
-function insertLineSeparator(value, startIndex = value.start, endIndex = value.end) {
-  const beforeText = value.text.slice(0, startIndex);
-  const previousLineSeparatorIndex = beforeText.lastIndexOf(LINE_SEPARATOR);
-  const previousLineSeparatorFormats = value.replacements[previousLineSeparatorIndex];
-  let replacements = [,];
+function insertLineSeparator(value) {
+  var startIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : value.start;
+  var endIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : value.end;
+  var beforeText = getTextContent(value).slice(0, startIndex);
+  var previousLineSeparatorIndex = beforeText.lastIndexOf(LINE_SEPARATOR);
+  var previousLineSeparatorFormats = value.formats[previousLineSeparatorIndex];
+  var formats = [,];
 
   if (previousLineSeparatorFormats) {
-    replacements = [previousLineSeparatorFormats];
+    formats = [previousLineSeparatorFormats];
   }
 
-  const valueToInsert = {
-    formats: [,],
-    replacements,
+  var valueToInsert = {
+    formats: formats,
+    replacements: [,],
     text: LINE_SEPARATOR
   };
   return insert(value, valueToInsert, startIndex, endIndex);
 }
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/remove-line-separator.js
-/**
- * Internal dependencies
- */
-
-
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
- * Removes a line separator character, if existing, from a Rich Text value at
- * the current indices. If no line separator exists on the indices it will
- * return undefined.
- *
- * @param {RichTextValue} value    Value to modify.
- * @param {boolean}       backward Indicates if are removing from the start
- *                                 index or the end index.
- *
- * @return {RichTextValue|undefined} A new value with the line separator
- *                                   removed. Or undefined if no line separator
- *                                   is found on the position.
- */
-
-function removeLineSeparator(value, backward = true) {
-  const {
-    replacements,
-    text,
-    start,
-    end
-  } = value;
-  const collapsed = isCollapsed(value);
-  let index = start - 1;
-  let removeStart = collapsed ? start - 1 : start;
-  let removeEnd = end;
-
-  if (!backward) {
-    index = end;
-    removeStart = start;
-    removeEnd = collapsed ? end + 1 : end;
-  }
-
-  if (text[index] !== LINE_SEPARATOR) {
-    return;
-  }
-
-  let newValue; // If the line separator that is about te be removed
-  // contains wrappers, remove the wrappers first.
-
-  if (collapsed && replacements[index] && replacements[index].length) {
-    const newReplacements = replacements.slice();
-    newReplacements[index] = replacements[index].slice(0, -1);
-    newValue = { ...value,
-      replacements: newReplacements
-    };
-  } else {
-    newValue = remove_remove(value, removeStart, removeEnd);
-  }
-
-  return newValue;
-}
-
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/insert-object.js
+
+
 /**
  * Internal dependencies
  */
 
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/** @typedef {import('./create').RichTextFormat} RichTextFormat */
-
+var insert_object_OBJECT_REPLACEMENT_CHARACTER = "\uFFFC";
 /**
  * Insert a format as an object into a Rich Text value at the given
  * `startIndex`. Any content between `startIndex` and `endIndex` will be
  * removed. Indices are retrieved from the selection if none are provided.
  *
- * @param {RichTextValue}  value          Value to modify.
- * @param {RichTextFormat} formatToInsert Format to insert as object.
- * @param {number}         [startIndex]   Start index.
- * @param {number}         [endIndex]     End index.
+ * @param {Object} value          Value to modify.
+ * @param {Object} formatToInsert Format to insert as object.
+ * @param {number} startIndex     Start index.
+ * @param {number} endIndex       End index.
  *
- * @return {RichTextValue} A new value with the object inserted.
+ * @return {Object} A new value with the object inserted.
  */
 
 function insertObject(value, formatToInsert, startIndex, endIndex) {
-  const valueToInsert = {
-    formats: [,],
-    replacements: [formatToInsert],
-    text: OBJECT_REPLACEMENT_CHARACTER
+  var valueToInsert = {
+    text: insert_object_OBJECT_REPLACEMENT_CHARACTER,
+    replacements: [Object(objectSpread["a" /* default */])({}, formatToInsert, {
+      object: true
+    })],
+    formats: [,]
   };
   return insert(value, valueToInsert, startIndex, endIndex);
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/slice.js
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Slice a Rich Text value from `startIndex` to `endIndex`. Indices are
  * retrieved from the selection if none are provided. This is similar to
  * `String.prototype.slice`.
  *
- * @param {RichTextValue} value        Value to modify.
- * @param {number}        [startIndex] Start index.
- * @param {number}        [endIndex]   End index.
+ * @param {Object} value       Value to modify.
+ * @param {number} startIndex  Start index.
+ * @param {number} endIndex    End index.
  *
- * @return {RichTextValue} A new extracted value.
+ * @return {Object} A new extracted value.
  */
-function slice(value, startIndex = value.start, endIndex = value.end) {
-  const {
-    formats,
-    replacements,
-    text
-  } = value;
+function slice(_ref) {
+  var formats = _ref.formats,
+      text = _ref.text,
+      start = _ref.start,
+      end = _ref.end,
+      replacements = _ref.replacements;
+  var startIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : start;
+  var endIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : end;
 
   if (startIndex === undefined || endIndex === undefined) {
-    return { ...value
+    return {
+      formats: formats,
+      text: text,
+      replacements: replacements
     };
   }
 
@@ -2344,34 +2516,33 @@ function slice(value, startIndex = value.start, endIndex = value.end) {
  * Internal dependencies
  */
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Split a Rich Text value in two at the given `startIndex` and `endIndex`, or
  * split at the given separator. This is similar to `String.prototype.split`.
  * Indices are retrieved from the selection if none are provided.
  *
- * @param {RichTextValue} value
- * @param {number|string} [string] Start index, or string at which to split.
+ * @param {Object}        value   Value to modify.
+ * @param {number|string} string  Start index, or string at which to split.
+ * @param {number}        end     End index.
  *
- * @return {Array<RichTextValue>|undefined} An array of new values.
+ * @return {Array} An array of new values.
  */
 
-function split({
-  formats,
-  replacements,
-  text,
-  start,
-  end
-}, string) {
+function split(_ref, string) {
+  var formats = _ref.formats,
+      text = _ref.text,
+      start = _ref.start,
+      end = _ref.end,
+      replacements = _ref.replacements;
+
   if (typeof string !== 'string') {
-    return splitAtSelection(...arguments);
+    return splitAtSelection.apply(void 0, arguments);
   }
 
-  let nextStart = 0;
-  return text.split(string).map(substring => {
-    const startIndex = nextStart;
-    const value = {
+  var nextStart = 0;
+  return text.split(string).map(function (substring) {
+    var startIndex = nextStart;
+    var value = {
       formats: formats.slice(startIndex, startIndex + substring.length),
       replacements: replacements.slice(startIndex, startIndex + substring.length),
       text: substring
@@ -2396,23 +2567,20 @@ function split({
   });
 }
 
-function splitAtSelection({
-  formats,
-  replacements,
-  text,
-  start,
-  end
-}, startIndex = start, endIndex = end) {
-  if (start === undefined || end === undefined) {
-    return;
-  }
-
-  const before = {
+function splitAtSelection(_ref2) {
+  var formats = _ref2.formats,
+      text = _ref2.text,
+      start = _ref2.start,
+      end = _ref2.end,
+      replacements = _ref2.replacements;
+  var startIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : start;
+  var endIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : end;
+  var before = {
     formats: formats.slice(0, startIndex),
     replacements: replacements.slice(0, startIndex),
     text: text.slice(0, startIndex)
   };
-  const after = {
+  var after = {
     formats: formats.slice(endIndex),
     replacements: replacements.slice(endIndex),
     text: text.slice(endIndex),
@@ -2420,7 +2588,7 @@ function splitAtSelection({
     end: 0
   };
   return [// Ensure newlines are trimmed.
-  replace_replace(before, /\u2028+$/, ''), replace_replace(after, /^\u2028+/, '')];
+  replace(before, /\u2028+$/, ''), replace(after, /^\u2028+/, '')];
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-format-type.js
@@ -2429,29 +2597,24 @@ function splitAtSelection({
  */
 
 /**
- * Internal dependencies
- */
-
-
-/** @typedef {import('./register-format-type').RichTextFormatType} RichTextFormatType */
-
-/**
  * Returns a registered format type.
  *
  * @param {string} name Format name.
  *
- * @return {RichTextFormatType|undefined} Format type.
+ * @return {?Object} Format type.
  */
 
 function get_format_type_getFormatType(name) {
-  return Object(external_wp_data_["select"])(store).getFormatType(name);
+  return Object(external_this_wp_data_["select"])('core/rich-text').getFormatType(name);
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/to-tree.js
+
+
+
 /**
  * Internal dependencies
  */
-
 
 
 
@@ -2460,10 +2623,10 @@ function restoreOnAttributes(attributes, isEditableTree) {
     return attributes;
   }
 
-  const newAttributes = {};
+  var newAttributes = {};
 
-  for (const key in attributes) {
-    let newKey = key;
+  for (var key in attributes) {
+    var newKey = key;
 
     if (key.startsWith('data-disable-rich-text-')) {
       newKey = key.slice('data-disable-rich-text-'.length);
@@ -2474,61 +2637,27 @@ function restoreOnAttributes(attributes, isEditableTree) {
 
   return newAttributes;
 }
-/**
- * Converts a format object to information that can be used to create an element
- * from (type, attributes and object).
- *
- * @param  {Object}  $1                        Named parameters.
- * @param  {string}  $1.type                   The format type.
- * @param  {Object}  $1.attributes             The format attributes.
- * @param  {Object}  $1.unregisteredAttributes The unregistered format
- *                                             attributes.
- * @param  {boolean} $1.object                 Whether or not it is an object
- *                                             format.
- * @param  {boolean} $1.boundaryClass          Whether or not to apply a boundary
- *                                             class.
- * @param  {boolean} $1.isEditableTree
- *
- * @return {Object}                            Information to be used for
- *                                             element creation.
- */
 
-
-function fromFormat({
-  type,
-  attributes,
-  unregisteredAttributes,
-  object,
-  boundaryClass,
-  isEditableTree
-}) {
-  const formatType = get_format_type_getFormatType(type);
-  let elementAttributes = {};
-
-  if (boundaryClass) {
-    elementAttributes['data-rich-text-format-boundary'] = 'true';
-  }
+function fromFormat(_ref) {
+  var type = _ref.type,
+      attributes = _ref.attributes,
+      unregisteredAttributes = _ref.unregisteredAttributes,
+      object = _ref.object,
+      isEditableTree = _ref.isEditableTree;
+  var formatType = get_format_type_getFormatType(type);
 
   if (!formatType) {
-    if (attributes) {
-      elementAttributes = { ...attributes,
-        ...elementAttributes
-      };
-    }
-
     return {
-      type,
-      attributes: restoreOnAttributes(elementAttributes, isEditableTree),
-      object
+      type: type,
+      attributes: restoreOnAttributes(attributes, isEditableTree),
+      object: object
     };
   }
 
-  elementAttributes = { ...unregisteredAttributes,
-    ...elementAttributes
-  };
+  var elementAttributes = Object(objectSpread["a" /* default */])({}, unregisteredAttributes);
 
-  for (const name in attributes) {
-    const key = formatType.attributes ? formatType.attributes[name] : false;
+  for (var name in attributes) {
+    var key = formatType.attributes[name];
 
     if (key) {
       elementAttributes[key] = attributes[name];
@@ -2539,7 +2668,7 @@ function fromFormat({
 
   if (formatType.className) {
     if (elementAttributes.class) {
-      elementAttributes.class = `${formatType.className} ${elementAttributes.class}`;
+      elementAttributes.class = "".concat(formatType.className, " ").concat(elementAttributes.class);
     } else {
       elementAttributes.class = formatType.className;
     }
@@ -2551,59 +2680,37 @@ function fromFormat({
     attributes: restoreOnAttributes(elementAttributes, isEditableTree)
   };
 }
-/**
- * Checks if both arrays of formats up until a certain index are equal.
- *
- * @param {Array}  a     Array of formats to compare.
- * @param {Array}  b     Array of formats to compare.
- * @param {number} index Index to check until.
- */
 
-
-function isEqualUntil(a, b, index) {
-  do {
-    if (a[index] !== b[index]) {
-      return false;
-    }
-  } while (index--);
-
-  return true;
-}
-
-function toTree({
-  value,
-  multilineTag,
-  preserveWhiteSpace,
-  createEmpty,
-  append,
-  getLastChild,
-  getParent,
-  isText,
-  getText,
-  remove,
-  appendText,
-  onStartIndex,
-  onEndIndex,
-  isEditableTree,
-  placeholder
-}) {
-  const {
-    formats,
-    replacements,
-    text,
-    start,
-    end
-  } = value;
-  const formatsLength = formats.length + 1;
-  const tree = createEmpty();
-  const multilineFormat = {
+function toTree(_ref2) {
+  var value = _ref2.value,
+      multilineTag = _ref2.multilineTag,
+      _ref2$multilineWrappe = _ref2.multilineWrapperTags,
+      multilineWrapperTags = _ref2$multilineWrappe === void 0 ? [] : _ref2$multilineWrappe,
+      createEmpty = _ref2.createEmpty,
+      append = _ref2.append,
+      getLastChild = _ref2.getLastChild,
+      getParent = _ref2.getParent,
+      isText = _ref2.isText,
+      getText = _ref2.getText,
+      remove = _ref2.remove,
+      appendText = _ref2.appendText,
+      onStartIndex = _ref2.onStartIndex,
+      onEndIndex = _ref2.onEndIndex,
+      isEditableTree = _ref2.isEditableTree;
+  var formats = value.formats,
+      text = value.text,
+      start = value.start,
+      end = value.end,
+      formatPlaceholder = value.formatPlaceholder,
+      replacements = value.replacements;
+  var formatsLength = formats.length + 1;
+  var tree = createEmpty();
+  var multilineFormat = {
     type: multilineTag
   };
-  const activeFormats = getActiveFormats(value);
-  const deepestActiveFormat = activeFormats[activeFormats.length - 1];
-  let lastSeparatorFormats;
-  let lastCharacterFormats;
-  let lastCharacter; // If we're building a multiline tree, start off with a multiline element.
+  var lastSeparatorFormats;
+  var lastCharacterFormats;
+  var lastCharacter; // If we're building a multiline tree, start off with a multiline element.
 
   if (multilineTag) {
     append(append(tree, {
@@ -2614,40 +2721,45 @@ function toTree({
     append(tree, '');
   }
 
-  for (let i = 0; i < formatsLength; i++) {
-    const character = text.charAt(i);
-    const shouldInsertPadding = isEditableTree && ( // Pad the line if the line is empty.
-    !lastCharacter || lastCharacter === LINE_SEPARATOR || // Pad the line if the previous character is a line break, otherwise
-    // the line break won't be visible.
-    lastCharacter === '\n');
-    let characterFormats = formats[i]; // Set multiline tags in queue for building the tree.
+  function setFormatPlaceholder(pointer, index) {
+    if (isEditableTree && formatPlaceholder && formatPlaceholder.index === index) {
+      var parent = getParent(pointer);
+
+      if (formatPlaceholder.format === undefined) {
+        pointer = getParent(parent);
+      } else {
+        pointer = append(parent, fromFormat(formatPlaceholder.format));
+      }
+
+      pointer = append(pointer, ZERO_WIDTH_NO_BREAK_SPACE);
+    }
+
+    return pointer;
+  }
+
+  var _loop = function _loop(i) {
+    var character = text.charAt(i);
+    var characterFormats = formats[i]; // Set multiline tags in queue for building the tree.
 
     if (multilineTag) {
       if (character === LINE_SEPARATOR) {
-        characterFormats = lastSeparatorFormats = (replacements[i] || []).reduce((accumulator, format) => {
-          accumulator.push(format, multilineFormat);
+        characterFormats = lastSeparatorFormats = (characterFormats || []).reduce(function (accumulator, format) {
+          if (character === LINE_SEPARATOR && multilineWrapperTags.indexOf(format.type) !== -1) {
+            accumulator.push(format);
+            accumulator.push(multilineFormat);
+          }
+
           return accumulator;
         }, [multilineFormat]);
       } else {
-        characterFormats = [...lastSeparatorFormats, ...(characterFormats || [])];
+        characterFormats = Object(toConsumableArray["a" /* default */])(lastSeparatorFormats).concat(Object(toConsumableArray["a" /* default */])(characterFormats || []));
       }
     }
 
-    let pointer = getLastChild(tree);
-
-    if (shouldInsertPadding && character === LINE_SEPARATOR) {
-      let node = pointer;
-
-      while (!isText(node)) {
-        node = getLastChild(node);
-      }
-
-      append(getParent(node), ZWNBSP);
-    } // Set selection for the start of line.
-
+    var pointer = getLastChild(tree); // Set selection for the start of line.
 
     if (lastCharacter === LINE_SEPARATOR) {
-      let node = pointer;
+      var node = pointer;
 
       while (!isText(node)) {
         node = getLastChild(node);
@@ -2663,35 +2775,30 @@ function toTree({
     }
 
     if (characterFormats) {
-      characterFormats.forEach((format, formatIndex) => {
-        if (pointer && lastCharacterFormats && // Reuse the last element if all formats remain the same.
-        isEqualUntil(characterFormats, lastCharacterFormats, formatIndex) && ( // Do not reuse the last element if the character is a
+      characterFormats.forEach(function (format, formatIndex) {
+        if (pointer && lastCharacterFormats && format === lastCharacterFormats[formatIndex] && ( // Do not reuse the last element if the character is a
         // line separator.
         character !== LINE_SEPARATOR || characterFormats.length - 1 !== formatIndex)) {
           pointer = getLastChild(pointer);
           return;
         }
 
-        const {
-          type,
-          attributes,
-          unregisteredAttributes
-        } = format;
-        const boundaryClass = isEditableTree && character !== LINE_SEPARATOR && format === deepestActiveFormat;
-        const parent = getParent(pointer);
-        const newNode = append(parent, fromFormat({
-          type,
-          attributes,
-          unregisteredAttributes,
-          boundaryClass,
-          isEditableTree
+        var parent = getParent(pointer);
+        var type = format.type,
+            attributes = format.attributes,
+            unregisteredAttributes = format.unregisteredAttributes;
+        var newNode = append(parent, fromFormat({
+          type: type,
+          attributes: attributes,
+          unregisteredAttributes: unregisteredAttributes,
+          isEditableTree: isEditableTree
         }));
 
         if (isText(pointer) && getText(pointer).length === 0) {
           remove(pointer);
         }
 
-        pointer = append(newNode, '');
+        pointer = append(format.object ? parent : newNode, '');
       });
     } // No need for further processing if the character is a line separator.
 
@@ -2699,9 +2806,10 @@ function toTree({
     if (character === LINE_SEPARATOR) {
       lastCharacterFormats = characterFormats;
       lastCharacter = character;
-      continue;
-    } // If there is selection at 0, handle it before characters are inserted.
+      return "continue";
+    }
 
+    pointer = setFormatPlaceholder(pointer, 0); // If there is selection at 0, handle it before characters are inserted.
 
     if (i === 0) {
       if (onStartIndex && start === 0) {
@@ -2717,26 +2825,23 @@ function toTree({
       if (!isEditableTree && replacements[i].type === 'script') {
         pointer = append(getParent(pointer), fromFormat({
           type: 'script',
-          isEditableTree
+          isEditableTree: isEditableTree
         }));
         append(pointer, {
           html: decodeURIComponent(replacements[i].attributes['data-rich-text-script'])
         });
       } else {
-        pointer = append(getParent(pointer), fromFormat({ ...replacements[i],
+        pointer = append(getParent(pointer), fromFormat(Object(objectSpread["a" /* default */])({}, replacements[i], {
           object: true,
-          isEditableTree
-        }));
+          isEditableTree: isEditableTree
+        })));
       } // Ensure pointer is text node.
 
 
       pointer = append(getParent(pointer), '');
-    } else if (!preserveWhiteSpace && character === '\n') {
+    } else if (character === '\n') {
       pointer = append(getParent(pointer), {
         type: 'br',
-        attributes: isEditableTree ? {
-          'data-rich-text-line-break': 'true'
-        } : undefined,
         object: true
       }); // Ensure pointer is text node.
 
@@ -2747,6 +2852,8 @@ function toTree({
       appendText(pointer, character);
     }
 
+    pointer = setFormatPlaceholder(pointer, i + 1);
+
     if (onStartIndex && start === i + 1) {
       onStartIndex(tree, pointer);
     }
@@ -2755,39 +2862,35 @@ function toTree({
       onEndIndex(tree, pointer);
     }
 
-    if (shouldInsertPadding && i === text.length) {
-      append(getParent(pointer), ZWNBSP);
-
-      if (placeholder && text.length === 0) {
-        append(getParent(pointer), {
-          type: 'span',
-          attributes: {
-            'data-rich-text-placeholder': placeholder,
-            // Necessary to prevent the placeholder from catching
-            // selection. The placeholder is also not editable after
-            // all.
-            contenteditable: 'false',
-            style: 'pointer-events:none;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;'
-          }
-        });
-      }
-    }
-
     lastCharacterFormats = characterFormats;
     lastCharacter = character;
+  };
+
+  for (var i = 0; i < formatsLength; i++) {
+    var _ret = _loop(i);
+
+    if (_ret === "continue") continue;
   }
 
   return tree;
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/to-dom.js
+
+
+
 /**
  * Internal dependencies
  */
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
+/**
+ * Browser dependencies
+ */
 
+var to_dom_window$Node = window.Node,
+    to_dom_TEXT_NODE = to_dom_window$Node.TEXT_NODE,
+    to_dom_ELEMENT_NODE = to_dom_window$Node.ELEMENT_NODE;
 /**
  * Creates a path as an array of indices from the given root node to the given
  * node.
@@ -2800,14 +2903,14 @@ function toTree({
  */
 
 function createPathToNode(node, rootNode, path) {
-  const parentNode = node.parentNode;
-  let i = 0;
+  var parentNode = node.parentNode;
+  var i = 0;
 
   while (node = node.previousSibling) {
     i++;
   }
 
-  path = [i, ...path];
+  path = [i].concat(Object(toConsumableArray["a" /* default */])(path));
 
   if (parentNode !== rootNode) {
     path = createPathToNode(parentNode, rootNode, path);
@@ -2826,32 +2929,46 @@ function createPathToNode(node, rootNode, path) {
 
 
 function getNodeByPath(node, path) {
-  path = [...path];
+  path = Object(toConsumableArray["a" /* default */])(path);
 
   while (node && path.length > 1) {
     node = node.childNodes[path.shift()];
   }
 
   return {
-    node,
+    node: node,
     offset: path[0]
   };
 }
+/**
+ * Returns a new instance of a DOM tree upon which RichText operations can be
+ * applied.
+ *
+ * Note: The current implementation will return a shared reference, reset on
+ * each call to `createEmpty`. Therefore, you should not hold a reference to
+ * the value to operate upon asynchronously, as it may have unexpected results.
+ *
+ * @return {WPRichTextTree} RichText tree.
+ */
+
+
+var to_dom_createEmpty = function createEmpty() {
+  return createElement(document, '');
+};
 
 function to_dom_append(element, child) {
   if (typeof child === 'string') {
     child = element.ownerDocument.createTextNode(child);
   }
 
-  const {
-    type,
-    attributes
-  } = child;
+  var _child = child,
+      type = _child.type,
+      attributes = _child.attributes;
 
   if (type) {
     child = element.ownerDocument.createElement(type);
 
-    for (const key in attributes) {
+    for (var key in attributes) {
       child.setAttribute(key, attributes[key]);
     }
   }
@@ -2863,25 +2980,23 @@ function to_dom_appendText(node, text) {
   node.appendData(text);
 }
 
-function to_dom_getLastChild({
-  lastChild
-}) {
+function to_dom_getLastChild(_ref) {
+  var lastChild = _ref.lastChild;
   return lastChild;
 }
 
-function to_dom_getParent({
-  parentNode
-}) {
+function to_dom_getParent(_ref2) {
+  var parentNode = _ref2.parentNode;
   return parentNode;
 }
 
-function to_dom_isText(node) {
-  return node.nodeType === node.TEXT_NODE;
+function to_dom_isText(_ref3) {
+  var nodeType = _ref3.nodeType;
+  return nodeType === to_dom_TEXT_NODE;
 }
 
-function to_dom_getText({
-  nodeValue
-}) {
+function to_dom_getText(_ref4) {
+  var nodeValue = _ref4.nodeValue;
   return nodeValue;
 }
 
@@ -2889,40 +3004,59 @@ function to_dom_remove(node) {
   return node.parentNode.removeChild(node);
 }
 
-function toDom({
-  value,
-  multilineTag,
-  prepareEditableTree,
-  isEditableTree = true,
-  placeholder,
-  doc = document
-}) {
-  let startPath = [];
-  let endPath = [];
+function padEmptyLines(_ref5) {
+  var element = _ref5.element,
+      createLinePadding = _ref5.createLinePadding,
+      multilineWrapperTags = _ref5.multilineWrapperTags;
+  var length = element.childNodes.length;
+  var doc = element.ownerDocument;
 
-  if (prepareEditableTree) {
-    value = { ...value,
-      formats: prepareEditableTree(value)
-    };
+  for (var index = 0; index < length; index++) {
+    var child = element.childNodes[index];
+
+    if (child.nodeType === to_dom_TEXT_NODE) {
+      if (length === 1 && !child.nodeValue) {
+        // Pad if the only child is an empty text node.
+        element.appendChild(createLinePadding(doc));
+      }
+    } else {
+      if (multilineWrapperTags && !child.previousSibling && multilineWrapperTags.indexOf(child.nodeName.toLowerCase()) !== -1) {
+        // Pad the line if there is no content before a nested wrapper.
+        element.insertBefore(createLinePadding(doc), child);
+      }
+
+      padEmptyLines({
+        element: child,
+        createLinePadding: createLinePadding,
+        multilineWrapperTags: multilineWrapperTags
+      });
+    }
   }
-  /**
-   * Returns a new instance of a DOM tree upon which RichText operations can be
-   * applied.
-   *
-   * Note: The current implementation will return a shared reference, reset on
-   * each call to `createEmpty`. Therefore, you should not hold a reference to
-   * the value to operate upon asynchronously, as it may have unexpected results.
-   *
-   * @return {Object} RichText tree.
-   */
+}
 
+function prepareFormats() {
+  var prepareEditableTree = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  var value = arguments.length > 1 ? arguments[1] : undefined;
+  return prepareEditableTree.reduce(function (accumlator, fn) {
+    return fn(accumlator, value.text);
+  }, value.formats);
+}
 
-  const createEmpty = () => createElement(doc, '');
-
-  const tree = toTree({
-    value,
-    multilineTag,
-    createEmpty,
+function toDom(_ref6) {
+  var value = _ref6.value,
+      multilineTag = _ref6.multilineTag,
+      multilineWrapperTags = _ref6.multilineWrapperTags,
+      createLinePadding = _ref6.createLinePadding,
+      prepareEditableTree = _ref6.prepareEditableTree;
+  var startPath = [];
+  var endPath = [];
+  var tree = toTree({
+    value: Object(objectSpread["a" /* default */])({}, value, {
+      formats: prepareFormats(prepareEditableTree, value)
+    }),
+    multilineTag: multilineTag,
+    multilineWrapperTags: multilineWrapperTags,
+    createEmpty: to_dom_createEmpty,
     append: to_dom_append,
     getLastChild: to_dom_getLastChild,
     getParent: to_dom_getParent,
@@ -2930,23 +3064,28 @@ function toDom({
     getText: to_dom_getText,
     remove: to_dom_remove,
     appendText: to_dom_appendText,
-
-    onStartIndex(body, pointer) {
+    onStartIndex: function onStartIndex(body, pointer) {
       startPath = createPathToNode(pointer, body, [pointer.nodeValue.length]);
     },
-
-    onEndIndex(body, pointer) {
+    onEndIndex: function onEndIndex(body, pointer) {
       endPath = createPathToNode(pointer, body, [pointer.nodeValue.length]);
     },
-
-    isEditableTree,
-    placeholder
+    isEditableTree: true
   });
+
+  if (createLinePadding) {
+    padEmptyLines({
+      element: tree,
+      createLinePadding: createLinePadding,
+      multilineWrapperTags: multilineWrapperTags
+    });
+  }
+
   return {
     body: tree,
     selection: {
-      startPath,
-      endPath
+      startPath: startPath,
+      endPath: endPath
     }
   };
 }
@@ -2955,87 +3094,48 @@ function toDom({
  * the `Element` tree contained by `current`. If a `multilineTag` is provided,
  * text separated by two new lines will be wrapped in an `Element` of that type.
  *
- * @param {Object}        $1                       Named arguments.
- * @param {RichTextValue} $1.value                 Value to apply.
- * @param {HTMLElement}   $1.current               The live root node to apply the element tree to.
- * @param {string}        [$1.multilineTag]        Multiline tag.
- * @param {Function}      [$1.prepareEditableTree] Function to filter editorable formats.
- * @param {boolean}       [$1.__unstableDomOnly]   Only apply elements, no selection.
- * @param {string}        [$1.placeholder]         Placeholder text.
+ * @param {Object}      value        Value to apply.
+ * @param {HTMLElement} current      The live root node to apply the element
+ *                                   tree to.
+ * @param {string}      multilineTag Multiline tag.
  */
 
-function apply({
-  value,
-  current,
-  multilineTag,
-  prepareEditableTree,
-  __unstableDomOnly,
-  placeholder
-}) {
+function apply(_ref7) {
+  var value = _ref7.value,
+      current = _ref7.current,
+      multilineTag = _ref7.multilineTag,
+      multilineWrapperTags = _ref7.multilineWrapperTags,
+      createLinePadding = _ref7.createLinePadding,
+      prepareEditableTree = _ref7.prepareEditableTree;
+
   // Construct a new element tree in memory.
-  const {
-    body,
-    selection
-  } = toDom({
-    value,
-    multilineTag,
-    prepareEditableTree,
-    placeholder,
-    doc: current.ownerDocument
-  });
+  var _toDom = toDom({
+    value: value,
+    multilineTag: multilineTag,
+    multilineWrapperTags: multilineWrapperTags,
+    createLinePadding: createLinePadding,
+    prepareEditableTree: prepareEditableTree
+  }),
+      body = _toDom.body,
+      selection = _toDom.selection;
+
   applyValue(body, current);
 
-  if (value.start !== undefined && !__unstableDomOnly) {
+  if (value.start !== undefined) {
     applySelection(selection, current);
   }
 }
 function applyValue(future, current) {
-  let i = 0;
-  let futureChild;
+  var i = 0;
+  var futureChild;
 
   while (futureChild = future.firstChild) {
-    const currentChild = current.childNodes[i];
+    var currentChild = current.childNodes[i];
 
     if (!currentChild) {
       current.appendChild(futureChild);
     } else if (!currentChild.isEqualNode(futureChild)) {
-      if (currentChild.nodeName !== futureChild.nodeName || currentChild.nodeType === currentChild.TEXT_NODE && currentChild.data !== futureChild.data) {
-        current.replaceChild(futureChild, currentChild);
-      } else {
-        const currentAttributes = currentChild.attributes;
-        const futureAttributes = futureChild.attributes;
-
-        if (currentAttributes) {
-          let ii = currentAttributes.length; // Reverse loop because `removeAttribute` on `currentChild`
-          // changes `currentAttributes`.
-
-          while (ii--) {
-            const {
-              name
-            } = currentAttributes[ii];
-
-            if (!futureChild.getAttribute(name)) {
-              currentChild.removeAttribute(name);
-            }
-          }
-        }
-
-        if (futureAttributes) {
-          for (let ii = 0; ii < futureAttributes.length; ii++) {
-            const {
-              name,
-              value
-            } = futureAttributes[ii];
-
-            if (currentChild.getAttribute(name) !== value) {
-              currentChild.setAttribute(name, value);
-            }
-          }
-        }
-
-        applyValue(futureChild, currentChild);
-        future.removeChild(futureChild);
-      }
+      current.replaceChild(futureChild, currentChild);
     } else {
       future.removeChild(futureChild);
     }
@@ -3062,64 +3162,51 @@ function isRangeEqual(a, b) {
   return a.startContainer === b.startContainer && a.startOffset === b.startOffset && a.endContainer === b.endContainer && a.endOffset === b.endOffset;
 }
 
-function applySelection({
-  startPath,
-  endPath
-}, current) {
-  const {
-    node: startContainer,
-    offset: startOffset
-  } = getNodeByPath(current, startPath);
-  const {
-    node: endContainer,
-    offset: endOffset
-  } = getNodeByPath(current, endPath);
-  const {
-    ownerDocument
-  } = current;
-  const {
-    defaultView
-  } = ownerDocument;
-  const selection = defaultView.getSelection();
-  const range = ownerDocument.createRange();
-  range.setStart(startContainer, startOffset);
-  range.setEnd(endContainer, endOffset);
-  const {
-    activeElement
-  } = ownerDocument;
+function applySelection(selection, current) {
+  var _getNodeByPath = getNodeByPath(current, selection.startPath),
+      startContainer = _getNodeByPath.node,
+      startOffset = _getNodeByPath.offset;
 
-  if (selection.rangeCount > 0) {
+  var _getNodeByPath2 = getNodeByPath(current, selection.endPath),
+      endContainer = _getNodeByPath2.node,
+      endOffset = _getNodeByPath2.offset;
+
+  var windowSelection = window.getSelection();
+  var range = current.ownerDocument.createRange();
+  var collapsed = startContainer === endContainer && startOffset === endOffset;
+
+  if (collapsed && startOffset === 0 && startContainer.previousSibling && startContainer.previousSibling.nodeType === to_dom_ELEMENT_NODE && startContainer.previousSibling.nodeName !== 'BR') {
+    startContainer.insertData(0, "\uFEFF");
+    range.setStart(startContainer, 1);
+    range.setEnd(endContainer, 1);
+  } else if (collapsed && startOffset === 0 && startContainer === to_dom_TEXT_NODE && startContainer.nodeValue.length === 0) {
+    startContainer.insertData(0, "\uFEFF");
+    range.setStart(startContainer, 1);
+    range.setEnd(endContainer, 1);
+  } else {
+    range.setStart(startContainer, startOffset);
+    range.setEnd(endContainer, endOffset);
+  }
+
+  if (windowSelection.rangeCount > 0) {
     // If the to be added range and the live range are the same, there's no
     // need to remove the live range and add the equivalent range.
-    if (isRangeEqual(range, selection.getRangeAt(0))) {
+    if (isRangeEqual(range, windowSelection.getRangeAt(0))) {
       return;
     }
 
-    selection.removeAllRanges();
+    windowSelection.removeAllRanges();
   }
 
-  selection.addRange(range); // This function is not intended to cause a shift in focus. Since the above
-  // selection manipulations may shift focus, ensure that focus is restored to
-  // its previous state.
-
-  if (activeElement !== ownerDocument.activeElement) {
-    // The `instanceof` checks protect against edge cases where the focused
-    // element is not of the interface HTMLElement (does not have a `focus`
-    // or `blur` property).
-    //
-    // See: https://github.com/Microsoft/TypeScript/issues/5901#issuecomment-431649653
-    if (activeElement instanceof defaultView.HTMLElement) {
-      activeElement.focus();
-    }
-  }
+  windowSelection.addRange(range);
 }
 
-// EXTERNAL MODULE: external ["wp","escapeHtml"]
-var external_wp_escapeHtml_ = __webpack_require__("Vx3V");
+// EXTERNAL MODULE: external {"this":["wp","escapeHtml"]}
+var external_this_wp_escapeHtml_ = __webpack_require__("Vx3V");
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/to-html-string.js
 /**
- * WordPress dependencies
+ * Internal dependencies
  */
 
 /**
@@ -3127,30 +3214,27 @@ var external_wp_escapeHtml_ = __webpack_require__("Vx3V");
  */
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Create an HTML string from a Rich Text value. If a `multilineTag` is
  * provided, text separated by a line separator will be wrapped in it.
  *
- * @param {Object}        $1                      Named argements.
- * @param {RichTextValue} $1.value                Rich text value.
- * @param {string}        [$1.multilineTag]       Multiline tag.
- * @param {boolean}       [$1.preserveWhiteSpace] Whether or not to use newline
- *                                                characters for line breaks.
+ * @param {Object} $1                      Named argements.
+ * @param {Object} $1.value                Rich text value.
+ * @param {string} $1.multilineTag         Multiline tag.
+ * @param {Array}  $1.multilineWrapperTags Tags where lines can be found if
+ *                                         nesting is possible.
  *
  * @return {string} HTML string.
  */
 
-function toHTMLString({
-  value,
-  multilineTag,
-  preserveWhiteSpace
-}) {
-  const tree = toTree({
-    value,
-    multilineTag,
-    preserveWhiteSpace,
+function toHTMLString(_ref) {
+  var value = _ref.value,
+      multilineTag = _ref.multilineTag,
+      multilineWrapperTags = _ref.multilineWrapperTags;
+  var tree = toTree({
+    value: value,
+    multilineTag: multilineTag,
+    multilineWrapperTags: multilineWrapperTags,
     createEmpty: to_html_string_createEmpty,
     append: to_html_string_append,
     getLastChild: to_html_string_getLastChild,
@@ -3167,9 +3251,8 @@ function to_html_string_createEmpty() {
   return {};
 }
 
-function to_html_string_getLastChild({
-  children
-}) {
+function to_html_string_getLastChild(_ref2) {
+  var children = _ref2.children;
   return children && children[children.length - 1];
 }
 
@@ -3190,26 +3273,23 @@ function to_html_string_appendText(object, text) {
   object.text += text;
 }
 
-function to_html_string_getParent({
-  parent
-}) {
+function to_html_string_getParent(_ref3) {
+  var parent = _ref3.parent;
   return parent;
 }
 
-function to_html_string_isText({
-  text
-}) {
+function to_html_string_isText(_ref4) {
+  var text = _ref4.text;
   return typeof text === 'string';
 }
 
-function to_html_string_getText({
-  text
-}) {
+function to_html_string_getText(_ref5) {
+  var text = _ref5.text;
   return text;
 }
 
 function to_html_string_remove(object) {
-  const index = object.parent.children.indexOf(object);
+  var index = object.parent.children.indexOf(object);
 
   if (index !== -1) {
     object.parent.children.splice(index, 1);
@@ -3218,36 +3298,36 @@ function to_html_string_remove(object) {
   return object;
 }
 
-function createElementHTML({
-  type,
-  attributes,
-  object,
-  children
-}) {
-  let attributeString = '';
+function createElementHTML(_ref6) {
+  var type = _ref6.type,
+      attributes = _ref6.attributes,
+      object = _ref6.object,
+      children = _ref6.children;
+  var attributeString = '';
 
-  for (const key in attributes) {
-    if (!Object(external_wp_escapeHtml_["isValidAttributeName"])(key)) {
+  for (var key in attributes) {
+    if (!Object(external_this_wp_escapeHtml_["isValidAttributeName"])(key)) {
       continue;
     }
 
-    attributeString += ` ${key}="${Object(external_wp_escapeHtml_["escapeAttribute"])(attributes[key])}"`;
+    attributeString += " ".concat(key, "=\"").concat(Object(external_this_wp_escapeHtml_["escapeAttribute"])(attributes[key]), "\"");
   }
 
   if (object) {
-    return `<${type}${attributeString}>`;
+    return "<".concat(type).concat(attributeString, ">");
   }
 
-  return `<${type}${attributeString}>${createChildrenHTML(children)}</${type}>`;
+  return "<".concat(type).concat(attributeString, ">").concat(createChildrenHTML(children), "</").concat(type, ">");
 }
 
-function createChildrenHTML(children = []) {
-  return children.map(child => {
+function createChildrenHTML() {
+  var children = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  return children.map(function (child) {
     if (child.html !== undefined) {
       return child.html;
     }
 
-    return child.text === undefined ? createElementHTML(child) : Object(external_wp_escapeHtml_["escapeEditableHTML"])(child.text);
+    return child.text === undefined ? createElementHTML(child) : Object(external_this_wp_escapeHtml_["escapeHTML"])(child.text);
   }).join('');
 }
 
@@ -3258,17 +3338,13 @@ function createChildrenHTML(children = []) {
 
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/** @typedef {import('./create').RichTextFormat} RichTextFormat */
-
 /**
  * Toggles a format object to a Rich Text value at the current selection.
  *
- * @param {RichTextValue}  value  Value to modify.
- * @param {RichTextFormat} format Format to apply or remove.
+ * @param {Object} value      Value to modify.
+ * @param {Object} format     Format to apply or remove.
  *
- * @return {RichTextValue} A new value with the format applied or removed.
+ * @return {Object} A new value with the format applied or removed.
  */
 
 function toggleFormat(value, format) {
@@ -3284,90 +3360,60 @@ function toggleFormat(value, format) {
  * WordPress dependencies
  */
 
-/**
- * Internal dependencies
- */
-
-
-/** @typedef {import('./register-format-type').RichTextFormatType} RichTextFormatType */
 
 /**
  * Unregisters a format.
  *
  * @param {string} name Format name.
  *
- * @return {RichTextFormatType|undefined} The previous format value, if it has
- *                                        been successfully unregistered;
- *                                        otherwise `undefined`.
+ * @return {?WPFormat} The previous format value, if it has been successfully
+ *                     unregistered; otherwise `undefined`.
  */
 
 function unregisterFormatType(name) {
-  const oldFormat = Object(external_wp_data_["select"])(store).getFormatType(name);
+  var oldFormat = Object(external_this_wp_data_["select"])('core/rich-text').getFormatType(name);
 
   if (!oldFormat) {
-    window.console.error(`Format ${name} is not registered.`);
+    window.console.error("Format ".concat(name, " is not registered."));
     return;
   }
 
-  Object(external_wp_data_["dispatch"])(store).removeFormatTypes(name);
+  if (oldFormat.__experimentalCreatePrepareEditableTree && oldFormat.__experimentalGetPropsForEditableTreePreparation) {
+    Object(external_this_wp_hooks_["removeFilter"])('experimentalRichText', name);
+  }
+
+  Object(external_this_wp_data_["dispatch"])('core/rich-text').removeFormatTypes(name);
   return oldFormat;
 }
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/can-indent-list-items.js
+// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-line-index.js
 /**
  * Internal dependencies
  */
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
- * Checks if the selected list item can be indented.
+ * Gets the currently selected line index, or the first line index if the
+ * selection spans over multiple items.
  *
- * @param {RichTextValue} value Value to check.
+ * @param {Object}  value      Value to get the line index from.
+ * @param {boolean} startIndex Optional index that should be contained by the
+ *                             line. Defaults to the selection start of the
+ *                             value.
  *
- * @return {boolean} Whether or not the selected list item can be indented.
+ * @return {?boolean} The line index. Undefined if not found.
  */
 
-function canIndentListItems(value) {
-  const lineIndex = getLineIndex(value); // There is only one line, so the line cannot be indented.
+function getLineIndex(_ref) {
+  var start = _ref.start,
+      text = _ref.text;
+  var startIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : start;
+  var index = startIndex;
 
-  if (lineIndex === undefined) {
-    return false;
+  while (index--) {
+    if (text[index] === LINE_SEPARATOR) {
+      return index;
+    }
   }
-
-  const {
-    replacements
-  } = value;
-  const previousLineIndex = getLineIndex(value, lineIndex);
-  const formatsAtLineIndex = replacements[lineIndex] || [];
-  const formatsAtPreviousLineIndex = replacements[previousLineIndex] || []; // If the indentation of the current line is greater than previous line,
-  // then the line cannot be furter indented.
-
-  return formatsAtLineIndex.length <= formatsAtPreviousLineIndex.length;
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/can-outdent-list-items.js
-/**
- * Internal dependencies
- */
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
- * Checks if the selected list item can be outdented.
- *
- * @param {RichTextValue} value Value to check.
- *
- * @return {boolean} Whether or not the selected list item can be outdented.
- */
-
-function canOutdentListItems(value) {
-  const {
-    replacements,
-    start
-  } = value;
-  const startingLineIndex = getLineIndex(value, start);
-  return replacements[startingLineIndex] !== undefined;
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/indent-list-items.js
@@ -3377,33 +3423,27 @@ function canOutdentListItems(value) {
 
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/** @typedef {import('./create').RichTextFormat} RichTextFormat */
-
 /**
  * Gets the line index of the first previous list item with higher indentation.
  *
- * @param {RichTextValue} value      Value to search.
- * @param {number}        lineIndex  Line index of the list item to compare
- *                                   with.
+ * @param {Object} value      Value to search.
+ * @param {number} lineIndex  Line index of the list item to compare with.
  *
- * @return {number|void} The line index.
+ * @return {boolean} The line index.
  */
 
-function getTargetLevelLineIndex({
-  text,
-  replacements
-}, lineIndex) {
-  const startFormats = replacements[lineIndex] || [];
-  let index = lineIndex;
+function getTargetLevelLineIndex(_ref, lineIndex) {
+  var text = _ref.text,
+      formats = _ref.formats;
+  var startFormats = formats[lineIndex] || [];
+  var index = lineIndex;
 
   while (index-- >= 0) {
     if (text[index] !== LINE_SEPARATOR) {
       continue;
     }
 
-    const formatsAtIndex = replacements[index] || []; // Return the first line index that is one level higher. If the level is
+    var formatsAtIndex = formats[index] || []; // Return the first line index that is one level higher. If the level is
     // lower or equal, there is no result.
 
     if (formatsAtIndex.length === startFormats.length + 1) {
@@ -3416,29 +3456,37 @@ function getTargetLevelLineIndex({
 /**
  * Indents any selected list items if possible.
  *
- * @param {RichTextValue}  value      Value to change.
- * @param {RichTextFormat} rootFormat Root format.
+ * @param {Object} value      Value to change.
+ * @param {Object} rootFormat
  *
- * @return {RichTextValue} The changed value.
+ * @return {Object} The changed value.
  */
 
 
 function indentListItems(value, rootFormat) {
-  if (!canIndentListItems(value)) {
+  var lineIndex = getLineIndex(value); // There is only one line, so the line cannot be indented.
+
+  if (lineIndex === undefined) {
     return value;
   }
 
-  const lineIndex = getLineIndex(value);
-  const previousLineIndex = getLineIndex(value, lineIndex);
-  const {
-    text,
-    replacements,
-    end
-  } = value;
-  const newFormats = replacements.slice();
-  const targetLevelLineIndex = getTargetLevelLineIndex(value, lineIndex);
+  var text = value.text,
+      formats = value.formats,
+      start = value.start,
+      end = value.end;
+  var previousLineIndex = getLineIndex(value, lineIndex);
+  var formatsAtLineIndex = formats[lineIndex] || [];
+  var formatsAtPreviousLineIndex = formats[previousLineIndex] || []; // The the indentation of the current line is greater than previous line,
+  // then the line cannot be furter indented.
 
-  for (let index = lineIndex; index < end; index++) {
+  if (formatsAtLineIndex.length > formatsAtPreviousLineIndex.length) {
+    return value;
+  }
+
+  var newFormats = formats.slice();
+  var targetLevelLineIndex = getTargetLevelLineIndex(value, lineIndex);
+
+  for (var index = lineIndex; index < end; index++) {
     if (text[index] !== LINE_SEPARATOR) {
       continue;
     } // Get the previous list, and if there's a child list, take over the
@@ -3446,18 +3494,22 @@ function indentListItems(value, rootFormat) {
 
 
     if (targetLevelLineIndex) {
-      const targetFormats = replacements[targetLevelLineIndex] || [];
+      var targetFormats = formats[targetLevelLineIndex] || [];
       newFormats[index] = targetFormats.concat((newFormats[index] || []).slice(targetFormats.length - 1));
     } else {
-      const targetFormats = replacements[previousLineIndex] || [];
-      const lastformat = targetFormats[targetFormats.length - 1] || rootFormat;
-      newFormats[index] = targetFormats.concat([lastformat], (newFormats[index] || []).slice(targetFormats.length));
+      var _targetFormats = formats[previousLineIndex] || [];
+
+      var lastformat = _targetFormats[_targetFormats.length - 1] || rootFormat;
+      newFormats[index] = _targetFormats.concat([lastformat], (newFormats[index] || []).slice(_targetFormats.length));
     }
   }
 
-  return { ...value,
-    replacements: newFormats
-  };
+  return normaliseFormats({
+    text: text,
+    formats: newFormats,
+    start: start,
+    end: end
+  });
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/get-parent-line-index.js
@@ -3465,32 +3517,29 @@ function indentListItems(value, rootFormat) {
  * Internal dependencies
  */
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Gets the index of the first parent list. To get the parent list formats, we
  * go through every list item until we find one with exactly one format type
  * less.
  *
- * @param {RichTextValue} value     Value to search.
- * @param {number}        lineIndex Line index of a child list item.
+ * @param {Object} value     Value to search.
+ * @param {number} lineIndex Line index of a child list item.
  *
- * @return {number|void} The parent list line index.
+ * @return {Array} The parent list line index.
  */
 
-function getParentLineIndex({
-  text,
-  replacements
-}, lineIndex) {
-  const startFormats = replacements[lineIndex] || [];
-  let index = lineIndex;
+function getParentLineIndex(_ref, lineIndex) {
+  var text = _ref.text,
+      formats = _ref.formats;
+  var startFormats = formats[lineIndex] || [];
+  var index = lineIndex;
 
   while (index-- >= 0) {
     if (text[index] !== LINE_SEPARATOR) {
       continue;
     }
 
-    const formatsAtIndex = replacements[index] || [];
+    var formatsAtIndex = formats[index] || [];
 
     if (formatsAtIndex.length === startFormats.length - 1) {
       return index;
@@ -3503,32 +3552,29 @@ function getParentLineIndex({
  * Internal dependencies
  */
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Gets the line index of the last child in the list.
  *
- * @param {RichTextValue} value     Value to search.
- * @param {number}        lineIndex Line index of a list item in the list.
+ * @param {Object} value     Value to search.
+ * @param {number} lineIndex Line index of a list item in the list.
  *
- * @return {number} The index of the last child.
+ * @return {Array} The index of the last child.
  */
 
-function getLastChildIndex({
-  text,
-  replacements
-}, lineIndex) {
-  const lineFormats = replacements[lineIndex] || []; // Use the given line index in case there are no next children.
+function getLastChildIndex(_ref, lineIndex) {
+  var text = _ref.text,
+      formats = _ref.formats;
+  var lineFormats = formats[lineIndex] || []; // Use the given line index in case there are no next children.
 
-  let childIndex = lineIndex; // `lineIndex` could be `undefined` if it's the first line.
+  var childIndex = lineIndex; // `lineIndex` could be `undefined` if it's the first line.
 
-  for (let index = lineIndex || 0; index < text.length; index++) {
+  for (var index = lineIndex || 0; index < text.length; index++) {
     // We're only interested in line indices.
     if (text[index] !== LINE_SEPARATOR) {
       continue;
     }
 
-    const formatsAtIndex = replacements[index] || []; // If the amout of formats is equal or more, store it, then return the
+    var formatsAtIndex = formats[index] || []; // If the amout of formats is equal or more, store it, then return the
     // last one if the amount of formats is less.
 
     if (formatsAtIndex.length >= lineFormats.length) {
@@ -3551,43 +3597,40 @@ function getLastChildIndex({
 
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
 /**
  * Outdents any selected list items if possible.
  *
- * @param {RichTextValue} value Value to change.
+ * @param {Object} value Value to change.
  *
- * @return {RichTextValue} The changed value.
+ * @return {Object} The changed value.
  */
 
 function outdentListItems(value) {
-  if (!canOutdentListItems(value)) {
+  var text = value.text,
+      formats = value.formats,
+      start = value.start,
+      end = value.end;
+  var startingLineIndex = getLineIndex(value, start); // Return early if the starting line index cannot be further outdented.
+
+  if (formats[startingLineIndex] === undefined) {
     return value;
   }
 
-  const {
-    text,
-    replacements,
-    start,
-    end
-  } = value;
-  const startingLineIndex = getLineIndex(value, start);
-  const newFormats = replacements.slice(0);
-  const parentFormats = replacements[getParentLineIndex(value, startingLineIndex)] || [];
-  const endingLineIndex = getLineIndex(value, end);
-  const lastChildIndex = getLastChildIndex(value, endingLineIndex); // Outdent all list items from the starting line index until the last child
+  var newFormats = formats.slice(0);
+  var parentFormats = formats[getParentLineIndex(value, startingLineIndex)] || [];
+  var endingLineIndex = getLineIndex(value, end);
+  var lastChildIndex = getLastChildIndex(value, endingLineIndex); // Outdent all list items from the starting line index until the last child
   // index of the ending list. All children of the ending list need to be
   // outdented, otherwise they'll be orphaned.
 
-  for (let index = startingLineIndex; index <= lastChildIndex; index++) {
+  for (var index = startingLineIndex; index <= lastChildIndex; index++) {
     // Skip indices that are not line separators.
     if (text[index] !== LINE_SEPARATOR) {
       continue;
     } // In the case of level 0, the formats at the index are undefined.
 
 
-    const currentFormats = newFormats[index] || []; // Omit the indentation level where the selection starts.
+    var currentFormats = newFormats[index] || []; // Omit the indentation level where the selection starts.
 
     newFormats[index] = parentFormats.concat(currentFormats.slice(parentFormats.length + 1));
 
@@ -3596,9 +3639,12 @@ function outdentListItems(value) {
     }
   }
 
-  return { ...value,
-    replacements: newFormats
-  };
+  return normaliseFormats({
+    text: text,
+    formats: newFormats,
+    start: start,
+    end: end
+  });
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/change-list-type.js
@@ -3608,9 +3654,6 @@ function outdentListItems(value) {
 
 
 
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/** @typedef {import('./create').RichTextFormat} RichTextFormat */
 
 /**
  * Changes the list type of the selected indented list, if any. Looks at the
@@ -3618,44 +3661,42 @@ function outdentListItems(value) {
  * type of this list. When multiple lines are selected, the parent lists are
  * takes and changed.
  *
- * @param {RichTextValue}  value     Value to change.
- * @param {RichTextFormat} newFormat The new list format object. Choose between
- *                                   `{ type: 'ol' }` and `{ type: 'ul' }`.
+ * @param {Object} value     Value to change.
+ * @param {Object} newFormat The new list format object. Choose between
+ *                           `{ type: 'ol' }` and `{ type: 'ul' }`.
  *
- * @return {RichTextValue} The changed value.
+ * @return {Object} The changed value.
  */
 
 function changeListType(value, newFormat) {
-  const {
-    text,
-    replacements,
-    start,
-    end
-  } = value;
-  const startingLineIndex = getLineIndex(value, start);
-  const startLineFormats = replacements[startingLineIndex] || [];
-  const endLineFormats = replacements[getLineIndex(value, end)] || [];
-  const startIndex = getParentLineIndex(value, startingLineIndex);
-  const newReplacements = replacements.slice();
-  const startCount = startLineFormats.length - 1;
-  const endCount = endLineFormats.length - 1;
-  let changed;
+  var text = value.text,
+      formats = value.formats,
+      start = value.start,
+      end = value.end;
+  var startingLineIndex = getLineIndex(value, start);
+  var startLineFormats = formats[startingLineIndex] || [];
+  var endLineFormats = formats[getLineIndex(value, end)] || [];
+  var startIndex = getParentLineIndex(value, startingLineIndex);
+  var newFormats = formats.slice(0);
+  var startCount = startLineFormats.length - 1;
+  var endCount = endLineFormats.length - 1;
+  var changed;
 
-  for (let index = startIndex + 1 || 0; index < text.length; index++) {
+  for (var index = startIndex + 1 || 0; index < text.length; index++) {
     if (text[index] !== LINE_SEPARATOR) {
       continue;
     }
 
-    if ((newReplacements[index] || []).length <= startCount) {
+    if ((newFormats[index] || []).length <= startCount) {
       break;
     }
 
-    if (!newReplacements[index]) {
+    if (!newFormats[index]) {
       continue;
     }
 
     changed = true;
-    newReplacements[index] = newReplacements[index].map((format, i) => {
+    newFormats[index] = newFormats[index].map(function (format, i) {
       return i < startCount || i > endCount ? format : newFormat;
     });
   }
@@ -3664,1146 +3705,15 @@ function changeListType(value, newFormat) {
     return value;
   }
 
-  return { ...value,
-    replacements: newReplacements
-  };
-}
-
-// EXTERNAL MODULE: external ["wp","element"]
-var external_wp_element_ = __webpack_require__("GRId");
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-anchor-ref.js
-/**
- * WordPress dependencies
- */
-
-/**
- * Internal dependencies
- */
-
-
-/** @typedef {import('@wordpress/element').RefObject} RefObject */
-
-/** @typedef {import('../register-format-type').RichTextFormatType} RichTextFormatType */
-
-/** @typedef {import('../create').RichTextValue} RichTextValue */
-
-/**
- * This hook, to be used in a format type's Edit component, returns the active
- * element that is formatted, or the selection range if no format is active.
- * The returned value is meant to be used for positioning UI, e.g. by passing it
- * to the `Popover` component.
- *
- * @param {Object}                 $1          Named parameters.
- * @param {RefObject<HTMLElement>} $1.ref      React ref of the element
- *                                             containing  the editable content.
- * @param {RichTextValue}          $1.value    Value to check for selection.
- * @param {RichTextFormatType}     $1.settings The format type's settings.
- *
- * @return {Element|Range} The active element or selection range.
- */
-
-function useAnchorRef({
-  ref,
-  value,
-  settings = {}
-}) {
-  const {
-    tagName,
-    className,
-    name
-  } = settings;
-  const activeFormat = name ? getActiveFormat(value, name) : undefined;
-  return Object(external_wp_element_["useMemo"])(() => {
-    if (!ref.current) return;
-    const {
-      ownerDocument: {
-        defaultView
-      }
-    } = ref.current;
-    const selection = defaultView.getSelection();
-
-    if (!selection.rangeCount) {
-      return;
-    }
-
-    const range = selection.getRangeAt(0);
-
-    if (!activeFormat) {
-      return range;
-    }
-
-    let element = range.startContainer; // If the caret is right before the element, select the next element.
-
-    element = element.nextElementSibling || element;
-
-    while (element.nodeType !== element.ELEMENT_NODE) {
-      element = element.parentNode;
-    }
-
-    return element.closest(tagName + (className ? '.' + className : ''));
-  }, [activeFormat, value.start, value.end, tagName, className]);
-}
-
-// EXTERNAL MODULE: external ["wp","compose"]
-var external_wp_compose_ = __webpack_require__("K9lf");
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-default-style.js
-/**
- * WordPress dependencies
- */
-
-/**
- * In HTML, leading and trailing spaces are not visible, and multiple spaces
- * elsewhere are visually reduced to one space. This rule prevents spaces from
- * collapsing so all space is visible in the editor and can be removed. It also
- * prevents some browsers from inserting non-breaking spaces at the end of a
- * line to prevent the space from visually disappearing. Sometimes these non
- * breaking spaces can linger in the editor causing unwanted non breaking spaces
- * in between words. If also prevent Firefox from inserting a trailing `br` node
- * to visualise any trailing space, causing the element to be saved.
- *
- * > Authors are encouraged to set the 'white-space' property on editing hosts
- * > and on markup that was originally created through these editing mechanisms
- * > to the value 'pre-wrap'. Default HTML whitespace handling is not well
- * > suited to WYSIWYG editing, and line wrapping will not work correctly in
- * > some corner cases if 'white-space' is left at its default value.
- *
- * https://html.spec.whatwg.org/multipage/interaction.html#best-practices-for-in-page-editors
- *
- * @type {string}
- */
-
-const whiteSpace = 'pre-wrap';
-/**
- * A minimum width of 1px will prevent the rich text container from collapsing
- * to 0 width and hiding the caret. This is useful for inline containers.
- */
-
-const minWidth = '1px';
-function useDefaultStyle() {
-  return Object(external_wp_element_["useCallback"])(element => {
-    if (!element) return;
-    element.style.whiteSpace = whiteSpace;
-    element.style.minWidth = minWidth;
-  }, []);
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-boundary-style.js
-/**
- * WordPress dependencies
- */
-
-/*
- * Calculates and renders the format boundary style when the active formats
- * change.
- */
-
-function useBoundaryStyle({
-  record
-}) {
-  const ref = Object(external_wp_element_["useRef"])();
-  const {
-    activeFormats = []
-  } = record.current;
-  Object(external_wp_element_["useEffect"])(() => {
-    // There's no need to recalculate the boundary styles if no formats are
-    // active, because no boundary styles will be visible.
-    if (!activeFormats || !activeFormats.length) {
-      return;
-    }
-
-    const boundarySelector = '*[data-rich-text-format-boundary]';
-    const element = ref.current.querySelector(boundarySelector);
-
-    if (!element) {
-      return;
-    }
-
-    const {
-      ownerDocument
-    } = element;
-    const {
-      defaultView
-    } = ownerDocument;
-    const computedStyle = defaultView.getComputedStyle(element);
-    const newColor = computedStyle.color.replace(')', ', 0.2)').replace('rgb', 'rgba');
-    const selector = `.rich-text:focus ${boundarySelector}`;
-    const rule = `background-color: ${newColor}`;
-    const style = `${selector} {${rule}}`;
-    const globalStyleId = 'rich-text-boundary-style';
-    let globalStyle = ownerDocument.getElementById(globalStyleId);
-
-    if (!globalStyle) {
-      globalStyle = ownerDocument.createElement('style');
-      globalStyle.id = globalStyleId;
-      ownerDocument.head.appendChild(globalStyle);
-    }
-
-    if (globalStyle.innerHTML !== style) {
-      globalStyle.innerHTML = style;
-    }
-  }, [activeFormats]);
-  return ref;
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-inline-warning.js
-/**
- * WordPress dependencies
- */
-
-const message = 'RichText cannot be used with an inline container. Please use a different display property.';
-function useInlineWarning() {
-  const ref = Object(external_wp_element_["useRef"])();
-  Object(external_wp_element_["useEffect"])(() => {
-    if (false) {}
-  }, []);
-  return ref;
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-copy-handler.js
-/**
- * WordPress dependencies
- */
-
-
-/**
- * Internal dependencies
- */
-
-
-
-
-
-function useCopyHandler(props) {
-  const propsRef = Object(external_wp_element_["useRef"])(props);
-  propsRef.current = props;
-  return Object(external_wp_compose_["useRefEffect"])(element => {
-    function onCopy(event) {
-      const {
-        record,
-        multilineTag,
-        preserveWhiteSpace
-      } = propsRef.current;
-
-      if (isCollapsed(record.current) || !element.contains(element.ownerDocument.activeElement)) {
-        return;
-      }
-
-      const selectedRecord = slice(record.current);
-      const plainText = getTextContent(selectedRecord);
-      const html = toHTMLString({
-        value: selectedRecord,
-        multilineTag,
-        preserveWhiteSpace
-      });
-      event.clipboardData.setData('text/plain', plainText);
-      event.clipboardData.setData('text/html', html);
-      event.clipboardData.setData('rich-text', 'true');
-      event.preventDefault();
-    }
-
-    element.addEventListener('copy', onCopy);
-    return () => {
-      element.removeEventListener('copy', onCopy);
-    };
-  }, []);
-}
-
-// EXTERNAL MODULE: external ["wp","keycodes"]
-var external_wp_keycodes_ = __webpack_require__("RxS6");
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-format-boundaries.js
-/**
- * WordPress dependencies
- */
-
-
-
-/**
- * Internal dependencies
- */
-
-
-const EMPTY_ACTIVE_FORMATS = [];
-function useFormatBoundaries(props) {
-  const [, forceRender] = Object(external_wp_element_["useReducer"])(() => ({}));
-  const propsRef = Object(external_wp_element_["useRef"])(props);
-  propsRef.current = props;
-  return Object(external_wp_compose_["useRefEffect"])(element => {
-    function onKeyDown(event) {
-      const {
-        keyCode,
-        shiftKey,
-        altKey,
-        metaKey,
-        ctrlKey
-      } = event;
-
-      if ( // Only override left and right keys without modifiers pressed.
-      shiftKey || altKey || metaKey || ctrlKey || keyCode !== external_wp_keycodes_["LEFT"] && keyCode !== external_wp_keycodes_["RIGHT"]) {
-        return;
-      }
-
-      const {
-        record,
-        applyRecord
-      } = propsRef.current;
-      const {
-        text,
-        formats,
-        start,
-        end,
-        activeFormats: currentActiveFormats = []
-      } = record.current;
-      const collapsed = isCollapsed(record.current);
-      const {
-        ownerDocument
-      } = element;
-      const {
-        defaultView
-      } = ownerDocument; // To do: ideally, we should look at visual position instead.
-
-      const {
-        direction
-      } = defaultView.getComputedStyle(element);
-      const reverseKey = direction === 'rtl' ? external_wp_keycodes_["RIGHT"] : external_wp_keycodes_["LEFT"];
-      const isReverse = event.keyCode === reverseKey; // If the selection is collapsed and at the very start, do nothing if
-      // navigating backward.
-      // If the selection is collapsed and at the very end, do nothing if
-      // navigating forward.
-
-      if (collapsed && currentActiveFormats.length === 0) {
-        if (start === 0 && isReverse) {
-          return;
-        }
-
-        if (end === text.length && !isReverse) {
-          return;
-        }
-      } // If the selection is not collapsed, let the browser handle collapsing
-      // the selection for now. Later we could expand this logic to set
-      // boundary positions if needed.
-
-
-      if (!collapsed) {
-        return;
-      }
-
-      const formatsBefore = formats[start - 1] || EMPTY_ACTIVE_FORMATS;
-      const formatsAfter = formats[start] || EMPTY_ACTIVE_FORMATS;
-      let newActiveFormatsLength = currentActiveFormats.length;
-      let source = formatsAfter;
-
-      if (formatsBefore.length > formatsAfter.length) {
-        source = formatsBefore;
-      } // If the amount of formats before the caret and after the caret is
-      // different, the caret is at a format boundary.
-
-
-      if (formatsBefore.length < formatsAfter.length) {
-        if (!isReverse && currentActiveFormats.length < formatsAfter.length) {
-          newActiveFormatsLength++;
-        }
-
-        if (isReverse && currentActiveFormats.length > formatsBefore.length) {
-          newActiveFormatsLength--;
-        }
-      } else if (formatsBefore.length > formatsAfter.length) {
-        if (!isReverse && currentActiveFormats.length > formatsAfter.length) {
-          newActiveFormatsLength--;
-        }
-
-        if (isReverse && currentActiveFormats.length < formatsBefore.length) {
-          newActiveFormatsLength++;
-        }
-      }
-
-      if (newActiveFormatsLength === currentActiveFormats.length) {
-        record.current._newActiveFormats = isReverse ? formatsBefore : formatsAfter;
-        return;
-      }
-
-      event.preventDefault();
-      const newActiveFormats = source.slice(0, newActiveFormatsLength);
-      const newValue = { ...record.current,
-        activeFormats: newActiveFormats
-      };
-      record.current = newValue;
-      applyRecord(newValue);
-      forceRender();
-    }
-
-    element.addEventListener('keydown', onKeyDown);
-    return () => {
-      element.removeEventListener('keydown', onKeyDown);
-    };
-  }, []);
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-select-object.js
-/**
- * WordPress dependencies
- */
-
-function useSelectObject() {
-  return Object(external_wp_compose_["useRefEffect"])(element => {
-    function onClick(event) {
-      const {
-        target
-      } = event; // If the child element has no text content, it must be an object.
-
-      if (target === element || target.textContent) {
-        return;
-      }
-
-      const {
-        ownerDocument
-      } = target;
-      const {
-        defaultView
-      } = ownerDocument;
-      const range = ownerDocument.createRange();
-      const selection = defaultView.getSelection();
-      range.selectNode(target);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-
-    element.addEventListener('click', onClick);
-    return () => {
-      element.removeEventListener('click', onClick);
-    };
-  }, []);
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-indent-list-item-on-space.js
-/**
- * WordPress dependencies
- */
-
-
-
-/**
- * Internal dependencies
- */
-
-
-
-
-function useIndentListItemOnSpace(props) {
-  const propsRef = Object(external_wp_element_["useRef"])(props);
-  propsRef.current = props;
-  return Object(external_wp_compose_["useRefEffect"])(element => {
-    function onKeyDown(event) {
-      const {
-        keyCode,
-        shiftKey,
-        altKey,
-        metaKey,
-        ctrlKey
-      } = event;
-      const {
-        multilineTag,
-        createRecord,
-        handleChange
-      } = propsRef.current;
-
-      if ( // Only override when no modifiers are pressed.
-      shiftKey || altKey || metaKey || ctrlKey || keyCode !== external_wp_keycodes_["SPACE"] || multilineTag !== 'li') {
-        return;
-      }
-
-      const currentValue = createRecord();
-
-      if (!isCollapsed(currentValue)) {
-        return;
-      }
-
-      const {
-        text,
-        start
-      } = currentValue;
-      const characterBefore = text[start - 1]; // The caret must be at the start of a line.
-
-      if (characterBefore && characterBefore !== LINE_SEPARATOR) {
-        return;
-      }
-
-      handleChange(indentListItems(currentValue, {
-        type: element.tagName.toLowerCase()
-      }));
-      event.preventDefault();
-    }
-
-    element.addEventListener('keydown', onKeyDown);
-    return () => {
-      element.removeEventListener('keydown', onKeyDown);
-    };
-  }, []);
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/update-formats.js
-/**
- * Internal dependencies
- */
-
-/** @typedef {import('./create').RichTextValue} RichTextValue */
-
-/**
- * Efficiently updates all the formats from `start` (including) until `end`
- * (excluding) with the active formats. Mutates `value`.
- *
- * @param  {Object}        $1         Named paramentes.
- * @param  {RichTextValue} $1.value   Value te update.
- * @param  {number}        $1.start   Index to update from.
- * @param  {number}        $1.end     Index to update until.
- * @param  {Array}         $1.formats Replacement formats.
- *
- * @return {RichTextValue} Mutated value.
- */
-
-function updateFormats({
-  value,
-  start,
-  end,
-  formats
-}) {
-  const formatsBefore = value.formats[start - 1] || [];
-  const formatsAfter = value.formats[end] || []; // First, fix the references. If any format right before or after are
-  // equal, the replacement format should use the same reference.
-
-  value.activeFormats = formats.map((format, index) => {
-    if (formatsBefore[index]) {
-      if (isFormatEqual(format, formatsBefore[index])) {
-        return formatsBefore[index];
-      }
-    } else if (formatsAfter[index]) {
-      if (isFormatEqual(format, formatsAfter[index])) {
-        return formatsAfter[index];
-      }
-    }
-
-    return format;
-  });
-
-  while (--end >= start) {
-    if (value.activeFormats.length > 0) {
-      value.formats[end] = value.activeFormats;
-    } else {
-      delete value.formats[end];
-    }
-  }
-
-  return value;
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-input-and-selection.js
-/**
- * WordPress dependencies
- */
-
-
-/**
- * Internal dependencies
- */
-
-
-
-/**
- * All inserting input types that would insert HTML into the DOM.
- *
- * @see https://www.w3.org/TR/input-events-2/#interface-InputEvent-Attributes
- *
- * @type {Set}
- */
-
-const INSERTION_INPUT_TYPES_TO_IGNORE = new Set(['insertParagraph', 'insertOrderedList', 'insertUnorderedList', 'insertHorizontalRule', 'insertLink']);
-const use_input_and_selection_EMPTY_ACTIVE_FORMATS = [];
-/**
- * If the selection is set on the placeholder element, collapse the selection to
- * the start (before the placeholder).
- *
- * @param {Window} defaultView
- */
-
-function fixPlaceholderSelection(defaultView) {
-  const selection = defaultView.getSelection();
-  const {
-    anchorNode,
-    anchorOffset
-  } = selection;
-
-  if (anchorNode.nodeType !== anchorNode.ELEMENT_NODE) {
-    return;
-  }
-
-  const targetNode = anchorNode.childNodes[anchorOffset];
-
-  if (!targetNode || targetNode.nodeType !== targetNode.ELEMENT_NODE || !targetNode.getAttribute('data-rich-text-placeholder')) {
-    return;
-  }
-
-  selection.collapseToStart();
-}
-
-function useInputAndSelection(props) {
-  const propsRef = Object(external_wp_element_["useRef"])(props);
-  propsRef.current = props;
-  return Object(external_wp_compose_["useRefEffect"])(element => {
-    const {
-      ownerDocument
-    } = element;
-    const {
-      defaultView
-    } = ownerDocument;
-    let isComposing = false;
-    let rafId;
-
-    function onInput(event) {
-      // Do not trigger a change if characters are being composed.
-      // Browsers  will usually emit a final `input` event when the
-      // characters are composed.
-      // As of December 2019, Safari doesn't support
-      // nativeEvent.isComposing.
-      if (isComposing) {
-        return;
-      }
-
-      let inputType;
-
-      if (event) {
-        inputType = event.inputType;
-      }
-
-      const {
-        record,
-        applyRecord,
-        createRecord,
-        handleChange
-      } = propsRef.current; // The browser formatted something or tried to insert HTML.
-      // Overwrite it. It will be handled later by the format library if
-      // needed.
-
-      if (inputType && (inputType.indexOf('format') === 0 || INSERTION_INPUT_TYPES_TO_IGNORE.has(inputType))) {
-        applyRecord(record.current);
-        return;
-      }
-
-      const currentValue = createRecord();
-      const {
-        start,
-        activeFormats: oldActiveFormats = []
-      } = record.current; // Update the formats between the last and new caret position.
-
-      const change = updateFormats({
-        value: currentValue,
-        start,
-        end: currentValue.start,
-        formats: oldActiveFormats
-      });
-      handleChange(change);
-    }
-    /**
-     * Syncs the selection to local state. A callback for the `selectionchange`
-     * native events, `keyup`, `mouseup` and `touchend` synthetic events, and
-     * animation frames after the `focus` event.
-     *
-     * @param {Event|DOMHighResTimeStamp} event
-     */
-
-
-    function handleSelectionChange(event) {
-      if (ownerDocument.activeElement !== element) {
-        return;
-      }
-
-      const {
-        record,
-        applyRecord,
-        createRecord,
-        isSelected,
-        onSelectionChange
-      } = propsRef.current;
-
-      if (event.type !== 'selectionchange' && !isSelected) {
-        return;
-      } // Check if the implementor disabled editing. `contentEditable`
-      // does disable input, but not text selection, so we must ignore
-      // selection changes.
-
-
-      if (element.contentEditable !== 'true') {
-        return;
-      } // In case of a keyboard event, ignore selection changes during
-      // composition.
-
-
-      if (isComposing) {
-        return;
-      }
-
-      const {
-        start,
-        end,
-        text
-      } = createRecord();
-      const oldRecord = record.current; // Fallback mechanism for IE11, which doesn't support the input event.
-      // Any input results in a selection change.
-
-      if (text !== oldRecord.text) {
-        onInput();
-        return;
-      }
-
-      if (start === oldRecord.start && end === oldRecord.end) {
-        // Sometimes the browser may set the selection on the placeholder
-        // element, in which case the caret is not visible. We need to set
-        // the caret before the placeholder if that's the case.
-        if (oldRecord.text.length === 0 && start === 0) {
-          fixPlaceholderSelection(defaultView);
-        }
-
-        return;
-      }
-
-      const newValue = { ...oldRecord,
-        start,
-        end,
-        // _newActiveFormats may be set on arrow key navigation to control
-        // the right boundary position. If undefined, getActiveFormats will
-        // give the active formats according to the browser.
-        activeFormats: oldRecord._newActiveFormats,
-        _newActiveFormats: undefined
-      };
-      const newActiveFormats = getActiveFormats(newValue, use_input_and_selection_EMPTY_ACTIVE_FORMATS); // Update the value with the new active formats.
-
-      newValue.activeFormats = newActiveFormats; // It is important that the internal value is updated first,
-      // otherwise the value will be wrong on render!
-
-      record.current = newValue;
-      applyRecord(newValue, {
-        domOnly: true
-      });
-      onSelectionChange(start, end);
-    }
-
-    function onCompositionStart() {
-      isComposing = true; // Do not update the selection when characters are being composed as
-      // this rerenders the component and might distroy internal browser
-      // editing state.
-
-      ownerDocument.removeEventListener('selectionchange', handleSelectionChange);
-    }
-
-    function onCompositionEnd() {
-      isComposing = false; // Ensure the value is up-to-date for browsers that don't emit a final
-      // input event after composition.
-
-      onInput({
-        inputType: 'insertText'
-      }); // Tracking selection changes can be resumed.
-
-      ownerDocument.addEventListener('selectionchange', handleSelectionChange);
-    }
-
-    function onFocus() {
-      const {
-        record,
-        isSelected,
-        onSelectionChange
-      } = propsRef.current;
-
-      if (!isSelected) {
-        // We know for certain that on focus, the old selection is invalid.
-        // It will be recalculated on the next mouseup, keyup, or touchend
-        // event.
-        const index = undefined;
-        record.current = { ...record.current,
-          start: index,
-          end: index,
-          activeFormats: use_input_and_selection_EMPTY_ACTIVE_FORMATS
-        };
-        onSelectionChange(index, index);
-      } else {
-        onSelectionChange(record.current.start, record.current.end);
-      } // Update selection as soon as possible, which is at the next animation
-      // frame. The event listener for selection changes may be added too late
-      // at this point, but this focus event is still too early to calculate
-      // the selection.
-
-
-      rafId = defaultView.requestAnimationFrame(handleSelectionChange);
-      ownerDocument.addEventListener('selectionchange', handleSelectionChange);
-    }
-
-    function onBlur() {
-      ownerDocument.removeEventListener('selectionchange', handleSelectionChange);
-    }
-
-    element.addEventListener('input', onInput);
-    element.addEventListener('compositionstart', onCompositionStart);
-    element.addEventListener('compositionend', onCompositionEnd);
-    element.addEventListener('focus', onFocus);
-    element.addEventListener('blur', onBlur); // Selection updates must be done at these events as they
-    // happen before the `selectionchange` event. In some cases,
-    // the `selectionchange` event may not even fire, for
-    // example when the window receives focus again on click.
-
-    element.addEventListener('keyup', handleSelectionChange);
-    element.addEventListener('mouseup', handleSelectionChange);
-    element.addEventListener('touchend', handleSelectionChange);
-    return () => {
-      element.removeEventListener('input', onInput);
-      element.removeEventListener('compositionstart', onCompositionStart);
-      element.removeEventListener('compositionend', onCompositionEnd);
-      element.removeEventListener('focus', onFocus);
-      element.removeEventListener('blur', onBlur);
-      element.removeEventListener('keyup', handleSelectionChange);
-      element.removeEventListener('mouseup', handleSelectionChange);
-      element.removeEventListener('touchend', handleSelectionChange);
-      ownerDocument.removeEventListener('selectionchange', handleSelectionChange);
-      defaultView.cancelAnimationFrame(rafId);
-    };
-  }, []);
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-delete.js
-/**
- * WordPress dependencies
- */
-
-
-
-/**
- * Internal dependencies
- */
-
-
-
-
-function useDelete(props) {
-  const propsRef = Object(external_wp_element_["useRef"])(props);
-  propsRef.current = props;
-  return Object(external_wp_compose_["useRefEffect"])(element => {
-    function onKeyDown(event) {
-      const {
-        keyCode
-      } = event;
-      const {
-        createRecord,
-        handleChange,
-        multilineTag
-      } = propsRef.current;
-
-      if (event.defaultPrevented) {
-        return;
-      }
-
-      if (keyCode !== external_wp_keycodes_["DELETE"] && keyCode !== external_wp_keycodes_["BACKSPACE"]) {
-        return;
-      }
-
-      const currentValue = createRecord();
-      const {
-        start,
-        end,
-        text
-      } = currentValue;
-      const isReverse = keyCode === external_wp_keycodes_["BACKSPACE"]; // Always handle full content deletion ourselves.
-
-      if (start === 0 && end !== 0 && end === text.length) {
-        handleChange(remove_remove(currentValue));
-        event.preventDefault();
-        return;
-      }
-
-      if (multilineTag) {
-        let newValue; // Check to see if we should remove the first item if empty.
-
-        if (isReverse && currentValue.start === 0 && currentValue.end === 0 && isEmptyLine(currentValue)) {
-          newValue = removeLineSeparator(currentValue, !isReverse);
-        } else {
-          newValue = removeLineSeparator(currentValue, isReverse);
-        }
-
-        if (newValue) {
-          handleChange(newValue);
-          event.preventDefault();
-        }
-      }
-    }
-
-    element.addEventListener('keydown', onKeyDown);
-    return () => {
-      element.removeEventListener('keydown', onKeyDown);
-    };
-  }, []);
-}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/index.js
-/**
- * WordPress dependencies
- */
-
-
-/**
- * Internal dependencies
- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-function useRichText({
-  value = '',
-  selectionStart,
-  selectionEnd,
-  placeholder,
-  preserveWhiteSpace,
-  onSelectionChange,
-  onChange,
-  __unstableMultilineTag: multilineTag,
-  __unstableDisableFormats: disableFormats,
-  __unstableIsSelected: isSelected,
-  __unstableDependencies,
-  __unstableAfterParse,
-  __unstableBeforeSerialize,
-  __unstableAddInvisibleFormats
-}) {
-  const [, forceRender] = Object(external_wp_element_["useReducer"])(() => ({}));
-  const ref = Object(external_wp_element_["useRef"])();
-
-  function createRecord() {
-    const {
-      ownerDocument: {
-        defaultView
-      }
-    } = ref.current;
-    const selection = defaultView.getSelection();
-    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-    return create({
-      element: ref.current,
-      range,
-      multilineTag,
-      multilineWrapperTags: multilineTag === 'li' ? ['ul', 'ol'] : undefined,
-      __unstableIsEditableTree: true,
-      preserveWhiteSpace
-    });
-  }
-
-  function applyRecord(newRecord, {
-    domOnly
-  } = {}) {
-    apply({
-      value: newRecord,
-      current: ref.current,
-      multilineTag,
-      multilineWrapperTags: multilineTag === 'li' ? ['ul', 'ol'] : undefined,
-      prepareEditableTree: __unstableAddInvisibleFormats,
-      __unstableDomOnly: domOnly,
-      placeholder
-    });
-  } // Internal values are updated synchronously, unlike props and state.
-
-
-  const _value = Object(external_wp_element_["useRef"])(value);
-
-  const record = Object(external_wp_element_["useRef"])();
-
-  function setRecordFromProps() {
-    _value.current = value;
-    record.current = create({
-      html: value,
-      multilineTag,
-      multilineWrapperTags: multilineTag === 'li' ? ['ul', 'ol'] : undefined,
-      preserveWhiteSpace
-    });
-
-    if (disableFormats) {
-      record.current.formats = Array(value.length);
-      record.current.replacements = Array(value.length);
-    }
-
-    record.current.formats = __unstableAfterParse(record.current);
-    record.current.start = selectionStart;
-    record.current.end = selectionEnd;
-  }
-
-  const hadSelectionUpdate = Object(external_wp_element_["useRef"])(false);
-
-  if (!record.current) {
-    setRecordFromProps();
-  } else if (selectionStart !== record.current.start || selectionEnd !== record.current.end) {
-    hadSelectionUpdate.current = isSelected;
-    record.current = { ...record.current,
-      start: selectionStart,
-      end: selectionEnd
-    };
-  }
-  /**
-   * Sync the value to global state. The node tree and selection will also be
-   * updated if differences are found.
-   *
-   * @param {Object} newRecord The record to sync and apply.
-   */
-
-
-  function handleChange(newRecord) {
-    applyRecord(newRecord);
-
-    if (disableFormats) {
-      _value.current = newRecord.text;
-    } else {
-      _value.current = toHTMLString({
-        value: { ...newRecord,
-          formats: __unstableBeforeSerialize(newRecord)
-        },
-        multilineTag,
-        preserveWhiteSpace
-      });
-    }
-
-    record.current = newRecord;
-    const {
-      start,
-      end,
-      formats,
-      text
-    } = newRecord; // Selection must be updated first, so it is recorded in history when
-    // the content change happens.
-
-    onSelectionChange(start, end);
-    onChange(_value.current, {
-      __unstableFormats: formats,
-      __unstableText: text
-    });
-    forceRender();
-  }
-
-  function applyFromProps() {
-    setRecordFromProps();
-    applyRecord(record.current);
-  }
-
-  const didMount = Object(external_wp_element_["useRef"])(false); // Value updates must happen synchonously to avoid overwriting newer values.
-
-  Object(external_wp_element_["useLayoutEffect"])(() => {
-    if (didMount.current && value !== _value.current) {
-      applyFromProps();
-    }
-  }, [value]); // Value updates must happen synchonously to avoid overwriting newer values.
-
-  Object(external_wp_element_["useLayoutEffect"])(() => {
-    if (!hadSelectionUpdate.current) {
-      return;
-    }
-
-    applyFromProps();
-    hadSelectionUpdate.current = false;
-  }, [hadSelectionUpdate.current]);
-
-  function focus() {
-    ref.current.focus();
-    applyRecord(record.current);
-  }
-
-  const mergedRefs = Object(external_wp_compose_["useMergeRefs"])([ref, useDefaultStyle(), useBoundaryStyle({
-    record
-  }), useInlineWarning(), useCopyHandler({
-    record,
-    multilineTag,
-    preserveWhiteSpace
-  }), useSelectObject(), useFormatBoundaries({
-    record,
-    applyRecord
-  }), useDelete({
-    createRecord,
-    handleChange,
-    multilineTag
-  }), useIndentListItemOnSpace({
-    multilineTag,
-    createRecord,
-    handleChange
-  }), useInputAndSelection({
-    record,
-    applyRecord,
-    createRecord,
-    handleChange,
-    isSelected,
-    onSelectionChange
-  }), Object(external_wp_compose_["useRefEffect"])(() => {
-    applyFromProps();
-    didMount.current = true;
-  }, [placeholder, ...__unstableDependencies])]);
-  return {
-    value: record.current,
-    onChange: handleChange,
-    onFocus: focus,
-    ref: mergedRefs
-  };
-}
-function __experimentalRichText() {}
-
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/format-edit.js
-
-
-/**
- * Internal dependencies
- */
-
-
-function FormatEdit({
-  formatTypes,
-  onChange,
-  onFocus,
-  value,
-  forwardedRef
-}) {
-  return formatTypes.map(settings => {
-    const {
-      name,
-      edit: Edit
-    } = settings;
-
-    if (!Edit) {
-      return null;
-    }
-
-    const activeFormat = getActiveFormat(value, name);
-    const isActive = activeFormat !== undefined;
-    const activeObject = getActiveObject(value);
-    const isObjectActive = activeObject !== undefined && activeObject.type === name;
-    return Object(external_wp_element_["createElement"])(Edit, {
-      key: name,
-      isActive: isActive,
-      activeAttributes: isActive ? activeFormat.attributes || {} : {},
-      isObjectActive: isObjectActive,
-      activeObjectAttributes: isObjectActive ? activeObject.attributes || {} : {},
-      value: value,
-      onChange: onChange,
-      onFocus: onFocus,
-      contentRef: forwardedRef
-    });
+  return normaliseFormats({
+    text: text,
+    formats: newFormats,
+    start: start,
+    end: end
   });
 }
 
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/index.js
-
-
-
-
-
-
-
 
 
 

@@ -11,33 +11,21 @@
 if ( ! class_exists( 'POMO_Reader', false ) ) :
 	class POMO_Reader {
 
-		public $endian = 'little';
-		public $_post  = '';
+		var $endian = 'little';
+		var $_post  = '';
 
 		/**
 		 * PHP5 constructor.
 		 */
 		function __construct() {
-			if ( function_exists( 'mb_substr' )
-				&& ( (int) ini_get( 'mbstring.func_overload' ) & 2 ) // phpcs:ignore PHPCompatibility.IniDirectives.RemovedIniDirectives.mbstring_func_overloadDeprecated
-			) {
-				$this->is_overloaded = true;
-			} else {
-				$this->is_overloaded = false;
-			}
-
-			$this->_pos = 0;
+			$this->is_overloaded = ( ( ini_get( 'mbstring.func_overload' ) & 2 ) != 0 ) && function_exists( 'mb_substr' );
+			$this->_pos          = 0;
 		}
 
 		/**
 		 * PHP4 constructor.
-		 *
-		 * @deprecated 5.4.0 Use __construct() instead.
-		 *
-		 * @see POMO_Reader::__construct()
 		 */
 		public function POMO_Reader() {
-			_deprecated_constructor( self::class, '5.4.0', static::class );
 			self::__construct();
 		}
 
@@ -46,7 +34,7 @@ if ( ! class_exists( 'POMO_Reader', false ) ) :
 		 *
 		 * @param string $endian Set the endianness of the file. Accepts 'big', or 'little'.
 		 */
-		function setEndian( $endian ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
+		function setEndian( $endian ) {
 			$this->endian = $endian;
 		}
 
@@ -61,7 +49,7 @@ if ( ! class_exists( 'POMO_Reader', false ) ) :
 			if ( 4 != $this->strlen( $bytes ) ) {
 				return false;
 			}
-			$endian_letter = ( 'big' === $this->endian ) ? 'N' : 'V';
+			$endian_letter = ( 'big' == $this->endian ) ? 'N' : 'V';
 			$int           = unpack( $endian_letter, $bytes );
 			return reset( $int );
 		}
@@ -69,7 +57,7 @@ if ( ! class_exists( 'POMO_Reader', false ) ) :
 		/**
 		 * Reads an array of 32-bit Integers from the Stream
 		 *
-		 * @param int $count How many elements should be read
+		 * @param integer $count How many elements should be read
 		 * @return mixed Array of integers or false if there isn't
 		 *  enough data or on error
 		 */
@@ -78,7 +66,7 @@ if ( ! class_exists( 'POMO_Reader', false ) ) :
 			if ( 4 * $count != $this->strlen( $bytes ) ) {
 				return false;
 			}
-			$endian_letter = ( 'big' === $this->endian ) ? 'N' : 'V';
+			$endian_letter = ( 'big' == $this->endian ) ? 'N' : 'V';
 			return unpack( $endian_letter . $count, $bytes );
 		}
 
@@ -156,19 +144,14 @@ if ( ! class_exists( 'POMO_FileReader', false ) ) :
 		 * @param string $filename
 		 */
 		function __construct( $filename ) {
-			parent::__construct();
+			parent::POMO_Reader();
 			$this->_f = fopen( $filename, 'rb' );
 		}
 
 		/**
 		 * PHP4 constructor.
-		 *
-		 * @deprecated 5.4.0 Use __construct() instead.
-		 *
-		 * @see POMO_FileReader::__construct()
 		 */
 		public function POMO_FileReader( $filename ) {
-			_deprecated_constructor( self::class, '5.4.0', static::class );
 			self::__construct( $filename );
 		}
 
@@ -182,7 +165,7 @@ if ( ! class_exists( 'POMO_FileReader', false ) ) :
 
 		/**
 		 * @param int $pos
-		 * @return bool
+		 * @return boolean
 		 */
 		function seekto( $pos ) {
 			if ( -1 == fseek( $this->_f, $pos, SEEK_SET ) ) {
@@ -233,26 +216,21 @@ if ( ! class_exists( 'POMO_StringReader', false ) ) :
 	 */
 	class POMO_StringReader extends POMO_Reader {
 
-		public $_str = '';
+		var $_str = '';
 
 		/**
 		 * PHP5 constructor.
 		 */
 		function __construct( $str = '' ) {
-			parent::__construct();
+			parent::POMO_Reader();
 			$this->_str = $str;
 			$this->_pos = 0;
 		}
 
 		/**
 		 * PHP4 constructor.
-		 *
-		 * @deprecated 5.4.0 Use __construct() instead.
-		 *
-		 * @see POMO_StringReader::__construct()
 		 */
 		public function POMO_StringReader( $str = '' ) {
-			_deprecated_constructor( self::class, '5.4.0', static::class );
 			self::__construct( $str );
 		}
 
@@ -307,7 +285,7 @@ if ( ! class_exists( 'POMO_CachedFileReader', false ) ) :
 		 * PHP5 constructor.
 		 */
 		function __construct( $filename ) {
-			parent::__construct();
+			parent::POMO_StringReader();
 			$this->_str = file_get_contents( $filename );
 			if ( false === $this->_str ) {
 				return false;
@@ -317,13 +295,8 @@ if ( ! class_exists( 'POMO_CachedFileReader', false ) ) :
 
 		/**
 		 * PHP4 constructor.
-		 *
-		 * @deprecated 5.4.0 Use __construct() instead.
-		 *
-		 * @see POMO_CachedFileReader::__construct()
 		 */
 		public function POMO_CachedFileReader( $filename ) {
-			_deprecated_constructor( self::class, '5.4.0', static::class );
 			self::__construct( $filename );
 		}
 	}
@@ -338,18 +311,13 @@ if ( ! class_exists( 'POMO_CachedIntFileReader', false ) ) :
 		 * PHP5 constructor.
 		 */
 		public function __construct( $filename ) {
-			parent::__construct( $filename );
+			parent::POMO_CachedFileReader( $filename );
 		}
 
 		/**
 		 * PHP4 constructor.
-		 *
-		 * @deprecated 5.4.0 Use __construct() instead.
-		 *
-		 * @see POMO_CachedIntFileReader::__construct()
 		 */
 		function POMO_CachedIntFileReader( $filename ) {
-			_deprecated_constructor( self::class, '5.4.0', static::class );
 			self::__construct( $filename );
 		}
 	}

@@ -48,8 +48,7 @@ class WP_List_Util {
 	 * @param array $input Array to perform operations on.
 	 */
 	public function __construct( $input ) {
-		$this->output = $input;
-		$this->input  = $input;
+		$this->output = $this->input = $input;
 	}
 
 	/**
@@ -77,13 +76,6 @@ class WP_List_Util {
 	/**
 	 * Filters the list, based on a set of key => value arguments.
 	 *
-	 * Retrieves the objects from the list that match the given arguments.
-	 * Key represents property name, and value represents property value.
-	 *
-	 * If an object has more properties than those specified in arguments,
-	 * that will not disqualify it. When using the 'AND' operator,
-	 * any missing properties will disqualify it.
-	 *
 	 * @since 4.7.0
 	 *
 	 * @param array  $args     Optional. An array of key => value arguments to match
@@ -109,25 +101,19 @@ class WP_List_Util {
 		$filtered = array();
 
 		foreach ( $this->output as $key => $obj ) {
-			$matched = 0;
+			$to_match = (array) $obj;
 
+			$matched = 0;
 			foreach ( $args as $m_key => $m_value ) {
-				if ( is_array( $obj ) ) {
-					// Treat object as an array.
-					if ( array_key_exists( $m_key, $obj ) && ( $m_value == $obj[ $m_key ] ) ) {
-						$matched++;
-					}
-				} elseif ( is_object( $obj ) ) {
-					// Treat object as an object.
-					if ( isset( $obj->{$m_key} ) && ( $m_value == $obj->{$m_key} ) ) {
-						$matched++;
-					}
+				if ( array_key_exists( $m_key, $to_match ) && $m_value == $to_match[ $m_key ] ) {
+					$matched++;
 				}
 			}
 
-			if ( ( 'AND' === $operator && $matched === $count )
-				|| ( 'OR' === $operator && $matched > 0 )
-				|| ( 'NOT' === $operator && 0 === $matched )
+			if (
+				( 'AND' == $operator && $matched == $count ) ||
+				( 'OR' == $operator && $matched > 0 ) ||
+				( 'NOT' == $operator && 0 == $matched )
 			) {
 				$filtered[ $key ] = $obj;
 			}
