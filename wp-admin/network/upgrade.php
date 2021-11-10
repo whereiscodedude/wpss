@@ -8,11 +8,10 @@
  */
 
 /** Load WordPress Administration Bootstrap */
-require_once __DIR__ . '/admin.php';
+require_once( dirname( __FILE__ ) . '/admin.php' );
 
-require_once ABSPATH . WPINC . '/http.php';
+require_once( ABSPATH . WPINC . '/http.php' );
 
-// Used in the HTML title tag.
 $title       = __( 'Upgrade Network' );
 $parent_file = 'upgrade.php';
 
@@ -33,7 +32,7 @@ get_current_screen()->set_help_sidebar(
 	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
-require_once ABSPATH . 'wp-admin/admin-header.php';
+require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
 if ( ! current_user_can( 'upgrade_network' ) ) {
 	wp_die( __( 'Sorry, you are not allowed to access this page.' ), 403 );
@@ -46,7 +45,7 @@ $action = isset( $_GET['action'] ) ? $_GET['action'] : 'show';
 
 switch ( $action ) {
 	case 'upgrade':
-		$n = ( isset( $_GET['n'] ) ) ? (int) $_GET['n'] : 0;
+		$n = ( isset( $_GET['n'] ) ) ? intval( $_GET['n'] ) : 0;
 
 		if ( $n < 5 ) {
 			/**
@@ -91,7 +90,6 @@ switch ( $action ) {
 					'sslverify'   => false,
 				)
 			);
-
 			if ( is_wp_error( $response ) ) {
 				wp_die(
 					sprintf(
@@ -111,7 +109,6 @@ switch ( $action ) {
 			 * @param array|WP_Error $response The upgrade response array or WP_Error on failure.
 			 */
 			do_action( 'after_mu_upgrade', $response );
-
 			/**
 			 * Fires after each site has been upgraded.
 			 *
@@ -135,7 +132,7 @@ switch ( $action ) {
 		break;
 	case 'show':
 	default:
-		if ( (int) get_site_option( 'wpmu_upgrade_site' ) !== $GLOBALS['wp_db_version'] ) :
+		if ( get_site_option( 'wpmu_upgrade_site' ) != $GLOBALS['wp_db_version'] ) :
 			?>
 		<h2><?php _e( 'Database Update Required' ); ?></h2>
 		<p><?php _e( 'WordPress has been updated! Before we send you on your way, we need to individually upgrade the sites in your network.' ); ?></p>
@@ -155,4 +152,4 @@ switch ( $action ) {
 ?>
 </div>
 
-<?php require_once ABSPATH . 'wp-admin/admin-footer.php'; ?>
+<?php include( ABSPATH . 'wp-admin/admin-footer.php' ); ?>
