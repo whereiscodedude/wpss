@@ -18,7 +18,6 @@
  * avoid registering rewrite rules before the {@see 'init'} action.
  *
  * @since 2.8.0
- * @since 5.9.0 Added `'wp_template_part_area'` taxonomy.
  *
  * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
  */
@@ -108,26 +107,17 @@ function create_initial_taxonomies() {
 		'nav_menu',
 		'nav_menu_item',
 		array(
-			'public'                => false,
-			'hierarchical'          => false,
-			'labels'                => array(
+			'public'            => false,
+			'hierarchical'      => false,
+			'labels'            => array(
 				'name'          => __( 'Navigation Menus' ),
 				'singular_name' => __( 'Navigation Menu' ),
 			),
-			'query_var'             => false,
-			'rewrite'               => false,
-			'show_ui'               => false,
-			'_builtin'              => true,
-			'show_in_nav_menus'     => false,
-			'capabilities'          => array(
-				'manage_terms' => 'edit_theme_options',
-				'edit_terms'   => 'edit_theme_options',
-				'delete_terms' => 'edit_theme_options',
-				'assign_terms' => 'edit_theme_options',
-			),
-			'show_in_rest'          => true,
-			'rest_base'             => 'menus',
-			'rest_controller_class' => 'WP_REST_Menus_Controller',
+			'query_var'         => false,
+			'rewrite'           => false,
+			'show_ui'           => false,
+			'_builtin'          => true,
+			'show_in_nav_menus' => false,
 		)
 	);
 
@@ -185,32 +175,13 @@ function create_initial_taxonomies() {
 
 	register_taxonomy(
 		'wp_theme',
-		array( 'wp_template', 'wp_template_part', 'wp_global_styles' ),
+		array( 'wp_template' ),
 		array(
 			'public'            => false,
 			'hierarchical'      => false,
 			'labels'            => array(
 				'name'          => __( 'Themes' ),
 				'singular_name' => __( 'Theme' ),
-			),
-			'query_var'         => false,
-			'rewrite'           => false,
-			'show_ui'           => false,
-			'_builtin'          => true,
-			'show_in_nav_menus' => false,
-			'show_in_rest'      => false,
-		)
-	);
-
-	register_taxonomy(
-		'wp_template_part_area',
-		array( 'wp_template_part' ),
-		array(
-			'public'            => false,
-			'hierarchical'      => false,
-			'labels'            => array(
-				'name'          => __( 'Template Part Areas' ),
-				'singular_name' => __( 'Template Part Area' ),
 			),
 			'query_var'         => false,
 			'rewrite'           => false,
@@ -227,7 +198,7 @@ function create_initial_taxonomies() {
  *
  * @since 3.0.0
  *
- * @global WP_Taxonomy[] $wp_taxonomies The registered taxonomies.
+ * @global array $wp_taxonomies The registered taxonomies.
  *
  * @param array  $args     Optional. An array of `key => value` arguments to match against the taxonomy objects.
  *                         Default empty array.
@@ -260,7 +231,7 @@ function get_taxonomies( $args = array(), $output = 'names', $operator = 'and' )
  *
  * @since 2.3.0
  *
- * @global WP_Taxonomy[] $wp_taxonomies The registered taxonomies.
+ * @global array $wp_taxonomies The registered taxonomies.
  *
  * @param string|string[]|WP_Post $object Name of the type of taxonomy object, or an object (row from posts)
  * @param string                  $output Optional. The type of output to return in the array. Accepts either
@@ -301,7 +272,7 @@ function get_object_taxonomies( $object, $output = 'names' ) {
  *
  * @since 2.3.0
  *
- * @global WP_Taxonomy[] $wp_taxonomies The registered taxonomies.
+ * @global array $wp_taxonomies The registered taxonomies.
  *
  * @param string $taxonomy Name of taxonomy object to return.
  * @return WP_Taxonomy|false The Taxonomy Object or false if $taxonomy doesn't exist.
@@ -327,7 +298,7 @@ function get_taxonomy( $taxonomy ) {
  *
  * @since 3.0.0
  *
- * @global WP_Taxonomy[] $wp_taxonomies The registered taxonomies.
+ * @global array $wp_taxonomies The registered taxonomies.
  *
  * @param string $taxonomy Name of taxonomy object.
  * @return bool Whether the taxonomy exists.
@@ -384,9 +355,8 @@ function is_taxonomy_hierarchical( $taxonomy ) {
  * @since 5.1.0 Introduced `meta_box_sanitize_cb` argument.
  * @since 5.4.0 Added the registered taxonomy object as a return value.
  * @since 5.5.0 Introduced `default_term` argument.
- * @since 5.9.0 Introduced `rest_namespace` argument.
  *
- * @global WP_Taxonomy[] $wp_taxonomies Registered taxonomies.
+ * @global array $wp_taxonomies Registered taxonomies.
  *
  * @param string       $taxonomy    Taxonomy key, must not exceed 32 characters.
  * @param array|string $object_type Object type or array of object types with which the taxonomy should be associated.
@@ -417,7 +387,6 @@ function is_taxonomy_hierarchical( $taxonomy ) {
  *     @type bool          $show_in_rest          Whether to include the taxonomy in the REST API. Set this to true
  *                                                for the taxonomy to be available in the block editor.
  *     @type string        $rest_base             To change the base url of REST API route. Default is $taxonomy.
- *     @type string        $rest_namespace        To change the namespace URL of REST API route. Default is wp/v2.
  *     @type string        $rest_controller_class REST API Controller class name. Default is 'WP_REST_Terms_Controller'.
  *     @type bool          $show_tagcloud         Whether to list the taxonomy in the Tag Cloud Widget controls. If not set,
  *                                                the default is inherited from `$show_ui` (default true).
@@ -538,7 +507,7 @@ function register_taxonomy( $taxonomy, $object_type, $args = array() ) {
  * @since 4.5.0
  *
  * @global WP    $wp            Current WordPress environment instance.
- * @global WP_Taxonomy[] $wp_taxonomies List of taxonomies.
+ * @global array $wp_taxonomies List of taxonomies.
  *
  * @param string $taxonomy Taxonomy name.
  * @return true|WP_Error True on success, WP_Error on failure or if the taxonomy doesn't exist.
@@ -646,16 +615,12 @@ function get_taxonomy_labels( $tax ) {
 
 	$nohier_vs_hier_defaults = array(
 		'name'                       => array( _x( 'Tags', 'taxonomy general name' ), _x( 'Categories', 'taxonomy general name' ) ),
-		'name_description'           => array( __( 'The name is how it appears on your site.' ), __( 'The name is how it appears on your site.' ) ),
 		'singular_name'              => array( _x( 'Tag', 'taxonomy singular name' ), _x( 'Category', 'taxonomy singular name' ) ),
 		'search_items'               => array( __( 'Search Tags' ), __( 'Search Categories' ) ),
 		'popular_items'              => array( __( 'Popular Tags' ), null ),
 		'all_items'                  => array( __( 'All Tags' ), __( 'All Categories' ) ),
 		'parent_item'                => array( null, __( 'Parent Category' ) ),
 		'parent_item_colon'          => array( null, __( 'Parent Category:' ) ),
-		'parent_description'         => array( null, __( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ) ),
-		'slug_description'           => array( __( 'The &#8220;slug&#8221; is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ), __( 'The &#8220;slug&#8221; is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ) ),
-		'description_description'    => array( __( 'The description is not prominent by default; however, some themes may show it.' ), __( 'The description is not prominent by default; however, some themes may show it.' ) ),
 		'edit_item'                  => array( __( 'Edit Tag' ), __( 'Edit Category' ) ),
 		'view_item'                  => array( __( 'View Tag' ), __( 'View Category' ) ),
 		'update_item'                => array( __( 'Update Tag' ), __( 'Update Category' ) ),
@@ -719,7 +684,7 @@ function get_taxonomy_labels( $tax ) {
  *
  * @since 3.0.0
  *
- * @global WP_Taxonomy[] $wp_taxonomies The registered taxonomies.
+ * @global array $wp_taxonomies The registered taxonomies.
  *
  * @param string $taxonomy    Name of taxonomy object.
  * @param string $object_type Name of the object type.
@@ -761,7 +726,7 @@ function register_taxonomy_for_object_type( $taxonomy, $object_type ) {
  *
  * @since 3.7.0
  *
- * @global WP_Taxonomy[] $wp_taxonomies The registered taxonomies.
+ * @global array $wp_taxonomies The registered taxonomies.
  *
  * @param string $taxonomy    Name of taxonomy object.
  * @param string $object_type Name of the object type.
@@ -980,13 +945,8 @@ function get_term( $term, $taxonomy = '', $output = OBJECT, $filter = 'raw' ) {
 	/**
 	 * Filters a taxonomy term object.
 	 *
-	 * The dynamic portion of the hook name, `$taxonomy`, refers
+	 * The dynamic portion of the filter name, `$taxonomy`, refers
 	 * to the slug of the term's taxonomy.
-	 *
-	 * Possible hook names include:
-	 *
-	 *  - `get_category`
-	 *  - `get_post_tag`
 	 *
 	 * @since 2.3.0
 	 * @since 4.4.0 `$_term` is now a `WP_Term` object.
@@ -1041,7 +1001,7 @@ function get_term( $term, $taxonomy = '', $output = OBJECT, $filter = 'raw' ) {
  *
  * @see sanitize_term_field() The $context param lists the available values for get_term_by() $filter param.
  *
- * @param string     $field    Either 'slug', 'name', 'term_id' (or 'id', 'ID'), or 'term_taxonomy_id'.
+ * @param string     $field    Either 'slug', 'name', 'id' or 'ID' (term_id), or 'term_taxonomy_id'.
  * @param string|int $value    Search for this term value.
  * @param string     $taxonomy Taxonomy name. Optional, if `$field` is 'term_taxonomy_id'.
  * @param string     $output   Optional. The required return type. One of OBJECT, ARRAY_A, or ARRAY_N, which
@@ -1515,10 +1475,6 @@ function unregister_term_meta( $taxonomy, $meta_key ) {
 function term_exists( $term, $taxonomy = '', $parent = null ) {
 	global $wpdb;
 
-	if ( null === $term ) {
-		return null;
-	}
-
 	$select     = "SELECT term_id FROM $wpdb->terms as t WHERE ";
 	$tax_select = "SELECT tt.term_id, tt.term_taxonomy_id FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy as tt ON tt.term_id = t.term_id WHERE ";
 
@@ -1694,7 +1650,7 @@ function sanitize_term_field( $field, $value, $term_id, $taxonomy, $context ) {
 		/**
 		 * Filters a term field to edit before it is sanitized.
 		 *
-		 * The dynamic portion of the hook name, `$field`, refers to the term field.
+		 * The dynamic portion of the filter name, `$field`, refers to the term field.
 		 *
 		 * @since 2.3.0
 		 *
@@ -1727,7 +1683,7 @@ function sanitize_term_field( $field, $value, $term_id, $taxonomy, $context ) {
 		/**
 		 * Filters a term field value before it is sanitized.
 		 *
-		 * The dynamic portion of the hook name, `$field`, refers to the term field.
+		 * The dynamic portion of the filter name, `$field`, refers to the term field.
 		 *
 		 * @since 2.3.0
 		 *
@@ -1766,7 +1722,7 @@ function sanitize_term_field( $field, $value, $term_id, $taxonomy, $context ) {
 		/**
 		 * Filters the term field for use in RSS.
 		 *
-		 * The dynamic portion of the hook name, `$field`, refers to the term field.
+		 * The dynamic portion of the filter name, `$field`, refers to the term field.
 		 *
 		 * @since 2.3.0
 		 *
@@ -1792,7 +1748,7 @@ function sanitize_term_field( $field, $value, $term_id, $taxonomy, $context ) {
 		/**
 		 * Filters the term field sanitized for display.
 		 *
-		 * The dynamic portion of the hook name, `$field`, refers to the term field name.
+		 * The dynamic portion of the filter name, `$field`, refers to the term field name.
 		 *
 		 * @since 2.3.0
 		 *

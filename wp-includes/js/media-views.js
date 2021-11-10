@@ -2858,21 +2858,16 @@ UploaderInline = View.extend(/** @lends wp.media.view.UploaderInline.prototype *
 			$placeholder;
 
 		if ( this.controller.uploader ) {
-			$placeholder = this.$('.browser-container');
+			$placeholder = this.$('.browser');
 
 			// Check if we've already replaced the placeholder.
 			if ( $placeholder[0] === $browser[0] ) {
 				return;
 			}
 
-			var browserLabel = $placeholder.find( 'label' );
-			var browserInput = $placeholder.find( 'input' );
-
-			browserLabel.attr( 'for', $browser[0].id );
-			browserInput.attr( 'id', $browser[0].id );
-			$browser.removeAttr( 'id' );
-
-			$browser.append( browserLabel ).append( browserInput );
+			$browser.detach().text( $placeholder.text() );
+			$browser[0].className = $placeholder[0].className;
+			$browser[0].setAttribute( 'aria-labelledby', $browser[0].id + ' ' + $placeholder[0].getAttribute('aria-labelledby') );
 			$placeholder.replaceWith( $browser.show() );
 		}
 
@@ -3451,7 +3446,7 @@ Library = wp.media.controller.State.extend(/** @lends wp.media.controller.Librar
 	isImageAttachment: function( attachment ) {
 		// If uploading, we know the filename but not the mime type.
 		if ( attachment.get('uploading') ) {
-			return /\.(jpe?g|png|gif|webp)$/i.test( attachment.get('filename') );
+			return /\.(jpe?g|png|gif)$/i.test( attachment.get('filename') );
 		}
 
 		return attachment.get('type') === 'image';
@@ -6339,7 +6334,7 @@ UploaderWindow = wp.media.View.extend(/** @lends wp.media.view.UploaderWindow.pr
 	initialize: function() {
 		var uploader;
 
-		this.$browser = $( '<div class="browser-container">' ).hide().appendTo( 'body' );
+		this.$browser = $( '<button type="button" class="browser" />' ).hide().appendTo( 'body' );
 
 		uploader = this.options.uploader = _.defaults( this.options.uploader || {}, {
 			dropzone:  this.$el,
@@ -8076,8 +8071,8 @@ Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 		// Enable page scrolling.
 		$( 'body' ).removeClass( 'modal-open' );
 
-		// Hide the modal element by adding display none.
-		this.$el.hide();
+		// Hide modal and remove restricted media modal tab focus once it's closed.
+		this.$el.hide().off( 'keydown' );
 
 		/*
 		 * Make visible again to assistive technologies all body children that

@@ -159,7 +159,7 @@ function get_registered_nav_menus() {
  *
  * @since 3.0.0
  *
- * @return int[] Associative array of registered navigation menu IDs keyed by their
+ * @return int[] Associative array of egistered navigation menu IDs keyed by their
  *               location name. If none are registered, an empty array.
  */
 function get_nav_menu_locations() {
@@ -406,11 +406,10 @@ function wp_update_nav_menu_object( $menu_id = 0, $menu_data = array() ) {
 /**
  * Save the properties of a menu item or create a new one.
  *
- * The menu-item-title, menu-item-description, menu-item-attr-title, and menu-item-content are expected
- * to be pre-slashed since they are passed directly to APIs that expect slashed data.
+ * The menu-item-title, menu-item-description, and menu-item-attr-title are expected
+ * to be pre-slashed since they are passed directly into `wp_insert_post()`.
  *
  * @since 3.0.0
- * @since 5.9.0 Added the menu-item-content parameter.
  *
  * @param int   $menu_id         The ID of the menu. Required. If "0", makes the menu item a draft orphan.
  * @param int   $menu_item_db_id The ID of the menu item. If "0", creates a new menu item.
@@ -449,7 +448,6 @@ function wp_update_nav_menu_item( $menu_id = 0, $menu_item_db_id = 0, $menu_item
 		'menu-item-attr-title'    => '',
 		'menu-item-target'        => '',
 		'menu-item-classes'       => '',
-		'menu-item-content'       => '',
 		'menu-item-xfn'           => '',
 		'menu-item-status'        => '',
 		'menu-item-post-date'     => '',
@@ -528,7 +526,7 @@ function wp_update_nav_menu_item( $menu_id = 0, $menu_item_db_id = 0, $menu_item
 	if ( ! $update ) {
 		$post['ID']          = 0;
 		$post['post_status'] = 'publish' === $args['menu-item-status'] ? 'publish' : 'draft';
-		$menu_item_db_id     = wp_insert_post( $post, true );
+		$menu_item_db_id     = wp_insert_post( $post );
 		if ( ! $menu_item_db_id || is_wp_error( $menu_item_db_id ) ) {
 			return $menu_item_db_id;
 		}
@@ -550,10 +548,7 @@ function wp_update_nav_menu_item( $menu_id = 0, $menu_item_db_id = 0, $menu_item
 	// Associate the menu item with the menu term.
 	// Only set the menu term if it isn't set to avoid unnecessary wp_get_object_terms().
 	if ( $menu_id && ( ! $update || ! is_object_in_term( $menu_item_db_id, 'nav_menu', (int) $menu->term_id ) ) ) {
-		$update_terms = wp_set_object_terms( $menu_item_db_id, array( $menu->term_id ), 'nav_menu' );
-		if ( is_wp_error( $update_terms ) ) {
-			return $update_terms;
-		}
+		wp_set_object_terms( $menu_item_db_id, array( $menu->term_id ), 'nav_menu' );
 	}
 
 	if ( 'custom' === $args['menu-item-type'] ) {
@@ -574,7 +569,6 @@ function wp_update_nav_menu_item( $menu_id = 0, $menu_item_db_id = 0, $menu_item
 	update_post_meta( $menu_item_db_id, '_menu_item_classes', $args['menu-item-classes'] );
 	update_post_meta( $menu_item_db_id, '_menu_item_xfn', $args['menu-item-xfn'] );
 	update_post_meta( $menu_item_db_id, '_menu_item_url', esc_url_raw( $args['menu-item-url'] ) );
-	update_post_meta( $menu_item_db_id, '_menu_item_content', $args['menu-item-content'] );
 
 	if ( 0 == $menu_id ) {
 		update_post_meta( $menu_item_db_id, '_menu_item_orphaned', (string) time() );
@@ -586,11 +580,7 @@ function wp_update_nav_menu_item( $menu_id = 0, $menu_item_db_id = 0, $menu_item
 	if ( $update ) {
 		$post['ID']          = $menu_item_db_id;
 		$post['post_status'] = ( 'draft' === $args['menu-item-status'] ) ? 'draft' : 'publish';
-
-		$update_post = wp_update_post( $post, true );
-		if ( is_wp_error( $update_post ) ) {
-			return $update_post;
-		}
+		wp_update_post( $post );
 	}
 
 	/**
@@ -913,10 +903,6 @@ function wp_setup_nav_menu_item( $menu_item ) {
 
 				$menu_item->title = ( '' === $menu_item->post_title ) ? $original_title : $menu_item->post_title;
 
-			} elseif ( 'block' === $menu_item->type ) {
-				$menu_item->type_label        = __( 'Block' );
-				$menu_item->title             = $menu_item->post_title;
-				$menu_item->menu_item_content = ! isset( $menu_item->menu_item_content ) ? get_post_meta( $menu_item->ID, '_menu_item_content', true ) : $menu_item->menu_item_content;
 			} else {
 				$menu_item->type_label = __( 'Custom Link' );
 				$menu_item->title      = $menu_item->post_title;

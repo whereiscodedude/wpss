@@ -864,7 +864,6 @@ $_new_bundled_files = array(
 	'themes/twentynineteen/'  => '5.0',
 	'themes/twentytwenty/'    => '5.3',
 	'themes/twentytwentyone/' => '5.6',
-	'themes/twentytwentytwo/' => '5.9',
 );
 
 /**
@@ -1657,13 +1656,6 @@ function _upgrade_422_find_genericons_files_in_folder( $directory ) {
 	}
 
 	$dirs = glob( $directory . '*', GLOB_ONLYDIR );
-	$dirs = array_filter(
-		$dirs,
-		static function( $dir ) {
-			// Skip any node_modules directories.
-			return false === strpos( $dir, 'node_modules' );
-		}
-	);
 
 	if ( $dirs ) {
 		foreach ( $dirs as $dir ) {

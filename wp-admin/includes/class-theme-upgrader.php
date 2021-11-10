@@ -328,14 +328,9 @@ class Theme_Upgrader extends WP_Upgrader {
 				'clear_destination' => true,
 				'clear_working'     => true,
 				'hook_extra'        => array(
-					'theme'       => $theme,
-					'type'        => 'theme',
-					'action'      => 'update',
-					'temp_backup' => array(
-						'slug' => $theme,
-						'src'  => get_theme_root( $theme ),
-						'dir'  => 'themes',
-					),
+					'theme'  => $theme,
+					'type'   => 'theme',
+					'action' => 'update',
 				),
 			)
 		);
@@ -448,17 +443,12 @@ class Theme_Upgrader extends WP_Upgrader {
 					'clear_working'     => true,
 					'is_multi'          => true,
 					'hook_extra'        => array(
-						'theme'       => $theme,
-						'temp_backup' => array(
-							'slug' => $theme,
-							'src'  => get_theme_root( $theme ),
-							'dir'  => 'themes',
-						),
+						'theme' => $theme,
 					),
 				)
 			);
 
-			$results[ $theme ] = $result;
+			$results[ $theme ] = $this->result;
 
 			// Prevent credentials auth screen from displaying multiple times.
 			if ( false === $result ) {

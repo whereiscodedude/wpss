@@ -114,10 +114,6 @@ __webpack_require__.d(__webpack_exports__, "TAB", function() { return /* binding
 __webpack_require__.d(__webpack_exports__, "ENTER", function() { return /* binding */ ENTER; });
 __webpack_require__.d(__webpack_exports__, "ESCAPE", function() { return /* binding */ ESCAPE; });
 __webpack_require__.d(__webpack_exports__, "SPACE", function() { return /* binding */ SPACE; });
-__webpack_require__.d(__webpack_exports__, "PAGEUP", function() { return /* binding */ PAGEUP; });
-__webpack_require__.d(__webpack_exports__, "PAGEDOWN", function() { return /* binding */ PAGEDOWN; });
-__webpack_require__.d(__webpack_exports__, "END", function() { return /* binding */ END; });
-__webpack_require__.d(__webpack_exports__, "HOME", function() { return /* binding */ HOME; });
 __webpack_require__.d(__webpack_exports__, "LEFT", function() { return /* binding */ LEFT; });
 __webpack_require__.d(__webpack_exports__, "UP", function() { return /* binding */ UP; });
 __webpack_require__.d(__webpack_exports__, "RIGHT", function() { return /* binding */ RIGHT; });
@@ -198,7 +194,7 @@ function isAppleOS(_window = null) {
 
 /** @typedef {typeof ALT | CTRL | COMMAND | SHIFT } WPModifierPart */
 
-/** @typedef {'primary' | 'primaryShift' | 'primaryAlt' | 'secondary' | 'access' | 'ctrl' | 'alt' | 'ctrlShift' | 'shift' | 'shiftAlt' | 'undefined'} WPKeycodeModifier */
+/** @typedef {'primary' | 'primaryShift' | 'primaryAlt' | 'secondary' | 'access' | 'ctrl' | 'alt' | 'ctrlShift' | 'shift' | 'shiftAlt'} WPKeycodeModifier */
 
 /**
  * An object of handler functions for each of the possible modifier
@@ -242,26 +238,6 @@ const ESCAPE = 27;
  */
 
 const SPACE = 32;
-/**
- * Keycode for PAGEUP key.
- */
-
-const PAGEUP = 33;
-/**
- * Keycode for PAGEDOWN key.
- */
-
-const PAGEDOWN = 34;
-/**
- * Keycode for END key.
- */
-
-const END = 35;
-/**
- * Keycode for HOME key.
- */
-
-const HOME = 36;
 /**
  * Keycode for LEFT key.
  */
@@ -334,8 +310,7 @@ const modifiers = {
   alt: () => [ALT],
   ctrlShift: () => [CTRL, SHIFT],
   shift: () => [SHIFT],
-  shiftAlt: () => [SHIFT, ALT],
-  undefined: () => []
+  shiftAlt: () => [SHIFT, ALT]
 };
 /**
  * An object that contains functions to get raw shortcuts.
@@ -508,22 +483,11 @@ const isKeyboardEvent = Object(external_lodash_["mapValues"])(modifiers, getModi
         return false;
       }
 
-      let key = event.key.toLowerCase();
-
       if (!character) {
-        return Object(external_lodash_["includes"])(mods, key);
+        return Object(external_lodash_["includes"])(mods, event.key.toLowerCase());
       }
 
-      if (event.altKey && character.length === 1) {
-        key = String.fromCharCode(event.keyCode).toLowerCase();
-      } // For backwards compatibility.
-
-
-      if (character === 'del') {
-        character = 'delete';
-      }
-
-      return key === character.toLowerCase();
+      return event.key === character;
     }
   );
 });

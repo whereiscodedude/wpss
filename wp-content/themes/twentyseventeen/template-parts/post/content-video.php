@@ -28,8 +28,8 @@
 				echo twentyseventeen_time_link();
 				twentyseventeen_edit_link();
 			}
-			echo '</div><!-- .entry-meta -->';
-		}
+				echo '</div><!-- .entry-meta -->';
+		};
 
 		if ( is_single() ) {
 			the_title( '<h1 class="entry-title">', '</h1>' );
@@ -71,8 +71,9 @@
 						echo $video_html;
 					echo '</div>';
 				}
-			}
-		}
+			};
+
+		};
 
 		if ( is_single() || empty( $video ) ) {
 
@@ -92,7 +93,7 @@
 					'link_after'  => '</span>',
 				)
 			);
-		}
+		};
 		?>
 
 	</div><!-- .entry-content -->

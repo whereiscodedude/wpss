@@ -129,20 +129,6 @@ this["wp"] = this["wp"] || {}; this["wp"]["richText"] =
 
 /***/ }),
 
-/***/ "gdqT":
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["wp"]["a11y"]; }());
-
-/***/ }),
-
-/***/ "l3Sj":
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["wp"]["i18n"]; }());
-
-/***/ }),
-
 /***/ "pPDe":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -550,7 +536,7 @@ const getFormatTypes = Object(rememo["a" /* default */])(state => Object.values(
  * Returns a format type by name.
  *
  * @param {Object} state Data state.
- * @param {string} name  Format type name.
+ * @param {string} name Format type name.
  *
  * @return {Object?} Format type.
  */
@@ -939,6 +925,14 @@ function createEmptyValue() {
   };
 }
 
+function simpleFindKey(object, value) {
+  for (const key in object) {
+    if (object[key] === value) {
+      return key;
+    }
+  }
+}
+
 function toFormat({
   type,
   attributes
@@ -946,7 +940,7 @@ function toFormat({
   let formatType;
 
   if (attributes && attributes.class) {
-    formatType = Object(external_wp_data_["select"])(store).getFormatTypeForClassName(attributes.class);
+    formatType = Object(external_wp_data_["select"])('core/rich-text').getFormatTypeForClassName(attributes.class);
 
     if (formatType) {
       // Preserve any additional classes.
@@ -959,7 +953,7 @@ function toFormat({
   }
 
   if (!formatType) {
-    formatType = Object(external_wp_data_["select"])(store).getFormatTypeForBareElement(type);
+    formatType = Object(external_wp_data_["select"])('core/rich-text').getFormatTypeForBareElement(type);
   }
 
   if (!formatType) {
@@ -983,28 +977,15 @@ function toFormat({
 
   const registeredAttributes = {};
   const unregisteredAttributes = {};
-  const _attributes = { ...attributes
-  };
 
-  for (const key in formatType.attributes) {
-    const name = formatType.attributes[key];
-    registeredAttributes[key] = _attributes[name];
+  for (const name in attributes) {
+    const key = simpleFindKey(formatType.attributes, name);
 
-    if (formatType.__unstableFilterAttributeValue) {
-      registeredAttributes[key] = formatType.__unstableFilterAttributeValue(key, registeredAttributes[key]);
-    } // delete the attribute and what's left is considered
-    // to be unregistered.
-
-
-    delete _attributes[name];
-
-    if (typeof registeredAttributes[key] === 'undefined') {
-      delete registeredAttributes[key];
+    if (key) {
+      registeredAttributes[key] = attributes[name];
+    } else {
+      unregisteredAttributes[name] = attributes[name];
     }
-  }
-
-  for (const name in _attributes) {
-    unregisteredAttributes[name] = attributes[name];
   }
 
   return {
@@ -1041,17 +1022,17 @@ function toFormat({
  * `start` and `end` state which text indices are selected. They are only
  * provided if a `Range` was given.
  *
- * @param {Object}  [$1]                          Optional named arguments.
- * @param {Element} [$1.element]                  Element to create value from.
- * @param {string}  [$1.text]                     Text to create value from.
- * @param {string}  [$1.html]                     HTML to create value from.
- * @param {Range}   [$1.range]                    Range to create value from.
- * @param {string}  [$1.multilineTag]             Multiline tag if the structure is
- *                                                multiline.
- * @param {Array}   [$1.multilineWrapperTags]     Tags where lines can be found if
- *                                                nesting is possible.
- * @param {boolean} [$1.preserveWhiteSpace]       Whether or not to collapse white
- *                                                space characters.
+ * @param {Object}  [$1]                      Optional named arguments.
+ * @param {Element} [$1.element]              Element to create value from.
+ * @param {string}  [$1.text]                 Text to create value from.
+ * @param {string}  [$1.html]                 HTML to create value from.
+ * @param {Range}   [$1.range]                Range to create value from.
+ * @param {string}  [$1.multilineTag]         Multiline tag if the structure is
+ *                                            multiline.
+ * @param {Array}   [$1.multilineWrapperTags] Tags where lines can be found if
+ *                                            nesting is possible.
+ * @param {boolean} [$1.preserveWhiteSpace]   Whether or not to collapse white
+ *                                            space characters.
  * @param {boolean} [$1.__unstableIsEditableTree]
  *
  * @return {RichTextValue} A rich text value.
@@ -1206,16 +1187,16 @@ function filterRange(node, range, filter) {
 function collapseWhiteSpace(string) {
   return string.replace(/[\n\r\t]+/g, ' ');
 }
+
+const ZWNBSPRegExp = new RegExp(ZWNBSP, 'g');
 /**
- * Removes reserved characters used by rich-text (zero width non breaking spaces added by `toTree` and object replacement characters).
+ * Removes padding (zero width non breaking spaces) added by `toTree`.
  *
  * @param {string} string
  */
 
-
-function removeReservedCharacters(string) {
-  //with the global flag, note that we should create a new regex each time OR reset lastIndex state.
-  return string.replace(new RegExp(`[${ZWNBSP}${OBJECT_REPLACEMENT_CHARACTER}]`, 'gu'), '');
+function removePadding(string) {
+  return string.replace(ZWNBSPRegExp, '');
 }
 /**
  * Creates a Rich Text value from a DOM element and range.
@@ -1234,6 +1215,7 @@ function removeReservedCharacters(string) {
  *
  * @return {RichTextValue} A rich text value.
  */
+
 
 function createFromElement({
   element,
@@ -1262,10 +1244,10 @@ function createFromElement({
     const type = node.nodeName.toLowerCase();
 
     if (node.nodeType === node.TEXT_NODE) {
-      let filter = removeReservedCharacters;
+      let filter = removePadding;
 
       if (!preserveWhiteSpace) {
-        filter = string => removeReservedCharacters(collapseWhiteSpace(string));
+        filter = string => removePadding(collapseWhiteSpace(string));
       }
 
       const text = filter(node.nodeValue);
@@ -1316,12 +1298,15 @@ function createFromElement({
       continue;
     }
 
-    const format = toFormat({
+    const lastFormats = accumulator.formats[accumulator.formats.length - 1];
+    const lastFormat = lastFormats && lastFormats[lastFormats.length - 1];
+    const newFormat = toFormat({
       type,
       attributes: getAttributes({
         element: node
       })
     });
+    const format = isFormatEqual(newFormat, lastFormat) ? lastFormat : newFormat;
 
     if (multilineWrapperTags && multilineWrapperTags.indexOf(type) !== -1) {
       const value = createFromMultilineElement({
@@ -1394,7 +1379,7 @@ function createFromElement({
  *                                            multiline.
  * @param {Array}   [$1.multilineWrapperTags] Tags where lines can be found if
  *                                            nesting is possible.
- * @param {Array}   [$1.currentWrapperTags]   Whether to prepend a line
+ * @param {boolean} [$1.currentWrapperTags]   Whether to prepend a line
  *                                            separator.
  * @param {boolean} [$1.preserveWhiteSpace]   Whether or not to collapse white
  *                                            space characters.
@@ -1669,10 +1654,10 @@ function getTextContent({
  * Gets the currently selected line index, or the first line index if the
  * selection spans over multiple items.
  *
- * @param {RichTextValue} value      Value to get the line index from.
- * @param {boolean}       startIndex Optional index that should be contained by
- *                                   the line. Defaults to the selection start
- *                                   of the value.
+ * @param {RichTextValue}  value      Value to get the line index from.
+ * @param {boolean}        startIndex Optional index that should be contained by
+ *                                    the line. Defaults to the selection start
+ *                                    of the value.
  *
  * @return {number|void} The line index. Undefined if not found.
  */
@@ -1800,7 +1785,7 @@ function isEmpty({
  * Check if the current collapsed selection is on an empty line in case of a
  * multiline value.
  *
- * @param {RichTextValue} value Value te check.
+ * @param  {RichTextValue} value Value te check.
  *
  * @return {boolean} True if the line is empty, false if not.
  */
@@ -1893,8 +1878,8 @@ function join(values, separator = '') {
  * Registers a new format provided a unique name and an object defining its
  * behavior.
  *
- * @param {string}   name     Format name.
- * @param {WPFormat} settings Format settings.
+ * @param {string}   name                 Format name.
+ * @param {WPFormat} settings             Format settings.
  *
  * @return {WPFormat|undefined} The format, if it has been successfully
  *                              registered; otherwise `undefined`.
@@ -2129,8 +2114,8 @@ function remove_remove(value, startIndex, endIndex) {
  * Search a Rich Text value and replace the match(es) with `replacement`. This
  * is similar to `String.prototype.replace`.
  *
- * @param {RichTextValue}   value       The value to modify.
- * @param {RegExp|string}   pattern     A RegExp object or literal. Can also be
+ * @param {RichTextValue}  value        The value to modify.
+ * @param {RegExp|string}  pattern      A RegExp object or literal. Can also be
  *                                      a string. It is treated as a verbatim
  *                                      string and is not interpreted as a
  *                                      regular expression. Only the first
@@ -2493,18 +2478,19 @@ function restoreOnAttributes(attributes, isEditableTree) {
  * Converts a format object to information that can be used to create an element
  * from (type, attributes and object).
  *
- * @param {Object}  $1                        Named parameters.
- * @param {string}  $1.type                   The format type.
- * @param {Object}  $1.attributes             The format attributes.
- * @param {Object}  $1.unregisteredAttributes The unregistered format
- *                                            attributes.
- * @param {boolean} $1.object                 Whether or not it is an object
- *                                            format.
- * @param {boolean} $1.boundaryClass          Whether or not to apply a boundary
- *                                            class.
- * @param {boolean} $1.isEditableTree
+ * @param  {Object}  $1                        Named parameters.
+ * @param  {string}  $1.type                   The format type.
+ * @param  {Object}  $1.attributes             The format attributes.
+ * @param  {Object}  $1.unregisteredAttributes The unregistered format
+ *                                             attributes.
+ * @param  {boolean} $1.object                 Whether or not it is an object
+ *                                             format.
+ * @param  {boolean} $1.boundaryClass          Whether or not to apply a boundary
+ *                                             class.
+ * @param  {boolean} $1.isEditableTree
  *
- * @return {Object} Information to be used for element creation.
+ * @return {Object}                            Information to be used for
+ *                                             element creation.
  */
 
 
@@ -2728,9 +2714,7 @@ function toTree({
     }
 
     if (character === OBJECT_REPLACEMENT_CHARACTER) {
-      var _replacements$i;
-
-      if (!isEditableTree && ((_replacements$i = replacements[i]) === null || _replacements$i === void 0 ? void 0 : _replacements$i.type) === 'script') {
+      if (!isEditableTree && replacements[i].type === 'script') {
         pointer = append(getParent(pointer), fromFormat({
           type: 'script',
           isEditableTree
@@ -3267,22 +3251,10 @@ function createChildrenHTML(children = []) {
   }).join('');
 }
 
-// EXTERNAL MODULE: external ["wp","a11y"]
-var external_wp_a11y_ = __webpack_require__("gdqT");
-
-// EXTERNAL MODULE: external ["wp","i18n"]
-var external_wp_i18n_ = __webpack_require__("l3Sj");
-
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/toggle-format.js
-/**
- * WordPress dependencies
- */
-
-
 /**
  * Internal dependencies
  */
-
 
 
 
@@ -3301,19 +3273,7 @@ var external_wp_i18n_ = __webpack_require__("l3Sj");
 
 function toggleFormat(value, format) {
   if (getActiveFormat(value, format.type)) {
-    // For screen readers, will announce if formatting control is disabled.
-    if (format.title) {
-      // translators: %s: title of the formatting control
-      Object(external_wp_a11y_["speak"])(Object(external_wp_i18n_["sprintf"])(Object(external_wp_i18n_["__"])('%s removed.'), format.title), 'assertive');
-    }
-
     return removeFormat(value, format.type);
-  } // For screen readers, will announce if formatting control is enabled.
-
-
-  if (format.title) {
-    // translators: %s: title of the formatting control
-    Object(external_wp_a11y_["speak"])(Object(external_wp_i18n_["sprintf"])(Object(external_wp_i18n_["__"])('%s applied.'), format.title), 'assertive');
   }
 
   return applyFormat(value, format);
@@ -3424,9 +3384,9 @@ function canOutdentListItems(value) {
 /**
  * Gets the line index of the first previous list item with higher indentation.
  *
- * @param {RichTextValue} value     Value to search.
- * @param {number}        lineIndex Line index of the list item to compare
- *                                  with.
+ * @param {RichTextValue} value      Value to search.
+ * @param {number}        lineIndex  Line index of the list item to compare
+ *                                   with.
  *
  * @return {number|void} The line index.
  */
@@ -3887,6 +3847,20 @@ function useBoundaryStyle({
   return ref;
 }
 
+// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-inline-warning.js
+/**
+ * WordPress dependencies
+ */
+
+const message = 'RichText cannot be used with an inline container. Please use a different display property.';
+function useInlineWarning() {
+  const ref = Object(external_wp_element_["useRef"])();
+  Object(external_wp_element_["useEffect"])(() => {
+    if (false) {}
+  }, []);
+  return ref;
+}
+
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-copy-handler.js
 /**
  * WordPress dependencies
@@ -3926,7 +3900,6 @@ function useCopyHandler(props) {
       event.clipboardData.setData('text/plain', plainText);
       event.clipboardData.setData('text/html', html);
       event.clipboardData.setData('rich-text', 'true');
-      event.clipboardData.setData('rich-text-multi-line-tag', multilineTag || '');
       event.preventDefault();
     }
 
@@ -4019,24 +3992,39 @@ function useFormatBoundaries(props) {
 
       const formatsBefore = formats[start - 1] || EMPTY_ACTIVE_FORMATS;
       const formatsAfter = formats[start] || EMPTY_ACTIVE_FORMATS;
-      const destination = isReverse ? formatsBefore : formatsAfter;
-      const isIncreasing = currentActiveFormats.every((format, index) => format === destination[index]);
       let newActiveFormatsLength = currentActiveFormats.length;
+      let source = formatsAfter;
 
-      if (!isIncreasing) {
-        newActiveFormatsLength--;
-      } else if (newActiveFormatsLength < destination.length) {
-        newActiveFormatsLength++;
+      if (formatsBefore.length > formatsAfter.length) {
+        source = formatsBefore;
+      } // If the amount of formats before the caret and after the caret is
+      // different, the caret is at a format boundary.
+
+
+      if (formatsBefore.length < formatsAfter.length) {
+        if (!isReverse && currentActiveFormats.length < formatsAfter.length) {
+          newActiveFormatsLength++;
+        }
+
+        if (isReverse && currentActiveFormats.length > formatsBefore.length) {
+          newActiveFormatsLength--;
+        }
+      } else if (formatsBefore.length > formatsAfter.length) {
+        if (!isReverse && currentActiveFormats.length > formatsAfter.length) {
+          newActiveFormatsLength--;
+        }
+
+        if (isReverse && currentActiveFormats.length < formatsBefore.length) {
+          newActiveFormatsLength++;
+        }
       }
 
       if (newActiveFormatsLength === currentActiveFormats.length) {
-        record.current._newActiveFormats = destination;
+        record.current._newActiveFormats = isReverse ? formatsBefore : formatsAfter;
         return;
       }
 
       event.preventDefault();
-      const origin = isReverse ? formatsAfter : formatsBefore;
-      const source = isIncreasing ? destination : origin;
       const newActiveFormats = source.slice(0, newActiveFormatsLength);
       const newValue = { ...record.current,
         activeFormats: newActiveFormats
@@ -4166,11 +4154,11 @@ function useIndentListItemOnSpace(props) {
  * Efficiently updates all the formats from `start` (including) until `end`
  * (excluding) with the active formats. Mutates `value`.
  *
- * @param {Object}        $1         Named paramentes.
- * @param {RichTextValue} $1.value   Value te update.
- * @param {number}        $1.start   Index to update from.
- * @param {number}        $1.end     Index to update until.
- * @param {Array}         $1.formats Replacement formats.
+ * @param  {Object}        $1         Named paramentes.
+ * @param  {RichTextValue} $1.value   Value te update.
+ * @param  {number}        $1.start   Index to update from.
+ * @param  {number}        $1.end     Index to update until.
+ * @param  {Array}         $1.formats Replacement formats.
  *
  * @return {RichTextValue} Mutated value.
  */
@@ -4181,11 +4169,8 @@ function updateFormats({
   end,
   formats
 }) {
-  // Start and end may be switched in case of delete.
-  const min = Math.min(start, end);
-  const max = Math.max(start, end);
-  const formatsBefore = value.formats[min - 1] || [];
-  const formatsAfter = value.formats[max] || []; // First, fix the references. If any format right before or after are
+  const formatsBefore = value.formats[start - 1] || [];
+  const formatsAfter = value.formats[end] || []; // First, fix the references. If any format right before or after are
   // equal, the replacement format should use the same reference.
 
   value.activeFormats = formats.map((format, index) => {
@@ -4426,8 +4411,7 @@ function useInputAndSelection(props) {
       const {
         record,
         isSelected,
-        onSelectionChange,
-        applyRecord
+        onSelectionChange
       } = propsRef.current;
 
       if (!isSelected) {
@@ -4442,7 +4426,6 @@ function useInputAndSelection(props) {
         };
         onSelectionChange(index, index);
       } else {
-        applyRecord(record.current);
         onSelectionChange(record.current.start, record.current.end);
       } // Update selection as soon as possible, which is at the next animation
       // frame. The event listener for selection changes may be added too late
@@ -4558,57 +4541,10 @@ function useDelete(props) {
   }, []);
 }
 
-// CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/use-space.js
-/**
- * WordPress dependencies
- */
-
-
-/**
- * For some elements like BUTTON and SUMMARY, the space key doesn't insert a
- * space character in some browsers even though the element is editable. We have
- * to manually insert a space and prevent default behaviour.
- *
- * DO NOT limit this behaviour to specific tag names! It would mean that this
- * behaviour is not widely tested. If there's ever any problems, we should find
- * a different solution entirely or remove it entirely.
- */
-
-function useSpace() {
-  return Object(external_wp_compose_["useRefEffect"])(element => {
-    function onKeyDown(event) {
-      // Don't insert a space if default behaviour is prevented.
-      if (event.defaultPrevented) {
-        return;
-      }
-
-      const {
-        keyCode,
-        altKey,
-        metaKey,
-        ctrlKey
-      } = event; // Only consider the space key without modifiers pressed.
-
-      if (keyCode !== external_wp_keycodes_["SPACE"] || altKey || metaKey || ctrlKey) {
-        return;
-      }
-
-      event.target.ownerDocument.execCommand('insertText', false, ' ');
-      event.preventDefault();
-    }
-
-    element.addEventListener('keydown', onKeyDown);
-    return () => {
-      element.removeEventListener('keydown', onKeyDown);
-    };
-  }, []);
-}
-
 // CONCATENATED MODULE: ./node_modules/@wordpress/rich-text/build-module/component/index.js
 /**
  * WordPress dependencies
  */
-
 
 
 /**
@@ -4638,12 +4574,11 @@ function useRichText({
   __unstableMultilineTag: multilineTag,
   __unstableDisableFormats: disableFormats,
   __unstableIsSelected: isSelected,
-  __unstableDependencies = [],
+  __unstableDependencies,
   __unstableAfterParse,
   __unstableBeforeSerialize,
   __unstableAddInvisibleFormats
 }) {
-  const registry = Object(external_wp_data_["useRegistry"])();
   const [, forceRender] = Object(external_wp_element_["useReducer"])(() => ({}));
   const ref = Object(external_wp_element_["useRef"])();
 
@@ -4698,10 +4633,7 @@ function useRichText({
       record.current.replacements = Array(value.length);
     }
 
-    if (__unstableAfterParse) {
-      record.current.formats = __unstableAfterParse(record.current);
-    }
-
+    record.current.formats = __unstableAfterParse(record.current);
     record.current.start = selectionStart;
     record.current.end = selectionEnd;
   }
@@ -4709,22 +4641,7 @@ function useRichText({
   const hadSelectionUpdate = Object(external_wp_element_["useRef"])(false);
 
   if (!record.current) {
-    var _record$current, _record$current$forma, _record$current$forma2;
-
-    setRecordFromProps(); // Sometimes formats are added programmatically and we need to make
-    // sure it's persisted to the block store / markup. If these formats
-    // are not applied, they could cause inconsistencies between the data
-    // in the visual editor and the frontend. Right now, it's only relevant
-    // to the `core/text-color` format, which is applied at runtime in
-    // certain circunstances. See the `__unstableFilterAttributeValue`
-    // function in `packages/format-library/src/text-color/index.js`.
-    // @todo find a less-hacky way of solving this.
-
-    const hasRelevantInitFormat = ((_record$current = record.current) === null || _record$current === void 0 ? void 0 : (_record$current$forma = _record$current.formats[0]) === null || _record$current$forma === void 0 ? void 0 : (_record$current$forma2 = _record$current$forma[0]) === null || _record$current$forma2 === void 0 ? void 0 : _record$current$forma2.type) === 'core/text-color';
-
-    if (hasRelevantInitFormat) {
-      handleChangesUponInit(record.current);
-    }
+    setRecordFromProps();
   } else if (selectionStart !== record.current.start || selectionEnd !== record.current.end) {
     hadSelectionUpdate.current = isSelected;
     record.current = { ...record.current,
@@ -4741,21 +4658,21 @@ function useRichText({
 
 
   function handleChange(newRecord) {
-    record.current = newRecord;
     applyRecord(newRecord);
 
     if (disableFormats) {
       _value.current = newRecord.text;
     } else {
       _value.current = toHTMLString({
-        value: __unstableBeforeSerialize ? { ...newRecord,
+        value: { ...newRecord,
           formats: __unstableBeforeSerialize(newRecord)
-        } : newRecord,
+        },
         multilineTag,
         preserveWhiteSpace
       });
     }
 
+    record.current = newRecord;
     const {
       start,
       end,
@@ -4763,36 +4680,11 @@ function useRichText({
       text
     } = newRecord; // Selection must be updated first, so it is recorded in history when
     // the content change happens.
-    // We batch both calls to only attempt to rerender once.
 
-    registry.batch(() => {
-      onSelectionChange(start, end);
-      onChange(_value.current, {
-        __unstableFormats: formats,
-        __unstableText: text
-      });
-    });
-    forceRender();
-  }
-
-  function handleChangesUponInit(newRecord) {
-    record.current = newRecord;
-    _value.current = toHTMLString({
-      value: __unstableBeforeSerialize ? { ...newRecord,
-        formats: __unstableBeforeSerialize(newRecord)
-      } : newRecord,
-      multilineTag,
-      preserveWhiteSpace
-    });
-    const {
-      formats,
-      text
-    } = newRecord;
-    registry.batch(() => {
-      onChange(_value.current, {
-        __unstableFormats: formats,
-        __unstableText: text
-      });
+    onSelectionChange(start, end);
+    onChange(_value.current, {
+      __unstableFormats: formats,
+      __unstableText: text
     });
     forceRender();
   }
@@ -4818,9 +4710,15 @@ function useRichText({
     applyFromProps();
     hadSelectionUpdate.current = false;
   }, [hadSelectionUpdate.current]);
+
+  function focus() {
+    ref.current.focus();
+    applyRecord(record.current);
+  }
+
   const mergedRefs = Object(external_wp_compose_["useMergeRefs"])([ref, useDefaultStyle(), useBoundaryStyle({
     record
-  }), useCopyHandler({
+  }), useInlineWarning(), useCopyHandler({
     record,
     multilineTag,
     preserveWhiteSpace
@@ -4842,13 +4740,14 @@ function useRichText({
     handleChange,
     isSelected,
     onSelectionChange
-  }), useSpace(), Object(external_wp_compose_["useRefEffect"])(() => {
+  }), Object(external_wp_compose_["useRefEffect"])(() => {
     applyFromProps();
     didMount.current = true;
   }, [placeholder, ...__unstableDependencies])]);
   return {
     value: record.current,
     onChange: handleChange,
+    onFocus: focus,
     ref: mergedRefs
   };
 }
