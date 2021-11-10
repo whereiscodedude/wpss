@@ -20,8 +20,8 @@ get_header(); ?>
 		<div id="content" role="main">
 		<?php if ( have_posts() ) : ?>
 
+			<?php /* Start the Loop */ ?>
 			<?php
-			// Start the Loop.
 			while ( have_posts() ) :
 				the_post();
 				?>
@@ -43,12 +43,7 @@ get_header(); ?>
 				</header>
 
 				<div class="entry-content">
-					<p>
-					<?php
-					/* translators: %s: Post editor URL. */
-					printf( __( 'Ready to publish your first post? <a href="%s">Get started here</a>.', 'twentytwelve' ), admin_url( 'post-new.php' ) );
-					?>
-					</p>
+					<p><?php printf( __( 'Ready to publish your first post? <a href="%s">Get started here</a>.', 'twentytwelve' ), admin_url( 'post-new.php' ) ); ?></p>
 				</div><!-- .entry-content -->
 
 				<?php
@@ -63,11 +58,11 @@ get_header(); ?>
 					<p><?php _e( 'Apologies, but no results were found. Perhaps searching will help find a related post.', 'twentytwelve' ); ?></p>
 					<?php get_search_form(); ?>
 				</div><!-- .entry-content -->
-			<?php endif; // End current_user_can() check. ?>
+			<?php endif; // end current_user_can() check ?>
 
 			</article><!-- #post-0 -->
 
-		<?php endif; // End have_posts() check. ?>
+		<?php endif; // end have_posts() check ?>
 
 		</div><!-- #content -->
 	</div><!-- #primary -->
