@@ -17,7 +17,6 @@ if ( ! current_user_can( 'manage_sites' ) ) {
 $wp_list_table = _get_list_table( 'WP_MS_Sites_List_Table' );
 $pagenum       = $wp_list_table->get_pagenum();
 
-// Used in the HTML title tag.
 $title       = __( 'Sites' );
 $parent_file = 'sites.php';
 
@@ -178,8 +177,8 @@ if ( isset( $_GET['action'] ) ) {
 			break;
 
 		case 'allblogs':
-			if ( isset( $_POST['action'] ) && isset( $_POST['allblogs'] ) ) {
-				$doaction = $_POST['action'];
+			if ( ( isset( $_POST['action'] ) || isset( $_POST['action2'] ) ) && isset( $_POST['allblogs'] ) ) {
+				$doaction = -1 != $_POST['action'] ? $_POST['action'] : $_POST['action2'];
 
 				foreach ( (array) $_POST['allblogs'] as $key => $val ) {
 					if ( '0' != $val && get_network()->site_id != $val ) {
@@ -367,7 +366,7 @@ require_once ABSPATH . 'wp-admin/admin-header.php';
 <h1 class="wp-heading-inline"><?php _e( 'Sites' ); ?></h1>
 
 <?php if ( current_user_can( 'create_sites' ) ) : ?>
-	<a href="<?php echo esc_url( network_admin_url( 'site-new.php' ) ); ?>" class="page-title-action"><?php echo esc_html_x( 'Add New', 'site' ); ?></a>
+	<a href="<?php echo network_admin_url( 'site-new.php' ); ?>" class="page-title-action"><?php echo esc_html_x( 'Add New', 'site' ); ?></a>
 <?php endif; ?>
 
 <?php

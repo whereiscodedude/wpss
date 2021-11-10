@@ -162,9 +162,9 @@ class Plugin_Upgrader extends WP_Upgrader {
 			 *
 			 * @since 5.5.0
 			 *
-			 * @param string  $package      The package file.
-			 * @param array   $data         The new plugin or theme data.
-			 * @param string  $package_type The package type ('plugin' or 'theme').
+			 * @param string  $package          The package file.
+			 * @param array   $new_plugin_data  The new plugin data.
+			 * @param string  $package_type     The package type (plugin or theme).
 			 */
 			do_action( 'upgrader_overwrote_package', $package, $this->new_plugin_data, 'plugin' );
 		}
@@ -226,14 +226,9 @@ class Plugin_Upgrader extends WP_Upgrader {
 				'clear_destination' => true,
 				'clear_working'     => true,
 				'hook_extra'        => array(
-					'plugin'      => $plugin,
-					'type'        => 'plugin',
-					'action'      => 'update',
-					'temp_backup' => array(
-						'slug' => dirname( $plugin ),
-						'src'  => WP_PLUGIN_DIR,
-						'dir'  => 'plugins',
-					),
+					'plugin' => $plugin,
+					'type'   => 'plugin',
+					'action' => 'update',
 				),
 			)
 		);
@@ -347,17 +342,12 @@ class Plugin_Upgrader extends WP_Upgrader {
 					'clear_working'     => true,
 					'is_multi'          => true,
 					'hook_extra'        => array(
-						'plugin'      => $plugin,
-						'temp_backup' => array(
-							'slug' => dirname( $plugin ),
-							'src'  => WP_PLUGIN_DIR,
-							'dir'  => 'plugins',
-						),
+						'plugin' => $plugin,
 					),
 				)
 			);
 
-			$results[ $plugin ] = $result;
+			$results[ $plugin ] = $this->result;
 
 			// Prevent credentials auth screen from displaying multiple times.
 			if ( false === $result ) {
