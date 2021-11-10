@@ -735,7 +735,7 @@ function get_feed_link( $feed = '' ) {
  * @param int    $post_id Optional. Post ID. Default is the ID of the global `$post`.
  * @param string $feed    Optional. Feed type. Possible values include 'rss2', 'atom'.
  *                        Default is the value of get_default_feed().
- * @return string The permalink for the comments feed for the given post on success, empty string on failure.
+ * @return string The permalink for the comments feed for the given post.
  */
 function get_post_comments_feed_link( $post_id = 0, $feed = '' ) {
 	$post_id = absint( $post_id );
@@ -748,13 +748,7 @@ function get_post_comments_feed_link( $post_id = 0, $feed = '' ) {
 		$feed = get_default_feed();
 	}
 
-	$post = get_post( $post_id );
-
-	// Bail out if the post does not exist.
-	if ( ! $post instanceof WP_Post ) {
-		return '';
-	}
-
+	$post       = get_post( $post_id );
 	$unattached = 'attachment' === $post->post_type && 0 === (int) $post->post_parent;
 
 	if ( get_option( 'permalink_structure' ) ) {
@@ -1739,7 +1733,7 @@ function get_edit_user_link( $user_id = null ) {
  * @param bool         $in_same_term   Optional. Whether post should be in a same taxonomy term. Default false.
  * @param int[]|string $excluded_terms Optional. Array or comma-separated list of excluded term IDs. Default empty.
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
- * @return WP_Post|null|string Post object if successful. Null if global $post is not set. Empty string if no
+ * @return null|string|WP_Post Post object if successful. Null if global $post is not set. Empty string if no
  *                             corresponding post exists.
  */
 function get_previous_post( $in_same_term = false, $excluded_terms = '', $taxonomy = 'category' ) {
@@ -1754,7 +1748,7 @@ function get_previous_post( $in_same_term = false, $excluded_terms = '', $taxono
  * @param bool         $in_same_term   Optional. Whether post should be in a same taxonomy term. Default false.
  * @param int[]|string $excluded_terms Optional. Array or comma-separated list of excluded term IDs. Default empty.
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
- * @return WP_Post|null|string Post object if successful. Null if global $post is not set. Empty string if no
+ * @return null|string|WP_Post Post object if successful. Null if global $post is not set. Empty string if no
  *                             corresponding post exists.
  */
 function get_next_post( $in_same_term = false, $excluded_terms = '', $taxonomy = 'category' ) {
@@ -1774,7 +1768,7 @@ function get_next_post( $in_same_term = false, $excluded_terms = '', $taxonomy =
  * @param int[]|string $excluded_terms Optional. Array or comma-separated list of excluded term IDs. Default empty string.
  * @param bool         $previous       Optional. Whether to retrieve previous post. Default true
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
- * @return WP_Post|null|string Post object if successful. Null if global $post is not set. Empty string if no
+ * @return null|string|WP_Post Post object if successful. Null if global $post is not set. Empty string if no
  *                             corresponding post exists.
  */
 function get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previous = true, $taxonomy = 'category' ) {
@@ -1816,11 +1810,6 @@ function get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previo
 	 *
 	 * The dynamic portion of the hook name, `$adjacent`, refers to the type
 	 * of adjacency, 'next' or 'previous'.
-	 *
-	 * Possible hook names include:
-	 *
-	 *  - `get_next_post_excluded_terms`
-	 *  - `get_previous_post_excluded_terms`
 	 *
 	 * @since 4.4.0
 	 *
@@ -1872,7 +1861,7 @@ function get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previo
 		 */
 		$private_states = get_post_stati( array( 'private' => true ) );
 		$where         .= " AND ( p.post_status = 'publish'";
-		foreach ( $private_states as $state ) {
+		foreach ( (array) $private_states as $state ) {
 			if ( current_user_can( $read_private_cap ) ) {
 				$where .= $wpdb->prepare( ' OR p.post_status = %s', $state );
 			} else {
@@ -1893,11 +1882,6 @@ function get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previo
 	 * The dynamic portion of the hook name, `$adjacent`, refers to the type
 	 * of adjacency, 'next' or 'previous'.
 	 *
-	 * Possible hook names include:
-	 *
-	 *  - `get_next_post_join`
-	 *  - `get_previous_post_join`
-	 *
 	 * @since 2.5.0
 	 * @since 4.4.0 Added the `$taxonomy` and `$post` parameters.
 	 *
@@ -1915,11 +1899,6 @@ function get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previo
 	 * The dynamic portion of the hook name, `$adjacent`, refers to the type
 	 * of adjacency, 'next' or 'previous'.
 	 *
-	 * Possible hook names include:
-	 *
-	 *  - `get_next_post_where`
-	 *  - `get_previous_post_where`
-	 *
 	 * @since 2.5.0
 	 * @since 4.4.0 Added the `$taxonomy` and `$post` parameters.
 	 *
@@ -1936,11 +1915,6 @@ function get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previo
 	 *
 	 * The dynamic portion of the hook name, `$adjacent`, refers to the type
 	 * of adjacency, 'next' or 'previous'.
-	 *
-	 * Possible hook names include:
-	 *
-	 *  - `get_next_post_sort`
-	 *  - `get_previous_post_sort`
 	 *
 	 * @since 2.5.0
 	 * @since 4.4.0 Added the `$post` parameter.
@@ -2029,11 +2003,6 @@ function get_adjacent_post_rel_link( $title = '%title', $in_same_term = false, $
 	 *
 	 * The dynamic portion of the hook name, `$adjacent`, refers to the type
 	 * of adjacency, 'next' or 'previous'.
-	 *
-	 * Possible hook names include:
-	 *
-	 *  - `next_post_rel_link`
-	 *  - `previous_post_rel_link`
 	 *
 	 * @since 2.8.0
 	 *
@@ -2291,11 +2260,6 @@ function get_adjacent_post_link( $format, $link, $in_same_term = false, $exclude
 	 *
 	 * The dynamic portion of the hook name, `$adjacent`, refers to the type
 	 * of adjacency, 'next' or 'previous'.
-	 *
-	 * Possible hook names include:
-	 *
-	 *  - `next_post_link`
-	 *  - `previous_post_link`
 	 *
 	 * @since 2.6.0
 	 * @since 4.2.0 Added the `$adjacent` parameter.
@@ -2899,7 +2863,7 @@ function _navigation_markup( $links, $class = 'posts-navigation', $screen_reader
 	}
 
 	$template = '
-	<nav class="navigation %1$s" aria-label="%4$s">
+	<nav class="navigation %1$s" role="navigation" aria-label="%4$s">
 		<h2 class="screen-reader-text">%2$s</h2>
 		<div class="nav-links">%3$s</div>
 	</nav>';
@@ -2911,7 +2875,7 @@ function _navigation_markup( $links, $class = 'posts-navigation', $screen_reader
 	 * class (%1$s), the screen-reader-text value (%2$s), placement of the navigation
 	 * links (%3$s), and ARIA label text if screen-reader-text does not fit that (%4$s):
 	 *
-	 *     <nav class="navigation %1$s" aria-label="%4$s">
+	 *     <nav class="navigation %1$s" role="navigation" aria-label="%4$s">
 	 *         <h2 class="screen-reader-text">%2$s</h2>
 	 *         <div class="nav-links">%3$s</div>
 	 *     </nav>
@@ -3435,15 +3399,12 @@ function get_admin_url( $blog_id = null, $path = '', $scheme = 'admin' ) {
 	 * Filters the admin area URL.
 	 *
 	 * @since 2.8.0
-	 * @since 5.8.0 The `$scheme` parameter was added.
 	 *
-	 * @param string      $url     The complete admin area URL including scheme and path.
-	 * @param string      $path    Path relative to the admin area URL. Blank string if no path is specified.
-	 * @param int|null    $blog_id Site ID, or null for the current site.
-	 * @param string|null $scheme  The scheme to use. Accepts 'http', 'https',
-	 *                             'admin', or null. Default 'admin', which obeys force_ssl_admin() and is_ssl().
+	 * @param string   $url     The complete admin area URL including scheme and path.
+	 * @param string   $path    Path relative to the admin area URL. Blank string if no path is specified.
+	 * @param int|null $blog_id Site ID, or null for the current site.
 	 */
-	return apply_filters( 'admin_url', $url, $path, $blog_id, $scheme );
+	return apply_filters( 'admin_url', $url, $path, $blog_id );
 }
 
 /**
@@ -3467,15 +3428,12 @@ function includes_url( $path = '', $scheme = null ) {
 	 * Filters the URL to the includes directory.
 	 *
 	 * @since 2.8.0
-	 * @since 5.8.0 The `$scheme` parameter was added.
 	 *
-	 * @param string      $url    The complete URL to the includes directory including scheme and path.
-	 * @param string      $path   Path relative to the URL to the wp-includes directory. Blank string
-	 *                            if no path is specified.
-	 * @param string|null $scheme Scheme to give the includes URL context. Accepts
-	 *                            'http', 'https', 'relative', or null. Default null.
+	 * @param string $url  The complete URL to the includes directory including scheme and path.
+	 * @param string $path Path relative to the URL to the wp-includes directory. Blank string
+	 *                     if no path is specified.
 	 */
-	return apply_filters( 'includes_url', $url, $path, $scheme );
+	return apply_filters( 'includes_url', $url, $path );
 }
 
 /**
@@ -3680,15 +3638,12 @@ function network_admin_url( $path = '', $scheme = 'admin' ) {
 	 * Filters the network admin URL.
 	 *
 	 * @since 3.0.0
-	 * @since 5.8.0 The `$scheme` parameter was added.
 	 *
-	 * @param string      $url    The complete network admin URL including scheme and path.
-	 * @param string      $path   Path relative to the network admin URL. Blank string if
-	 *                            no path is specified.
-	 * @param string|null $scheme The scheme to use. Accepts 'http', 'https',
-	 *                            'admin', or null. Default is 'admin', which obeys force_ssl_admin() and is_ssl().
+	 * @param string $url  The complete network admin URL including scheme and path.
+	 * @param string $path Path relative to the network admin URL. Blank string if
+	 *                     no path is specified.
 	 */
-	return apply_filters( 'network_admin_url', $url, $path, $scheme );
+	return apply_filters( 'network_admin_url', $url, $path );
 }
 
 /**
@@ -3712,15 +3667,12 @@ function user_admin_url( $path = '', $scheme = 'admin' ) {
 	 * Filters the user admin URL for the current user.
 	 *
 	 * @since 3.1.0
-	 * @since 5.8.0 The `$scheme` parameter was added.
 	 *
-	 * @param string      $url    The complete URL including scheme and path.
-	 * @param string      $path   Path relative to the URL. Blank string if
-	 *                            no path is specified.
-	 * @param string|null $scheme The scheme to use. Accepts 'http', 'https',
-	 *                            'admin', or null. Default is 'admin', which obeys force_ssl_admin() and is_ssl().
+	 * @param string $url  The complete URL including scheme and path.
+	 * @param string $path Path relative to the URL. Blank string if
+	 *                     no path is specified.
 	 */
-	return apply_filters( 'user_admin_url', $url, $path, $scheme );
+	return apply_filters( 'user_admin_url', $url, $path );
 }
 
 /**

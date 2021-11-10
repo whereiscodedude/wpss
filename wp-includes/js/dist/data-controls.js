@@ -140,7 +140,7 @@ __webpack_require__.r(__webpack_exports__);
 function apiFetch(request) {
   return {
     type: 'API_FETCH',
-    request
+    request: request
   };
 }
 /**
@@ -150,12 +150,11 @@ function apiFetch(request) {
  * @param {Array} args Arguments passed without change to the `@wordpress/data` control.
  */
 
-function select(...args) {
+function select() {
   _wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2___default()('`select` control in `@wordpress/data-controls`', {
-    since: '5.7',
     alternative: 'built-in `resolveSelect` control in `@wordpress/data`'
   });
-  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].resolveSelect(...args);
+  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].resolveSelect.apply(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"], arguments);
 }
 /**
  * Control for calling a selector in a registered data store.
@@ -164,12 +163,11 @@ function select(...args) {
  * @param {Array} args Arguments passed without change to the `@wordpress/data` control.
  */
 
-function syncSelect(...args) {
+function syncSelect() {
   _wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2___default()('`syncSelect` control in `@wordpress/data-controls`', {
-    since: '5.7',
     alternative: 'built-in `select` control in `@wordpress/data`'
   });
-  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].select(...args);
+  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].select.apply(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"], arguments);
 }
 /**
  * Control for dispatching an action in a registered data store.
@@ -178,12 +176,11 @@ function syncSelect(...args) {
  * @param {Array} args Arguments passed without change to the `@wordpress/data` control.
  */
 
-function dispatch(...args) {
+function dispatch() {
   _wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2___default()('`dispatch` control in `@wordpress/data-controls`', {
-    since: '5.7',
     alternative: 'built-in `dispatch` control in `@wordpress/data`'
   });
-  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].dispatch(...args);
+  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].dispatch.apply(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"], arguments);
 }
 /**
  * Dispatches a control action for awaiting on a promise to be resolved.
@@ -205,16 +202,17 @@ function dispatch(...args) {
  * @return {Object} The control descriptor.
  */
 
-const __unstableAwaitPromise = function (promise) {
+var __unstableAwaitPromise = function __unstableAwaitPromise(promise) {
   return {
     type: 'AWAIT_PROMISE',
-    promise
+    promise: promise
   };
 };
 /**
  * The default export is what you use to register the controls with your custom
  * store.
  *
+ * @param paths
  * @example
  * ```js
  * // WordPress dependencies
@@ -239,17 +237,15 @@ const __unstableAwaitPromise = function (promise) {
  * store.
  */
 
-const controls = {
-  AWAIT_PROMISE: ({
-    promise
-  }) => promise,
-
-  API_FETCH({
-    request
-  }) {
+var controls = {
+  AWAIT_PROMISE: function AWAIT_PROMISE(_ref) {
+    var promise = _ref.promise;
+    return promise;
+  },
+  API_FETCH: function API_FETCH(_ref2) {
+    var request = _ref2.request;
     return _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()(request);
   }
-
 };
 
 

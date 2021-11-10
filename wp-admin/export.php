@@ -15,8 +15,6 @@ if ( ! current_user_can( 'export' ) ) {
 
 /** Load WordPress export API */
 require_once ABSPATH . 'wp-admin/includes/export.php';
-
-// Used in the HTML title tag.
 $title = __( 'Export' );
 
 /**

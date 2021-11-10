@@ -262,7 +262,7 @@ function comment_author_link( $comment_ID = 0 ) {
  *
  * @param int|WP_Comment $comment_ID Optional. WP_Comment or the ID of the comment for which to get the author's IP address.
  *                                   Default current comment.
- * @return string Comment author's IP address, or an empty string if it's not available.
+ * @return string Comment author's IP address.
  */
 function get_comment_author_IP( $comment_ID = 0 ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 	$comment = get_comment( $comment_ID );
@@ -273,7 +273,7 @@ function get_comment_author_IP( $comment_ID = 0 ) { // phpcs:ignore WordPress.Na
 	 * @since 1.5.0
 	 * @since 4.1.0 The `$comment_ID` and `$comment` parameters were added.
 	 *
-	 * @param string     $comment_author_IP The comment author's IP address, or an empty string if it's not available.
+	 * @param string     $comment_author_IP The comment author's IP address.
 	 * @param int        $comment_ID        The comment ID.
 	 * @param WP_Comment $comment           The comment object.
 	 */
@@ -1706,12 +1706,6 @@ function get_comment_reply_link( $args = array(), $comment = null, $post = null 
 		return false;
 	}
 
-	if ( get_option( 'page_comments' ) ) {
-		$permalink = str_replace( '#comment-' . $comment->comment_ID, '', get_comment_link( $comment ) );
-	} else {
-		$permalink = get_permalink( $post->ID );
-	}
-
 	/**
 	 * Filters the comment reply link arguments.
 	 *
@@ -1756,7 +1750,7 @@ function get_comment_reply_link( $args = array(), $comment = null, $post = null 
 						'unapproved'      => false,
 						'moderation-hash' => false,
 					),
-					$permalink
+					get_permalink( $post->ID )
 				)
 			) . '#' . $args['respond_id'],
 			$data_attribute_string,
@@ -2350,15 +2344,9 @@ function comment_form( $args = array(), $post_id = null ) {
 		$args['format'] = current_theme_supports( 'html5', 'comment-form' ) ? 'html5' : 'xhtml';
 	}
 
-	$req   = get_option( 'require_name_email' );
-	$html5 = 'html5' === $args['format'];
-
-	// Define attributes in HTML5 or XHTML syntax.
-	$required_attribute = ( $html5 ? ' required' : ' required="required"' );
-	$checked_attribute  = ( $html5 ? ' checked' : ' checked="checked"' );
-
-	// Identify required fields visually.
-	$required_indicator = ' <span class="required" aria-hidden="true">*</span>';
+	$req      = get_option( 'require_name_email' );
+	$html_req = ( $req ? " required='required'" : '' );
+	$html5    = 'html5' === $args['format'];
 
 	$fields = array(
 		'author' => sprintf(
@@ -2366,12 +2354,12 @@ function comment_form( $args = array(), $post_id = null ) {
 			sprintf(
 				'<label for="author">%s%s</label>',
 				__( 'Name' ),
-				( $req ? $required_indicator : '' )
+				( $req ? ' <span class="required">*</span>' : '' )
 			),
 			sprintf(
 				'<input id="author" name="author" type="text" value="%s" size="30" maxlength="245"%s />',
 				esc_attr( $commenter['comment_author'] ),
-				( $req ? $required_attribute : '' )
+				$html_req
 			)
 		),
 		'email'  => sprintf(
@@ -2379,13 +2367,13 @@ function comment_form( $args = array(), $post_id = null ) {
 			sprintf(
 				'<label for="email">%s%s</label>',
 				__( 'Email' ),
-				( $req ? $required_indicator : '' )
+				( $req ? ' <span class="required">*</span>' : '' )
 			),
 			sprintf(
 				'<input id="email" name="email" %s value="%s" size="30" maxlength="100" aria-describedby="email-notes"%s />',
 				( $html5 ? 'type="email"' : 'type="text"' ),
 				esc_attr( $commenter['comment_author_email'] ),
-				( $req ? $required_attribute : '' )
+				$html_req
 			)
 		),
 		'url'    => sprintf(
@@ -2403,7 +2391,7 @@ function comment_form( $args = array(), $post_id = null ) {
 	);
 
 	if ( has_action( 'set_comment_cookies', 'wp_set_comment_cookies' ) && get_option( 'show_comments_cookies_opt_in' ) ) {
-		$consent = empty( $commenter['comment_author_email'] ) ? '' : $checked_attribute;
+		$consent = empty( $commenter['comment_author_email'] ) ? '' : ' checked="checked"';
 
 		$fields['cookies'] = sprintf(
 			'<p class="comment-form-cookies-consent">%s %s</p>',
@@ -2425,8 +2413,8 @@ function comment_form( $args = array(), $post_id = null ) {
 
 	$required_text = sprintf(
 		/* translators: %s: Asterisk symbol (*). */
-		' <span class="comment-required-message" aria-hidden="true">' . __( 'Required fields are marked %s' ) . '</span>',
-		trim( $required_indicator )
+		' ' . __( 'Required fields are marked %s' ),
+		'<span class="required">*</span>'
 	);
 
 	/**
@@ -2443,11 +2431,10 @@ function comment_form( $args = array(), $post_id = null ) {
 		'comment_field'        => sprintf(
 			'<p class="comment-form-comment">%s %s</p>',
 			sprintf(
-				'<label for="comment">%s%s</label>',
-				_x( 'Comment', 'noun' ),
-				$required_indicator
+				'<label for="comment">%s</label>',
+				_x( 'Comment', 'noun' )
 			),
-			'<textarea id="comment" name="comment" cols="45" rows="8" maxlength="65525"' . $required_attribute . '></textarea>'
+			'<textarea id="comment" name="comment" cols="45" rows="8" maxlength="65525" required="required"></textarea>'
 		),
 		'must_log_in'          => sprintf(
 			'<p class="must-log-in">%s</p>',
@@ -2459,7 +2446,7 @@ function comment_form( $args = array(), $post_id = null ) {
 			)
 		),
 		'logged_in_as'         => sprintf(
-			'<p class="logged-in-as">%s%s</p>',
+			'<p class="logged-in-as">%s</p>',
 			sprintf(
 				/* translators: 1: Edit user link, 2: Accessibility text, 3: User name, 4: Logout URL. */
 				__( '<a href="%1$s" aria-label="%2$s">Logged in as %3$s</a>. <a href="%4$s">Log out?</a>' ),
@@ -2469,8 +2456,7 @@ function comment_form( $args = array(), $post_id = null ) {
 				$user_identity,
 				/** This filter is documented in wp-includes/link-template.php */
 				wp_logout_url( apply_filters( 'the_permalink', get_permalink( $post_id ), $post_id ) )
-			),
-			$required_text
+			)
 		),
 		'comment_notes_before' => sprintf(
 			'<p class="comment-notes">%s%s</p>',
@@ -2478,7 +2464,7 @@ function comment_form( $args = array(), $post_id = null ) {
 				'<span id="email-notes">%s</span>',
 				__( 'Your email address will not be published.' )
 			),
-			$required_text
+			( $req ? $required_text : '' )
 		),
 		'comment_notes_after'  => '',
 		'action'               => site_url( '/wp-comments-post.php' ),
@@ -2654,16 +2640,8 @@ function comment_form( $args = array(), $post_id = null ) {
 					/**
 					 * Filters a comment form field for display.
 					 *
-					 * The dynamic portion of the hook name, `$name`, refers to the name
-					 * of the comment form field.
-					 *
-					 * Possible hook names include:
-					 *
-					 *  - `comment_form_field_comment`
-					 *  - `comment_form_field_author`
-					 *  - `comment_form_field_email`
-					 *  - `comment_form_field_url`
-					 *  - `comment_form_field_cookies`
+					 * The dynamic portion of the filter hook, `$name`, refers to the name
+					 * of the comment form field. Such as 'author', 'email', or 'url'.
 					 *
 					 * @since 3.0.0
 					 *

@@ -160,7 +160,7 @@ abstract class WP_Sitemaps_Provider {
 		);
 
 		if ( ! $wp_rewrite->using_permalinks() ) {
-			$basename = '/?' . http_build_query( $params, '', '&' );
+			$basename = '/?' . http_build_query( $params, null, '&' );
 		}
 
 		return home_url( $basename );
