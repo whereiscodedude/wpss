@@ -19,7 +19,7 @@ if ( ! function_exists( 'twentyfifteen_comment_nav' ) ) :
 		// Are there comments to navigate through?
 		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) :
 			?>
-		<nav class="navigation comment-navigation">
+		<nav class="navigation comment-navigation" role="navigation">
 		<h2 class="screen-reader-text"><?php _e( 'Comment navigation', 'twentyfifteen' ); ?></h2>
 		<div class="nav-links">
 			<?php
@@ -61,7 +61,7 @@ if ( ! function_exists( 'twentyfifteen_entry_meta' ) ) :
 			);
 		}
 
-		if ( in_array( get_post_type(), array( 'post', 'attachment' ), true ) ) {
+		if ( in_array( get_post_type(), array( 'post', 'attachment' ) ) ) {
 			$time_string = '<time class="entry-date published updated" datetime="%1$s">%2$s</time>';
 
 			if ( get_the_time( 'U' ) !== get_the_modified_time( 'U' ) ) {
@@ -84,7 +84,7 @@ if ( ! function_exists( 'twentyfifteen_entry_meta' ) ) :
 			);
 		}
 
-		if ( 'post' === get_post_type() ) {
+		if ( 'post' == get_post_type() ) {
 			if ( is_singular() || is_multi_author() ) {
 				printf(
 					'<span class="byline"><span class="author vcard"><span class="screen-reader-text">%1$s </span><a class="url fn n" href="%2$s">%3$s</a></span></span>',
