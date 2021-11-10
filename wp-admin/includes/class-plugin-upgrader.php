@@ -162,9 +162,9 @@ class Plugin_Upgrader extends WP_Upgrader {
 			 *
 			 * @since 5.5.0
 			 *
-			 * @param string  $package      The package file.
-			 * @param array   $data         The new plugin or theme data.
-			 * @param string  $package_type The package type ('plugin' or 'theme').
+			 * @param string  $package          The package file.
+			 * @param array   $new_plugin_data  The new plugin data.
+			 * @param string  $package_type     The package type (plugin or theme).
 			 */
 			do_action( 'upgrader_overwrote_package', $package, $this->new_plugin_data, 'plugin' );
 		}
@@ -226,14 +226,9 @@ class Plugin_Upgrader extends WP_Upgrader {
 				'clear_destination' => true,
 				'clear_working'     => true,
 				'hook_extra'        => array(
-					'plugin'      => $plugin,
-					'type'        => 'plugin',
-					'action'      => 'update',
-					'temp_backup' => array(
-						'slug' => dirname( $plugin ),
-						'src'  => WP_PLUGIN_DIR,
-						'dir'  => 'plugins',
-					),
+					'plugin' => $plugin,
+					'type'   => 'plugin',
+					'action' => 'update',
 				),
 			)
 		);
@@ -347,17 +342,12 @@ class Plugin_Upgrader extends WP_Upgrader {
 					'clear_working'     => true,
 					'is_multi'          => true,
 					'hook_extra'        => array(
-						'plugin'      => $plugin,
-						'temp_backup' => array(
-							'slug' => dirname( $plugin ),
-							'src'  => WP_PLUGIN_DIR,
-							'dir'  => 'plugins',
-						),
+						'plugin' => $plugin,
 					),
 				)
 			);
 
-			$results[ $plugin ] = $result;
+			$results[ $plugin ] = $this->result;
 
 			// Prevent credentials auth screen from displaying multiple times.
 			if ( false === $result ) {
@@ -408,20 +398,21 @@ class Plugin_Upgrader extends WP_Upgrader {
 	}
 
 	/**
-	 * Checks that the source package contains a valid plugin.
+	 * Check a source package to be sure it contains a plugin.
 	 *
-	 * Hooked to the {@see 'upgrader_source_selection'} filter by Plugin_Upgrader::install().
+	 * This function is added to the {@see 'upgrader_source_selection'} filter by
+	 * Plugin_Upgrader::install().
 	 *
 	 * @since 3.3.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 * @global string             $wp_version    The WordPress version string.
 	 *
 	 * @param string $source The path to the downloaded package source.
-	 * @return string|WP_Error The source as passed, or a WP_Error object on failure.
+	 * @return string|WP_Error The source as passed, or a WP_Error object
+	 *                         if no plugins were found.
 	 */
 	public function check_package( $source ) {
-		global $wp_filesystem, $wp_version;
+		global $wp_filesystem;
 
 		$this->new_plugin_data = array();
 
@@ -468,7 +459,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 			$error = sprintf(
 				/* translators: 1: Current WordPress version, 2: Version required by the uploaded plugin. */
 				__( 'Your WordPress version is %1$s, however the uploaded plugin requires %2$s.' ),
-				$wp_version,
+				$GLOBALS['wp_version'],
 				$requires_wp
 			);
 

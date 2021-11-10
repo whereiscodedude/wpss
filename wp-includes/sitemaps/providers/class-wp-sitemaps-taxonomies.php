@@ -38,7 +38,7 @@ class WP_Sitemaps_Taxonomies extends WP_Sitemaps_Provider {
 		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
 
 		/**
-		 * Filters the list of taxonomy object subtypes available within the sitemap.
+		 * Filter the list of taxonomy object subtypes available within the sitemap.
 		 *
 		 * @since 5.5.0
 		 *
@@ -51,16 +51,12 @@ class WP_Sitemaps_Taxonomies extends WP_Sitemaps_Provider {
 	 * Gets a URL list for a taxonomy sitemap.
 	 *
 	 * @since 5.5.0
-	 * @since 5.9.0 Renamed `$taxonomy` to `$object_subtype` to match parent class
-	 *              for PHP 8 named parameter support.
 	 *
-	 * @param int    $page_num       Page of results.
-	 * @param string $object_subtype Optional. Taxonomy name. Default empty.
+	 * @param int    $page_num Page of results.
+	 * @param string $taxonomy Optional. Taxonomy name. Default empty.
 	 * @return array Array of URLs for a sitemap.
 	 */
-	public function get_url_list( $page_num, $object_subtype = '' ) {
-		// Restores the more descriptive, specific name for use within this method.
-		$taxonomy        = $object_subtype;
+	public function get_url_list( $page_num, $taxonomy = '' ) {
 		$supported_types = $this->get_object_subtypes();
 
 		// Bail early if the queried taxonomy is not supported.
@@ -103,14 +99,8 @@ class WP_Sitemaps_Taxonomies extends WP_Sitemaps_Provider {
 
 		if ( ! empty( $taxonomy_terms->terms ) ) {
 			foreach ( $taxonomy_terms->terms as $term ) {
-				$term_link = get_term_link( $term, $taxonomy );
-
-				if ( is_wp_error( $term_link ) ) {
-					continue;
-				}
-
 				$sitemap_entry = array(
-					'loc' => $term_link,
+					'loc' => get_term_link( $term ),
 				);
 
 				/**
@@ -134,19 +124,14 @@ class WP_Sitemaps_Taxonomies extends WP_Sitemaps_Provider {
 	 * Gets the max number of pages available for the object type.
 	 *
 	 * @since 5.5.0
-	 * @since 5.9.0 Renamed `$taxonomy` to `$object_subtype` to match parent class
-	 *              for PHP 8 named parameter support.
 	 *
-	 * @param string $object_subtype Optional. Taxonomy name. Default empty.
+	 * @param string $taxonomy Taxonomy name.
 	 * @return int Total number of pages.
 	 */
-	public function get_max_num_pages( $object_subtype = '' ) {
-		if ( empty( $object_subtype ) ) {
+	public function get_max_num_pages( $taxonomy = '' ) {
+		if ( empty( $taxonomy ) ) {
 			return 0;
 		}
-
-		// Restores the more descriptive, specific name for use within this method.
-		$taxonomy = $object_subtype;
 
 		/**
 		 * Filters the max number of pages before it is generated.
@@ -165,7 +150,7 @@ class WP_Sitemaps_Taxonomies extends WP_Sitemaps_Provider {
 			return $max_num_pages;
 		}
 
-		$term_count = wp_count_terms( $this->get_taxonomies_query_args( $taxonomy ) );
+		$term_count = wp_count_terms( $taxonomy, $this->get_taxonomies_query_args( $taxonomy ) );
 
 		return (int) ceil( $term_count / wp_sitemaps_get_max_urls( $this->object_type ) );
 	}

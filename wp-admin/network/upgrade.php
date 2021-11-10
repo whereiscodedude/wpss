@@ -12,7 +12,6 @@ require_once __DIR__ . '/admin.php';
 
 require_once ABSPATH . WPINC . '/http.php';
 
-// Used in the HTML title tag.
 $title       = __( 'Upgrade Network' );
 $parent_file = 'upgrade.php';
 
@@ -46,7 +45,7 @@ $action = isset( $_GET['action'] ) ? $_GET['action'] : 'show';
 
 switch ( $action ) {
 	case 'upgrade':
-		$n = ( isset( $_GET['n'] ) ) ? (int) $_GET['n'] : 0;
+		$n = ( isset( $_GET['n'] ) ) ? intval( $_GET['n'] ) : 0;
 
 		if ( $n < 5 ) {
 			/**
