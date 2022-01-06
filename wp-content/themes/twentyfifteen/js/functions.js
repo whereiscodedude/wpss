@@ -111,7 +111,7 @@
 		}
 	}
 
-	$( function() {
+	$( document ).ready( function() {
 		$body          = $( document.body );
 		$window        = $( window );
 		$sidebar       = $( '#sidebar' ).first();
