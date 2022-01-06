@@ -13,7 +13,7 @@
  * @since 3.1.0
  * @access private
  *
- * @see WP_List_Table
+ * @see WP_List_Tsble
  */
 class WP_Links_List_Table extends WP_List_Table {
 
@@ -58,7 +58,7 @@ class WP_Links_List_Table extends WP_List_Table {
 			'hide_empty'     => 0,
 		);
 
-		if ( 'all' !== $cat_id ) {
+		if ( 'all' != $cat_id ) {
 			$args['category'] = $cat_id;
 		}
 		if ( ! empty( $s ) ) {
@@ -97,12 +97,12 @@ class WP_Links_List_Table extends WP_List_Table {
 	protected function extra_tablenav( $which ) {
 		global $cat_id;
 
-		if ( 'top' !== $which ) {
+		if ( 'top' != $which ) {
 			return;
 		}
 		?>
 		<div class="alignleft actions">
-			<?php
+		<?php
 			$dropdown_options = array(
 				'selected'        => $cat_id,
 				'name'            => 'cat_id',
@@ -114,10 +114,8 @@ class WP_Links_List_Table extends WP_List_Table {
 				'orderby'         => 'name',
 			);
 
-			echo '<label class="screen-reader-text" for="cat_id">' . get_taxonomy( 'link_category' )->labels->filter_by_item . '</label>';
-
+			echo '<label class="screen-reader-text" for="cat_id">' . __( 'Filter by category' ) . '</label>';
 			wp_dropdown_categories( $dropdown_options );
-
 			submit_button( __( 'Filter' ), '', 'filter_action', false, array( 'id' => 'post-query-submit' ) );
 			?>
 		</div>
@@ -166,21 +164,12 @@ class WP_Links_List_Table extends WP_List_Table {
 	 * Handles the checkbox column output.
 	 *
 	 * @since 4.3.0
-	 * @since 5.9.0 Renamed `$link` to `$item` to match parent class for PHP 8 named parameter support.
 	 *
-	 * @param object $item The current link object.
+	 * @param object $link The current link object.
 	 */
-	public function column_cb( $item ) {
-		// Restores the more descriptive, specific name for use within this method.
-		$link = $item;
-
+	public function column_cb( $link ) {
 		?>
-		<label class="screen-reader-text" for="cb-select-<?php echo $link->link_id; ?>">
-			<?php
-			/* translators: %s: Link name. */
-			printf( __( 'Select %s' ), $link->link_name );
-			?>
-		</label>
+		<label class="screen-reader-text" for="cb-select-<?php echo $link->link_id; ?>"><?php echo sprintf( __( 'Select %s' ), $link->link_name ); ?></label>
 		<input type="checkbox" name="linkcheck[]" id="cb-select-<?php echo $link->link_id; ?>" value="<?php echo esc_attr( $link->link_id ); ?>" />
 		<?php
 	}
@@ -197,7 +186,7 @@ class WP_Links_List_Table extends WP_List_Table {
 		printf(
 			'<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
 			$edit_link,
-			/* translators: %s: Link name. */
+			/* translators: %s: link name */
 			esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $link->link_name ) ),
 			$link->link_name
 		);
@@ -234,7 +223,7 @@ class WP_Links_List_Table extends WP_List_Table {
 				echo $cat->get_error_message();
 			}
 			$cat_name = $cat->name;
-			if ( (int) $cat_id !== $category ) {
+			if ( $cat_id != $category ) {
 				$cat_name = "<a href='link-manager.php?cat_id=$category'>$cat_name</a>";
 			}
 			$cat_names[] = $cat_name;
@@ -283,12 +272,11 @@ class WP_Links_List_Table extends WP_List_Table {
 	 * Handles the default column output.
 	 *
 	 * @since 4.3.0
-	 * @since 5.9.0 Renamed `$link` to `$item` to match parent class for PHP 8 named parameter support.
 	 *
-	 * @param object $item        Link object.
+	 * @param object $link        Link object.
 	 * @param string $column_name Current column name.
 	 */
-	public function column_default( $item, $column_name ) {
+	public function column_default( $link, $column_name ) {
 		/**
 		 * Fires for each registered custom link column.
 		 *
@@ -297,7 +285,7 @@ class WP_Links_List_Table extends WP_List_Table {
 		 * @param string $column_name Name of the custom column.
 		 * @param int    $link_id     Link ID.
 		 */
-		do_action( 'manage_link_custom_column', $column_name, $item->link_id );
+		do_action( 'manage_link_custom_column', $column_name, $link->link_id );
 	}
 
 	public function display_rows() {
@@ -317,33 +305,22 @@ class WP_Links_List_Table extends WP_List_Table {
 	 * Generates and displays row action links.
 	 *
 	 * @since 4.3.0
-	 * @since 5.9.0 Renamed `$link` to `$item` to match parent class for PHP 8 named parameter support.
 	 *
-	 * @param object $item        Link being acted upon.
+	 * @param object $link        Link being acted upon.
 	 * @param string $column_name Current column name.
 	 * @param string $primary     Primary column name.
-	 * @return string Row actions output for links, or an empty string
-	 *                if the current column is not the primary column.
+	 * @return string Row action output for links.
 	 */
-	protected function handle_row_actions( $item, $column_name, $primary ) {
+	protected function handle_row_actions( $link, $column_name, $primary ) {
 		if ( $primary !== $column_name ) {
 			return '';
 		}
 
-		// Restores the more descriptive, specific name for use within this method.
-		$link      = $item;
 		$edit_link = get_edit_bookmark_link( $link );
 
 		$actions           = array();
 		$actions['edit']   = '<a href="' . $edit_link . '">' . __( 'Edit' ) . '</a>';
-		$actions['delete'] = sprintf(
-			'<a class="submitdelete" href="%s" onclick="return confirm( \'%s\' );">%s</a>',
-			wp_nonce_url( "link.php?action=delete&amp;link_id=$link->link_id", 'delete-bookmark_' . $link->link_id ),
-			/* translators: %s: Link name. */
-			esc_js( sprintf( __( "You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete." ), $link->link_name ) ),
-			__( 'Delete' )
-		);
-
+		$actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url( "link.php?action=delete&amp;link_id=$link->link_id", 'delete-bookmark_' . $link->link_id ) . "' onclick=\"if ( confirm( '" . esc_js( sprintf( __( "You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete." ), $link->link_name ) ) . "' ) ) { return true;}return false;\">" . __( 'Delete' ) . '</a>';
 		return $this->row_actions( $actions );
 	}
 }
