@@ -34,14 +34,13 @@
  * @property string $locale
  * @property string $rich_editing
  * @property string $syntax_highlighting
- * @property string $use_ssl
  */
 class WP_User {
 	/**
 	 * User data container.
 	 *
 	 * @since 2.0.0
-	 * @var stdClass
+	 * @var object
 	 */
 	public $data;
 
@@ -168,9 +167,6 @@ class WP_User {
 	 * @param int    $site_id Optional. The site ID to initialize for.
 	 */
 	public function init( $data, $site_id = '' ) {
-		if ( ! isset( $data->ID ) ) {
-			$data->ID = 0;
-		}
 		$this->data = $data;
 		$this->ID   = (int) $data->ID;
 
@@ -203,7 +199,7 @@ class WP_User {
 			if ( ! is_numeric( $value ) ) {
 				return false;
 			}
-			$value = (int) $value;
+			$value = intval( $value );
 			if ( $value < 1 ) {
 				return false;
 			}
@@ -649,7 +645,7 @@ class WP_User {
 	 */
 	public function level_reduction( $max, $item ) {
 		if ( preg_match( '/^level_(10|[0-9])$/i', $item, $matches ) ) {
-			$level = (int) $matches[1];
+			$level = intval( $matches[1] );
 			return max( $max, $level );
 		} else {
 			return $max;

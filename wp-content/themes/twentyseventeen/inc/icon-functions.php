@@ -205,7 +205,6 @@ function twentyseventeen_social_links_icons() {
 		'vimeo.com'       => 'vimeo',
 		'vine.co'         => 'vine',
 		'vk.com'          => 'vk',
-		'wa.me'           => 'whatsapp',
 		'whatsapp.com'    => 'whatsapp',
 		'wordpress.org'   => 'wordpress',
 		'wordpress.com'   => 'wordpress',
@@ -214,7 +213,7 @@ function twentyseventeen_social_links_icons() {
 	);
 
 	/**
-	 * Filters Twenty Seventeen social links icons.
+	 * Filter Twenty Seventeen social links icons.
 	 *
 	 * @since Twenty Seventeen 1.0
 	 *
