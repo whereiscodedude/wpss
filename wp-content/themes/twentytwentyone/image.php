@@ -24,9 +24,7 @@ while ( have_posts() ) {
 				/**
 				 * Filter the default image attachment size.
 				 *
-				 * @since Twenty Twenty-One 1.0
-				 *
-				 * @param string $image_size Image size. Default 'full'.
+				 * @param string $image_size Image size. Default 'large'.
 				 */
 				$image_size = apply_filters( 'twenty_twenty_one_attachment_size', 'full' );
 				echo wp_get_attachment_image( get_the_ID(), $image_size );
@@ -44,7 +42,7 @@ while ( have_posts() ) {
 				array(
 					'before'   => '<nav class="page-links" aria-label="' . esc_attr__( 'Page', 'twentytwentyone' ) . '">',
 					'after'    => '</nav>',
-					/* translators: %: Page number. */
+					/* translators: %: page number. */
 					'pagelink' => esc_html__( 'Page %', 'twentytwentyone' ),
 				)
 			);
@@ -57,7 +55,7 @@ while ( have_posts() ) {
 			if ( wp_get_post_parent_id( $post ) ) {
 				echo '<span class="posted-on">';
 				printf(
-					/* translators: %s: Parent post. */
+					/* translators: %s: parent post. */
 					esc_html__( 'Published in %s', 'twentytwentyone' ),
 					'<a href="' . esc_url( get_the_permalink( wp_get_post_parent_id( $post ) ) ) . '">' . esc_html( get_the_title( wp_get_post_parent_id( $post ) ) ) . '</a>'
 				);
