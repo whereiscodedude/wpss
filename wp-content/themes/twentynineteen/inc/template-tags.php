@@ -208,7 +208,8 @@ if ( ! function_exists( 'twentynineteen_comment_form' ) ) :
 
 			comment_form(
 				array(
-					'title_reply' => null,
+					'logged_in_as' => null,
+					'title_reply'  => null,
 				)
 			);
 		}
