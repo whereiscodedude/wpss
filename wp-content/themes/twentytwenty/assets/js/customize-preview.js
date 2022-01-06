@@ -4,14 +4,12 @@
  *
  * Contains handlers to make Theme Customizer preview reload changes asynchronously.
  *
- * @since Twenty Twenty 1.0
+ * @since 1.0.0
  */
 
 ( function( $, api, _ ) {
 	/**
 	 * Return a value for our partial refresh.
-	 *
-	 * @since Twenty Twenty 1.0
 	 *
 	 * @param {Object} partial  Current partial.
 	 *
@@ -27,13 +25,11 @@
 		return deferred.promise();
 	}
 
-	// Selective refresh for "Fixed Background Image".
+	// Selective refresh for "Fixed Background Image"
 	api.selectiveRefresh.partialConstructor.cover_fixed = api.selectiveRefresh.Partial.extend( {
 
 		/**
-		 * Override the refresh method.
-		 *
-		 * @since Twenty Twenty 1.0
+		 * Override the refresh method
 		 *
 		 * @return {jQuery.Promise} Resolved promise.
 		 */
@@ -53,21 +49,18 @@
 
 	} );
 
-	// Selective refresh for "Image Overlay Opacity".
+	// Selective refresh for "Image Overlay Opacity"
 	api.selectiveRefresh.partialConstructor.cover_opacity = api.selectiveRefresh.Partial.extend( {
 
 		/**
 		 * Input attributes.
 		 *
-		 * @since Twenty Twenty 1.0
 		 * @type {Object}
 		 */
 		attrs: {},
 
 		/**
-		 * Override the refresh method.
-		 *
-		 * @since Twenty Twenty 1.0
+		 * Override the refresh method
 		 *
 		 * @return {jQuery.Promise} Resolved promise.
 		 */
@@ -153,7 +146,7 @@
 	/**
 	 * Add styles to elements in the preview pane.
 	 *
-	 * @since Twenty Twenty 1.0
+	 * @since 1.0.0
 	 *
 	 * @param {string} context The area for which we want to generate styles. Can be for example "content", "header" etc.
 	 *
@@ -186,7 +179,7 @@
 		stylesheet.html( styles );
 	}
 	// Generate styles on load. Handles page-changes on the preview pane.
-	$( function() {
+	$( document ).ready( function() {
 		twentyTwentyGenerateColorA11yPreviewStyles( 'content' );
 		twentyTwentyGenerateColorA11yPreviewStyles( 'header-footer' );
 	} );

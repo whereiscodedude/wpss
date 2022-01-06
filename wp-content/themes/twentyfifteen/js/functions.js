@@ -17,7 +17,7 @@
 		container.find( '.current-menu-ancestor > button' ).addClass( 'toggle-on' );
 		container.find( '.current-menu-ancestor > .sub-menu' ).addClass( 'toggled-on' );
 
-		container.find( '.dropdown-toggle' ).on( 'click', function( e ) {
+		container.find( '.dropdown-toggle' ).click( function( e ) {
 			var _this = $( this );
 			e.preventDefault();
 			_this.toggleClass( 'toggle-on' );
@@ -79,7 +79,6 @@
 	 *
 	 * Uses jQuery's width() function to determine the size of the window and add
 	 * the default ARIA attributes for the menu toggle if it's visible.
-	 *
 	 * @since Twenty Fifteen 1.1
 	 */
 	function onResizeARIA() {
@@ -111,7 +110,7 @@
 		}
 	}
 
-	$( function() {
+	$( document ).ready( function() {
 		$body          = $( document.body );
 		$window        = $( window );
 		$sidebar       = $( '#sidebar' ).first();
