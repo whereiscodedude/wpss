@@ -2,7 +2,6 @@
  * WordPress inline HTML embed
  *
  * @since 4.4.0
- * @output wp-includes/js/wp-embed.js
  *
  * This file cannot have ampersands in it. This is to ensure
  * it can be embedded in older versions of WordPress.
@@ -20,25 +19,14 @@
 			}
 		}
 
-	/** @namespace wp */
 	window.wp = window.wp || {};
 
 	if ( !! window.wp.receiveEmbedMessage ) {
 		return;
 	}
 
-	/**
-	 * Receive embed message.
-	 *
-	 * @param {MessageEvent} e
-	 */
 	window.wp.receiveEmbedMessage = function( e ) {
 		var data = e.data;
-
-		if ( ! data ) {
-			return;
-		}
-
 		if ( ! ( data.secret || data.message || data.value ) ) {
 			return;
 		}
@@ -107,16 +95,16 @@
 			iframeClone, i, source, secret;
 
 		for ( i = 0; i < iframes.length; i++ ) {
-			/** @var {IframeElement} */
 			source = iframes[ i ];
 
-			secret = source.getAttribute( 'data-secret' );
-			if ( ! secret ) {
-				/* Add secret to iframe */
-				secret = Math.random().toString( 36 ).substr( 2, 10 );
-				source.src += '#?secret=' + secret;
-				source.setAttribute( 'data-secret', secret );
+			if ( source.getAttribute( 'data-secret' ) ) {
+				continue;
 			}
+
+			/* Add secret to iframe */
+			secret = Math.random().toString( 36 ).substr( 2, 10 );
+			source.src += '#?secret=' + secret;
+			source.setAttribute( 'data-secret', secret );
 
 			/* Remove security attribute from iframes in IE10 and IE11. */
 			if ( ( isIE10 || isIE11 ) ) {
@@ -124,16 +112,6 @@
 				iframeClone.removeAttribute( 'security' );
 				source.parentNode.replaceChild( iframeClone, source );
 			}
-
-			/*
-			 * Let post embed window know that the parent is ready for receiving the height message, in case the iframe
-			 * loaded before wp-embed.js was loaded. When the ready message is received by the post embed window, the
-			 * window will then (re-)send the height message right away.
-			 */
-			source.contentWindow.postMessage( {
-				message: 'ready',
-				secret: secret
-			}, '*' );
 		}
 	}
 
