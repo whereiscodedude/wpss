@@ -63,8 +63,7 @@ if ( file_exists( ABSPATH . 'wp-config.php' ) ) {
 			__( 'The file %1$s already exists. If you need to reset any of the configuration items in this file, please delete it first. You may try <a href="%2$s">installing now</a>.' ),
 			'<code>wp-config.php</code>',
 			'install.php'
-		) . '</p>',
-		409
+		) . '</p>'
 	);
 }
 
@@ -76,8 +75,7 @@ if ( @file_exists( ABSPATH . '../wp-config.php' ) && ! @file_exists( ABSPATH . '
 			__( 'The file %1$s already exists one level above your WordPress installation. If you need to reset any of the configuration items in this file, please delete it first. You may try <a href="%2$s">installing now</a>.' ),
 			'<code>wp-config.php</code>',
 			'install.php'
-		) . '</p>',
-		409
+		) . '</p>'
 	);
 }
 
@@ -89,7 +87,10 @@ $step = isset( $_GET['step'] ) ? (int) $_GET['step'] : -1;
  * @ignore
  * @since 2.3.0
  *
- * @param string|string[] $body_classes Class attribute values for the body tag.
+ * @global string    $wp_local_package Locale code of the package.
+ * @global WP_Locale $wp_locale        WordPress date and time locale object.
+ *
+ * @param string|array $body_classes
  */
 function setup_config_display_header( $body_classes = array() ) {
 	$body_classes   = (array) $body_classes;
@@ -103,7 +104,7 @@ function setup_config_display_header( $body_classes = array() ) {
 	header( 'Content-Type: text/html; charset=utf-8' );
 	?>
 <!DOCTYPE html>
-<html<?php echo $dir_attr; ?>>
+<html xmlns="http://www.w3.org/1999/xhtml"<?php echo $dir_attr; ?>>
 <head>
 	<meta name="viewport" content="width=device-width" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -112,7 +113,7 @@ function setup_config_display_header( $body_classes = array() ) {
 	<?php wp_admin_css( 'install', true ); ?>
 </head>
 <body class="<?php echo implode( ' ', $body_classes ); ?>">
-<p id="logo"><?php _e( 'WordPress' ); ?></p>
+<p id="logo"><a href="<?php echo esc_url( __( 'https://wordpress.org/' ) ); ?>"><?php _e( 'WordPress' ); ?></a></p>
 	<?php
 } // End function setup_config_display_header();
 
@@ -192,7 +193,7 @@ switch ( $step ) {
 		);
 		?>
 </p>
-<p><?php _e( 'In all likelihood, these items were supplied to you by your web host. If you don&#8217;t have this information, then you will need to contact them before you can continue. If you&#8217;re all ready&hellip;' ); ?></p>
+<p><?php _e( 'In all likelihood, these items were supplied to you by your Web Host. If you don&#8217;t have this information, then you will need to contact them before you can continue. If you&#8217;re all ready&hellip;' ); ?></p>
 
 <p class="step"><a href="<?php echo $step_1; ?>" class="button button-large"><?php _e( 'Let&#8217;s go!' ); ?></a></p>
 		<?php
@@ -351,7 +352,7 @@ switch ( $step ) {
 
 		$key = 0;
 		foreach ( $config_file as $line_num => $line ) {
-			if ( '$table_prefix =' === substr( $line, 0, 15 ) ) {
+			if ( '$table_prefix =' == substr( $line, 0, 15 ) ) {
 				$config_file[ $line_num ] = '$table_prefix = \'' . addcslashes( $prefix, "\\'" ) . "';\r\n";
 				continue;
 			}
@@ -423,63 +424,33 @@ if ( ! /iPad|iPod|iPhone/.test( navigator.userAgent ) ) {
 })();
 </script>
 			<?php
-		else :
-			/*
-			 * If this file doesn't exist, then we are using the wp-config-sample.php
-			 * file one level up, which is for the develop repo.
-			 */
-			if ( file_exists( ABSPATH . 'wp-config-sample.php' ) ) {
-				$path_to_wp_config = ABSPATH . 'wp-config.php';
-			} else {
-				$path_to_wp_config = dirname( ABSPATH ) . '/wp-config.php';
-			}
+	else :
+		/*
+		 * If this file doesn't exist, then we are using the wp-config-sample.php
+		 * file one level up, which is for the develop repo.
+		 */
+		if ( file_exists( ABSPATH . 'wp-config-sample.php' ) ) {
+			$path_to_wp_config = ABSPATH . 'wp-config.php';
+		} else {
+			$path_to_wp_config = dirname( ABSPATH ) . '/wp-config.php';
+		}
 
-			$error_message = '';
-			$handle        = fopen( $path_to_wp_config, 'w' );
-			/*
-			 * Why check for the absence of false instead of checking for resource with is_resource()?
-			 * To future-proof the check for when fopen returns object instead of resource, i.e. a known
-			 * change coming in PHP.
-			 */
-			if ( false !== $handle ) {
-				foreach ( $config_file as $line ) {
-					fwrite( $handle, $line );
-				}
-				fclose( $handle );
-			} else {
-				$wp_config_perms = fileperms( $path_to_wp_config );
-				if ( ! empty( $wp_config_perms ) && ! is_writable( $path_to_wp_config ) ) {
-					$error_message = sprintf(
-						/* translators: 1: wp-config.php, 2: Documentation URL. */
-						__( 'You need to make the file %1$s writable before you can save your changes. See <a href="%2$s">Changing File Permissions</a> for more information.' ),
-						'<code>wp-config.php</code>',
-						__( 'https://wordpress.org/support/article/changing-file-permissions/' )
-					);
-				} else {
-					$error_message = sprintf(
-						/* translators: %s: wp-config.php */
-						__( 'Unable to write to %s file.' ),
-						'<code>wp-config.php</code>'
-					);
-				}
-			}
-
-			chmod( $path_to_wp_config, 0666 );
-			setup_config_display_header();
-
-			if ( false !== $handle ) :
-				?>
+		$handle = fopen( $path_to_wp_config, 'w' );
+		foreach ( $config_file as $line ) {
+			fwrite( $handle, $line );
+		}
+		fclose( $handle );
+		chmod( $path_to_wp_config, 0666 );
+		setup_config_display_header();
+		?>
 <h1 class="screen-reader-text"><?php _e( 'Successful database connection' ); ?></h1>
 <p><?php _e( 'All right, sparky! You&#8217;ve made it through this part of the installation. WordPress can now communicate with your database. If you are ready, time now to&hellip;' ); ?></p>
 
 <p class="step"><a href="<?php echo $install; ?>" class="button button-large"><?php _e( 'Run the installation' ); ?></a></p>
-				<?php
-			else :
-				printf( '<p>%s</p>', $error_message );
-			endif;
-		endif;
+		<?php
+	endif;
 		break;
-} // End of the steps switch.
+}
 ?>
 <?php wp_print_scripts( 'language-chooser' ); ?>
 </body>
