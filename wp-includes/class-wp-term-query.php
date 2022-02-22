@@ -775,7 +775,7 @@ class WP_Term_Query {
 		}
 
 		if ( empty( $terms ) ) {
-			wp_cache_add( $cache_key, array(), 'terms' );
+			wp_cache_add( $cache_key, array(), 'terms', DAY_IN_SECONDS );
 			return array();
 		}
 
@@ -880,7 +880,7 @@ class WP_Term_Query {
 			}
 		}
 
-		wp_cache_add( $cache_key, $terms, 'terms' );
+		wp_cache_add( $cache_key, $terms, 'terms', DAY_IN_SECONDS );
 
 		if ( 'all' === $_fields || 'all_with_object_id' === $_fields ) {
 			$terms = $this->populate_terms( $terms );

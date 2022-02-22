@@ -30,7 +30,7 @@ class Walker_Comment extends Walker {
 	 * Database fields to use.
 	 *
 	 * @since 2.7.0
-	 * @var string[]
+	 * @var array
 	 *
 	 * @see Walker::$db_fields
 	 * @todo Decouple this

@@ -24,7 +24,7 @@ class Walker {
 	 * DB fields to use.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $db_fields;
 
