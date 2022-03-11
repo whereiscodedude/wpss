@@ -18,7 +18,7 @@ class WP_Locale {
 	 * Stores the translated strings for the full weekday names.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $weekday;
 
@@ -31,7 +31,7 @@ class WP_Locale {
 	 * @see WP_Locale::init() for how to handle the hack.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $weekday_initial;
 
@@ -39,7 +39,7 @@ class WP_Locale {
 	 * Stores the translated strings for the abbreviated weekday names.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $weekday_abbrev;
 
@@ -47,7 +47,7 @@ class WP_Locale {
 	 * Stores the translated strings for the full month names.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $month;
 
@@ -55,7 +55,7 @@ class WP_Locale {
 	 * Stores the translated strings for the month names in genitive case, if the locale specifies.
 	 *
 	 * @since 4.4.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $month_genitive;
 
@@ -63,7 +63,7 @@ class WP_Locale {
 	 * Stores the translated strings for the abbreviated month names.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $month_abbrev;
 
@@ -73,7 +73,7 @@ class WP_Locale {
 	 * Also the capitalized versions.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $meridiem;
 
@@ -115,10 +115,10 @@ class WP_Locale {
 	 * @since 2.1.0
 	 *
 	 * @global string $text_direction
-	 * @global string $wp_version     The WordPress version string.
+	 * @global string $wp_version
 	 */
 	public function init() {
-		// The weekdays.
+		// The Weekdays
 		$this->weekday[0] = /* translators: Weekday. */ __( 'Sunday' );
 		$this->weekday[1] = /* translators: Weekday. */ __( 'Monday' );
 		$this->weekday[2] = /* translators: Weekday. */ __( 'Tuesday' );
@@ -138,14 +138,14 @@ class WP_Locale {
 
 		// Abbreviations for each day.
 		$this->weekday_abbrev[ __( 'Sunday' ) ]    = /* translators: Three-letter abbreviation of the weekday. */ __( 'Sun' );
-		$this->weekday_abbrev[ __( 'Monday' ) ]    = /* translators: Three-letter abbreviation of the weekday. */ __( 'Mon' );
+		$this->weekday_abbrev[ __( 'Monday' ) ]    = /* translators: Ttree-letter abbreviation of the weekday. */ __( 'Mon' );
 		$this->weekday_abbrev[ __( 'Tuesday' ) ]   = /* translators: Three-letter abbreviation of the weekday. */ __( 'Tue' );
 		$this->weekday_abbrev[ __( 'Wednesday' ) ] = /* translators: Three-letter abbreviation of the weekday. */ __( 'Wed' );
 		$this->weekday_abbrev[ __( 'Thursday' ) ]  = /* translators: Three-letter abbreviation of the weekday. */ __( 'Thu' );
 		$this->weekday_abbrev[ __( 'Friday' ) ]    = /* translators: Three-letter abbreviation of the weekday. */ __( 'Fri' );
 		$this->weekday_abbrev[ __( 'Saturday' ) ]  = /* translators: Three-letter abbreviation of the weekday. */ __( 'Sat' );
 
-		// The months.
+		// The Months
 		$this->month['01'] = /* translators: Month name. */ __( 'January' );
 		$this->month['02'] = /* translators: Month name. */ __( 'February' );
 		$this->month['03'] = /* translators: Month name. */ __( 'March' );
@@ -159,7 +159,7 @@ class WP_Locale {
 		$this->month['11'] = /* translators: Month name. */ __( 'November' );
 		$this->month['12'] = /* translators: Month name. */ __( 'December' );
 
-		// The months, genitive.
+		// The Months, genitive
 		$this->month_genitive['01'] = /* translators: Month name, genitive. */ _x( 'January', 'genitive' );
 		$this->month_genitive['02'] = /* translators: Month name, genitive. */ _x( 'February', 'genitive' );
 		$this->month_genitive['03'] = /* translators: Month name, genitive. */ _x( 'March', 'genitive' );
@@ -187,16 +187,16 @@ class WP_Locale {
 		$this->month_abbrev[ __( 'November' ) ]  = /* translators: Three-letter abbreviation of the month. */ _x( 'Nov', 'November abbreviation' );
 		$this->month_abbrev[ __( 'December' ) ]  = /* translators: Three-letter abbreviation of the month. */ _x( 'Dec', 'December abbreviation' );
 
-		// The meridiems.
+		// The Meridiems
 		$this->meridiem['am'] = __( 'am' );
 		$this->meridiem['pm'] = __( 'pm' );
 		$this->meridiem['AM'] = __( 'AM' );
 		$this->meridiem['PM'] = __( 'PM' );
 
-		// Numbers formatting.
-		// See https://www.php.net/number_format
+		// Numbers formatting
+		// See https://secure.php.net/number_format
 
-		/* translators: $thousands_sep argument for https://www.php.net/number_format, default is ',' */
+		/* translators: $thousands_sep argument for https://secure.php.net/number_format, default is ',' */
 		$thousands_sep = __( 'number_format_thousands_sep' );
 
 		// Replace space with a non-breaking space to avoid wrapping.
@@ -204,7 +204,7 @@ class WP_Locale {
 
 		$this->number_format['thousands_sep'] = ( 'number_format_thousands_sep' === $thousands_sep ) ? ',' : $thousands_sep;
 
-		/* translators: $dec_point argument for https://www.php.net/number_format, default is '.' */
+		/* translators: $dec_point argument for https://secure.php.net/number_format, default is '.' */
 		$decimal_point = __( 'number_format_decimal_point' );
 
 		$this->number_format['decimal_point'] = ( 'number_format_decimal_point' === $decimal_point ) ? '.' : $decimal_point;
@@ -214,7 +214,7 @@ class WP_Locale {
 			$this->text_direction = $GLOBALS['text_direction'];
 
 			/* translators: 'rtl' or 'ltr'. This sets the text direction for WordPress. */
-		} elseif ( 'rtl' === _x( 'ltr', 'text direction' ) ) {
+		} elseif ( 'rtl' == _x( 'ltr', 'text direction' ) ) {
 			$this->text_direction = 'rtl';
 		}
 	}
@@ -346,7 +346,7 @@ class WP_Locale {
 	 * @return bool Whether locale is RTL.
 	 */
 	public function is_rtl() {
-		return 'rtl' === $this->text_direction;
+		return 'rtl' == $this->text_direction;
 	}
 
 	/**
@@ -359,11 +359,11 @@ class WP_Locale {
 	 * @since 3.6.0
 	 */
 	public function _strings_for_pot() {
-		/* translators: Localized date format, see https://www.php.net/manual/datetime.format.php */
+		/* translators: Localized date format, see https://secure.php.net/date */
 		__( 'F j, Y' );
-		/* translators: Localized time format, see https://www.php.net/manual/datetime.format.php */
+		/* translators: Localized time format, see https://secure.php.net/date */
 		__( 'g:i a' );
-		/* translators: Localized date and time format, see https://www.php.net/manual/datetime.format.php */
+		/* translators: Localized date and time format, see https://secure.php.net/date */
 		__( 'F j, Y g:i a' );
 	}
 }

@@ -108,7 +108,6 @@ if ( ! function_exists( 'twentysixteen_setup' ) ) :
 				'caption',
 				'script',
 				'style',
-				'navigation-widgets',
 			)
 		);
 
@@ -216,11 +215,8 @@ if ( ! function_exists( 'twentysixteen_setup' ) ) :
 
 		// Indicate widget sidebars can use selective refresh in the Customizer.
 		add_theme_support( 'customize-selective-refresh-widgets' );
-
-		// Add support for custom line height controls.
-		add_theme_support( 'custom-line-height' );
 	}
-endif; // twentysixteen_setup()
+endif; // twentysixteen_setup
 add_action( 'after_setup_theme', 'twentysixteen_setup' );
 
 /**
@@ -242,9 +238,9 @@ add_action( 'after_setup_theme', 'twentysixteen_content_width', 0 );
  *
  * @since Twenty Sixteen 1.6
  *
- * @param array  $urls          URLs to print for resource hints.
- * @param string $relation_type The relation type the URLs are printed.
- * @return array URLs to print for resource hints.
+ * @param array  $urls           URLs to print for resource hints.
+ * @param string $relation_type  The relation type the URLs are printed.
+ * @return array $urls           URLs to print for resource hints.
  */
 function twentysixteen_resource_hints( $urls, $relation_type ) {
 	if ( wp_style_is( 'twentysixteen-fonts', 'queue' ) && 'preconnect' === $relation_type ) {
@@ -380,10 +376,10 @@ function twentysixteen_scripts() {
 	wp_enqueue_style( 'twentysixteen-fonts', twentysixteen_fonts_url(), array(), null );
 
 	// Add Genericons, used in the main stylesheet.
-	wp_enqueue_style( 'genericons', get_template_directory_uri() . '/genericons/genericons.css', array(), '20201208' );
+	wp_enqueue_style( 'genericons', get_template_directory_uri() . '/genericons/genericons.css', array(), '3.4.1' );
 
 	// Theme stylesheet.
-	wp_enqueue_style( 'twentysixteen-style', get_stylesheet_uri(), array(), '20201208' );
+	wp_enqueue_style( 'twentysixteen-style', get_stylesheet_uri(), array(), '20190507' );
 
 	// Theme block stylesheet.
 	wp_enqueue_style( 'twentysixteen-block-style', get_template_directory_uri() . '/css/blocks.css', array( 'twentysixteen-style' ), '20190102' );
@@ -434,7 +430,7 @@ add_action( 'wp_enqueue_scripts', 'twentysixteen_scripts' );
  */
 function twentysixteen_block_editor_styles() {
 	// Block styles.
-	wp_enqueue_style( 'twentysixteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20201208' );
+	wp_enqueue_style( 'twentysixteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20190102' );
 	// Add custom fonts.
 	wp_enqueue_style( 'twentysixteen-fonts', twentysixteen_fonts_url(), array(), null );
 }
@@ -510,11 +506,6 @@ function twentysixteen_hex2rgb( $color ) {
 require get_template_directory() . '/inc/template-tags.php';
 
 /**
- * Block Patterns.
- */
-require get_template_directory() . '/inc/block-patterns.php';
-
-/**
  * Customizer additions.
  */
 require get_template_directory() . '/inc/customizer.php';
@@ -559,12 +550,10 @@ add_filter( 'wp_calculate_image_sizes', 'twentysixteen_content_image_sizes_attr'
  *
  * @since Twenty Sixteen 1.0
  *
- * @param string[]     $attr       Array of attribute values for the image markup, keyed by attribute name.
- *                                 See wp_get_attachment_image().
- * @param WP_Post      $attachment Image attachment post.
- * @param string|int[] $size       Requested image size. Can be any registered image size name, or
- *                                 an array of width and height values in pixels (in that order).
- * @return string[] The filtered attributes for the image markup.
+ * @param array $attr Attributes for the image markup.
+ * @param int   $attachment Image attachment ID.
+ * @param array $size Registered image size or flat array of height and width dimensions.
+ * @return array The filtered attributes for the image markup.
  */
 function twentysixteen_post_thumbnail_sizes_attr( $attr, $attachment, $size ) {
 	if ( 'post-thumbnail' === $size ) {

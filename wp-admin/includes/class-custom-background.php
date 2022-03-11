@@ -117,21 +117,17 @@ class Custom_Background {
 
 		if ( isset( $_POST['reset-background'] ) ) {
 			check_admin_referer( 'custom-background-reset', '_wpnonce-custom-background-reset' );
-
 			remove_theme_mod( 'background_image' );
 			remove_theme_mod( 'background_image_thumb' );
-
 			$this->updated = true;
 			return;
 		}
 
 		if ( isset( $_POST['remove-background'] ) ) {
-			// @todo Uploaded files are not removed here.
+			// @TODO: Uploaded files are not removed here.
 			check_admin_referer( 'custom-background-remove', '_wpnonce-custom-background-remove' );
-
 			set_theme_mod( 'background_image', '' );
 			set_theme_mod( 'background_image_thumb', '' );
-
 			$this->updated = true;
 			wp_safe_redirect( $_POST['_wp_http_referer'] );
 			return;
@@ -208,10 +204,8 @@ class Custom_Background {
 
 		if ( isset( $_POST['background-color'] ) ) {
 			check_admin_referer( 'custom-background' );
-
 			$color = preg_replace( '/[^0-9a-fA-F]/', '', $_POST['background-color'] );
-
-			if ( strlen( $color ) === 6 || strlen( $color ) === 3 ) {
+			if ( strlen( $color ) == 6 || strlen( $color ) == 3 ) {
 				set_theme_mod( 'background_color', $color );
 			} else {
 				set_theme_mod( 'background_color', '' );
@@ -290,7 +284,7 @@ class Custom_Background {
 				. " background-attachment: $background_attachment;";
 			}
 			?>
-	<div id="custom-background-image" style="<?php echo $background_styles; ?>"><?php // Must be double quote, see above. ?>
+	<div id="custom-background-image" style="<?php echo $background_styles; ?>"><?php // must be double quote, see above ?>
 			<?php if ( $background_image_thumb ) { ?>
 		<img class="custom-background-image" src="<?php echo $background_image_thumb; ?>" style="visibility:hidden;" alt="" /><br />
 		<img class="custom-background-image" src="<?php echo $background_image_thumb; ?>" style="visibility:hidden;" alt="" />
@@ -314,7 +308,7 @@ class Custom_Background {
 		<?php endif; ?>
 
 		<?php $default_image = get_theme_support( 'custom-background', 'default-image' ); ?>
-		<?php if ( $default_image && get_background_image() !== $default_image ) : ?>
+		<?php if ( $default_image && get_background_image() != $default_image ) : ?>
 <tr>
 <th scope="row"><?php _e( 'Restore Original Image' ); ?></th>
 <td>
@@ -418,7 +412,7 @@ class Custom_Background {
 	<div class="button-group">
 				<?php foreach ( $group as $value => $input ) : ?>
 		<label>
-			<input class="ui-helper-hidden-accessible" name="background-position" type="radio" value="<?php echo esc_attr( $value ); ?>"<?php checked( $value, $background_position ); ?>>
+			<input class="screen-reader-text" name="background-position" type="radio" value="<?php echo esc_attr( $value ); ?>"<?php checked( $value, $background_position ); ?>>
 			<span class="button display-options position"><span class="<?php echo esc_attr( $input['icon'] ); ?>" aria-hidden="true"></span></span>
 			<span class="screen-reader-text"><?php echo $input['label']; ?></span>
 		</label>
@@ -490,7 +484,6 @@ class Custom_Background {
 		}
 
 		check_admin_referer( 'custom-background-upload', '_wpnonce-custom-background-upload' );
-
 		$overrides = array( 'test_form' => false );
 
 		$uploaded_file = $_FILES['import'];
@@ -510,7 +503,7 @@ class Custom_Background {
 		$file     = $file['file'];
 		$filename = wp_basename( $file );
 
-		// Construct the object array.
+		// Construct the object array
 		$object = array(
 			'post_title'     => $filename,
 			'post_content'   => $url,
@@ -519,10 +512,10 @@ class Custom_Background {
 			'context'        => 'custom-background',
 		);
 
-		// Save the data.
+		// Save the data
 		$id = wp_insert_attachment( $object, $file );
 
-		// Add the metadata.
+		// Add the meta-data
 		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
 		update_post_meta( $id, '_wp_attachment_is_custom_background', get_option( 'stylesheet' ) );
 
@@ -532,7 +525,7 @@ class Custom_Background {
 		set_theme_mod( 'background_image_thumb', esc_url_raw( $thumbnail[0] ) );
 
 		/** This action is documented in wp-admin/includes/class-custom-image-header.php */
-		do_action( 'wp_create_file_in_uploads', $file, $id ); // For replication.
+		do_action( 'wp_create_file_in_uploads', $file, $id ); // For replication
 		$this->updated = true;
 	}
 
@@ -610,7 +603,7 @@ class Custom_Background {
 		);
 
 		$size = 'thumbnail';
-		if ( in_array( $_POST['size'], $sizes, true ) ) {
+		if ( in_array( $_POST['size'], $sizes ) ) {
 			$size = esc_attr( $_POST['size'] );
 		}
 
