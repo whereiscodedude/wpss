@@ -22,6 +22,7 @@ class WP_Customize_Nav_Menus_Panel extends WP_Customize_Panel {
 	 * Control type.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 * @var string
 	 */
 	public $type = 'nav_menus';
@@ -30,6 +31,7 @@ class WP_Customize_Nav_Menus_Panel extends WP_Customize_Panel {
 	 * Render screen options for Menus.
 	 *
 	 * @since 4.3.0
+	 * @access public
 	 */
 	public function render_screen_options() {
 		// Adds the screen options.
@@ -62,6 +64,7 @@ class WP_Customize_Nav_Menus_Panel extends WP_Customize_Panel {
 	 * export custom variables by overriding WP_Customize_Panel::json().
 	 *
 	 * @since 4.3.0
+	 * @access protected
 	 *
 	 * @see WP_Customize_Panel::print_template()
 	 */
@@ -74,7 +77,7 @@ class WP_Customize_Nav_Menus_Panel extends WP_Customize_Panel {
 			<div class="accordion-section-title">
 				<span class="preview-notice">
 					<?php
-					/* translators: %s: The site/panel title in the Customizer. */
+					/* translators: %s: the site/panel title in the Customizer */
 					printf( __( 'You are customizing %s' ), '<strong class="panel-title">{{ data.title }}</strong>' );
 					?>
 				</span>
@@ -92,33 +95,6 @@ class WP_Customize_Nav_Menus_Panel extends WP_Customize_Panel {
 				<?php $this->render_screen_options(); ?>
 			</div>
 		</li>
-		<?php
-		// NOTE: The following is a workaround for an inability to treat (and thus label) a list of sections as a whole.
-		?>
-		<li class="customize-control-title customize-section-title-nav_menus-heading"><?php _e( 'Menus' ); ?></li>
-		<?php
-	}
-
-	/**
-	 * Checks required user capabilities and whether the theme has the
-	 * feature support required by the panel.
-	 *
-	 * @since 5.9.0
-	 *
-	 * @return bool False if theme doesn't support the panel or the user doesn't have the capability.
-	 */
-	public function check_capabilities() {
-		/*
-		 * WP_Customize_Panel::$theme_supports only supports checking one
-		 * theme_supports, so instead we override check_capabilities().
-		 */
-		if (
-			! current_theme_supports( 'menus' ) &&
-			! current_theme_supports( 'widgets' )
-		) {
-			return false;
-		}
-
-		return parent::check_capabilities();
+	<?php
 	}
 }
