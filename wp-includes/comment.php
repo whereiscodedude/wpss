@@ -1883,11 +1883,9 @@ function wp_transition_comment_status( $new_status, $old_status, $comment ) {
  */
 function _clear_modified_cache_on_transition_comment_status( $new_status, $old_status ) {
 	if ( 'approved' === $new_status || 'approved' === $old_status ) {
-		$data = array();
 		foreach ( array( 'server', 'gmt', 'blog' ) as $timezone ) {
-			$data[] = "lastcommentmodified:$timezone";
+			wp_cache_delete( "lastcommentmodified:$timezone", 'timeinfo' );
 		}
-		wp_cache_delete_multiple( $data, 'timeinfo' );
 	}
 }
 
@@ -2047,11 +2045,9 @@ function wp_insert_comment( $commentdata ) {
 	if ( 1 == $comment_approved ) {
 		wp_update_comment_count( $comment_post_ID );
 
-		$data = array();
 		foreach ( array( 'server', 'gmt', 'blog' ) as $timezone ) {
-			$data[] = "lastcommentmodified:$timezone";
+			wp_cache_delete( "lastcommentmodified:$timezone", 'timeinfo' );
 		}
-		wp_cache_delete_multiple( $data, 'timeinfo' );
 	}
 
 	clean_comment_cache( $id );
@@ -3224,9 +3220,9 @@ function xmlrpc_pingback_error( $ixr_error ) {
  * @param int|array $ids Comment ID or an array of comment IDs to remove from cache.
  */
 function clean_comment_cache( $ids ) {
-	$comment_ids = (array) $ids;
-	wp_cache_delete_multiple( $comment_ids, 'comment' );
-	foreach ( $comment_ids as $id ) {
+	foreach ( (array) $ids as $id ) {
+		wp_cache_delete( $id, 'comment' );
+
 		/**
 		 * Fires immediately after a comment has been removed from the object cache.
 		 *
@@ -3254,11 +3250,9 @@ function clean_comment_cache( $ids ) {
  * @param bool         $update_meta_cache Whether to update commentmeta cache. Default true.
  */
 function update_comment_cache( $comments, $update_meta_cache = true ) {
-	$data = array();
 	foreach ( (array) $comments as $comment ) {
-		$data[ $comment->comment_ID ] = $comment;
+		wp_cache_add( $comment->comment_ID, $comment, 'comment' );
 	}
-	wp_cache_add_multiple( $data, 'comment' );
 
 	if ( $update_meta_cache ) {
 		// Avoid `wp_list_pluck()` in case `$comments` is passed by reference.

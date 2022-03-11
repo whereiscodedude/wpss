@@ -287,7 +287,7 @@ function wp_get_theme_file_editable_extensions( $theme ) {
 	 * @since 4.4.0
 	 *
 	 * @param string[] $default_types An array of editable theme file extensions.
-	 * @param WP_Theme $theme         The active theme object.
+	 * @param WP_Theme $theme         The current theme object.
 	 */
 	$file_types = apply_filters( 'wp_theme_editor_filetypes', $default_types, $theme );
 
@@ -1397,10 +1397,7 @@ function verify_file_signature( $filename, $signatures, $filename_for_errors = f
 
 		// Allow for an old version of Sodium_Compat being loaded before the bundled WordPress one.
 		if ( method_exists( 'ParagonIE_Sodium_Compat', 'runtime_speed_test' ) ) {
-			/*
-			 * Run `ParagonIE_Sodium_Compat::runtime_speed_test()` in optimized integer mode,
-			 * as that's what WordPress utilizes during signing verifications.
-			 */
+			// Run `ParagonIE_Sodium_Compat::runtime_speed_test()` in optimized integer mode, as that's what WordPress utilises during signing verifications.
 			// phpcs:disable WordPress.NamingConventions.ValidVariableName
 			$old_fastMult                      = ParagonIE_Sodium_Compat::$fastMult;
 			ParagonIE_Sodium_Compat::$fastMult = true;
@@ -1666,7 +1663,7 @@ function _unzip_file_ziparchive( $file, $to, $needed_dirs = array() ) {
 	 * Require we have enough space to unzip the file and copy its contents, with a 10% buffer.
 	 */
 	if ( wp_doing_cron() ) {
-		$available_space = function_exists( 'disk_free_space' ) ? @disk_free_space( WP_CONTENT_DIR ) : false;
+		$available_space = @disk_free_space( WP_CONTENT_DIR );
 
 		if ( $available_space && ( $uncompressed_size * 2.1 ) > $available_space ) {
 			return new WP_Error(
@@ -1807,7 +1804,7 @@ function _unzip_file_pclzip( $file, $to, $needed_dirs = array() ) {
 	 * Require we have enough space to unzip the file and copy its contents, with a 10% buffer.
 	 */
 	if ( wp_doing_cron() ) {
-		$available_space = function_exists( 'disk_free_space' ) ? @disk_free_space( WP_CONTENT_DIR ) : false;
+		$available_space = @disk_free_space( WP_CONTENT_DIR );
 
 		if ( $available_space && ( $uncompressed_size * 2.1 ) > $available_space ) {
 			return new WP_Error(
@@ -2554,42 +2551,4 @@ function wp_opcache_invalidate( $filepath, $force = false ) {
 	}
 
 	return false;
-}
-
-/**
- * Wrapper for PHP filesize with filters and casting the result as an integer.
- *
- * @since 6.0.0
- *
- * @link https://www.php.net/manual/en/function.filesize.php
- *
- * @param string $path Path to the file.
- * @return int The size of the file in bytes, or 0 in the event of an error.
- */
-function wp_filesize( $path ) {
-	/**
-	 * Filters the result of wp_filesize before the PHP function is run.
-	 *
-	 * @since 6.0.0
-	 *
-	 * @param null|int $size The unfiltered value. Returning an int from the callback bypasses the filesize call.
-	 * @param string   $path Path to the file.
-	 */
-	$size = apply_filters( 'pre_wp_filesize', null, $path );
-
-	if ( is_int( $size ) ) {
-		return $size;
-	}
-
-	$size = (int) @filesize( $path );
-
-	/**
-	 * Filters the size of the file.
-	 *
-	 * @since 6.0.0
-	 *
-	 * @param int    $size The result of PHP filesize on the file.
-	 * @param string $path Path to the file.
-	 */
-	return (int) apply_filters( 'wp_filesize', $size, $path );
 }

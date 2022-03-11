@@ -712,7 +712,7 @@ class WP_Theme_JSON {
 	}
 
 	/**
-	 * Returns the page templates of the active theme.
+	 * Returns the page templates of the current theme.
 	 *
 	 * @since 5.9.0
 	 *
@@ -736,7 +736,7 @@ class WP_Theme_JSON {
 	}
 
 	/**
-	 * Returns the template part data of active theme.
+	 * Returns the template part data of current theme.
 	 *
 	 * @since 5.9.0
 	 *
@@ -1532,7 +1532,7 @@ class WP_Theme_JSON {
 		 * Additionally, for some preset types, we also want to make sure the
 		 * values they introduce don't conflict with default values. We do so
 		 * by checking the incoming slugs for theme presets and compare them
-		 * with the equivalent default presets: if a slug is present as a default
+		 * with the equivalent dfefault presets: if a slug is present as a default
 		 * we remove it from the theme presets.
 		 */
 		$nodes        = static::get_setting_nodes( $incoming_data );
@@ -1598,7 +1598,6 @@ class WP_Theme_JSON {
 		$blocks_metadata = static::get_blocks_metadata();
 		$setting_nodes   = static::get_setting_nodes( $this->theme_json, $blocks_metadata );
 
-		$filters = '';
 		foreach ( $setting_nodes as $metadata ) {
 			$node = _wp_array_get( $this->theme_json, $metadata['path'], array() );
 			if ( empty( $node['color']['duotone'] ) ) {
@@ -1607,6 +1606,7 @@ class WP_Theme_JSON {
 
 			$duotone_presets = $node['color']['duotone'];
 
+			$filters = '';
 			foreach ( $origins as $origin ) {
 				if ( ! isset( $duotone_presets[ $origin ] ) ) {
 					continue;

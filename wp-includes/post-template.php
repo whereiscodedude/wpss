@@ -1521,26 +1521,26 @@ function wp_page_menu( $args = array() ) {
  * @param array $pages
  * @param int   $depth
  * @param int   $current_page
- * @param array $args
+ * @param array $r
  * @return string
  */
-function walk_page_tree( $pages, $depth, $current_page, $args ) {
-	if ( empty( $args['walker'] ) ) {
+function walk_page_tree( $pages, $depth, $current_page, $r ) {
+	if ( empty( $r['walker'] ) ) {
 		$walker = new Walker_Page;
 	} else {
 		/**
 		 * @var Walker $walker
 		 */
-		$walker = $args['walker'];
+		$walker = $r['walker'];
 	}
 
 	foreach ( (array) $pages as $page ) {
 		if ( $page->post_parent ) {
-			$args['pages_with_children'][ $page->post_parent ] = true;
+			$r['pages_with_children'][ $page->post_parent ] = true;
 		}
 	}
 
-	return $walker->walk( $pages, $depth, $args, $current_page );
+	return $walker->walk( $pages, $depth, $r, $current_page );
 }
 
 /**
