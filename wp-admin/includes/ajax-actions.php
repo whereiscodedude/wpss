@@ -374,7 +374,7 @@ function wp_ajax_get_community_events() {
 		 * The location is stored network-wide, so that the user doesn't have to set it on each site.
 		 */
 		if ( $ip_changed || $search ) {
-			update_user_meta( $user_id, 'community-events-location', $events['location'] );
+			update_user_option( $user_id, 'community-events-location', $events['location'], true );
 		}
 
 		wp_send_json_success( $events );
@@ -1102,19 +1102,9 @@ function wp_ajax_add_tag() {
 	$wp_list_table->single_row( $tag );
 	$parents = ob_get_clean();
 
-	require ABSPATH . 'wp-admin/includes/edit-tag-messages.php';
-
-	$message = '';
-	if ( isset( $messages[ $tax->name ][1] ) ) {
-		$message = $messages[ $tax->name ][1];
-	} elseif ( isset( $messages['_item'][1] ) ) {
-		$message = $messages['_item'][1];
-	}
-
 	$x->add(
 		array(
 			'what'         => 'taxonomy',
-			'data'         => $message,
 			'supplemental' => compact( 'parents', 'noparents' ),
 		)
 	);
@@ -1743,13 +1733,13 @@ function wp_ajax_closed_postboxes() {
 	}
 
 	if ( is_array( $closed ) ) {
-		update_user_meta( $user->ID, "closedpostboxes_$page", $closed );
+		update_user_option( $user->ID, "closedpostboxes_$page", $closed, true );
 	}
 
 	if ( is_array( $hidden ) ) {
 		// Postboxes that are always shown.
 		$hidden = array_diff( $hidden, array( 'submitdiv', 'linksubmitdiv', 'manage-menu', 'create-menu' ) );
-		update_user_meta( $user->ID, "metaboxhidden_$page", $hidden );
+		update_user_option( $user->ID, "metaboxhidden_$page", $hidden, true );
 	}
 
 	wp_die( 1 );
@@ -1774,7 +1764,7 @@ function wp_ajax_hidden_columns() {
 	}
 
 	$hidden = ! empty( $_POST['hidden'] ) ? explode( ',', $_POST['hidden'] ) : array();
-	update_user_meta( $user->ID, "manage{$page}columnshidden", $hidden );
+	update_user_option( $user->ID, "manage{$page}columnshidden", $hidden, true );
 
 	wp_die( 1 );
 }
@@ -1929,11 +1919,11 @@ function wp_ajax_meta_box_order() {
 	}
 
 	if ( $order ) {
-		update_user_meta( $user->ID, "meta-box-order_$page", $order );
+		update_user_option( $user->ID, "meta-box-order_$page", $order, true );
 	}
 
 	if ( $page_columns ) {
-		update_user_meta( $user->ID, "screen_layout_$page", $page_columns );
+		update_user_option( $user->ID, "screen_layout_$page", $page_columns, true );
 	}
 
 	wp_send_json_success();
@@ -2997,28 +2987,11 @@ function wp_ajax_query_attachments() {
 	 *
 	 * @param array $query An array of query variables.
 	 */
-	$query             = apply_filters( 'ajax_query_attachments_args', $query );
-	$attachments_query = new WP_Query( $query );
+	$query = apply_filters( 'ajax_query_attachments_args', $query );
+	$query = new WP_Query( $query );
 
-	$posts       = array_map( 'wp_prepare_attachment_for_js', $attachments_query->posts );
-	$posts       = array_filter( $posts );
-	$total_posts = $attachments_query->found_posts;
-
-	if ( $total_posts < 1 ) {
-		// Out-of-bounds, run the query again without LIMIT for total count.
-		unset( $query['paged'] );
-
-		$count_query = new WP_Query();
-		$count_query->query( $query );
-		$total_posts = $count_query->found_posts;
-	}
-
-	$posts_per_page = (int) $attachments_query->get( 'posts_per_page' );
-
-	$max_pages = $posts_per_page ? ceil( $total_posts / $posts_per_page ) : 0;
-
-	header( 'X-WP-Total: ' . (int) $total_posts );
-	header( 'X-WP-TotalPages: ' . (int) $max_pages );
+	$posts = array_map( 'wp_prepare_attachment_for_js', $query->posts );
+	$posts = array_filter( $posts );
 
 	wp_send_json_success( $posts );
 }
@@ -3568,19 +3541,6 @@ function wp_ajax_query_themes() {
 
 	$update_php = network_admin_url( 'update.php?action=install-theme' );
 
-	$installed_themes = search_theme_directories();
-
-	if ( false === $installed_themes ) {
-		$installed_themes = array();
-	}
-
-	foreach ( $installed_themes as $theme_slug => $theme_data ) {
-		// Ignore child themes.
-		if ( str_contains( $theme_slug, '/' ) ) {
-			unset( $installed_themes[ $theme_slug ] );
-		}
-	}
-
 	foreach ( $api->themes as &$theme ) {
 		$theme->install_url = add_query_arg(
 			array(
@@ -3612,19 +3572,12 @@ function wp_ajax_query_themes() {
 			}
 		}
 
-		$is_theme_installed = array_key_exists( $theme->slug, $installed_themes );
-
-		// We only care about installed themes.
-		$theme->block_theme = $is_theme_installed && wp_get_theme( $theme->slug )->is_block_theme();
-
 		if ( ! is_multisite() && current_user_can( 'edit_theme_options' ) && current_user_can( 'customize' ) ) {
-			$customize_url = $theme->block_theme ? admin_url( 'site-editor.php' ) : wp_customize_url( $theme->slug );
-
 			$theme->customize_url = add_query_arg(
 				array(
 					'return' => urlencode( network_admin_url( 'theme-install.php', 'relative' ) ),
 				),
-				$customize_url
+				wp_customize_url( $theme->slug )
 			);
 		}
 
@@ -3745,7 +3698,7 @@ function wp_ajax_parse_embed() {
 		$mce_styles = wpview_media_sandbox_styles();
 
 		foreach ( $mce_styles as $style ) {
-			$styles .= sprintf( '<link rel="stylesheet" href="%s" />', $style );
+			$styles .= sprintf( '<link rel="stylesheet" href="%s"/>', $style );
 		}
 
 		$html = do_shortcode( $parsed );
@@ -4158,9 +4111,6 @@ function wp_ajax_install_theme() {
 			);
 		}
 	}
-
-	$theme                = wp_get_theme( $slug );
-	$status['blockTheme'] = $theme->is_block_theme();
 
 	if ( ! is_multisite() && current_user_can( 'edit_theme_options' ) && current_user_can( 'customize' ) ) {
 		$status['customizeUrl'] = add_query_arg(

@@ -197,31 +197,18 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 		}
 
 		try {
-			switch ( $this->mime_type ) {
-				case 'image/jpeg':
-					$this->image->setImageCompressionQuality( $quality );
-					$this->image->setImageCompression( imagick::COMPRESSION_JPEG );
-					break;
-				case 'image/webp':
-					$webp_info = wp_get_webp_info( $this->file );
-
-					if ( 'lossless' === $webp_info['type'] ) {
-						// Use WebP lossless settings.
-						$this->image->setImageCompressionQuality( 100 );
-						$this->image->setOption( 'webp:lossless', 'true' );
-					} else {
-						$this->image->setImageCompressionQuality( $quality );
-					}
-					break;
-				default:
-					$this->image->setImageCompressionQuality( $quality );
+			if ( 'image/jpeg' === $this->mime_type ) {
+				$this->image->setImageCompressionQuality( $quality );
+				$this->image->setImageCompression( imagick::COMPRESSION_JPEG );
+			} else {
+				$this->image->setImageCompressionQuality( $quality );
 			}
 		} catch ( Exception $e ) {
 			return new WP_Error( 'image_quality_error', $e->getMessage() );
 		}
+
 		return true;
 	}
-
 
 	/**
 	 * Sets or updates current image size.
@@ -589,7 +576,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 		try {
 			$this->image->rotateImage( new ImagickPixel( 'none' ), 360 - $angle );
 
-			// Normalize EXIF orientation data so that display is consistent across devices.
+			// Normalise EXIF orientation data so that display is consistent across devices.
 			if ( is_callable( array( $this->image, 'setImageOrientation' ) ) && defined( 'Imagick::ORIENTATION_TOPLEFT' ) ) {
 				$this->image->setImageOrientation( Imagick::ORIENTATION_TOPLEFT );
 			}
@@ -627,7 +614,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 				$this->image->flopImage();
 			}
 
-			// Normalize EXIF orientation data so that display is consistent across devices.
+			// Normalise EXIF orientation data so that display is consistent across devices.
 			if ( is_callable( array( $this->image, 'setImageOrientation' ) ) && defined( 'Imagick::ORIENTATION_TOPLEFT' ) ) {
 				$this->image->setImageOrientation( Imagick::ORIENTATION_TOPLEFT );
 			}
@@ -662,8 +649,8 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @param string $destfilename Optional. Destination filename. Default null.
-	 * @param string $mime_type    Optional. The mime-type. Default null.
+	 * @param string $destfilename
+	 * @param string $mime_type
 	 * @return array|WP_Error {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string}
 	 */
 	public function save( $destfilename = null, $mime_type = null ) {
@@ -729,7 +716,6 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 			'width'     => $this->size['width'],
 			'height'    => $this->size['height'],
 			'mime-type' => $mime_type,
-			'filesize'  => wp_filesize( $filename ),
 		);
 	}
 
@@ -902,7 +888,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 	 *
 	 * @since 5.6.0
 	 *
-	 * @return true|WP_Error
+	 * @return true|WP_error
 	 */
 	protected function pdf_load_source() {
 		$filename = $this->pdf_setup();
