@@ -146,7 +146,6 @@ if ( ! function_exists( 'twentyfourteen_setup' ) ) :
 				'caption',
 				'script',
 				'style',
-				'navigation-widgets',
 			)
 		);
 
@@ -171,7 +170,7 @@ if ( ! function_exists( 'twentyfourteen_setup' ) ) :
 		add_theme_support(
 			'custom-background',
 			/**
-			 * Filters Twenty Fourteen custom-background support arguments.
+			 * Filter Twenty Fourteen custom-background support arguments.
 			 *
 			 * @since Twenty Fourteen 1.0
 			 *
@@ -228,7 +227,7 @@ add_action( 'template_redirect', 'twentyfourteen_content_width' );
  */
 function twentyfourteen_get_featured_posts() {
 	/**
-	 * Filters the featured posts to return in Twenty Fourteen.
+	 * Filter the featured posts to return in Twenty Fourteen.
 	 *
 	 * @since Twenty Fourteen 1.0
 	 *
@@ -410,7 +409,7 @@ add_filter( 'wp_resource_hints', 'twentyfourteen_resource_hints', 10, 2 );
  */
 function twentyfourteen_block_editor_styles() {
 	// Block styles.
-	wp_enqueue_style( 'twentyfourteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20201208' );
+	wp_enqueue_style( 'twentyfourteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20190102' );
 	// Add custom fonts.
 	wp_enqueue_style( 'twentyfourteen-fonts', twentyfourteen_font_url(), array(), null );
 }
@@ -425,7 +424,7 @@ if ( ! function_exists( 'twentyfourteen_the_attached_image' ) ) :
 	function twentyfourteen_the_attached_image() {
 		$post = get_post();
 		/**
-		 * Filters the default Twenty Fourteen attachment size.
+		 * Filter the default Twenty Fourteen attachment size.
 		 *
 		 * @since Twenty Fourteen 1.0
 		 *
@@ -491,29 +490,14 @@ if ( ! function_exists( 'twentyfourteen_list_authors' ) ) :
 	 * @since Twenty Fourteen 1.0
 	 */
 	function twentyfourteen_list_authors() {
-		$args = array(
-			'fields'     => 'ID',
-			'orderby'    => 'post_count',
-			'order'      => 'DESC',
-			'capability' => array( 'edit_posts' ),
+		$contributor_ids = get_users(
+			array(
+				'fields'  => 'ID',
+				'orderby' => 'post_count',
+				'order'   => 'DESC',
+				'who'     => 'authors',
+			)
 		);
-
-		// Capability queries were only introduced in WP 5.9.
-		if ( version_compare( $GLOBALS['wp_version'], '5.9-alpha', '<' ) ) {
-			$args['who'] = 'authors';
-			unset( $args['capability'] );
-		}
-
-		/**
-		 * Filters query arguments for listing authors.
-		 *
-		 * @since 3.3
-		 *
-		 * @param array $args Query arguments.
-		 */
-		$args = apply_filters( 'twentyfourteen_list_authors_query_args', $args );
-
-		$contributor_ids = get_users( $args );
 
 		foreach ( $contributor_ids as $contributor_id ) :
 			$post_count = count_user_posts( $contributor_id );
@@ -692,9 +676,6 @@ require get_template_directory() . '/inc/template-tags.php';
 
 // Add Customizer functionality.
 require get_template_directory() . '/inc/customizer.php';
-
-// Add support for block patterns.
-require get_template_directory() . '/inc/block-patterns.php';
 
 /*
  * Add Featured Content functionality.

@@ -103,8 +103,8 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		}
 
 		$args = array(
-			'number'     => (int) $per_page,
-			'offset'     => (int) ( ( $pagenum - 1 ) * $per_page ),
+			'number'     => intval( $per_page ),
+			'offset'     => intval( ( $pagenum - 1 ) * $per_page ),
 			'network_id' => get_current_network_id(),
 		);
 
@@ -332,9 +332,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 			 * @param string $which The location of the extra table nav markup: 'top' or 'bottom'.
 			 */
 			do_action( 'restrict_manage_sites', $which );
-
 			$output = ob_get_clean();
-
 			if ( ! empty( $output ) ) {
 				echo $output;
 				submit_button( __( 'Filter' ), '', 'filter_action', false, array( 'id' => 'site-query-submit' ) );
@@ -396,14 +394,10 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 	 * Handles the checkbox column output.
 	 *
 	 * @since 4.3.0
-	 * @since 5.9.0 Renamed `$blog` to `$item` to match parent class for PHP 8 named parameter support.
 	 *
-	 * @param array $item Current site.
+	 * @param array $blog Current site.
 	 */
-	public function column_cb( $item ) {
-		// Restores the more descriptive, specific name for use within this method.
-		$blog = $item;
-
+	public function column_cb( $blog ) {
 		if ( ! is_main_site( $blog['blog_id'] ) ) :
 			$blogname = untrailingslashit( $blog['domain'] . $blog['path'] );
 			?>
@@ -564,12 +558,11 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 	 * Handles output for the default column.
 	 *
 	 * @since 4.3.0
-	 * @since 5.9.0 Renamed `$blog` to `$item` to match parent class for PHP 8 named parameter support.
 	 *
-	 * @param array  $item        Current site.
+	 * @param array  $blog        Current site.
 	 * @param string $column_name Current column name.
 	 */
-	public function column_default( $item, $column_name ) {
+	public function column_default( $blog, $column_name ) {
 		/**
 		 * Fires for each registered custom column in the Sites list table.
 		 *
@@ -578,7 +571,7 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		 * @param string $column_name The name of the column to display.
 		 * @param int    $blog_id     The site ID.
 		 */
-		do_action( 'manage_sites_custom_column', $column_name, $item['blog_id'] );
+		do_action( 'manage_sites_custom_column', $column_name, $blog['blog_id'] );
 	}
 
 	/**
@@ -625,34 +618,29 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 
 		$site_status = isset( $_REQUEST['status'] ) ? wp_unslash( trim( $_REQUEST['status'] ) ) : '';
 		foreach ( $this->status_list as $status => $col ) {
-			if ( ( 1 === (int) $_site->{$status} ) && ( $site_status !== $status ) ) {
+			if ( ( 1 === intval( $_site->{$status} ) ) && ( $site_status !== $status ) ) {
 				$site_states[ $col[0] ] = $col[1];
 			}
 		}
 
 		/**
-		 * Filters the default site display states for items in the Sites list table.
+		 * Filter the default site display states for items in the Sites list table.
 		 *
 		 * @since 5.3.0
 		 *
-		 * @param string[] $site_states An array of site states. Default 'Main',
-		 *                              'Archived', 'Mature', 'Spam', 'Deleted'.
-		 * @param WP_Site  $site        The current site object.
+		 * @param array $site_states An array of site states. Default 'Main',
+		 *                           'Archived', 'Mature', 'Spam', 'Deleted'.
+		 * @param WP_Site $site The current site object.
 		 */
 		$site_states = apply_filters( 'display_site_states', $site_states, $_site );
 
 		if ( ! empty( $site_states ) ) {
 			$state_count = count( $site_states );
-
-			$i = 0;
-
+			$i           = 0;
 			echo ' &mdash; ';
-
 			foreach ( $site_states as $state ) {
 				++$i;
-
-				$sep = ( $i < $state_count ) ? ', ' : '';
-
+				( $i == $state_count ) ? $sep = '' : $sep = ', ';
 				echo "<span class='post-state'>{$state}{$sep}</span>";
 			}
 		}
@@ -673,21 +661,18 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 	 * Generates and displays row action links.
 	 *
 	 * @since 4.3.0
-	 * @since 5.9.0 Renamed `$blog` to `$item` to match parent class for PHP 8 named parameter support.
 	 *
-	 * @param array  $item        Site being acted upon.
+	 * @param object $blog        Site being acted upon.
 	 * @param string $column_name Current column name.
 	 * @param string $primary     Primary column name.
 	 * @return string Row actions output for sites in Multisite, or an empty string
 	 *                if the current column is not the primary column.
 	 */
-	protected function handle_row_actions( $item, $column_name, $primary ) {
+	protected function handle_row_actions( $blog, $column_name, $primary ) {
 		if ( $primary !== $column_name ) {
 			return '';
 		}
 
-		// Restores the more descriptive, specific name for use within this method.
-		$blog     = $item;
 		$blogname = untrailingslashit( $blog['domain'] . $blog['path'] );
 
 		// Preordered.
