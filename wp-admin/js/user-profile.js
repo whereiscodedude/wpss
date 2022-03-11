@@ -43,9 +43,6 @@
 
 		// Once zxcvbn loads, passwords strength is known.
 		$( '#pw-weak-text-label' ).text( __( 'Confirm use of weak password' ) );
-
-		// Focus the password field.
-		$( $pass1 ).trigger( 'focus' );
 	}
 
 	function bindPass1() {
@@ -98,7 +95,7 @@
 	 * Handle the password reset button. Sets up an ajax callback to trigger sending
 	 * a password reset email.
 	 */
-	function bindPasswordResetLink() {
+	function bindPasswordRestLink() {
 		$( '#generate-reset-link' ).on( 'click', function() {
 			var $this  = $(this),
 				data = {
@@ -216,7 +213,7 @@
 			updateLock = true;
 
 			// Make sure the password fields are shown.
-			$generateButton.not( '.skip-aria-expanded' ).attr( 'aria-expanded', 'true' );
+			$generateButton.attr( 'aria-expanded', 'true' );
 			$passwordWrapper
 				.show()
 				.addClass( 'is-open' );
@@ -257,8 +254,6 @@
 
 			// Stop an empty password from being submitted as a change.
 			$submitButtons.prop( 'disabled', false );
-
-			$generateButton.attr( 'aria-expanded', 'false' );
 		} );
 
 		$pass1Row.closest( 'form' ).on( 'submit', function () {
@@ -436,7 +431,7 @@
 		});
 
 		bindPasswordForm();
-		bindPasswordResetLink();
+		bindPasswordRestLink();
 	});
 
 	$( '#destroy-sessions' ).on( 'click', function( e ) {

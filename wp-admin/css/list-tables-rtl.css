@@ -385,23 +385,6 @@ table.media .column-title .filename {
 	margin-bottom: 0.2em;
 }
 
-/* Media Copy to clipboard row action */
-.media .row-actions .copy-to-clipboard-container {
-	display: inline;
-	position: relative;
-}
-
-.media .row-actions .copy-to-clipboard-container .success {
-	position: absolute;
-	right: 50%;
-	transform: translate(50%, -100%);
-	background: #000;
-	color: #fff;
-	border-radius: 5px;
-	margin: 0;
-	padding: 2px 5px;
-}
-
 /* @todo: pick a consistent list table selector */
 .wp-list-table a {
 	transition: none;
@@ -815,7 +798,7 @@ p.pagenav {
 }
 
 .row-actions {
-	color: #a7aaad;
+	color: #dcdcde;
 	font-size: 13px;
 	padding: 2px 0 0;
 	position: relative;
@@ -1272,11 +1255,6 @@ ul.cat-checklist {
 	padding: 0 0 5px;
 }
 
-.plugins .row-actions {
-	white-space: normal;
-	min-width: 12em;
-}
-
 .plugins .update .second,
 .plugins .update .row-actions,
 .plugins .updated .second,
@@ -1575,7 +1553,7 @@ div.action-links,
 }
 
 .plugin-card .notice {
-	margin: 20px 20px 0;
+	margin: 20px 20px 0 20px;
 }
 
 .plugin-icon {
@@ -1666,7 +1644,7 @@ div.action-links,
 	}
 
 	.tablenav.top {
-		margin: 20px 0 5px;
+		margin: 20px 0 5px 0;
 	}
 
 	.tablenav.bottom {
