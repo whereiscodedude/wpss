@@ -19,7 +19,7 @@
  *
  * @param int|string $cat_name Category name.
  * @param int        $parent   Optional. ID of parent term.
- * @return string|null Returns the category ID as a numeric string if the pairing exists, null if not.
+ * @return mixed
  */
 function category_exists( $cat_name, $parent = null ) {
 	$id = term_exists( $cat_name, 'category', $parent );
@@ -115,8 +115,8 @@ function wp_create_categories( $categories, $post_id = '' ) {
  *     @type int|string $category_parent      Category parent ID. Default empty.
  * }
  * @param bool  $wp_error Optional. Default false.
- * @return int|WP_Error The ID number of the new or updated Category on success. Zero or a WP_Error on failure,
- *                      depending on param `$wp_error`.
+ * @return int|object The ID number of the new or updated Category on success. Zero or a WP_Error on failure,
+ *                    depending on param $wp_error.
  */
 function wp_insert_category( $catarr, $wp_error = false ) {
 	$cat_defaults = array(
@@ -129,7 +129,7 @@ function wp_insert_category( $catarr, $wp_error = false ) {
 	);
 	$catarr       = wp_parse_args( $catarr, $cat_defaults );
 
-	if ( '' === trim( $catarr['cat_name'] ) ) {
+	if ( trim( $catarr['cat_name'] ) == '' ) {
 		if ( ! $wp_error ) {
 			return 0;
 		} else {
@@ -183,7 +183,7 @@ function wp_insert_category( $catarr, $wp_error = false ) {
  * @since 2.0.0
  *
  * @param array $catarr The 'cat_ID' value is required. All other keys are optional.
- * @return int|false The ID number of the new or updated Category on success. Zero or FALSE on failure.
+ * @return int|bool The ID number of the new or updated Category on success. Zero or FALSE on failure.
  */
 function wp_update_category( $catarr ) {
 	$cat_ID = (int) $catarr['cat_ID'];
@@ -215,9 +215,7 @@ function wp_update_category( $catarr ) {
  * @since 2.3.0
  *
  * @param int|string $tag_name
- * @return mixed Returns null if the term does not exist.
- *               Returns an array of the term ID and the term taxonomy ID if the pairing exists.
- *               Returns 0 if term ID 0 is passed to the function.
+ * @return mixed
  */
 function tag_exists( $tag_name ) {
 	return term_exists( $tag_name, 'post_tag' );
@@ -242,7 +240,7 @@ function wp_create_tag( $tag_name ) {
  *
  * @param int    $post_id
  * @param string $taxonomy Optional. The taxonomy for which to retrieve terms. Default 'post_tag'.
- * @return string|false|WP_Error
+ * @return string|bool|WP_Error
  */
 function get_tags_to_edit( $post_id, $taxonomy = 'post_tag' ) {
 	return get_terms_to_edit( $post_id, $taxonomy );
@@ -255,7 +253,7 @@ function get_tags_to_edit( $post_id, $taxonomy = 'post_tag' ) {
  *
  * @param int    $post_id
  * @param string $taxonomy Optional. The taxonomy for which to retrieve terms. Default 'post_tag'.
- * @return string|false|WP_Error
+ * @return string|bool|WP_Error
  */
 function get_terms_to_edit( $post_id, $taxonomy = 'post_tag' ) {
 	$post_id = (int) $post_id;
@@ -280,7 +278,7 @@ function get_terms_to_edit( $post_id, $taxonomy = 'post_tag' ) {
 		$term_names[] = $term->name;
 	}
 
-	$terms_to_edit = esc_attr( implode( ',', $term_names ) );
+	$terms_to_edit = esc_attr( join( ',', $term_names ) );
 
 	/**
 	 * Filters the comma-separated list of terms available to edit.
@@ -302,8 +300,8 @@ function get_terms_to_edit( $post_id, $taxonomy = 'post_tag' ) {
  *
  * @since 2.8.0
  *
- * @param string $tag_name The term name.
- * @param string $taxonomy Optional. The taxonomy within which to create the term. Default 'post_tag'.
+ * @param int|string $tag_name
+ * @param string $taxonomy Optional. The taxonomy for which to retrieve terms. Default 'post_tag'.
  * @return array|WP_Error
  */
 function wp_create_term( $tag_name, $taxonomy = 'post_tag' ) {

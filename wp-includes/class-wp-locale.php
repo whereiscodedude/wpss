@@ -18,7 +18,7 @@ class WP_Locale {
 	 * Stores the translated strings for the full weekday names.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $weekday;
 
@@ -31,7 +31,7 @@ class WP_Locale {
 	 * @see WP_Locale::init() for how to handle the hack.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $weekday_initial;
 
@@ -39,7 +39,7 @@ class WP_Locale {
 	 * Stores the translated strings for the abbreviated weekday names.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $weekday_abbrev;
 
@@ -47,7 +47,7 @@ class WP_Locale {
 	 * Stores the translated strings for the full month names.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $month;
 
@@ -55,7 +55,7 @@ class WP_Locale {
 	 * Stores the translated strings for the month names in genitive case, if the locale specifies.
 	 *
 	 * @since 4.4.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $month_genitive;
 
@@ -63,7 +63,7 @@ class WP_Locale {
 	 * Stores the translated strings for the abbreviated month names.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $month_abbrev;
 
@@ -73,7 +73,7 @@ class WP_Locale {
 	 * Also the capitalized versions.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $meridiem;
 
@@ -138,7 +138,7 @@ class WP_Locale {
 
 		// Abbreviations for each day.
 		$this->weekday_abbrev[ __( 'Sunday' ) ]    = /* translators: Three-letter abbreviation of the weekday. */ __( 'Sun' );
-		$this->weekday_abbrev[ __( 'Monday' ) ]    = /* translators: Three-letter abbreviation of the weekday. */ __( 'Mon' );
+		$this->weekday_abbrev[ __( 'Monday' ) ]    = /* translators: Ttree-letter abbreviation of the weekday. */ __( 'Mon' );
 		$this->weekday_abbrev[ __( 'Tuesday' ) ]   = /* translators: Three-letter abbreviation of the weekday. */ __( 'Tue' );
 		$this->weekday_abbrev[ __( 'Wednesday' ) ] = /* translators: Three-letter abbreviation of the weekday. */ __( 'Wed' );
 		$this->weekday_abbrev[ __( 'Thursday' ) ]  = /* translators: Three-letter abbreviation of the weekday. */ __( 'Thu' );
@@ -214,7 +214,7 @@ class WP_Locale {
 			$this->text_direction = $GLOBALS['text_direction'];
 
 			/* translators: 'rtl' or 'ltr'. This sets the text direction for WordPress. */
-		} elseif ( 'rtl' === _x( 'ltr', 'text direction' ) ) {
+		} elseif ( 'rtl' == _x( 'ltr', 'text direction' ) ) {
 			$this->text_direction = 'rtl';
 		}
 	}
@@ -346,7 +346,7 @@ class WP_Locale {
 	 * @return bool Whether locale is RTL.
 	 */
 	public function is_rtl() {
-		return 'rtl' === $this->text_direction;
+		return 'rtl' == $this->text_direction;
 	}
 
 	/**
@@ -359,11 +359,11 @@ class WP_Locale {
 	 * @since 3.6.0
 	 */
 	public function _strings_for_pot() {
-		/* translators: Localized date format, see https://www.php.net/manual/datetime.format.php */
+		/* translators: Localized date format, see https://www.php.net/date */
 		__( 'F j, Y' );
-		/* translators: Localized time format, see https://www.php.net/manual/datetime.format.php */
+		/* translators: Localized time format, see https://www.php.net/date */
 		__( 'g:i a' );
-		/* translators: Localized date and time format, see https://www.php.net/manual/datetime.format.php */
+		/* translators: Localized date and time format, see https://www.php.net/date */
 		__( 'F j, Y g:i a' );
 	}
 }
