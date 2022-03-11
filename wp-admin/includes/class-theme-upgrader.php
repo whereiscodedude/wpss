@@ -92,7 +92,7 @@ class Theme_Upgrader extends WP_Upgrader {
 		/* translators: %s: Theme name. */
 		$this->strings['parent_theme_not_found'] = sprintf( __( '<strong>The parent theme could not be found.</strong> You will need to install the parent theme, %s, before you can use this child theme.' ), '<strong>%s</strong>' );
 		/* translators: %s: Theme error. */
-		$this->strings['current_theme_has_errors'] = __( 'The active theme has the following error: "%s".' );
+		$this->strings['current_theme_has_errors'] = __( 'The current theme has the following error: "%s".' );
 
 		if ( ! empty( $this->skin->overwrite ) ) {
 			if ( 'update-theme' === $this->skin->overwrite ) {
@@ -270,7 +270,16 @@ class Theme_Upgrader extends WP_Upgrader {
 		wp_clean_themes_cache( $parsed_args['clear_update_cache'] );
 
 		if ( $parsed_args['overwrite_package'] ) {
-			/** This action is documented in wp-admin/includes/class-plugin-upgrader.php */
+			/**
+			 * Fires when the upgrader has successfully overwritten a currently installed
+			 * plugin or theme with an uploaded zip package.
+			 *
+			 * @since 5.5.0
+			 *
+			 * @param string  $package        The package file.
+			 * @param array   $new_theme_data The new theme data.
+			 * @param string  $package_type   The package type (plugin or theme).
+			 */
 			do_action( 'upgrader_overwrote_package', $package, $this->new_theme_data, 'theme' );
 		}
 
@@ -448,7 +457,7 @@ class Theme_Upgrader extends WP_Upgrader {
 				)
 			);
 
-			$results[ $theme ] = $result;
+			$results[ $theme ] = $this->result;
 
 			// Prevent credentials auth screen from displaying multiple times.
 			if ( false === $result ) {
@@ -609,7 +618,7 @@ class Theme_Upgrader extends WP_Upgrader {
 	}
 
 	/**
-	 * Turn on maintenance mode before attempting to upgrade the active theme.
+	 * Turn on maintenance mode before attempting to upgrade the current theme.
 	 *
 	 * Hooked to the {@see 'upgrader_pre_install'} filter by Theme_Upgrader::upgrade() and
 	 * Theme_Upgrader::bulk_upgrade().
@@ -627,7 +636,7 @@ class Theme_Upgrader extends WP_Upgrader {
 
 		$theme = isset( $theme['theme'] ) ? $theme['theme'] : '';
 
-		// Only run if active theme
+		// Only run if current theme
 		if ( get_stylesheet() !== $theme ) {
 			return $return;
 		}
@@ -641,7 +650,7 @@ class Theme_Upgrader extends WP_Upgrader {
 	}
 
 	/**
-	 * Turn off maintenance mode after upgrading the active theme.
+	 * Turn off maintenance mode after upgrading the current theme.
 	 *
 	 * Hooked to the {@see 'upgrader_post_install'} filter by Theme_Upgrader::upgrade()
 	 * and Theme_Upgrader::bulk_upgrade().
@@ -659,7 +668,7 @@ class Theme_Upgrader extends WP_Upgrader {
 
 		$theme = isset( $theme['theme'] ) ? $theme['theme'] : '';
 
-		// Only run if active theme.
+		// Only run if current theme.
 		if ( get_stylesheet() !== $theme ) {
 			return $return;
 		}

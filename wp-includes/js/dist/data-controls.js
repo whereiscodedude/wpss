@@ -90,7 +90,7 @@ this["wp"] = this["wp"] || {}; this["wp"]["dataControls"] =
 /***/ "1ZqX":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["data"]; }());
+(function() { module.exports = this["wp"]["data"]; }());
 
 /***/ }),
 
@@ -103,19 +103,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "select", function() { return select; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "syncSelect", function() { return syncSelect; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dispatch", function() { return dispatch; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__unstableAwaitPromise", function() { return __unstableAwaitPromise; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "controls", function() { return controls; });
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("ywyh");
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1ZqX");
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("NMb1");
-/* harmony import */ var _wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2__);
 /**
  * WordPress dependencies
  */
 
-
+ // TODO: mark the deprecated controls after all Gutenberg usages are removed
+// import deprecated from '@wordpress/deprecated';
 
 /**
  * Dispatches a control action for triggering an api fetch call.
@@ -140,7 +138,7 @@ __webpack_require__.r(__webpack_exports__);
 function apiFetch(request) {
   return {
     type: 'API_FETCH',
-    request
+    request: request
   };
 }
 /**
@@ -151,11 +149,10 @@ function apiFetch(request) {
  */
 
 function select() {
-  _wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2___default()('`select` control in `@wordpress/data-controls`', {
-    since: '5.7',
-    alternative: 'built-in `resolveSelect` control in `@wordpress/data`'
-  });
-  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].resolveSelect(...arguments);
+  // deprecated( '`select` control in `@wordpress/data-controls`', {
+  // 	alternative: 'built-in `resolveSelect` control in `@wordpress/data`',
+  // } );
+  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].resolveSelect.apply(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"], arguments);
 }
 /**
  * Control for calling a selector in a registered data store.
@@ -165,11 +162,10 @@ function select() {
  */
 
 function syncSelect() {
-  _wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2___default()('`syncSelect` control in `@wordpress/data-controls`', {
-    since: '5.7',
-    alternative: 'built-in `select` control in `@wordpress/data`'
-  });
-  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].select(...arguments);
+  // deprecated( '`syncSelect` control in `@wordpress/data-controls`', {
+  // 	alternative: 'built-in `select` control in `@wordpress/data`',
+  // } );
+  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].select.apply(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"], arguments);
 }
 /**
  * Control for dispatching an action in a registered data store.
@@ -179,38 +175,11 @@ function syncSelect() {
  */
 
 function dispatch() {
-  _wordpress_deprecated__WEBPACK_IMPORTED_MODULE_2___default()('`dispatch` control in `@wordpress/data-controls`', {
-    since: '5.7',
-    alternative: 'built-in `dispatch` control in `@wordpress/data`'
-  });
-  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].dispatch(...arguments);
+  // deprecated( '`dispatch` control in `@wordpress/data-controls`', {
+  // 	alternative: 'built-in `dispatch` control in `@wordpress/data`',
+  // } );
+  return _wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"].dispatch.apply(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["controls"], arguments);
 }
-/**
- * Dispatches a control action for awaiting on a promise to be resolved.
- *
- * @param {Object} promise Promise to wait for.
- *
- * @example
- * ```js
- * import { __unstableAwaitPromise } from '@wordpress/data-controls';
- *
- * // Action generator using apiFetch
- * export function* myAction() {
- * 	const promise = getItemsAsync();
- * 	const items = yield __unstableAwaitPromise( promise );
- * 	// do something with the items.
- * }
- * ```
- *
- * @return {Object} The control descriptor.
- */
-
-const __unstableAwaitPromise = function (promise) {
-  return {
-    type: 'AWAIT_PROMISE',
-    promise
-  };
-};
 /**
  * The default export is what you use to register the controls with your custom
  * store.
@@ -228,48 +197,32 @@ const __unstableAwaitPromise = function (promise) {
  * import * as resolvers from './resolvers';
  *
  * registerStore( 'my-custom-store', {
- * reducer,
- * controls,
- * actions,
- * selectors,
- * resolvers,
+ * 	reducer,
+ * 	controls,
+ * 	actions,
+ * 	selectors,
+ * 	resolvers,
  * } );
  * ```
+ *
  * @return {Object} An object for registering the default controls with the
- * store.
+ *                  store.
  */
 
-const controls = {
-  AWAIT_PROMISE: _ref => {
-    let {
-      promise
-    } = _ref;
-    return promise;
-  },
-
-  API_FETCH(_ref2) {
-    let {
-      request
-    } = _ref2;
+var controls = {
+  API_FETCH: function API_FETCH(_ref) {
+    var request = _ref.request;
     return _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()(request);
   }
-
 };
 
-
-/***/ }),
-
-/***/ "NMb1":
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["wp"]["deprecated"]; }());
 
 /***/ }),
 
 /***/ "ywyh":
 /***/ (function(module, exports) {
 
-(function() { module.exports = window["wp"]["apiFetch"]; }());
+(function() { module.exports = this["wp"]["apiFetch"]; }());
 
 /***/ })
 

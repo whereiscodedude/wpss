@@ -59,7 +59,6 @@ abstract class WP_Widget_Media extends WP_Widget {
 			array(
 				'description'                 => __( 'A media item.' ),
 				'customize_selective_refresh' => true,
-				'show_instance_in_rest'       => true,
 				'mime_type'                   => '',
 			)
 		);
@@ -163,7 +162,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 		 * @since 4.9.0
 		 *
 		 * @param array           $schema Instance schema.
-		 * @param WP_Widget_Media $widget Widget object.
+		 * @param WP_Widget_Media $this   Widget object.
 		 */
 		$schema = apply_filters( "widget_{$this->id_base}_instance_schema", $schema, $this );
 
@@ -246,7 +245,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 		 *
 		 * @param array           $instance Instance data.
 		 * @param array           $args     Widget args.
-		 * @param WP_Widget_Media $widget   Widget object.
+		 * @param WP_Widget_Media $this     Widget object.
 		 */
 		$instance = apply_filters( "widget_{$this->id_base}_instance", $instance, $args, $this );
 
@@ -259,18 +258,16 @@ abstract class WP_Widget_Media extends WP_Widget {
 	 * Sanitizes the widget form values as they are saved.
 	 *
 	 * @since 4.8.0
-	 * @since 5.9.0 Renamed `$instance` to `$old_instance` to match parent class
-	 *              for PHP 8 named parameter support.
 	 *
 	 * @see WP_Widget::update()
 	 * @see WP_REST_Request::has_valid_params()
 	 * @see WP_REST_Request::sanitize_params()
 	 *
 	 * @param array $new_instance Values just sent to be saved.
-	 * @param array $old_instance Previously saved values from database.
+	 * @param array $instance     Previously saved values from database.
 	 * @return array Updated safe values to be saved.
 	 */
-	public function update( $new_instance, $old_instance ) {
+	public function update( $new_instance, $instance ) {
 
 		$schema = $this->get_instance_schema();
 		foreach ( $schema as $field => $field_schema ) {
@@ -305,10 +302,10 @@ abstract class WP_Widget_Media extends WP_Widget {
 			if ( is_wp_error( $value ) ) {
 				continue;
 			}
-			$old_instance[ $field ] = $value;
+			$instance[ $field ] = $value;
 		}
 
-		return $old_instance;
+		return $instance;
 	}
 
 	/**
@@ -317,6 +314,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 	 * @since 4.8.0
 	 *
 	 * @param array $instance Widget instance props.
+	 * @return string
 	 */
 	abstract public function render_media( $instance );
 
