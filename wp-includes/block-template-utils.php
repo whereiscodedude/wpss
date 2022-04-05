@@ -159,10 +159,10 @@ function get_default_block_template_types() {
 		),
 		'tag'            => array(
 			'title'       => _x( 'Tag', 'Template name' ),
-			'description' => __( 'Displays latest posts with a single post tag.' ),
+			'description' => __( 'Displays latest posts with single post tag.' ),
 		),
 		'attachment'     => array(
-			'title'       => __( 'Attachment' ),
+			'title'       => __( 'Media' ),
 			'description' => __( 'Displays individual media items or attachments.' ),
 		),
 		'search'         => array(
@@ -422,7 +422,7 @@ function _flatten_blocks( &$blocks ) {
 }
 
 /**
- * Parses wp_template content and injects the active theme's
+ * Parses wp_template content and injects the current theme's
  * stylesheet as a theme attribute into each wp_template_part
  *
  * @since 5.9.0
@@ -757,8 +757,8 @@ function get_block_template( $id, $template_type = 'wp_template' ) {
 	 *
 	 * @param WP_Block_Template|null $block_template Return block template object to short-circuit the default query,
 	 *                                               or null to allow WP to run its normal queries.
-	 * @param string $id                             Template unique identifier (example: theme_slug//template_slug).
-	 * @param string $template_type                  Template type: `'wp_template'` or '`wp_template_part'`.
+	 * @param string                 $id             Template unique identifier (example: theme_slug//template_slug).
+	 * @param string                 $template_type  Template type: `'wp_template'` or '`wp_template_part'`.
 	 */
 	$block_template = apply_filters( 'pre_get_block_template', null, $id, $template_type );
 	if ( ! is_null( $block_template ) ) {
@@ -804,7 +804,7 @@ function get_block_template( $id, $template_type = 'wp_template' ) {
 	 *
 	 * @param WP_Block_Template|null $block_template The found block template, or null if there isn't one.
 	 * @param string                 $id             Template unique identifier (example: theme_slug//template_slug).
-	 * @param array                  $template_type  Template type: `'wp_template'` or '`wp_template_part'`.
+	 * @param string                 $template_type  Template type: `'wp_template'` or '`wp_template_part'`.
 	 */
 	return apply_filters( 'get_block_template', $block_template, $id, $template_type );
 }

@@ -147,7 +147,7 @@ class WP_Theme_JSON_Resolver {
 	 * Data from theme.json will be backfilled from existing
 	 * theme supports, if any. Note that if the same data
 	 * is present in theme.json and in theme supports,
-	 * the theme.json takes precedence.
+	 * the theme.json takes precendence.
 	 *
 	 * @since 5.8.0
 	 * @since 5.9.0 Theme supports have been inlined and the `$theme_support_data` argument removed.
@@ -217,14 +217,14 @@ class WP_Theme_JSON_Resolver {
 
 	/**
 	 * Returns the custom post type that contains the user's origin config
-	 * for the active theme or a void array if none are found.
+	 * for the current theme or a void array if none are found.
 	 *
 	 * This can also create and return a new draft custom post type.
 	 *
 	 * @since 5.9.0
 	 *
 	 * @param WP_Theme $theme              The theme object. If empty, it
-	 *                                     defaults to the active theme.
+	 *                                     defaults to the current theme.
 	 * @param bool     $create_post        Optional. Whether a new custom post
 	 *                                     type should be created if none are
 	 *                                     found. Default false.
@@ -396,7 +396,7 @@ class WP_Theme_JSON_Resolver {
 	}
 
 	/**
-	 * Whether the active theme has a theme.json file.
+	 * Whether the current theme has a theme.json file.
 	 *
 	 * @since 5.8.0
 	 * @since 5.9.0 Added a check in the parent theme.
@@ -449,32 +449,4 @@ class WP_Theme_JSON_Resolver {
 		static::$i18n_schema              = null;
 	}
 
-	/**
-	 * Returns the style variations defined by the theme.
-	 *
-	 * @since 6.0.0
-	 *
-	 * @return array
-	 */
-	public static function get_style_variations() {
-		$variations     = array();
-		$base_directory = get_stylesheet_directory() . '/styles';
-		if ( is_dir( $base_directory ) ) {
-			$nested_files      = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $base_directory ) );
-			$nested_html_files = iterator_to_array( new RegexIterator( $nested_files, '/^.+\.json$/i', RecursiveRegexIterator::GET_MATCH ) );
-			ksort( $nested_html_files );
-			foreach ( $nested_html_files as $path => $file ) {
-				$decoded_file = wp_json_file_decode( $path, array( 'associative' => true ) );
-				if ( is_array( $decoded_file ) ) {
-					$translated = static::translate( $decoded_file, wp_get_theme()->get( 'TextDomain' ) );
-					$variation  = ( new WP_Theme_JSON( $translated ) )->get_raw_data();
-					if ( empty( $variation['title'] ) ) {
-						$variation['title'] = basename( $path, '.json' );
-					}
-					$variations[] = $variation;
-				}
-			}
-		}
-		return $variations;
-	}
 }

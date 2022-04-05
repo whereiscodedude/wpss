@@ -23,7 +23,7 @@ class WP_Automatic_Updater {
 	protected $update_results = array();
 
 	/**
-	 * Determines whether the entire automatic updater is disabled.
+	 * Whether the entire automatic updater is disabled.
 	 *
 	 * @since 3.7.0
 	 */
@@ -56,7 +56,7 @@ class WP_Automatic_Updater {
 	}
 
 	/**
-	 * Checks for version control checkouts.
+	 * Check for version control checkouts.
 	 *
 	 * Checks for Subversion, Git, Mercurial, and Bazaar. It recursively looks up the
 	 * filesystem to the top of the drive, erring on the side of detecting a VCS
@@ -295,7 +295,7 @@ class WP_Automatic_Updater {
 	}
 
 	/**
-	 * Updates an item, if appropriate.
+	 * Update an item, if appropriate.
 	 *
 	 * @since 3.7.0
 	 *
@@ -419,10 +419,9 @@ class WP_Automatic_Updater {
 				return false;
 			}
 
-			// Core doesn't output this, so let's append it, so we don't get confused.
+			// Core doesn't output this, so let's append it so we don't get confused.
 			if ( is_wp_error( $upgrade_result ) ) {
-				$upgrade_result->add( 'installation_failed', __( 'Installation failed.' ) );
-				$skin->error( $upgrade_result );
+				$skin->error( __( 'Installation failed.' ), $upgrade_result );
 			} else {
 				$skin->feedback( __( 'WordPress updated successfully.' ) );
 			}
@@ -1236,15 +1235,9 @@ class WP_Automatic_Updater {
 		$body[] = __( 'https://wordpress.org/support/forums/' );
 		$body[] = "\n" . __( 'The WordPress Team' );
 
-		if ( '' !== get_option( 'blogname' ) ) {
-			$site_title = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-		} else {
-			$site_title = parse_url( home_url(), PHP_URL_HOST );
-		}
-
 		$body    = implode( "\n", $body );
 		$to      = get_site_option( 'admin_email' );
-		$subject = sprintf( $subject, $site_title );
+		$subject = sprintf( $subject, wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) );
 		$headers = '';
 
 		$email = compact( 'to', 'subject', 'body', 'headers' );
@@ -1353,11 +1346,7 @@ class WP_Automatic_Updater {
 			$body[] = '';
 		}
 
-		if ( '' !== get_bloginfo( 'name' ) ) {
-			$site_title = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
-		} else {
-			$site_title = parse_url( home_url(), PHP_URL_HOST );
-		}
+		$site_title = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 
 		if ( $failures ) {
 			$body[] = trim(

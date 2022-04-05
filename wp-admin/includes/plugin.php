@@ -215,7 +215,7 @@ function _get_plugin_data_markup_translate( $plugin_file, $plugin_data, $markup 
 }
 
 /**
- * Gets a list of a plugin's files.
+ * Get a list of a plugin's files.
  *
  * @since 2.8.0
  *
@@ -250,7 +250,7 @@ function get_plugin_files( $plugin ) {
 }
 
 /**
- * Checks the plugins directory and retrieve all plugin files with plugin data.
+ * Check the plugins directory and retrieve all plugin files with plugin data.
  *
  * WordPress only supports plugin files in the base plugins directory
  * (wp-content/plugins) and in one directory above the plugins directory
@@ -350,7 +350,7 @@ function get_plugins( $plugin_folder = '' ) {
 }
 
 /**
- * Checks the mu-plugins directory and retrieve all mu-plugin files with any plugin data.
+ * Check the mu-plugins directory and retrieve all mu-plugin files with any plugin data.
  *
  * WordPress only includes mu-plugin files in the base mu-plugins directory (wp-content/mu-plugins).
  *
@@ -409,7 +409,7 @@ function get_mu_plugins() {
 }
 
 /**
- * Declares a callback to sort array by a 'Name' key.
+ * Callback to sort array by a 'Name' key.
  *
  * @since 3.1.0
  *
@@ -424,7 +424,7 @@ function _sort_uname_callback( $a, $b ) {
 }
 
 /**
- * Checks the wp-content directory and retrieve all drop-ins with any plugin data.
+ * Check the wp-content directory and retrieve all drop-ins with any plugin data.
  *
  * @since 3.0.0
  * @return array[] Array of arrays of dropin plugin data, keyed by plugin file name. See `get_plugin_data()`.
@@ -728,7 +728,7 @@ function activate_plugin( $plugin, $redirect = '', $network_wide = false, $silen
 }
 
 /**
- * Deactivates a single plugin or multiple plugins.
+ * Deactivate a single plugin or multiple plugins.
  *
  * The deactivation hook is disabled by the plugin upgrader by using the $silent
  * parameter.
@@ -836,7 +836,7 @@ function deactivate_plugins( $plugins, $silent = false, $network_wide = null ) {
 }
 
 /**
- * Activates multiple plugins.
+ * Activate multiple plugins.
  *
  * When WP_Error is returned, it does not mean that one of the plugins had
  * errors. It means that one or more of the plugin file paths were invalid.
@@ -876,7 +876,7 @@ function activate_plugins( $plugins, $redirect = '', $network_wide = false, $sil
 }
 
 /**
- * Removes directory and files of a plugin for a list of plugins.
+ * Remove directory and files of a plugin for a list of plugins.
  *
  * @since 2.6.0
  *
@@ -1041,7 +1041,7 @@ function delete_plugins( $plugins, $deprecated = '' ) {
 }
 
 /**
- * Validates active plugins.
+ * Validate active plugins
  *
  * Validate all active plugins, deactivates invalid and
  * returns an array of deactivated ones.
@@ -1080,7 +1080,7 @@ function validate_active_plugins() {
 }
 
 /**
- * Validates the plugin path.
+ * Validate the plugin path.
  *
  * Checks that the main plugin file exists and is a valid plugin. See validate_file().
  *
@@ -1182,7 +1182,7 @@ function validate_plugin_requirements( $plugin ) {
 }
 
 /**
- * Determines whether the plugin can be uninstalled.
+ * Whether the plugin can be uninstalled.
  *
  * @since 2.7.0
  *
@@ -1201,7 +1201,7 @@ function is_uninstallable_plugin( $plugin ) {
 }
 
 /**
- * Uninstalls a single plugin.
+ * Uninstall a single plugin.
  *
  * Calls the uninstall hook, if it is available.
  *
@@ -1329,21 +1329,6 @@ function add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $func
 		$position            = $position + substr( base_convert( md5( $menu_slug . $menu_title ), 16, 10 ), -5 ) * 0.00001;
 		$menu[ "$position" ] = $new_menu;
 	} else {
-		if ( ! is_int( $position ) ) {
-			_doing_it_wrong(
-				__FUNCTION__,
-				sprintf(
-					/* translators: %s: add_menu_page() */
-					__( 'The seventh parameter passed to %s should be an integer representing menu position.' ),
-					'<code>add_menu_page()</code>'
-				),
-				'6.0.0'
-			);
-			// If the position is not a string (i.e. float), convert it to string.
-			if ( ! is_string( $position ) ) {
-				$position = (string) $position;
-			}
-		}
 		$menu[ $position ] = $new_menu;
 	}
 
@@ -1858,8 +1843,8 @@ function menu_page_url( $menu_slug, $echo = true ) {
  * @global string $parent_file
  * @global array  $menu
  * @global array  $submenu
- * @global string $pagenow              The filename of the current screen.
- * @global string $typenow              The post type of the current screen.
+ * @global string $pagenow
+ * @global string $typenow
  * @global string $plugin_page
  * @global array  $_wp_real_parent_file
  * @global array  $_wp_menu_nopriv
@@ -1947,16 +1932,16 @@ function get_admin_page_parent( $parent = '' ) {
  * @since 1.5.0
  *
  * @global string $title
- * @global array  $menu
- * @global array  $submenu
- * @global string $pagenow     The filename of the current screen.
- * @global string $typenow     The post type of the current screen.
+ * @global array $menu
+ * @global array $submenu
+ * @global string $pagenow
  * @global string $plugin_page
+ * @global string $typenow
  *
  * @return string The title of the current admin page.
  */
 function get_admin_page_title() {
-	global $title, $menu, $submenu, $pagenow, $typenow, $plugin_page;
+	global $title, $menu, $submenu, $pagenow, $plugin_page, $typenow;
 
 	if ( ! empty( $title ) ) {
 		return $title;
@@ -2084,7 +2069,7 @@ function get_plugin_page_hookname( $plugin_page, $parent_page ) {
  *
  * @since 1.5.0
  *
- * @global string $pagenow            The filename of the current screen.
+ * @global string $pagenow
  * @global array  $menu
  * @global array  $submenu
  * @global array  $_wp_menu_nopriv
@@ -2259,7 +2244,7 @@ function remove_allowed_options( $del_options, $options = '' ) {
 }
 
 /**
- * Outputs nonce, action, and option_page fields for a settings page.
+ * Output nonce, action, and option_page fields for a settings page.
  *
  * @since 2.7.0
  *
@@ -2287,7 +2272,7 @@ function wp_clean_plugins_cache( $clear_update_cache = true ) {
 }
 
 /**
- * Loads a given plugin attempt to generate errors.
+ * Load a given plugin attempt to generate errors.
  *
  * @since 3.0.0
  * @since 4.4.0 Function was moved into the `wp-admin/includes/plugin.php` file.
@@ -2304,7 +2289,7 @@ function plugin_sandbox_scrape( $plugin ) {
 }
 
 /**
- * Declares a helper function for adding content to the Privacy Policy Guide.
+ * Helper function for adding content to the Privacy Policy Guide.
  *
  * Plugins and themes should suggest text for inclusion in the site's privacy policy.
  * The suggested text should contain information about any functionality that affects user privacy,
@@ -2467,7 +2452,7 @@ function resume_plugin( $plugin, $redirect = '' ) {
  *
  * @since 5.2.0
  *
- * @global string $pagenow The filename of the current screen.
+ * @global string $pagenow
  */
 function paused_plugins_notice() {
 	if ( 'plugins.php' === $GLOBALS['pagenow'] ) {
@@ -2500,8 +2485,8 @@ function paused_plugins_notice() {
  * @since 5.8.0
  * @access private
  *
- * @global string $pagenow    The filename of the current screen.
- * @global string $wp_version The WordPress version string.
+ * @global string $pagenow
+ * @global string $wp_version
  */
 function deactivated_plugins_notice() {
 	if ( 'plugins.php' === $GLOBALS['pagenow'] ) {

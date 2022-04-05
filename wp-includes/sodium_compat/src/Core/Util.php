@@ -458,7 +458,7 @@ abstract class ParagonIE_Sodium_Core_Util
         }
         /** @var array<int, int> $unpacked */
         $unpacked = unpack('V', $string);
-        return (int) $unpacked[1];
+        return (int) ($unpacked[1] & 0xffffffff);
     }
 
     /**
@@ -613,11 +613,7 @@ abstract class ParagonIE_Sodium_Core_Util
     {
         $high = 0;
         /** @var int $low */
-        if (PHP_INT_SIZE === 4) {
-            $low = (int) $num;
-        } else {
-            $low = $num & 0xffffffff;
-        }
+        $low = $num & 0xffffffff;
 
         if ((+(abs($num))) >= 1) {
             if ($num > 0) {

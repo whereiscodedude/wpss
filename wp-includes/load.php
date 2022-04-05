@@ -886,8 +886,6 @@ function wp_skip_paused_plugins( array $plugins ) {
  * @since 5.1.0
  * @access private
  *
- * @global string $pagenow The filename of the current screen.
- *
  * @return string[] Array of absolute paths to theme directories.
  */
 function wp_get_active_and_valid_themes() {
@@ -968,7 +966,7 @@ function wp_is_recovery_mode() {
  *
  * @since 5.2.0
  *
- * @global string $pagenow The filename of the current screen.
+ * @global string $pagenow
  *
  * @return bool True if the current endpoint should be protected.
  */
@@ -1748,7 +1746,7 @@ function wp_is_xml_request() {
  *
  * @since 5.6.1
  *
- * @global string $pagenow The filename of the current screen.
+ * @global string $pagenow The current page.
  *
  * @param string $context The context to check for protection. Accepts 'login', 'admin', and 'front'.
  *                        Defaults to the current context.

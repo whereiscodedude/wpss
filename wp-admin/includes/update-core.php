@@ -983,7 +983,7 @@ function update_core( $from, $to ) {
 
 	/*
 	 * Import $wp_version, $required_php_version, and $required_mysql_version from the new version.
-	 * DO NOT globalize any variables imported from `version-current.php` in this function.
+	 * DO NOT globalise any variables imported from `version-current.php` in this function.
 	 *
 	 * BC Note: $wp_filesystem->wp_content_dir() returned unslashed pre-2.8.
 	 */
@@ -1259,7 +1259,7 @@ function update_core( $from, $to ) {
 
 		// If we don't have enough free space, it isn't worth trying again.
 		// Unlikely to be hit due to the check in unzip_file().
-		$available_space = function_exists( 'disk_free_space' ) ? @disk_free_space( ABSPATH ) : false;
+		$available_space = @disk_free_space( ABSPATH );
 
 		if ( $available_space && $total_size >= $available_space ) {
 			$result = new WP_Error( 'disk_full', __( 'There is not enough free disk space to complete the update.' ) );
@@ -1554,7 +1554,7 @@ function _copy_dir( $from, $to, $skip_list = array() ) {
  * @since 3.3.0
  *
  * @global string $wp_version The WordPress version string.
- * @global string $pagenow    The filename of the current screen.
+ * @global string $pagenow
  * @global string $action
  *
  * @param string $new_version

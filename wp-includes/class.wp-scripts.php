@@ -125,7 +125,7 @@ class WP_Scripts extends WP_Dependencies {
 	/**
 	 * Holds a string which contains the type attribute for script tag.
 	 *
-	 * If the active theme does not declare HTML5 support for 'script',
+	 * If the current theme does not declare HTML5 support for 'script',
 	 * then it initializes as `type='text/javascript'`.
 	 *
 	 * @since 5.3.0
@@ -599,7 +599,8 @@ class WP_Scripts extends WP_Dependencies {
 		$json_translations = load_script_textdomain( $handle, $domain, $path );
 
 		if ( ! $json_translations ) {
-			return false;
+			// Register empty locale data object to ensure the domain still exists.
+			$json_translations = '{ "locale_data": { "messages": { "": {} } } }';
 		}
 
 		$output = <<<JS

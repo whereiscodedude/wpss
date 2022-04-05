@@ -23,7 +23,7 @@ final class WP_Theme implements ArrayAccess {
 	 *
 	 * @since 3.4.0
 	 * @since 5.4.0 Added `Requires at least` and `Requires PHP` headers.
-	 * @var string[]
+	 * @var array
 	 */
 	private static $file_headers = array(
 		'Name'        => 'Theme Name',
@@ -54,8 +54,7 @@ final class WP_Theme implements ArrayAccess {
 	 * @since 5.0.0 Added the Twenty Nineteen theme.
 	 * @since 5.3.0 Added the Twenty Twenty theme.
 	 * @since 5.6.0 Added the Twenty Twenty-One theme.
-	 * @since 5.9.0 Added the Twenty Twenty-Two theme.
-	 * @var string[]
+	 * @var array
 	 */
 	private static $default_themes = array(
 		'classic'         => 'WordPress Classic',
@@ -78,7 +77,7 @@ final class WP_Theme implements ArrayAccess {
 	 * Renamed theme tags.
 	 *
 	 * @since 3.8.0
-	 * @var string[]
+	 * @var array
 	 */
 	private static $tag_map = array(
 		'fixed-width'    => 'fixed-layout',
@@ -282,7 +281,7 @@ final class WP_Theme implements ArrayAccess {
 				)
 			);
 			if ( ! file_exists( $this->theme_root ) ) { // Don't cache this one.
-				$this->errors->add( 'theme_root_missing', __( 'Error: The themes directory is either empty or does not exist. Please check your installation.' ) );
+				$this->errors->add( 'theme_root_missing', __( 'Error: The themes directory is either empty or doesn&#8217;t exist. Please check your installation.' ) );
 			}
 			return;
 		} elseif ( ! is_readable( $this->theme_root . '/' . $theme_file ) ) {
@@ -339,15 +338,10 @@ final class WP_Theme implements ArrayAccess {
 
 		if ( ! $this->template ) {
 			$this->template = $this->stylesheet;
-			$theme_path     = $this->theme_root . '/' . $this->stylesheet;
-
-			if ( ! file_exists( $theme_path . '/templates/index.html' )
-				&& ! file_exists( $theme_path . '/index.php' )
-			) {
+			if ( ! file_exists( $this->theme_root . '/' . $this->stylesheet . '/index.php' ) ) {
 				$error_message = sprintf(
-					/* translators: 1: templates/index.html, 2: index.php, 3: Documentation URL, 4: style.css */
-					__( 'Template is missing. Standalone themes need to have a %1$s or %2$s template file. <a href="%3$s">Child themes</a> need to have a Template header in the %4$s stylesheet.' ),
-					'<code>templates/index.html</code>',
+					/* translators: 1: index.php, 2: Documentation URL, 3: style.css */
+					__( 'Template is missing. Standalone themes need to have a %1$s template file. <a href="%2$s">Child themes</a> need to have a Template header in the %3$s stylesheet.' ),
 					'<code>index.php</code>',
 					__( 'https://developer.wordpress.org/themes/advanced-topics/child-themes/' ),
 					'<code>style.css</code>'
@@ -704,7 +698,7 @@ final class WP_Theme implements ArrayAccess {
 	 *
 	 * @since 3.4.0
 	 *
-	 * @return WP_Theme|false Parent theme, or false if the active theme is not a child theme.
+	 * @return WP_Theme|false Parent theme, or false if the current theme is not a child theme.
 	 */
 	public function parent() {
 		return isset( $this->parent ) ? $this->parent : false;
@@ -930,7 +924,8 @@ final class WP_Theme implements ArrayAccess {
 			case 'Tags':
 				static $comma = null;
 				if ( ! isset( $comma ) ) {
-					$comma = wp_get_list_item_separator();
+					/* translators: Used between list items, there is a space after the comma. */
+					$comma = __( ', ' );
 				}
 				$value = implode( $comma, $value );
 				break;
@@ -986,8 +981,8 @@ final class WP_Theme implements ArrayAccess {
 						'tan'               => __( 'Tan' ),
 						'white'             => __( 'White' ),
 						'yellow'            => __( 'Yellow' ),
-						'dark'              => _x( 'Dark', 'color scheme' ),
-						'light'             => _x( 'Light', 'color scheme' ),
+						'dark'              => __( 'Dark' ),
+						'light'             => __( 'Light' ),
 						'fixed-layout'      => __( 'Fixed Layout' ),
 						'fluid-layout'      => __( 'Fluid Layout' ),
 						'responsive-layout' => __( 'Responsive Layout' ),
@@ -1222,7 +1217,7 @@ final class WP_Theme implements ArrayAccess {
 	 *                 with the value of the translated header name.
 	 */
 	public function get_post_templates() {
-		// If you screw up your active theme and we invalidate your parent, most things still work. Let it slide.
+		// If you screw up your current theme and we invalidate your parent, most things still work. Let it slide.
 		if ( $this->errors() && $this->errors()->get_error_codes() !== array( 'theme_parent_invalid' ) ) {
 			return array();
 		}

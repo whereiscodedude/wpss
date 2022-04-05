@@ -328,7 +328,7 @@ function wp_oembed_register_route() {
 }
 
 /**
- * Adds oEmbed discovery links in the head element of the website.
+ * Adds oEmbed discovery links in the website <head>.
  *
  * @since 4.4.0
  */

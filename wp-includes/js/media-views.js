@@ -2116,7 +2116,7 @@ AttachmentsBrowser = View.extend(/** @lends wp.media.view.AttachmentsBrowser.pro
 			mediaFoundHasMoreResultsMessage = __( 'Number of media items displayed: %d. Scroll the page for more results.' );
 		}
 
-		if ( this.collection.mirroring && this.collection.mirroring.args.s ) {
+		if ( this.collection.mirroring.args.s ) {
 			count = this.collection.length;
 
 			if ( 0 === count ) {
@@ -8491,13 +8491,7 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		this.getFocusableElements();
 
 		if ( window.confirm( l10n.warnDelete ) ) {
-			this.model.destroy( {
-				wait: true,
-				error: function() {
-					window.alert( l10n.errorDeleting );
-				}
-			} );
-
+			this.model.destroy();
 			this.moveFocus();
 		}
 	},

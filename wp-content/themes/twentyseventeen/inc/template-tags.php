@@ -62,7 +62,8 @@ if ( ! function_exists( 'twentyseventeen_entry_footer' ) ) :
 	 */
 	function twentyseventeen_entry_footer() {
 
-		$separate_meta = wp_get_list_item_separator();
+		/* translators: Used between list items, there is a space after the comma. */
+		$separate_meta = __( ', ', 'twentyseventeen' );
 
 		// Get Categories for posts.
 		$categories_list = get_the_category_list( $separate_meta );

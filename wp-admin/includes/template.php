@@ -19,7 +19,7 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-internal-pointers.php';
 //
 
 /**
- * Outputs an unordered list of checkbox input elements labeled with category names.
+ * Output an unordered list of checkbox input elements labeled with category names.
  *
  * @since 2.5.1
  *
@@ -52,7 +52,7 @@ function wp_category_checklist( $post_id = 0, $descendants_and_self = 0, $select
 }
 
 /**
- * Outputs an unordered list of checkbox input elements labelled with term names.
+ * Output an unordered list of checkbox input elements labelled with term names.
  *
  * Taxonomy-independent version of wp_category_checklist().
  *
@@ -191,11 +191,11 @@ function wp_terms_checklist( $post_id = 0, $args = array() ) {
 }
 
 /**
- * Retrieves a list of the most popular terms from the specified taxonomy.
+ * Retrieve a list of the most popular terms from the specified taxonomy.
  *
  * If the $echo argument is true then the elements for a list of checkbox
  * `<input>` elements labelled with the names of the selected terms is output.
- * If the $post_ID global is not empty then the terms associated with that
+ * If the $post_ID global isn't empty then the terms associated with that
  * post will be marked as checked.
  *
  * @since 2.5.0
@@ -344,11 +344,7 @@ function get_inline_data( $post ) {
 	foreach ( $taxonomy_names as $taxonomy_name ) {
 		$taxonomy = get_taxonomy( $taxonomy_name );
 
-		if ( ! $taxonomy->show_in_quick_edit ) {
-			continue;
-		}
-
-		if ( $taxonomy->hierarchical ) {
+		if ( $taxonomy->hierarchical && $taxonomy->show_ui ) {
 
 			$terms = get_object_term_cache( $post->ID, $taxonomy_name );
 			if ( false === $terms ) {
@@ -359,7 +355,7 @@ function get_inline_data( $post ) {
 
 			echo '<div class="post_category" id="' . $taxonomy_name . '_' . $post->ID . '">' . implode( ',', $term_ids ) . '</div>';
 
-		} else {
+		} elseif ( $taxonomy->show_ui ) {
 
 			$terms_to_edit = get_terms_to_edit( $post->ID, $taxonomy_name );
 			if ( ! is_string( $terms_to_edit ) ) {
@@ -531,7 +527,7 @@ function wp_comment_reply( $position = 1, $checkbox = false, $mode = 'single', $
 }
 
 /**
- * Outputs 'undo move to Trash' text for comments.
+ * Output 'undo move to Trash' text for comments
  *
  * @since 2.9.0
  */
@@ -774,7 +770,7 @@ function meta_form( $post = null ) {
 }
 
 /**
- * Prints out HTML form date elements for editing post or comment publish date.
+ * Print out HTML form date elements for editing post or comment publish date.
  *
  * @since 0.71
  * @since 4.4.0 Converted to use get_comment() instead of the global `$comment`.
@@ -869,7 +865,7 @@ function touch_time( $edit = 1, $for_post = 1, $tab_index = 0, $multi = 0 ) {
 }
 
 /**
- * Prints out option HTML elements for the page templates drop-down.
+ * Print out option HTML elements for the page templates drop-down.
  *
  * @since 1.5.0
  * @since 4.7.0 Added the `$post_type` parameter.
@@ -889,7 +885,7 @@ function page_template_dropdown( $default = '', $post_type = 'page' ) {
 }
 
 /**
- * Prints out option HTML elements for the page parents drop-down.
+ * Print out option HTML elements for the page parents drop-down.
  *
  * @since 1.5.0
  * @since 4.4.0 `$post` argument was added.
@@ -927,7 +923,7 @@ function parent_dropdown( $default = 0, $parent = 0, $level = 0, $post = null ) 
 }
 
 /**
- * Prints out option HTML elements for role selectors.
+ * Print out option HTML elements for role selectors.
  *
  * @since 2.1.0
  *
@@ -1123,7 +1119,7 @@ function add_meta_box( $id, $title, $callback, $screen = null, $context = 'advan
 
 
 /**
- * Renders a "fake" meta box with an information message,
+ * Function that renders a "fake" meta box with an information message,
  * shown on the block editor, when an incompatible meta box is found.
  *
  * @since 5.0.0
@@ -1144,9 +1140,9 @@ function do_block_editor_incompatible_meta_box( $object, $box ) {
 	echo '<p>';
 	if ( $plugin ) {
 		/* translators: %s: The name of the plugin that generated this meta box. */
-		printf( __( 'This meta box, from the %s plugin, is not compatible with the block editor.' ), "<strong>{$plugin['Name']}</strong>" );
+		printf( __( "This meta box, from the %s plugin, isn't compatible with the block editor." ), "<strong>{$plugin['Name']}</strong>" );
 	} else {
-		_e( 'This meta box is not compatible with the block editor.' );
+		_e( "This meta box isn't compatible with the block editor." );
 	}
 	echo '</p>';
 
@@ -1388,7 +1384,7 @@ function do_meta_boxes( $screen, $context, $object ) {
 								<p>
 									<?php
 										/* translators: %s: The name of the plugin that generated this meta box. */
-										printf( __( 'This meta box, from the %s plugin, is not compatible with the block editor.' ), "<strong>{$plugin['Name']}</strong>" );
+										printf( __( "This meta box, from the %s plugin, isn't compatible with the block editor." ), "<strong>{$plugin['Name']}</strong>" );
 									?>
 								</p>
 							</div>
@@ -1540,7 +1536,7 @@ function do_accordion_sections( $screen, $context, $object ) {
 }
 
 /**
- * Adds a new section to a settings page.
+ * Add a new section to a settings page.
  *
  * Part of the Settings API. Use this to define new settings sections for an admin page.
  * Show settings sections in your admin page callback function with do_settings_sections().
@@ -1598,7 +1594,7 @@ function add_settings_section( $id, $title, $callback, $page ) {
 }
 
 /**
- * Adds a new field to a section of a settings page.
+ * Add a new field to a section of a settings page.
  *
  * Part of the Settings API. Use this to define a settings field that will show
  * as part of a settings section inside a settings page. The fields are shown using
@@ -1708,7 +1704,7 @@ function do_settings_sections( $page ) {
 }
 
 /**
- * Prints out the settings fields for a particular settings section.
+ * Print out the settings fields for a particular settings section.
  *
  * Part of the Settings API. Use this in a settings page to output
  * a specific section. Should normally be called by do_settings_sections()
@@ -1751,7 +1747,7 @@ function do_settings_fields( $page, $section ) {
 }
 
 /**
- * Registers a settings error to be displayed to the user.
+ * Register a settings error to be displayed to the user.
  *
  * Part of the Settings API. Use this to show messages to users about settings validation
  * problems, missing settings or anything else.
@@ -1787,7 +1783,7 @@ function add_settings_error( $setting, $code, $message, $type = 'error' ) {
 }
 
 /**
- * Fetches settings errors registered by add_settings_error().
+ * Fetch settings errors registered by add_settings_error().
  *
  * Checks the $wp_settings_errors array for any errors declared during the current
  * pageload and returns them.
@@ -1858,7 +1854,7 @@ function get_settings_errors( $setting = '', $sanitize = false ) {
 }
 
 /**
- * Displays settings errors registered by add_settings_error().
+ * Display settings errors registered by add_settings_error().
  *
  * Part of the Settings API. Outputs a div for each error retrieved by
  * get_settings_errors().
@@ -1978,7 +1974,7 @@ function the_post_password() {
 }
 
 /**
- * Gets the post title.
+ * Get the post title.
  *
  * The post title is fetched and if it is blank then a default string is
  * returned.
@@ -2009,7 +2005,7 @@ function _admin_search_query() {
 }
 
 /**
- * Generic Iframe header for use with Thickbox.
+ * Generic Iframe header for use with Thickbox
  *
  * @since 2.7.0
  *
@@ -2097,7 +2093,7 @@ document.body.className = c;
 }
 
 /**
- * Generic Iframe footer for use with Thickbox.
+ * Generic Iframe footer for use with Thickbox
  *
  * @since 2.7.0
  */
@@ -2132,7 +2128,7 @@ function iframe_footer() {
 }
 
 /**
- * Echoes or returns the post states as HTML.
+ * Function to echo or return the post states as HTML.
  *
  * @since 2.7.0
  * @since 5.3.0 Added the `$echo` parameter and a return value.
@@ -2365,7 +2361,7 @@ function get_media_states( $post ) {
 }
 
 /**
- * Tests support for compressing JavaScript from PHP.
+ * Test support for compressing JavaScript from PHP
  *
  * Outputs JavaScript that tests if compression from PHP works as expected
  * and sets an option with the result. Has no effect when the current user
@@ -2455,7 +2451,7 @@ function submit_button( $text = null, $type = 'primary', $name = 'submit', $wrap
 }
 
 /**
- * Returns a submit button, with provided text and appropriate class.
+ * Returns a submit button, with provided text and appropriate class
  *
  * @since 3.1.0
  *
@@ -2558,7 +2554,7 @@ function _wp_admin_html_begin() {
 }
 
 /**
- * Converts a screen string to a screen object.
+ * Convert a screen string to a screen object
  *
  * @since 3.0.0
  *
@@ -2608,7 +2604,7 @@ function _local_storage_notice() {
 }
 
 /**
- * Outputs a HTML element with a star rating for a given rating.
+ * Output a HTML element with a star rating for a given rating.
  *
  * Outputs a HTML element with the star rating exposed on a 0..5 scale in
  * half star increments (ie. 1, 1.5, 2 stars). Optionally, if specified, the

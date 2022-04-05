@@ -75,7 +75,8 @@ function wp_apply_colors_support( $block_type, $block_attributes ) {
 
 	if (
 		is_array( $color_support ) &&
-		wp_should_skip_block_supports_serialization( $block_type, 'color' )
+		array_key_exists( '__experimentalSkipSerialization', $color_support ) &&
+		$color_support['__experimentalSkipSerialization']
 	) {
 		return array();
 	}
@@ -88,7 +89,7 @@ function wp_apply_colors_support( $block_type, $block_attributes ) {
 
 	// Text colors.
 	// Check support for text colors.
-	if ( $has_text_colors_support && ! wp_should_skip_block_supports_serialization( $block_type, 'color', 'text' ) ) {
+	if ( $has_text_colors_support ) {
 		$has_named_text_color  = array_key_exists( 'textColor', $block_attributes );
 		$has_custom_text_color = isset( $block_attributes['style']['color']['text'] );
 
@@ -105,7 +106,7 @@ function wp_apply_colors_support( $block_type, $block_attributes ) {
 	}
 
 	// Background colors.
-	if ( $has_background_colors_support && ! wp_should_skip_block_supports_serialization( $block_type, 'color', 'background' ) ) {
+	if ( $has_background_colors_support ) {
 		$has_named_background_color  = array_key_exists( 'backgroundColor', $block_attributes );
 		$has_custom_background_color = isset( $block_attributes['style']['color']['background'] );
 
@@ -122,7 +123,7 @@ function wp_apply_colors_support( $block_type, $block_attributes ) {
 	}
 
 	// Gradients.
-	if ( $has_gradients_support && ! wp_should_skip_block_supports_serialization( $block_type, 'color', 'gradients' ) ) {
+	if ( $has_gradients_support ) {
 		$has_named_gradient  = array_key_exists( 'gradient', $block_attributes );
 		$has_custom_gradient = isset( $block_attributes['style']['color']['gradient'] );
 
