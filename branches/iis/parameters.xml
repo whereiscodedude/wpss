@@ -75,13 +75,13 @@
 	/>
 <parameter
 	name="Automatic Database Server PHP File"
-	defaultValue="define('DB_HOST', '{DbServer}');"
+	defaultValue="define( 'DB_HOST', '{DbServer}' );"
 	tags="Hidden, MySQL"
 	>
 	<parameterEntry 
 	type="TextFile"
-	scope="wp-config.php$"
-	match="define\('DB_HOST', '[^']*'\);"
+	scope="wp-config\.php$"
+	match="define\(\s*'DB_HOST',\s*'[^']*'\s*\);"
 	/>
 </parameter>
 
@@ -100,13 +100,13 @@
 </parameter>
 <parameter 
 	name="Automatic Database Name PHP File"
-	defaultValue="define('DB_NAME', '{DbName}');"
+	defaultValue="define( 'DB_NAME', '{DbName}' );"
 	tags="Hidden, MySQL"
 	>
 	<parameterEntry
 	type="TextFile"
-	scope="wp-config.php$"
-	match="define\('DB_NAME', '[^']*'\);"
+	scope="wp-config\.php$"
+	match="define\(\s*'DB_NAME',\s*'[^']*'\s*\);"
 	/>
 </parameter>
 
@@ -131,13 +131,13 @@
 </parameter>
 <parameter
 	name="Automatic Database Username PHP File"
-	defaultValue="define('DB_USER', '{DbUsername}');"
+	defaultValue="define( 'DB_USER', '{DbUsername}' );"
 	tags="Hidden,MySQL"
 	>
 	<parameterEntry
 	type="TextFile"
-	scope="wp-config.php$"
-	match="define\('DB_USER', '[^']*'\);"
+	scope="wp-config\.php$"
+	match="define\(\s*'DB_USER',\s*'[^']*'\s*\);"
 	/>
 </parameter>
 
@@ -155,13 +155,13 @@
 </parameter>
 <parameter
 	name="Automatic Database Password PHP File"
-	defaultValue="define('DB_PASSWORD', '{DbPassword}');"
+	defaultValue="define( 'DB_PASSWORD', '{DbPassword}' );"
 	tags="Hidden, MySQL"
 	>
 	<parameterEntry
 	type="TextFile"
-	scope="wp-config.php$"
-	match="define\('DB_PASSWORD', '[^']*'\);"
+	scope="wp-config\.php$"
+	match="define\(\s*'DB_PASSWORD',\s*'[^']*'\s*\);"
 	/>
 </parameter>
 
@@ -237,13 +237,13 @@
 </parameter>
 <parameter
 	name="Automatic Auth Key PHP File"
-	defaultValue="define('AUTH_KEY',         '{Authentication Key}');"
+	defaultValue="define( 'AUTH_KEY',         '{Authentication Key}' );"
 	tags="Hidden, NoStore"
 	>
 	<parameterEntry
 		type="TextFile"
-		scope="wp-config.php$"
-		match="define\('AUTH_KEY',\s*'[^']*'\);"
+		scope="wp-config\.php$"
+		match="define\(\s*'AUTH_KEY',\s*'[^']*'\s*\);"
 		/>
 </parameter>
 
@@ -262,13 +262,13 @@
 </parameter>
 <parameter
 	name="Automatic Secure Auth Key PHP File"
-	defaultValue="define('SECURE_AUTH_KEY',  '{Secure Authentication Key}');"
+	defaultValue="define( 'SECURE_AUTH_KEY',  '{Secure Authentication Key}' );"
 	tags="Hidden, NoStore"
 	>
 	<parameterEntry
 		type="TextFile"
-		scope="wp-config.php$"
-		match="define\('SECURE_AUTH_KEY',\s*'[^']*'\);"
+		scope="wp-config\.php$"
+		match="define\(\s*'SECURE_AUTH_KEY',\s*'[^']*'\s*\);"
 		/>
 </parameter>
 
@@ -287,13 +287,13 @@
 </parameter>
 <parameter
 	name="Automatic Logged In Key PHP File"
-	defaultValue="define('LOGGED_IN_KEY',    '{Logged In Key}');"
+	defaultValue="define( 'LOGGED_IN_KEY',    '{Logged In Key}' );"
 	tags="Hidden, NoStore"
 	>
 	<parameterEntry
 		type="TextFile"
-		scope="wp-config.php$"
-		match="define\('LOGGED_IN_KEY',\s*'[^']*'\);"
+		scope="wp-config\.php$"
+		match="define\(\s*'LOGGED_IN_KEY',\s*'[^']*'\s*\);"
 		/>
 </parameter>
 
@@ -312,13 +312,13 @@
 </parameter>
 <parameter
 	name="Automatic Nonce Key PHP File"
-	defaultValue="define('NONCE_KEY',        '{Nonce Key}');"
+	defaultValue="define( 'NONCE_KEY',        '{Nonce Key}' );"
 	tags="Hidden, NoStore"
 	>
 	<parameterEntry
 		type="TextFile"
-		scope="wp-config.php$"
-		match="define\('NONCE_KEY',\s*'[^']*'\);"
+		scope="wp-config\.php$"
+		match="define\(\s*'NONCE_KEY',\s*'[^']*'\s*\);"
 		/>
 </parameter>
 
@@ -337,13 +337,13 @@
 </parameter>
 <parameter
 	name="Automatic Auth Salt PHP File"
-	defaultValue="define('AUTH_SALT',        '{Authentication Salt}');"
+	defaultValue="define( 'AUTH_SALT',        '{Authentication Salt}' );"
 	tags="Hidden, NoStore"
 	>
 	<parameterEntry
 		type="TextFile"
-		scope="wp-config.php$"
-		match="define\('AUTH_SALT',\s*'[^']*'\);"
+		scope="wp-config\.php$"
+		match="define\(\s*'AUTH_SALT',\s*'[^']*'\s*\);"
 		/>
 </parameter>
 
@@ -362,13 +362,13 @@
 </parameter>
 <parameter
 	name="Automatic Secure Auth Salt PHP File"
-	defaultValue="define('SECURE_AUTH_SALT', '{Secure Authentication Salt}');"
+	defaultValue="define( 'SECURE_AUTH_SALT', '{Secure Authentication Salt}' );"
 	tags="Hidden, NoStore"
 	>
 	<parameterEntry
 		type="TextFile"
-		scope="wp-config.php$"
-		match="define\('SECURE_AUTH_SALT',\s*'[^']*'\);"
+		scope="wp-config\.php$"
+		match="define\(\s*'SECURE_AUTH_SALT',\s*'[^']*'\s*\);"
 		/>
 </parameter>
 
@@ -387,13 +387,13 @@
 </parameter>
 <parameter
 	name="Automatic Logged In Salt PHP File"
-	defaultValue="define('LOGGED_IN_SALT',   '{Logged In Salt}');"
+	defaultValue="define( 'LOGGED_IN_SALT',   '{Logged In Salt}' );"
 	tags="Hidden, NoStore"
 	>
 	<parameterEntry
 		type="TextFile"
-		scope="wp-config.php$"
-		match="define\('LOGGED_IN_SALT',\s*'[^']*'\);"
+		scope="wp-config\.php$"
+		match="define\(\s*'LOGGED_IN_SALT',\s*'[^']*'\s*\);"
 		/>
 </parameter>
 
@@ -412,13 +412,13 @@
 </parameter>
 <parameter
 	name="Automatic Nonce Salt PHP File"
-	defaultValue="define('NONCE_SALT',       '{Nonce Salt}');"
+	defaultValue="define( 'NONCE_SALT',       '{Nonce Salt}' );"
 	tags="Hidden, NoStore"
 	>
 	<parameterEntry
 		type="TextFile"
-		scope="wp-config.php$"
-		match="define\('NONCE_SALT',\s*'[^']*'\);"
+		scope="wp-config\.php$"
+		match="define\(\s*'NONCE_SALT',\s*'[^']*'\s*\);"
 		/>
 </parameter>
 
