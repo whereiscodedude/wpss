@@ -3441,6 +3441,385 @@ exports.parse = (GradientParser || {}).parse;
 
 /***/ }),
 
+/***/ 8198:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+
+var GetIntrinsic = __webpack_require__(3010);
+
+var $defineProperty = GetIntrinsic('%Object.defineProperty%', true);
+
+var hasPropertyDescriptors = function hasPropertyDescriptors() {
+	if ($defineProperty) {
+		try {
+			$defineProperty({}, 'a', { value: 1 });
+			return true;
+		} catch (e) {
+			// IE 8 has a broken defineProperty
+			return false;
+		}
+	}
+	return false;
+};
+
+hasPropertyDescriptors.hasArrayLengthDefineBug = function hasArrayLengthDefineBug() {
+	// node v0.6 has a bug where array lengths can be Set but not Defined
+	if (!hasPropertyDescriptors()) {
+		return null;
+	}
+	try {
+		return $defineProperty([], 'length', { value: 1 }).length !== 1;
+	} catch (e) {
+		// In Firefox 4-22, defining length on an array throws an exception.
+		return true;
+	}
+};
+
+module.exports = hasPropertyDescriptors;
+
+
+/***/ }),
+
+/***/ 3010:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+
+var undefined;
+
+var $SyntaxError = SyntaxError;
+var $Function = Function;
+var $TypeError = TypeError;
+
+// eslint-disable-next-line consistent-return
+var getEvalledConstructor = function (expressionSyntax) {
+	try {
+		return $Function('"use strict"; return (' + expressionSyntax + ').constructor;')();
+	} catch (e) {}
+};
+
+var $gOPD = Object.getOwnPropertyDescriptor;
+if ($gOPD) {
+	try {
+		$gOPD({}, '');
+	} catch (e) {
+		$gOPD = null; // this is IE 8, which has a broken gOPD
+	}
+}
+
+var throwTypeError = function () {
+	throw new $TypeError();
+};
+var ThrowTypeError = $gOPD
+	? (function () {
+		try {
+			// eslint-disable-next-line no-unused-expressions, no-caller, no-restricted-properties
+			arguments.callee; // IE 8 does not throw here
+			return throwTypeError;
+		} catch (calleeThrows) {
+			try {
+				// IE 8 throws on Object.getOwnPropertyDescriptor(arguments, '')
+				return $gOPD(arguments, 'callee').get;
+			} catch (gOPDthrows) {
+				return throwTypeError;
+			}
+		}
+	}())
+	: throwTypeError;
+
+var hasSymbols = __webpack_require__(9905)();
+
+var getProto = Object.getPrototypeOf || function (x) { return x.__proto__; }; // eslint-disable-line no-proto
+
+var needsEval = {};
+
+var TypedArray = typeof Uint8Array === 'undefined' ? undefined : getProto(Uint8Array);
+
+var INTRINSICS = {
+	'%AggregateError%': typeof AggregateError === 'undefined' ? undefined : AggregateError,
+	'%Array%': Array,
+	'%ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined : ArrayBuffer,
+	'%ArrayIteratorPrototype%': hasSymbols ? getProto([][Symbol.iterator]()) : undefined,
+	'%AsyncFromSyncIteratorPrototype%': undefined,
+	'%AsyncFunction%': needsEval,
+	'%AsyncGenerator%': needsEval,
+	'%AsyncGeneratorFunction%': needsEval,
+	'%AsyncIteratorPrototype%': needsEval,
+	'%Atomics%': typeof Atomics === 'undefined' ? undefined : Atomics,
+	'%BigInt%': typeof BigInt === 'undefined' ? undefined : BigInt,
+	'%Boolean%': Boolean,
+	'%DataView%': typeof DataView === 'undefined' ? undefined : DataView,
+	'%Date%': Date,
+	'%decodeURI%': decodeURI,
+	'%decodeURIComponent%': decodeURIComponent,
+	'%encodeURI%': encodeURI,
+	'%encodeURIComponent%': encodeURIComponent,
+	'%Error%': Error,
+	'%eval%': eval, // eslint-disable-line no-eval
+	'%EvalError%': EvalError,
+	'%Float32Array%': typeof Float32Array === 'undefined' ? undefined : Float32Array,
+	'%Float64Array%': typeof Float64Array === 'undefined' ? undefined : Float64Array,
+	'%FinalizationRegistry%': typeof FinalizationRegistry === 'undefined' ? undefined : FinalizationRegistry,
+	'%Function%': $Function,
+	'%GeneratorFunction%': needsEval,
+	'%Int8Array%': typeof Int8Array === 'undefined' ? undefined : Int8Array,
+	'%Int16Array%': typeof Int16Array === 'undefined' ? undefined : Int16Array,
+	'%Int32Array%': typeof Int32Array === 'undefined' ? undefined : Int32Array,
+	'%isFinite%': isFinite,
+	'%isNaN%': isNaN,
+	'%IteratorPrototype%': hasSymbols ? getProto(getProto([][Symbol.iterator]())) : undefined,
+	'%JSON%': typeof JSON === 'object' ? JSON : undefined,
+	'%Map%': typeof Map === 'undefined' ? undefined : Map,
+	'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols ? undefined : getProto(new Map()[Symbol.iterator]()),
+	'%Math%': Math,
+	'%Number%': Number,
+	'%Object%': Object,
+	'%parseFloat%': parseFloat,
+	'%parseInt%': parseInt,
+	'%Promise%': typeof Promise === 'undefined' ? undefined : Promise,
+	'%Proxy%': typeof Proxy === 'undefined' ? undefined : Proxy,
+	'%RangeError%': RangeError,
+	'%ReferenceError%': ReferenceError,
+	'%Reflect%': typeof Reflect === 'undefined' ? undefined : Reflect,
+	'%RegExp%': RegExp,
+	'%Set%': typeof Set === 'undefined' ? undefined : Set,
+	'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols ? undefined : getProto(new Set()[Symbol.iterator]()),
+	'%SharedArrayBuffer%': typeof SharedArrayBuffer === 'undefined' ? undefined : SharedArrayBuffer,
+	'%String%': String,
+	'%StringIteratorPrototype%': hasSymbols ? getProto(''[Symbol.iterator]()) : undefined,
+	'%Symbol%': hasSymbols ? Symbol : undefined,
+	'%SyntaxError%': $SyntaxError,
+	'%ThrowTypeError%': ThrowTypeError,
+	'%TypedArray%': TypedArray,
+	'%TypeError%': $TypeError,
+	'%Uint8Array%': typeof Uint8Array === 'undefined' ? undefined : Uint8Array,
+	'%Uint8ClampedArray%': typeof Uint8ClampedArray === 'undefined' ? undefined : Uint8ClampedArray,
+	'%Uint16Array%': typeof Uint16Array === 'undefined' ? undefined : Uint16Array,
+	'%Uint32Array%': typeof Uint32Array === 'undefined' ? undefined : Uint32Array,
+	'%URIError%': URIError,
+	'%WeakMap%': typeof WeakMap === 'undefined' ? undefined : WeakMap,
+	'%WeakRef%': typeof WeakRef === 'undefined' ? undefined : WeakRef,
+	'%WeakSet%': typeof WeakSet === 'undefined' ? undefined : WeakSet
+};
+
+var doEval = function doEval(name) {
+	var value;
+	if (name === '%AsyncFunction%') {
+		value = getEvalledConstructor('async function () {}');
+	} else if (name === '%GeneratorFunction%') {
+		value = getEvalledConstructor('function* () {}');
+	} else if (name === '%AsyncGeneratorFunction%') {
+		value = getEvalledConstructor('async function* () {}');
+	} else if (name === '%AsyncGenerator%') {
+		var fn = doEval('%AsyncGeneratorFunction%');
+		if (fn) {
+			value = fn.prototype;
+		}
+	} else if (name === '%AsyncIteratorPrototype%') {
+		var gen = doEval('%AsyncGenerator%');
+		if (gen) {
+			value = getProto(gen.prototype);
+		}
+	}
+
+	INTRINSICS[name] = value;
+
+	return value;
+};
+
+var LEGACY_ALIASES = {
+	'%ArrayBufferPrototype%': ['ArrayBuffer', 'prototype'],
+	'%ArrayPrototype%': ['Array', 'prototype'],
+	'%ArrayProto_entries%': ['Array', 'prototype', 'entries'],
+	'%ArrayProto_forEach%': ['Array', 'prototype', 'forEach'],
+	'%ArrayProto_keys%': ['Array', 'prototype', 'keys'],
+	'%ArrayProto_values%': ['Array', 'prototype', 'values'],
+	'%AsyncFunctionPrototype%': ['AsyncFunction', 'prototype'],
+	'%AsyncGenerator%': ['AsyncGeneratorFunction', 'prototype'],
+	'%AsyncGeneratorPrototype%': ['AsyncGeneratorFunction', 'prototype', 'prototype'],
+	'%BooleanPrototype%': ['Boolean', 'prototype'],
+	'%DataViewPrototype%': ['DataView', 'prototype'],
+	'%DatePrototype%': ['Date', 'prototype'],
+	'%ErrorPrototype%': ['Error', 'prototype'],
+	'%EvalErrorPrototype%': ['EvalError', 'prototype'],
+	'%Float32ArrayPrototype%': ['Float32Array', 'prototype'],
+	'%Float64ArrayPrototype%': ['Float64Array', 'prototype'],
+	'%FunctionPrototype%': ['Function', 'prototype'],
+	'%Generator%': ['GeneratorFunction', 'prototype'],
+	'%GeneratorPrototype%': ['GeneratorFunction', 'prototype', 'prototype'],
+	'%Int8ArrayPrototype%': ['Int8Array', 'prototype'],
+	'%Int16ArrayPrototype%': ['Int16Array', 'prototype'],
+	'%Int32ArrayPrototype%': ['Int32Array', 'prototype'],
+	'%JSONParse%': ['JSON', 'parse'],
+	'%JSONStringify%': ['JSON', 'stringify'],
+	'%MapPrototype%': ['Map', 'prototype'],
+	'%NumberPrototype%': ['Number', 'prototype'],
+	'%ObjectPrototype%': ['Object', 'prototype'],
+	'%ObjProto_toString%': ['Object', 'prototype', 'toString'],
+	'%ObjProto_valueOf%': ['Object', 'prototype', 'valueOf'],
+	'%PromisePrototype%': ['Promise', 'prototype'],
+	'%PromiseProto_then%': ['Promise', 'prototype', 'then'],
+	'%Promise_all%': ['Promise', 'all'],
+	'%Promise_reject%': ['Promise', 'reject'],
+	'%Promise_resolve%': ['Promise', 'resolve'],
+	'%RangeErrorPrototype%': ['RangeError', 'prototype'],
+	'%ReferenceErrorPrototype%': ['ReferenceError', 'prototype'],
+	'%RegExpPrototype%': ['RegExp', 'prototype'],
+	'%SetPrototype%': ['Set', 'prototype'],
+	'%SharedArrayBufferPrototype%': ['SharedArrayBuffer', 'prototype'],
+	'%StringPrototype%': ['String', 'prototype'],
+	'%SymbolPrototype%': ['Symbol', 'prototype'],
+	'%SyntaxErrorPrototype%': ['SyntaxError', 'prototype'],
+	'%TypedArrayPrototype%': ['TypedArray', 'prototype'],
+	'%TypeErrorPrototype%': ['TypeError', 'prototype'],
+	'%Uint8ArrayPrototype%': ['Uint8Array', 'prototype'],
+	'%Uint8ClampedArrayPrototype%': ['Uint8ClampedArray', 'prototype'],
+	'%Uint16ArrayPrototype%': ['Uint16Array', 'prototype'],
+	'%Uint32ArrayPrototype%': ['Uint32Array', 'prototype'],
+	'%URIErrorPrototype%': ['URIError', 'prototype'],
+	'%WeakMapPrototype%': ['WeakMap', 'prototype'],
+	'%WeakSetPrototype%': ['WeakSet', 'prototype']
+};
+
+var bind = __webpack_require__(1930);
+var hasOwn = __webpack_require__(9284);
+var $concat = bind.call(Function.call, Array.prototype.concat);
+var $spliceApply = bind.call(Function.apply, Array.prototype.splice);
+var $replace = bind.call(Function.call, String.prototype.replace);
+var $strSlice = bind.call(Function.call, String.prototype.slice);
+
+/* adapted from https://github.com/lodash/lodash/blob/4.17.15/dist/lodash.js#L6735-L6744 */
+var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
+var reEscapeChar = /\\(\\)?/g; /** Used to match backslashes in property paths. */
+var stringToPath = function stringToPath(string) {
+	var first = $strSlice(string, 0, 1);
+	var last = $strSlice(string, -1);
+	if (first === '%' && last !== '%') {
+		throw new $SyntaxError('invalid intrinsic syntax, expected closing `%`');
+	} else if (last === '%' && first !== '%') {
+		throw new $SyntaxError('invalid intrinsic syntax, expected opening `%`');
+	}
+	var result = [];
+	$replace(string, rePropName, function (match, number, quote, subString) {
+		result[result.length] = quote ? $replace(subString, reEscapeChar, '$1') : number || match;
+	});
+	return result;
+};
+/* end adaptation */
+
+var getBaseIntrinsic = function getBaseIntrinsic(name, allowMissing) {
+	var intrinsicName = name;
+	var alias;
+	if (hasOwn(LEGACY_ALIASES, intrinsicName)) {
+		alias = LEGACY_ALIASES[intrinsicName];
+		intrinsicName = '%' + alias[0] + '%';
+	}
+
+	if (hasOwn(INTRINSICS, intrinsicName)) {
+		var value = INTRINSICS[intrinsicName];
+		if (value === needsEval) {
+			value = doEval(intrinsicName);
+		}
+		if (typeof value === 'undefined' && !allowMissing) {
+			throw new $TypeError('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
+		}
+
+		return {
+			alias: alias,
+			name: intrinsicName,
+			value: value
+		};
+	}
+
+	throw new $SyntaxError('intrinsic ' + name + ' does not exist!');
+};
+
+module.exports = function GetIntrinsic(name, allowMissing) {
+	if (typeof name !== 'string' || name.length === 0) {
+		throw new $TypeError('intrinsic name must be a non-empty string');
+	}
+	if (arguments.length > 1 && typeof allowMissing !== 'boolean') {
+		throw new $TypeError('"allowMissing" argument must be a boolean');
+	}
+
+	var parts = stringToPath(name);
+	var intrinsicBaseName = parts.length > 0 ? parts[0] : '';
+
+	var intrinsic = getBaseIntrinsic('%' + intrinsicBaseName + '%', allowMissing);
+	var intrinsicRealName = intrinsic.name;
+	var value = intrinsic.value;
+	var skipFurtherCaching = false;
+
+	var alias = intrinsic.alias;
+	if (alias) {
+		intrinsicBaseName = alias[0];
+		$spliceApply(parts, $concat([0, 1], alias));
+	}
+
+	for (var i = 1, isOwn = true; i < parts.length; i += 1) {
+		var part = parts[i];
+		var first = $strSlice(part, 0, 1);
+		var last = $strSlice(part, -1);
+		if (
+			(
+				(first === '"' || first === "'" || first === '`')
+				|| (last === '"' || last === "'" || last === '`')
+			)
+			&& first !== last
+		) {
+			throw new $SyntaxError('property names with quotes must have matching quotes');
+		}
+		if (part === 'constructor' || !isOwn) {
+			skipFurtherCaching = true;
+		}
+
+		intrinsicBaseName += '.' + part;
+		intrinsicRealName = '%' + intrinsicBaseName + '%';
+
+		if (hasOwn(INTRINSICS, intrinsicRealName)) {
+			value = INTRINSICS[intrinsicRealName];
+		} else if (value != null) {
+			if (!(part in value)) {
+				if (!allowMissing) {
+					throw new $TypeError('base intrinsic for ' + name + ' exists, but the property is not available.');
+				}
+				return void undefined;
+			}
+			if ($gOPD && (i + 1) >= parts.length) {
+				var desc = $gOPD(value, part);
+				isOwn = !!desc;
+
+				// By convention, when a data property is converted to an accessor
+				// property to emulate a data property that does not suffer from
+				// the override mistake, that accessor's getter is marked with
+				// an `originalValue` property. Here, when we detect this, we
+				// uphold the illusion by pretending to see that original data
+				// property, i.e., returning the value rather than the getter
+				// itself.
+				if (isOwn && 'get' in desc && !('originalValue' in desc.get)) {
+					value = desc.get;
+				} else {
+					value = value[part];
+				}
+			} else {
+				isOwn = hasOwn(value, part);
+				value = value[part];
+			}
+
+			if (isOwn && !skipFurtherCaching) {
+				INTRINSICS[intrinsicRealName] = value;
+			}
+		}
+	}
+	return value;
+};
+
+
+/***/ }),
+
 /***/ 9905:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
@@ -14178,28 +14557,6 @@ module.exports = window["moment"];
 
 /***/ }),
 
-/***/ 7472:
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-"use strict";
-
-
-var GetIntrinsic = __webpack_require__(4219);
-
-var $Array = GetIntrinsic('%Array%');
-
-// eslint-disable-next-line global-require
-var toStr = !$Array.isArray && __webpack_require__(9630)('Object.prototype.toString');
-
-// https://ecma-international.org/ecma-262/6.0/#sec-isarray
-
-module.exports = $Array.isArray || function IsArray(argument) {
-	return toStr(argument) === '[object Array]';
-};
-
-
-/***/ }),
-
 /***/ 3665:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
@@ -14562,38 +14919,18 @@ module.exports = function FlattenIntoArray(target, source, sourceLen, start, dep
 
 
 var assertRecord = __webpack_require__(5114);
+var fromPropertyDescriptor = __webpack_require__(3359);
 
 var Type = __webpack_require__(9747);
 
 // https://ecma-international.org/ecma-262/6.0/#sec-frompropertydescriptor
 
 module.exports = function FromPropertyDescriptor(Desc) {
-	if (typeof Desc === 'undefined') {
-		return Desc;
+	if (typeof Desc !== 'undefined') {
+		assertRecord(Type, 'Property Descriptor', 'Desc', Desc);
 	}
 
-	assertRecord(Type, 'Property Descriptor', 'Desc', Desc);
-
-	var obj = {};
-	if ('[[Value]]' in Desc) {
-		obj.value = Desc['[[Value]]'];
-	}
-	if ('[[Writable]]' in Desc) {
-		obj.writable = Desc['[[Writable]]'];
-	}
-	if ('[[Get]]' in Desc) {
-		obj.get = Desc['[[Get]]'];
-	}
-	if ('[[Set]]' in Desc) {
-		obj.set = Desc['[[Set]]'];
-	}
-	if ('[[Enumerable]]' in Desc) {
-		obj.enumerable = Desc['[[Enumerable]]'];
-	}
-	if ('[[Configurable]]' in Desc) {
-		obj.configurable = Desc['[[Configurable]]'];
-	}
-	return obj;
+	return fromPropertyDescriptor(Desc);
 };
 
 
@@ -14697,18 +15034,8 @@ module.exports = function IsAccessorDescriptor(Desc) {
 "use strict";
 
 
-var GetIntrinsic = __webpack_require__(4219);
-
-var $Array = GetIntrinsic('%Array%');
-
-// eslint-disable-next-line global-require
-var toStr = !$Array.isArray && __webpack_require__(9630)('Object.prototype.toString');
-
 // https://ecma-international.org/ecma-262/6.0/#sec-isarray
-
-module.exports = $Array.isArray || function IsArray(argument) {
-	return toStr(argument) === '[object Array]';
-};
+module.exports = __webpack_require__(4351);
 
 
 /***/ }),
@@ -15404,30 +15731,16 @@ module.exports = __webpack_require__(4219);
 "use strict";
 
 
+var hasPropertyDescriptors = __webpack_require__(8198);
+
 var GetIntrinsic = __webpack_require__(4219);
 
-var $defineProperty = GetIntrinsic('%Object.defineProperty%', true);
+var $defineProperty = hasPropertyDescriptors() && GetIntrinsic('%Object.defineProperty%', true);
 
-if ($defineProperty) {
-	try {
-		$defineProperty({}, 'a', { value: 1 });
-	} catch (e) {
-		// IE 8 has a broken defineProperty
-		$defineProperty = null;
-	}
-}
-
-// node v0.6 has a bug where array lengths can be Set but not Defined
-var hasArrayLengthDefineBug;
-try {
-	hasArrayLengthDefineBug = $defineProperty && $defineProperty([], 'length', { value: 1 }).length === 0;
-} catch (e) {
-	// In Firefox 4-22, defining length on an array throws an exception.
-	hasArrayLengthDefineBug = true;
-}
+var hasArrayLengthDefineBug = hasPropertyDescriptors.hasArrayLengthDefineBug();
 
 // eslint-disable-next-line global-require
-var isArray = hasArrayLengthDefineBug && __webpack_require__(7472); // this does not depend on any other AOs.
+var isArray = hasArrayLengthDefineBug && __webpack_require__(4351);
 
 var callBound = __webpack_require__(9630);
 
@@ -15475,6 +15788,26 @@ module.exports = function DefineOwnProperty(IsDataDescriptor, SameValue, FromPro
 
 /***/ }),
 
+/***/ 4351:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+
+var GetIntrinsic = __webpack_require__(4219);
+
+var $Array = GetIntrinsic('%Array%');
+
+// eslint-disable-next-line global-require
+var toStr = !$Array.isArray && __webpack_require__(9630)('Object.prototype.toString');
+
+module.exports = $Array.isArray || function IsArray(argument) {
+	return toStr(argument) === '[object Array]';
+};
+
+
+/***/ }),
+
 /***/ 5114:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
@@ -15488,12 +15821,11 @@ var $SyntaxError = GetIntrinsic('%SyntaxError%');
 
 var has = __webpack_require__(9284);
 
+var isMatchRecord = __webpack_require__(7040);
+
 var predicates = {
 	// https://262.ecma-international.org/6.0/#sec-property-descriptor-specification-type
-	'Property Descriptor': function isPropertyDescriptor(Type, Desc) {
-		if (Type(Desc) !== 'Object') {
-			return false;
-		}
+	'Property Descriptor': function isPropertyDescriptor(Desc) {
 		var allowed = {
 			'[[Configurable]]': true,
 			'[[Enumerable]]': true,
@@ -15515,7 +15847,9 @@ var predicates = {
 			throw new $TypeError('Property Descriptors may not be both accessor and data descriptors');
 		}
 		return true;
-	}
+	},
+	// https://262.ecma-international.org/13.0/#sec-match-records
+	'Match Record': isMatchRecord
 };
 
 module.exports = function assertRecord(Type, recordType, argumentName, value) {
@@ -15523,9 +15857,44 @@ module.exports = function assertRecord(Type, recordType, argumentName, value) {
 	if (typeof predicate !== 'function') {
 		throw new $SyntaxError('unknown record type: ' + recordType);
 	}
-	if (!predicate(Type, value)) {
+	if (Type(value) !== 'Object' || !predicate(value)) {
 		throw new $TypeError(argumentName + ' must be a ' + recordType);
 	}
+};
+
+
+/***/ }),
+
+/***/ 3359:
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = function fromPropertyDescriptor(Desc) {
+	if (typeof Desc === 'undefined') {
+		return Desc;
+	}
+	var obj = {};
+	if ('[[Value]]' in Desc) {
+		obj.value = Desc['[[Value]]'];
+	}
+	if ('[[Writable]]' in Desc) {
+		obj.writable = !!Desc['[[Writable]]'];
+	}
+	if ('[[Get]]' in Desc) {
+		obj.get = Desc['[[Get]]'];
+	}
+	if ('[[Set]]' in Desc) {
+		obj.set = Desc['[[Set]]'];
+	}
+	if ('[[Enumerable]]' in Desc) {
+		obj.enumerable = !!Desc['[[Enumerable]]'];
+	}
+	if ('[[Configurable]]' in Desc) {
+		obj.configurable = !!Desc['[[Configurable]]'];
+	}
+	return obj;
 };
 
 
@@ -15563,6 +15932,30 @@ module.exports = $gOPD;
 var $isNaN = Number.isNaN || function (a) { return a !== a; };
 
 module.exports = Number.isFinite || function (x) { return typeof x === 'number' && !$isNaN(x) && x !== Infinity && x !== -Infinity; };
+
+
+/***/ }),
+
+/***/ 7040:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+
+var has = __webpack_require__(9284);
+
+// https://262.ecma-international.org/13.0/#sec-match-records
+
+module.exports = function isMatchRecord(record) {
+	return (
+		has(record, '[[StartIndex]]')
+        && has(record, '[[EndIndex]]')
+        && record['[[StartIndex]]'] >= 0
+        && record['[[EndIndex]]'] >= record['[[StartIndex]]']
+        && String(parseInt(record['[[StartIndex]]'], 10)) === String(record['[[StartIndex]]'])
+        && String(parseInt(record['[[EndIndex]]'], 10)) === String(record['[[EndIndex]]'])
+	);
+};
 
 
 /***/ }),
@@ -37619,10 +38012,10 @@ function computeRubberband(bounds, [Vx, Vy], [Rx, Ry]) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/@use-gesture/core/dist/actions-8e12537b.esm.js
+;// CONCATENATED MODULE: ./node_modules/@use-gesture/core/dist/actions-e2a59bb9.esm.js
 
 
-function actions_8e12537b_esm_defineProperty(obj, key, value) {
+function actions_e2a59bb9_esm_defineProperty(obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
       value: value,
@@ -37637,7 +38030,7 @@ function actions_8e12537b_esm_defineProperty(obj, key, value) {
   return obj;
 }
 
-function actions_8e12537b_esm_ownKeys(object, enumerableOnly) {
+function actions_e2a59bb9_esm_ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
 
   if (Object.getOwnPropertySymbols) {
@@ -37650,12 +38043,12 @@ function actions_8e12537b_esm_ownKeys(object, enumerableOnly) {
   return keys;
 }
 
-function actions_8e12537b_esm_objectSpread2(target) {
+function actions_e2a59bb9_esm_objectSpread2(target) {
   for (var i = 1; i < arguments.length; i++) {
     var source = null != arguments[i] ? arguments[i] : {};
-    i % 2 ? actions_8e12537b_esm_ownKeys(Object(source), !0).forEach(function (key) {
-      actions_8e12537b_esm_defineProperty(target, key, source[key]);
-    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : actions_8e12537b_esm_ownKeys(Object(source)).forEach(function (key) {
+    i % 2 ? actions_e2a59bb9_esm_ownKeys(Object(source), !0).forEach(function (key) {
+      actions_e2a59bb9_esm_defineProperty(target, key, source[key]);
+    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : actions_e2a59bb9_esm_ownKeys(Object(source)).forEach(function (key) {
       Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
     });
   }
@@ -37691,10 +38084,16 @@ function capitalize(string) {
   return string[0].toUpperCase() + string.slice(1);
 }
 
+const actionsWithoutCaptureSupported = ['enter', 'leave'];
+
+function hasCapture(capture = false, actionKey) {
+  return capture && !actionsWithoutCaptureSupported.includes(actionKey);
+}
+
 function toHandlerProp(device, action = '', capture = false) {
   const deviceProps = EVENT_TYPE_MAP[device];
   const actionKey = deviceProps ? deviceProps[action] || action : action;
-  return 'on' + capitalize(device) + capitalize(actionKey) + (capture ? 'Capture' : '');
+  return 'on' + capitalize(device) + capitalize(actionKey) + (hasCapture(capture, actionKey) ? 'Capture' : '');
 }
 const pointerCaptureEvents = ['gotpointercapture', 'lostpointercapture'];
 function parseProp(prop) {
@@ -38058,7 +38457,7 @@ class Engine {
     const config = this.config;
     if (!state._active) this.clean();
     if ((state._blocked || !state.intentional) && !state._force && !config.triggerAllEvents) return;
-    const memo = this.handler(actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, shared), state), {}, {
+    const memo = this.handler(actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, shared), state), {}, {
       [this.aliasKey]: state.values
     }));
     if (memo !== undefined) state.memo = memo;
@@ -38090,7 +38489,7 @@ class CoordinatesEngine extends Engine {
   constructor(...args) {
     super(...args);
 
-    actions_8e12537b_esm_defineProperty(this, "aliasKey", 'xy');
+    actions_e2a59bb9_esm_defineProperty(this, "aliasKey", 'xy');
   }
 
   reset() {
@@ -38146,6 +38545,10 @@ const commonConfigResolver = {
     return value;
   },
 
+  eventOptions(value, _k, config) {
+    return actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, config.shared.eventOptions), value);
+  },
+
   preventDefault(value = false) {
     return value;
   },
@@ -38190,7 +38593,7 @@ const commonConfigResolver = {
 if (false) {}
 
 const DEFAULT_AXIS_THRESHOLD = 0;
-const coordinatesConfigResolver = actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, commonConfigResolver), {}, {
+const coordinatesConfigResolver = actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, commonConfigResolver), {}, {
   axis(_v, _k, {
     axis
   }) {
@@ -38237,7 +38640,7 @@ class DragEngine extends CoordinatesEngine {
   constructor(...args) {
     super(...args);
 
-    actions_8e12537b_esm_defineProperty(this, "ingKey", 'dragging');
+    actions_e2a59bb9_esm_defineProperty(this, "ingKey", 'dragging');
   }
 
   reset() {
@@ -38297,13 +38700,13 @@ class DragEngine extends CoordinatesEngine {
     const config = this.config;
     const state = this.state;
     if (event.buttons != null && (Array.isArray(config.pointerButtons) ? !config.pointerButtons.includes(event.buttons) : config.pointerButtons !== -1 && config.pointerButtons !== event.buttons)) return;
-    this.ctrl.setEventIds(event);
+    const ctrlIds = this.ctrl.setEventIds(event);
 
     if (config.pointerCapture) {
       event.target.setPointerCapture(event.pointerId);
     }
 
-    if (state._pointerActive) return;
+    if (ctrlIds && ctrlIds.size > 1 && state._pointerActive) return;
     this.start(event);
     this.setupPointer(event);
     state._pointerId = pointerId(event);
@@ -38461,11 +38864,11 @@ class DragEngine extends CoordinatesEngine {
 
   setupScrollPrevention(event) {
     persistEvent(event);
-    this.eventStore.add(this.sharedConfig.window, 'touch', 'change', this.preventScroll.bind(this), {
+    const remove = this.eventStore.add(this.sharedConfig.window, 'touch', 'change', this.preventScroll.bind(this), {
       passive: false
     });
-    this.eventStore.add(this.sharedConfig.window, 'touch', 'end', this.clean.bind(this));
-    this.eventStore.add(this.sharedConfig.window, 'touch', 'cancel', this.clean.bind(this));
+    this.eventStore.add(this.sharedConfig.window, 'touch', 'end', remove);
+    this.eventStore.add(this.sharedConfig.window, 'touch', 'cancel', remove);
     this.timeoutStore.add('startPointerDrag', this.startPointerDrag.bind(this), this.config.preventScrollDelay, event);
   }
 
@@ -38483,8 +38886,8 @@ class DragEngine extends CoordinatesEngine {
     if (deltaFn) {
       const state = this.state;
       const factor = event.shiftKey ? 10 : event.altKey ? 0.1 : 1;
-      state._delta = deltaFn(factor);
       this.start(event);
+      state._delta = deltaFn(factor);
       state._keyboardActive = true;
       V.addTo(state._movement, state._delta);
       this.compute(event);
@@ -38528,22 +38931,22 @@ function persistEvent(event) {
   'persist' in event && typeof event.persist === 'function' && event.persist();
 }
 
-const actions_8e12537b_esm_isBrowser = typeof window !== 'undefined' && window.document && window.document.createElement;
+const actions_e2a59bb9_esm_isBrowser = typeof window !== 'undefined' && window.document && window.document.createElement;
 
-function actions_8e12537b_esm_supportsTouchEvents() {
-  return actions_8e12537b_esm_isBrowser && 'ontouchstart' in window;
+function actions_e2a59bb9_esm_supportsTouchEvents() {
+  return actions_e2a59bb9_esm_isBrowser && 'ontouchstart' in window;
 }
 
 function isTouchScreen() {
-  return actions_8e12537b_esm_supportsTouchEvents() || actions_8e12537b_esm_isBrowser && window.navigator.maxTouchPoints > 1;
+  return actions_e2a59bb9_esm_supportsTouchEvents() || actions_e2a59bb9_esm_isBrowser && window.navigator.maxTouchPoints > 1;
 }
 
-function actions_8e12537b_esm_supportsPointerEvents() {
-  return actions_8e12537b_esm_isBrowser && 'onpointerdown' in window;
+function actions_e2a59bb9_esm_supportsPointerEvents() {
+  return actions_e2a59bb9_esm_isBrowser && 'onpointerdown' in window;
 }
 
 function supportsPointerLock() {
-  return actions_8e12537b_esm_isBrowser && 'exitPointerLock' in window.document;
+  return actions_e2a59bb9_esm_isBrowser && 'exitPointerLock' in window.document;
 }
 
 function supportsGestureEvents() {
@@ -38555,11 +38958,11 @@ function supportsGestureEvents() {
 }
 
 const SUPPORT = {
-  isBrowser: actions_8e12537b_esm_isBrowser,
+  isBrowser: actions_e2a59bb9_esm_isBrowser,
   gesture: supportsGestureEvents(),
   touch: isTouchScreen(),
   touchscreen: isTouchScreen(),
-  pointer: actions_8e12537b_esm_supportsPointerEvents(),
+  pointer: actions_e2a59bb9_esm_supportsPointerEvents(),
   pointerLock: supportsPointerLock()
 };
 
@@ -38573,7 +38976,7 @@ const DEFAULT_DRAG_AXIS_THRESHOLD = {
   touch: 0,
   pen: 8
 };
-const dragConfigResolver = actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, coordinatesConfigResolver), {}, {
+const dragConfigResolver = actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, coordinatesConfigResolver), {}, {
   device(_v, _k, {
     pointer: {
       touch = false,
@@ -38645,7 +39048,7 @@ const dragConfigResolver = actions_8e12537b_esm_objectSpread2(actions_8e12537b_e
 
   axisThreshold(value) {
     if (!value) return DEFAULT_DRAG_AXIS_THRESHOLD;
-    return actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, DEFAULT_DRAG_AXIS_THRESHOLD), value);
+    return actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, DEFAULT_DRAG_AXIS_THRESHOLD), value);
   }
 
 });
@@ -38658,9 +39061,9 @@ class PinchEngine extends Engine {
   constructor(...args) {
     super(...args);
 
-    actions_8e12537b_esm_defineProperty(this, "ingKey", 'pinching');
+    actions_e2a59bb9_esm_defineProperty(this, "ingKey", 'pinching');
 
-    actions_8e12537b_esm_defineProperty(this, "aliasKey", 'da');
+    actions_e2a59bb9_esm_defineProperty(this, "aliasKey", 'da');
   }
 
   init() {
@@ -38924,7 +39327,7 @@ class PinchEngine extends Engine {
 
 }
 
-const pinchConfigResolver = actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, commonConfigResolver), {}, {
+const pinchConfigResolver = actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, commonConfigResolver), {}, {
   device(_v, _k, {
     shared,
     pointer: {
@@ -38982,7 +39385,7 @@ class MoveEngine extends CoordinatesEngine {
   constructor(...args) {
     super(...args);
 
-    actions_8e12537b_esm_defineProperty(this, "ingKey", 'moving');
+    actions_e2a59bb9_esm_defineProperty(this, "ingKey", 'moving');
   }
 
   move(event) {
@@ -39024,7 +39427,7 @@ class MoveEngine extends CoordinatesEngine {
 
 }
 
-const moveConfigResolver = actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, coordinatesConfigResolver), {}, {
+const moveConfigResolver = actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, coordinatesConfigResolver), {}, {
   mouseOnly: (value = true) => value
 });
 
@@ -39032,7 +39435,7 @@ class ScrollEngine extends CoordinatesEngine {
   constructor(...args) {
     super(...args);
 
-    actions_8e12537b_esm_defineProperty(this, "ingKey", 'scrolling');
+    actions_e2a59bb9_esm_defineProperty(this, "ingKey", 'scrolling');
   }
 
   scroll(event) {
@@ -39071,7 +39474,7 @@ class WheelEngine extends CoordinatesEngine {
   constructor(...args) {
     super(...args);
 
-    actions_8e12537b_esm_defineProperty(this, "ingKey", 'wheeling');
+    actions_e2a59bb9_esm_defineProperty(this, "ingKey", 'wheeling');
   }
 
   wheel(event) {
@@ -39119,7 +39522,7 @@ class HoverEngine extends CoordinatesEngine {
   constructor(...args) {
     super(...args);
 
-    actions_8e12537b_esm_defineProperty(this, "ingKey", 'hovering');
+    actions_e2a59bb9_esm_defineProperty(this, "ingKey", 'hovering');
   }
 
   enter(event) {
@@ -39150,42 +39553,42 @@ class HoverEngine extends CoordinatesEngine {
 
 }
 
-const hoverConfigResolver = actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, coordinatesConfigResolver), {}, {
+const hoverConfigResolver = actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, coordinatesConfigResolver), {}, {
   mouseOnly: (value = true) => value
 });
 
-const actions_8e12537b_esm_EngineMap = new Map();
+const actions_e2a59bb9_esm_EngineMap = new Map();
 const ConfigResolverMap = new Map();
-function actions_8e12537b_esm_registerAction(action) {
-  actions_8e12537b_esm_EngineMap.set(action.key, action.engine);
+function actions_e2a59bb9_esm_registerAction(action) {
+  actions_e2a59bb9_esm_EngineMap.set(action.key, action.engine);
   ConfigResolverMap.set(action.key, action.resolver);
 }
-const actions_8e12537b_esm_dragAction = {
+const actions_e2a59bb9_esm_dragAction = {
   key: 'drag',
   engine: DragEngine,
   resolver: dragConfigResolver
 };
-const actions_8e12537b_esm_hoverAction = {
+const actions_e2a59bb9_esm_hoverAction = {
   key: 'hover',
   engine: HoverEngine,
   resolver: hoverConfigResolver
 };
-const actions_8e12537b_esm_moveAction = {
+const actions_e2a59bb9_esm_moveAction = {
   key: 'move',
   engine: MoveEngine,
   resolver: moveConfigResolver
 };
-const actions_8e12537b_esm_pinchAction = {
+const actions_e2a59bb9_esm_pinchAction = {
   key: 'pinch',
   engine: PinchEngine,
   resolver: pinchConfigResolver
 };
-const actions_8e12537b_esm_scrollAction = {
+const actions_e2a59bb9_esm_scrollAction = {
   key: 'scroll',
   engine: ScrollEngine,
   resolver: scrollConfigResolver
 };
-const actions_8e12537b_esm_wheelAction = {
+const actions_e2a59bb9_esm_wheelAction = {
   key: 'wheel',
   engine: WheelEngine,
   resolver: wheelConfigResolver
@@ -39312,7 +39715,7 @@ function use_gesture_core_esm_parse(config, gestureKey) {
 
   if (gestureKey) {
     const resolver = ConfigResolverMap.get(gestureKey);
-    _config[gestureKey] = resolveWith(actions_8e12537b_esm_objectSpread2({
+    _config[gestureKey] = resolveWith(actions_e2a59bb9_esm_objectSpread2({
       shared: _config.shared
     }, rest), resolver);
   } else {
@@ -39320,7 +39723,7 @@ function use_gesture_core_esm_parse(config, gestureKey) {
       const resolver = ConfigResolverMap.get(key);
 
       if (resolver) {
-        _config[key] = resolveWith(actions_8e12537b_esm_objectSpread2({
+        _config[key] = resolveWith(actions_e2a59bb9_esm_objectSpread2({
           shared: _config.shared
         }, rest[key]), resolver);
       } else if (false) {}
@@ -39331,33 +39734,43 @@ function use_gesture_core_esm_parse(config, gestureKey) {
 }
 
 class EventStore {
-  constructor(ctrl) {
-    actions_8e12537b_esm_defineProperty(this, "_listeners", []);
+  constructor(ctrl, gestureKey) {
+    actions_e2a59bb9_esm_defineProperty(this, "_listeners", new Set());
 
     this._ctrl = ctrl;
+    this._gestureKey = gestureKey;
   }
 
   add(element, device, action, handler, options) {
+    const listeners = this._listeners;
     const type = toDomEventType(device, action);
 
-    const eventOptions = actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, this._ctrl.config.shared.eventOptions), options);
+    const _options = this._gestureKey ? this._ctrl.config[this._gestureKey].eventOptions : {};
+
+    const eventOptions = actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, _options), options);
 
     element.addEventListener(type, handler, eventOptions);
 
-    this._listeners.push(() => element.removeEventListener(type, handler, eventOptions));
+    const remove = () => {
+      element.removeEventListener(type, handler, eventOptions);
+      listeners.delete(remove);
+    };
+
+    listeners.add(remove);
+    return remove;
   }
 
   clean() {
     this._listeners.forEach(remove => remove());
 
-    this._listeners = [];
+    this._listeners.clear();
   }
 
 }
 
 class TimeoutStore {
   constructor() {
-    actions_8e12537b_esm_defineProperty(this, "_timeouts", new Map());
+    actions_e2a59bb9_esm_defineProperty(this, "_timeouts", new Map());
   }
 
   add(key, callback, ms = 140, ...args) {
@@ -39382,23 +39795,23 @@ class TimeoutStore {
 
 class Controller {
   constructor(handlers) {
-    actions_8e12537b_esm_defineProperty(this, "gestures", new Set());
+    actions_e2a59bb9_esm_defineProperty(this, "gestures", new Set());
 
-    actions_8e12537b_esm_defineProperty(this, "_targetEventStore", new EventStore(this));
+    actions_e2a59bb9_esm_defineProperty(this, "_targetEventStore", new EventStore(this));
 
-    actions_8e12537b_esm_defineProperty(this, "gestureEventStores", {});
+    actions_e2a59bb9_esm_defineProperty(this, "gestureEventStores", {});
 
-    actions_8e12537b_esm_defineProperty(this, "gestureTimeoutStores", {});
+    actions_e2a59bb9_esm_defineProperty(this, "gestureTimeoutStores", {});
 
-    actions_8e12537b_esm_defineProperty(this, "handlers", {});
+    actions_e2a59bb9_esm_defineProperty(this, "handlers", {});
 
-    actions_8e12537b_esm_defineProperty(this, "config", {});
+    actions_e2a59bb9_esm_defineProperty(this, "config", {});
 
-    actions_8e12537b_esm_defineProperty(this, "pointerIds", new Set());
+    actions_e2a59bb9_esm_defineProperty(this, "pointerIds", new Set());
 
-    actions_8e12537b_esm_defineProperty(this, "touchIds", new Set());
+    actions_e2a59bb9_esm_defineProperty(this, "touchIds", new Set());
 
-    actions_8e12537b_esm_defineProperty(this, "state", {
+    actions_e2a59bb9_esm_defineProperty(this, "state", {
       shared: {
         shiftKey: false,
         metaKey: false,
@@ -39413,8 +39826,10 @@ class Controller {
   setEventIds(event) {
     if (isTouch(event)) {
       this.touchIds = new Set(touchIds(event));
+      return this.touchIds;
     } else if ('pointerId' in event) {
       if (event.type === 'pointerup' || event.type === 'pointercancel') this.pointerIds.delete(event.pointerId);else if (event.type === 'pointerdown') this.pointerIds.add(event.pointerId);
+      return this.pointerIds;
     }
   }
 
@@ -39443,7 +39858,6 @@ class Controller {
 
   bind(...args) {
     const sharedConfig = this.config.shared;
-    const eventOptions = sharedConfig.eventOptions;
     const props = {};
     let target;
 
@@ -39452,18 +39866,21 @@ class Controller {
       if (!target) return;
     }
 
-    const bindFunction = bindToProps(props, eventOptions, !!target);
-
     if (sharedConfig.enabled) {
       for (const gestureKey of this.gestures) {
-        if (this.config[gestureKey].enabled) {
-          const Engine = actions_8e12537b_esm_EngineMap.get(gestureKey);
+        const gestureConfig = this.config[gestureKey];
+        const bindFunction = bindToProps(props, gestureConfig.eventOptions, !!target);
+
+        if (gestureConfig.enabled) {
+          const Engine = actions_e2a59bb9_esm_EngineMap.get(gestureKey);
           new Engine(this, args, gestureKey).bind(bindFunction);
         }
       }
 
+      const nativeBindFunction = bindToProps(props, sharedConfig.eventOptions, !!target);
+
       for (const eventKey in this.nativeHandlers) {
-        bindFunction(eventKey, '', event => this.nativeHandlers[eventKey](actions_8e12537b_esm_objectSpread2(actions_8e12537b_esm_objectSpread2({}, this.state.shared), {}, {
+        nativeBindFunction(eventKey, '', event => this.nativeHandlers[eventKey](actions_e2a59bb9_esm_objectSpread2(actions_e2a59bb9_esm_objectSpread2({}, this.state.shared), {}, {
           event,
           args
         })), undefined, true);
@@ -39494,7 +39911,7 @@ class Controller {
 
 function setupGesture(ctrl, gestureKey) {
   ctrl.gestures.add(gestureKey);
-  ctrl.gestureEventStores[gestureKey] = new EventStore(ctrl);
+  ctrl.gestureEventStores[gestureKey] = new EventStore(ctrl, gestureKey);
   ctrl.gestureTimeoutStores[gestureKey] = new TimeoutStore();
 }
 
@@ -39604,7 +40021,7 @@ function useRecognizers(handlers, config = {}, gestureKey, nativeHandlers) {
 }
 
 function use_gesture_react_esm_useDrag(handler, config) {
-  actions_8e12537b_esm_registerAction(actions_8e12537b_esm_dragAction);
+  actions_e2a59bb9_esm_registerAction(actions_e2a59bb9_esm_dragAction);
   return useRecognizers({
     drag: handler
   }, config || {}, 'drag');
@@ -39639,7 +40056,7 @@ function useMove(handler, config) {
 }
 
 function useHover(handler, config) {
-  actions_8e12537b_esm_registerAction(actions_8e12537b_esm_hoverAction);
+  actions_e2a59bb9_esm_registerAction(actions_e2a59bb9_esm_hoverAction);
   return useRecognizers({
     hover: handler
   }, config || {}, 'hover');
