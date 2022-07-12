@@ -1014,7 +1014,7 @@ function update_core( $from, $to ) {
 	require WP_CONTENT_DIR . '/upgrade/version-current.php';
 	$wp_filesystem->delete( $versions_file );
 
-	$php_version       = PHP_VERSION;
+	$php_version       = phpversion();
 	$mysql_version     = $wpdb->db_version();
 	$old_wp_version    = $GLOBALS['wp_version']; // The version of WordPress we're updating from.
 	$development_build = ( false !== strpos( $old_wp_version . $wp_version, '-' ) ); // A dash in the version indicates a development release.

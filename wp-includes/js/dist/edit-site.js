@@ -1417,7 +1417,7 @@ var external_wp_deprecated_default = /*#__PURE__*/__webpack_require__.n(external
 var external_wp_notices_namespaceObject = window["wp"]["notices"];
 ;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/extends.js
 function extends_extends() {
-  extends_extends = Object.assign || function (target) {
+  extends_extends = Object.assign ? Object.assign.bind() : function (target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i];
 
@@ -1430,7 +1430,6 @@ function extends_extends() {
 
     return target;
   };
-
   return extends_extends.apply(this, arguments);
 }
 // EXTERNAL MODULE: ./node_modules/classnames/index.js

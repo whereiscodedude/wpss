@@ -1204,12 +1204,12 @@ function wp_dropdown_pages( $args = '' ) {
 	}
 
 	/**
-	 * Filters the HTML output of a list of pages as a dropdown.
+	 * Filters the HTML output of a list of pages as a drop down.
 	 *
 	 * @since 2.1.0
 	 * @since 4.4.0 `$parsed_args` and `$pages` added as arguments.
 	 *
-	 * @param string    $output      HTML output for dropdown list of pages.
+	 * @param string    $output      HTML output for drop down list of pages.
 	 * @param array     $parsed_args The parsed arguments array. See wp_dropdown_pages()
 	 *                               for information on accepted arguments.
 	 * @param WP_Post[] $pages       Array of the page objects.
@@ -1443,7 +1443,7 @@ function wp_page_menu( $args = array() ) {
 		if ( is_front_page() && ! is_paged() ) {
 			$class = 'class="current_page_item"';
 		}
-		$menu .= '<li ' . $class . '><a href="' . esc_url( home_url( '/' ) ) . '">' . $args['link_before'] . $text . $args['link_after'] . '</a></li>';
+		$menu .= '<li ' . $class . '><a href="' . home_url( '/' ) . '">' . $args['link_before'] . $text . $args['link_after'] . '</a></li>';
 		// If the front page is a page, add it to the exclude list.
 		if ( 'page' === get_option( 'show_on_front' ) ) {
 			if ( ! empty( $list_args['exclude'] ) ) {

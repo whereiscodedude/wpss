@@ -886,7 +886,6 @@ table.form-table td .updated p {
 #application-passwords-section .notice {
 	margin-top: 20px;
 	margin-bottom: 0;
-	word-wrap: break-word;
 }
 
 .application-password-display input.code {
@@ -1645,10 +1644,6 @@ table.form-table td .updated p {
 		left: 2.5rem;
 	}
 
-	body.user-new-php .wp-pwd button.wp-hide-pw {
-		left: 0;
-	}
-
 	.wp-pwd button.button:hover,
 	.wp-pwd button.button:focus {
 		background: transparent;
@@ -1668,11 +1663,6 @@ table.form-table td .updated p {
 	.wp-pwd [type="password"] {
 		line-height: 2;
 		padding-left: 5rem;
-	}
-
-	body.user-new-php .wp-pwd [type="text"],
-	body.user-new-php .wp-pwd [type="password"] {
-		padding-left: 2.5rem;
 	}
 
 	.wp-cancel-pw .dashicons-no {
