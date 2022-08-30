@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Seventeen
- * @since Twenty Seventeen 1.0
+ * @since 1.0
  */
 
 /**
@@ -14,16 +14,16 @@ function twentyseventeen_custom_colors_css() {
 	$hue = absint( get_theme_mod( 'colorscheme_hue', 250 ) );
 
 	/**
-	 * Filters Twenty Seventeen default saturation level.
+	 * Filter Twenty Seventeen default saturation level.
 	 *
 	 * @since Twenty Seventeen 1.0
 	 *
 	 * @param int $saturation Color saturation level.
 	 */
-	$saturation         = absint( apply_filters( 'twentyseventeen_custom_colors_saturation', 50 ) );
+	$saturation = absint( apply_filters( 'twentyseventeen_custom_colors_saturation', 50 ) );
 	$reduced_saturation = ( .8 * $saturation ) . '%';
-	$saturation         = $saturation . '%';
-	$css                = '
+	$saturation = $saturation . '%';
+	$css = '
 /**
  * Twenty Seventeen: Color Patterns
  *
@@ -36,8 +36,6 @@ function twentyseventeen_custom_colors_css() {
 .colors-custom .entry-content a:hover,
 .colors-custom .entry-summary a:focus,
 .colors-custom .entry-summary a:hover,
-.colors-custom .comment-content a:focus,
-.colors-custom .comment-content a:hover,
 .colors-custom .widget a:focus,
 .colors-custom .widget a:hover,
 .colors-custom .site-footer .widget-area a:focus,
@@ -93,7 +91,6 @@ function twentyseventeen_custom_colors_css() {
 
 .colors-custom .entry-content a,
 .colors-custom .entry-summary a,
-.colors-custom .comment-content a,
 .colors-custom .widget a,
 .colors-custom .site-footer .widget-area a,
 .colors-custom .posts-navigation a,
@@ -155,8 +152,6 @@ function twentyseventeen_custom_colors_css() {
 .colors-custom .entry-content a:hover,
 .colors-custom .entry-summary a:focus,
 .colors-custom .entry-summary a:hover,
-.colors-custom .comment-content a:focus,
-.colors-custom .comment-content a:hover,
 .colors-custom .widget a:focus,
 .colors-custom .widget a:hover,
 .colors-custom .site-footer .widget-area a:focus,
@@ -307,8 +302,8 @@ body.colors-custom,
 	color: hsl( ' . $hue . ', ' . $saturation . ', 46% ); /* base: #767676; */
 }
 
-.colors-custom :not( .mejs-button ) > button:hover,
-.colors-custom :not( .mejs-button ) > button:focus,
+.colors-custom button:hover,
+.colors-custom button:focus,
 .colors-custom input[type="button"]:hover,
 .colors-custom input[type="button"]:focus,
 .colors-custom input[type="submit"]:hover,
@@ -498,8 +493,6 @@ body.colors-custom,
 .colors-custom .entry-content a:focus,
 .colors-custom .entry-summary a:hover,
 .colors-custom .entry-summary a:focus,
-.colors-custom .comment-content a:focus,
-.colors-custom .comment-content a:hover,
 .colors-custom .widget a:hover,
 .colors-custom .widget a:focus,
 .colors-custom .site-footer .widget-area a:hover,
