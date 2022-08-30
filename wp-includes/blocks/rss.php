@@ -13,10 +13,6 @@
  * @return string Returns the block content with received rss items.
  */
 function render_block_core_rss( $attributes ) {
-	if ( in_array( untrailingslashit( $attributes['feedURL'] ), array( site_url(), home_url() ), true ) ) {
-		return '<div class="components-placeholder"><div class="notice notice-error">' . __( 'Adding an RSS feed to this site’s homepage is not supported, as it could lead to a loop that slows down your site. Try using another block, like the <strong>Latest Posts</strong> block, to list posts from the site.' ) . '</div></div>';
-	}
-
 	$rss = fetch_feed( $attributes['feedURL'] );
 
 	if ( is_wp_error( $rss ) ) {
@@ -83,26 +79,24 @@ function render_block_core_rss( $attributes ) {
 		$list_items .= "<li class='wp-block-rss__item'>{$title}{$date}{$author}{$excerpt}</li>";
 	}
 
-	$classnames = array();
+	$class = 'wp-block-rss';
+	if ( isset( $attributes['align'] ) ) {
+		$class .= ' align' . $attributes['align'];
+	}
+
 	if ( isset( $attributes['blockLayout'] ) && 'grid' === $attributes['blockLayout'] ) {
-		$classnames[] = 'is-grid';
+		$class .= ' is-grid';
 	}
+
 	if ( isset( $attributes['columns'] ) && 'grid' === $attributes['blockLayout'] ) {
-		$classnames[] = 'columns-' . $attributes['columns'];
-	}
-	if ( $attributes['displayDate'] ) {
-		$classnames[] = 'has-dates';
-	}
-	if ( $attributes['displayAuthor'] ) {
-		$classnames[] = 'has-authors';
-	}
-	if ( $attributes['displayExcerpt'] ) {
-		$classnames[] = 'has-excerpts';
+		$class .= ' columns-' . $attributes['columns'];
 	}
 
-	$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => implode( ' ', $classnames ) ) );
+	if ( isset( $attributes['className'] ) ) {
+		$class .= ' ' . $attributes['className'];
+	}
 
-	return sprintf( '<ul %s>%s</ul>', $wrapper_attributes, $list_items );
+	return sprintf( '<ul class="%s">%s</ul>', esc_attr( $class ), $list_items );
 }
 
 /**

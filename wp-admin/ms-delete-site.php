@@ -35,10 +35,8 @@ if ( isset( $_GET['h'] ) && '' !== $_GET['h'] && false !== get_option( 'delete_b
 $blog = get_site();
 $user = wp_get_current_user();
 
-// Used in the HTML title tag.
 $title       = __( 'Delete Site' );
 $parent_file = 'tools.php';
-
 require_once ABSPATH . 'wp-admin/admin-header.php';
 
 echo '<div class="wrap">';
@@ -74,11 +72,11 @@ All at ###SITENAME###
 ###SITEURL###"
 	);
 	/**
-	 * Filters the text for the email sent to the site admin when a request to delete a site in a Multisite network is submitted.
+	 * Filters the email content sent when a site in a Multisite network is deleted.
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param string $content The email text.
+	 * @param string $content The email content that will be sent to the user who deleted a site in a Multisite network.
 	 */
 	$content = apply_filters( 'delete_site_email_content', $content );
 

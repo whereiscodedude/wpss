@@ -50,21 +50,6 @@ class WP_Site_Health {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_site_health_scheduled_check', array( $this, 'wp_cron_scheduled_check' ) );
-
-		add_action( 'site_health_tab_content', array( $this, 'show_site_health_tab' ) );
-	}
-
-	/**
-	 * Output the content of a tab in the Site Health screen.
-	 *
-	 * @since 5.8.0
-	 *
-	 * @param string $tab Slug of the current tab being displayed.
-	 */
-	public function show_site_health_tab( $tab ) {
-		if ( 'debug' === $tab ) {
-			require_once ABSPATH . '/wp-admin/site-health-info.php';
-		}
 	}
 
 	/**
@@ -118,12 +103,12 @@ class WP_Site_Health {
 			$health_check_js_variables['site_status']['issues'] = $issue_counts;
 		}
 
-		if ( 'site-health' === $screen->id && ( ! isset( $_GET['tab'] ) || empty( $_GET['tab'] ) ) ) {
+		if ( 'site-health' === $screen->id && ! isset( $_GET['tab'] ) ) {
 			$tests = WP_Site_Health::get_tests();
 
-			// Don't run https test on development environments.
-			if ( $this->is_development_environment() ) {
-				unset( $tests['async']['https_status'] );
+			// Don't run https test on localhost.
+			if ( 'localhost' === preg_replace( '|https?://|', '', get_site_url() ) ) {
+				unset( $tests['direct']['https_status'] );
 			}
 
 			foreach ( $tests['direct'] as $test ) {
@@ -148,9 +133,7 @@ class WP_Site_Health {
 				if ( is_string( $test['test'] ) ) {
 					$health_check_js_variables['site_status']['async'][] = array(
 						'test'      => $test['test'],
-						'has_rest'  => ( isset( $test['has_rest'] ) ? $test['has_rest'] : false ),
 						'completed' => false,
-						'headers'   => isset( $test['headers'] ) ? $test['headers'] : array(),
 					);
 				}
 			}
@@ -169,7 +152,7 @@ class WP_Site_Health {
 	 */
 	private function perform_test( $callback ) {
 		/**
-		 * Filters the output of a finished Site Health test.
+		 * Filter the output of a finished Site Health test.
 		 *
 		 * @since 5.3.0
 		 *
@@ -284,7 +267,7 @@ class WP_Site_Health {
 
 			$result['description'] = sprintf(
 				'<p>%s</p>',
-				__( 'Unable to check if any new versions of WordPress are available.' )
+				__( 'We were unable to check if any new versions of WordPress are available.' )
 			);
 
 			$result['actions'] = sprintf(
@@ -381,9 +364,10 @@ class WP_Site_Health {
 		$plugins        = get_plugins();
 		$plugin_updates = get_plugin_updates();
 
-		$plugins_active      = 0;
-		$plugins_total       = 0;
-		$plugins_need_update = 0;
+		$plugins_have_updates = false;
+		$plugins_active       = 0;
+		$plugins_total        = 0;
+		$plugins_need_update  = 0;
 
 		// Loop over the available plugins and check their versions and active state.
 		foreach ( $plugins as $plugin_path => $plugin ) {
@@ -393,8 +377,11 @@ class WP_Site_Health {
 				$plugins_active++;
 			}
 
+			$plugin_version = $plugin['Version'];
+
 			if ( array_key_exists( $plugin_path, $plugin_updates ) ) {
 				$plugins_need_update++;
+				$plugins_have_updates = true;
 			}
 		}
 
@@ -428,7 +415,7 @@ class WP_Site_Health {
 					'<p>%s</p>',
 					__( 'Your site has 1 active plugin, and it is up to date.' )
 				);
-			} elseif ( $plugins_active > 0 ) {
+			} else {
 				$result['description'] .= sprintf(
 					'<p>%s</p>',
 					sprintf(
@@ -440,11 +427,6 @@ class WP_Site_Health {
 						),
 						$plugins_active
 					)
-				);
-			} else {
-				$result['description'] .= sprintf(
-					'<p>%s</p>',
-					__( 'Your site does not have any active plugins.' )
 				);
 			}
 		}
@@ -468,7 +450,7 @@ class WP_Site_Health {
 					),
 					$unused_plugins
 				),
-				__( 'Inactive plugins are tempting targets for attackers. If you are not going to use a plugin, you should consider removing it.' )
+				__( 'Inactive plugins are tempting targets for attackers. If you&#8217;re not going to use a plugin, we recommend you remove it.' )
 			);
 
 			$result['actions'] .= sprintf(
@@ -596,7 +578,7 @@ class WP_Site_Health {
 					'<p>%s</p>',
 					__( 'Your site has 1 installed theme, and it is up to date.' )
 				);
-			} elseif ( $themes_total > 0 ) {
+			} else {
 				$result['description'] .= sprintf(
 					'<p>%s</p>',
 					sprintf(
@@ -608,11 +590,6 @@ class WP_Site_Health {
 						),
 						$themes_total
 					)
-				);
-			} else {
-				$result['description'] .= sprintf(
-					'<p>%s</p>',
-					__( 'Your site does not have any installed themes.' )
 				);
 			}
 		}
@@ -640,7 +617,7 @@ class WP_Site_Health {
 						),
 						sprintf(
 							/* translators: 1: The currently active theme. 2: The active theme's parent theme. */
-							__( 'To enhance your site&#8217;s security, you should consider removing any themes you are not using. You should keep your active theme, %1$s, and %2$s, its parent theme.' ),
+							__( 'To enhance your site&#8217;s security, we recommend you remove any themes you&#8217;re not using. You should keep your current theme, %1$s, and %2$s, its parent theme.' ),
 							$active_theme->name,
 							$active_theme->parent()->name
 						)
@@ -659,7 +636,7 @@ class WP_Site_Health {
 						),
 						sprintf(
 							/* translators: 1: The default theme for WordPress. 2: The currently active theme. 3: The active theme's parent theme. */
-							__( 'To enhance your site&#8217;s security, you should consider removing any themes you are not using. You should keep %1$s, the default WordPress theme, %2$s, your active theme, and %3$s, its parent theme.' ),
+							__( 'To enhance your site&#8217;s security, we recommend you remove any themes you&#8217;re not using. You should keep %1$s, the default WordPress theme, %2$s, your current theme, and %3$s, its parent theme.' ),
 							$default_theme ? $default_theme->name : WP_DEFAULT_THEME,
 							$active_theme->name,
 							$active_theme->parent()->name
@@ -685,7 +662,7 @@ class WP_Site_Health {
 							$themes_inactive,
 							$active_theme->name
 						),
-						__( 'You should consider removing any unused themes to enhance your site&#8217;s security.' )
+						__( 'We recommend removing any unused themes to enhance your site&#8217;s security.' )
 					);
 				} else {
 					$result['description'] .= sprintf(
@@ -701,7 +678,7 @@ class WP_Site_Health {
 							$default_theme ? $default_theme->name : WP_DEFAULT_THEME,
 							$active_theme->name
 						),
-						__( 'You should consider removing any unused themes to enhance your site&#8217;s security.' )
+						__( 'We recommend removing any unused themes to enhance your site&#8217;s security.' )
 					);
 				}
 			}
@@ -747,12 +724,12 @@ class WP_Site_Health {
 				'<p>%s</p>',
 				sprintf(
 					/* translators: %s: The minimum recommended PHP version. */
-					__( 'PHP is the programming language used to build and maintain WordPress. Newer versions of PHP are created with increased performance in mind, so you may see a positive effect on your site&#8217;s performance. The minimum recommended version of PHP is %s.' ),
+					__( 'PHP is the programming language used to build and maintain WordPress. Newer versions of PHP are faster and more secure, so staying up to date will help your site&#8217;s overall performance and security. The minimum recommended version of PHP is %s.' ),
 					$response ? $response['recommended_version'] : ''
 				)
 			),
 			'actions'     => sprintf(
-				'<p><a href="%s" target="_blank" rel="noopener">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				'<p><a href="%s" target="_blank" rel="noopener noreferrer">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				esc_url( wp_get_update_php_url() ),
 				__( 'Learn more about updating PHP' ),
 				/* translators: Accessibility text. */
@@ -808,33 +785,30 @@ class WP_Site_Health {
 	 * Make the check for available PHP modules into a simple boolean operator for a cleaner test runner.
 	 *
 	 * @since 5.2.0
-	 * @since 5.3.0 The `$constant_name` and `$class_name` parameters were added.
+	 * @since 5.3.0 The `$constant` and `$class` parameters were added.
 	 *
-	 * @param string $extension_name Optional. The extension name to test. Default null.
-	 * @param string $function_name  Optional. The function name to test. Default null.
-	 * @param string $constant_name  Optional. The constant name to test for. Default null.
-	 * @param string $class_name     Optional. The class name to test for. Default null.
+	 * @param string $extension Optional. The extension name to test. Default null.
+	 * @param string $function  Optional. The function name to test. Default null.
+	 * @param string $constant  Optional. The constant name to test for. Default null.
+	 * @param string $class     Optional. The class name to test for. Default null.
 	 * @return bool Whether or not the extension and function are available.
 	 */
-	private function test_php_extension_availability( $extension_name = null, $function_name = null, $constant_name = null, $class_name = null ) {
+	private function test_php_extension_availability( $extension = null, $function = null, $constant = null, $class = null ) {
 		// If no extension or function is passed, claim to fail testing, as we have nothing to test against.
-		if ( ! $extension_name && ! $function_name && ! $constant_name && ! $class_name ) {
+		if ( ! $extension && ! $function && ! $constant && ! $class ) {
 			return false;
 		}
 
-		if ( $extension_name && ! extension_loaded( $extension_name ) ) {
+		if ( $extension && ! extension_loaded( $extension ) ) {
 			return false;
 		}
-
-		if ( $function_name && ! function_exists( $function_name ) ) {
+		if ( $function && ! function_exists( $function ) ) {
 			return false;
 		}
-
-		if ( $constant_name && ! defined( $constant_name ) ) {
+		if ( $constant && ! defined( $constant ) ) {
 			return false;
 		}
-
-		if ( $class_name && ! class_exists( $class_name ) ) {
+		if ( $class && ! class_exists( $class ) ) {
 			return false;
 		}
 
@@ -867,7 +841,7 @@ class WP_Site_Health {
 					__( 'The WordPress Hosting Team maintains a list of those modules, both recommended and required, in <a href="%1$s" %2$s>the team handbook%3$s</a>.' ),
 					/* translators: Localized team handbook, if one exists. */
 					esc_url( __( 'https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions' ) ),
-					'target="_blank" rel="noopener"',
+					'target="_blank" rel="noopener noreferrer"',
 					sprintf(
 						' <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span>',
 						/* translators: Accessibility text. */
@@ -900,10 +874,6 @@ class WP_Site_Health {
 				'function' => 'hash',
 				'required' => false,
 			),
-			'imagick'   => array(
-				'extension' => 'imagick',
-				'required'  => false,
-			),
 			'json'      => array(
 				'function' => 'json_last_error',
 				'required' => true,
@@ -929,6 +899,10 @@ class WP_Site_Health {
 				'function' => 'preg_match',
 				'required' => false,
 			),
+			'imagick'   => array(
+				'extension' => 'imagick',
+				'required'  => false,
+			),
 			'mod_xml'   => array(
 				'extension' => 'libxml',
 				'required'  => false,
@@ -949,10 +923,6 @@ class WP_Site_Health {
 			'iconv'     => array(
 				'function' => 'iconv',
 				'required' => false,
-			),
-			'intl'      => array(
-				'extension' => 'intl',
-				'required'  => false,
 			),
 			'mcrypt'    => array(
 				'extension'    => 'mcrypt',
@@ -1003,10 +973,10 @@ class WP_Site_Health {
 		$failures = array();
 
 		foreach ( $modules as $library => $module ) {
-			$extension_name = ( isset( $module['extension'] ) ? $module['extension'] : null );
-			$function_name  = ( isset( $module['function'] ) ? $module['function'] : null );
-			$constant_name  = ( isset( $module['constant'] ) ? $module['constant'] : null );
-			$class_name     = ( isset( $module['class'] ) ? $module['class'] : null );
+			$extension  = ( isset( $module['extension'] ) ? $module['extension'] : null );
+			$function   = ( isset( $module['function'] ) ? $module['function'] : null );
+			$constant   = ( isset( $module['constant'] ) ? $module['constant'] : null );
+			$class_name = ( isset( $module['class'] ) ? $module['class'] : null );
 
 			// If this module is a fallback for another function, check if that other function passed.
 			if ( isset( $module['fallback_for'] ) ) {
@@ -1021,10 +991,7 @@ class WP_Site_Health {
 				}
 			}
 
-			if ( ! $this->test_php_extension_availability( $extension_name, $function_name, $constant_name, $class_name )
-				&& ( ! isset( $module['php_bundled_version'] )
-					|| version_compare( PHP_VERSION, $module['php_bundled_version'], '<' ) )
-			) {
+			if ( ! $this->test_php_extension_availability( $extension, $function, $constant, $class_name ) && ( ! isset( $module['php_bundled_version'] ) || version_compare( PHP_VERSION, $module['php_bundled_version'], '<' ) ) ) {
 				if ( $module['required'] ) {
 					$result['status'] = 'critical';
 
@@ -1191,7 +1158,7 @@ class WP_Site_Health {
 				__( 'The SQL server is a required piece of software for the database WordPress uses to store all your site&#8217;s content and settings.' )
 			),
 			'actions'     => sprintf(
-				'<p><a href="%s" target="_blank" rel="noopener">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				'<p><a href="%s" target="_blank" rel="noopener noreferrer">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				/* translators: Localized version of WordPress requirements if one exists. */
 				esc_url( __( 'https://wordpress.org/about/requirements/' ) ),
 				__( 'Learn more about what WordPress requires to run.' ),
@@ -1212,7 +1179,7 @@ class WP_Site_Health {
 				'<p>%s</p>',
 				sprintf(
 					/* translators: 1: The database engine in use (MySQL or MariaDB). 2: Database server recommended version number. */
-					__( 'For optimal performance and security reasons, you should consider running %1$s version %2$s or higher. Contact your web hosting company to correct this.' ),
+					__( 'For optimal performance and security reasons, we recommend running %1$s version %2$s or higher. Contact your web hosting company to correct this.' ),
 					( $this->is_mariadb ? 'MariaDB' : 'MySQL' ),
 					$this->health_check_mysql_rec_version
 				)
@@ -1428,7 +1395,7 @@ class WP_Site_Health {
 			);
 
 			$result['actions'] = sprintf(
-				'<p><a href="%s" target="_blank" rel="noopener">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				'<p><a href="%s" target="_blank" rel="noopener noreferrer">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				/* translators: Localized Support reference. */
 				esc_url( __( 'https://wordpress.org/support' ) ),
 				__( 'Get help resolving this issue.' ),
@@ -1466,7 +1433,7 @@ class WP_Site_Health {
 				__( 'Debug mode is often enabled to gather more details about an error or site failure, but may contain sensitive information which should not be available on a publicly available website.' )
 			),
 			'actions'     => sprintf(
-				'<p><a href="%s" target="_blank" rel="noopener">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				'<p><a href="%s" target="_blank" rel="noopener noreferrer">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				/* translators: Documentation explaining debugging in WordPress. */
 				esc_url( __( 'https://wordpress.org/support/article/debugging-in-wordpress/' ) ),
 				__( 'Learn more about debugging in WordPress.' ),
@@ -1478,7 +1445,7 @@ class WP_Site_Health {
 
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
-				$result['label'] = __( 'Your site is set to log errors to a potentially public file' );
+				$result['label'] = __( 'Your site is set to log errors to a potentially public file.' );
 
 				$result['status'] = ( 0 === strpos( ini_get( 'error_log' ), ABSPATH ) ) ? 'critical' : 'recommended';
 
@@ -1496,11 +1463,6 @@ class WP_Site_Health {
 				$result['label'] = __( 'Your site is set to display errors to site visitors' );
 
 				$result['status'] = 'critical';
-
-				// On development environments, set the status to recommended.
-				if ( $this->is_development_environment() ) {
-					$result['status'] = 'recommended';
-				}
 
 				$result['description'] .= sprintf(
 					'<p>%s</p>',
@@ -1524,19 +1486,12 @@ class WP_Site_Health {
 	 * enabled, but only if you visit the right site address.
 	 *
 	 * @since 5.2.0
-	 * @since 5.7.0 Updated to rely on {@see wp_is_using_https()} and {@see wp_is_https_supported()}.
 	 *
 	 * @return array The test results.
 	 */
 	public function get_test_https_status() {
-		// Enforce fresh HTTPS detection results. This is normally invoked by using cron,
-		// but for Site Health it should always rely on the latest results.
-		wp_update_https_detection_errors();
-
-		$default_update_url = wp_get_default_update_https_url();
-
 		$result = array(
-			'label'       => __( 'Your website is using an active HTTPS connection' ),
+			'label'       => __( 'Your website is using an active HTTPS connection.' ),
 			'status'      => 'good',
 			'badge'       => array(
 				'label' => __( 'Security' ),
@@ -1547,8 +1502,9 @@ class WP_Site_Health {
 				__( 'An HTTPS connection is a more secure way of browsing the web. Many services now have HTTPS as a requirement. HTTPS allows you to take advantage of new features that can increase site speed, improve search rankings, and gain the trust of your visitors by helping to protect their online privacy.' )
 			),
 			'actions'     => sprintf(
-				'<p><a href="%s" target="_blank" rel="noopener">%s<span class="screen-reader-text"> %s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				esc_url( $default_update_url ),
+				'<p><a href="%s" target="_blank" rel="noopener noreferrer">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				/* translators: Documentation explaining HTTPS and why it should be used. */
+				esc_url( __( 'https://wordpress.org/support/article/why-should-i-use-https/' ) ),
 				__( 'Learn more about why you should use HTTPS' ),
 				/* translators: Accessibility text. */
 				__( '(opens in a new tab)' )
@@ -1556,111 +1512,34 @@ class WP_Site_Health {
 			'test'        => 'https_status',
 		);
 
-		if ( ! wp_is_using_https() ) {
-			// If the website is not using HTTPS, provide more information
-			// about whether it is supported and how it can be enabled.
-			$result['status'] = 'recommended';
-			$result['label']  = __( 'Your website does not use HTTPS' );
+		if ( is_ssl() ) {
+			$wp_url   = get_bloginfo( 'wpurl' );
+			$site_url = get_bloginfo( 'url' );
 
-			if ( wp_is_site_url_using_https() ) {
-				if ( is_ssl() ) {
-					$result['description'] = sprintf(
-						'<p>%s</p>',
-						sprintf(
-							/* translators: %s: URL to Settings > General > Site Address. */
-							__( 'You are accessing this website using HTTPS, but your <a href="%s">Site Address</a> is not set up to use HTTPS by default.' ),
-							esc_url( admin_url( 'options-general.php' ) . '#home' )
-						)
-					);
-				} else {
-					$result['description'] = sprintf(
-						'<p>%s</p>',
-						sprintf(
-							/* translators: %s: URL to Settings > General > Site Address. */
-							__( 'Your <a href="%s">Site Address</a> is not set up to use HTTPS.' ),
-							esc_url( admin_url( 'options-general.php' ) . '#home' )
-						)
-					);
-				}
-			} else {
-				if ( is_ssl() ) {
-					$result['description'] = sprintf(
-						'<p>%s</p>',
-						sprintf(
-							/* translators: 1: URL to Settings > General > WordPress Address, 2: URL to Settings > General > Site Address. */
-							__( 'You are accessing this website using HTTPS, but your <a href="%1$s">WordPress Address</a> and <a href="%2$s">Site Address</a> are not set up to use HTTPS by default.' ),
-							esc_url( admin_url( 'options-general.php' ) . '#siteurl' ),
-							esc_url( admin_url( 'options-general.php' ) . '#home' )
-						)
-					);
-				} else {
-					$result['description'] = sprintf(
-						'<p>%s</p>',
-						sprintf(
-							/* translators: 1: URL to Settings > General > WordPress Address, 2: URL to Settings > General > Site Address. */
-							__( 'Your <a href="%1$s">WordPress Address</a> and <a href="%2$s">Site Address</a> are not set up to use HTTPS.' ),
-							esc_url( admin_url( 'options-general.php' ) . '#siteurl' ),
-							esc_url( admin_url( 'options-general.php' ) . '#home' )
-						)
-					);
-				}
-			}
+			if ( 'https' !== substr( $wp_url, 0, 5 ) || 'https' !== substr( $site_url, 0, 5 ) ) {
+				$result['status'] = 'recommended';
 
-			if ( wp_is_https_supported() ) {
-				$result['description'] .= sprintf(
+				$result['label'] = __( 'Only parts of your site are using HTTPS' );
+
+				$result['description'] = sprintf(
 					'<p>%s</p>',
-					__( 'HTTPS is already supported for your website.' )
+					sprintf(
+						/* translators: %s: URL to General Settings screen. */
+						__( 'You are accessing this website using HTTPS, but your <a href="%s">WordPress Address</a> is not set up to use HTTPS by default.' ),
+						esc_url( admin_url( 'options-general.php' ) )
+					)
 				);
 
-				if ( defined( 'WP_HOME' ) || defined( 'WP_SITEURL' ) ) {
-					$result['description'] .= sprintf(
-						'<p>%s</p>',
-						sprintf(
-							/* translators: 1: wp-config.php, 2: WP_HOME, 3: WP_SITEURL */
-							__( 'However, your WordPress Address is currently controlled by a PHP constant and therefore cannot be updated. You need to edit your %1$s and remove or update the definitions of %2$s and %3$s.' ),
-							'<code>wp-config.php</code>',
-							'<code>WP_HOME</code>',
-							'<code>WP_SITEURL</code>'
-						)
-					);
-				} elseif ( current_user_can( 'update_https' ) ) {
-					$default_direct_update_url = add_query_arg( 'action', 'update_https', wp_nonce_url( admin_url( 'site-health.php' ), 'wp_update_https' ) );
-					$direct_update_url         = wp_get_direct_update_https_url();
-
-					if ( ! empty( $direct_update_url ) ) {
-						$result['actions'] = sprintf(
-							'<p class="button-container"><a class="button button-primary" href="%1$s" target="_blank" rel="noopener">%2$s<span class="screen-reader-text"> %3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-							esc_url( $direct_update_url ),
-							__( 'Update your site to use HTTPS' ),
-							/* translators: Accessibility text. */
-							__( '(opens in a new tab)' )
-						);
-					} else {
-						$result['actions'] = sprintf(
-							'<p class="button-container"><a class="button button-primary" href="%1$s">%2$s</a></p>',
-							esc_url( $default_direct_update_url ),
-							__( 'Update your site to use HTTPS' )
-						);
-					}
-				}
-			} else {
-				// If host-specific "Update HTTPS" URL is provided, include a link.
-				$update_url = wp_get_update_https_url();
-				if ( $update_url !== $default_update_url ) {
-					$result['description'] .= sprintf(
-						'<p><a href="%s" target="_blank" rel="noopener">%s<span class="screen-reader-text"> %s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-						esc_url( $update_url ),
-						__( 'Talk to your web host about supporting HTTPS for your website.' ),
-						/* translators: Accessibility text. */
-						__( '(opens in a new tab)' )
-					);
-				} else {
-					$result['description'] .= sprintf(
-						'<p>%s</p>',
-						__( 'Talk to your web host about supporting HTTPS for your website.' )
-					);
-				}
+				$result['actions'] .= sprintf(
+					'<p><a href="%s">%s</a></p>',
+					esc_url( admin_url( 'options-general.php' ) ),
+					__( 'Update your site addresses' )
+				);
 			}
+		} else {
+			$result['status'] = 'recommended';
+
+			$result['label'] = __( 'Your site does not use HTTPS' );
 		}
 
 		return $result;
@@ -1975,7 +1854,7 @@ class WP_Site_Health {
 			$hosts = explode( ',', WP_ACCESSIBLE_HOSTS );
 		}
 
-		if ( $blocked && 0 === count( $hosts ) ) {
+		if ( $blocked && 0 === sizeof( $hosts ) ) {
 			$result['status'] = 'critical';
 
 			$result['label'] = __( 'HTTP requests are blocked' );
@@ -1990,7 +1869,7 @@ class WP_Site_Health {
 			);
 		}
 
-		if ( $blocked && 0 < count( $hosts ) ) {
+		if ( $blocked && 0 < sizeof( $hosts ) ) {
 			$result['status'] = 'recommended';
 
 			$result['label'] = __( 'HTTP requests are partially blocked' );
@@ -2124,7 +2003,7 @@ class WP_Site_Health {
 	 */
 	public function get_test_file_uploads() {
 		$result = array(
-			'label'       => __( 'Files can be uploaded' ),
+			'label'       => __( 'Files can be uploaded.' ),
 			'status'      => 'good',
 			'badge'       => array(
 				'label' => __( 'Performance' ),
@@ -2173,191 +2052,22 @@ class WP_Site_Health {
 		if ( wp_convert_hr_to_bytes( $post_max_size ) < wp_convert_hr_to_bytes( $upload_max_filesize ) ) {
 			$result['label'] = sprintf(
 				/* translators: 1: post_max_size, 2: upload_max_filesize */
-				__( 'The "%1$s" value is smaller than "%2$s"' ),
+				__( 'The "%1$s" value is smaller than "%2$s".' ),
 				'post_max_size',
 				'upload_max_filesize'
 			);
-			$result['status'] = 'recommended';
-
-			if ( 0 === wp_convert_hr_to_bytes( $post_max_size ) ) {
-				$result['description'] = sprintf(
-					'<p>%s</p>',
-					sprintf(
-						/* translators: 1: post_max_size, 2: upload_max_filesize */
-						__( 'The setting for %1$s is currently configured as 0, this could cause some problems when trying to upload files through plugin or theme features that rely on various upload methods. It is recommended to configure this setting to a fixed value, ideally matching the value of %2$s, as some upload methods read the value 0 as either unlimited, or disabled.' ),
-						'<code>post_max_size</code>',
-						'<code>upload_max_filesize</code>'
-					)
-				);
-			} else {
-				$result['description'] = sprintf(
-					'<p>%s</p>',
-					sprintf(
-						/* translators: 1: post_max_size, 2: upload_max_filesize */
-						__( 'The setting for %1$s is smaller than %2$s, this could cause some problems when trying to upload files.' ),
-						'<code>post_max_size</code>',
-						'<code>upload_max_filesize</code>'
-					)
-				);
-			}
-
-			return $result;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Tests if the Authorization header has the expected values.
-	 *
-	 * @since 5.6.0
-	 *
-	 * @return array
-	 */
-	public function get_test_authorization_header() {
-		$result = array(
-			'label'       => __( 'The Authorization header is working as expected' ),
-			'status'      => 'good',
-			'badge'       => array(
-				'label' => __( 'Security' ),
-				'color' => 'blue',
-			),
-			'description' => sprintf(
+			$result['status']      = 'recommended';
+			$result['description'] = sprintf(
 				'<p>%s</p>',
-				__( 'The Authorization header comes from the third-party applications you approve. Without it, those apps cannot connect to your site.' )
-			),
-			'actions'     => '',
-			'test'        => 'authorization_header',
-		);
-
-		if ( ! isset( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ) ) {
-			$result['label'] = __( 'The authorization header is missing' );
-		} elseif ( 'user' !== $_SERVER['PHP_AUTH_USER'] || 'pwd' !== $_SERVER['PHP_AUTH_PW'] ) {
-			$result['label'] = __( 'The authorization header is invalid' );
-		} else {
-			return $result;
-		}
-
-		$result['status'] = 'recommended';
-
-		if ( ! function_exists( 'got_mod_rewrite' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/misc.php';
-		}
-
-		if ( got_mod_rewrite() ) {
-			$result['actions'] .= sprintf(
-				'<p><a href="%s">%s</a></p>',
-				esc_url( admin_url( 'options-permalink.php' ) ),
-				__( 'Flush permalinks' )
-			);
-		} else {
-			$result['actions'] .= sprintf(
-				'<p><a href="%s" target="_blank" rel="noopener">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				__( 'https://developer.wordpress.org/rest-api/frequently-asked-questions/#why-is-authentication-not-working' ),
-				__( 'Learn how to configure the Authorization header.' ),
-				/* translators: Accessibility text. */
-				__( '(opens in a new tab)' )
-			);
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Tests if sites uses persistent object cache.
-	 *
-	 * Checks if site uses persistent object cache or recommends to use it if not.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @return array The test result.
-	 */
-	public function get_test_persistent_object_cache() {
-		/**
-		 * Filters the action URL for the persistent object cache health check.
-		 *
-		 * @since 6.1.0
-		 *
-		 * @param string $action_url Learn more link for persistent object cache health check.
-		 */
-		$action_url = apply_filters(
-			'site_status_persistent_object_cache_url',
-			/* translators: Localized Support reference. */
-			__( 'https://wordpress.org/support/article/optimization/#object-caching' )
-		);
-
-		$result = array(
-			'test'        => 'persistent_object_cache',
-			'status'      => 'good',
-			'badge'       => array(
-				'label' => __( 'Performance' ),
-				'color' => 'blue',
-			),
-			'label'       => __( 'A persistent object cache is being used' ),
-			'description' => sprintf(
-				'<p>%s</p>',
-				__( "A persistent object cache makes your site's database more efficient, resulting in faster load times because WordPress can retrieve your site's content and settings much more quickly." )
-			),
-			'actions'     => sprintf(
-				'<p><a href="%s" target="_blank" rel="noopener">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				esc_url( $action_url ),
-				__( 'Learn more about persistent object caching.' ),
-				/* translators: Accessibility text. */
-				__( '(opens in a new tab)' )
-			),
-		);
-
-		if ( wp_using_ext_object_cache() ) {
-			return $result;
-		}
-
-		if ( ! $this->should_suggest_persistent_object_cache() ) {
-			$result['label'] = __( 'A persistent object cache is not required' );
-
-			return $result;
-		}
-
-		$available_services = $this->available_object_cache_services();
-
-		$notes = __( 'Your hosting provider can tell you if a persistent object cache can be enabled on your site.' );
-
-		if ( ! empty( $available_services ) ) {
-			$notes .= ' ' . sprintf(
-				/* translators: Available object caching services. */
-				__( 'Your host appears to support the following object caching services: %s.' ),
-				implode( ', ', $available_services )
-			);
-		}
-
-		/**
-		 * Filters the second paragraph of the health check's description
-		 * when suggesting the use of a persistent object cache.
-		 *
-		 * Hosts may want to replace the notes to recommend their preferred object caching solution.
-		 *
-		 * Plugin authors may want to append notes (not replace) on why object caching is recommended for their plugin.
-		 *
-		 * @since 6.1.0
-		 *
-		 * @param string $notes              The notes appended to the health check description.
-		 * @param array  $available_services The list of available persistent object cache services.
-		 */
-		$notes = apply_filters( 'site_status_persistent_object_cache_notes', $notes, $available_services );
-
-		$result['status']       = 'recommended';
-		$result['label']        = __( 'You should use a persistent object cache' );
-		$result['description'] .= sprintf(
-			'<p>%s</p>',
-			wp_kses(
-				$notes,
-				array(
-					'a'      => array( 'href' => true ),
-					'code'   => true,
-					'em'     => true,
-					'strong' => true,
+				sprintf(
+					/* translators: 1: post_max_size, 2: upload_max_filesize */
+					__( 'The setting for %1$s is smaller than %2$s, this could cause some problems when trying to upload files.' ),
+					'<code>post_max_size</code>',
+					'<code>upload_max_filesize</code>'
 				)
-			)
-		);
+			);
+			return $result;
+		}
 
 		return $result;
 	}
@@ -2370,7 +2080,6 @@ class WP_Site_Health {
 	 * experiences.
 	 *
 	 * @since 5.2.0
-	 * @since 5.6.0 Added support for `has_rest` and `permissions`.
 	 *
 	 * @return array The list of tests to run.
 	 */
@@ -2413,6 +2122,10 @@ class WP_Site_Health {
 					'label' => __( 'MySQL utf8mb4 support' ),
 					'test'  => 'utf8mb4_support',
 				),
+				'https_status'              => array(
+					'label' => __( 'HTTPS status' ),
+					'test'  => 'https_status',
+				),
 				'ssl_support'               => array(
 					'label' => __( 'Secure communication' ),
 					'test'  => 'ssl_support',
@@ -2424,11 +2137,6 @@ class WP_Site_Health {
 				'http_requests'             => array(
 					'label' => __( 'HTTP Requests' ),
 					'test'  => 'http_requests',
-				),
-				'rest_availability'         => array(
-					'label'     => __( 'REST API availability' ),
-					'test'      => 'rest_availability',
-					'skip_cron' => true,
 				),
 				'debug_enabled'             => array(
 					'label' => __( 'Debugging enabled' ),
@@ -2445,48 +2153,25 @@ class WP_Site_Health {
 			),
 			'async'  => array(
 				'dotorg_communication' => array(
-					'label'             => __( 'Communication with WordPress.org' ),
-					'test'              => rest_url( 'wp-site-health/v1/tests/dotorg-communication' ),
-					'has_rest'          => true,
-					'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_dotorg_communication' ),
+					'label' => __( 'Communication with WordPress.org' ),
+					'test'  => 'dotorg_communication',
 				),
 				'background_updates'   => array(
-					'label'             => __( 'Background updates' ),
-					'test'              => rest_url( 'wp-site-health/v1/tests/background-updates' ),
-					'has_rest'          => true,
-					'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_background_updates' ),
+					'label' => __( 'Background updates' ),
+					'test'  => 'background_updates',
 				),
 				'loopback_requests'    => array(
-					'label'             => __( 'Loopback request' ),
-					'test'              => rest_url( 'wp-site-health/v1/tests/loopback-requests' ),
-					'has_rest'          => true,
-					'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_loopback_requests' ),
-				),
-				'https_status'         => array(
-					'label'             => __( 'HTTPS status' ),
-					'test'              => rest_url( 'wp-site-health/v1/tests/https-status' ),
-					'has_rest'          => true,
-					'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_https_status' ),
+					'label' => __( 'Loopback request' ),
+					'test'  => 'loopback_requests',
 				),
 			),
 		);
 
-		// Conditionally include Authorization header test if the site isn't protected by Basic Auth.
-		if ( ! wp_is_site_protected_by_basic_auth() ) {
-			$tests['async']['authorization_header'] = array(
-				'label'     => __( 'Authorization header' ),
-				'test'      => rest_url( 'wp-site-health/v1/tests/authorization-header' ),
-				'has_rest'  => true,
-				'headers'   => array( 'Authorization' => 'Basic ' . base64_encode( 'user:pwd' ) ),
-				'skip_cron' => true,
-			);
-		}
-
-		// Only check for a persistent object cache in production environments to not unnecessarily promote complicated setups.
-		if ( 'production' === wp_get_environment_type() ) {
-			$tests['direct']['persistent_object_cache'] = array(
-				'label' => __( 'Persistent object cache' ),
-				'test'  => 'persistent_object_cache',
+		// Conditionally include REST rules if the function for it exists.
+		if ( function_exists( 'rest_url' ) ) {
+			$tests['direct']['rest_availability'] = array(
+				'label' => __( 'REST API availability' ),
+				'test'  => 'rest_availability',
 			);
 		}
 
@@ -2494,7 +2179,7 @@ class WP_Site_Health {
 		 * Add or modify which site status tests are run on a site.
 		 *
 		 * The site health is determined by a set of tests based on best practices from
-		 * both the WordPress Hosting Team and web standards in general.
+		 * both the WordPress Hosting Team, but also web standards in general.
 		 *
 		 * Some sites may not have the same requirements, for example the automatic update
 		 * checks may be handled by a host, and are therefore disabled in core.
@@ -2504,41 +2189,19 @@ class WP_Site_Health {
 		 * to complete should run asynchronously, to avoid extended loading periods within wp-admin.
 		 *
 		 * @since 5.2.0
-		 * @since 5.6.0 Added the `async_direct_test` array key for asynchronous tests.
-		 *              Added the `skip_cron` array key for all tests.
 		 *
-		 * @param array[] $tests {
-		 *     An associative array of direct and asynchronous tests.
+		 * @param array $test_type {
+		 *     An associative array, where the `$test_type` is either `direct` or
+		 *     `async`, to declare if the test should run via Ajax calls after page load.
 		 *
-		 *     @type array[] $direct {
-		 *         An array of direct tests.
+		 *     @type array $identifier {
+		 *         `$identifier` should be a unique identifier for the test that should run.
+		 *         Plugins and themes are encouraged to prefix test identifiers with their slug
+		 *         to avoid any collisions between tests.
 		 *
-		 *         @type array ...$identifier {
-		 *             `$identifier` should be a unique identifier for the test. Plugins and themes are encouraged to
-		 *             prefix test identifiers with their slug to avoid collisions between tests.
-		 *
-		 *             @type string   $label     The friendly label to identify the test.
-		 *             @type callable $test      The callback function that runs the test and returns its result.
-		 *             @type bool     $skip_cron Whether to skip this test when running as cron.
-		 *         }
-		 *     }
-		 *     @type array[] $async {
-		 *         An array of asynchronous tests.
-		 *
-		 *         @type array ...$identifier {
-		 *             `$identifier` should be a unique identifier for the test. Plugins and themes are encouraged to
-		 *             prefix test identifiers with their slug to avoid collisions between tests.
-		 *
-		 *             @type string   $label             The friendly label to identify the test.
-		 *             @type string   $test              An admin-ajax.php action to be called to perform the test, or
-		 *                                               if `$has_rest` is true, a URL to a REST API endpoint to perform
-		 *                                               the test.
-		 *             @type bool     $has_rest          Whether the `$test` property points to a REST API endpoint.
-		 *             @type bool     $skip_cron         Whether to skip this test when running as cron.
-		 *             @type callable $async_direct_test A manner of directly calling the test marked as asynchronous,
-		 *                                               as the scheduled event can not authenticate, and endpoints
-		 *                                               may require authentication.
-		 *         }
+		 *         @type string $label A friendly label for your test to identify it by.
+		 *         @type mixed  $test  A callable to perform a direct test, or a string Ajax action to be called
+		 *                             to perform an async test.
 		 *     }
 		 * }
 		 */
@@ -2687,7 +2350,7 @@ class WP_Site_Health {
 	 *
 	 * @return object The test results.
 	 */
-	public function detect_plugin_theme_auto_update_issues() {
+	function detect_plugin_theme_auto_update_issues() {
 		$mock_plugin = (object) array(
 			'id'            => 'w.org/plugins/a-fake-plugin',
 			'slug'          => 'a-fake-plugin',
@@ -2718,8 +2381,13 @@ class WP_Site_Health {
 			'requires_php' => '5.6.20',
 		);
 
-		$test_plugins_enabled = wp_is_auto_update_forced_for_item( 'plugin', true, $mock_plugin );
-		$test_themes_enabled  = wp_is_auto_update_forced_for_item( 'theme', true, $mock_theme );
+		$type = 'plugin';
+		/** This filter is documented in wp-admin/includes/class-wp-automatic-updater.php */
+		$test_plugins_enabled = apply_filters( "auto_update_{$type}", true, $mock_plugin );
+
+		$type = 'theme';
+		/** This filter is documented in wp-admin/includes/class-wp-automatic-updater.php */
+		$test_themes_enabled = apply_filters( "auto_update_{$type}", true, $mock_theme );
 
 		$ui_enabled_for_plugins = wp_is_auto_update_enabled_for_type( 'plugin' );
 		$ui_enabled_for_themes  = wp_is_auto_update_enabled_for_type( 'theme' );
@@ -2770,8 +2438,7 @@ class WP_Site_Health {
 	 *
 	 * @return object The test results.
 	 */
-	public function can_perform_loopback() {
-		$body    = array( 'site-health' => 'loopback-test' );
+	function can_perform_loopback() {
 		$cookies = wp_unslash( $_COOKIE );
 		$timeout = 10;
 		$headers = array(
@@ -2785,19 +2452,9 @@ class WP_Site_Health {
 			$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
 		}
 
-		$url = site_url( 'wp-cron.php' );
+		$url = admin_url();
 
-		/*
-		 * A post request is used for the wp-cron.php loopback test to cause the file
-		 * to finish early without triggering cron jobs. This has two benefits:
-		 * - cron jobs are not triggered a second time on the site health page,
-		 * - the loopback request finishes sooner providing a quicker result.
-		 *
-		 * Using a POST request causes the loopback to differ slightly to the standard
-		 * GET request WordPress uses for wp-cron.php loopback requests but is close
-		 * enough. See https://core.trac.wordpress.org/ticket/52547
-		 */
-		$r = wp_remote_post( $url, compact( 'body', 'cookies', 'headers', 'timeout', 'sslverify' ) );
+		$r = wp_remote_get( $url, compact( 'cookies', 'headers', 'timeout', 'sslverify' ) );
 
 		if ( is_wp_error( $r ) ) {
 			return (object) array(
@@ -2862,15 +2519,12 @@ class WP_Site_Health {
 			'critical'    => 0,
 		);
 
-		// Don't run https test on development environments.
-		if ( $this->is_development_environment() ) {
-			unset( $tests['async']['https_status'] );
+		// Don't run https test on localhost.
+		if ( 'localhost' === preg_replace( '|https?://|', '', get_site_url() ) ) {
+			unset( $tests['direct']['https_status'] );
 		}
 
 		foreach ( $tests['direct'] as $test ) {
-			if ( ! empty( $test['skip_cron'] ) ) {
-				continue;
-			}
 
 			if ( is_string( $test['test'] ) ) {
 				$test_function = sprintf(
@@ -2890,22 +2544,10 @@ class WP_Site_Health {
 		}
 
 		foreach ( $tests['async'] as $test ) {
-			if ( ! empty( $test['skip_cron'] ) ) {
-				continue;
-			}
-
-			// Local endpoints may require authentication, so asynchronous tests can pass a direct test runner as well.
-			if ( ! empty( $test['async_direct_test'] ) && is_callable( $test['async_direct_test'] ) ) {
-				// This test is callable, do so and continue to the next asynchronous check.
-				$results[] = $this->perform_test( $test['async_direct_test'] );
-				continue;
-			}
-
 			if ( is_string( $test['test'] ) ) {
-				// Check if this test has a REST API endpoint.
 				if ( isset( $test['has_rest'] ) && $test['has_rest'] ) {
-					$result_fetch = wp_remote_get(
-						$test['test'],
+					$result_fetch = wp_remote_post(
+						rest_url( $test['test'] ),
 						array(
 							'body' => array(
 								'_wpnonce' => wp_create_nonce( 'wp_rest' ),
@@ -2924,7 +2566,7 @@ class WP_Site_Health {
 					);
 				}
 
-				if ( ! is_wp_error( $result_fetch ) && 200 === wp_remote_retrieve_response_code( $result_fetch ) ) {
+				if ( ! is_wp_error( $result_fetch ) ) {
 					$result = json_decode( wp_remote_retrieve_body( $result_fetch ), true );
 				} else {
 					$result = false;
@@ -2953,139 +2595,4 @@ class WP_Site_Health {
 
 		set_transient( 'health-check-site-status-result', wp_json_encode( $site_status ) );
 	}
-
-	/**
-	 * Checks if the current environment type is set to 'development' or 'local'.
-	 *
-	 * @since 5.6.0
-	 *
-	 * @return bool True if it is a development environment, false if not.
-	 */
-	public function is_development_environment() {
-		return in_array( wp_get_environment_type(), array( 'development', 'local' ), true );
-	}
-
-	/**
-	 * Determines whether to suggest using a persistent object cache.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
-	 *
-	 * @return bool Whether to suggest using a persistent object cache.
-	 */
-	public function should_suggest_persistent_object_cache() {
-		global $wpdb;
-
-		if ( is_multisite() ) {
-			return true;
-		}
-
-		/**
-		 * Filters whether to suggest use of a persistent object cache and bypass default threshold checks.
-		 *
-		 * Using this filter allows to override the default logic, effectively short-circuiting the method.
-		 *
-		 * @since 6.1.0
-		 *
-		 * @param bool|null $suggest Boolean to short-circuit, for whether to suggest using a persistent object cache.
-		 *                           Default null.
-		 */
-		$short_circuit = apply_filters( 'site_status_should_suggest_persistent_object_cache', null );
-		if ( is_bool( $short_circuit ) ) {
-			return $short_circuit;
-		}
-
-		/**
-		 * Filters the thresholds used to determine whether to suggest the use of a persistent object cache.
-		 *
-		 * @since 6.1.0
-		 *
-		 * @param array $thresholds The list of threshold names and numbers.
-		 */
-		$thresholds = apply_filters(
-			'site_status_persistent_object_cache_thresholds',
-			array(
-				'alloptions_count' => 500,
-				'alloptions_bytes' => 100000,
-				'comments_count'   => 1000,
-				'options_count'    => 1000,
-				'posts_count'      => 1000,
-				'terms_count'      => 1000,
-				'users_count'      => 1000,
-			)
-		);
-
-		$alloptions = wp_load_alloptions();
-
-		if ( $thresholds['alloptions_count'] < count( $alloptions ) ) {
-			return true;
-		}
-
-		if ( $thresholds['alloptions_bytes'] < strlen( serialize( $alloptions ) ) ) {
-			return true;
-		}
-
-		$table_names = implode( "','", array( $wpdb->comments, $wpdb->options, $wpdb->posts, $wpdb->terms, $wpdb->users ) );
-
-		// With InnoDB the `TABLE_ROWS` are estimates, which are accurate enough and faster to retrieve than individual `COUNT()` queries.
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- This query cannot use interpolation.
-				"SELECT TABLE_NAME AS 'table', TABLE_ROWS AS 'rows', SUM(data_length + index_length) as 'bytes' FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ('$table_names') GROUP BY TABLE_NAME;",
-				DB_NAME
-			),
-			OBJECT_K
-		);
-
-		$threshold_map = array(
-			'comments_count' => $wpdb->comments,
-			'options_count'  => $wpdb->options,
-			'posts_count'    => $wpdb->posts,
-			'terms_count'    => $wpdb->terms,
-			'users_count'    => $wpdb->users,
-		);
-
-		foreach ( $threshold_map as $threshold => $table ) {
-			if ( $thresholds[ $threshold ] <= $results[ $table ]->rows ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Returns a list of available persistent object cache services.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @return array The list of available persistent object cache services.
-	 */
-	private function available_object_cache_services() {
-		$extensions = array_map(
-			'extension_loaded',
-			array(
-				'APCu'      => 'apcu',
-				'Redis'     => 'redis',
-				'Relay'     => 'relay',
-				'Memcache'  => 'memcache',
-				'Memcached' => 'memcached',
-			)
-		);
-
-		$services = array_keys( array_filter( $extensions ) );
-
-		/**
-		 * Filters the persistent object cache services available to the user.
-		 *
-		 * This can be useful to hide or add services not included in the defaults.
-		 *
-		 * @since 6.1.0
-		 *
-		 * @param array $services The list of available persistent object cache services.
-		 */
-		return apply_filters( 'site_status_available_object_cache_services', $services );
-	}
-
 }

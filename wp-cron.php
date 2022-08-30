@@ -1,33 +1,31 @@
 <?php
 /**
- * A pseudo-cron daemon for scheduling WordPress tasks.
+ * A pseudo-CRON daemon for scheduling WordPress tasks
  *
- * WP-Cron is triggered when the site receives a visit. In the scenario
+ * WP Cron is triggered when the site receives a visit. In the scenario
  * where a site may not receive enough visits to execute scheduled tasks
  * in a timely manner, this file can be called directly or via a server
- * cron daemon for X number of times.
+ * CRON daemon for X number of times.
  *
  * Defining DISABLE_WP_CRON as true and calling this file directly are
  * mutually exclusive and the latter does not rely on the former to work.
  *
  * The HTTP request to this file will not slow down the visitor who happens to
- * visit when a scheduled cron event runs.
+ * visit when the cron job is needed to run.
  *
  * @package WordPress
  */
 
 ignore_user_abort( true );
 
-if ( ! headers_sent() ) {
-	header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
-	header( 'Cache-Control: no-cache, must-revalidate, max-age=0' );
-}
-
 /* Don't make the request block till we finish, if possible. */
-if ( PHP_VERSION_ID >= 70016 && function_exists( 'fastcgi_finish_request' ) ) {
+if ( function_exists( 'fastcgi_finish_request' ) && version_compare( phpversion(), '7.0.16', '>=' ) ) {
+	if ( ! headers_sent() ) {
+		header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
+		header( 'Cache-Control: no-cache, must-revalidate, max-age=0' );
+	}
+
 	fastcgi_finish_request();
-} elseif ( function_exists( 'litespeed_finish_request' ) ) {
-	litespeed_finish_request();
 }
 
 if ( ! empty( $_POST ) || defined( 'DOING_AJAX' ) || defined( 'DOING_CRON' ) ) {
@@ -35,7 +33,7 @@ if ( ! empty( $_POST ) || defined( 'DOING_AJAX' ) || defined( 'DOING_CRON' ) ) {
 }
 
 /**
- * Tell WordPress we are doing the cron task.
+ * Tell WordPress we are doing the CRON task.
  *
  * @var bool
  */
@@ -56,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @return string|int|false Value of the `doing_cron` transient, 0|false otherwise.
+ * @return string|false Value of the `doing_cron` transient, 0|false otherwise.
  */
 function _get_cron_lock() {
 	global $wpdb;

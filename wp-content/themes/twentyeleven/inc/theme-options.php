@@ -162,7 +162,7 @@ function twentyeleven_color_schemes() {
 	);
 
 	/**
-	 * Filters the Twenty Eleven color scheme options.
+	 * Filter the Twenty Eleven color scheme options.
 	 *
 	 * @since Twenty Eleven 1.0
 	 *
@@ -196,7 +196,7 @@ function twentyeleven_layouts() {
 	);
 
 	/**
-	 * Filters the Twenty Eleven layout options.
+	 * Filter the Twenty Eleven layout options.
 	 *
 	 * @since Twenty Eleven 1.0
 	 *
@@ -224,7 +224,7 @@ function twentyeleven_get_default_theme_options() {
 	}
 
 	/**
-	 * Filters the Twenty Eleven default options.
+	 * Filter the Twenty Eleven default options.
 	 *
 	 * @since Twenty Eleven 1.0
 	 *
@@ -339,9 +339,10 @@ function twentyeleven_settings_field_layout() {
  * @since Twenty Eleven 1.2
  */
 function twentyeleven_theme_options_render_page() {
-	$theme_name = function_exists( 'wp_get_theme' ) ? wp_get_theme()->display( 'Name' ) : get_option( 'current_theme' );
 	?>
 	<div class="wrap">
+		<?php screen_icon(); ?>
+		<?php $theme_name = function_exists( 'wp_get_theme' ) ? wp_get_theme() : get_current_theme(); ?>
 		<h2>
 		<?php
 		/* translators: %s: Theme name. */
@@ -397,7 +398,7 @@ function twentyeleven_theme_options_validate( $input ) {
 	}
 
 	/**
-	 * Filters the Twenty Eleven sanitized form input array.
+	 * Filter the Twenty Eleven sanitized form input array.
 	 *
 	 * @since Twenty Eleven 1.0
 	 *
@@ -507,7 +508,7 @@ function twentyeleven_layout_classes( $existing_classes ) {
 	}
 
 	/**
-	 * Filters the Twenty Eleven layout body classes.
+	 * Filter the Twenty Eleven layout body classes.
 	 *
 	 * @since Twenty Eleven 1.0
 	 *
@@ -525,7 +526,7 @@ add_filter( 'body_class', 'twentyeleven_layout_classes' );
  *
  * @since Twenty Eleven 1.3
  *
- * @param WP_Customize_Manager $wp_customize Customizer object.
+ * @param object $wp_customize Customizer object.
  */
 function twentyeleven_customize_register( $wp_customize ) {
 	$wp_customize->get_setting( 'blogname' )->transport         = 'postMessage';

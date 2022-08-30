@@ -17,7 +17,7 @@ get_header(); ?>
 				<header class="page-header">
 					<h1 class="page-title">
 					<?php
-						/* translators: %s: Category title. */
+						/* translators: %s: Ñategory title. */
 						printf( __( 'Category Archives: %s', 'twentyeleven' ), '<span>' . single_cat_title( '', false ) . '</span>' );
 					?>
 					</h1>
@@ -26,7 +26,7 @@ get_header(); ?>
 						$category_description = category_description();
 					if ( ! empty( $category_description ) ) {
 						/**
-						 * Filters the default Twenty Eleven category description.
+						 * Filter the default Twenty Eleven category description.
 						 *
 						 * @since Twenty Eleven 1.0
 						 *

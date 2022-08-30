@@ -137,9 +137,6 @@ if ( ! function_exists( 'twentyeleven_setup' ) ) :
 		// Grab Twenty Eleven's Ephemera widget.
 		require get_template_directory() . '/inc/widgets.php';
 
-		// Load block patterns.
-		require get_template_directory() . '/inc/block-patterns.php';
-
 		// Add default posts and comments RSS feed links to <head>.
 		add_theme_support( 'automatic-feed-links' );
 
@@ -177,7 +174,7 @@ if ( ! function_exists( 'twentyeleven_setup' ) ) :
 			'default-text-color'     => '000',
 			// The height and width of our custom header.
 			/**
-			 * Filters the Twenty Eleven default header image width.
+			 * Filter the Twenty Eleven default header image width.
 			 *
 			 * @since Twenty Eleven 1.0
 			 *
@@ -185,7 +182,7 @@ if ( ! function_exists( 'twentyeleven_setup' ) ) :
 			 */
 			'width'                  => apply_filters( 'twentyeleven_header_image_width', 1000 ),
 			/**
-			 * Filters the Twenty Eleven default header image height.
+			 * Filter the Twenty Eleven default header image height.
 			 *
 			 * @since Twenty Eleven 1.0
 			 *
@@ -308,7 +305,7 @@ add_action( 'wp_enqueue_scripts', 'twentyeleven_scripts_styles' );
  */
 function twentyeleven_block_editor_styles() {
 	// Block styles.
-	wp_enqueue_style( 'twentyeleven-block-editor-style', get_template_directory_uri() . '/editor-blocks.css', array(), '20201208' );
+	wp_enqueue_style( 'twentyeleven-block-editor-style', get_template_directory_uri() . '/editor-blocks.css', array(), '20190102' );
 }
 add_action( 'enqueue_block_editor_assets', 'twentyeleven_block_editor_styles' );
 
@@ -474,7 +471,7 @@ endif; // twentyeleven_continue_reading_link()
  * @since Twenty Eleven 1.0
  *
  * @param string $more The Read More text.
- * @return string The filtered Read More text.
+ * @return The filtered Read More text.
  */
 function twentyeleven_auto_excerpt_more( $more ) {
 	if ( ! is_admin() ) {
@@ -701,9 +698,9 @@ if ( ! function_exists( 'twentyeleven_comment' ) ) :
 	 *
 	 * @since Twenty Eleven 1.0
 	 *
-	 * @param WP_Comment $comment The comment object.
-	 * @param array      $args    An array of comment arguments. @see get_comment_reply_link()
-	 * @param int        $depth   The depth of the comment.
+	 * @param object $comment The comment object.
+	 * @param array  $args    An array of comment arguments. @see get_comment_reply_link()
+	 * @param int    $depth   The depth of the comment.
 	 */
 	function twentyeleven_comment( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
@@ -752,7 +749,7 @@ if ( ! function_exists( 'twentyeleven_comment' ) ) :
 					if ( $commenter['comment_author_email'] ) {
 						$moderation_note = __( 'Your comment is awaiting moderation.', 'twentyeleven' );
 					} else {
-						$moderation_note = __( 'Your comment is awaiting moderation. This is a preview; your comment will be visible after it has been approved.', 'twentyeleven' );
+						$moderation_note = __( 'Your comment is awaiting moderation. This is a preview, your comment will be visible after it has been approved.', 'twentyeleven' );
 					}
 					?>
 
@@ -929,17 +926,3 @@ function twentyeleven_skip_link() {
 	}
 }
 add_action( 'wp_body_open', 'twentyeleven_skip_link', 5 );
-
-if ( ! function_exists( 'wp_get_list_item_separator' ) ) :
-	/**
-	 * Retrieves the list item separator based on the locale.
-	 *
-	 * Added for backward compatibility to support pre-6.0.0 WordPress versions.
-	 *
-	 * @since 6.0.0
-	 */
-	function wp_get_list_item_separator() {
-		/* translators: Used between list items, there is a space after the comma. */
-		return __( ', ', 'twentyeleven' );
-	}
-endif;

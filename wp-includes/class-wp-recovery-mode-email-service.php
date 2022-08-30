@@ -40,7 +40,7 @@ final class WP_Recovery_Mode_Email_Service {
 	 * @since 5.2.0
 	 *
 	 * @param int   $rate_limit Number of seconds before another email can be sent.
-	 * @param array $error      Error details from `error_get_last()`.
+	 * @param array $error      Error details from {@see error_get_last()}
 	 * @param array $extension {
 	 *     The extension that caused the error.
 	 *
@@ -75,7 +75,7 @@ final class WP_Recovery_Mode_Email_Service {
 		}
 
 		$err_message = sprintf(
-			/* translators: 1: Last sent as a human time diff, 2: Wait time as a human time diff. */
+			/* translators: 1. Last sent as a human time diff, 2. Wait time as a human time diff. */
 			__( 'A recovery link was already sent %1$s ago. Please wait another %2$s before requesting a new email.' ),
 			human_time_diff( $last_sent ),
 			human_time_diff( $last_sent + $rate_limit )
@@ -101,13 +101,8 @@ final class WP_Recovery_Mode_Email_Service {
 	 * @since 5.2.0
 	 *
 	 * @param int   $rate_limit Number of seconds before another email can be sent.
-	 * @param array $error      Error details from `error_get_last()`.
-	 * @param array $extension {
-	 *     The extension that caused the error.
-	 *
-	 *     @type string $slug The extension slug. The directory of the plugin or theme.
-	 *     @type string $type The extension type. Either 'plugin' or 'theme'.
-	 * }
+	 * @param array $error      Error details from {@see error_get_last()}
+	 * @param array $extension  Extension that caused the error.
 	 * @return bool Whether the email was sent successfully.
 	 */
 	private function send_recovery_mode_email( $rate_limit, $error, $extension ) {
@@ -199,29 +194,19 @@ When seeking help with this issue, you may be asked for some of the following in
 		);
 
 		$email = array(
-			'to'          => $this->get_recovery_mode_email_address(),
+			'to'      => $this->get_recovery_mode_email_address(),
 			/* translators: %s: Site title. */
-			'subject'     => __( '[%s] Your Site is Experiencing a Technical Issue' ),
-			'message'     => $message,
-			'headers'     => '',
-			'attachments' => '',
+			'subject' => __( '[%s] Your Site is Experiencing a Technical Issue' ),
+			'message' => $message,
+			'headers' => '',
 		);
 
 		/**
-		 * Filters the contents of the Recovery Mode email.
+		 * Filter the contents of the Recovery Mode email.
 		 *
 		 * @since 5.2.0
-		 * @since 5.6.0 The `$email` argument includes the `attachments` key.
 		 *
-		 * @param array  $email {
-		 *     Used to build a call to wp_mail().
-		 *
-		 *     @type string|array $to          Array or comma-separated list of email addresses to send message.
-		 *     @type string       $subject     Email subject
-		 *     @type string       $message     Message contents
-		 *     @type string|array $headers     Optional. Additional headers.
-		 *     @type string|array $attachments Optional. Files to attach.
-		 * }
+		 * @param array  $email Used to build wp_mail().
 		 * @param string $url   URL to enter recovery mode.
 		 */
 		$email = apply_filters( 'recovery_mode_email', $email, $url );
@@ -230,8 +215,7 @@ When seeking help with this issue, you may be asked for some of the following in
 			$email['to'],
 			wp_specialchars_decode( sprintf( $email['subject'], $blogname ) ),
 			$email['message'],
-			$email['headers'],
-			$email['attachments']
+			$email['headers']
 		);
 
 		if ( $switched_locale ) {
@@ -261,12 +245,7 @@ When seeking help with this issue, you may be asked for some of the following in
 	 *
 	 * @since 5.2.0
 	 *
-	 * @param array $extension {
-	 *     The extension that caused the error.
-	 *
-	 *     @type string $slug The extension slug. The directory of the plugin or theme.
-	 *     @type string $type The extension type. Either 'plugin' or 'theme'.
-	 * }
+	 * @param array $extension The extension that caused the error.
 	 * @return string Message about which extension caused the error.
 	 */
 	private function get_cause( $extension ) {
@@ -298,13 +277,8 @@ When seeking help with this issue, you may be asked for some of the following in
 	 *
 	 * @since 5.3.0
 	 *
-	 * @param array $extension {
-	 *     The extension that caused the error.
-	 *
-	 *     @type string $slug The extension slug. The directory of the plugin or theme.
-	 *     @type string $type The extension type. Either 'plugin' or 'theme'.
-	 * }
-	 * @return array|false A plugin array {@see get_plugins()} or `false` if no plugin was found.
+	 * @param array $extension The extension that caused the error.
+	 * @return bool|array A plugin array {@see get_plugins()} or `false` if no plugin was found.
 	 */
 	private function get_plugin( $extension ) {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -332,12 +306,7 @@ When seeking help with this issue, you may be asked for some of the following in
 	 *
 	 * @since 5.3.0
 	 *
-	 * @param array $extension {
-	 *     The extension that caused the error.
-	 *
-	 *     @type string $slug The extension slug. The directory of the plugin or theme.
-	 *     @type string $type The extension type. Either 'plugin' or 'theme'.
-	 * }
+	 * @param array $extension The extension that caused the error.
 	 * @return array An associative array of debug information.
 	 */
 	private function get_debug( $extension ) {
@@ -351,14 +320,14 @@ When seeking help with this issue, you may be asked for some of the following in
 		}
 
 		$debug = array(
+			/* translators: %s: Current WordPress version number. */
 			'wp'    => sprintf(
-				/* translators: %s: Current WordPress version number. */
 				__( 'WordPress version %s' ),
 				$wp_version
 			),
 			'theme' => sprintf(
 				/* translators: 1: Current active theme name. 2: Current active theme version. */
-				__( 'Active theme: %1$s (version %2$s)' ),
+				__( 'Current theme: %1$s (version %2$s)' ),
 				$theme->get( 'Name' ),
 				$theme->get( 'Version' )
 			),
