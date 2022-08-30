@@ -6,7 +6,7 @@
  * @subpackage Administration
  */
 
-global $editor_styles;
+global $post, $editor_styles;
 
 /** WordPress Administration Bootstrap */
 require_once __DIR__ . '/admin.php';
@@ -76,7 +76,7 @@ $custom_settings      = array(
 $custom_settings['__experimentalAdditionalBlockPatterns']          = WP_Block_Patterns_Registry::get_instance()->get_all_registered( true );
 $custom_settings['__experimentalAdditionalBlockPatternCategories'] = WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered( true );
 
-$editor_settings = get_block_editor_settings( $custom_settings, $block_editor_context );
+$editor_settings      = get_block_editor_settings( $custom_settings, $block_editor_context );
 
 if ( isset( $_GET['postType'] ) && ! isset( $_GET['postId'] ) ) {
 	$post_type = get_post_type_object( $_GET['postType'] );
@@ -120,7 +120,7 @@ wp_add_inline_script(
 
 wp_add_inline_script(
 	'wp-blocks',
-	sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( isset( $editor_settings['blockCategories'] ) ? $editor_settings['blockCategories'] : array() ) ),
+	sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $post ) ) ),
 	'after'
 );
 

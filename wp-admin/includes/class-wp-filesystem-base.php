@@ -663,10 +663,10 @@ class WP_Filesystem_Base {
 	 * @since 2.5.0
 	 * @abstract
 	 *
-	 * @param string $path Path to file or directory.
-	 * @return bool Whether $path exists or not.
+	 * @param string $file Path to file or directory.
+	 * @return bool Whether $file exists or not.
 	 */
-	public function exists( $path ) {
+	public function exists( $file ) {
 		return false;
 	}
 
@@ -715,10 +715,10 @@ class WP_Filesystem_Base {
 	 * @since 2.5.0
 	 * @abstract
 	 *
-	 * @param string $path Path to file or directory.
-	 * @return bool Whether $path is writable.
+	 * @param string $file Path to file or directory.
+	 * @return bool Whether $file is writable.
 	 */
-	public function is_writable( $path ) {
+	public function is_writable( $file ) {
 		return false;
 	}
 

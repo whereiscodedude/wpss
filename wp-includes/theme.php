@@ -1179,21 +1179,7 @@ function get_header_image() {
 		$url = get_random_header_image();
 	}
 
-	/**
-	 * Filters the header image URL.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param string $url Header image URL.
-	 */
-	$url = apply_filters( 'get_header_image', $url );
-
-	if ( ! is_string( $url ) ) {
-		return false;
-	}
-
-	$url = trim( $url );
-	return sanitize_url( set_url_scheme( $url ) );
+	return esc_url_raw( set_url_scheme( $url ) );
 }
 
 /**
@@ -1442,7 +1428,7 @@ function get_uploaded_header_images() {
 	}
 
 	foreach ( (array) $headers as $header ) {
-		$url          = sanitize_url( wp_get_attachment_url( $header->ID ) );
+		$url          = esc_url_raw( wp_get_attachment_url( $header->ID ) );
 		$header_data  = wp_get_attachment_metadata( $header->ID );
 		$header_index = $header->ID;
 
@@ -1603,7 +1589,7 @@ function get_header_video_url() {
 		return false;
 	}
 
-	return sanitize_url( set_url_scheme( $url ) );
+	return esc_url_raw( set_url_scheme( $url ) );
 }
 
 /**
@@ -1820,7 +1806,7 @@ function _custom_background_cb() {
 	$style = $color ? "background-color: #$color;" : '';
 
 	if ( $background ) {
-		$image = ' background-image: url("' . sanitize_url( $background ) . '");';
+		$image = ' background-image: url("' . esc_url_raw( $background ) . '");';
 
 		// Background Position.
 		$position_x = get_theme_mod( 'background_position_x', get_theme_support( 'custom-background', 'default-position-x' ) );
@@ -2068,8 +2054,7 @@ function wp_update_custom_css_post( $css, $args = array() ) {
 			}
 
 			// Trigger creation of a revision. This should be removed once #30854 is resolved.
-			$revisions = wp_get_latest_revision_id_and_total_count( $r );
-			if ( ! is_wp_error( $revisions ) && 0 === $revisions['count'] ) {
+			if ( 0 === count( wp_get_post_revisions( $r ) ) ) {
 				wp_save_post_revision( $r );
 			}
 		}
@@ -2161,7 +2146,7 @@ function get_editor_stylesheets() {
 		// Support externally referenced styles (like, say, fonts).
 		foreach ( $editor_styles as $key => $file ) {
 			if ( preg_match( '~^(https?:)?//~', $file ) ) {
-				$stylesheets[] = sanitize_url( $file );
+				$stylesheets[] = esc_url_raw( $file );
 				unset( $editor_styles[ $key ] );
 			}
 		}
@@ -2538,8 +2523,6 @@ function get_theme_starter_content() {
  * @since 2.9.0
  * @since 3.4.0 The `custom-header-uploads` feature was deprecated.
  * @since 3.6.0 The `html5` feature was added.
- * @since 3.6.1 The `html5` feature requires an array of types to be passed. Defaults to
- *              'comment-list', 'comment-form', 'search-form' for backward compatibility.
  * @since 3.9.0 The `html5` feature now also accepts 'gallery' and 'caption'.
  * @since 4.1.0 The `title-tag` feature was added.
  * @since 4.5.0 The `customize-selective-refresh-widgets` feature was added.
@@ -2552,9 +2535,8 @@ function get_theme_starter_content() {
  *              by adding it to the function signature.
  * @since 5.5.0 The `core-block-patterns` feature was added and is enabled by default.
  * @since 5.5.0 The `custom-logo` feature now also accepts 'unlink-homepage-logo'.
- * @since 5.6.0 The `post-formats` feature warns if no array is passed as the second parameter.
+ * @since 5.6.0 The `post-formats` feature warns if no array is passed.
  * @since 5.8.0 The `widgets-block-editor` feature enables the Widgets block editor.
- * @since 6.0.0 The `html5` feature warns if no array is passed as the second parameter.
  *
  * @global array $_wp_theme_features
  *

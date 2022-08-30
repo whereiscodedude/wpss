@@ -751,14 +751,8 @@ $availableStructureTags.on( 'click', function() {
 	    selectionStart          = $permalinkStructure[ 0 ].selectionStart,
 	    selectionEnd            = $permalinkStructure[ 0 ].selectionEnd,
 	    textToAppend            = $( this ).text().trim(),
-	    textToAnnounce,
+	    textToAnnounce          = $( this ).attr( 'data-added' ),
 	    newSelectionStart;
-
-	if ( $( this ).hasClass( 'active' ) ) {
-		textToAnnounce = $( this ).attr( 'data-removed' );
-	} else {
-		textToAnnounce = $( this ).attr( 'data-added' );
-	}
 
 	// Remove structure tag if already part of the structure.
 	if ( -1 !== permalinkStructureValue.indexOf( textToAppend ) ) {
