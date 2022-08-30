@@ -33,7 +33,7 @@ class Text_Diff {
      *                           Normally an array of two arrays, each
      *                           containing the lines from a file.
      */
-    function __construct( $engine, $params )
+    function Text_Diff($engine, $params)
     {
         // Backward compatibility workaround.
         if (!is_string($engine)) {
@@ -55,13 +55,6 @@ class Text_Diff {
         $this->_edits = call_user_func_array(array($diff_engine, 'diff'), $params);
     }
 
-	/**
-	 * PHP4 constructor.
-	 */
-	public function Text_Diff( $engine, $params ) {
-		self::__construct( $engine, $params );
-	}
-
     /**
      * Returns the array of differences.
      */
@@ -75,7 +68,7 @@ class Text_Diff {
      *
      * @since Text_Diff 1.1.0
      *
-     * @return int The number of new lines
+     * @return integer The number of new lines
      */
     function countAddedLines()
     {
@@ -94,7 +87,7 @@ class Text_Diff {
      *
      * @since Text_Diff 1.1.0
      *
-     * @return int The number of deleted lines
+     * @return integer The number of deleted lines
      */
     function countDeletedLines()
     {
@@ -139,7 +132,7 @@ class Text_Diff {
     /**
      * Checks for an empty diff.
      *
-     * @return bool True if two sequences were identical.
+     * @return boolean  True if two sequences were identical.
      */
     function isEmpty()
     {
@@ -156,7 +149,7 @@ class Text_Diff {
      *
      * This is mostly for diagnostic purposes.
      *
-     * @return int The length of the LCS.
+     * @return integer  The length of the LCS.
      */
     function lcs()
     {
@@ -210,7 +203,7 @@ class Text_Diff {
      * with array_walk().
      *
      * @param string $line  The line to trim.
-     * @param int    $key   The index of the line in the array. Not used.
+     * @param integer $key  The index of the line in the array. Not used.
      */
     static function trimNewlines(&$line, $key)
     {
@@ -220,12 +213,14 @@ class Text_Diff {
     /**
      * Determines the location of the system temporary directory.
      *
+     * @static
+     *
      * @access protected
      *
      * @return string  A directory name which can be used for temp files.
      *                 Returns false if one could not be found.
      */
-    static function _getTempDir()
+    function _getTempDir()
     {
         $tmp_locations = array('/tmp', '/var/tmp', 'c:\WUTemp', 'c:\temp',
                                'c:\windows\temp', 'c:\winnt\temp');
@@ -260,23 +255,23 @@ class Text_Diff {
     function _check($from_lines, $to_lines)
     {
         if (serialize($from_lines) != serialize($this->getOriginal())) {
-            trigger_error("Reconstructed original does not match", E_USER_ERROR);
+            trigger_error("Reconstructed original doesn't match", E_USER_ERROR);
         }
         if (serialize($to_lines) != serialize($this->getFinal())) {
-            trigger_error("Reconstructed final does not match", E_USER_ERROR);
+            trigger_error("Reconstructed final doesn't match", E_USER_ERROR);
         }
 
         $rev = $this->reverse();
         if (serialize($to_lines) != serialize($rev->getOriginal())) {
-            trigger_error("Reversed original does not match", E_USER_ERROR);
+            trigger_error("Reversed original doesn't match", E_USER_ERROR);
         }
         if (serialize($from_lines) != serialize($rev->getFinal())) {
-            trigger_error("Reversed final does not match", E_USER_ERROR);
+            trigger_error("Reversed final doesn't match", E_USER_ERROR);
         }
 
         $prevtype = null;
         foreach ($this->_edits as $edit) {
-            if ($edit instanceof $prevtype) {
+            if ($prevtype == get_class($edit)) {
                 trigger_error("Edit sequence is non-optimal", E_USER_ERROR);
             }
             $prevtype = get_class($edit);
@@ -309,7 +304,7 @@ class Text_MappedDiff extends Text_Diff {
      * @param array $mapped_to_lines    This array should have the same number
      *                                  of elements as $to_lines.
      */
-    function __construct($from_lines, $to_lines,
+    function Text_MappedDiff($from_lines, $to_lines,
                              $mapped_from_lines, $mapped_to_lines)
     {
         assert(count($from_lines) == count($mapped_from_lines));
@@ -332,15 +327,6 @@ class Text_MappedDiff extends Text_Diff {
             }
         }
     }
-
-	/**
-	 * PHP4 constructor.
-	 */
-	public function Text_MappedDiff( $from_lines, $to_lines,
-                             $mapped_from_lines, $mapped_to_lines ) {
-		self::__construct( $from_lines, $to_lines,
-                             $mapped_from_lines, $mapped_to_lines );
-	}
 
 }
 
@@ -380,10 +366,7 @@ class Text_Diff_Op {
  */
 class Text_Diff_Op_copy extends Text_Diff_Op {
 
-	/**
-	 * PHP5 constructor.
-	 */
-    function __construct( $orig, $final = false )
+    function Text_Diff_Op_copy($orig, $final = false)
     {
         if (!is_array($final)) {
             $final = $orig;
@@ -391,13 +374,6 @@ class Text_Diff_Op_copy extends Text_Diff_Op {
         $this->orig = $orig;
         $this->final = $final;
     }
-
-	/**
-	 * PHP4 constructor.
-	 */
-	public function Text_Diff_Op_copy( $orig, $final = false ) {
-		self::__construct( $orig, $final );
-	}
 
     function &reverse()
     {
@@ -415,21 +391,11 @@ class Text_Diff_Op_copy extends Text_Diff_Op {
  */
 class Text_Diff_Op_delete extends Text_Diff_Op {
 
-	/**
-	 * PHP5 constructor.
-	 */
-	function __construct( $lines )
+    function Text_Diff_Op_delete($lines)
     {
         $this->orig = $lines;
         $this->final = false;
     }
-
-	/**
-	 * PHP4 constructor.
-	 */
-	public function Text_Diff_Op_delete( $lines ) {
-		self::__construct( $lines );
-	}
 
     function &reverse()
     {
@@ -447,21 +413,11 @@ class Text_Diff_Op_delete extends Text_Diff_Op {
  */
 class Text_Diff_Op_add extends Text_Diff_Op {
 
-	/**
-	 * PHP5 constructor.
-	 */
-    function __construct( $lines )
+    function Text_Diff_Op_add($lines)
     {
         $this->final = $lines;
         $this->orig = false;
     }
-
-	/**
-	 * PHP4 constructor.
-	 */
-	public function Text_Diff_Op_add( $lines ) {
-		self::__construct( $lines );
-	}
 
     function &reverse()
     {
@@ -479,21 +435,11 @@ class Text_Diff_Op_add extends Text_Diff_Op {
  */
 class Text_Diff_Op_change extends Text_Diff_Op {
 
-	/**
-	 * PHP5 constructor.
-	 */
-    function __construct( $orig, $final )
+    function Text_Diff_Op_change($orig, $final)
     {
         $this->orig = $orig;
         $this->final = $final;
     }
-
-	/**
-	 * PHP4 constructor.
-	 */
-	public function Text_Diff_Op_change( $orig, $final ) {
-		self::__construct( $orig, $final );
-	}
 
     function &reverse()
     {
