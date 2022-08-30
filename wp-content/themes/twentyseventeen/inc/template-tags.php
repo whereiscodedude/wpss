@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Seventeen
- * @since Twenty Seventeen 1.0
+ * @since 1.0
  */
 
 if ( ! function_exists( 'twentyseventeen_posted_on' ) ) :
@@ -17,7 +17,7 @@ if ( ! function_exists( 'twentyseventeen_posted_on' ) ) :
 
 		// Get the author name; wrap it in a link.
 		$byline = sprintf(
-			/* translators: %s: Post author. */
+			/* translators: %s: post author */
 			__( 'by %s', 'twentyseventeen' ),
 			'<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . get_the_author() . '</a></span>'
 		);
@@ -48,7 +48,7 @@ if ( ! function_exists( 'twentyseventeen_time_link' ) ) :
 
 		// Wrap the time string in a link, and preface it with 'Posted on'.
 		return sprintf(
-			/* translators: %s: Post date. */
+			/* translators: %s: post date */
 			__( '<span class="screen-reader-text">Posted on</span> %s', 'twentyseventeen' ),
 			'<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">' . $time_string . '</a>'
 		);
@@ -62,7 +62,8 @@ if ( ! function_exists( 'twentyseventeen_entry_footer' ) ) :
 	 */
 	function twentyseventeen_entry_footer() {
 
-		$separate_meta = wp_get_list_item_separator();
+		/* translators: used between list items, there is a space after the comma */
+		$separate_meta = __( ', ', 'twentyseventeen' );
 
 		// Get Categories for posts.
 		$categories_list = get_the_category_list( $separate_meta );
@@ -79,7 +80,7 @@ if ( ! function_exists( 'twentyseventeen_entry_footer' ) ) :
 				if ( ( $categories_list && twentyseventeen_categorized_blog() ) || $tags_list ) {
 					echo '<span class="cat-tags-links">';
 
-					// Make sure there's more than one category before displaying.
+						// Make sure there's more than one category before displaying.
 					if ( $categories_list && twentyseventeen_categorized_blog() ) {
 						echo '<span class="cat-links">' . twentyseventeen_get_svg( array( 'icon' => 'folder-open' ) ) . '<span class="screen-reader-text">' . __( 'Categories', 'twentyseventeen' ) . '</span>' . $categories_list . '</span>';
 					}
@@ -112,7 +113,7 @@ if ( ! function_exists( 'twentyseventeen_edit_link' ) ) :
 	function twentyseventeen_edit_link() {
 		edit_post_link(
 			sprintf(
-				/* translators: %s: Post title. Only visible to screen readers. */
+				/* translators: %s: Name of current post */
 				__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'twentyseventeen' ),
 				get_the_title()
 			),
@@ -126,15 +127,13 @@ endif;
  * Display a front page section.
  *
  * @param WP_Customize_Partial $partial Partial associated with a selective refresh request.
- * @param int                  $id Front page section to display.
+ * @param integer              $id Front page section to display.
  */
 function twentyseventeen_front_page_section( $partial = null, $id = 0 ) {
 	if ( is_a( $partial, 'WP_Customize_Partial' ) ) {
-		// Find out the ID and set it up during a selective refresh.
+		// Find out the id and set it up during a selective refresh.
 		global $twentyseventeencounter;
-
-		$id = str_replace( 'panel_', '', $partial->id );
-
+		$id                     = str_replace( 'panel_', '', $partial->id );
 		$twentyseventeencounter = $id;
 	}
 
@@ -149,13 +148,7 @@ function twentyseventeen_front_page_section( $partial = null, $id = 0 ) {
 		wp_reset_postdata();
 	} elseif ( is_customize_preview() ) {
 		// The output placeholder anchor.
-		printf(
-			'<article class="panel-placeholder panel twentyseventeen-panel twentyseventeen-panel%1$s" id="panel%1$s">' .
-			'<span class="twentyseventeen-panel-title">%2$s</span></article>',
-			$id,
-			/* translators: %s: The section ID. */
-			sprintf( __( 'Front Page Section %s Placeholder', 'twentyseventeen' ), $id )
-		);
+		echo '<article class="panel-placeholder panel twentyseventeen-panel twentyseventeen-panel' . $id . '" id="panel' . $id . '"><span class="twentyseventeen-panel-title">' . sprintf( __( 'Front Page Section %1$s Placeholder', 'twentyseventeen' ), $id ) . '</span></article>';
 	}
 }
 
@@ -210,7 +203,7 @@ if ( ! function_exists( 'wp_body_open' ) ) :
 	/**
 	 * Fire the wp_body_open action.
 	 *
-	 * Added for backward compatibility to support pre-5.2.0 WordPress versions.
+	 * Added for backwards compatibility to support pre 5.2.0 WordPress versions.
 	 *
 	 * @since Twenty Seventeen 2.2
 	 */

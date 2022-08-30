@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Seventeen
- * @since Twenty Seventeen 1.0
+ * @since 1.0
  * @version 1.2
  */
 
@@ -28,8 +28,8 @@
 				echo twentyseventeen_time_link();
 				twentyseventeen_edit_link();
 			}
-			echo '</div><!-- .entry-meta -->';
-		}
+				echo '</div><!-- .entry-meta -->';
+		};
 
 		if ( is_single() ) {
 			the_title( '<h1 class="entry-title">', '</h1>' );
@@ -71,14 +71,15 @@
 						echo $video_html;
 					echo '</div>';
 				}
-			}
-		}
+			};
+
+		};
 
 		if ( is_single() || empty( $video ) ) {
 
+			/* translators: %s: Name of current post */
 			the_content(
 				sprintf(
-					/* translators: %s: Post title. Only visible to screen readers. */
 					__( 'Continue reading<span class="screen-reader-text"> "%s"</span>', 'twentyseventeen' ),
 					get_the_title()
 				)
@@ -92,7 +93,7 @@
 					'link_after'  => '</span>',
 				)
 			);
-		}
+		};
 		?>
 
 	</div><!-- .entry-content -->

@@ -4,16 +4,14 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
 $discussion = ! is_page() && twentynineteen_can_show_post_thumbnail() ? twentynineteen_get_discussion_data() : null; ?>
 
 <?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 
-<?php
-if ( ! is_page() ) :
-	?>
+<?php if ( ! is_page() ) : ?>
 <div class="entry-meta">
 	<?php twentynineteen_posted_by(); ?>
 	<?php twentynineteen_posted_on(); ?>
@@ -26,11 +24,11 @@ if ( ! is_page() ) :
 		<?php twentynineteen_comment_count(); ?>
 	</span>
 	<?php
-		// Edit post link.
+	// Edit post link.
 		edit_post_link(
 			sprintf(
 				wp_kses(
-					/* translators: %s: Post title. Only visible to screen readers. */
+					/* translators: %s: Name of current post. Only visible to screen readers. */
 					__( 'Edit <span class="screen-reader-text">%s</span>', 'twentynineteen' ),
 					array(
 						'span' => array(
@@ -45,5 +43,4 @@ if ( ! is_page() ) :
 		);
 	?>
 </div><!-- .entry-meta -->
-	<?php
-endif;
+<?php endif; ?>
