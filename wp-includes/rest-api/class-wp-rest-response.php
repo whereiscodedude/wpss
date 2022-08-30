@@ -20,6 +20,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Links related to the response.
 	 *
 	 * @since 4.4.0
+	 * @access protected
 	 * @var array
 	 */
 	protected $links = array();
@@ -28,6 +29,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * The route that was to create the response.
 	 *
 	 * @since 4.4.0
+	 * @access protected
 	 * @var string
 	 */
 	protected $matched_route = '';
@@ -36,6 +38,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * The handler that was used to create the response.
 	 *
 	 * @since 4.4.0
+	 * @access protected
 	 * @var null|array
 	 */
 	protected $matched_handler = null;
@@ -46,6 +49,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * @internal The $rel parameter is first, as this looks nicer when sending multiple.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @link https://tools.ietf.org/html/rfc5988
 	 * @link https://www.iana.org/assignments/link-relations/link-relations.xml
@@ -75,10 +79,11 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Removes a link from the response.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
-	 * @param string $rel  Link relation. Either an IANA registered type, or an absolute URL.
-	 * @param string $href Optional. Only remove links for the relation matching the given href.
-	 *                     Default null.
+	 * @param  string $rel  Link relation. Either an IANA registered type, or an absolute URL.
+	 * @param  string $href Optional. Only remove links for the relation matching the given href.
+	 *                      Default null.
 	 */
 	public function remove_link( $rel, $href = null ) {
 		if ( ! isset( $this->links[ $rel ] ) ) {
@@ -105,6 +110,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * associative arrays.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @param array $links Map of link relation to list of links.
 	 */
@@ -125,6 +131,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Retrieves links for the response.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @return array List of links.
 	 */
@@ -138,13 +145,14 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * @internal The $rel parameter is first, as this looks nicer when sending multiple.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @link https://tools.ietf.org/html/rfc5988
 	 * @link https://www.iana.org/assignments/link-relations/link-relations.xml
 	 *
 	 * @param string $rel   Link relation. Either an IANA registered type, or an absolute URL.
 	 * @param string $link  Target IRI for the link.
-	 * @param array  $other Optional. Other parameters to send, as an associative array.
+	 * @param array  $other Optional. Other parameters to send, as an assocative array.
 	 *                      Default empty array.
 	 */
 	public function link_header( $rel, $link, $other = array() ) {
@@ -154,7 +162,6 @@ class WP_REST_Response extends WP_HTTP_Response {
 			if ( 'title' === $key ) {
 				$value = '"' . $value . '"';
 			}
-
 			$header .= '; ' . $key . '=' . $value;
 		}
 		$this->header( 'Link', $header, false );
@@ -164,6 +171,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Retrieves the route that was used.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @return string The matched route.
 	 */
@@ -175,6 +183,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Sets the route (regex for path) that caused the response.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @param string $route Route name.
 	 */
@@ -186,6 +195,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Retrieves the handler that was used to generate the response.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @return null|array The handler that was used to create the response.
 	 */
@@ -194,9 +204,10 @@ class WP_REST_Response extends WP_HTTP_Response {
 	}
 
 	/**
-	 * Sets the handler that was responsible for generating the response.
+	 * Retrieves the handler that was responsible for generating the response.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @param array $handler The matched handler.
 	 */
@@ -208,6 +219,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Checks if the response is an error, i.e. >= 400 response code.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @return bool Whether the response is an error.
 	 */
@@ -219,6 +231,7 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Retrieves a WP_Error object from the response.
 	 *
 	 * @since 4.4.0
+	 * @access public
 	 *
 	 * @return WP_Error|null WP_Error or null on not an errored response.
 	 */
@@ -232,9 +245,8 @@ class WP_REST_Response extends WP_HTTP_Response {
 		if ( is_array( $this->get_data() ) ) {
 			$data = $this->get_data();
 			$error->add( $data['code'], $data['message'], $data['data'] );
-
 			if ( ! empty( $data['additional_errors'] ) ) {
-				foreach ( $data['additional_errors'] as $err ) {
+				foreach( $data['additional_errors'] as $err ) {
 					$error->add( $err['code'], $err['message'], $err['data'] );
 				}
 			}
@@ -249,20 +261,21 @@ class WP_REST_Response extends WP_HTTP_Response {
 	 * Retrieves the CURIEs (compact URIs) used for relations.
 	 *
 	 * @since 4.5.0
+	 * @access public
 	 *
 	 * @return array Compact URIs.
 	 */
 	public function get_curies() {
 		$curies = array(
 			array(
-				'name'      => 'wp',
-				'href'      => 'https://api.w.org/{rel}',
+				'name' => 'wp',
+				'href' => 'https://api.w.org/{rel}',
 				'templated' => true,
 			),
 		);
 
 		/**
-		 * Filters extra CURIEs available on REST API responses.
+		 * Filters extra CURIEs available on API responses.
 		 *
 		 * CURIEs allow a shortened version of URI relations. This allows a more
 		 * usable form for custom relations than using the full URI. These work
@@ -278,16 +291,15 @@ class WP_REST_Response extends WP_HTTP_Response {
 		 * `http://w.org/{rel}` would transform a `http://w.org/term` relation
 		 * into `example:term`.
 		 *
-		 * Well-behaved clients should expand and normalize these back to their
+		 * Well-behaved clients should expand and normalise these back to their
 		 * full URI relation, however some naive clients may not resolve these
 		 * correctly, so adding new CURIEs may break backward compatibility.
 		 *
 		 * @since 4.5.0
 		 *
-		 * @param array $additional Additional CURIEs to register with the REST API.
+		 * @param array $additional Additional CURIEs to register with the API.
 		 */
 		$additional = apply_filters( 'rest_response_link_curies', array() );
-
 		return array_merge( $curies, $additional );
 	}
 }

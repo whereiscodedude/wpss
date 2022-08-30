@@ -1,12 +1,9 @@
 /**
  * WordPress View plugin.
  */
-( function( tinymce ) {
+( function( tinymce, wp ) {
 	tinymce.PluginManager.add( 'wpview', function( editor ) {
 		function noop () {}
-
-		// Set this here as wp-tinymce.js may be loaded too early.
-		var wp = window.wp;
 
 		if ( ! wp || ! wp.mce || ! wp.mce.views ) {
 			return {
@@ -25,7 +22,7 @@
 				return '<p>' + window.decodeURIComponent( $1 ) + '</p>';
 			}
 
-			if ( ! content || content.indexOf( ' data-wpview-' ) === -1 ) {
+			if ( ! content ) {
 				return content;
 			}
 
@@ -52,7 +49,7 @@
 				var className = editor.getBody().className;
 
 				editor.$( 'iframe[class="wpview-sandbox"]' ).each( function( i, iframe ) {
-					// Make sure it is a local iframe.
+					// Make sure it is a local iframe
 					// jshint scripturl: true
 					if ( ! iframe.src || iframe.src === 'javascript:""' ) {
 						try {
@@ -79,11 +76,11 @@
 				node = editor.selection.getNode();
 
 				if ( node && node !== editor.getBody() && /^\s*https?:\/\/\S+\s*$/i.test( event.content ) ) {
-					// When a url is pasted or inserted, only try to embed it when it is in an empty paragraph.
+					// When a url is pasted or inserted, only try to embed it when it is in an empty paragrapgh.
 					node = editor.dom.getParent( node, 'p' );
 
 					if ( node && /^[\s\uFEFF\u00A0]*$/.test( editor.$( node ).text() || '' ) ) {
-						// Make sure there are no empty inline elements in the <p>.
+						// Make sure there are no empty inline elements in the <p>
 						node.innerHTML = '';
 					} else {
 						return;
@@ -91,11 +88,17 @@
 				}
 			}
 
-			event.content = wp.mce.views.setMarkers( event.content, editor );
+			event.content = wp.mce.views.setMarkers( event.content );
 		} );
 
 		// Replace any new markers nodes with views.
-		editor.on( 'setcontent', function() {
+		editor.on( 'setcontent', function( event ) {
+			if ( event.load && ! event.initial && editor.quirks.refreshContentEditable ) {
+				// Make sure there is a selection in Gecko browsers.
+				// Or it will refresh the content internally which resets the iframes.
+				editor.quirks.refreshContentEditable();
+			}
+
 			wp.mce.views.render();
 		} );
 
@@ -111,30 +114,10 @@
 			event.content = resetViews( event.content );
 		} );
 
-		// Prevent adding of undo levels when replacing wpview markers
-		// or when there are changes only in the (non-editable) previews.
+		// Replace views with their text inside undo levels.
+		// This also prevents that new levels are added when there are changes inside the views.
 		editor.on( 'beforeaddundo', function( event ) {
-			var lastContent;
-			var newContent = event.level.content || ( event.level.fragments && event.level.fragments.join( '' ) );
-
-			if ( ! event.lastLevel ) {
-				lastContent = editor.startContent;
-			} else {
-				lastContent = event.lastLevel.content || ( event.lastLevel.fragments && event.lastLevel.fragments.join( '' ) );
-			}
-
-			if (
-				! newContent ||
-				! lastContent ||
-				newContent.indexOf( ' data-wpview-' ) === -1 ||
-				lastContent.indexOf( ' data-wpview-' ) === -1
-			) {
-				return;
-			}
-
-			if ( resetViews( lastContent ) === resetViews( newContent ) ) {
-				event.preventDefault();
-			}
+			event.level.content = resetViews( event.level.content );
 		} );
 
 		// Make sure views are copied as their text.
@@ -178,7 +161,7 @@
 		} );
 
 		editor.addButton( 'wp_view_edit', {
-			tooltip: 'Edit|button', // '|button' is not displayed, only used for context.
+			tooltip: 'Edit ', // trailing space is needed, used for context
 			icon: 'dashicon dashicons-edit',
 			onclick: function() {
 				var node = editor.selection.getNode();
@@ -207,7 +190,7 @@
 				] );
 
 				editor.on( 'wptoolbar', function( event ) {
-					if ( ! event.collapsed && isView( event.element ) ) {
+					if ( isView( event.element ) ) {
 						event.toolbar = toolbar;
 					}
 				} );
@@ -222,4 +205,4 @@
 			getView: noop
 		};
 	} );
-} )( window.tinymce );
+} )( window.tinymce, window.wp );
