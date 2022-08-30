@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
 if ( ! function_exists( 'twentynineteen_posted_on' ) ) :
@@ -76,13 +76,14 @@ if ( ! function_exists( 'twentynineteen_entry_footer' ) ) :
 		// Hide author, post date, category and tag text for pages.
 		if ( 'post' === get_post_type() ) {
 
-			// Posted by.
+			// Posted by
 			twentynineteen_posted_by();
 
-			// Posted on.
+			// Posted on
 			twentynineteen_posted_on();
 
-			$categories_list = get_the_category_list( wp_get_list_item_separator() );
+			/* translators: Used between list items, there is a space after the comma. */
+			$categories_list = get_the_category_list( __( ', ', 'twentynineteen' ) );
 			if ( $categories_list ) {
 				printf(
 					/* translators: 1: SVG icon. 2: Posted in label, only visible to screen readers. 3: List of categories. */
@@ -93,8 +94,9 @@ if ( ! function_exists( 'twentynineteen_entry_footer' ) ) :
 				); // WPCS: XSS OK.
 			}
 
-			$tags_list = get_the_tag_list( '', wp_get_list_item_separator() );
-			if ( $tags_list && ! is_wp_error( $tags_list ) ) {
+			/* translators: Used between list items, there is a space after the comma. */
+			$tags_list = get_the_tag_list( '', __( ', ', 'twentynineteen' ) );
+			if ( $tags_list ) {
 				printf(
 					/* translators: 1: SVG icon. 2: Posted in label, only visible to screen readers. 3: List of tags. */
 					'<span class="tags-links">%1$s<span class="screen-reader-text">%2$s </span>%3$s</span>',
@@ -206,7 +208,8 @@ if ( ! function_exists( 'twentynineteen_comment_form' ) ) :
 
 			comment_form(
 				array(
-					'title_reply' => null,
+					'logged_in_as' => null,
+					'title_reply'  => null,
 				)
 			);
 		}
@@ -240,7 +243,7 @@ if ( ! function_exists( 'wp_body_open' ) ) :
 	/**
 	 * Fire the wp_body_open action.
 	 *
-	 * Added for backward compatibility to support pre-5.2.0 WordPress versions.
+	 * Added for backwards compatibility to support pre 5.2.0 WordPress versions.
 	 *
 	 * @since Twenty Nineteen 1.4
 	 */

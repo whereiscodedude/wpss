@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Seventeen
- * @since Twenty Seventeen 1.0
+ * @since 1.0
  * @version 1.0
  */
 
@@ -28,11 +28,11 @@ get_header(); ?>
 	</header><!-- .page-header -->
 
 	<div id="primary" class="content-area">
-		<main id="main" class="site-main">
+		<main id="main" class="site-main" role="main">
 
 		<?php
 		if ( have_posts() ) :
-			// Start the Loop.
+			/* Start the Loop */
 			while ( have_posts() ) :
 				the_post();
 
@@ -43,7 +43,7 @@ get_header(); ?>
 				 */
 				get_template_part( 'template-parts/post/content', 'excerpt' );
 
-			endwhile; // End the loop.
+			endwhile; // End of the loop.
 
 			the_posts_pagination(
 				array(

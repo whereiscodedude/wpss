@@ -46,13 +46,6 @@ if ( version_compare( $GLOBALS['wp_version'], '3.6-alpha', '<' ) ) {
 }
 
 /**
- * Block Patterns.
- *
- * @since Twenty Thirteen 3.4
- */
-require get_template_directory() . '/inc/block-patterns.php';
-
-/**
  * Twenty Thirteen setup.
  *
  * Sets up theme defaults and registers the various WordPress features that
@@ -158,33 +151,6 @@ function twentythirteen_setup() {
 		)
 	);
 
-	// Add support for block gradient colors.
-	add_theme_support(
-		'editor-gradient-presets',
-		array(
-			array(
-				'name'     => __( 'Autumn Brown', 'twentythirteen' ),
-				'gradient' => 'linear-gradient(135deg, rgba(226,45,15,1) 0%, rgba(158,25,13,1) 100%)',
-				'slug'     => 'autumn-brown',
-			),
-			array(
-				'name'     => __( 'Sunset Yellow', 'twentythirteen' ),
-				'gradient' => 'linear-gradient(135deg, rgba(233,139,41,1) 0%, rgba(238,179,95,1) 100%)',
-				'slug'     => 'sunset-yellow',
-			),
-			array(
-				'name'     => __( 'Light Sky', 'twentythirteen' ),
-				'gradient' => 'linear-gradient(135deg,rgba(228,228,228,1.0) 0%,rgba(208,225,252,1.0) 100%)',
-				'slug'     => 'light-sky',
-			),
-			array(
-				'name'     => __( 'Dark Sky', 'twentythirteen' ),
-				'gradient' => 'linear-gradient(135deg,rgba(0,0,0,1.0) 0%,rgba(56,61,69,1.0) 100%)',
-				'slug'     => 'dark-sky',
-			),
-		)
-	);
-
 	// Adds RSS feed links to <head> for posts and comments.
 	add_theme_support( 'automatic-feed-links' );
 
@@ -202,7 +168,6 @@ function twentythirteen_setup() {
 			'caption',
 			'script',
 			'style',
-			'navigation-widgets',
 		)
 	);
 
@@ -319,7 +284,7 @@ function twentythirteen_scripts_styles() {
 	wp_enqueue_style( 'genericons', get_template_directory_uri() . '/genericons/genericons.css', array(), '3.0.3' );
 
 	// Loads our main stylesheet.
-	wp_enqueue_style( 'twentythirteen-style', get_stylesheet_uri(), array(), '20220524' );
+	wp_enqueue_style( 'twentythirteen-style', get_stylesheet_uri(), array(), '20190507' );
 
 	// Theme block stylesheet.
 	wp_enqueue_style( 'twentythirteen-block-style', get_template_directory_uri() . '/css/blocks.css', array( 'twentythirteen-style' ), '20190102' );
@@ -362,7 +327,7 @@ add_filter( 'wp_resource_hints', 'twentythirteen_resource_hints', 10, 2 );
  */
 function twentythirteen_block_editor_styles() {
 	// Block styles.
-	wp_enqueue_style( 'twentythirteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20201208' );
+	wp_enqueue_style( 'twentythirteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20190102' );
 	// Add custom fonts.
 	wp_enqueue_style( 'twentythirteen-fonts', twentythirteen_fonts_url(), array(), null );
 }
@@ -438,20 +403,6 @@ function twentythirteen_widgets_init() {
 }
 add_action( 'widgets_init', 'twentythirteen_widgets_init' );
 
-if ( ! function_exists( 'wp_get_list_item_separator' ) ) :
-	/**
-	 * Retrieves the list item separator based on the locale.
-	 *
-	 * Added for backward compatibility to support pre-6.0.0 WordPress versions.
-	 *
-	 * @since 6.0.0
-	 */
-	function wp_get_list_item_separator() {
-		/* translators: Used between list items, there is a space after the comma. */
-		return __( ', ', 'twentythirteen' );
-	}
-endif;
-
 if ( ! function_exists( 'twentythirteen_paging_nav' ) ) :
 	/**
 	 * Display navigation to next/previous set of posts when applicable.
@@ -466,7 +417,7 @@ if ( ! function_exists( 'twentythirteen_paging_nav' ) ) :
 			return;
 		}
 		?>
-		<nav class="navigation paging-navigation">
+		<nav class="navigation paging-navigation" role="navigation">
 		<h1 class="screen-reader-text"><?php _e( 'Posts navigation', 'twentythirteen' ); ?></h1>
 		<div class="nav-links">
 
@@ -501,7 +452,7 @@ if ( ! function_exists( 'twentythirteen_post_nav' ) ) :
 			return;
 		}
 		?>
-		<nav class="navigation post-navigation">
+		<nav class="navigation post-navigation" role="navigation">
 		<h1 class="screen-reader-text"><?php _e( 'Post navigation', 'twentythirteen' ); ?></h1>
 		<div class="nav-links">
 
@@ -527,22 +478,24 @@ if ( ! function_exists( 'twentythirteen_entry_meta' ) ) :
 			echo '<span class="featured-post">' . esc_html__( 'Sticky', 'twentythirteen' ) . '</span>';
 		}
 
-		if ( ! has_post_format( 'link' ) && 'post' === get_post_type() ) {
+		if ( ! has_post_format( 'link' ) && 'post' == get_post_type() ) {
 			twentythirteen_entry_date();
 		}
 
-		$categories_list = get_the_category_list( wp_get_list_item_separator() );
+		/* translators: Used between list items, there is a space after the comma. */
+		$categories_list = get_the_category_list( __( ', ', 'twentythirteen' ) );
 		if ( $categories_list ) {
 			echo '<span class="categories-links">' . $categories_list . '</span>';
 		}
 
-		$tags_list = get_the_tag_list( '', wp_get_list_item_separator() );
-		if ( $tags_list && ! is_wp_error( $tags_list ) ) {
-			echo '<span class="tags-links">' . $tags_list . '</span>';
+		/* translators: Used between list items, there is a space after the comma. */
+		$tag_list = get_the_tag_list( '', __( ', ', 'twentythirteen' ) );
+		if ( $tag_list ) {
+			echo '<span class="tags-links">' . $tag_list . '</span>';
 		}
 
-		// Post author.
-		if ( 'post' === get_post_type() ) {
+		// Post author
+		if ( 'post' == get_post_type() ) {
 			printf(
 				'<span class="author vcard"><a class="url fn n" href="%1$s" title="%2$s" rel="author">%3$s</a></span>',
 				esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
@@ -562,10 +515,10 @@ if ( ! function_exists( 'twentythirteen_entry_date' ) ) :
 	 *
 	 * @since Twenty Thirteen 1.0
 	 *
-	 * @param bool $display (optional) Whether to display the date. Default true.
+	 * @param boolean $echo (optional) Whether to echo the date. Default true.
 	 * @return string The HTML-formatted post date.
 	 */
-	function twentythirteen_entry_date( $display = true ) {
+	function twentythirteen_entry_date( $echo = true ) {
 		if ( has_post_format( array( 'chat', 'status' ) ) ) {
 			/* translators: 1: Post format name, 2: Date. */
 			$format_prefix = _x( '%1$s on %2$s', '1: post format name. 2: date', 'twentythirteen' );
@@ -582,7 +535,7 @@ if ( ! function_exists( 'twentythirteen_entry_date' ) ) :
 			esc_html( sprintf( $format_prefix, get_post_format_string( get_post_format() ), get_the_date() ) )
 		);
 
-		if ( $display ) {
+		if ( $echo ) {
 			echo $date;
 		}
 
@@ -598,7 +551,7 @@ if ( ! function_exists( 'twentythirteen_the_attached_image' ) ) :
 	 */
 	function twentythirteen_the_attached_image() {
 		/**
-		 * Filters the image attachment size to use.
+		 * Filter the image attachment size to use.
 		 *
 		 * @since Twenty thirteen 1.0
 		 *
@@ -639,11 +592,11 @@ if ( ! function_exists( 'twentythirteen_the_attached_image' ) ) :
 				}
 			}
 
+			// get the URL of the next image attachment...
 			if ( $next_id ) {
-				// ...get the URL of the next image attachment.
 				$next_attachment_url = get_attachment_link( $next_id );
 			} else {
-				// ...or get the URL of the first image attachment.
+				// or get the URL of the first image attachment.
 				$next_attachment_url = get_attachment_link( reset( $attachment_ids ) );
 			}
 		}
@@ -690,7 +643,7 @@ if ( ! function_exists( 'twentythirteen_excerpt_more' ) && ! is_admin() ) :
 		$link = sprintf(
 			'<a href="%1$s" class="more-link">%2$s</a>',
 			esc_url( get_permalink( get_the_ID() ) ),
-			/* translators: %s: Post title. Only visible to screen readers. */
+			/* translators: %s: Post title. */
 			sprintf( __( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'twentythirteen' ), '<span class="screen-reader-text">' . get_the_title( get_the_ID() ) . '</span>' )
 		);
 		return ' &hellip; ' . $link;
@@ -781,7 +734,6 @@ add_action( 'customize_register', 'twentythirteen_customize_register' );
  * Render the site title for the selective refresh partial.
  *
  * @since Twenty Thirteen 1.9
- *
  * @see twentythirteen_customize_register()
  *
  * @return void
@@ -794,7 +746,6 @@ function twentythirteen_customize_partial_blogname() {
  * Render the site tagline for the selective refresh partial.
  *
  * @since Twenty Thirteen 1.9
- *
  * @see twentythirteen_customize_register()
  *
  * @return void
@@ -804,7 +755,7 @@ function twentythirteen_customize_partial_blogdescription() {
 }
 
 /**
- * Enqueue JavaScript postMessage handlers for the Customizer.
+ * Enqueue Javascript postMessage handlers for the Customizer.
  *
  * Binds JavaScript handlers to make the Customizer preview
  * reload changes asynchronously.
@@ -861,7 +812,7 @@ if ( ! function_exists( 'wp_body_open' ) ) :
 	/**
 	 * Fire the wp_body_open action.
 	 *
-	 * Added for backward compatibility to support pre-5.2.0 WordPress versions.
+	 * Added for backwards compatibility to support pre 5.2.0 WordPress versions.
 	 *
 	 * @since Twenty Thirteen 2.8
 	 */
@@ -874,26 +825,3 @@ if ( ! function_exists( 'wp_body_open' ) ) :
 		do_action( 'wp_body_open' );
 	}
 endif;
-
-/**
- * Register Custom Block Styles
- *
- * @since Twenty Thirteen 3.4
- */
-if ( function_exists( 'register_block_style' ) ) {
-	function twentythirteen_register_block_styles() {
-
-		/**
-		 * Register block style
-		 */
-		register_block_style(
-			'core/button',
-			array(
-				'name'         => 'no-shadow',
-				'label'        => __( 'No Shadow', 'twentythirteen' ),
-				'style_handle' => 'no-shadow',
-			)
-		);
-	}
-	add_action( 'init', 'twentythirteen_register_block_styles' );
-}

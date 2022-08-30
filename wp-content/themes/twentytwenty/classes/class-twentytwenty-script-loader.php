@@ -8,14 +8,12 @@
  *
  * @package WordPress
  * @subpackage Twenty_Twenty
- * @since Twenty Twenty 1.0
+ * @since 1.0.0
  */
 
 if ( ! class_exists( 'TwentyTwenty_Script_Loader' ) ) {
 	/**
 	 * A class that provides a way to add `async` or `defer` attributes to scripts.
-	 *
-	 * @since Twenty Twenty 1.0
 	 */
 	class TwentyTwenty_Script_Loader {
 
@@ -24,8 +22,6 @@ if ( ! class_exists( 'TwentyTwenty_Script_Loader' ) ) {
 		 *
 		 * If #12009 lands in WordPress, this function can no-op since it would be handled in core.
 		 *
-		 * @since Twenty Twenty 1.0
-		 *
 		 * @link https://core.trac.wordpress.org/ticket/12009
 		 *
 		 * @param string $tag    The script tag.
@@ -33,7 +29,7 @@ if ( ! class_exists( 'TwentyTwenty_Script_Loader' ) ) {
 		 * @return string Script HTML string.
 		 */
 		public function filter_script_loader_tag( $tag, $handle ) {
-			foreach ( array( 'async', 'defer' ) as $attr ) {
+			foreach ( [ 'async', 'defer' ] as $attr ) {
 				if ( ! wp_scripts()->get_data( $handle, $attr ) ) {
 					continue;
 				}

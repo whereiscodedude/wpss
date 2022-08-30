@@ -102,7 +102,6 @@ if ( ! function_exists( 'twentyfifteen_setup' ) ) :
 				'caption',
 				'script',
 				'style',
-				'navigation-widgets',
 			)
 		);
 
@@ -145,20 +144,20 @@ if ( ! function_exists( 'twentyfifteen_setup' ) ) :
 
 		// Setup the WordPress core custom background feature.
 
+		/**
+		 * Filter Twenty Fifteen custom-header support arguments.
+		 *
+		 * @since Twenty Fifteen 1.0
+		 *
+		 * @param array $args {
+		 *     An array of custom-header support arguments.
+		 *
+		 *     @type string $default-color          Default color of the header.
+		 *     @type string $default-attachment     Default attachment of the header.
+		 * }
+		 */
 		add_theme_support(
 			'custom-background',
-			/**
-			 * Filters Twenty Fifteen custom-background support arguments.
-			 *
-			 * @since Twenty Fifteen 1.0
-			 *
-			 * @param array $args {
-			 *     An array of custom-background support arguments.
-			 *
-			 *     @type string $default-color      Default color of the background.
-			 *     @type string $default-attachment Default attachment of the background.
-			 * }
-			 */
 			apply_filters(
 				'twentyfifteen_custom_background_args',
 				array(
@@ -250,77 +249,10 @@ if ( ! function_exists( 'twentyfifteen_setup' ) ) :
 			)
 		);
 
-		// Add support for custom color scheme.
-		add_theme_support(
-			'editor-gradient-presets',
-			array(
-				array(
-					'name'     => __( 'Dark Gray Gradient', 'twentyfifteen' ),
-					'slug'     => 'dark-gray-gradient-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(17,17,17,1) 0%, rgba(42,42,42,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Light Gray Gradient', 'twentyfifteen' ),
-					'slug'     => 'light-gray-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(241,241,241,1) 0%, rgba(215,215,215,1) 100%)',
-				),
-				array(
-					'name'     => __( 'White Gradient', 'twentyfifteen' ),
-					'slug'     => 'white-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(230,230,230,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Yellow Gradient', 'twentyfifteen' ),
-					'slug'     => 'yellow-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(244,202,22,1) 0%, rgba(205,168,10,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Dark Brown Gradient', 'twentyfifteen' ),
-					'slug'     => 'dark-brown-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(53,39,18,1) 0%, rgba(91,67,31,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Medium Pink Gradient', 'twentyfifteen' ),
-					'slug'     => 'medium-pink-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(229,59,81,1) 0%, rgba(209,28,51,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Light Pink Gradient', 'twentyfifteen' ),
-					'slug'     => 'light-pink-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(255,229,209,1) 0%, rgba(255,200,158,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Dark Purple Gradient', 'twentyfifteen' ),
-					'slug'     => 'dark-purple-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(46,34,86,1) 0%, rgba(66,48,123,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Purple Gradient', 'twentyfifteen' ),
-					'slug'     => 'purple-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(103,73,112,1) 0%, rgba(131,93,143,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Blue Gray Gradient', 'twentyfifteen' ),
-					'slug'     => 'blue-gray-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(34,49,63,1) 0%, rgba(52,75,96,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Bright Blue Gradient', 'twentyfifteen' ),
-					'slug'     => 'bright-blue-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(85,195,220,1) 0%, rgba(43,180,211,1) 100%)',
-				),
-				array(
-					'name'     => __( 'Light Blue Gradient', 'twentyfifteen' ),
-					'slug'     => 'light-blue-gradient',
-					'gradient' => 'linear-gradient(90deg, rgba(233,242,249,1) 0%, rgba(193,218,238,1) 100%)',
-				),
-			)
-		);
-
 		// Indicate widget sidebars can use selective refresh in the Customizer.
 		add_theme_support( 'customize-selective-refresh-widgets' );
 	}
-endif; // twentyfifteen_setup()
+endif; // twentyfifteen_setup
 add_action( 'after_setup_theme', 'twentyfifteen_setup' );
 
 /**
@@ -388,13 +320,13 @@ if ( ! function_exists( 'twentyfifteen_fonts_url' ) ) :
 		 */
 		$subset = _x( 'no-subset', 'Add new subset (greek, cyrillic, devanagari, vietnamese)', 'twentyfifteen' );
 
-		if ( 'cyrillic' === $subset ) {
+		if ( 'cyrillic' == $subset ) {
 			$subsets .= ',cyrillic,cyrillic-ext';
-		} elseif ( 'greek' === $subset ) {
+		} elseif ( 'greek' == $subset ) {
 			$subsets .= ',greek,greek-ext';
-		} elseif ( 'devanagari' === $subset ) {
+		} elseif ( 'devanagari' == $subset ) {
 			$subsets .= ',devanagari';
-		} elseif ( 'vietnamese' === $subset ) {
+		} elseif ( 'vietnamese' == $subset ) {
 			$subsets .= ',vietnamese';
 		}
 
@@ -435,13 +367,13 @@ function twentyfifteen_scripts() {
 	wp_enqueue_style( 'twentyfifteen-fonts', twentyfifteen_fonts_url(), array(), null );
 
 	// Add Genericons, used in the main stylesheet.
-	wp_enqueue_style( 'genericons', get_template_directory_uri() . '/genericons/genericons.css', array(), '20201208' );
+	wp_enqueue_style( 'genericons', get_template_directory_uri() . '/genericons/genericons.css', array(), '3.2' );
 
 	// Load our main stylesheet.
-	wp_enqueue_style( 'twentyfifteen-style', get_stylesheet_uri(), array(), '20201208' );
+	wp_enqueue_style( 'twentyfifteen-style', get_stylesheet_uri(), array(), '20190507' );
 
 	// Theme block stylesheet.
-	wp_enqueue_style( 'twentyfifteen-block-style', get_template_directory_uri() . '/css/blocks.css', array( 'twentyfifteen-style' ), '20220524' );
+	wp_enqueue_style( 'twentyfifteen-block-style', get_template_directory_uri() . '/css/blocks.css', array( 'twentyfifteen-style' ), '20190102' );
 
 	// Load the Internet Explorer specific stylesheet.
 	wp_enqueue_style( 'twentyfifteen-ie', get_template_directory_uri() . '/css/ie.css', array( 'twentyfifteen-style' ), '20170916' );
@@ -461,7 +393,7 @@ function twentyfifteen_scripts() {
 		wp_enqueue_script( 'twentyfifteen-keyboard-image-navigation', get_template_directory_uri() . '/js/keyboard-image-navigation.js', array( 'jquery' ), '20141210' );
 	}
 
-	wp_enqueue_script( 'twentyfifteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20220524', true );
+	wp_enqueue_script( 'twentyfifteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20171218', true );
 	wp_localize_script(
 		'twentyfifteen-script',
 		'screenReaderText',
@@ -480,7 +412,7 @@ add_action( 'wp_enqueue_scripts', 'twentyfifteen_scripts' );
  */
 function twentyfifteen_block_editor_styles() {
 	// Block styles.
-	wp_enqueue_style( 'twentyfifteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20201208' );
+	wp_enqueue_style( 'twentyfifteen-block-editor-style', get_template_directory_uri() . '/css/editor-blocks.css', array(), '20190102' );
 	// Add custom fonts.
 	wp_enqueue_style( 'twentyfifteen-fonts', twentyfifteen_fonts_url(), array(), null );
 }
@@ -528,7 +460,7 @@ function twentyfifteen_post_nav_background() {
 	$next     = get_adjacent_post( false, '', false );
 	$css      = '';
 
-	if ( is_attachment() && 'attachment' === $previous->post_type ) {
+	if ( is_attachment() && 'attachment' == $previous->post_type ) {
 		return;
 	}
 
@@ -559,14 +491,14 @@ add_action( 'wp_enqueue_scripts', 'twentyfifteen_post_nav_background' );
  *
  * @since Twenty Fifteen 1.0
  *
- * @param string   $item_output The menu item's starting HTML output.
- * @param WP_Post  $item        Menu item data object.
- * @param int      $depth       Depth of the menu. Used for padding.
- * @param stdClass $args        An object of wp_nav_menu() arguments.
+ * @param string  $item_output The menu item output.
+ * @param WP_Post $item        Menu item object.
+ * @param int     $depth       Depth of the menu.
+ * @param array   $args        wp_nav_menu() arguments.
  * @return string Menu item with possible description.
  */
 function twentyfifteen_nav_description( $item_output, $item, $depth, $args ) {
-	if ( 'primary' === $args->theme_location && $item->description ) {
+	if ( 'primary' == $args->theme_location && $item->description ) {
 		$item_output = str_replace( $args->link_after . '</a>', '<div class="menu-item-description">' . $item->description . '</div>' . $args->link_after . '</a>', $item_output );
 	}
 
@@ -649,10 +581,3 @@ require get_template_directory() . '/inc/template-tags.php';
  * @since Twenty Fifteen 1.0
  */
 require get_template_directory() . '/inc/customizer.php';
-
-/**
- * Block Patterns.
- *
- * @since Twenty Fifteen 3.0
- */
-require get_template_directory() . '/inc/block-patterns.php';

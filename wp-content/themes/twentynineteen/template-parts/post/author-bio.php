@@ -4,11 +4,10 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
-if ( (bool) get_the_author_meta( 'description' ) ) :
-	?>
+if ( (bool) get_the_author_meta( 'description' ) ) : ?>
 <div class="author-bio">
 	<h2 class="author-title">
 		<span class="author-heading">
@@ -28,5 +27,4 @@ if ( (bool) get_the_author_meta( 'description' ) ) :
 		</a>
 	</p><!-- .author-description -->
 </div><!-- .author-bio -->
-	<?php
-endif;
+<?php endif; ?>
