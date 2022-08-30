@@ -4,12 +4,11 @@ Theme URI: https://wordpress.org/themes/twentyfifteen/
 Author: the WordPress team
 Author URI: https://wordpress.org/
 Description: Our 2015 default theme is clean, blog-focused, and designed for clarity. Twenty Fifteen's simple, straightforward typography is readable on a wide variety of screen sizes, and suitable for multiple languages. We designed it using a mobile-first approach, meaning your content takes center-stage, regardless of whether your visitors arrive by smartphone, tablet, laptop, or desktop computer.
-Version: 3.2
-Tested up to: 6.0
+Version: 2.6
 Requires PHP: 5.2.4
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Tags: blog, two-columns, left-sidebar, accessibility-ready, custom-background, custom-colors, custom-header, custom-logo, custom-menu, editor-style, featured-images, microformats, post-formats, rtl-language-support, sticky-post, threaded-comments, translation-ready, block-patterns
+Tags: blog, two-columns, left-sidebar, accessibility-ready, custom-background, custom-colors, custom-header, custom-logo, custom-menu, editor-style, featured-images, microformats, post-formats, rtl-language-support, sticky-post, threaded-comments, translation-ready
 Text Domain: twentyfifteen
 
 This theme, like WordPress, is licensed under the GPL.
@@ -196,7 +195,7 @@ a img {
 	font-weight: normal;
 	font-variant: normal;
 	line-height: 1;
-	speak: never;
+	speak: none;
 	text-align: center;
 	text-decoration: inherit;
 	text-transform: none;
@@ -1399,8 +1398,7 @@ img.aligncenter {
 	text-transform: uppercase;
 }
 
-.widget > :last-child,
-.widget > nav > :last-child {
+.widget > :last-child {
 	margin-bottom: 0;
 }
 

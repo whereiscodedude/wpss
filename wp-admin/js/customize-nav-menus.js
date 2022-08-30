@@ -95,7 +95,7 @@
 	 * @since 4.7.0
 	 * @alias wp.customize.Menus.insertAutoDraftPost
 	 *
-	 * @param {Object} params - Parameters for the draft post to create.
+	 * @param {object} params - Parameters for the draft post to create.
 	 * @param {string} params.post_type - Post type to add.
 	 * @param {string} params.post_title - Post title to use.
 	 * @return {jQuery.promise} Promise resolved with the added post.
@@ -216,9 +216,9 @@
 				}
 			} );
 
-			// Clear the search results and trigger an `input` event to fire a new search.
+			// Clear the search results and trigger a `keyup` event to fire a new search.
 			this.$clearResults.on( 'click', function() {
-				self.$search.val( '' ).trigger( 'focus' ).trigger( 'input' );
+				self.$search.val( '' ).focus().trigger( 'keyup' );
 			} );
 
 			this.$el.on( 'input', '#custom-menu-item-name.invalid, #custom-menu-item-url.invalid', function() {
@@ -226,7 +226,7 @@
 			});
 
 			// Load available items if it looks like we'll need them.
-			api.panel( 'nav_menus' ).container.on( 'expanded', function() {
+			api.panel( 'nav_menus' ).container.bind( 'expanded', function() {
 				if ( ! self.rendered ) {
 					self.initList();
 					self.rendered = true;
@@ -234,7 +234,7 @@
 			});
 
 			// Load more items.
-			this.sectionContent.on( 'scroll', function() {
+			this.sectionContent.scroll( function() {
 				var totalHeight = self.$el.find( '.accordion-section.open .available-menu-items-list' ).prop( 'scrollHeight' ),
 					visibleHeight = self.$el.find( '.accordion-section.open' ).height();
 
@@ -387,7 +387,7 @@
 		 * @since 4.7.0 Changed function signature to take list of item types instead of single type/object.
 		 * @access private
 		 *
-		 * @param {Array.<Object>} itemTypes List of objects containing type and key.
+		 * @param {Array.<object>} itemTypes List of objects containing type and key.
 		 * @param {string} deprecated Formerly the object parameter.
 		 * @return {void}
 		 */
@@ -446,7 +446,7 @@
 						self.pages[ name ] = -1;
 						return;
 					} else if ( ( 'post_type:page' === name ) && ( ! availableMenuItemContainers[ name ].hasClass( 'open' ) ) ) {
-						availableMenuItemContainers[ name ].find( '.accordion-section-title > button' ).trigger( 'click' );
+						availableMenuItemContainers[ name ].find( '.accordion-section-title > button' ).click();
 					}
 					typeItems = new api.Menus.AvailableItemCollection( typeItems ); // @todo Why is this collection created and then thrown away?
 					self.collection.add( typeItems.models );
@@ -644,7 +644,7 @@
 				return;
 			}
 
-			if ( '' === itemName.val().trim() ) {
+			if ( '' === $.trim( itemName.val() ) ) {
 				itemName.addClass( 'invalid' );
 				itemName.focus();
 				return;
@@ -716,7 +716,7 @@
 
 			this.$el.find( '.selected' ).removeClass( 'selected' );
 
-			this.$search.trigger( 'focus' );
+			this.$search.focus();
 		},
 
 		// Closes the panel.
@@ -733,7 +733,7 @@
 			$( 'body' ).removeClass( 'adding-menu-items' );
 			$( '#available-menu-items .menu-item-handle.item-added' ).removeClass( 'item-added' );
 
-			this.$search.val( '' ).trigger( 'input' );
+			this.$search.val( '' ).trigger( 'keyup' );
 		},
 
 		// Add a few keyboard enhancements to the panel.
@@ -827,7 +827,7 @@
 		 */
 		ready: function() {
 			var panel = this;
-			panel.container.find( '.hide-column-tog' ).on( 'click', function() {
+			panel.container.find( '.hide-column-tog' ).click( function() {
 				panel.saveManageColumnsState();
 			});
 
@@ -905,7 +905,7 @@
 		 *
 		 * @since 4.3.0
 		 *
-		 * @param {string} id
+		 * @param {String} id
 		 * @param {Object} options
 		 */
 		initialize: function( id, options ) {
@@ -1819,10 +1819,10 @@
 				/*
 				 * If the menu item deleted is the only of its instance left,
 				 * remove the check icon of this menu item in the right panel.
-				 */
+				 */ 
 				_.each( addedItems, function( addedItem ) {
 					var menuItemId, menuItemControl, matches;
-
+						
 					// This is because menu item that's deleted is just hidden.
 					if ( ! $( addedItem ).is( ':visible' ) ) {
 						return;
@@ -1879,7 +1879,7 @@
 
 			// Ensure that whitespace is trimmed on blur so placeholder can be shown.
 			control.container.find( '.edit-menu-item-title' ).on( 'blur', function() {
-				$( this ).val( $( this ).val().trim() );
+				$( this ).val( $.trim( $( this ).val() ) );
 			} );
 
 			titleEl = control.container.find( '.menu-item-title' );
@@ -1888,8 +1888,7 @@
 				if ( ! item ) {
 					return;
 				}
-				item.title = item.title || '';
-				trimmedTitle = item.title.trim();
+				trimmedTitle = $.trim( item.title );
 
 				titleText = trimmedTitle || item.original_title || api.Menus.data.l10n.untitled;
 
@@ -2213,7 +2212,7 @@
 		 *
 		 * @private
 		 *
-		 * @param {number} offset 1|-1
+		 * @param {Number} offset 1|-1
 		 */
 		_changePosition: function( offset ) {
 			var control = this,
@@ -2273,7 +2272,7 @@
 		 *
 		 * @private
 		 *
-		 * @param {number} offset 1|-1
+		 * @param {Number} offset 1|-1
 		 */
 		_changeDepth: function( offset ) {
 			if ( 1 !== offset && -1 !== offset ) {
@@ -2656,7 +2655,7 @@
 		 * Notice that the UI aspects here are handled by wpNavMenu.initSortables()
 		 * which is called in MenuSection.onChangeExpanded()
 		 *
-		 * @param {Object} menuList - The element that has sortable().
+		 * @param {object} menuList - The element that has sortable().
 		 */
 		_setupSortable: function( menuList ) {
 			var control = this;
@@ -2855,7 +2854,7 @@
 		/**
 		 * Enable/disable the reordering UI
 		 *
-		 * @param {boolean} showOrHide to enable/disable reordering
+		 * @param {Boolean} showOrHide to enable/disable reordering
 		 */
 		toggleReordering: function( showOrHide ) {
 			var addNewItemBtn = this.container.find( '.add-new-menu-item' ),
@@ -2995,7 +2994,7 @@
 		/**
 		 * Add a new item to this menu.
 		 *
-		 * @param {Object} item - Value for the nav_menu_item setting to be created.
+		 * @param {object} item - Value for the nav_menu_item setting to be created.
 		 * @return {wp.customize.Menus.controlConstructor.nav_menu_item} The newly-created nav_menu_item control instance.
 		 */
 		addItemToMenu: function( item ) {
@@ -3136,9 +3135,9 @@
 	 *
 	 * @alias wp.customize.Menus.applySavedData
 	 *
-	 * @param {Object} data
-	 * @param {Array} data.nav_menu_updates
-	 * @param {Array} data.nav_menu_item_updates
+	 * @param {object} data
+	 * @param {array} data.nav_menu_updates
+	 * @param {array} data.nav_menu_item_updates
 	 */
 	api.Menus.applySavedData = function( data ) {
 
@@ -3395,7 +3394,7 @@
 	 * @alias wp.customize.Menus.getMenuItemControl
 	 *
 	 * @param {string} menuItemId
-	 * @return {Object|null}
+	 * @return {object|null}
 	 */
 	api.Menus.getMenuItemControl = function( menuItemId ) {
 		return api.control( menuItemIdToSettingId( menuItemId ) );
@@ -3404,7 +3403,7 @@
 	/**
 	 * @alias wp.customize.Menus~menuItemIdToSettingId
 	 *
-	 * @param {string} menuItemId
+	 * @param {String} menuItemId
 	 */
 	function menuItemIdToSettingId( menuItemId ) {
 		return 'nav_menu_item[' + menuItemId + ']';
@@ -3422,7 +3421,7 @@
 	function displayNavMenuName( name ) {
 		name = name || '';
 		name = wp.sanitize.stripTagsAndEncodeText( name ); // Remove any potential tags from name.
-		name = name.toString().trim();
+		name = $.trim( name );
 		return name || api.Menus.data.l10n.unnamed;
 	}
 

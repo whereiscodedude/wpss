@@ -56,7 +56,7 @@ class WP_Customize_Panel {
 	 * Priority of the panel, defining the display order of panels and sections.
 	 *
 	 * @since 4.0.0
-	 * @var int
+	 * @var integer
 	 */
 	public $priority = 160;
 
@@ -72,7 +72,7 @@ class WP_Customize_Panel {
 	 * Theme features required to support the panel.
 	 *
 	 * @since 4.0.0
-	 * @var mixed[]
+	 * @var string|string[]
 	 */
 	public $theme_supports = '';
 
@@ -146,7 +146,7 @@ class WP_Customize_Panel {
 	 *                                            of panels and sections. Default 160.
 	 *     @type string          $capability      Capability required for the panel.
 	 *                                            Default `edit_theme_options`.
-	 *     @type mixed[]         $theme_supports  Theme features required to support the panel.
+	 *     @type string|string[] $theme_supports  Theme features required to support the panel.
 	 *     @type string          $title           Title of the panel to show in UI.
 	 *     @type string          $description     Description to show in the UI.
 	 *     @type string          $type            Type of the panel.
@@ -232,11 +232,10 @@ class WP_Customize_Panel {
 	 * feature support required by the panel.
 	 *
 	 * @since 4.0.0
-	 * @since 5.9.0 Method was marked non-final.
 	 *
 	 * @return bool False if theme doesn't support the panel or the user doesn't have the capability.
 	 */
-	public function check_capabilities() {
+	final public function check_capabilities() {
 		if ( $this->capability && ! current_user_can( $this->capability ) ) {
 			return false;
 		}
@@ -276,7 +275,7 @@ class WP_Customize_Panel {
 		 *
 		 * @since 4.0.0
 		 *
-		 * @param WP_Customize_Panel $panel WP_Customize_Panel instance.
+		 * @param WP_Customize_Panel $this WP_Customize_Panel instance.
 		 */
 		do_action( 'customize_render_panel', $this );
 
@@ -372,7 +371,7 @@ class WP_Customize_Panel {
 				<span class="preview-notice">
 				<?php
 					/* translators: %s: The site/panel title in the Customizer. */
-					printf( __( 'You are customizing %s' ), '<strong class="panel-title">{{ data.title }}</strong>' );
+					echo sprintf( __( 'You are customizing %s' ), '<strong class="panel-title">{{ data.title }}</strong>' );
 				?>
 				</span>
 				<# if ( data.description ) { #>

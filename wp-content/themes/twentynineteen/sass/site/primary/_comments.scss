@@ -114,11 +114,6 @@
 	}
 }
 
-.comment-form-wrapper,
-.comment-form-wrapper .comments-title {
-	display: block;
-}
-
 .comment-list {
 	list-style: none;
 	padding: 0;
@@ -385,10 +380,6 @@
 		@include font-family( $font__heading );
 		font-size: $font__size-xs;
 		color: $color__text-light;
-	}
-
-	#wp-comment-cookies-consent {
-		margin: 0 10px 0 0;
 	}
 
 	.comment-form-author,

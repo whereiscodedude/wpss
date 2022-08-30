@@ -62,7 +62,8 @@ if ( ! function_exists( 'twentyseventeen_entry_footer' ) ) :
 	 */
 	function twentyseventeen_entry_footer() {
 
-		$separate_meta = wp_get_list_item_separator();
+		/* translators: Used between list items, there is a space after the comma. */
+		$separate_meta = __( ', ', 'twentyseventeen' );
 
 		// Get Categories for posts.
 		$categories_list = get_the_category_list( $separate_meta );
@@ -112,7 +113,7 @@ if ( ! function_exists( 'twentyseventeen_edit_link' ) ) :
 	function twentyseventeen_edit_link() {
 		edit_post_link(
 			sprintf(
-				/* translators: %s: Post title. Only visible to screen readers. */
+				/* translators: %s: Post title. */
 				__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'twentyseventeen' ),
 				get_the_title()
 			),
@@ -126,11 +127,11 @@ endif;
  * Display a front page section.
  *
  * @param WP_Customize_Partial $partial Partial associated with a selective refresh request.
- * @param int                  $id Front page section to display.
+ * @param integer              $id Front page section to display.
  */
 function twentyseventeen_front_page_section( $partial = null, $id = 0 ) {
 	if ( is_a( $partial, 'WP_Customize_Partial' ) ) {
-		// Find out the ID and set it up during a selective refresh.
+		// Find out the id and set it up during a selective refresh.
 		global $twentyseventeencounter;
 
 		$id = str_replace( 'panel_', '', $partial->id );

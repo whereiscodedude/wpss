@@ -133,11 +133,6 @@ add_action( 'after_setup_theme', 'twentytwelve_setup' );
 require get_template_directory() . '/inc/custom-header.php';
 
 /**
- * Add block patterns.
- */
-require get_template_directory() . '/inc/block-patterns.php';
-
-/**
  * Return the Google font stylesheet URL if available.
  *
  * The use of Open Sans by default is localized. For languages that use
@@ -163,11 +158,11 @@ function twentytwelve_get_font_url() {
 		 */
 		$subset = _x( 'no-subset', 'Open Sans font: add new subset (greek, cyrillic, vietnamese)', 'twentytwelve' );
 
-		if ( 'cyrillic' === $subset ) {
+		if ( 'cyrillic' == $subset ) {
 			$subsets .= ',cyrillic,cyrillic-ext';
-		} elseif ( 'greek' === $subset ) {
+		} elseif ( 'greek' == $subset ) {
 			$subsets .= ',greek,greek-ext';
-		} elseif ( 'vietnamese' === $subset ) {
+		} elseif ( 'vietnamese' == $subset ) {
 			$subsets .= ',vietnamese';
 		}
 
@@ -384,20 +379,6 @@ function twentytwelve_widgets_init() {
 }
 add_action( 'widgets_init', 'twentytwelve_widgets_init' );
 
-if ( ! function_exists( 'wp_get_list_item_separator' ) ) :
-	/**
-	 * Retrieves the list item separator based on the locale.
-	 *
-	 * Added for backward compatibility to support pre-6.0.0 WordPress versions.
-	 *
-	 * @since 6.0.0
-	 */
-	function wp_get_list_item_separator() {
-		/* translators: Used between list items, there is a space after the comma. */
-		return __( ', ', 'twentytwelve' );
-	}
-endif;
-
 if ( ! function_exists( 'twentytwelve_content_nav' ) ) :
 	/**
 	 * Displays navigation to next/previous pages when applicable.
@@ -408,7 +389,7 @@ if ( ! function_exists( 'twentytwelve_content_nav' ) ) :
 		global $wp_query;
 
 		if ( $wp_query->max_num_pages > 1 ) : ?>
-			<nav id="<?php echo esc_attr( $html_id ); ?>" class="navigation">
+			<nav id="<?php echo esc_attr( $html_id ); ?>" class="navigation" role="navigation">
 				<h3 class="assistive-text"><?php _e( 'Post navigation', 'twentytwelve' ); ?></h3>
 				<div class="nav-previous"><?php next_posts_link( __( '<span class="meta-nav">&larr;</span> Older posts', 'twentytwelve' ) ); ?></div>
 				<div class="nav-next"><?php previous_posts_link( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'twentytwelve' ) ); ?></div>
@@ -470,7 +451,7 @@ if ( ! function_exists( 'twentytwelve_comment' ) ) :
 				if ( $commenter['comment_author_email'] ) {
 					$moderation_note = __( 'Your comment is awaiting moderation.', 'twentytwelve' );
 				} else {
-					$moderation_note = __( 'Your comment is awaiting moderation. This is a preview; your comment will be visible after it has been approved.', 'twentytwelve' );
+					$moderation_note = __( 'Your comment is awaiting moderation. This is a preview, your comment will be visible after it has been approved.', 'twentytwelve' );
 				}
 				?>
 
@@ -516,9 +497,11 @@ if ( ! function_exists( 'twentytwelve_entry_meta' ) ) :
 	 * @since Twenty Twelve 1.0
 	 */
 	function twentytwelve_entry_meta() {
-		$categories_list = get_the_category_list( wp_get_list_item_separator() );
+		/* translators: Used between list items, there is a space after the comma. */
+		$categories_list = get_the_category_list( __( ', ', 'twentytwelve' ) );
 
-		$tags_list = get_the_tag_list( '', wp_get_list_item_separator() );
+		/* translators: Used between list items, there is a space after the comma. */
+		$tag_list = get_the_tag_list( '', __( ', ', 'twentytwelve' ) );
 
 		$date = sprintf(
 			'<a href="%1$s" title="%2$s" rel="bookmark"><time class="entry-date" datetime="%3$s">%4$s</time></a>',
@@ -536,7 +519,7 @@ if ( ! function_exists( 'twentytwelve_entry_meta' ) ) :
 			get_the_author()
 		);
 
-		if ( $tags_list && ! is_wp_error( $tags_list ) ) {
+		if ( $tag_list ) {
 			/* translators: 1: Category name, 2: Tag name, 3: Date, 4: Author display name. */
 			$utility_text = __( 'This entry was posted in %1$s and tagged %2$s on %3$s<span class="by-author"> by %4$s</span>.', 'twentytwelve' );
 		} elseif ( $categories_list ) {
@@ -550,7 +533,7 @@ if ( ! function_exists( 'twentytwelve_entry_meta' ) ) :
 		printf(
 			$utility_text,
 			$categories_list,
-			$tags_list,
+			$tag_list,
 			$date,
 			$author
 		);
@@ -595,7 +578,7 @@ function twentytwelve_body_class( $classes ) {
 	if ( empty( $background_image ) ) {
 		if ( empty( $background_color ) ) {
 			$classes[] = 'custom-background-empty';
-		} elseif ( in_array( $background_color, array( 'fff', 'ffffff' ), true ) ) {
+		} elseif ( in_array( $background_color, array( 'fff', 'ffffff' ) ) ) {
 			$classes[] = 'custom-background-white';
 		}
 	}
@@ -668,7 +651,6 @@ add_action( 'customize_register', 'twentytwelve_customize_register' );
  * Render the site title for the selective refresh partial.
  *
  * @since Twenty Twelve 2.0
- *
  * @see twentytwelve_customize_register()
  *
  * @return void
@@ -681,7 +663,6 @@ function twentytwelve_customize_partial_blogname() {
  * Render the site tagline for the selective refresh partial.
  *
  * @since Twenty Twelve 2.0
- *
  * @see twentytwelve_customize_register()
  *
  * @return void
@@ -691,7 +672,7 @@ function twentytwelve_customize_partial_blogdescription() {
 }
 
 /**
- * Enqueue JavaScript postMessage handlers for the Customizer.
+ * Enqueue Javascript postMessage handlers for the Customizer.
  *
  * Binds JS handlers to make the Customizer preview reload changes asynchronously.
  *

@@ -70,10 +70,9 @@
 
 	<footer class="entry-meta">
 		<?php $show_sep = false; ?>
-
 		<?php
-		$categories_list = get_the_category_list( wp_get_list_item_separator() );
-
+			/* translators: Used between list items, there is a space after the comma. */
+			$categories_list = get_the_category_list( __( ', ', 'twentyeleven' ) );
 		if ( $categories_list ) :
 			?>
 		<span class="cat-links">
@@ -84,11 +83,10 @@
 			?>
 		</span>
 		<?php endif; // End if categories. ?>
-
 		<?php
-		$tags_list = get_the_tag_list( '', wp_get_list_item_separator() );
-
-		if ( $tags_list && ! is_wp_error( $tags_list ) ) :
+			/* translators: Used between list items, there is a space after the comma. */
+			$tags_list = get_the_tag_list( '', __( ', ', 'twentyeleven' ) );
+		if ( $tags_list ) :
 			if ( $show_sep ) :
 				?>
 		<span class="sep"> | </span>
