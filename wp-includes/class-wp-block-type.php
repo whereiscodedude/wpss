@@ -54,18 +54,9 @@ class WP_Block_Type {
 	 * when nested within the specified blocks.
 	 *
 	 * @since 5.5.0
-	 * @var string[]|null
+	 * @var array|null
 	 */
 	public $parent = null;
-
-	/**
-	 * Setting ancestor makes a block available only inside the specified
-	 * block types at any position of the ancestor's block subtree.
-	 *
-	 * @since 6.0.0
-	 * @var string[]|null
-	 */
-	public $ancestor = null;
 
 	/**
 	 * Block type icon.
@@ -88,7 +79,7 @@ class WP_Block_Type {
 	 * in search interfaces.
 	 *
 	 * @since 5.5.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $keywords = array();
 
@@ -112,7 +103,7 @@ class WP_Block_Type {
 	 * Block variations.
 	 *
 	 * @since 5.8.0
-	 * @var array[]
+	 * @var array
 	 */
 	public $variations = array();
 
@@ -152,7 +143,7 @@ class WP_Block_Type {
 	 * Context values inherited by blocks of this type.
 	 *
 	 * @since 5.5.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $uses_context = array();
 
@@ -160,12 +151,12 @@ class WP_Block_Type {
 	 * Context provided by blocks of this type.
 	 *
 	 * @since 5.5.0
-	 * @var string[]|null
+	 * @var array|null
 	 */
 	public $provides_context = null;
 
 	/**
-	 * Block type editor only script handle.
+	 * Block type editor script handle.
 	 *
 	 * @since 5.0.0
 	 * @var string|null
@@ -173,7 +164,7 @@ class WP_Block_Type {
 	public $editor_script = null;
 
 	/**
-	 * Block type front end and editor script handle.
+	 * Block type front end script handle.
 	 *
 	 * @since 5.0.0
 	 * @var string|null
@@ -181,15 +172,7 @@ class WP_Block_Type {
 	public $script = null;
 
 	/**
-	 * Block type front end only script handle.
-	 *
-	 * @since 5.9.0
-	 * @var string|null
-	 */
-	public $view_script = null;
-
-	/**
-	 * Block type editor only style handle.
+	 * Block type editor style handle.
 	 *
 	 * @since 5.0.0
 	 * @var string|null
@@ -197,22 +180,12 @@ class WP_Block_Type {
 	public $editor_style = null;
 
 	/**
-	 * Block type front end and editor style handle.
+	 * Block type front end style handle.
 	 *
 	 * @since 5.0.0
 	 * @var string|null
 	 */
 	public $style = null;
-
-	/**
-	 * Attributes supported by every block.
-	 *
-	 * @since 6.0.0
-	 * @var array
-	 */
-	const GLOBAL_ATTRIBUTES = array(
-		'lock' => array( 'type' => 'object' ),
-	);
 
 	/**
 	 * Constructor.
@@ -225,8 +198,6 @@ class WP_Block_Type {
 	 *              `uses_context`, and `provides_context` properties.
 	 * @since 5.6.0 Added the `api_version` property.
 	 * @since 5.8.0 Added the `variations` property.
-	 * @since 5.9.0 Added the `view_script` property.
-	 * @since 6.0.0 Added the `ancestor` property.
 	 *
 	 * @see register_block_type()
 	 *
@@ -239,28 +210,25 @@ class WP_Block_Type {
 	 *     @type string        $title            Human-readable block type label.
 	 *     @type string|null   $category         Block type category classification, used in
 	 *                                           search interfaces to arrange block types by category.
-	 *     @type string[]|null $parent           Setting parent lets a block require that it is only
+	 *     @type array|null    $parent           Setting parent lets a block require that it is only
 	 *                                           available when nested within the specified blocks.
-	 *     @type string[]|null $ancestor         Setting ancestor makes a block available only inside the specified
-	 *                                           block types at any position of the ancestor's block subtree.
 	 *     @type string|null   $icon             Block type icon.
 	 *     @type string        $description      A detailed block type description.
-	 *     @type string[]      $keywords         Additional keywords to produce block type as
+	 *     @type array         $keywords         Additional keywords to produce block type as
 	 *                                           result in search interfaces.
 	 *     @type string|null   $textdomain       The translation textdomain.
-	 *     @type array[]       $styles           Alternative block styles.
-	 *     @type array[]       $variations       Block variations.
+	 *     @type array         $styles           Alternative block styles.
+	 *     @type array         $variations       Block variations.
 	 *     @type array|null    $supports         Supported features.
 	 *     @type array|null    $example          Structured data for the block preview.
 	 *     @type callable|null $render_callback  Block type render callback.
 	 *     @type array|null    $attributes       Block type attributes property schemas.
-	 *     @type string[]      $uses_context     Context values inherited by blocks of this type.
-	 *     @type string[]|null $provides_context Context provided by blocks of this type.
-	 *     @type string|null   $editor_script    Block type editor only script handle.
-	 *     @type string|null   $script           Block type front end and editor script handle.
-	 *     @type string|null   $view_script      Block type front end only script handle.
-	 *     @type string|null   $editor_style     Block type editor only style handle.
-	 *     @type string|null   $style            Block type front end and editor style handle.
+	 *     @type array         $uses_context     Context values inherited by blocks of this type.
+	 *     @type array|null    $provides_context Context provided by blocks of this type.
+	 *     @type string|null   $editor_script    Block type editor script handle.
+	 *     @type string|null   $script           Block type front end script handle.
+	 *     @type string|null   $editor_style     Block type editor style handle.
+	 *     @type string|null   $style            Block type front end style handle.
 	 * }
 	 */
 	public function __construct( $block_type, $args = array() ) {
@@ -364,18 +332,6 @@ class WP_Block_Type {
 		);
 
 		$args['name'] = $this->name;
-
-		// Setup attributes if needed.
-		if ( ! isset( $args['attributes'] ) || ! is_array( $args['attributes'] ) ) {
-			$args['attributes'] = array();
-		}
-
-		// Register core attributes.
-		foreach ( static::GLOBAL_ATTRIBUTES as $attr_key => $attr_schema ) {
-			if ( ! array_key_exists( $attr_key, $args['attributes'] ) ) {
-				$args['attributes'][ $attr_key ] = $attr_schema;
-			}
-		}
 
 		/**
 		 * Filters the arguments for registering a block type.

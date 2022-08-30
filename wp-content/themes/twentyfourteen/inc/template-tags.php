@@ -56,7 +56,7 @@ if ( ! function_exists( 'twentyfourteen_paging_nav' ) ) :
 		if ( $links ) :
 
 			?>
-		<nav class="navigation paging-navigation">
+		<nav class="navigation paging-navigation" role="navigation">
 		<h1 class="screen-reader-text"><?php _e( 'Posts navigation', 'twentyfourteen' ); ?></h1>
 		<div class="pagination loop-pagination">
 			<?php echo $links; ?>
@@ -83,7 +83,7 @@ if ( ! function_exists( 'twentyfourteen_post_nav' ) ) :
 		}
 
 		?>
-		<nav class="navigation post-navigation">
+		<nav class="navigation post-navigation" role="navigation">
 		<h1 class="screen-reader-text"><?php _e( 'Post navigation', 'twentyfourteen' ); ?></h1>
 		<div class="nav-links">
 			<?php
@@ -226,7 +226,7 @@ if ( ! function_exists( 'twentyfourteen_excerpt_more' ) && ! is_admin() ) :
 		$link = sprintf(
 			'<a href="%1$s" class="more-link">%2$s</a>',
 			esc_url( get_permalink( get_the_ID() ) ),
-			/* translators: %s: Post title. Only visible to screen readers. */
+			/* translators: %s: Post title. */
 			sprintf( __( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'twentyfourteen' ), '<span class="screen-reader-text">' . get_the_title( get_the_ID() ) . '</span>' )
 		);
 		return ' &hellip; ' . $link;

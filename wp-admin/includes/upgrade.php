@@ -31,7 +31,7 @@ if ( ! function_exists( 'wp_install' ) ) :
 	 * @param string $blog_title    Site title.
 	 * @param string $user_name     User's username.
 	 * @param string $user_email    User's email.
-	 * @param bool   $is_public     Whether the site is public.
+	 * @param bool   $public        Whether site is public.
 	 * @param string $deprecated    Optional. Not used.
 	 * @param string $user_password Optional. User's chosen password. Default empty (random password).
 	 * @param string $language      Optional. Language chosen. Default empty.
@@ -44,7 +44,7 @@ if ( ! function_exists( 'wp_install' ) ) :
 	 *     @type string $password_message The explanatory message regarding the password.
 	 * }
 	 */
-	function wp_install( $blog_title, $user_name, $user_email, $is_public, $deprecated = '', $user_password = '', $language = '' ) {
+	function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated = '', $user_password = '', $language = '' ) {
 		if ( ! empty( $deprecated ) ) {
 			_deprecated_argument( __FUNCTION__, '2.6.0' );
 		}
@@ -57,7 +57,7 @@ if ( ! function_exists( 'wp_install' ) ) :
 
 		update_option( 'blogname', $blog_title );
 		update_option( 'admin_email', $user_email );
-		update_option( 'blog_public', $is_public );
+		update_option( 'blog_public', $public );
 
 		// Freshness of site - in the future, this could get more specific about actions taken, perhaps.
 		update_option( 'fresh_site', 1 );
@@ -71,7 +71,7 @@ if ( ! function_exists( 'wp_install' ) ) :
 		update_option( 'siteurl', $guessurl );
 
 		// If not a public site, don't ping.
-		if ( ! $is_public ) {
+		if ( ! $public ) {
 			update_option( 'default_pingback_flag', 0 );
 		}
 
@@ -249,11 +249,6 @@ if ( ! function_exists( 'wp_install_defaults' ) ) :
 				'post_content_filtered' => '',
 			)
 		);
-
-		if ( is_multisite() ) {
-			update_posts_count();
-		}
-
 		$wpdb->insert(
 			$wpdb->term_relationships,
 			array(
@@ -272,15 +267,11 @@ if ( ! function_exists( 'wp_install_defaults' ) ) :
 
 		$first_comment_author = ! empty( $first_comment_author ) ? $first_comment_author : __( 'A WordPress Commenter' );
 		$first_comment_email  = ! empty( $first_comment_email ) ? $first_comment_email : 'wapuu@wordpress.example';
-		$first_comment_url    = ! empty( $first_comment_url ) ? $first_comment_url : esc_url( __( 'https://wordpress.org/' ) );
-		$first_comment        = ! empty( $first_comment ) ? $first_comment : sprintf(
-			/* translators: %s: Gravatar URL. */
-			__(
-				'Hi, this is a comment.
+		$first_comment_url    = ! empty( $first_comment_url ) ? $first_comment_url : 'https://wordpress.org/';
+		$first_comment        = ! empty( $first_comment ) ? $first_comment : __(
+			'Hi, this is a comment.
 To get started with moderating, editing, and deleting comments, please visit the Comments screen in the dashboard.
-Commenter avatars come from <a href="%s">Gravatar</a>.'
-			),
-			esc_url( __( 'https://en.gravatar.com/' ) )
+Commenter avatars come from <a href="https://gravatar.com">Gravatar</a>.'
 		);
 		$wpdb->insert(
 			$wpdb->comments,
@@ -839,14 +830,6 @@ function upgrade_all() {
 
 	if ( $wp_current_db_version < 49752 ) {
 		upgrade_560();
-	}
-
-	if ( $wp_current_db_version < 51917 ) {
-		upgrade_590();
-	}
-
-	if ( $wp_current_db_version < 53011 ) {
-		upgrade_600();
 	}
 
 	maybe_disable_link_manager();
@@ -1891,6 +1874,7 @@ function upgrade_370() {
  *
  * @ignore
  * @since 3.7.2
+ * @since 3.8.0
  *
  * @global int $wp_current_db_version The old (current) database version.
  */
@@ -2261,44 +2245,6 @@ function upgrade_560() {
 			$network_id = get_main_network_id();
 			update_network_option( $network_id, WP_Application_Passwords::OPTION_KEY_IN_USE, 1 );
 		}
-	}
-}
-
-/**
- * Executes changes made in WordPress 5.9.0.
- *
- * @ignore
- * @since 5.9.0
- *
- * @global int $wp_current_db_version The old (current) database version.
- */
-function upgrade_590() {
-	global $wp_current_db_version;
-
-	if ( $wp_current_db_version < 51917 ) {
-		$crons = _get_cron_array();
-
-		if ( $crons && is_array( $crons ) ) {
-			// Remove errant `false` values, see #53950, #54906.
-			$crons = array_filter( $crons );
-			_set_cron_array( $crons );
-		}
-	}
-}
-
-/**
- * Executes changes made in WordPress 6.0.0.
- *
- * @ignore
- * @since 6.0.0
- *
- * @global int $wp_current_db_version The old (current) database version.
- */
-function upgrade_600() {
-	global $wp_current_db_version;
-
-	if ( $wp_current_db_version < 53011 ) {
-		wp_update_user_counts();
 	}
 }
 
@@ -2713,8 +2659,6 @@ function deslash( $content ) {
  * Useful for creating new tables and updating existing tables to a new structure.
  *
  * @since 1.5.0
- * @since 6.1.0 Ignores display width for integer data types on MySQL 8.0.17 or later,
- *              to match MySQL behavior. Note: This does not affect MariaDB.
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
@@ -2791,12 +2735,8 @@ function dbDelta( $queries = '', $execute = true ) { // phpcs:ignore WordPress.N
 
 	$text_fields = array( 'tinytext', 'text', 'mediumtext', 'longtext' );
 	$blob_fields = array( 'tinyblob', 'blob', 'mediumblob', 'longblob' );
-	$int_fields  = array( 'tinyint', 'smallint', 'mediumint', 'int', 'integer', 'bigint' );
 
-	$global_tables  = $wpdb->tables( 'global' );
-	$db_version     = $wpdb->db_version();
-	$db_server_info = $wpdb->db_server_info();
-
+	$global_tables = $wpdb->tables( 'global' );
 	foreach ( $cqueries as $table => $qry ) {
 		// Upgrade global tables only for the main site. Don't upgrade at all if conditions are not optimal.
 		if ( in_array( $table, $global_tables, true ) && ! wp_should_upgrade_global_tables() ) {
@@ -2897,29 +2837,27 @@ function dbDelta( $queries = '', $execute = true ) { // phpcs:ignore WordPress.N
 					// Normalize columns.
 					foreach ( $index_columns as $id => &$index_column ) {
 						// Extract column name and number of indexed characters (sub_part).
-						// phpcs:disable Squiz.Strings.ConcatenationSpacing.PaddingFound -- don't remove regex indentation
 						preg_match(
 							'/'
-							.   '`?'                      // Name can be escaped with a backtick.
-							.       '(?P<column_name>'    // 1) Name of the column.
-							.           '(?:[0-9a-zA-Z$_-]|[\xC2-\xDF][\x80-\xBF])+'
-							.       ')'
-							.   '`?'                      // Name can be escaped with a backtick.
-							.   '(?:'                     // Optional sub part.
-							.       '\s*'                 // Optional white space character between name and opening bracket.
-							.       '\('                  // Opening bracket for the sub part.
-							.           '\s*'             // Optional white space character after opening bracket.
-							.           '(?P<sub_part>'
-							.               '\d+'         // 2) Number of indexed characters.
-							.           ')'
-							.           '\s*'             // Optional white space character before closing bracket.
-							.       '\)'                  // Closing bracket for the sub part.
-							.   ')?'
+							. '`?'                      // Name can be escaped with a backtick.
+							. '(?P<column_name>'    // 1) Name of the column.
+							. '(?:[0-9a-zA-Z$_-]|[\xC2-\xDF][\x80-\xBF])+'
+							. ')'
+							. '`?'                      // Name can be escaped with a backtick.
+							. '(?:'                     // Optional sub part.
+							. '\s*'                 // Optional white space character between name and opening bracket.
+							. '\('                  // Opening bracket for the sub part.
+							. '\s*'             // Optional white space character after opening bracket.
+							. '(?P<sub_part>'
+							. '\d+'         // 2) Number of indexed characters.
+							. ')'
+							. '\s*'             // Optional white space character before closing bracket.
+							. '\)'                 // Closing bracket for the sub part.
+							. ')?'
 							. '/',
 							$index_column,
 							$index_column_matches
 						);
-						// phpcs:enable
 
 						// Escape the column name with backticks.
 						$index_column = '`' . $index_column_matches['column_name'] . '`';
@@ -2954,19 +2892,6 @@ function dbDelta( $queries = '', $execute = true ) { // phpcs:ignore WordPress.N
 			$tablefield_field_lowercased = strtolower( $tablefield->Field );
 			$tablefield_type_lowercased  = strtolower( $tablefield->Type );
 
-			$tablefield_type_without_parentheses = preg_replace(
-				'/'
-				. '(.+)'       // Field type, e.g. `int`.
-				. '\(\d*\)'    // Display width.
-				. '(.*)'       // Optional attributes, e.g. `unsigned`.
-				. '/',
-				'$1$2',
-				$tablefield_type_lowercased
-			);
-
-			// Get the type without attributes, e.g. `int`.
-			$tablefield_type_base = strtok( $tablefield_type_without_parentheses, ' ' );
-
 			// If the table field exists in the field array...
 			if ( array_key_exists( $tablefield_field_lowercased, $cfields ) ) {
 
@@ -2974,19 +2899,6 @@ function dbDelta( $queries = '', $execute = true ) { // phpcs:ignore WordPress.N
 				preg_match( '|`?' . $tablefield->Field . '`? ([^ ]*( unsigned)?)|i', $cfields[ $tablefield_field_lowercased ], $matches );
 				$fieldtype            = $matches[1];
 				$fieldtype_lowercased = strtolower( $fieldtype );
-
-				$fieldtype_without_parentheses = preg_replace(
-					'/'
-					. '(.+)'       // Field type, e.g. `int`.
-					. '\(\d*\)'    // Display width.
-					. '(.*)'       // Optional attributes, e.g. `unsigned`.
-					. '/',
-					'$1$2',
-					$fieldtype_lowercased
-				);
-
-				// Get the type without attributes, e.g. `int`.
-				$fieldtype_base = strtok( $fieldtype_without_parentheses, ' ' );
 
 				// Is actual field type different from the field type in query?
 				if ( $tablefield->Type != $fieldtype ) {
@@ -2999,21 +2911,6 @@ function dbDelta( $queries = '', $execute = true ) { // phpcs:ignore WordPress.N
 
 					if ( in_array( $fieldtype_lowercased, $blob_fields, true ) && in_array( $tablefield_type_lowercased, $blob_fields, true ) ) {
 						if ( array_search( $fieldtype_lowercased, $blob_fields, true ) < array_search( $tablefield_type_lowercased, $blob_fields, true ) ) {
-							$do_change = false;
-						}
-					}
-
-					if ( in_array( $fieldtype_base, $int_fields, true ) && in_array( $tablefield_type_base, $int_fields, true )
-						&& $fieldtype_without_parentheses === $tablefield_type_without_parentheses
-					) {
-						/*
-						 * MySQL 8.0.17 or later does not support display width for integer data types,
-						 * so if display width is the only difference, it can be safely ignored.
-						 * Note: This is specific to MySQL and does not affect MariaDB.
-						 */
-						if ( version_compare( $db_version, '8.0.17', '>=' )
-							&& ! str_contains( $db_server_info, 'MariaDB' )
-						) {
 							$do_change = false;
 						}
 					}

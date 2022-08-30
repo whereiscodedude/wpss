@@ -149,7 +149,7 @@ function prepareMediaItemInit( fileObj ) {
 	jQuery( '.filename.original', item ).replaceWith( jQuery( '.filename.new', item ) );
 
 	// Bind Ajax to the new Delete button.
-	jQuery( 'a.delete', item ).on( 'click', function(){
+	jQuery( 'a.delete', item ).click( function(){
 		// Tell the server to delete it. TODO: Handle exceptions.
 		jQuery.ajax({
 			url: ajaxurl,
@@ -167,7 +167,7 @@ function prepareMediaItemInit( fileObj ) {
 	});
 
 	// Bind Ajax to the new Undo button.
-	jQuery( 'a.undo', item ).on( 'click', function(){
+	jQuery( 'a.undo', item ).click( function(){
 		// Tell the server to untrash it. TODO: Handle exceptions.
 		jQuery.ajax({
 			url: ajaxurl,
@@ -486,7 +486,7 @@ jQuery( document ).ready( function( $ ) {
 
 		times = tryAgainCount[ file.id ];
 
-		if ( times && times > 8 ) {
+		if ( times && times > 4 ) {
 			/*
 			 * The file may have been uploaded and attachment post created,
 			 * but post-processing and resizing failed...

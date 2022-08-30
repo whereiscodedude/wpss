@@ -11,7 +11,7 @@
 get_header();
 ?>
 
-<main id="site-content">
+<main id="site-content" role="main">
 
 	<?php
 
@@ -30,5 +30,4 @@ get_header();
 
 <?php get_template_part( 'template-parts/footer-menus-widgets' ); ?>
 
-<?php
-get_footer();
+<?php get_footer(); ?>

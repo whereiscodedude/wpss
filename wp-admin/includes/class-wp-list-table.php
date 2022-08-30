@@ -207,14 +207,12 @@ class WP_List_Table {
 	 * @since 4.0.0
 	 *
 	 * @param string $name Property to check if set.
-	 * @return bool Whether the property is a back-compat property and it is set.
+	 * @return bool Whether the property is set.
 	 */
 	public function __isset( $name ) {
 		if ( in_array( $name, $this->compat_fields, true ) ) {
 			return isset( $this->$name );
 		}
-
-		return false;
 	}
 
 	/**
@@ -315,8 +313,6 @@ class WP_List_Table {
 		if ( isset( $this->_pagination_args[ $key ] ) ) {
 			return $this->_pagination_args[ $key ];
 		}
-
-		return 0;
 	}
 
 	/**
@@ -600,7 +596,7 @@ class WP_List_Table {
 		}
 
 		/**
-		 * Filters whether to short-circuit performing the months dropdown query.
+		 * Filters to short-circuit performing the months dropdown query.
 		 *
 		 * @since 5.7.0
 		 *
@@ -823,14 +819,14 @@ class WP_List_Table {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param string $option        User option name.
-	 * @param int    $default_value Optional. The number of items to display. Default 20.
+	 * @param string $option
+	 * @param int    $default
 	 * @return int
 	 */
-	protected function get_items_per_page( $option, $default_value = 20 ) {
+	protected function get_items_per_page( $option, $default = 20 ) {
 		$per_page = (int) get_user_option( $option );
 		if ( empty( $per_page ) || $per_page < 1 ) {
-			$per_page = $default_value;
+			$per_page = $default;
 		}
 
 		/**
@@ -910,9 +906,15 @@ class WP_List_Table {
 			$disable_first = true;
 			$disable_prev  = true;
 		}
+		if ( 2 == $current ) {
+			$disable_first = true;
+		}
 		if ( $total_pages == $current ) {
 			$disable_last = true;
 			$disable_next = true;
+		}
+		if ( $total_pages - 1 == $current ) {
+			$disable_last = true;
 		}
 
 		if ( $disable_first ) {
@@ -1108,10 +1110,7 @@ class WP_List_Table {
 	 */
 	protected function get_column_info() {
 		// $_column_headers is already set / cached.
-		if (
-			isset( $this->_column_headers ) &&
-			is_array( $this->_column_headers )
-		) {
+		if ( isset( $this->_column_headers ) && is_array( $this->_column_headers ) ) {
 			/*
 			 * Backward compatibility for `$_column_headers` format prior to WordPress 4.3.
 			 *
@@ -1119,18 +1118,12 @@ class WP_List_Table {
 			 * column headers property. This ensures the primary column name is included
 			 * in plugins setting the property directly in the three item format.
 			 */
-			if ( 4 === count( $this->_column_headers ) ) {
-				return $this->_column_headers;
-			}
-
 			$column_headers = array( array(), array(), array(), $this->get_primary_column_name() );
 			foreach ( $this->_column_headers as $key => $value ) {
 				$column_headers[ $key ] = $value;
 			}
 
-			$this->_column_headers = $column_headers;
-
-			return $this->_column_headers;
+			return $column_headers;
 		}
 
 		$columns = get_column_headers( $this->screen );

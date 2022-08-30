@@ -41,12 +41,6 @@
  * These variables do not appear to be used anywhere else.
  */
 /**
-*  Converts a hex value into the rgb equivalent.
-*
-* @param {string} hex - the hexadecimal value to convert
-* @return {string} comma separated rgb values
-*/
-/**
  * Breakpoint mixins
  */
 /**
@@ -91,26 +85,23 @@
   pointer-events: none;
 }
 
-@media (min-width: 600px) {
-  .wp-block-page-list-modal {
-    max-width: 480px;
-  }
+.wp-block-page-list .components-placeholder {
+  min-height: 0;
+  padding: 0;
+  background-color: inherit;
+}
+.wp-block-page-list .components-placeholder .components-spinner {
+  margin: 0.5em;
+}
+
+.wp-block-page-list-modal {
+  max-width: 400px;
 }
 
 .wp-block-page-list-modal-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
 }
-
-.wp-block-page-list .open-on-click:focus-within > .wp-block-navigation__submenu-container {
-  visibility: visible;
-  opacity: 1;
-  width: auto;
-  height: auto;
-  min-width: 200px;
-}
-
-.wp-block-page-list .components-notice {
-  margin-right: 0;
+.wp-block-page-list-modal-buttons .components-button {
+  margin-right: 12px;
 }

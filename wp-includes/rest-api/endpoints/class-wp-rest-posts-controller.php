@@ -40,14 +40,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	protected $password_check_passed = array();
 
 	/**
-	 * Whether the controller supports batching.
-	 *
-	 * @since 5.9.0
-	 * @var array
-	 */
-	protected $allow_batch = array( 'v1' => true );
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 4.7.0
@@ -56,9 +48,9 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	 */
 	public function __construct( $post_type ) {
 		$this->post_type = $post_type;
+		$this->namespace = 'wp/v2';
 		$obj             = get_post_type_object( $post_type );
 		$this->rest_base = ! empty( $obj->rest_base ) ? $obj->rest_base : $obj->name;
-		$this->namespace = ! empty( $obj->rest_namespace ) ? $obj->rest_namespace : 'wp/v2';
 
 		$this->meta = new WP_REST_Post_Meta_Fields( $this->post_type );
 	}
@@ -88,8 +80,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
-				'allow_batch' => $this->allow_batch,
-				'schema'      => array( $this, 'get_public_item_schema' ),
+				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
 
@@ -107,7 +98,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'args'        => array(
+				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the post.' ),
 						'type'        => 'integer',
@@ -137,8 +128,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 						),
 					),
 				),
-				'allow_batch' => $this->allow_batch,
-				'schema'      => array( $this, 'get_public_item_schema' ),
+				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
 	}
@@ -167,7 +157,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Overrides the result of the post password check for REST requested posts.
+	 * Override the result of the post password check for REST requested posts.
 	 *
 	 * Allow users to read the content of password protected posts if they have
 	 * previously passed a permission check or if they have the `edit_post` capability
@@ -369,13 +359,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 
 		$posts = array();
 
-		update_post_author_caches( $query_result );
-		update_post_parent_caches( $query_result );
-
-		if ( post_type_supports( $this->post_type, 'thumbnail' ) ) {
-			update_post_thumbnail_cache( $posts_query );
-		}
-
 		foreach ( $query_result as $post ) {
 			if ( ! $this->check_read_permission( $post ) ) {
 				continue;
@@ -393,7 +376,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		$page        = (int) $query_args['paged'];
 		$total_posts = $posts_query->found_posts;
 
-		if ( $total_posts < 1 && $page > 1 ) {
+		if ( $total_posts < 1 ) {
 			// Out-of-bounds, run the query again without LIMIT for total count.
 			unset( $query_args['paged'] );
 
@@ -441,7 +424,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Gets the post, if the ID is valid.
+	 * Get the post, if the ID is valid.
 	 *
 	 * @since 4.7.2
 	 *
@@ -653,26 +636,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 
 		$prepared_post->post_type = $this->post_type;
 
-		if ( ! empty( $prepared_post->post_name )
-			&& ! empty( $prepared_post->post_status )
-			&& in_array( $prepared_post->post_status, array( 'draft', 'pending' ), true )
-		) {
-			/*
-			 * `wp_unique_post_slug()` returns the same
-			 * slug for 'draft' or 'pending' posts.
-			 *
-			 * To ensure that a unique slug is generated,
-			 * pass the post data with the 'publish' status.
-			 */
-			$prepared_post->post_name = wp_unique_post_slug(
-				$prepared_post->post_name,
-				$prepared_post->id,
-				'publish',
-				$prepared_post->post_type,
-				$prepared_post->post_parent
-			);
-		}
-
 		$post_id = wp_insert_post( wp_slash( (array) $prepared_post ), true, false );
 
 		if ( is_wp_error( $post_id ) ) {
@@ -852,24 +815,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 
 		if ( is_wp_error( $post ) ) {
 			return $post;
-		}
-
-		if ( ! empty( $post->post_status ) ) {
-			$post_status = $post->post_status;
-		} else {
-			$post_status = $post_before->post_status;
-		}
-
-		/*
-		 * `wp_unique_post_slug()` returns the same
-		 * slug for 'draft' or 'pending' posts.
-		 *
-		 * To ensure that a unique slug is generated,
-		 * pass the post data with the 'publish' status.
-		 */
-		if ( ! empty( $post->post_name ) && in_array( $post_status, array( 'draft', 'pending' ), true ) ) {
-			$post_parent     = ! empty( $post->post_parent ) ? $post->post_parent : 0;
-			$post->post_name = wp_unique_post_slug( $post->post_name, $post->ID, 'publish', $post->post_type, $post_parent );
 		}
 
 		// Convert the post object to an array, otherwise wp_update_post() will expect non-escaped input.
@@ -1078,12 +1023,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 * Fires immediately after a single post is deleted or trashed via the REST API.
 		 *
 		 * They dynamic portion of the hook name, `$this->post_type`, refers to the post type slug.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_delete_post`
-		 *  - `rest_delete_page`
-		 *  - `rest_delete_attachment`
 		 *
 		 * @since 4.7.0
 		 *
@@ -1492,7 +1431,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Checks whether the template is valid for the given post.
+	 * Check whether the template is valid for the given post.
 	 *
 	 * @since 4.9.0
 	 *
@@ -1596,7 +1535,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 				continue;
 			}
 
-			foreach ( (array) $request[ $base ] as $term_id ) {
+			foreach ( $request[ $base ] as $term_id ) {
 				// Invalid terms will be rejected later.
 				if ( ! get_term( $term_id, $taxonomy->name ) ) {
 					continue;
@@ -1734,15 +1673,12 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	 * Prepares a single post output for response.
 	 *
 	 * @since 4.7.0
-	 * @since 5.9.0 Renamed `$post` to `$item` to match parent class for PHP 8 named parameter support.
 	 *
-	 * @param WP_Post         $item    Post object.
+	 * @param WP_Post         $post    Post object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response Response object.
 	 */
-	public function prepare_item_for_response( $item, $request ) {
-		// Restores the more descriptive, specific name for use within this method.
-		$post            = $item;
+	public function prepare_item_for_response( $post, $request ) {
 		$GLOBALS['post'] = $post;
 
 		setup_postdata( $post );
@@ -1971,18 +1907,16 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		if ( rest_is_field_included( '_links', $fields ) || rest_is_field_included( '_embedded', $fields ) ) {
-			$links = $this->prepare_links( $post );
-			$response->add_links( $links );
+		$links = $this->prepare_links( $post );
+		$response->add_links( $links );
 
-			if ( ! empty( $links['self']['href'] ) ) {
-				$actions = $this->get_available_actions( $post, $request );
+		if ( ! empty( $links['self']['href'] ) ) {
+			$actions = $this->get_available_actions( $post, $request );
 
-				$self = $links['self']['href'];
+			$self = $links['self']['href'];
 
-				foreach ( $actions as $rel ) {
-					$response->add_link( $rel, $self );
-				}
+			foreach ( $actions as $rel ) {
+				$response->add_link( $rel, $self );
 			}
 		}
 
@@ -2064,8 +1998,8 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		if ( in_array( $post->post_type, array( 'post', 'page' ), true ) || post_type_supports( $post->post_type, 'revisions' ) ) {
-			$revisions       = wp_get_latest_revision_id_and_total_count( $post->ID );
-			$revisions_count = ! is_wp_error( $revisions ) ? $revisions['count'] : 0;
+			$revisions       = wp_get_post_revisions( $post->ID, array( 'fields' => 'ids' ) );
+			$revisions_count = count( $revisions );
 
 			$links['version-history'] = array(
 				'href'  => rest_url( trailingslashit( $base ) . $post->ID . '/revisions' ),
@@ -2073,9 +2007,11 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			);
 
 			if ( $revisions_count > 0 ) {
+				$last_revision = array_shift( $revisions );
+
 				$links['predecessor-version'] = array(
-					'href' => rest_url( trailingslashit( $base ) . $post->ID . '/revisions/' . $revisions['latest_id'] ),
-					'id'   => $revisions['latest_id'],
+					'href' => rest_url( trailingslashit( $base ) . $post->ID . '/revisions/' . $last_revision ),
+					'id'   => $last_revision,
 				);
 			}
 		}
@@ -2084,7 +2020,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 
 		if ( $post_type_obj->hierarchical && ! empty( $post->post_parent ) ) {
 			$links['up'] = array(
-				'href'       => rest_url( rest_get_route_for_post( $post->post_parent ) ),
+				'href'       => rest_url( trailingslashit( $base ) . (int) $post->post_parent ),
 				'embeddable' => true,
 			);
 		}
@@ -2092,7 +2028,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		// If we have a featured media, add that.
 		$featured_media = get_post_thumbnail_id( $post->ID );
 		if ( $featured_media ) {
-			$image_url = rest_url( rest_get_route_for_post( $featured_media ) );
+			$image_url = rest_url( 'wp/v2/media/' . $featured_media );
 
 			$links['https://api.w.org/featuredmedia'] = array(
 				'href'       => $image_url,
@@ -2101,7 +2037,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		if ( ! in_array( $post->post_type, array( 'attachment', 'nav_menu_item', 'revision' ), true ) ) {
-			$attachments_url = rest_url( rest_get_route_for_post_type_items( 'attachment' ) );
+			$attachments_url = rest_url( 'wp/v2/media' );
 			$attachments_url = add_query_arg( 'parent', $post->ID, $attachments_url );
 
 			$links['https://api.w.org/attachment'] = array(
@@ -2115,16 +2051,19 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 			$links['https://api.w.org/term'] = array();
 
 			foreach ( $taxonomies as $tax ) {
-				$taxonomy_route = rest_get_route_for_taxonomy_items( $tax );
+				$taxonomy_obj = get_taxonomy( $tax );
 
 				// Skip taxonomies that are not public.
-				if ( empty( $taxonomy_route ) ) {
+				if ( empty( $taxonomy_obj->show_in_rest ) ) {
 					continue;
 				}
+
+				$tax_base = ! empty( $taxonomy_obj->rest_base ) ? $taxonomy_obj->rest_base : $tax;
+
 				$terms_url = add_query_arg(
 					'post',
 					$post->ID,
-					rest_url( $taxonomy_route )
+					rest_url( 'wp/v2/' . $tax_base )
 				);
 
 				$links['https://api.w.org/term'][] = array(
@@ -2139,7 +2078,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Gets the link relations available for the post and current user.
+	 * Get the link relations available for the post and current user.
 	 *
 	 * @since 4.9.8
 	 *
@@ -2595,12 +2534,6 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 		 * The dynamic portion of the filter, `$this->post_type`, refers to the
 		 * post type slug for the controller.
 		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_post_item_schema`
-		 *  - `rest_page_item_schema`
-		 *  - `rest_attachment_item_schema`
-		 *
 		 * @since 5.4.0
 		 *
 		 * @param array $schema Item schema data.
@@ -2627,7 +2560,7 @@ class WP_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Retrieves Link Description Objects that should be added to the Schema for the posts collection.
+	 * Retrieve Link Description Objects that should be added to the Schema for the posts collection.
 	 *
 	 * @since 4.9.8
 	 *

@@ -17,10 +17,10 @@
  * @param string $value    The CSS value.
  * @param string $prefix   The CSS prefix.
  * @param string $suffix   The CSS suffix.
- * @param bool   $display  Print the styles.
+ * @param bool   $echo     Echo the styles.
  * @return string
  */
-function twenty_twenty_one_generate_css( $selector, $style, $value, $prefix = '', $suffix = '', $display = true ) {
+function twenty_twenty_one_generate_css( $selector, $style, $value, $prefix = '', $suffix = '', $echo = true ) {
 
 	// Bail early if there is no $selector elements or properties and $value.
 	if ( ! $value || ! $selector ) {
@@ -29,7 +29,7 @@ function twenty_twenty_one_generate_css( $selector, $style, $value, $prefix = ''
 
 	$css = sprintf( '%s { %s: %s; }', $selector, $style, $prefix . $value . $suffix );
 
-	if ( $display ) {
+	if ( $echo ) {
 		/*
 		 * Note to reviewers: $css contains auto-generated CSS.
 		 * It is included inside <style> tags and can only be interpreted as CSS on the browser.
