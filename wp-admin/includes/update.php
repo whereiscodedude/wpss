@@ -220,8 +220,6 @@ function find_core_update( $version, $locale ) {
 }
 
 /**
- * Returns core update footer message.
- *
  * @since 2.3.0
  *
  * @param string $msg
@@ -277,19 +275,17 @@ function core_update_footer( $msg = '' ) {
 }
 
 /**
- * Returns core update notification message.
- *
  * @since 2.3.0
  *
- * @global string $pagenow The filename of the current screen.
+ * @global string $pagenow
  * @return void|false
  */
 function update_nag() {
-	global $pagenow;
-
 	if ( is_multisite() && ! current_user_can( 'update_core' ) ) {
 		return false;
 	}
+
+	global $pagenow;
 
 	if ( 'update-core.php' === $pagenow ) {
 		return;
@@ -374,8 +370,6 @@ function update_right_now_message() {
 }
 
 /**
- * Retrieves plugins with updates available.
- *
  * @since 2.9.0
  *
  * @return array
@@ -395,8 +389,6 @@ function get_plugin_updates() {
 }
 
 /**
- * Adds a callback to display update information for plugins with updates available.
- *
  * @since 2.9.0
  */
 function wp_plugin_update_rows() {
@@ -542,7 +534,7 @@ function wp_plugin_update_row( $file, $plugin_data ) {
 			} else {
 				printf(
 					/* translators: 1: Plugin name, 2: Details URL, 3: Additional link attributes, 4: Version number 5: URL to Update PHP page. */
-					__( 'There is a new version of %1$s available, but it does not work with your version of PHP. <a href="%2$s" %3$s>View version %4$s details</a> or <a href="%5$s">learn more about updating PHP</a>.' ),
+					__( 'There is a new version of %1$s available, but it doesn&#8217;t work with your version of PHP. <a href="%2$s" %3$s>View version %4$s details</a> or <a href="%5$s">learn more about updating PHP</a>.' ),
 					$plugin_name,
 					esc_url( $details_url ),
 					sprintf(
@@ -593,8 +585,6 @@ function wp_plugin_update_row( $file, $plugin_data ) {
 }
 
 /**
- * Retrieves themes with updates available.
- *
  * @since 2.9.0
  *
  * @return array
@@ -616,8 +606,6 @@ function get_theme_updates() {
 }
 
 /**
- * Adds a callback to display update information for themes with updates available.
- *
  * @since 3.1.0
  */
 function wp_theme_update_rows() {
@@ -734,7 +722,7 @@ function wp_theme_update_row( $theme_key, $theme ) {
 		if ( ! $compatible_wp && ! $compatible_php ) {
 			printf(
 				/* translators: %s: Theme name. */
-				__( 'There is a new version of %s available, but it does not work with your versions of WordPress and PHP.' ),
+				__( 'There is a new version of %s available, but it doesn&#8217;t work with your versions of WordPress and PHP.' ),
 				$theme['Name']
 			);
 			if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
@@ -762,7 +750,7 @@ function wp_theme_update_row( $theme_key, $theme ) {
 		} elseif ( ! $compatible_wp ) {
 			printf(
 				/* translators: %s: Theme name. */
-				__( 'There is a new version of %s available, but it does not work with your version of WordPress.' ),
+				__( 'There is a new version of %s available, but it doesn&#8217;t work with your version of WordPress.' ),
 				$theme['Name']
 			);
 			if ( current_user_can( 'update_core' ) ) {
@@ -775,7 +763,7 @@ function wp_theme_update_row( $theme_key, $theme ) {
 		} elseif ( ! $compatible_php ) {
 			printf(
 				/* translators: %s: Theme name. */
-				__( 'There is a new version of %s available, but it does not work with your version of PHP.' ),
+				__( 'There is a new version of %s available, but it doesn&#8217;t work with your version of PHP.' ),
 				$theme['Name']
 			);
 			if ( current_user_can( 'update_php' ) ) {
@@ -813,8 +801,6 @@ function wp_theme_update_row( $theme_key, $theme ) {
 }
 
 /**
- * Displays maintenance nag HTML message.
- *
  * @since 2.7.0
  *
  * @global int $upgrading
@@ -863,8 +849,6 @@ function maintenance_nag() {
 /**
  * Prints the JavaScript templates for update admin notices.
  *
- * @since 4.6.0
- *
  * Template takes one argument with four values:
  *
  *     param {object} data {
@@ -875,6 +859,8 @@ function maintenance_nag() {
  *         @type string message   The notice's message.
  *         @type string type      The type of update the notice is for. Either 'plugin' or 'theme'.
  *     }
+ *
+ * @since 4.6.0
  */
 function wp_print_admin_notice_templates() {
 	?>
@@ -944,8 +930,6 @@ function wp_print_admin_notice_templates() {
 /**
  * Prints the JavaScript templates for update and deletion rows in list tables.
  *
- * @since 4.6.0
- *
  * The update template takes one argument with four values:
  *
  *     param {object} data {
@@ -967,6 +951,8 @@ function wp_print_admin_notice_templates() {
  *         @type string name    Plugin name.
  *         @type string colspan The number of table columns this row spans.
  *     }
+ *
+ * @since 4.6.0
  */
 function wp_print_update_row_templates() {
 	?>

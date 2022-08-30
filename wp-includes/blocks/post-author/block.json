@@ -1,10 +1,9 @@
 {
-	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
 	"name": "core/post-author",
 	"title": "Post Author",
 	"category": "theme",
-	"description": "Display post author details such as name, avatar, and bio.",
+	"description": "Add the author of this post.",
 	"textdomain": "default",
 	"attributes": {
 		"textAlign": {
@@ -46,11 +45,7 @@
 		"color": {
 			"gradients": true,
 			"link": true,
-			"__experimentalDuotone": ".wp-block-post-author__avatar img",
-			"__experimentalDefaultControls": {
-				"background": true,
-				"text": true
-			}
+			"__experimentalDuotone": ".wp-block-post-author__avatar img"
 		}
 	},
 	"editorStyle": "wp-block-post-author-editor",

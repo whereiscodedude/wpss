@@ -134,7 +134,7 @@ function twenty_twenty_one_get_avatar_size() {
  */
 function twenty_twenty_one_continue_reading_text() {
 	$continue_reading = sprintf(
-		/* translators: %s: Post title. Only visible to screen readers. */
+		/* translators: %s: Name of current post. */
 		esc_html__( 'Continue reading %s', 'twentytwentyone' ),
 		the_title( '<span class="screen-reader-text">', '</span>', false )
 	);
@@ -167,7 +167,7 @@ function twenty_twenty_one_continue_reading_link() {
 	}
 }
 
-// Filter the content more link.
+// Filter the excerpt more link.
 add_filter( 'the_content_more_link', 'twenty_twenty_one_continue_reading_link' );
 
 if ( ! function_exists( 'twenty_twenty_one_post_title' ) ) {

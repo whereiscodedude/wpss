@@ -203,7 +203,6 @@
 .components-button {
   display: inline-flex;
   text-decoration: none;
-  font-family: inherit;
   font-weight: normal;
   font-size: 13px;
   margin: 0;
@@ -354,17 +353,6 @@ p + .components-button.is-tertiary {
   color: #fff;
   background: #710d0d;
   box-shadow: inset 0 0 0 1px #710d0d;
-}
-.components-button.is-destructive.is-tertiary {
-  box-shadow: none;
-}
-.components-button.is-destructive.is-tertiary:hover:not(:disabled) {
-  box-shadow: inset 0 0 0 1px #cc1818;
-  color: #cc1818;
-}
-.components-button.is-destructive.is-tertiary:focus:not(:disabled) {
-  box-shadow: inset 0 0 0 1px #fff, 0 0 0 var(--wp-admin-border-width-focus) #cc1818;
-  color: #cc1818;
 }
 .components-button.is-link {
   margin: 0;
@@ -595,11 +583,11 @@ p + .components-button.is-tertiary {
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--wp-admin-theme-color);
   outline: 2px solid transparent;
 }
-.components-checkbox-control__input[type=checkbox]:checked, .components-checkbox-control__input[type=checkbox]:indeterminate {
+.components-checkbox-control__input[type=checkbox]:checked {
   background: var(--wp-admin-theme-color);
   border-color: var(--wp-admin-theme-color);
 }
-.components-checkbox-control__input[type=checkbox]:checked::-ms-check, .components-checkbox-control__input[type=checkbox]:indeterminate::-ms-check {
+.components-checkbox-control__input[type=checkbox]:checked::-ms-check {
   opacity: 0;
 }
 .components-checkbox-control__input[type=checkbox]:checked::before {
@@ -621,8 +609,7 @@ p + .components-button.is-tertiary {
   }
 }
 
-svg.components-checkbox-control__checked,
-svg.components-checkbox-control__indeterminate {
+svg.components-checkbox-control__checked {
   fill: #fff;
   cursor: pointer;
   position: absolute;
@@ -635,8 +622,7 @@ svg.components-checkbox-control__indeterminate {
   pointer-events: none;
 }
 @media (min-width: 600px) {
-  svg.components-checkbox-control__checked,
-svg.components-checkbox-control__indeterminate {
+  svg.components-checkbox-control__checked {
     left: -2px;
     top: -2px;
   }
@@ -790,12 +776,14 @@ svg.components-checkbox-control__indeterminate {
 }
 
 .component-color-indicator {
-  width: 20px;
-  height: 20px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
-  border-radius: 50%;
+  width: 25px;
+  height: 16px;
+  margin-left: 0.8rem;
+  border: 1px solid #dadada;
   display: inline-block;
-  padding: 0;
+}
+.component-color-indicator + .component-color-indicator {
+  margin-left: 0.5rem;
 }
 
 .components-combobox-control {
@@ -806,7 +794,6 @@ input.components-combobox-control__input[type=text] {
   width: 100%;
   border: none;
   box-shadow: none;
-  font-family: inherit;
   font-size: 16px;
   padding: 2px;
   margin: 0;
@@ -877,8 +864,8 @@ input.components-combobox-control__input[type=text]:focus {
 
 .components-combobox-control__reset.components-button {
   display: flex;
-  height: 16px;
-  min-width: 16px;
+  height: 24px;
+  min-width: 24px;
   padding: 0;
 }
 
@@ -895,10 +882,10 @@ input.components-combobox-control__input[type=text]:focus {
   position: relative;
   border: none;
   background: none;
+  display: block;
   border-radius: 2px;
-  height: 64px;
-  padding: 12px;
-  font-family: inherit;
+  height: 48px;
+  text-align: right;
   width: 100%;
   background-image: repeating-linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%, #e0e0e0), repeating-linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%, #e0e0e0);
   background-position: 0 0, 25px 25px;
@@ -941,15 +928,6 @@ input.components-combobox-control__input[type=text]:focus {
     margin-bottom: -60px;
   }
 }
-.components-color-palette__custom-color-name {
-  text-align: left;
-}
-
-.components-color-palette__custom-color-value {
-  margin-left: 16px;
-  text-transform: uppercase;
-}
-
 .components-custom-gradient-picker__gradient-bar:not(.has-gradient) {
   opacity: 0.4;
 }
@@ -1039,8 +1017,13 @@ input.components-combobox-control__input[type=text]:focus {
   border-radius: 2px;
 }
 
+.components-custom-gradient-picker .components-select-control__input,
+.components-custom-gradient-picker .components-input-control__input {
+  height: 40px !important;
+}
 .components-custom-gradient-picker .components-input-control__label {
   line-height: 1;
+  padding-bottom: 8px !important;
 }
 .components-custom-gradient-picker label {
   text-transform: uppercase;
@@ -1060,19 +1043,12 @@ input.components-combobox-control__input[type=text]:focus {
 .components-custom-select-control__button {
   border: 1px solid #757575;
   border-radius: 2px;
+  min-height: 30px;
   min-width: 130px;
   position: relative;
   text-align: left;
 }
-.components-custom-select-control__button:not(.is-next-36px-default-size) {
-  min-height: 30px;
-}
 .components-custom-select-control__button.components-custom-select-control__button {
-  padding-left: 16px;
-  padding-right: 32px;
-}
-.components-custom-select-control__button.components-custom-select-control__button:not(.is-next-36px-default-size) {
-  padding-left: 8px;
   padding-right: 24px;
 }
 .components-custom-select-control__button:focus:not(:disabled) {
@@ -1083,11 +1059,8 @@ input.components-combobox-control__input[type=text]:focus {
   height: 100%;
   padding: 0;
   position: absolute;
-  right: 8px;
+  right: 0;
   top: 0;
-}
-.components-custom-select-control__button .components-custom-select-control__button-icon:not(.is-next-36px-default-size) {
-  right: 4px;
 }
 
 .components-custom-select-control__menu {
@@ -1112,12 +1085,9 @@ input.components-combobox-control__input[type=text]:focus {
   display: grid;
   grid-template-columns: auto auto;
   list-style-type: none;
-  padding: 8px 16px;
+  padding: 8px;
   cursor: default;
   line-height: 28px;
-}
-.components-custom-select-control__item:not(.is-next-36px-default-size) {
-  padding: 8px;
 }
 .components-custom-select-control__item.has-hint {
   grid-template-columns: auto auto 30px;
@@ -2345,10 +2315,6 @@ input.components-combobox-control__input[type=text]:focus {
   left: -999em;
 }
 
-.components-datetime__time-field-integer-field {
-  font-family: inherit;
-}
-
 .components-datetime__time-field-hours-input,
 .components-datetime__time-field-minutes-input,
 .components-datetime__time-field-day-input {
@@ -2778,7 +2744,6 @@ body.is-dragging-components-draggable {
 .components-form-token-field__input-container input[type=text].components-form-token-field__input {
   display: inline-block;
   flex: 1;
-  font-family: inherit;
   font-size: 16px;
   width: 100%;
   max-width: 100%;
@@ -2806,7 +2771,7 @@ body.is-dragging-components-draggable {
 
 .components-form-token-field__label {
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .components-form-token-field__help {
@@ -3043,6 +3008,9 @@ body.is-dragging-components-draggable {
 }
 .components-button.components-guide__finish-button {
   right: 32px;
+}
+.components-button.components-guide__inline-finish-button {
+  display: none;
 }
 
 [role=region] {
@@ -3295,13 +3263,6 @@ body.is-dragging-components-draggable {
   content: "";
   display: block;
   margin-bottom: 24px;
-}
-.components-modal__content.hide-header {
-  margin-top: 0;
-  padding-top: 24px;
-}
-.components-modal__content.hide-header::before {
-  content: none;
 }
 
 .components-notice {
@@ -3607,16 +3568,6 @@ body.rtl .components-panel__body-toggle.components-button .dashicons-arrow-right
 .components-placeholder__fieldset form p {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-size: 13px;
-}
-
-.components-placeholder__fieldset.components-placeholder__fieldset {
-  border: none;
-  padding: 0;
-}
-.components-placeholder__fieldset.components-placeholder__fieldset .components-placeholder__instructions {
-  padding: 0;
-  font-weight: normal;
-  font-size: 1em;
 }
 
 .components-placeholder__fieldset.is-column-layout,
@@ -4783,6 +4734,178 @@ div.components-toolbar > div + div.has-left-divider::before {
   left: -3px;
   width: 1px;
   height: 20px;
+}
+
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button:first-child:last-child,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown:first-child:last-child .components-button, .block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot.components-dropdown > .components-button.components-button, .block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot.components-dropdown > * .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button:first-child:last-child,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown:first-child:last-child .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot.components-dropdown > .components-button.components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot.components-dropdown > * .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button:first-child:last-child,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown:first-child:last-child .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar.components-dropdown > .components-button.components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar.components-dropdown > * .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button:first-child:last-child,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown:first-child:last-child .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown.components-dropdown > .components-button.components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown.components-dropdown > * .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button:first-child:last-child,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown:first-child:last-child .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group.components-dropdown > .components-button.components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group.components-dropdown > * .components-button {
+  min-width: 48px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button:first-child:last-child::before,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown:first-child:last-child .components-button::before, .block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot.components-dropdown > .components-button.components-button::before, .block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot.components-dropdown > * .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button:first-child:last-child::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown:first-child:last-child .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot.components-dropdown > .components-button.components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot.components-dropdown > * .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button:first-child:last-child::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown:first-child:last-child .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar.components-dropdown > .components-button.components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar.components-dropdown > * .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button:first-child:last-child::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown:first-child:last-child .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown.components-dropdown > .components-button.components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown.components-dropdown > * .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button:first-child:last-child::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown:first-child:last-child .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group.components-dropdown > .components-button.components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group.components-dropdown > * .components-button::before {
+  left: 8px;
+  right: 8px;
+}
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button:first-child,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > div:first-child > .components-button,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown:first-child .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button:first-child,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > div:first-child > .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown:first-child .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button:first-child,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > div:first-child > .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown:first-child .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button:first-child,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > div:first-child > .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown:first-child .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button:first-child,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > div:first-child > .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown:first-child .components-button {
+  min-width: 42px;
+  padding-left: 11px;
+  padding-right: 6px;
+}
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button:first-child::before,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > div:first-child > .components-button::before,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown:first-child .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button:first-child::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > div:first-child > .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown:first-child .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button:first-child::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > div:first-child > .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown:first-child .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button:first-child::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > div:first-child > .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown:first-child .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button:first-child::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > div:first-child > .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown:first-child .components-button::before {
+  left: 8px;
+  right: 2px;
+}
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > div > .components-button,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > div > .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > div > .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > div > .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > div > .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown .components-button {
+  min-width: 36px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button svg,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > div > .components-button svg,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown .components-button svg,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button svg,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > div > .components-button svg,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown .components-button svg,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button svg,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > div > .components-button svg,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown .components-button svg,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button svg,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > div > .components-button svg,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown .components-button svg,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button svg,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > div > .components-button svg,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown .components-button svg {
+  min-width: 24px;
+}
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button::before,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > div > .components-button::before,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > div > .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > div > .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > div > .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > div > .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown .components-button::before {
+  left: 2px;
+  right: 2px;
+}
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button:last-child,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > div:last-child > .components-button,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown:last-child .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button:last-child,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > div:last-child > .components-button,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown:last-child .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button:last-child,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > div:last-child > .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown:last-child .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button:last-child,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > div:last-child > .components-button,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown:last-child .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button:last-child,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > div:last-child > .components-button,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown:last-child .components-button {
+  min-width: 42px;
+  padding-left: 6px;
+  padding-right: 11px;
+}
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-button:last-child::before,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > div:last-child > .components-button::before,
+.block-editor-block-toolbar > .components-toolbar > .block-editor-block-toolbar__slot > .components-dropdown:last-child .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-button:last-child::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > div:last-child > .components-button::before,
+.block-editor-block-toolbar > .components-toolbar-group > .block-editor-block-toolbar__slot > .components-dropdown:last-child .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-button:last-child::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > div:last-child > .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-toolbar > .components-dropdown:last-child .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-button:last-child::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > div:last-child > .components-button::before,
+.block-editor-block-toolbar > .block-editor-block-toolbar__slot > .components-dropdown > .components-dropdown:last-child .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-button:last-child::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > div:last-child > .components-button::before,
+.block-editor-block-toolbar .block-editor-block-toolbar__slot .components-toolbar-group > .components-dropdown:last-child .components-button::before {
+  left: 2px;
+  right: 8px;
 }
 
 .components-tooltip.components-popover {

@@ -103,12 +103,7 @@ function render_block_core_template_part( $attributes ) {
 		}
 	}
 
-	// WP_DEBUG_DISPLAY must only be honored when WP_DEBUG. This precedent
-	// is set in `wp_debug_mode()`.
-	$is_debug = defined( 'WP_DEBUG' ) && WP_DEBUG &&
-		defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY;
-
-	if ( is_null( $content ) && $is_debug ) {
+	if ( is_null( $content ) && is_user_logged_in() ) {
 		if ( ! isset( $attributes['slug'] ) ) {
 			// If there is no slug this is a placeholder and we dont want to return any message.
 			return;
@@ -121,6 +116,11 @@ function render_block_core_template_part( $attributes ) {
 	}
 
 	if ( isset( $seen_ids[ $template_part_id ] ) ) {
+		// WP_DEBUG_DISPLAY must only be honored when WP_DEBUG. This precedent
+		// is set in `wp_debug_mode()`.
+		$is_debug = defined( 'WP_DEBUG' ) && WP_DEBUG &&
+			defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY;
+
 		return $is_debug ?
 			// translators: Visible only in the front end, this warning takes the place of a faulty block.
 			__( '[block rendering halted]' ) :

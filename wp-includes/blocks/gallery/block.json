@@ -1,5 +1,4 @@
 {
-	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
 	"name": "core/gallery",
 	"title": "Gallery",
@@ -106,24 +105,7 @@
 	},
 	"supports": {
 		"anchor": true,
-		"align": true,
-		"html": false,
-		"units": [ "px", "em", "rem", "vh", "vw" ],
-		"spacing": {
-			"blockGap": true,
-			"__experimentalSkipSerialization": [ "blockGap" ],
-			"__experimentalDefaultControls": {
-				"blockGap": true
-			}
-		},
-		"__experimentalLayout": {
-			"allowSwitching": false,
-			"allowInheriting": false,
-			"allowEditing": false,
-			"default": {
-				"type": "flex"
-			}
-		}
+		"align": true
 	},
 	"editorStyle": "wp-block-gallery-editor",
 	"style": "wp-block-gallery"

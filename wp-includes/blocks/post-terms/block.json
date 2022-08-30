@@ -1,5 +1,4 @@
 {
-	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
 	"name": "core/post-terms",
 	"title": "Post Terms",
@@ -23,12 +22,7 @@
 		"html": false,
 		"color": {
 			"gradients": true,
-			"link": true,
-			"__experimentalDefaultControls": {
-				"background": true,
-				"text": true,
-				"link": true
-			}
+			"link": true
 		},
 		"typography": {
 			"lineHeight": true,

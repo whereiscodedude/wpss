@@ -25,8 +25,8 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 	 * @since 5.8.0
 	 */
 	public function __construct() {
-		$this->namespace = 'wp/v2';
-		$this->rest_base = 'pattern-directory';
+		$this->namespace     = 'wp/v2';
+			$this->rest_base = 'pattern-directory';
 	}
 
 	/**
@@ -80,7 +80,6 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 	 * Search and retrieve block patterns metadata
 	 *
 	 * @since 5.8.0
-	 * @since 6.0.0 Added 'slug' to request.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
@@ -101,7 +100,6 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 		$category_id = $request['category'];
 		$keyword_id  = $request['keyword'];
 		$search_term = $request['search'];
-		$slug        = $request['slug'];
 
 		if ( $category_id ) {
 			$query_args['pattern-categories'] = $category_id;
@@ -115,11 +113,16 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 			$query_args['search'] = $search_term;
 		}
 
-		if ( $slug ) {
-			$query_args['slug'] = $slug;
-		}
-
-		$transient_key = $this->get_transient_key( $query_args );
+		/*
+		 * Include a hash of the query args, so that different requests are stored in
+		 * separate caches.
+		 *
+		 * MD5 is chosen for its speed, low-collision rate, universal availability, and to stay
+		 * under the character limit for `_site_transient_timeout_{...}` keys.
+		 *
+		 * @link https://stackoverflow.com/questions/3665247/fastest-hash-for-non-cryptographic-uses
+		 */
+		$transient_key = 'wp_remote_block_patterns_' . md5( implode( '-', $query_args ) );
 
 		/*
 		 * Use network-wide transient to improve performance. The locale is the only site
@@ -128,7 +131,11 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 		$raw_patterns = get_site_transient( $transient_key );
 
 		if ( ! $raw_patterns ) {
-			$api_url = 'http://api.wordpress.org/patterns/1.0/?' . build_query( $query_args );
+			$api_url = add_query_arg(
+				array_map( 'rawurlencode', $query_args ),
+				'http://api.wordpress.org/patterns/1.0/'
+			);
+
 			if ( wp_http_supports( array( 'ssl' ) ) ) {
 				$api_url = set_url_scheme( $api_url, 'https' );
 			}
@@ -152,7 +159,7 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 				$raw_patterns = new WP_Error(
 					'pattern_api_failed',
 					sprintf(
-						/* translators: %s: Support forums URL. */
+					/* translators: %s: Support forums URL. */
 						__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.' ),
 						__( 'https://wordpress.org/support/forums/' )
 					),
@@ -248,21 +255,21 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 					'description' => __( 'The pattern ID.' ),
 					'type'        => 'integer',
 					'minimum'     => 1,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'embed' ),
 				),
 
 				'title'          => array(
 					'description' => __( 'The pattern title, in human readable format.' ),
 					'type'        => 'string',
 					'minLength'   => 1,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'embed' ),
 				),
 
 				'content'        => array(
 					'description' => __( 'The pattern content.' ),
 					'type'        => 'string',
 					'minLength'   => 1,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'embed' ),
 				),
 
 				'categories'     => array(
@@ -270,7 +277,7 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'uniqueItems' => true,
 					'items'       => array( 'type' => 'string' ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'embed' ),
 				),
 
 				'keywords'       => array(
@@ -278,20 +285,20 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'uniqueItems' => true,
 					'items'       => array( 'type' => 'string' ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'embed' ),
 				),
 
 				'description'    => array(
 					'description' => __( 'A description of the pattern.' ),
 					'type'        => 'string',
 					'minLength'   => 1,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'embed' ),
 				),
 
 				'viewport_width' => array(
 					'description' => __( 'The preferred width of the viewport when previewing a pattern, in pixels.' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'embed' ),
 				),
 			),
 		);
@@ -328,11 +335,6 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 			'minimum'     => 1,
 		);
 
-		$query_params['slug'] = array(
-			'description' => __( 'Limit results to those matching a pattern (slug).' ),
-			'type'        => 'array',
-		);
-
 		/**
 		 * Filter collection parameters for the block pattern directory controller.
 		 *
@@ -341,37 +343,5 @@ class WP_REST_Pattern_Directory_Controller extends WP_REST_Controller {
 		 * @param array $query_params JSON Schema-formatted collection parameters.
 		 */
 		return apply_filters( 'rest_pattern_directory_collection_params', $query_params );
-	}
-
-	/*
-	 * Include a hash of the query args, so that different requests are stored in
-	 * separate caches.
-	 *
-	 * MD5 is chosen for its speed, low-collision rate, universal availability, and to stay
-	 * under the character limit for `_site_transient_timeout_{...}` keys.
-	 *
-	 * @link https://stackoverflow.com/questions/3665247/fastest-hash-for-non-cryptographic-uses
-	 *
-	 * @since 6.0.0
-	 *
-	 * @param array $query_args Query arguments to generate a transient key from.
-	 * @return string Transient key.
-	 */
-	protected function get_transient_key( $query_args ) {
-
-		if ( isset( $query_args['slug'] ) ) {
-			// This is an additional precaution because the "sort" function expects an array.
-			$query_args['slug'] = wp_parse_list( $query_args['slug'] );
-
-			// Empty arrays should not affect the transient key.
-			if ( empty( $query_args['slug'] ) ) {
-				unset( $query_args['slug'] );
-			} else {
-				// Sort the array so that the transient key doesn't depend on the order of slugs.
-				sort( $query_args['slug'] );
-			}
-		}
-
-		return 'wp_remote_block_patterns_' . md5( serialize( $query_args ) );
 	}
 }

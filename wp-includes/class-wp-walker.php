@@ -24,12 +24,12 @@ class Walker {
 	 * DB fields to use.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 */
 	public $db_fields;
 
 	/**
-	 * Max number of pages walked by the paged walker.
+	 * Max number of pages walked by the paged walker
 	 *
 	 * @since 2.7.0
 	 * @var int
@@ -77,10 +77,10 @@ class Walker {
 	public function end_lvl( &$output, $depth = 0, $args = array() ) {}
 
 	/**
-	 * Starts the element output.
+	 * Start the element output.
 	 *
 	 * The $args parameter holds additional values that may be used with the child
-	 * class methods. Also includes the element output.
+	 * class methods. Includes the element output also.
 	 *
 	 * @since 2.1.0
 	 * @since 5.9.0 Renamed `$object` (a PHP reserved keyword) to `$data_object` for PHP 8 named parameter support.
@@ -111,7 +111,7 @@ class Walker {
 	public function end_el( &$output, $data_object, $depth = 0, $args = array() ) {}
 
 	/**
-	 * Traverses elements to create list from elements.
+	 * Traverse elements to create list from elements.
 	 *
 	 * Display one element if the element doesn't have any children otherwise,
 	 * display the element and its children. Will only traverse up to the max
@@ -170,7 +170,7 @@ class Walker {
 	}
 
 	/**
-	 * Displays array of elements hierarchically.
+	 * Display array of elements hierarchically.
 	 *
 	 * Does not assume any existing order of elements.
 	 *
@@ -263,7 +263,7 @@ class Walker {
 	}
 
 	/**
-	 * Produces a page of nested elements.
+	 * paged_walk() - produce a page of nested elements
 	 *
 	 * Given an array of hierarchical elements, the maximum depth, a specific page number,
 	 * and number of elements per page, this function first determines all top level root elements
@@ -276,12 +276,12 @@ class Walker {
 	 * @since 5.3.0 Formalized the existing `...$args` parameter by adding it
 	 *              to the function signature.
 	 *
-	 * @param array $elements  An array of elements.
+	 * @param array $elements
 	 * @param int   $max_depth The maximum hierarchical depth.
 	 * @param int   $page_num  The specific page number, beginning with 1.
-	 * @param int   $per_page  Number of elements per page.
+	 * @param int   $per_page
 	 * @param mixed ...$args   Optional additional arguments.
-	 * @return string XHTML of the specified page of elements.
+	 * @return string XHTML of the specified page of elements
 	 */
 	public function paged_walk( $elements, $max_depth, $page_num, $per_page, ...$args ) {
 		if ( empty( $elements ) || $max_depth < -1 ) {
@@ -422,20 +422,20 @@ class Walker {
 	}
 
 	/**
-	 * Unsets all the children for a given top level element.
+	 * Unset all the children for a given top level element.
 	 *
 	 * @since 2.7.0
 	 *
-	 * @param object $element           The top level element.
-	 * @param array  $children_elements The children elements.
+	 * @param object $e
+	 * @param array  $children_elements
 	 */
-	public function unset_children( $element, &$children_elements ) {
-		if ( ! $element || ! $children_elements ) {
+	public function unset_children( $e, &$children_elements ) {
+		if ( ! $e || ! $children_elements ) {
 			return;
 		}
 
 		$id_field = $this->db_fields['id'];
-		$id       = $element->$id_field;
+		$id       = $e->$id_field;
 
 		if ( ! empty( $children_elements[ $id ] ) && is_array( $children_elements[ $id ] ) ) {
 			foreach ( (array) $children_elements[ $id ] as $child ) {

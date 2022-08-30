@@ -26,7 +26,7 @@
  * Restart Apache!
  * Check phpinfo() streams to confirm that: ssh2.shell, ssh2.exec, ssh2.tunnel, ssh2.scp, ssh2.sftp  exist.
  *
- * Note: As of WordPress 2.8, this utilizes the PHP5+ function `stream_get_contents()`.
+ * Note: As of WordPress 2.8, this utilises the PHP5+ function `stream_get_contents()`.
  *
  * @since 2.7.0
  *
@@ -557,11 +557,11 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	 *
 	 * @since 2.7.0
 	 *
-	 * @param string $path Path to file or directory.
-	 * @return bool Whether $path exists or not.
+	 * @param string $file Path to file or directory.
+	 * @return bool Whether $file exists or not.
 	 */
-	public function exists( $path ) {
-		return file_exists( $this->sftp_path( $path ) );
+	public function exists( $file ) {
+		return file_exists( $this->sftp_path( $file ) );
 	}
 
 	/**
@@ -605,10 +605,10 @@ class WP_Filesystem_SSH2 extends WP_Filesystem_Base {
 	 *
 	 * @since 2.7.0
 	 *
-	 * @param string $path Path to file or directory.
-	 * @return bool Whether $path is writable.
+	 * @param string $file Path to file or directory.
+	 * @return bool Whether $file is writable.
 	 */
-	public function is_writable( $path ) {
+	public function is_writable( $file ) {
 		// PHP will base its writable checks on system_user === file_owner, not ssh_user === file_owner.
 		return true;
 	}

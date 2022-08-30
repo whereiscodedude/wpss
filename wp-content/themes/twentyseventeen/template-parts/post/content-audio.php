@@ -79,7 +79,7 @@
 
 			the_content(
 				sprintf(
-					/* translators: %s: Post title. Only visible to screen readers. */
+					/* translators: %s: Post title. */
 					__( 'Continue reading<span class="screen-reader-text"> "%s"</span>', 'twentyseventeen' ),
 					get_the_title()
 				)

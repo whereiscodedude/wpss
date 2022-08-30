@@ -673,15 +673,7 @@ div#wp-responsive-toggle a:before {
 
 /* Welcome Panel */
 .welcome-panel {
-  background-color: #f3f7f4;
-}
-
-.welcome-panel-header-image .about-six {
-  fill: #9ebaa0;
-}
-
-.welcome-panel-header-image .about-zero {
-  fill: #738e96;
+  background-color: #9ebaa0;
 }
 
 [class*=welcome-panel-icon] {

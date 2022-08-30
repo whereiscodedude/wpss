@@ -238,13 +238,13 @@ final class WP_Customize_Widgets {
 	 *
 	 * @since 3.9.0
 	 *
-	 * @param string $name          Post value.
-	 * @param mixed  $default_value Default post value.
+	 * @param string $name    Post value.
+	 * @param mixed  $default Default post value.
 	 * @return mixed Unslashed post value or default value.
 	 */
-	protected function get_post_value( $name, $default_value = null ) {
+	protected function get_post_value( $name, $default = null ) {
 		if ( ! isset( $_POST[ $name ] ) ) {
-			return $default_value;
+			return $default;
 		}
 
 		return wp_unslash( $_POST[ $name ] );
@@ -420,7 +420,6 @@ final class WP_Customize_Widgets {
 				'priority'                 => 110,
 				'active_callback'          => array( $this, 'is_panel_active' ),
 				'auto_expand_sole_section' => true,
-				'theme_supports'           => 'widgets',
 			)
 		);
 
@@ -747,7 +746,7 @@ final class WP_Customize_Widgets {
 		 */
 		$some_non_rendered_areas_messages    = array();
 		$some_non_rendered_areas_messages[1] = html_entity_decode(
-			__( 'Your theme has 1 other widget area, but this particular page does not display it.' ),
+			__( 'Your theme has 1 other widget area, but this particular page doesn&#8217;t display it.' ),
 			ENT_QUOTES,
 			get_bloginfo( 'charset' )
 		);
@@ -757,8 +756,8 @@ final class WP_Customize_Widgets {
 				sprintf(
 					/* translators: %s: The number of other widget areas registered but not rendered. */
 					_n(
-						'Your theme has %s other widget area, but this particular page does not display it.',
-						'Your theme has %s other widget areas, but this particular page does not display them.',
+						'Your theme has %s other widget area, but this particular page doesn&#8217;t display it.',
+						'Your theme has %s other widget areas, but this particular page doesn&#8217;t display them.',
 						$non_rendered_count
 					),
 					number_format_i18n( $non_rendered_count )
@@ -771,7 +770,7 @@ final class WP_Customize_Widgets {
 		if ( 1 === $registered_sidebar_count ) {
 			$no_areas_shown_message = html_entity_decode(
 				sprintf(
-					__( 'Your theme has 1 widget area, but this particular page does not display it.' )
+					__( 'Your theme has 1 widget area, but this particular page doesn&#8217;t display it.' )
 				),
 				ENT_QUOTES,
 				get_bloginfo( 'charset' )
@@ -781,8 +780,8 @@ final class WP_Customize_Widgets {
 				sprintf(
 					/* translators: %s: The total number of widget areas registered. */
 					_n(
-						'Your theme has %s widget area, but this particular page does not display it.',
-						'Your theme has %s widget areas, but this particular page does not display them.',
+						'Your theme has %s widget area, but this particular page doesn&#8217;t display it.',
+						'Your theme has %s widget areas, but this particular page doesn&#8217;t display them.',
 						$registered_sidebar_count
 					),
 					number_format_i18n( $registered_sidebar_count )
@@ -838,11 +837,7 @@ final class WP_Customize_Widgets {
 		 */
 
 		if ( wp_use_widgets_block_editor() ) {
-			$block_editor_context = new WP_Block_Editor_Context(
-				array(
-					'name' => 'core/customize-widgets',
-				)
-			);
+			$block_editor_context = new WP_Block_Editor_Context();
 
 			$editor_settings = get_block_editor_settings(
 				get_legacy_widget_block_editor_settings(),
@@ -2057,15 +2052,15 @@ final class WP_Customize_Widgets {
 	 *
 	 * @since 4.2.0
 	 *
-	 * @param string $option_name   Option name.
-	 * @param mixed  $default_value Optional. Default value to return if the option does not exist. Default false.
+	 * @param string $option_name Option name.
+	 * @param mixed  $default     Optional. Default value to return if the option does not exist. Default false.
 	 * @return mixed Value set for the option.
 	 */
-	protected function get_captured_option( $option_name, $default_value = false ) {
+	protected function get_captured_option( $option_name, $default = false ) {
 		if ( array_key_exists( $option_name, $this->_captured_options ) ) {
 			$value = $this->_captured_options[ $option_name ];
 		} else {
-			$value = $default_value;
+			$value = $default;
 		}
 		return $value;
 	}

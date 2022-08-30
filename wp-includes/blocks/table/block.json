@@ -1,5 +1,4 @@
 {
-	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
 	"name": "core/table",
 	"title": "Table",
@@ -128,11 +127,7 @@
 		"align": true,
 		"color": {
 			"__experimentalSkipSerialization": true,
-			"gradients": true,
-			"__experimentalDefaultControls": {
-				"background": true,
-				"text": true
-			}
+			"gradients": true
 		},
 		"typography": {
 			"fontSize": true,
@@ -149,12 +144,7 @@
 			"__experimentalSkipSerialization": true,
 			"color": true,
 			"style": true,
-			"width": true,
-			"__experimentalDefaultControls": {
-				"color": true,
-				"style": true,
-				"width": true
-			}
+			"width": true
 		},
 		"__experimentalSelector": ".wp-block-table > table"
 	},

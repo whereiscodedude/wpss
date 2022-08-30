@@ -81,10 +81,16 @@ if ( ! CUSTOM_TAGS ) {
 			'target' => true,
 		),
 		'article'    => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'aside'      => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'audio'      => array(
 			'autoplay' => true,
@@ -95,10 +101,14 @@ if ( ! CUSTOM_TAGS ) {
 			'src'      => true,
 		),
 		'b'          => array(),
-		'bdo'        => array(),
+		'bdo'        => array(
+			'dir' => true,
+		),
 		'big'        => array(),
 		'blockquote' => array(
-			'cite' => true,
+			'cite'     => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'br'         => array(),
 		'button'     => array(
@@ -110,13 +120,17 @@ if ( ! CUSTOM_TAGS ) {
 		'caption'    => array(
 			'align' => true,
 		),
-		'cite'       => array(),
+		'cite'       => array(
+			'dir'  => true,
+			'lang' => true,
+		),
 		'code'       => array(),
 		'col'        => array(
 			'align'   => true,
 			'char'    => true,
 			'charoff' => true,
 			'span'    => true,
+			'dir'     => true,
 			'valign'  => true,
 			'width'   => true,
 		),
@@ -134,21 +148,33 @@ if ( ! CUSTOM_TAGS ) {
 		'dd'         => array(),
 		'dfn'        => array(),
 		'details'    => array(
-			'align' => true,
-			'open'  => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'open'     => true,
+			'xml:lang' => true,
 		),
 		'div'        => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'dl'         => array(),
 		'dt'         => array(),
 		'em'         => array(),
 		'fieldset'   => array(),
 		'figure'     => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'figcaption' => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'font'       => array(
 			'color' => true,
@@ -156,7 +182,10 @@ if ( ! CUSTOM_TAGS ) {
 			'size'  => true,
 		),
 		'footer'     => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'h1'         => array(
 			'align' => true,
@@ -177,10 +206,16 @@ if ( ! CUSTOM_TAGS ) {
 			'align' => true,
 		),
 		'header'     => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'hgroup'     => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'hr'         => array(
 			'align'   => true,
@@ -218,7 +253,10 @@ if ( ! CUSTOM_TAGS ) {
 			'value' => true,
 		),
 		'main'       => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'map'        => array(
 			'name' => true,
@@ -228,7 +266,10 @@ if ( ! CUSTOM_TAGS ) {
 			'type' => true,
 		),
 		'nav'        => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'object'     => array(
 			'data' => array(
@@ -241,7 +282,10 @@ if ( ! CUSTOM_TAGS ) {
 			),
 		),
 		'p'          => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'pre'        => array(
 			'width' => true,
@@ -249,25 +293,29 @@ if ( ! CUSTOM_TAGS ) {
 		'q'          => array(
 			'cite' => true,
 		),
-		'rb'         => array(),
-		'rp'         => array(),
-		'rt'         => array(),
-		'rtc'        => array(),
-		'ruby'       => array(),
 		's'          => array(),
 		'samp'       => array(),
 		'span'       => array(
-			'align' => true,
+			'dir'      => true,
+			'align'    => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'section'    => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'small'      => array(),
 		'strike'     => array(),
 		'strong'     => array(),
 		'sub'        => array(),
 		'summary'    => array(
-			'align' => true,
+			'align'    => true,
+			'dir'      => true,
+			'lang'     => true,
+			'xml:lang' => true,
 		),
 		'sup'        => array(),
 		'table'      => array(
@@ -276,6 +324,7 @@ if ( ! CUSTOM_TAGS ) {
 			'border'      => true,
 			'cellpadding' => true,
 			'cellspacing' => true,
+			'dir'         => true,
 			'rules'       => true,
 			'summary'     => true,
 			'width'       => true,
@@ -294,6 +343,7 @@ if ( ! CUSTOM_TAGS ) {
 			'char'    => true,
 			'charoff' => true,
 			'colspan' => true,
+			'dir'     => true,
 			'headers' => true,
 			'height'  => true,
 			'nowrap'  => true,
@@ -820,10 +870,6 @@ function wp_kses_allowed_html( $context = '' ) {
 		/**
 		 * Filters the HTML tags that are allowed for a given context.
 		 *
-		 * HTML tags and attribute names are case-insensitive in HTML but must be
-		 * added to the KSES allow list in lowercase. An item added to the allow list
-		 * in upper or mixed case will not recognized as permitted by KSES.
-		 *
 		 * @since 3.5.0
 		 *
 		 * @param array[] $html    Allowed HTML tags.
@@ -1094,7 +1140,7 @@ function wp_kses_split2( $string, $allowed_html, $allowed_protocols ) {
  * Removes all attributes, if none are allowed for this element.
  *
  * If some are allowed it calls `wp_kses_hair()` to split them further, and then
- * it builds up new HTML code from the data that `wp_kses_hair()` returns. It also
+ * it builds up new HTML code from the data that `kses_hair()` returns. It also
  * removes `<` and `>` characters, if there are any left. One more thing it does
  * is to check if the tag has a closing XHTML slash, and if it does, it puts one
  * in the returned code as well.
@@ -1191,7 +1237,7 @@ function wp_kses_attr( $element, $attr, $allowed_html, $allowed_protocols ) {
  * Determines whether an attribute is allowed.
  *
  * @since 4.2.3
- * @since 5.0.0 Added support for `data-*` wildcard attributes.
+ * @since 5.0.0 Add support for `data-*` wildcard attributes.
  *
  * @param string $name         The attribute name. Passed by reference. Returns empty string when not allowed.
  * @param string $value        The attribute value. Passed by reference. Returns a filtered value.
@@ -1225,9 +1271,7 @@ function wp_kses_attr_check( &$name, &$value, &$whole, $vless, $element, $allowe
 		 * Note: the attribute name should only contain `A-Za-z0-9_-` chars,
 		 * double hyphens `--` are not accepted by WordPress.
 		 */
-		if ( strpos( $name_low, 'data-' ) === 0 && ! empty( $allowed_attr['data-*'] )
-			&& preg_match( '/^data(?:-[a-z0-9_]+)+$/', $name_low, $match )
-		) {
+		if ( strpos( $name_low, 'data-' ) === 0 && ! empty( $allowed_attr['data-*'] ) && preg_match( '/^data(?:-[a-z0-9_]+)+$/', $name_low, $match ) ) {
 			/*
 			 * Add the whole attribute name to the allowed attributes and set any restrictions
 			 * for the `data-*` attribute values for the current element.
@@ -1881,7 +1925,7 @@ function wp_kses_named_entities( $matches ) {
  * @since 5.5.0
  *
  * @global array $allowedentitynames
- * @global array $allowedxmlentitynames
+ * @global array $allowedxmlnamedentities
  *
  * @param array $matches preg_replace_callback() matches array.
  * @return string Correctly encoded entity.
@@ -2508,9 +2552,7 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
  * Helper function to add global attributes to a tag in the allowed HTML list.
  *
  * @since 3.5.0
- * @since 5.0.0 Added support for `data-*` wildcard attributes.
- * @since 6.0.0 Added `dir`, `lang`, and `xml:lang` to global attributes.
- *
+ * @since 5.0.0 Add support for `data-*` wildcard attributes.
  * @access private
  * @ignore
  *
@@ -2525,14 +2567,11 @@ function _wp_add_global_attributes( $value ) {
 		'aria-labelledby'  => true,
 		'aria-hidden'      => true,
 		'class'            => true,
-		'data-*'           => true,
-		'dir'              => true,
 		'id'               => true,
-		'lang'             => true,
 		'style'            => true,
 		'title'            => true,
 		'role'             => true,
-		'xml:lang'         => true,
+		'data-*'           => true,
 	);
 
 	if ( true === $value ) {

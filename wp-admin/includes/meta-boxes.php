@@ -287,7 +287,7 @@ function post_submit_meta_box( $post, $args = array() ) {
 					<?php
 					printf(
 						/* translators: %s: URL to the Customizer. */
-						__( 'This draft comes from your <a href="%s">unpublished customization changes</a>. You can edit, but there is no need to publish now. It will be published automatically with those changes.' ),
+						__( 'This draft comes from your <a href="%s">unpublished customization changes</a>. You can edit, but there&#8217;s no need to publish now. It will be published automatically with those changes.' ),
 						esc_url(
 							add_query_arg(
 								'changeset_uuid',
@@ -382,11 +382,11 @@ function post_submit_meta_box( $post, $args = array() ) {
 }
 
 /**
- * Displays attachment submit form fields.
+ * Display attachment submit form fields.
  *
  * @since 3.5.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function attachment_submit_meta_box( $post ) {
 	?>
@@ -462,11 +462,11 @@ function attachment_submit_meta_box( $post ) {
 }
 
 /**
- * Displays post format form elements.
+ * Display post format form elements.
  *
  * @since 3.1.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post Post object.
  * @param array   $box {
  *     Post formats meta box arguments.
  *
@@ -485,7 +485,7 @@ function post_format_meta_box( $post, $box ) {
 			if ( ! $post_format ) {
 				$post_format = '0';
 			}
-			// Add in the current one if it isn't there yet, in case the active theme doesn't support it.
+			// Add in the current one if it isn't there yet, in case the current theme doesn't support it.
 			if ( $post_format && ! in_array( $post_format, $post_formats[0], true ) ) {
 				$post_formats[0][] = $post_format;
 			}
@@ -505,13 +505,13 @@ endif;
 }
 
 /**
- * Displays post tags form fields.
+ * Display post tags form fields.
  *
  * @since 2.6.0
  *
  * @todo Create taxonomy-agnostic wrapper for this.
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post Post object.
  * @param array   $box {
  *     Tags meta box arguments.
  *
@@ -568,13 +568,13 @@ function post_tags_meta_box( $post, $box ) {
 }
 
 /**
- * Displays post categories form fields.
+ * Display post categories form fields.
  *
  * @since 2.6.0
  *
  * @todo Create taxonomy-agnostic wrapper for this.
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post Post object.
  * @param array   $box {
  *     Categories meta box arguments.
  *
@@ -692,11 +692,11 @@ function post_categories_meta_box( $post, $box ) {
 }
 
 /**
- * Displays post excerpt form fields.
+ * Display post excerpt form fields.
  *
  * @since 2.6.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function post_excerpt_meta_box( $post ) {
 	?>
@@ -714,11 +714,11 @@ function post_excerpt_meta_box( $post ) {
 }
 
 /**
- * Displays trackback links form fields.
+ * Display trackback links form fields.
  *
  * @since 2.6.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function post_trackback_meta_box( $post ) {
 	$form_trackback = '<input type="text" name="trackback_url" id="trackback_url" class="code" value="' .
@@ -755,11 +755,11 @@ function post_trackback_meta_box( $post ) {
 }
 
 /**
- * Displays custom fields form fields.
+ * Display custom fields form fields.
  *
  * @since 2.6.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function post_custom_meta_box( $post ) {
 	?>
@@ -789,11 +789,11 @@ function post_custom_meta_box( $post ) {
 }
 
 /**
- * Displays comments status form fields.
+ * Display comments status form fields.
  *
  * @since 2.6.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function post_comment_status_meta_box( $post ) {
 	?>
@@ -815,7 +815,7 @@ function post_comment_status_meta_box( $post ) {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param WP_Post $post WP_Post object for the current post.
+	 * @param WP_Post $post WP_Post object of the current post.
 	 */
 	do_action( 'post_comment_status_meta_box-options', $post ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	?>
@@ -824,11 +824,11 @@ function post_comment_status_meta_box( $post ) {
 }
 
 /**
- * Displays comments for post table header
+ * Display comments for post table header
  *
  * @since 3.0.0
  *
- * @param array $result Table header rows.
+ * @param array $result table header rows
  * @return array
  */
 function post_comment_meta_box_thead( $result ) {
@@ -837,11 +837,11 @@ function post_comment_meta_box_thead( $result ) {
 }
 
 /**
- * Displays comments for post.
+ * Display comments for post.
  *
  * @since 2.8.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function post_comment_meta_box( $post ) {
 	wp_nonce_field( 'get-comments', 'add_comment_nonce', false );
@@ -878,11 +878,11 @@ function post_comment_meta_box( $post ) {
 }
 
 /**
- * Displays slug form fields.
+ * Display slug form fields.
  *
  * @since 2.6.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function post_slug_meta_box( $post ) {
 	/** This filter is documented in wp-admin/edit-tag-form.php */
@@ -893,13 +893,13 @@ function post_slug_meta_box( $post ) {
 }
 
 /**
- * Displays form field with list of authors.
+ * Display form field with list of authors.
  *
  * @since 2.6.0
  *
  * @global int $user_ID
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function post_author_meta_box( $post ) {
 	global $user_ID;
@@ -920,11 +920,11 @@ function post_author_meta_box( $post ) {
 }
 
 /**
- * Displays list of revisions.
+ * Display list of revisions.
  *
  * @since 2.6.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function post_revisions_meta_box( $post ) {
 	wp_list_post_revisions( $post );
@@ -935,11 +935,11 @@ function post_revisions_meta_box( $post ) {
 //
 
 /**
- * Displays page attributes form fields.
+ * Display page attributes form fields.
  *
  * @since 2.7.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post
  */
 function page_attributes_meta_box( $post ) {
 	if ( is_post_type_hierarchical( $post->post_type ) ) :
@@ -1032,11 +1032,11 @@ function page_attributes_meta_box( $post ) {
 //
 
 /**
- * Displays link create form fields.
+ * Display link create form fields.
  *
  * @since 2.7.0
  *
- * @param object $link Current link object.
+ * @param object $link
  */
 function link_submit_meta_box( $link ) {
 	?>
@@ -1108,11 +1108,11 @@ function link_submit_meta_box( $link ) {
 }
 
 /**
- * Displays link categories form fields.
+ * Display link categories form fields.
  *
  * @since 2.6.0
  *
- * @param object $link Current link object.
+ * @param object $link
  */
 function link_categories_meta_box( $link ) {
 	?>
@@ -1155,11 +1155,11 @@ function link_categories_meta_box( $link ) {
 }
 
 /**
- * Displays form fields for changing link target.
+ * Display form fields for changing link target.
  *
  * @since 2.6.0
  *
- * @param object $link Current link object.
+ * @param object $link
  */
 function link_target_meta_box( $link ) {
 
@@ -1180,70 +1180,52 @@ function link_target_meta_box( $link ) {
 }
 
 /**
- * Displays 'checked' checkboxes attribute for XFN microformat options.
+ * Display checked checkboxes attribute for xfn microformat options.
  *
  * @since 1.0.1
  *
- * @global object $link Current link object.
+ * @global object $link
  *
- * @param string $xfn_relationship XFN relationship category. Possible values are:
- *                                 'friendship', 'physical', 'professional',
- *                                 'geographical', 'family', 'romantic', 'identity'.
- * @param string $xfn_value        Optional. The XFN value to mark as checked
- *                                 if it matches the current link's relationship.
- *                                 Default empty string.
- * @param mixed  $deprecated       Deprecated. Not used.
+ * @param string $class
+ * @param string $value
+ * @param mixed  $deprecated Never used.
  */
-function xfn_check( $xfn_relationship, $xfn_value = '', $deprecated = '' ) {
+function xfn_check( $class, $value = '', $deprecated = '' ) {
 	global $link;
 
 	if ( ! empty( $deprecated ) ) {
 		_deprecated_argument( __FUNCTION__, '2.5.0' ); // Never implemented.
 	}
 
-	$link_rel  = isset( $link->link_rel ) ? $link->link_rel : ''; // In PHP 5.3: $link_rel = $link->link_rel ?: '';
-	$link_rels = preg_split( '/\s+/', $link_rel );
+	$link_rel = isset( $link->link_rel ) ? $link->link_rel : ''; // In PHP 5.3: $link_rel = $link->link_rel ?: '';
+	$rels     = preg_split( '/\s+/', $link_rel );
 
-	// Mark the specified value as checked if it matches the current link's relationship.
-	if ( '' !== $xfn_value && in_array( $xfn_value, $link_rels, true ) ) {
+	if ( '' !== $value && in_array( $value, $rels, true ) ) {
 		echo ' checked="checked"';
 	}
 
-	if ( '' === $xfn_value ) {
-		// Mark the 'none' value as checked if the current link does not match the specified relationship.
-		if ( 'family' === $xfn_relationship
-			&& ! array_intersect( $link_rels, array( 'child', 'parent', 'sibling', 'spouse', 'kin' ) )
-		) {
+	if ( '' === $value ) {
+		if ( 'family' === $class && strpos( $link_rel, 'child' ) === false && strpos( $link_rel, 'parent' ) === false && strpos( $link_rel, 'sibling' ) === false && strpos( $link_rel, 'spouse' ) === false && strpos( $link_rel, 'kin' ) === false ) {
 			echo ' checked="checked"';
 		}
-
-		if ( 'friendship' === $xfn_relationship
-			&& ! array_intersect( $link_rels, array( 'friend', 'acquaintance', 'contact' ) )
-		) {
+		if ( 'friendship' === $class && strpos( $link_rel, 'friend' ) === false && strpos( $link_rel, 'acquaintance' ) === false && strpos( $link_rel, 'contact' ) === false ) {
 			echo ' checked="checked"';
 		}
-
-		if ( 'geographical' === $xfn_relationship
-			&& ! array_intersect( $link_rels, array( 'co-resident', 'neighbor' ) )
-		) {
+		if ( 'geographical' === $class && strpos( $link_rel, 'co-resident' ) === false && strpos( $link_rel, 'neighbor' ) === false ) {
 			echo ' checked="checked"';
 		}
-
-		// Mark the 'me' value as checked if it matches the current link's relationship.
-		if ( 'identity' === $xfn_relationship
-			&& in_array( 'me', $link_rels, true )
-		) {
+		if ( 'identity' === $class && in_array( 'me', $rels, true ) ) {
 			echo ' checked="checked"';
 		}
 	}
 }
 
 /**
- * Displays XFN form fields.
+ * Display xfn form fields.
  *
  * @since 2.6.0
  *
- * @param object $link Current link object.
+ * @param object $link
  */
 function link_xfn_meta_box( $link ) {
 	?>
@@ -1357,11 +1339,11 @@ function link_xfn_meta_box( $link ) {
 }
 
 /**
- * Displays advanced link options form fields.
+ * Display advanced link options form fields.
  *
  * @since 2.6.0
  *
- * @param object $link Current link object.
+ * @param object $link
  */
 function link_advanced_meta_box( $link ) {
 	?>
@@ -1382,12 +1364,12 @@ function link_advanced_meta_box( $link ) {
 		<th scope="row"><label for="link_rating"><?php _e( 'Rating' ); ?></label></th>
 		<td><select name="link_rating" id="link_rating" size="1">
 		<?php
-		for ( $rating = 0; $rating <= 10; $rating++ ) {
-			echo '<option value="' . $rating . '"';
-			if ( isset( $link->link_rating ) && $link->link_rating == $rating ) {
+		for ( $parsed_args = 0; $parsed_args <= 10; $parsed_args++ ) {
+			echo '<option value="' . $parsed_args . '"';
+			if ( isset( $link->link_rating ) && $link->link_rating == $parsed_args ) {
 				echo ' selected="selected"';
 			}
-			echo '>' . $rating . '</option>';
+			echo( '>' . $parsed_args . '</option>' );
 		}
 		?>
 		</select>&nbsp;<?php _e( '(Leave at 0 for no rating.)' ); ?>
@@ -1398,11 +1380,11 @@ function link_advanced_meta_box( $link ) {
 }
 
 /**
- * Displays post thumbnail meta box.
+ * Display post thumbnail meta box.
  *
  * @since 2.9.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post A post object.
  */
 function post_thumbnail_meta_box( $post ) {
 	$thumbnail_id = get_post_meta( $post->ID, '_thumbnail_id', true );
@@ -1410,11 +1392,11 @@ function post_thumbnail_meta_box( $post ) {
 }
 
 /**
- * Displays fields for ID3 data.
+ * Display fields for ID3 data
  *
  * @since 3.9.0
  *
- * @param WP_Post $post Current post object.
+ * @param WP_Post $post A post object.
  */
 function attachment_id3_data_meta_box( $post ) {
 	$meta = array();
@@ -1459,13 +1441,13 @@ function register_and_do_post_meta_boxes( $post ) {
 	$publish_callback_args = array( '__back_compat_meta_box' => true );
 
 	if ( post_type_supports( $post_type, 'revisions' ) && 'auto-draft' !== $post->post_status ) {
-		$revisions = wp_get_latest_revision_id_and_total_count( $post->ID );
+		$revisions = wp_get_post_revisions( $post->ID, array( 'fields' => 'ids' ) );
 
 		// We should aim to show the revisions meta box only when there are revisions.
-		if ( ! is_wp_error( $revisions ) && $revisions['count'] > 1 ) {
+		if ( count( $revisions ) > 1 ) {
 			$publish_callback_args = array(
-				'revisions_count'        => $revisions['count'],
-				'revision_id'            => $revisions['latest_id'],
+				'revisions_count'        => count( $revisions ),
+				'revision_id'            => reset( $revisions ),
 				'__back_compat_meta_box' => true,
 			);
 

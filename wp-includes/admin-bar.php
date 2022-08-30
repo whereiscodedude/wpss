@@ -611,27 +611,14 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		)
 	);
 
-	/**
-	 * Filters whether to show the site icons in toolbar.
-	 *
-	 * Returning false to this hook is the recommended way to hide site icons in the toolbar.
-	 * A truthy return may have negative performance impact on large multisites.
-	 *
-	 * @since 6.0.0
-	 *
-	 * @param bool $show_site_icons Whether site icons should be shown in the toolbar. Default true.
-	 */
-	$show_site_icons = apply_filters( 'wp_admin_bar_show_site_icons', true );
-
 	foreach ( (array) $wp_admin_bar->user->blogs as $blog ) {
 		switch_to_blog( $blog->userblog_id );
 
-		if ( true === $show_site_icons && has_site_icon() ) {
+		if ( has_site_icon() ) {
 			$blavatar = sprintf(
-				'<img class="blavatar" src="%s" srcset="%s 2x" alt="" width="16" height="16"%s />',
+				'<img class="blavatar" src="%s" srcset="%s 2x" alt="" width="16" height="16" />',
 				esc_url( get_site_icon_url( 16 ) ),
-				esc_url( get_site_icon_url( 32 ) ),
-				( wp_lazy_loading_enabled( 'img', 'site_icon_in_toolbar' ) ? ' loading="lazy"' : '' )
+				esc_url( get_site_icon_url( 32 ) )
 			);
 		} else {
 			$blavatar = '<div class="blavatar"></div>';
@@ -724,7 +711,7 @@ function wp_admin_bar_shortlink_menu( $wp_admin_bar ) {
 		return;
 	}
 
-	$html = '<input class="shortlink-input" type="text" readonly="readonly" value="' . esc_attr( $short ) . '" aria-label="' . __( 'Shortlink' ) . '" />';
+	$html = '<input class="shortlink-input" type="text" readonly="readonly" value="' . esc_attr( $short ) . '" />';
 
 	$wp_admin_bar->add_node(
 		array(
@@ -809,7 +796,7 @@ function wp_admin_bar_edit_menu( $wp_admin_bar ) {
 			);
 		} elseif ( 'term' === $current_screen->base && isset( $tag ) && is_object( $tag ) && ! is_wp_error( $tag ) ) {
 			$tax = get_taxonomy( $tag->taxonomy );
-			if ( is_term_publicly_viewable( $tag ) ) {
+			if ( is_taxonomy_viewable( $tax ) ) {
 				$wp_admin_bar->add_node(
 					array(
 						'id'    => 'view',
@@ -1246,7 +1233,7 @@ function show_admin_bar( $show ) {
  * @since 3.1.0
  *
  * @global bool   $show_admin_bar
- * @global string $pagenow        The filename of the current screen.
+ * @global string $pagenow
  *
  * @return bool Whether the admin bar should be showing.
  */

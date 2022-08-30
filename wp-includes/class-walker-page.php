@@ -30,7 +30,7 @@ class Walker_Page extends Walker {
 	 * Database fields to use.
 	 *
 	 * @since 2.1.0
-	 * @var string[]
+	 * @var array
 	 *
 	 * @see Walker::$db_fields
 	 * @todo Decouple this.

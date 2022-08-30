@@ -350,13 +350,8 @@ class WP_Media_List_Table extends WP_List_Table {
 		/* translators: Column name. */
 		if ( ! $this->detached ) {
 			$posts_columns['parent'] = _x( 'Uploaded to', 'column name' );
-
 			if ( post_type_supports( 'attachment', 'comments' ) ) {
-				$posts_columns['comments'] = sprintf(
-					'<span class="vers comment-grey-bubble" title="%1$s" aria-hidden="true"></span><span class="screen-reader-text">%2$s</span>',
-					esc_attr__( 'Comments' ),
-					__( 'Comments' )
-				);
+				$posts_columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Comments' ) . '"><span class="screen-reader-text">' . __( 'Comments' ) . '</span></span>';
 			}
 		}
 
@@ -513,16 +508,7 @@ class WP_Media_List_Table extends WP_List_Table {
 			}
 		}
 
-		/**
-		 * Filters the published time of an attachment displayed in the Media list table.
-		 *
-		 * @since 6.0.0
-		 *
-		 * @param string  $h_time      The published time.
-		 * @param WP_Post $post        Attachment object.
-		 * @param string  $column_name The column name.
-		 */
-		echo apply_filters( 'media_date_column_time', $h_time, $post, 'date' );
+		echo $h_time;
 	}
 
 	/**
@@ -647,7 +633,8 @@ class WP_Media_List_Table extends WP_List_Table {
 						esc_html( sanitize_term_field( 'name', $t->name, $t->term_id, $taxonomy, 'display' ) )
 					);
 				}
-				echo implode( wp_get_list_item_separator(), $out );
+				/* translators: Used between list items, there is a space after the comma. */
+				echo implode( __( ', ' ), $out );
 			} else {
 				echo '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">' . get_taxonomy( $taxonomy )->labels->no_terms . '</span>';
 			}
@@ -818,15 +805,6 @@ class WP_Media_List_Table extends WP_List_Table {
 					/* translators: %s: Attachment title. */
 					esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $att_title ) ),
 					__( 'View' )
-				);
-
-				$actions['copy'] = sprintf(
-					'<span class="copy-to-clipboard-container"><button type="button" class="button-link copy-attachment-url media-library" data-clipboard-text="%s" aria-label="%s">%s</button><span class="success hidden" aria-hidden="true">%s</span></span>',
-					esc_url( wp_get_attachment_url( $post->ID ) ),
-					/* translators: %s: Attachment title. */
-					esc_attr( sprintf( __( 'Copy &#8220;%s&#8221; URL to clipboard' ), $att_title ) ),
-					__( 'Copy URL to clipboard' ),
-					__( 'Copied!' )
 				);
 			}
 		}
