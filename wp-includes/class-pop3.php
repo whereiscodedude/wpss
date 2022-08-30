@@ -59,7 +59,8 @@ class POP3 {
         if(!empty($timeout)) {
             settype($timeout,"integer");
             $this->TIMEOUT = $timeout;
-            set_time_limit($timeout);
+            if (!ini_get('safe_mode'))
+                set_time_limit($timeout);
         }
         return true;
     }
@@ -72,7 +73,8 @@ class POP3 {
 	}
 
     function update_timer () {
-        set_time_limit($this->TIMEOUT);
+        if (!ini_get('safe_mode'))
+            set_time_limit($this->TIMEOUT);
         return true;
     }
 
@@ -374,7 +376,7 @@ class POP3 {
         $line = fgets($fp,$buffer);
         while ( !preg_match('/^\.\r\n/',$line))
         {
-            if ( $line[0] == '.' ) { $line = substr($line,1); }
+            if ( $line{0} == '.' ) { $line = substr($line,1); }
             $MsgArray[$count] = $line;
             $count++;
             $line = fgets($fp,$buffer);
@@ -428,7 +430,7 @@ class POP3 {
         if(!$this->is_ok($reply))
         {
             //  The POP3 RSET command -never- gives a -ERR
-            //  response - if it ever does, something truly
+            //  response - if it ever does, something truely
             //  wild is going on.
 
             $this->ERROR = "POP3 reset: " . _("Error ") . "[$reply]";
