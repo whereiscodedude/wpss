@@ -111,9 +111,7 @@
 	function belowEntryMetaClass( param ) {
 		var sidebarPos, sidebarPosBottom;
 
-		if ( ! $body.hasClass( 'has-sidebar' ) ||
-			typeof $sidebar === 'undefined' ||
-			$sidebar.length < 1 || (
+		if ( ! $body.hasClass( 'has-sidebar' ) || (
 			$body.hasClass( 'search' ) ||
 			$body.hasClass( 'single-attachment' ) ||
 			$body.hasClass( 'error404' ) ||
@@ -178,7 +176,7 @@
 	}
 
 	// Fire on document ready.
-	$( function() {
+	$( document ).ready( function() {
 
 		// If navigation menu is present on page, setNavProps and adjustScrollClass.
 		if ( $navigation.length ) {
@@ -218,7 +216,7 @@
 		if ( true === supportsFixedBackground() ) {
 			document.documentElement.className += ' background-fixed';
 		}
-	} );
+	});
 
 	// If navigation menu is present on page, adjust it on scroll and screen resize.
 	if ( $navigation.length ) {

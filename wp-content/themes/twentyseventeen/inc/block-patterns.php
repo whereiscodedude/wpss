@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Seventeen
- * @since Twenty Seventeen 2.5
+ * @since Twenty Seventeen 2.4
  */
 
 /**
