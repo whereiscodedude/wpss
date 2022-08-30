@@ -10,7 +10,7 @@
 get_header(); ?>
 
 	<div id="primary" class="content-area">
-		<main id="main" class="site-main">
+		<main id="main" class="site-main" role="main">
 
 			<?php
 			// Start the loop.
@@ -84,7 +84,7 @@ get_header(); ?>
 						<?php
 						edit_post_link(
 							sprintf(
-								/* translators: %s: Post title. Only visible to screen readers. */
+								/* translators: %s: Post title. */
 								__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'twentysixteen' ),
 								get_the_title()
 							),

@@ -10,11 +10,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	die( '-1' );
 }
-
-/**
- * @global WP_Comment $comment Global comment object.
- */
-global $comment;
 ?>
 <form name="post" action="comment.php" method="post" id="post">
 <?php wp_nonce_field( 'update-comment_' . $comment->comment_ID ); ?>
@@ -57,7 +52,7 @@ if ( 'approved' === wp_get_comment_status( $comment ) && $comment->comment_post_
 <tr>
 	<td class="first"><label for="email"><?php _e( 'Email' ); ?></label></td>
 	<td>
-		<input type="text" name="newcomment_author_email" size="30" value="<?php echo esc_attr( $comment->comment_author_email ); ?>" id="email" />
+		<input type="text" name="newcomment_author_email" size="30" value="<?php echo $comment->comment_author_email; ?>" id="email" />
 	</td>
 </tr>
 <tr>
@@ -144,14 +139,7 @@ printf( __( 'Submitted on: %s' ), '<b>' . $submitted . '</b>' );
 <a href="#edit_timestamp" class="edit-timestamp hide-if-no-js"><span aria-hidden="true"><?php _e( 'Edit' ); ?></span> <span class="screen-reader-text"><?php _e( 'Edit date and time' ); ?></span></a>
 <fieldset id='timestampdiv' class='hide-if-js'>
 <legend class="screen-reader-text"><?php _e( 'Date and time' ); ?></legend>
-<?php
-/**
- * @global string $action
- */
-global $action;
-
-touch_time( ( 'editcomment' === $action ), 0 );
-?>
+<?php touch_time( ( 'editcomment' === $action ), 0 ); ?>
 </fieldset>
 </div>
 

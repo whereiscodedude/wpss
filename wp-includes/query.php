@@ -899,28 +899,19 @@ function is_embed() {
  * @return bool Whether the query is the main query.
  */
 function is_main_query() {
-	global $wp_query;
-
-	if ( ! isset( $wp_query ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'Conditional query tags do not work before the query is run. Before then, they always return false.' ), '6.1.0' );
-		return false;
-	}
-
 	if ( 'pre_get_posts' === current_filter() ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: pre_get_posts, 2: WP_Query->is_main_query(), 3: is_main_query(), 4: Documentation URL. */
-				__( 'In %1$s, use the %2$s method, not the %3$s function. See %4$s.' ),
-				'<code>pre_get_posts</code>',
-				'<code>WP_Query->is_main_query()</code>',
-				'<code>is_main_query()</code>',
-				__( 'https://developer.wordpress.org/reference/functions/is_main_query/' )
-			),
-			'3.7.0'
+		$message = sprintf(
+			/* translators: 1: pre_get_posts, 2: WP_Query->is_main_query(), 3: is_main_query(), 4: Link to codex is_main_query() page. */
+			__( 'In %1$s, use the %2$s method, not the %3$s function. See %4$s.' ),
+			'<code>pre_get_posts</code>',
+			'<code>WP_Query->is_main_query()</code>',
+			'<code>is_main_query()</code>',
+			__( 'https://codex.wordpress.org/Function_Reference/is_main_query' )
 		);
+		_doing_it_wrong( __FUNCTION__, $message, '3.7.0' );
 	}
 
+	global $wp_query;
 	return $wp_query->is_main_query();
 }
 
@@ -939,11 +930,6 @@ function is_main_query() {
  */
 function have_posts() {
 	global $wp_query;
-
-	if ( ! isset( $wp_query ) ) {
-		return false;
-	}
-
 	return $wp_query->have_posts();
 }
 
@@ -962,11 +948,6 @@ function have_posts() {
  */
 function in_the_loop() {
 	global $wp_query;
-
-	if ( ! isset( $wp_query ) ) {
-		return false;
-	}
-
 	return $wp_query->in_the_loop;
 }
 
@@ -979,11 +960,6 @@ function in_the_loop() {
  */
 function rewind_posts() {
 	global $wp_query;
-
-	if ( ! isset( $wp_query ) ) {
-		return;
-	}
-
 	$wp_query->rewind_posts();
 }
 
@@ -996,11 +972,6 @@ function rewind_posts() {
  */
 function the_post() {
 	global $wp_query;
-
-	if ( ! isset( $wp_query ) ) {
-		return;
-	}
-
 	$wp_query->the_post();
 }
 
@@ -1019,11 +990,6 @@ function the_post() {
  */
 function have_comments() {
 	global $wp_query;
-
-	if ( ! isset( $wp_query ) ) {
-		return false;
-	}
-
 	return $wp_query->have_comments();
 }
 
@@ -1033,15 +999,12 @@ function have_comments() {
  * @since 2.2.0
  *
  * @global WP_Query $wp_query WordPress Query object.
+ *
+ * @return null
  */
 function the_comment() {
 	global $wp_query;
-
-	if ( ! isset( $wp_query ) ) {
-		return;
-	}
-
-	$wp_query->the_comment();
+	return $wp_query->the_comment();
 }
 
 /**
@@ -1150,16 +1113,7 @@ function _find_post_by_old_slug( $post_type ) {
 		$query .= $wpdb->prepare( ' AND DAYOFMONTH(post_date) = %d', get_query_var( 'day' ) );
 	}
 
-	$key          = md5( $query );
-	$last_changed = wp_cache_get_last_changed( 'posts' );
-	$cache_key    = "find_post_by_old_slug:$key:$last_changed";
-	$cache        = wp_cache_get( $cache_key, 'posts' );
-	if ( false !== $cache ) {
-		$id = $cache;
-	} else {
-		$id = (int) $wpdb->get_var( $query );
-		wp_cache_set( $cache_key, $id, 'posts' );
-	}
+	$id = (int) $wpdb->get_var( $query );
 
 	return $id;
 }
@@ -1192,20 +1146,11 @@ function _find_post_by_old_date( $post_type ) {
 
 	$id = 0;
 	if ( $date_query ) {
-		$query        = $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta AS pm_date, $wpdb->posts WHERE ID = post_id AND post_type = %s AND meta_key = '_wp_old_date' AND post_name = %s" . $date_query, $post_type, get_query_var( 'name' ) );
-		$key          = md5( $query );
-		$last_changed = wp_cache_get_last_changed( 'posts' );
-		$cache_key    = "find_post_by_old_date:$key:$last_changed";
-		$cache        = wp_cache_get( $cache_key, 'posts' );
-		if ( false !== $cache ) {
-			$id = $cache;
-		} else {
-			$id = (int) $wpdb->get_var( $query );
-			if ( ! $id ) {
-				// Check to see if an old slug matches the old date.
-				$id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts, $wpdb->postmeta AS pm_slug, $wpdb->postmeta AS pm_date WHERE ID = pm_slug.post_id AND ID = pm_date.post_id AND post_type = %s AND pm_slug.meta_key = '_wp_old_slug' AND pm_slug.meta_value = %s AND pm_date.meta_key = '_wp_old_date'" . $date_query, $post_type, get_query_var( 'name' ) ) );
-			}
-			wp_cache_set( $cache_key, $id, 'posts' );
+		$id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta AS pm_date, $wpdb->posts WHERE ID = post_id AND post_type = %s AND meta_key = '_wp_old_date' AND post_name = %s" . $date_query, $post_type, get_query_var( 'name' ) ) );
+
+		if ( ! $id ) {
+			// Check to see if an old slug matches the old date.
+			$id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts, $wpdb->postmeta AS pm_slug, $wpdb->postmeta AS pm_date WHERE ID = pm_slug.post_id AND ID = pm_date.post_id AND post_type = %s AND pm_slug.meta_key = '_wp_old_slug' AND pm_slug.meta_value = %s AND pm_date.meta_key = '_wp_old_date'" . $date_query, $post_type, get_query_var( 'name' ) ) );
 		}
 	}
 
@@ -1241,7 +1186,7 @@ function setup_postdata( $post ) {
  * @global WP_Query $wp_query WordPress Query object.
  *
  * @param WP_Post|object|int $post WP_Post instance or Post ID/object.
- * @return array|false Elements of post, or false on failure.
+ * @return array|bool Elements of post, or false on failure.
  */
 function generate_postdata( $post ) {
 	global $wp_query;

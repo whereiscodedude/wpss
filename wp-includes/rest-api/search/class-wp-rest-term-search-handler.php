@@ -41,14 +41,9 @@ class WP_REST_Term_Search_Handler extends WP_REST_Search_Handler {
 	 * @since 5.6.0
 	 *
 	 * @param WP_REST_Request $request Full REST request.
-	 * @return array {
-	 *     Associative array containing found IDs and total count for the matching search results.
-	 *
-	 *     @type int[]               $ids   Found IDs.
-	 *     @type string|int|WP_Error $total Numeric string containing the number of terms in that
-	 *                                      taxonomy, 0 if there are no results, or WP_Error if
-	 *                                      the requested taxonomy does not exist.
-	 * }
+	 * @return array Associative array containing an `WP_REST_Search_Handler::RESULT_IDS` containing
+	 *               an array of found IDs and `WP_REST_Search_Handler::RESULT_TOTAL` containing the
+	 *               total count for the matching search results.
 	 */
 	public function search_items( WP_REST_Request $request ) {
 		$taxonomies = $request[ WP_REST_Search_Controller::PROP_SUBTYPE ];
@@ -71,11 +66,9 @@ class WP_REST_Term_Search_Handler extends WP_REST_Search_Handler {
 		}
 
 		/**
-		 * Filters the query arguments for a REST API search request.
+		 * Filters the query arguments for a search request.
 		 *
 		 * Enables adding extra arguments or setting defaults for a term search request.
-		 *
-		 * @since 5.6.0
 		 *
 		 * @param array           $query_args Key value array of query var to query value.
 		 * @param WP_REST_Request $request    The request used.
@@ -137,7 +130,7 @@ class WP_REST_Term_Search_Handler extends WP_REST_Search_Handler {
 	 * @since 5.6.0
 	 *
 	 * @param int $id Item ID.
-	 * @return array[] Array of link arrays for the given item.
+	 * @return array Links for the given item.
 	 */
 	public function prepare_item_links( $id ) {
 		$term = get_term( $id );
