@@ -1,24 +1,19 @@
-/******/ (function() { // webpackBootstrap
-/******/ 	var __webpack_modules__ = ({
-
-/***/ 5817:
-/***/ (function(module) {
-
-var l10n = wp.media.view.l10n,
-	EditAttachmentMetadata;
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*globals wp */
 
 /**
  * wp.media.controller.EditAttachmentMetadata
  *
  * A state for editing an attachment's metadata.
  *
- * @memberOf wp.media.controller
- *
  * @class
  * @augments wp.media.controller.State
  * @augments Backbone.Model
  */
-EditAttachmentMetadata = wp.media.controller.State.extend(/** @lends wp.media.controller.EditAttachmentMetadata.prototype */{
+var l10n = wp.media.view.l10n,
+	EditAttachmentMetadata;
+
+EditAttachmentMetadata = wp.media.controller.State.extend({
 	defaults: {
 		id:      'edit-attachment',
 		// Title string passed to the frame's title region view.
@@ -33,96 +28,79 @@ EditAttachmentMetadata = wp.media.controller.State.extend(/** @lends wp.media.co
 
 module.exports = EditAttachmentMetadata;
 
+},{}],2:[function(require,module,exports){
+/*globals wp */
 
-/***/ }),
+var media = wp.media;
 
-/***/ 9525:
-/***/ (function(module) {
+media.controller.EditAttachmentMetadata = require( './controllers/edit-attachment-metadata.js' );
+media.view.MediaFrame.Manage = require( './views/frame/manage.js' );
+media.view.Attachment.Details.TwoColumn = require( './views/attachment/details-two-column.js' );
+media.view.MediaFrame.Manage.Router = require( './routers/manage.js' );
+media.view.EditImage.Details = require( './views/edit-image-details.js' );
+media.view.MediaFrame.EditAttachments = require( './views/frame/edit-attachments.js' );
+media.view.SelectModeToggleButton = require( './views/button/select-mode-toggle.js' );
+media.view.DeleteSelectedButton = require( './views/button/delete-selected.js' );
+media.view.DeleteSelectedPermanentlyButton = require( './views/button/delete-selected-permanently.js' );
+
+},{"./controllers/edit-attachment-metadata.js":1,"./routers/manage.js":3,"./views/attachment/details-two-column.js":4,"./views/button/delete-selected-permanently.js":5,"./views/button/delete-selected.js":6,"./views/button/select-mode-toggle.js":7,"./views/edit-image-details.js":8,"./views/frame/edit-attachments.js":9,"./views/frame/manage.js":10}],3:[function(require,module,exports){
+/*globals wp, Backbone */
 
 /**
  * wp.media.view.MediaFrame.Manage.Router
  *
  * A router for handling the browser history and application state.
  *
- * @memberOf wp.media.view.MediaFrame.Manage
- *
  * @class
  * @augments Backbone.Router
  */
-var Router = Backbone.Router.extend(/** @lends wp.media.view.MediaFrame.Manage.Router.prototype */{
+var Router = Backbone.Router.extend({
 	routes: {
-		'upload.php?item=:slug&mode=edit': 'editItem',
-		'upload.php?item=:slug':           'showItem',
-		'upload.php?search=:query':        'search',
-		'upload.php':                      'reset'
+		'upload.php?item=:slug':    'showItem',
+		'upload.php?search=:query': 'search'
 	},
 
-	// Map routes against the page URL.
+	// Map routes against the page URL
 	baseUrl: function( url ) {
 		return 'upload.php' + url;
 	},
 
-	reset: function() {
-		var frame = wp.media.frames.edit;
-
-		if ( frame ) {
-			frame.close();
-		}
-	},
-
-	// Respond to the search route by filling the search field and triggering the input event.
+	// Respond to the search route by filling the search field and trigggering the input event
 	search: function( query ) {
 		jQuery( '#media-search-input' ).val( query ).trigger( 'input' );
 	},
 
-	// Show the modal with a specific item.
+	// Show the modal with a specific item
 	showItem: function( query ) {
 		var media = wp.media,
-			frame = media.frames.browse,
-			library = frame.state().get('library'),
+			library = media.frame.state().get('library'),
 			item;
 
-		// Trigger the media frame to open the correct item.
+		// Trigger the media frame to open the correct item
 		item = library.findWhere( { id: parseInt( query, 10 ) } );
-
 		if ( item ) {
-			item.set( 'skipHistory', true );
-			frame.trigger( 'edit:attachment', item );
+			media.frame.trigger( 'edit:attachment', item );
 		} else {
 			item = media.attachment( query );
-			frame.listenTo( item, 'change', function( model ) {
-				frame.stopListening( item );
-				frame.trigger( 'edit:attachment', model );
+			media.frame.listenTo( item, 'change', function( model ) {
+				media.frame.stopListening( item );
+				media.frame.trigger( 'edit:attachment', model );
 			} );
 			item.fetch();
 		}
-	},
-
-	// Show the modal in edit mode with a specific item.
-	editItem: function( query ) {
-		this.showItem( query );
-		wp.media.frames.edit.content.mode( 'edit-details' );
 	}
 });
 
 module.exports = Router;
 
-
-/***/ }),
-
-/***/ 7433:
-/***/ (function(module) {
-
-var Details = wp.media.view.Attachment.Details,
-	TwoColumn;
+},{}],4:[function(require,module,exports){
+/*globals wp */
 
 /**
  * wp.media.view.Attachment.Details.TwoColumn
  *
  * A similar view to media.view.Attachment.Details
  * for use in the Edit Attachment modal.
- *
- * @memberOf wp.media.view.Attachment.Details
  *
  * @class
  * @augments wp.media.view.Attachment.Details
@@ -131,47 +109,42 @@ var Details = wp.media.view.Attachment.Details,
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-TwoColumn = Details.extend(/** @lends wp.media.view.Attachment.Details.TowColumn.prototype */{
+var Details = wp.media.view.Attachment.Details,
+	TwoColumn;
+
+TwoColumn = Details.extend({
 	template: wp.template( 'attachment-details-two-column' ),
 
-	initialize: function() {
-		this.controller.on( 'content:activate:edit-details', _.bind( this.editAttachment, this ) );
-
-		Details.prototype.initialize.apply( this, arguments );
-	},
-
 	editAttachment: function( event ) {
-		if ( event ) {
-			event.preventDefault();
-		}
+		event.preventDefault();
 		this.controller.content.mode( 'edit-image' );
 	},
 
 	/**
 	 * Noop this from parent class, doesn't apply here.
 	 */
-	toggleSelectionHandler: function() {}
+	toggleSelectionHandler: function() {},
 
+	render: function() {
+		Details.prototype.render.apply( this, arguments );
+
+		wp.media.mixin.removeAllPlayers();
+		this.$( 'audio, video' ).each( function (i, elem) {
+			var el = wp.media.view.MediaDetails.prepareSrc( elem );
+			new window.MediaElementPlayer( el, wp.media.mixin.mejsSettings );
+		} );
+	}
 });
 
 module.exports = TwoColumn;
 
-
-/***/ }),
-
-/***/ 5562:
-/***/ (function(module) {
-
-var Button = wp.media.view.Button,
-	DeleteSelected = wp.media.view.DeleteSelectedButton,
-	DeleteSelectedPermanently;
+},{}],5:[function(require,module,exports){
+/*globals wp */
 
 /**
  * wp.media.view.DeleteSelectedPermanentlyButton
  *
  * When MEDIA_TRASH is true, a button that handles bulk Delete Permanently logic
- *
- * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.DeleteSelectedButton
@@ -180,11 +153,15 @@ var Button = wp.media.view.Button,
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-DeleteSelectedPermanently = DeleteSelected.extend(/** @lends wp.media.view.DeleteSelectedPermanentlyButton.prototype */{
+var Button = wp.media.view.Button,
+	DeleteSelected = wp.media.view.DeleteSelectedButton,
+	DeleteSelectedPermanently;
+
+DeleteSelectedPermanently = DeleteSelected.extend({
 	initialize: function() {
 		DeleteSelected.prototype.initialize.apply( this, arguments );
-		this.controller.on( 'select:activate', this.selectActivate, this );
-		this.controller.on( 'select:deactivate', this.selectDeactivate, this );
+		this.listenTo( this.controller, 'select:activate', this.selectActivate );
+		this.listenTo( this.controller, 'select:deactivate', this.selectDeactivate );
 	},
 
 	filterChange: function( model ) {
@@ -210,22 +187,13 @@ DeleteSelectedPermanently = DeleteSelected.extend(/** @lends wp.media.view.Delet
 
 module.exports = DeleteSelectedPermanently;
 
-
-/***/ }),
-
-/***/ 471:
-/***/ (function(module) {
-
-var Button = wp.media.view.Button,
-	l10n = wp.media.view.l10n,
-	DeleteSelected;
+},{}],6:[function(require,module,exports){
+/*globals wp */
 
 /**
  * wp.media.view.DeleteSelectedButton
  *
  * A button that handles bulk Delete/Trash logic
- *
- * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.Button
@@ -233,23 +201,26 @@ var Button = wp.media.view.Button,
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-DeleteSelected = Button.extend(/** @lends wp.media.view.DeleteSelectedButton.prototype */{
+var Button = wp.media.view.Button,
+	l10n = wp.media.view.l10n,
+	DeleteSelected;
+
+DeleteSelected = Button.extend({
 	initialize: function() {
 		Button.prototype.initialize.apply( this, arguments );
 		if ( this.options.filters ) {
-			this.options.filters.model.on( 'change', this.filterChange, this );
+			this.listenTo( this.options.filters.model, 'change', this.filterChange );
 		}
-		this.controller.on( 'selection:toggle', this.toggleDisabled, this );
-		this.controller.on( 'select:activate', this.toggleDisabled, this );
+		this.listenTo( this.controller, 'selection:toggle', this.toggleDisabled );
 	},
 
 	filterChange: function( model ) {
 		if ( 'trash' === model.get( 'status' ) ) {
-			this.model.set( 'text', l10n.restoreSelected );
+			this.model.set( 'text', l10n.untrashSelected );
 		} else if ( wp.media.view.settings.mediaTrash ) {
 			this.model.set( 'text', l10n.trashSelected );
 		} else {
-			this.model.set( 'text', l10n.deletePermanently );
+			this.model.set( 'text', l10n.deleteSelected );
 		}
 	},
 
@@ -271,21 +242,11 @@ DeleteSelected = Button.extend(/** @lends wp.media.view.DeleteSelectedButton.pro
 
 module.exports = DeleteSelected;
 
-
-/***/ }),
-
-/***/ 6767:
-/***/ (function(module) {
-
-
-var Button = wp.media.view.Button,
-	l10n = wp.media.view.l10n,
-	SelectModeToggle;
+},{}],7:[function(require,module,exports){
+/*globals wp */
 
 /**
  * wp.media.view.SelectModeToggleButton
- *
- * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.Button
@@ -293,15 +254,15 @@ var Button = wp.media.view.Button,
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-SelectModeToggle = Button.extend(/** @lends wp.media.view.SelectModeToggle.prototype */{
-	initialize: function() {
-		_.defaults( this.options, {
-			size : ''
-		} );
+var Button = wp.media.view.Button,
+	l10n = wp.media.view.l10n,
+	SelectModeToggle;
 
+SelectModeToggle = Button.extend({
+	initialize: function() {
 		Button.prototype.initialize.apply( this, arguments );
-		this.controller.on( 'select:activate select:deactivate', this.toggleBulkEditHandler, this );
-		this.controller.on( 'selection:action:done', this.back, this );
+		this.listenTo( this.controller, 'select:activate select:deactivate', this.toggleBulkEditHandler );
+		this.listenTo( this.controller, 'selection:action:done', this.back );
 	},
 
 	back: function () {
@@ -328,26 +289,18 @@ SelectModeToggle = Button.extend(/** @lends wp.media.view.SelectModeToggle.proto
 
 		children = toolbar.$( '.media-toolbar-secondary > *, .media-toolbar-primary > *' );
 
-		// @todo The Frame should be doing all of this.
+		// TODO: the Frame should be doing all of this.
 		if ( this.controller.isModeActive( 'select' ) ) {
-			this.model.set( {
-				size: 'large',
-				text: l10n.cancel
-			} );
-			children.not( '.spinner, .media-button' ).hide();
+			this.model.set( 'text', l10n.cancelSelection );
+			children.not( '.media-button' ).hide();
 			this.$el.show();
-			toolbar.$el.addClass( 'media-toolbar-mode-select' );
 			toolbar.$( '.delete-selected-button' ).removeClass( 'hidden' );
 		} else {
-			this.model.set( {
-				size: '',
-				text: l10n.bulkSelect
-			} );
+			this.model.set( 'text', l10n.bulkSelect );
 			this.controller.content.get().$el.removeClass( 'fixed' );
 			toolbar.$el.css( 'width', '' );
-			toolbar.$el.removeClass( 'media-toolbar-mode-select' );
 			toolbar.$( '.delete-selected-button' ).addClass( 'hidden' );
-			children.not( '.media-button' ).show();
+			children.not( '.spinner, .media-button' ).show();
 			this.controller.state().get( 'selection' ).reset();
 		}
 	}
@@ -355,20 +308,11 @@ SelectModeToggle = Button.extend(/** @lends wp.media.view.SelectModeToggle.proto
 
 module.exports = SelectModeToggle;
 
-
-/***/ }),
-
-/***/ 9157:
-/***/ (function(module) {
-
-var View = wp.media.View,
-	EditImage = wp.media.view.EditImage,
-	Details;
+},{}],8:[function(require,module,exports){
+/*globals wp, _ */
 
 /**
  * wp.media.view.EditImage.Details
- *
- * @memberOf wp.media.view.EditImage
  *
  * @class
  * @augments wp.media.view.EditImage
@@ -376,7 +320,11 @@ var View = wp.media.View,
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-Details = EditImage.extend(/** @lends wp.media.view.EditImage.Details.prototype */{
+var View = wp.media.View,
+	EditImage = wp.media.view.EditImage,
+	Details;
+
+Details = EditImage.extend({
 	initialize: function( options ) {
 		this.editor = window.imageEdit;
 		this.frame = options.frame;
@@ -397,17 +345,8 @@ Details = EditImage.extend(/** @lends wp.media.view.EditImage.Details.prototype 
 
 module.exports = Details;
 
-
-/***/ }),
-
-/***/ 5169:
-/***/ (function(module) {
-
-var Frame = wp.media.view.Frame,
-	MediaFrame = wp.media.view.MediaFrame,
-
-	$ = jQuery,
-	EditAttachments;
+},{}],9:[function(require,module,exports){
+/*globals wp, _, jQuery */
 
 /**
  * wp.media.view.MediaFrame.EditAttachments
@@ -418,8 +357,6 @@ var Frame = wp.media.view.Frame,
  *
  * Requires an attachment model to be passed in the options hash under `model`.
  *
- * @memberOf wp.media.view.MediaFrame
- *
  * @class
  * @augments wp.media.view.Frame
  * @augments wp.media.View
@@ -427,7 +364,13 @@ var Frame = wp.media.view.Frame,
  * @augments Backbone.View
  * @mixes wp.media.controller.StateMachine
  */
-EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAttachments.prototype */{
+var Frame = wp.media.view.Frame,
+	MediaFrame = wp.media.view.MediaFrame,
+
+	$ = jQuery,
+	EditAttachments;
+
+EditAttachments = MediaFrame.extend({
 
 	className: 'edit-attachment-frame',
 	template:  wp.template( 'edit-attachment-frame' ),
@@ -466,28 +409,21 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 		// Bind default title creation.
 		this.on( 'title:create:default', this.createTitle, this );
 
+		// Close the modal if the attachment is deleted.
+		this.listenTo( this.model, 'change:status destroy', this.close, this );
+
 		this.on( 'content:create:edit-metadata', this.editMetadataMode, this );
 		this.on( 'content:create:edit-image', this.editImageMode, this );
 		this.on( 'content:render:edit-image', this.editImageModeRender, this );
-		this.on( 'refresh', this.rerender, this );
 		this.on( 'close', this.detach );
-
-		this.bindModelHandlers();
-		this.listenTo( this.gridRouter, 'route:search', this.close, this );
-	},
-
-	bindModelHandlers: function() {
-		// Close the modal if the attachment is deleted.
-		this.listenTo( this.model, 'change:status destroy', this.close, this );
 	},
 
 	createModal: function() {
 		// Initialize modal container view.
 		if ( this.options.modal ) {
 			this.modal = new wp.media.view.Modal({
-				controller:     this,
-				title:          this.options.title,
-				hasCloseButton: false
+				controller: this,
+				title:      this.options.title
 			});
 
 			this.modal.on( 'open', _.bind( function () {
@@ -496,10 +432,10 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 
 			// Completely destroy the modal DOM element when closing it.
 			this.modal.on( 'close', _.bind( function() {
-				// Remove the keydown event.
-				$( 'body' ).off( 'keydown.media-modal' );
-				// Move focus back to the original item in the grid if possible.
-				$( 'li.attachment[data-id="' + this.model.get( 'id' ) +'"]' ).trigger( 'focus' );
+				this.modal.remove();
+				$( 'body' ).off( 'keydown.media-modal' ); /* remove the keydown event */
+				// Restore the original focus item if possible
+				$( 'li.attachment[data-id="' + this.model.get( 'id' ) +'"]' ).focus();
 				this.resetRoute();
 			}, this ) );
 
@@ -514,10 +450,7 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 	 */
 	createStates: function() {
 		this.states.add([
-			new wp.media.controller.EditAttachmentMetadata({
-				model:   this.model,
-				library: this.library
-			})
+			new wp.media.controller.EditAttachmentMetadata( { model: this.model } )
 		]);
 	},
 
@@ -542,8 +475,8 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 			model:      this.model
 		}) );
 
-		// Update browser url when navigating media details, except on load.
-		if ( this.model && ! this.model.get( 'skipHistory' ) ) {
+		// Update browser url when navigating media details
+		if ( this.model ) {
 			this.gridRouter.navigate( this.gridRouter.baseUrl( '?item=' + this.model.id ) );
 		}
 	},
@@ -569,9 +502,6 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 			frame: this,
 			controller: editImageController
 		} );
-
-		this.gridRouter.navigate( this.gridRouter.baseUrl( '?item=' + this.model.id + '&mode=edit' ) );
-
 	},
 
 	editImageModeRender: function( view ) {
@@ -579,20 +509,14 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 	},
 
 	toggleNav: function() {
-		this.$( '.left' ).prop( 'disabled', ! this.hasPrevious() );
-		this.$( '.right' ).prop( 'disabled', ! this.hasNext() );
+		this.$('.left').toggleClass( 'disabled', ! this.hasPrevious() );
+		this.$('.right').toggleClass( 'disabled', ! this.hasNext() );
 	},
 
 	/**
 	 * Rerender the view.
 	 */
-	rerender: function( model ) {
-		this.stopListening( this.model );
-
-		this.model = model;
-
-		this.bindModelHandlers();
-
+	rerender: function() {
 		// Only rerender the `content` region.
 		if ( this.content.mode() !== 'edit-metadata' ) {
 			this.content.mode( 'edit-metadata' );
@@ -608,12 +532,12 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 	 */
 	previousMediaItem: function() {
 		if ( ! this.hasPrevious() ) {
+			this.$( '.left' ).blur();
 			return;
 		}
-
-		this.trigger( 'refresh', this.library.at( this.getCurrentIndex() - 1 ) );
-		// Move focus to the Previous button. When there are no more items, to the Next button.
-		this.focusNavButton( this.hasPrevious() ? '.left' : '.right' );
+		this.model = this.library.at( this.getCurrentIndex() - 1 );
+		this.rerender();
+		this.$( '.left' ).focus();
 	},
 
 	/**
@@ -621,23 +545,12 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 	 */
 	nextMediaItem: function() {
 		if ( ! this.hasNext() ) {
+			this.$( '.right' ).blur();
 			return;
 		}
-
-		this.trigger( 'refresh', this.library.at( this.getCurrentIndex() + 1 ) );
-		// Move focus to the Next button. When there are no more items, to the Previous button.
-		this.focusNavButton( this.hasNext() ? '.right' : '.left' );
-	},
-
-	/**
-	 * Set focus to the navigation buttons depending on the browsing direction.
-	 *
-	 * @since 5.3.0
-	 *
-	 * @param {string} which A CSS selector to target the button to focus.
-	 */
-	focusNavButton: function( which ) {
-		$( which ).trigger( 'focus' );
+		this.model = this.library.at( this.getCurrentIndex() + 1 );
+		this.rerender();
+		this.$( '.right' ).focus();
 	},
 
 	getCurrentIndex: function() {
@@ -656,40 +569,29 @@ EditAttachments = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.EditAtta
 	 * focus is in a textarea or input field.
 	 */
 	keyEvent: function( event ) {
-		if ( ( 'INPUT' === event.target.nodeName || 'TEXTAREA' === event.target.nodeName ) && ! event.target.disabled ) {
+		if ( ( 'INPUT' === event.target.nodeName || 'TEXTAREA' === event.target.nodeName ) && ! ( event.target.readOnly || event.target.disabled ) ) {
 			return;
 		}
 
-		// The right arrow key.
+		// The right arrow key
 		if ( 39 === event.keyCode ) {
 			this.nextMediaItem();
 		}
-		// The left arrow key.
+		// The left arrow key
 		if ( 37 === event.keyCode ) {
 			this.previousMediaItem();
 		}
 	},
 
 	resetRoute: function() {
-		var searchTerm = this.controller.browserView.toolbar.get( 'search' ).$el.val(),
-			url = '' !== searchTerm ? '?search=' + searchTerm : '';
-		this.gridRouter.navigate( this.gridRouter.baseUrl( url ), { replace: true } );
+		this.gridRouter.navigate( this.gridRouter.baseUrl( '' ) );
 	}
 });
 
 module.exports = EditAttachments;
 
-
-/***/ }),
-
-/***/ 4817:
-/***/ (function(module) {
-
-var MediaFrame = wp.media.view.MediaFrame,
-	Library = wp.media.controller.Library,
-
-	$ = Backbone.$,
-	Manage;
+},{}],10:[function(require,module,exports){
+/*globals wp, _, Backbone */
 
 /**
  * wp.media.view.MediaFrame.Manage
@@ -697,8 +599,6 @@ var MediaFrame = wp.media.view.MediaFrame,
  * A generic management frame workflow.
  *
  * Used in the media grid view.
- *
- * @memberOf wp.media.view.MediaFrame
  *
  * @class
  * @augments wp.media.view.MediaFrame
@@ -708,9 +608,15 @@ var MediaFrame = wp.media.view.MediaFrame,
  * @augments Backbone.View
  * @mixes wp.media.controller.StateMachine
  */
-Manage = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Manage.prototype */{
+var MediaFrame = wp.media.view.MediaFrame,
+	Library = wp.media.controller.Library,
+
+	$ = Backbone.$,
+	Manage;
+
+Manage = MediaFrame.extend({
 	/**
-	 * @constructs
+	 * @global wp.Uploader
 	 */
 	initialize: function() {
 		_.defaults( this.options, {
@@ -727,12 +633,8 @@ Manage = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Manage.prototype 
 		this.$body = $( document.body );
 		this.$window = $( window );
 		this.$adminBar = $( '#wpadminbar' );
-		// Store the Add New button for later reuse in wp.media.view.UploaderInline.
-		this.$uploaderToggler = $( '.page-title-action' )
-			.attr( 'aria-expanded', 'false' )
-			.on( 'click', _.bind( this.addNewClickHandler, this ) );
-
 		this.$window.on( 'scroll resize', _.debounce( _.bind( this.fixPosition, this ), 15 ) );
+		$( document ).on( 'click', '.add-new-h2', _.bind( this.addNewClickHandler, this ) );
 
 		// Ensure core and media grid view UI is enabled.
 		this.$el.addClass('wp-core-ui');
@@ -770,42 +672,38 @@ Manage = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Manage.prototype 
 		this.bindRegionModeHandlers();
 		this.render();
 		this.bindSearchHandler();
-
-		wp.media.frames.browse = this;
 	},
 
 	bindSearchHandler: function() {
 		var search = this.$( '#media-search-input' ),
+			currentSearch = this.options.container.data( 'search' ),
 			searchView = this.browserView.toolbar.get( 'search' ).$el,
 			listMode = this.$( '.view-list' ),
 
-			input  = _.throttle( function (e) {
+			input  = _.debounce( function (e) {
 				var val = $( e.currentTarget ).val(),
 					url = '';
 
 				if ( val ) {
 					url += '?search=' + val;
-					this.gridRouter.navigate( this.gridRouter.baseUrl( url ), { replace: true } );
 				}
+				this.gridRouter.navigate( this.gridRouter.baseUrl( url ) );
 			}, 1000 );
 
-		// Update the URL when entering search string (at most once per second).
+		// Update the URL when entering search string (at most once per second)
 		search.on( 'input', _.bind( input, this ) );
+		searchView.val( currentSearch ).trigger( 'input' );
 
-		this.gridRouter
-			.on( 'route:search', function () {
-				var href = window.location.href;
-				if ( href.indexOf( 'mode=' ) > -1 ) {
-					href = href.replace( /mode=[^&]+/g, 'mode=list' );
-				} else {
-					href += href.indexOf( '?' ) > -1 ? '&mode=list' : '?mode=list';
-				}
-				href = href.replace( 'search=', 's=' );
-				listMode.prop( 'href', href );
-			})
-			.on( 'route:reset', function() {
-				searchView.val( '' ).trigger( 'input' );
-			});
+		this.gridRouter.on( 'route:search', function () {
+			var href = window.location.href;
+			if ( href.indexOf( 'mode=' ) > -1 ) {
+				href = href.replace( /mode=[^&]+/g, 'mode=list' );
+			} else {
+				href += href.indexOf( '?' ) > -1 ? '&mode=list' : '?mode=list';
+			}
+			href = href.replace( 'search=', 's=' );
+			listMode.prop( 'href', href );
+		} );
 	},
 
 	/**
@@ -870,7 +768,7 @@ Manage = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Manage.prototype 
 		$browser = this.$('.attachments-browser');
 		$toolbar = $browser.find('.media-toolbar');
 
-		// Offset doesn't appear to take top margin into account, hence +16.
+		// Offset doesn't appear to take top margin into account, hence +16
 		if ( ( $browser.offset().top + 16 ) < this.$window.scrollTop() + this.$adminBar.height() ) {
 			$browser.addClass( 'fixed' );
 			$toolbar.css('width', $browser.width() + 'px');
@@ -886,10 +784,6 @@ Manage = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Manage.prototype 
 	addNewClickHandler: function( event ) {
 		event.preventDefault();
 		this.trigger( 'toggle:upload:attachment' );
-
-		if ( this.uploader ) {
-			this.uploader.refresh();
-		}
 	},
 
 	/**
@@ -897,16 +791,12 @@ Manage = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Manage.prototype 
 	 */
 	openEditAttachmentModal: function( model ) {
 		// Create a new EditAttachment frame, passing along the library and the attachment model.
-		if ( wp.media.frames.edit ) {
-			wp.media.frames.edit.open().trigger( 'refresh', model );
-		} else {
-			wp.media.frames.edit = wp.media( {
-				frame:       'edit-attachments',
-				controller:  this,
-				library:     this.state().get('library'),
-				model:       model
-			} );
-		}
+		wp.media( {
+			frame:       'edit-attachments',
+			controller:  this,
+			library:     this.state().get('library'),
+			model:       model
+		} );
 	},
 
 	/**
@@ -958,11 +848,8 @@ Manage = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Manage.prototype 
 	},
 
 	startHistory: function() {
-		// Verify pushState support and activate.
+		// Verify pushState support and activate
 		if ( window.history && window.history.pushState ) {
-			if ( Backbone.History.started ) {
-				Backbone.history.stop();
-			}
 			Backbone.history.start( {
 				root: window._wpMediaGridSettings.adminUrl,
 				pushState: true
@@ -973,55 +860,4 @@ Manage = MediaFrame.extend(/** @lends wp.media.view.MediaFrame.Manage.prototype 
 
 module.exports = Manage;
 
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-!function() {
-/**
- * @output wp-includes/js/media-grid.js
- */
-
-var media = wp.media;
-
-media.controller.EditAttachmentMetadata = __webpack_require__( 5817 );
-media.view.MediaFrame.Manage = __webpack_require__( 4817 );
-media.view.Attachment.Details.TwoColumn = __webpack_require__( 7433 );
-media.view.MediaFrame.Manage.Router = __webpack_require__( 9525 );
-media.view.EditImage.Details = __webpack_require__( 9157 );
-media.view.MediaFrame.EditAttachments = __webpack_require__( 5169 );
-media.view.SelectModeToggleButton = __webpack_require__( 6767 );
-media.view.DeleteSelectedButton = __webpack_require__( 471 );
-media.view.DeleteSelectedPermanentlyButton = __webpack_require__( 5562 );
-
-}();
-/******/ })()
-;
+},{}]},{},[2]);
