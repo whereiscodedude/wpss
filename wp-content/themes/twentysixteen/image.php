@@ -10,10 +10,10 @@
 get_header(); ?>
 
 	<div id="primary" class="content-area">
-		<main id="main" class="site-main">
+		<main id="main" class="site-main" role="main">
 
 			<?php
-			// Start the loop.
+				// Start the loop.
 			while ( have_posts() ) :
 				the_post();
 				?>
@@ -36,7 +36,7 @@ get_header(); ?>
 					<div class="entry-attachment">
 						<?php
 							/**
-							 * Filters the default twentysixteen image attachment size.
+							 * Filter the default twentysixteen image attachment size.
 							 *
 							 * @since Twenty Sixteen 1.0
 							 *
@@ -84,7 +84,7 @@ get_header(); ?>
 						<?php
 						edit_post_link(
 							sprintf(
-								/* translators: %s: Post title. Only visible to screen readers. */
+								/* translators: %s: Name of current post */
 								__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'twentysixteen' ),
 								get_the_title()
 							),
@@ -93,7 +93,7 @@ get_header(); ?>
 						);
 						?>
 					</footer><!-- .entry-footer -->
-				</article><!-- #post-<?php the_ID(); ?> -->
+				</article><!-- #post-## -->
 
 				<?php
 				// If comments are open or we have at least one comment, load up the comment template.

@@ -4,13 +4,12 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @since 1.0.0
  */
 
-if ( is_active_sidebar( 'sidebar-1' ) ) :
-	?>
+if ( is_active_sidebar( 'sidebar-1' ) ) : ?>
 
-	<aside class="widget-area" aria-label="<?php esc_attr_e( 'Footer', 'twentynineteen' ); ?>">
+	<aside class="widget-area" role="complementary" aria-label="<?php esc_attr_e( 'Footer', 'twentynineteen' ); ?>">
 		<?php
 		if ( is_active_sidebar( 'sidebar-1' ) ) {
 			?>
@@ -22,5 +21,4 @@ if ( is_active_sidebar( 'sidebar-1' ) ) :
 		?>
 	</aside><!-- .widget-area -->
 
-	<?php
-endif;
+<?php endif; ?>

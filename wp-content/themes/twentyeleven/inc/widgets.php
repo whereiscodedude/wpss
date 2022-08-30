@@ -4,7 +4,7 @@
  *
  * Handles displaying Aside, Link, Status, and Quote Posts available with Twenty Eleven.
  *
- * @link https://developer.wordpress.org/themes/functionality/widgets/#developing-widgets
+ * @link https://codex.wordpress.org/Widgets_API#Developing_Widgets
  *
  * @package WordPress
  * @subpackage Twenty_Eleven
@@ -17,7 +17,7 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 	 *
 	 * @since Twenty Eleven 2.2
 	 */
-	public function __construct() {
+	function __construct() {
 		parent::__construct(
 			'widget_twentyeleven_ephemera',
 			__( 'Twenty Eleven Ephemera', 'twentyeleven' ),
@@ -38,9 +38,8 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 	 * PHP4 constructor.
 	 *
 	 * @since Twenty Eleven 1.0
-	 * @deprecated Twenty Eleven 2.2
 	 */
-	public function Twenty_Eleven_Ephemera_Widget() {
+	function Twenty_Eleven_Ephemera_Widget() {
 		self::__construct();
 	}
 
@@ -52,7 +51,7 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 	 * @param array $args     An array of standard parameters for widgets in this theme.
 	 * @param array $instance An array of settings for this widget instance.
 	 */
-	public function widget( $args, $instance ) {
+	function widget( $args, $instance ) {
 		$cache = wp_cache_get( 'widget_twentyeleven_ephemera', 'widget' );
 
 		if ( ! is_array( $cache ) ) {
@@ -77,8 +76,7 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 			$instance['number'] = '10';
 		}
 
-		$args['number'] = absint( $instance['number'] );
-		if ( ! $args['number'] ) {
+		if ( ! $args['number'] = absint( $instance['number'] ) ) {
 			$args['number'] = 10;
 		}
 
@@ -111,7 +109,7 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 				$ephemera->the_post();
 				?>
 
-				<?php if ( 'link' !== get_post_format() ) : ?>
+				<?php if ( 'link' != get_post_format() ) : ?>
 
 				<li class="widget-entry-title">
 					<a href="<?php echo esc_url( get_permalink() ); ?>" rel="bookmark"><?php the_title(); ?></a>
@@ -137,10 +135,10 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 
 			echo $args['after_widget'];
 
-			// Reset the post globals as this query will have stomped on it.
+			// Reset the post globals as this query will have stomped on it
 			wp_reset_postdata();
 
-			// End check for ephemeral posts.
+			// end check for ephemeral posts
 		endif;
 
 		$cache[ $args['widget_id'] ] = ob_get_flush();
@@ -158,7 +156,7 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 	 *
 	 * @since Twenty Eleven 1.0
 	 */
-	public function update( $new_instance, $old_instance ) {
+	function update( $new_instance, $old_instance ) {
 		$instance           = $old_instance;
 		$instance['title']  = strip_tags( $new_instance['title'] );
 		$instance['number'] = (int) $new_instance['number'];
@@ -177,7 +175,7 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 	 *
 	 * @since Twenty Eleven 1.0
 	 */
-	public function flush_widget_cache() {
+	function flush_widget_cache() {
 		wp_cache_delete( 'widget_twentyeleven_ephemera', 'widget' );
 	}
 
@@ -188,7 +186,7 @@ class Twenty_Eleven_Ephemera_Widget extends WP_Widget {
 	 *
 	 * @since Twenty Eleven 1.0
 	 */
-	public function form( $instance ) {
+	function form( $instance ) {
 		$title  = isset( $instance['title'] ) ? esc_attr( $instance['title'] ) : '';
 		$number = isset( $instance['number'] ) ? absint( $instance['number'] ) : 10;
 		?>
